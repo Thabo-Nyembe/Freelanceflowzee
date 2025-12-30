@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -22,7 +23,8 @@ import {
   ExternalLink, Copy, Maximize2, Grid, List, MapPin, Gauge, Terminal,
   FileText, Hash, Network, Radio, Thermometer, Droplets, Wind, Timer,
   CircleDot, Sparkles, Rocket, TrendingUp as TrendUp,
-  Key, Webhook, Sliders, AlertOctagon, CreditCard, Archive, Trash2, Edit3, Mail
+  Key, Webhook, Sliders, AlertOctagon, CreditCard, Archive, Trash2, Edit3, Mail,
+  Loader2
 } from 'lucide-react'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -48,6 +50,71 @@ import {
   overviewActivities,
   overviewQuickActions,
 } from '@/lib/mock-data/adapters'
+
+// ============================================================================
+// DATABASE TYPES
+// ============================================================================
+
+interface DbDashboardMetric {
+  id: string
+  user_id: string
+  name: string
+  value: number
+  previous_value: number
+  change: number
+  change_percent: number
+  trend: 'up' | 'down' | 'stable'
+  unit: string
+  icon: string | null
+  color: string | null
+  is_positive: boolean
+  target: number | null
+  target_progress: number | null
+  last_updated: string
+  category: string
+  description: string | null
+  created_at: string
+}
+
+interface DbDashboardStats {
+  id: string
+  user_id: string
+  earnings: number
+  earnings_trend: number
+  active_projects: number
+  active_projects_trend: number
+  completed_projects: number
+  completed_projects_trend: number
+  total_clients: number
+  total_clients_trend: number
+  hours_this_month: number
+  hours_this_month_trend: number
+  revenue_this_month: number
+  revenue_this_month_trend: number
+  average_project_value: number
+  average_project_value_trend: number
+  productivity_score: number
+  productivity_score_trend: number
+  pending_tasks: number
+  overdue_tasks: number
+  upcoming_meetings: number
+  unread_messages: number
+  last_updated: string
+  created_at: string
+}
+
+interface DbDashboardNotification {
+  id: string
+  user_id: string
+  title: string
+  message: string
+  type: 'info' | 'warning' | 'error' | 'success'
+  is_read: boolean
+  created_at: string
+  action_url: string | null
+  action_label: string | null
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+}
 
 // ============================================================================
 // TYPE DEFINITIONS - Datadog Level Monitoring
@@ -375,6 +442,9 @@ const mockOverviewQuickActions = [
 // ============================================================================
 
 export default function OverviewClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('dashboard')
   const [timeRange, setTimeRange] = useState<TimeRange>('24h')
   const [searchQuery, setSearchQuery] = useState('')
@@ -383,6 +453,33 @@ export default function OverviewClient() {
   const [selectedService, setSelectedService] = useState<Service | null>(null)
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Loading States
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Data State
+  const [dbMetrics, setDbMetrics] = useState<DbDashboardMetric[]>([])
+  const [dbStats, setDbStats] = useState<DbDashboardStats | null>(null)
+  const [dbNotifications, setDbNotifications] = useState<DbDashboardNotification[]>([])
+
+  // Settings Form State
+  const [settingsForm, setSettingsForm] = useState({
+    orgName: 'Kazi Platform',
+    environment: 'production',
+    timezone: 'utc',
+    dateFormat: 'iso',
+    weekStartsOn: 'monday',
+    darkMode: false,
+    compactView: false,
+    highContrastMode: false,
+    showSparklines: true,
+    animateTransitions: true,
+    autoRefresh: true,
+    refreshInterval: '30',
+    defaultTimeRange: '4h',
+    defaultTab: 'overview'
+  })
 
   const timeRanges: { value: TimeRange; label: string }[] = [
     { value: '1h', label: '1H' },
@@ -420,34 +517,263 @@ export default function OverviewClient() {
     )
   }, [searchQuery])
 
-  const handleRefresh = () => {
+  // Fetch dashboard metrics from Supabase
+  const fetchMetrics = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('dashboard_metrics')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbMetrics(data || [])
+    } catch (error) {
+      console.error('Error fetching metrics:', error)
+    }
+  }, [supabase])
+
+  // Fetch dashboard stats from Supabase
+  const fetchStats = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('dashboard_stats')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      if (error && error.code !== 'PGRST116') throw error
+      setDbStats(data)
+    } catch (error) {
+      console.error('Error fetching stats:', error)
+    }
+  }, [supabase])
+
+  // Fetch notifications from Supabase
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('dashboard_notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_read', false)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (error) throw error
+      setDbNotifications(data || [])
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
+    }
+  }, [supabase])
+
+  // Initial data fetch
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true)
+      await Promise.all([fetchMetrics(), fetchStats(), fetchNotifications()])
+      setIsLoading(false)
+    }
+    loadData()
+  }, [fetchMetrics, fetchStats, fetchNotifications])
+
+  // Real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('dashboard_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dashboard_metrics' }, () => {
+        fetchMetrics()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dashboard_stats' }, () => {
+        fetchStats()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dashboard_notifications' }, () => {
+        fetchNotifications()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, fetchMetrics, fetchStats, fetchNotifications])
+
+  const handleRefresh = async () => {
     setIsRefreshing(true)
-    setTimeout(() => setIsRefreshing(false), 1000)
+    await Promise.all([fetchMetrics(), fetchStats(), fetchNotifications()])
+    toast.success('Dashboard refreshed', { description: 'Data has been updated' })
+    setIsRefreshing(false)
   }
 
-  // Handlers
-  const handleExportDashboard = () => {
-    toast.success('Exporting dashboard', {
-      description: 'Dashboard report will be downloaded'
-    })
+  // Export dashboard data
+  const handleExportDashboard = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please log in to export data')
+        return
+      }
+
+      const exportData = {
+        metrics: dbMetrics,
+        stats: dbStats,
+        notifications: dbNotifications,
+        exportedAt: new Date().toISOString(),
+        timeRange
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `dashboard-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Dashboard exported', { description: 'Dashboard data has been downloaded' })
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Export failed', { description: 'Could not export dashboard data' })
+    }
   }
 
-  const handleCustomizeDashboard = () => {
-    toast.info('Customize Dashboard', {
-      description: 'Opening widget configuration...'
-    })
+  // Save settings to Supabase
+  const handleSaveSettings = async () => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please log in to save settings')
+        return
+      }
+
+      const { error } = await supabase
+        .from('user_preferences')
+        .upsert({
+          user_id: user.id,
+          theme: settingsForm.darkMode ? 'dark' : 'light',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' })
+
+      if (error) throw error
+      toast.success('Settings saved', { description: 'Your preferences have been updated' })
+    } catch (error: any) {
+      console.error('Error saving settings:', error)
+      toast.error('Failed to save settings', { description: error.message })
+    } finally {
+      setIsSaving(false)
+    }
   }
 
+  // Mark notification as read
+  const handleMarkNotificationRead = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from('dashboard_notifications')
+        .update({ is_read: true })
+        .eq('id', notificationId)
+
+      if (error) throw error
+      setDbNotifications(prev => prev.filter(n => n.id !== notificationId))
+      toast.success('Notification dismissed')
+    } catch (error: any) {
+      console.error('Error marking notification read:', error)
+      toast.error('Failed to dismiss notification')
+    }
+  }
+
+  // Clear all metrics (danger zone)
+  const handleClearMetrics = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase
+        .from('dashboard_metrics')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) throw error
+      setDbMetrics([])
+      toast.success('Metrics cleared', { description: 'All metrics data has been deleted' })
+    } catch (error: any) {
+      console.error('Error clearing metrics:', error)
+      toast.error('Failed to clear metrics', { description: error.message })
+    }
+  }
+
+  // Reset dashboard stats (danger zone)
+  const handleResetDashboards = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase
+        .from('dashboard_stats')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) throw error
+      setDbStats(null)
+      toast.success('Dashboard reset', { description: 'Dashboard has been restored to defaults' })
+    } catch (error: any) {
+      console.error('Error resetting dashboard:', error)
+      toast.error('Failed to reset dashboard', { description: error.message })
+    }
+  }
+
+  // Delete all data (danger zone)
+  const handleDeleteAllData = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      await Promise.all([
+        supabase.from('dashboard_metrics').delete().eq('user_id', user.id),
+        supabase.from('dashboard_stats').delete().eq('user_id', user.id),
+        supabase.from('dashboard_notifications').delete().eq('user_id', user.id)
+      ])
+
+      setDbMetrics([])
+      setDbStats(null)
+      setDbNotifications([])
+      toast.success('All data deleted', { description: 'All monitoring data has been permanently removed' })
+    } catch (error: any) {
+      console.error('Error deleting all data:', error)
+      toast.error('Failed to delete data', { description: error.message })
+    }
+  }
+
+  // Acknowledge alert (placeholder - can be connected to alerts table)
   const handleAcknowledgeAlert = (alertTitle: string) => {
-    toast.success('Alert acknowledged', {
-      description: `"${alertTitle}" has been acknowledged`
-    })
+    toast.success('Alert acknowledged', { description: `"${alertTitle}" has been acknowledged` })
   }
 
+  // View details (placeholder)
   const handleViewDetails = (section: string) => {
-    toast.info('View Details', {
-      description: `Opening ${section} details...`
-    })
+    toast.info('View Details', { description: `Opening ${section} details...` })
+  }
+
+  // Show loading spinner during initial load
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+          <p className="text-gray-500">Loading dashboard...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -1068,35 +1394,62 @@ export default function OverviewClient() {
                             <Label>Dark Mode</Label>
                             <p className="text-sm text-gray-500">Use dark theme for dashboard</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={settingsForm.darkMode}
+                            onCheckedChange={(checked) => setSettingsForm(prev => ({ ...prev, darkMode: checked }))}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Compact View</Label>
                             <p className="text-sm text-gray-500">Show more data on screen</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={settingsForm.compactView}
+                            onCheckedChange={(checked) => setSettingsForm(prev => ({ ...prev, compactView: checked }))}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>High Contrast Mode</Label>
                             <p className="text-sm text-gray-500">Enhanced visibility for metrics</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={settingsForm.highContrastMode}
+                            onCheckedChange={(checked) => setSettingsForm(prev => ({ ...prev, highContrastMode: checked }))}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Show Sparklines</Label>
                             <p className="text-sm text-gray-500">Display mini charts in cards</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={settingsForm.showSparklines}
+                            onCheckedChange={(checked) => setSettingsForm(prev => ({ ...prev, showSparklines: checked }))}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Animate Transitions</Label>
                             <p className="text-sm text-gray-500">Smooth animations between states</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={settingsForm.animateTransitions}
+                            onCheckedChange={(checked) => setSettingsForm(prev => ({ ...prev, animateTransitions: checked }))}
+                          />
+                        </div>
+                        <div className="pt-4 border-t">
+                          <Button onClick={handleSaveSettings} disabled={isSaving} className="w-full">
+                            {isSaving ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Saving...
+                              </>
+                            ) : (
+                              'Save Settings'
+                            )}
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1663,7 +2016,7 @@ export default function OverviewClient() {
                             </Select>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={handleExportDashboard}>
                           <Download className="h-4 w-4 mr-2" />
                           Export Data
                         </Button>
@@ -1722,7 +2075,11 @@ export default function OverviewClient() {
                             <p className="font-medium">Clear All Metrics</p>
                             <p className="text-sm text-gray-500">Delete all stored metrics data</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            onClick={handleClearMetrics}
+                          >
                             Clear Metrics
                           </Button>
                         </div>
@@ -1731,7 +2088,11 @@ export default function OverviewClient() {
                             <p className="font-medium">Reset All Dashboards</p>
                             <p className="text-sm text-gray-500">Restore default dashboard layouts</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            onClick={handleResetDashboards}
+                          >
                             Reset Dashboards
                           </Button>
                         </div>
@@ -1740,7 +2101,7 @@ export default function OverviewClient() {
                             <p className="font-medium">Delete All Data</p>
                             <p className="text-sm text-gray-500">Permanently delete all monitoring data</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={handleDeleteAllData}>
                             Delete All
                           </Button>
                         </div>

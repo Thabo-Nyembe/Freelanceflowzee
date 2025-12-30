@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { useEmployees, useCreateEmployee } from '@/lib/hooks/use-employees'
+import { useEmployees, useCreateEmployee, useUpdateEmployee, useDeleteEmployee, Employee as DBEmployee } from '@/lib/hooks/use-employees'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -331,6 +331,24 @@ export default function EmployeesClient() {
   // Database integration
   const { data: dbEmployees, loading: employeesLoading, refetch } = useEmployees({ status: 'active' })
   const { mutate: createEmployee, loading: creating } = useCreateEmployee()
+  const { mutate: updateEmployee, loading: updating } = useUpdateEmployee()
+  const { mutate: deleteEmployee, loading: deleting } = useDeleteEmployee()
+
+  // Edit dialog state
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [employeeToEdit, setEmployeeToEdit] = useState<DBEmployee | null>(null)
+  const [employeeToDelete, setEmployeeToDelete] = useState<DBEmployee | null>(null)
+
+  // Edit form state
+  const [editEmployeeForm, setEditEmployeeForm] = useState({
+    employee_name: '',
+    email: '',
+    department: '',
+    position: '',
+    phone: '',
+    status: 'active' as string
+  })
 
   // Form state for new employee
   const [newEmployeeForm, setNewEmployeeForm] = useState({
@@ -366,6 +384,85 @@ export default function EmployeesClient() {
     } catch (error) {
       console.error('Failed to create employee:', error)
     }
+  }
+
+  // Handle opening edit dialog for a database employee
+  const handleOpenEditDialog = (employee: DBEmployee) => {
+    setEmployeeToEdit(employee)
+    setEditEmployeeForm({
+      employee_name: employee.employee_name || '',
+      email: employee.email || '',
+      department: employee.department || '',
+      position: employee.position || '',
+      phone: employee.phone || '',
+      status: employee.status || 'active'
+    })
+    setShowEditDialog(true)
+  }
+
+  // Handle updating an employee
+  const handleUpdateEmployee = async () => {
+    if (!employeeToEdit) return
+    if (!editEmployeeForm.employee_name || !editEmployeeForm.email) {
+      toast.error('Please fill in name and email')
+      return
+    }
+    try {
+      await updateEmployee({
+        employee_name: editEmployeeForm.employee_name,
+        email: editEmployeeForm.email,
+        department: editEmployeeForm.department || null,
+        position: editEmployeeForm.position || null,
+        job_title: editEmployeeForm.position || null,
+        phone: editEmployeeForm.phone || null,
+        status: editEmployeeForm.status as any
+      } as any, employeeToEdit.id)
+      setShowEditDialog(false)
+      setEmployeeToEdit(null)
+      toast.success('Employee updated successfully')
+      refetch()
+    } catch (error) {
+      console.error('Failed to update employee:', error)
+      toast.error('Failed to update employee')
+    }
+  }
+
+  // Handle terminating an employee
+  const handleTerminateEmployee = async (employee: DBEmployee) => {
+    try {
+      await updateEmployee({
+        status: 'terminated',
+        termination_date: new Date().toISOString().split('T')[0]
+      } as any, employee.id)
+      toast.success(`${employee.employee_name} has been terminated`)
+      refetch()
+    } catch (error) {
+      console.error('Failed to terminate employee:', error)
+      toast.error('Failed to terminate employee')
+    }
+  }
+
+  // Handle deleting an employee (soft delete)
+  const handleDeleteEmployee = async () => {
+    if (!employeeToDelete) return
+    try {
+      const success = await deleteEmployee(employeeToDelete.id)
+      if (success) {
+        setShowDeleteDialog(false)
+        setEmployeeToDelete(null)
+        toast.success('Employee deleted successfully')
+        refetch()
+      }
+    } catch (error) {
+      console.error('Failed to delete employee:', error)
+      toast.error('Failed to delete employee')
+    }
+  }
+
+  // Handle opening delete confirmation dialog
+  const handleOpenDeleteDialog = (employee: DBEmployee) => {
+    setEmployeeToDelete(employee)
+    setShowDeleteDialog(true)
   }
 
   const filteredEmployees = useMemo(() => {
@@ -545,6 +642,117 @@ export default function EmployeesClient() {
               {['all', 'Engineering', 'Design', 'Product', 'Marketing', 'Sales'].map(dept => (
                 <Button key={dept} variant={departmentFilter === dept.toLowerCase() ? 'default' : 'outline'} size="sm" onClick={() => setDepartmentFilter(dept.toLowerCase())} className={departmentFilter === dept.toLowerCase() ? 'bg-blue-600' : ''}>{dept === 'all' ? 'All Departments' : dept}</Button>
               ))}
+            </div>
+            {/* Database Employees Section */}
+            {dbEmployees && dbEmployees.length > 0 && (
+              <>
+                <div className="flex items-center justify-between mt-8">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Users className="h-5 w-5 text-blue-600" />
+                    Your Employees ({dbEmployees.length})
+                  </h3>
+                  {employeesLoading && <span className="text-sm text-gray-500">Loading...</span>}
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {dbEmployees.map(employee => (
+                    <Card key={employee.id} className="border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow overflow-hidden">
+                      <div className="h-20 bg-gradient-to-r from-green-500 to-emerald-600 relative">
+                        <Avatar className="absolute -bottom-8 left-6 w-16 h-16 border-4 border-white dark:border-gray-800">
+                          <AvatarImage src={employee.avatar_url || undefined} />
+                          <AvatarFallback className="bg-green-100 text-green-700 text-lg">
+                            {employee.employee_name?.split(' ').map(n => n[0]).join('') || 'E'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-white/20 hover:bg-white/40 text-white"
+                            onClick={() => handleOpenEditDialog(employee)}
+                          >
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 bg-white/20 hover:bg-red-500/80 text-white"
+                            onClick={() => handleOpenDeleteDialog(employee)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      <CardContent className="pt-10 pb-4">
+                        <div className="flex items-start justify-between mb-3">
+                          <div>
+                            <h3 className="font-semibold text-lg flex items-center gap-2">
+                              {employee.employee_name}
+                              {employee.performance_score >= 95 && <Star className="h-4 w-4 fill-amber-400 text-amber-400" />}
+                            </h3>
+                            <p className="text-sm text-gray-500">{employee.position || employee.job_title || 'No position'}</p>
+                          </div>
+                          <Badge className={employee.status === 'active' ? 'bg-green-100 text-green-700' : employee.status === 'terminated' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}>
+                            {employee.status}
+                          </Badge>
+                        </div>
+                        <div className="space-y-2 mb-4">
+                          {employee.email && (
+                            <p className="text-sm flex items-center gap-2 text-gray-500">
+                              <Mail className="h-4 w-4" />{employee.email}
+                            </p>
+                          )}
+                          {employee.department && (
+                            <p className="text-sm flex items-center gap-2 text-gray-500">
+                              <Building2 className="h-4 w-4" />{employee.department}
+                            </p>
+                          )}
+                          {employee.phone && (
+                            <p className="text-sm flex items-center gap-2 text-gray-500">
+                              <Phone className="h-4 w-4" />{employee.phone}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t">
+                          <div className="flex items-center gap-4 text-sm">
+                            <div>
+                              <p className="text-gray-500">Performance</p>
+                              <p className="font-semibold text-blue-600">
+                                {employee.performance_score > 0 ? `${employee.performance_score}%` : 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-gray-500">Projects</p>
+                              <p className="font-semibold">{employee.projects_count || 0}</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-1">
+                            {employee.status === 'active' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                onClick={() => handleTerminateEmployee(employee)}
+                                disabled={updating}
+                              >
+                                <UserMinus className="h-4 w-4 mr-1" />
+                                Terminate
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </>
+            )}
+
+            {/* Mock Employees Section */}
+            <div className="flex items-center justify-between mt-8">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Briefcase className="h-5 w-5 text-blue-600" />
+                Sample Employees ({filteredEmployees.length})
+              </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEmployees.map(employee => (
@@ -1916,6 +2124,125 @@ export default function EmployeesClient() {
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg"><div><p className="font-medium">360 Feedback</p><p className="text-sm text-gray-500">Collect peer feedback</p></div><Switch /></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowReviewDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600">Start Review</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Employee Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Employee</DialogTitle>
+              <DialogDescription>Update employee information</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Full Name</Label>
+                <Input
+                  placeholder="John Doe"
+                  className="mt-1"
+                  value={editEmployeeForm.employee_name}
+                  onChange={(e) => setEditEmployeeForm(prev => ({ ...prev, employee_name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input
+                  type="email"
+                  placeholder="john@company.com"
+                  className="mt-1"
+                  value={editEmployeeForm.email}
+                  onChange={(e) => setEditEmployeeForm(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>Phone</Label>
+                <Input
+                  placeholder="+1-555-0123"
+                  className="mt-1"
+                  value={editEmployeeForm.phone}
+                  onChange={(e) => setEditEmployeeForm(prev => ({ ...prev, phone: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Department</Label>
+                  <Select
+                    value={editEmployeeForm.department}
+                    onValueChange={(value) => setEditEmployeeForm(prev => ({ ...prev, department: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="engineering">Engineering</SelectItem>
+                      <SelectItem value="design">Design</SelectItem>
+                      <SelectItem value="product">Product</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="hr">HR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Position</Label>
+                  <Input
+                    placeholder="Software Engineer"
+                    className="mt-1"
+                    value={editEmployeeForm.position}
+                    onChange={(e) => setEditEmployeeForm(prev => ({ ...prev, position: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select
+                  value={editEmployeeForm.status}
+                  onValueChange={(value) => setEditEmployeeForm(prev => ({ ...prev, status: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="on-leave">On Leave</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-blue-600 to-indigo-600"
+                onClick={handleUpdateEmployee}
+                disabled={updating || !editEmployeeForm.employee_name || !editEmployeeForm.email}
+              >
+                {updating ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Employee Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Employee</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete {employeeToDelete?.employee_name}? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteEmployee}
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete Employee'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

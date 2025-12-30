@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -519,13 +520,273 @@ const mockMonitoringQuickActions = [
 // MAIN COMPONENT
 // ============================================================================
 
+// Database types
+interface DbServer {
+  id: string
+  user_id: string
+  server_name: string
+  server_type: string
+  status: string
+  location: string | null
+  ip_address: string | null
+  cpu_usage: number
+  memory_usage: number
+  disk_usage: number
+  network_throughput: number
+  uptime_percentage: number
+  requests_per_hour: number
+  last_health_check: string
+  configuration: Record<string, unknown>
+  tags: string[]
+  created_at: string
+  updated_at: string
+}
+
+interface DbAlert {
+  id: string
+  user_id: string
+  server_id: string | null
+  alert_type: string
+  severity: string
+  title: string
+  description: string | null
+  status: string
+  acknowledged_at: string | null
+  acknowledged_by: string | null
+  resolved_at: string | null
+  resolved_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+// Form state types
+interface ServerFormData {
+  server_name: string
+  server_type: string
+  location: string
+  ip_address: string
+  tags: string
+}
+
+interface AlertFormData {
+  title: string
+  alert_type: string
+  severity: string
+  description: string
+  server_id: string
+}
+
+const initialServerForm: ServerFormData = {
+  server_name: '',
+  server_type: 'production',
+  location: '',
+  ip_address: '',
+  tags: ''
+}
+
+const initialAlertForm: AlertFormData = {
+  title: '',
+  alert_type: 'cpu_high',
+  severity: 'warning',
+  description: '',
+  server_id: ''
+}
+
 export default function MonitoringClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('infrastructure')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<HostStatus | 'all'>('all')
   const [selectedHost, setSelectedHost] = useState<Host | null>(null)
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Database state
+  const [dbServers, setDbServers] = useState<DbServer[]>([])
+  const [dbAlerts, setDbAlerts] = useState<DbAlert[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Dialog state
+  const [showAddServerDialog, setShowAddServerDialog] = useState(false)
+  const [showAddAlertDialog, setShowAddAlertDialog] = useState(false)
+  const [serverForm, setServerForm] = useState<ServerFormData>(initialServerForm)
+  const [alertForm, setAlertForm] = useState<AlertFormData>(initialAlertForm)
+
+  // Fetch servers from Supabase
+  const fetchServers = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('servers')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbServers(data || [])
+    } catch (error) {
+      console.error('Error fetching servers:', error)
+    }
+  }, [supabase])
+
+  // Fetch alerts from Supabase
+  const fetchAlerts = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('system_alerts')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbAlerts(data || [])
+    } catch (error) {
+      console.error('Error fetching alerts:', error)
+    }
+  }, [supabase])
+
+  // Load data on mount
+  useEffect(() => {
+    fetchServers()
+    fetchAlerts()
+  }, [fetchServers, fetchAlerts])
+
+  // Create server
+  const handleCreateServer = async () => {
+    setIsLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('servers').insert({
+        user_id: user.id,
+        server_name: serverForm.server_name,
+        server_type: serverForm.server_type,
+        location: serverForm.location || null,
+        ip_address: serverForm.ip_address || null,
+        tags: serverForm.tags ? serverForm.tags.split(',').map(t => t.trim()) : [],
+        status: 'healthy',
+        cpu_usage: 0,
+        memory_usage: 0,
+        disk_usage: 0
+      })
+
+      if (error) throw error
+
+      toast.success('Server added', { description: `${serverForm.server_name} has been registered` })
+      setShowAddServerDialog(false)
+      setServerForm(initialServerForm)
+      fetchServers()
+    } catch (error) {
+      toast.error('Failed to add server', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Delete server
+  const handleDeleteServer = async (serverId: string) => {
+    try {
+      const { error } = await supabase
+        .from('servers')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', serverId)
+
+      if (error) throw error
+
+      toast.success('Server removed', { description: 'Server has been unregistered' })
+      fetchServers()
+    } catch (error) {
+      toast.error('Failed to remove server', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Create alert
+  const handleCreateAlert = async () => {
+    setIsLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('system_alerts').insert({
+        user_id: user.id,
+        title: alertForm.title,
+        alert_type: alertForm.alert_type,
+        severity: alertForm.severity,
+        description: alertForm.description || null,
+        server_id: alertForm.server_id || null,
+        status: 'active'
+      })
+
+      if (error) throw error
+
+      toast.success('Alert created', { description: alertForm.title })
+      setShowAddAlertDialog(false)
+      setAlertForm(initialAlertForm)
+      fetchAlerts()
+    } catch (error) {
+      toast.error('Failed to create alert', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Acknowledge alert
+  const handleAcknowledgeAlert = async (alertId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      const { error } = await supabase
+        .from('system_alerts')
+        .update({
+          status: 'acknowledged',
+          acknowledged_at: new Date().toISOString(),
+          acknowledged_by: user?.id
+        })
+        .eq('id', alertId)
+
+      if (error) throw error
+
+      toast.success('Alert acknowledged')
+      fetchAlerts()
+    } catch (error) {
+      toast.error('Failed to acknowledge alert', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Resolve alert
+  const handleResolveAlert = async (alertId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      const { error } = await supabase
+        .from('system_alerts')
+        .update({
+          status: 'resolved',
+          resolved_at: new Date().toISOString(),
+          resolved_by: user?.id
+        })
+        .eq('id', alertId)
+
+      if (error) throw error
+
+      toast.success('Alert resolved')
+      fetchAlerts()
+    } catch (error) {
+      toast.error('Failed to resolve alert', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  // Refresh metrics
+  const handleRefreshMetrics = async () => {
+    setIsLoading(true)
+    try {
+      await Promise.all([fetchServers(), fetchAlerts()])
+      toast.success('Metrics refreshed', { description: 'Infrastructure data updated' })
+    } catch (error) {
+      toast.error('Failed to refresh', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   // Filtered hosts
   const filteredHosts = useMemo(() => {
@@ -553,31 +814,6 @@ export default function MonitoringClient() {
     return { total, healthy, warning, critical, avgCpu, avgMemory, totalContainers, activeAlerts }
   }, [])
 
-  // Handlers
-  const handleAddHost = () => {
-    toast.info('Add Host', {
-      description: 'Opening host configuration...'
-    })
-  }
-
-  const handleRefreshMetrics = () => {
-    toast.success('Metrics refreshed', {
-      description: 'Infrastructure metrics updated'
-    })
-  }
-
-  const handleAcknowledgeAlert = (alert: Alert) => {
-    toast.success('Alert acknowledged', {
-      description: `Alert "${alert.name}" has been acknowledged`
-    })
-  }
-
-  const handleMuteAlert = (alert: Alert) => {
-    toast.success('Alert muted', {
-      description: `Alert "${alert.name}" has been muted for 1 hour`
-    })
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -593,11 +829,14 @@ export default function MonitoringClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleRefreshMetrics} disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <Button className="bg-gradient-to-r from-slate-500 to-gray-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-slate-500 to-gray-600 text-white"
+              onClick={() => setShowAddServerDialog(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Add Host
             </Button>
@@ -911,8 +1150,8 @@ export default function MonitoringClient() {
             <Card>
               <CardHeader className="border-b">
                 <div className="flex items-center justify-between">
-                  <CardTitle>Active Alerts</CardTitle>
-                  <Button variant="outline" size="sm">
+                  <CardTitle>Active Alerts ({dbAlerts.filter(a => a.status === 'active').length} active)</CardTitle>
+                  <Button variant="outline" size="sm" onClick={() => setShowAddAlertDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />
                     Create Alert
                   </Button>
@@ -920,6 +1159,67 @@ export default function MonitoringClient() {
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y">
+                  {/* Database Alerts */}
+                  {dbAlerts.map(alert => (
+                    <div
+                      key={alert.id}
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                          alert.severity === 'critical' ? 'bg-red-100 text-red-600' :
+                          alert.severity === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                          'bg-blue-100 text-blue-600'
+                        }`}>
+                          <AlertTriangle className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-semibold">{alert.title}</span>
+                            <Badge className={
+                              alert.severity === 'critical' ? 'bg-red-100 text-red-800' :
+                              alert.severity === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-blue-100 text-blue-800'
+                            }>{alert.severity}</Badge>
+                            <Badge className={
+                              alert.status === 'active' ? 'bg-red-100 text-red-800' :
+                              alert.status === 'acknowledged' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-green-100 text-green-800'
+                            }>{alert.status}</Badge>
+                          </div>
+                          {alert.description && (
+                            <p className="text-sm text-gray-600 dark:text-gray-300">{alert.description}</p>
+                          )}
+                          <div className="flex items-center gap-4 text-xs text-gray-500 mt-1">
+                            <span>Created: {new Date(alert.created_at).toLocaleString()}</span>
+                            <span>Type: {alert.alert_type}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {alert.status === 'active' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleAcknowledgeAlert(alert.id)}
+                            >
+                              Acknowledge
+                            </Button>
+                          )}
+                          {(alert.status === 'active' || alert.status === 'acknowledged') && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600"
+                              onClick={() => handleResolveAlert(alert.id)}
+                            >
+                              Resolve
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {/* Mock Alerts for demo */}
                   {mockAlerts.map(alert => (
                     <div
                       key={alert.id}
@@ -955,6 +1255,11 @@ export default function MonitoringClient() {
                       </div>
                     </div>
                   ))}
+                  {dbAlerts.length === 0 && mockAlerts.length === 0 && (
+                    <div className="p-8 text-center text-gray-500">
+                      No alerts. Click "Create Alert" to add one.
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -1920,6 +2225,170 @@ export default function MonitoringClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Server Dialog */}
+        <Dialog open={showAddServerDialog} onOpenChange={setShowAddServerDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Server</DialogTitle>
+              <DialogDescription>Register a new server for monitoring</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="server_name">Server Name *</Label>
+                <Input
+                  id="server_name"
+                  placeholder="e.g., web-prod-01"
+                  value={serverForm.server_name}
+                  onChange={(e) => setServerForm(prev => ({ ...prev, server_name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="server_type">Server Type</Label>
+                <Select
+                  value={serverForm.server_type}
+                  onValueChange={(value) => setServerForm(prev => ({ ...prev, server_type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="production">Production</SelectItem>
+                    <SelectItem value="database">Database</SelectItem>
+                    <SelectItem value="cache">Cache</SelectItem>
+                    <SelectItem value="worker">Worker</SelectItem>
+                    <SelectItem value="network">Network</SelectItem>
+                    <SelectItem value="storage">Storage</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    placeholder="e.g., us-west-2"
+                    value={serverForm.location}
+                    onChange={(e) => setServerForm(prev => ({ ...prev, location: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ip_address">IP Address</Label>
+                  <Input
+                    id="ip_address"
+                    placeholder="e.g., 10.0.1.101"
+                    value={serverForm.ip_address}
+                    onChange={(e) => setServerForm(prev => ({ ...prev, ip_address: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tags">Tags (comma-separated)</Label>
+                <Input
+                  id="tags"
+                  placeholder="e.g., env:production, team:platform"
+                  value={serverForm.tags}
+                  onChange={(e) => setServerForm(prev => ({ ...prev, tags: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAddServerDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateServer} disabled={isLoading || !serverForm.server_name}>
+                {isLoading ? 'Adding...' : 'Add Server'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Alert Dialog */}
+        <Dialog open={showAddAlertDialog} onOpenChange={setShowAddAlertDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create Alert Rule</DialogTitle>
+              <DialogDescription>Set up a new monitoring alert</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="alert_title">Alert Title *</Label>
+                <Input
+                  id="alert_title"
+                  placeholder="e.g., High CPU Usage"
+                  value={alertForm.title}
+                  onChange={(e) => setAlertForm(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="alert_type">Alert Type</Label>
+                  <Select
+                    value={alertForm.alert_type}
+                    onValueChange={(value) => setAlertForm(prev => ({ ...prev, alert_type: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cpu_high">CPU High</SelectItem>
+                      <SelectItem value="memory_high">Memory High</SelectItem>
+                      <SelectItem value="disk_full">Disk Full</SelectItem>
+                      <SelectItem value="network_issue">Network Issue</SelectItem>
+                      <SelectItem value="offline">Offline</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="severity">Severity</Label>
+                  <Select
+                    value={alertForm.severity}
+                    onValueChange={(value) => setAlertForm(prev => ({ ...prev, severity: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="info">Info</SelectItem>
+                      <SelectItem value="warning">Warning</SelectItem>
+                      <SelectItem value="critical">Critical</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="server_select">Associated Server (optional)</Label>
+                <Select
+                  value={alertForm.server_id}
+                  onValueChange={(value) => setAlertForm(prev => ({ ...prev, server_id: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a server" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">None</SelectItem>
+                    {dbServers.map(server => (
+                      <SelectItem key={server.id} value={server.id}>{server.server_name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  placeholder="Alert description"
+                  value={alertForm.description}
+                  onChange={(e) => setAlertForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAddAlertDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateAlert} disabled={isLoading || !alertForm.title}>
+                {isLoading ? 'Creating...' : 'Create Alert'}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

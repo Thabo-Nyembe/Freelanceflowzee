@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,8 +10,11 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Rocket,
   GitBranch,
@@ -54,7 +58,8 @@ import {
   Terminal,
   FileCode,
   Activity,
-  BarChart3
+  BarChart3,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -75,6 +80,88 @@ import {
   releasesActivities,
   releasesQuickActions,
 } from '@/lib/mock-data/adapters'
+
+// Database Types
+interface DbRelease {
+  id: string
+  user_id: string
+  version: string
+  release_name: string
+  description: string | null
+  status: 'draft' | 'scheduled' | 'rolling' | 'deployed' | 'failed' | 'rolled_back'
+  release_type: 'major' | 'minor' | 'patch' | 'hotfix' | 'prerelease'
+  environment: 'development' | 'staging' | 'production' | 'canary'
+  deployed_at: string | null
+  scheduled_for: string | null
+  deploy_time_minutes: number | null
+  commits_count: number
+  contributors_count: number
+  coverage_percentage: number
+  rollback_rate: number
+  changelog: string | null
+  breaking_changes: string[]
+  git_branch: string | null
+  git_tag: string | null
+  build_number: string | null
+  is_prerelease: boolean
+  is_draft: boolean
+  is_latest: boolean
+  downloads_count: number
+  views_count: number
+  additions_count: number
+  deletions_count: number
+  files_changed: number
+  metadata: Record<string, any>
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+interface DbDeployment {
+  id: string
+  release_id: string
+  user_id: string
+  environment: string
+  status: 'pending' | 'in_progress' | 'success' | 'failed' | 'cancelled' | 'rolled_back'
+  started_at: string | null
+  completed_at: string | null
+  duration_minutes: number | null
+  servers_count: number
+  health_percentage: number
+  logs: string | null
+  error_message: string | null
+  deployed_by: string | null
+  created_at: string
+}
+
+interface DbRollback {
+  id: string
+  user_id: string
+  release_id: string
+  release_version: string
+  target_version: string
+  reason: string
+  status: 'completed' | 'failed' | 'in_progress'
+  started_at: string
+  completed_at: string | null
+  initiated_by: string | null
+  created_at: string
+}
+
+// Form state interface
+interface ReleaseFormData {
+  version: string
+  release_name: string
+  description: string
+  release_type: 'major' | 'minor' | 'patch' | 'hotfix' | 'prerelease'
+  environment: 'development' | 'staging' | 'production' | 'canary'
+  changelog: string
+  git_branch: string
+  git_tag: string
+  is_prerelease: boolean
+  is_draft: boolean
+  scheduled_for: string
+}
 
 // Types
 type ReleaseStatus = 'deployed' | 'rolling' | 'scheduled' | 'draft' | 'failed' | 'cancelled'
@@ -471,7 +558,25 @@ const mockReleasesQuickActions = [
   { id: '3', label: 'Export Changelog', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
 ]
 
+// Initial form state
+const initialFormData: ReleaseFormData = {
+  version: '',
+  release_name: '',
+  description: '',
+  release_type: 'minor',
+  environment: 'development',
+  changelog: '',
+  git_branch: 'main',
+  git_tag: '',
+  is_prerelease: false,
+  is_draft: true,
+  scheduled_for: ''
+}
+
 export default function ReleasesClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('releases')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
@@ -480,15 +585,529 @@ export default function ReleasesClient() {
   const [showReleaseDialog, setShowReleaseDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // CRUD Dialog State
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showDeployDialog, setShowDeployDialog] = useState(false)
+  const [showRollbackDialog, setShowRollbackDialog] = useState(false)
+
+  // Form State
+  const [formData, setFormData] = useState<ReleaseFormData>(initialFormData)
+  const [rollbackReason, setRollbackReason] = useState('')
+  const [targetVersion, setTargetVersion] = useState('')
+
+  // Loading States
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [isDeploying, setIsDeploying] = useState(false)
+  const [isRollingBack, setIsRollingBack] = useState(false)
+
+  // Data State
+  const [releases, setReleases] = useState<DbRelease[]>([])
+  const [deployments, setDeployments] = useState<DbDeployment[]>([])
+  const [rollbacks, setRollbacks] = useState<DbRollback[]>([])
+  const [releaseToEdit, setReleaseToEdit] = useState<DbRelease | null>(null)
+  const [releaseToDelete, setReleaseToDelete] = useState<DbRelease | null>(null)
+  const [releaseToDeploy, setReleaseToDeploy] = useState<DbRelease | null>(null)
+  const [releaseToRollback, setReleaseToRollback] = useState<DbRelease | null>(null)
+
+  // Fetch releases from Supabase
+  const fetchReleases = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('releases')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setReleases(data || [])
+    } catch (error) {
+      console.error('Error fetching releases:', error)
+      toast.error('Failed to load releases')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Fetch deployments
+  const fetchDeployments = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('deployments')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('started_at', { ascending: false, nullsFirst: false })
+
+      if (error) throw error
+      setDeployments(data || [])
+    } catch (error) {
+      console.error('Error fetching deployments:', error)
+    }
+  }, [supabase])
+
+  // Fetch rollbacks
+  const fetchRollbacks = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('rollbacks')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('started_at', { ascending: false })
+
+      if (error) throw error
+      setRollbacks(data || [])
+    } catch (error) {
+      console.error('Error fetching rollbacks:', error)
+    }
+  }, [supabase])
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchReleases()
+    fetchDeployments()
+    fetchRollbacks()
+  }, [fetchReleases, fetchDeployments, fetchRollbacks])
+
+  // Real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('releases_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'releases' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setReleases(prev => [payload.new as DbRelease, ...prev])
+        } else if (payload.eventType === 'UPDATE') {
+          setReleases(prev => prev.map(r => r.id === payload.new.id ? payload.new as DbRelease : r))
+        } else if (payload.eventType === 'DELETE') {
+          setReleases(prev => prev.filter(r => r.id !== payload.old.id))
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'deployments' }, () => {
+        fetchDeployments()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rollbacks' }, () => {
+        fetchRollbacks()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, fetchDeployments, fetchRollbacks])
+
+  // Create release
+  const handleCreateRelease = async () => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to create a release')
+        return
+      }
+
+      const releaseData = {
+        user_id: user.id,
+        version: formData.version,
+        release_name: formData.release_name,
+        description: formData.description || null,
+        status: formData.scheduled_for ? 'scheduled' : (formData.is_draft ? 'draft' : 'deployed'),
+        release_type: formData.release_type,
+        environment: formData.environment,
+        changelog: formData.changelog || null,
+        git_branch: formData.git_branch || null,
+        git_tag: formData.git_tag || formData.version,
+        is_prerelease: formData.is_prerelease,
+        is_draft: formData.is_draft,
+        is_latest: false,
+        scheduled_for: formData.scheduled_for || null,
+        commits_count: 0,
+        contributors_count: 1,
+        coverage_percentage: 0,
+        rollback_rate: 0,
+        breaking_changes: [],
+        downloads_count: 0,
+        views_count: 0,
+        additions_count: 0,
+        deletions_count: 0,
+        files_changed: 0,
+        metadata: {}
+      }
+
+      const { data, error } = await supabase
+        .from('releases')
+        .insert(releaseData)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      toast.success('Release created successfully', {
+        description: `${formData.release_name} (${formData.version}) has been created`
+      })
+      setShowCreateDialog(false)
+      setFormData(initialFormData)
+      fetchReleases()
+    } catch (error: any) {
+      console.error('Error creating release:', error)
+      toast.error('Failed to create release', {
+        description: error.message
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update release
+  const handleUpdateRelease = async () => {
+    if (!releaseToEdit) return
+
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to update a release')
+        return
+      }
+
+      const { error } = await supabase
+        .from('releases')
+        .update({
+          version: formData.version,
+          release_name: formData.release_name,
+          description: formData.description || null,
+          release_type: formData.release_type,
+          environment: formData.environment,
+          changelog: formData.changelog || null,
+          git_branch: formData.git_branch || null,
+          git_tag: formData.git_tag || formData.version,
+          is_prerelease: formData.is_prerelease,
+          is_draft: formData.is_draft,
+          scheduled_for: formData.scheduled_for || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', releaseToEdit.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Release updated successfully', {
+        description: `${formData.release_name} has been updated`
+      })
+      setShowEditDialog(false)
+      setReleaseToEdit(null)
+      setFormData(initialFormData)
+      fetchReleases()
+    } catch (error: any) {
+      console.error('Error updating release:', error)
+      toast.error('Failed to update release', {
+        description: error.message
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Delete release (soft delete)
+  const handleDeleteRelease = async () => {
+    if (!releaseToDelete) return
+
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to delete a release')
+        return
+      }
+
+      const { error } = await supabase
+        .from('releases')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', releaseToDelete.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Release deleted successfully', {
+        description: `${releaseToDelete.release_name} has been deleted`
+      })
+      setShowDeleteDialog(false)
+      setReleaseToDelete(null)
+      fetchReleases()
+    } catch (error: any) {
+      console.error('Error deleting release:', error)
+      toast.error('Failed to delete release', {
+        description: error.message
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Deploy release
+  const handleDeployRelease = async () => {
+    if (!releaseToDeploy) return
+
+    try {
+      setIsDeploying(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to deploy a release')
+        return
+      }
+
+      // Create deployment record
+      const deploymentData = {
+        user_id: user.id,
+        release_id: releaseToDeploy.id,
+        environment: releaseToDeploy.environment,
+        status: 'in_progress',
+        started_at: new Date().toISOString(),
+        servers_count: 1,
+        health_percentage: 0,
+        deployed_by: user.email || user.id
+      }
+
+      const { error: deployError } = await supabase
+        .from('deployments')
+        .insert(deploymentData)
+
+      if (deployError) throw deployError
+
+      // Update release status
+      const { error: releaseError } = await supabase
+        .from('releases')
+        .update({
+          status: 'rolling',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', releaseToDeploy.id)
+        .eq('user_id', user.id)
+
+      if (releaseError) throw releaseError
+
+      toast.success('Deployment started', {
+        description: `${releaseToDeploy.release_name} deployment is in progress`
+      })
+      setShowDeployDialog(false)
+      setReleaseToDeploy(null)
+      fetchReleases()
+      fetchDeployments()
+    } catch (error: any) {
+      console.error('Error deploying release:', error)
+      toast.error('Failed to deploy release', {
+        description: error.message
+      })
+    } finally {
+      setIsDeploying(false)
+    }
+  }
+
+  // Rollback release
+  const handleRollbackRelease = async () => {
+    if (!releaseToRollback || !rollbackReason || !targetVersion) return
+
+    try {
+      setIsRollingBack(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to rollback a release')
+        return
+      }
+
+      // Create rollback record
+      const rollbackData = {
+        user_id: user.id,
+        release_id: releaseToRollback.id,
+        release_version: releaseToRollback.version,
+        target_version: targetVersion,
+        reason: rollbackReason,
+        status: 'in_progress',
+        started_at: new Date().toISOString(),
+        initiated_by: user.email || user.id
+      }
+
+      const { error: rollbackError } = await supabase
+        .from('rollbacks')
+        .insert(rollbackData)
+
+      if (rollbackError) throw rollbackError
+
+      // Update release status
+      const { error: releaseError } = await supabase
+        .from('releases')
+        .update({
+          status: 'rolled_back',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', releaseToRollback.id)
+        .eq('user_id', user.id)
+
+      if (releaseError) throw releaseError
+
+      toast.success('Rollback initiated', {
+        description: `Rolling back ${releaseToRollback.version} to ${targetVersion}`
+      })
+      setShowRollbackDialog(false)
+      setReleaseToRollback(null)
+      setRollbackReason('')
+      setTargetVersion('')
+      fetchReleases()
+      fetchRollbacks()
+    } catch (error: any) {
+      console.error('Error rolling back release:', error)
+      toast.error('Failed to rollback release', {
+        description: error.message
+      })
+    } finally {
+      setIsRollingBack(false)
+    }
+  }
+
+  // Open edit dialog
+  const openEditDialog = (release: DbRelease) => {
+    setReleaseToEdit(release)
+    setFormData({
+      version: release.version,
+      release_name: release.release_name,
+      description: release.description || '',
+      release_type: release.release_type,
+      environment: release.environment,
+      changelog: release.changelog || '',
+      git_branch: release.git_branch || 'main',
+      git_tag: release.git_tag || release.version,
+      is_prerelease: release.is_prerelease,
+      is_draft: release.is_draft,
+      scheduled_for: release.scheduled_for || ''
+    })
+    setShowEditDialog(true)
+  }
+
+  // Open deploy dialog
+  const openDeployDialog = (release: DbRelease) => {
+    setReleaseToDeploy(release)
+    setShowDeployDialog(true)
+  }
+
+  // Open rollback dialog
+  const openRollbackDialog = (release: DbRelease) => {
+    setReleaseToRollback(release)
+    setShowRollbackDialog(true)
+  }
+
+  // Open delete dialog
+  const openDeleteDialog = (release: DbRelease) => {
+    setReleaseToDelete(release)
+    setShowDeleteDialog(true)
+  }
+
+  // Export releases
+  const handleExportReleases = async () => {
+    try {
+      const dataStr = JSON.stringify(releases, null, 2)
+      const blob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `releases-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      toast.success('Export successful', {
+        description: 'Release history has been downloaded'
+      })
+    } catch (error) {
+      toast.error('Failed to export releases')
+    }
+  }
+
+  // Calculate stats from real data
+  const stats = useMemo(() => {
+    const totalReleases = releases.length
+    const deployedReleases = releases.filter(r => r.status === 'deployed').length
+    const scheduledReleases = releases.filter(r => r.status === 'scheduled').length
+    const rollingReleases = releases.filter(r => r.status === 'rolling').length
+    const failedReleases = releases.filter(r => r.status === 'failed').length
+    const draftReleases = releases.filter(r => r.status === 'draft').length
+    const successRate = totalReleases > 0 ? ((deployedReleases / totalReleases) * 100).toFixed(1) : '0'
+    const avgDeployTime = releases.filter(r => r.deploy_time_minutes).length > 0
+      ? (releases.filter(r => r.deploy_time_minutes).reduce((sum, r) => sum + (r.deploy_time_minutes || 0), 0) / releases.filter(r => r.deploy_time_minutes).length).toFixed(1)
+      : '0'
+    const totalDownloads = releases.reduce((sum, r) => sum + (r.downloads_count || 0), 0)
+    const totalCommits = releases.reduce((sum, r) => sum + (r.commits_count || 0), 0)
+
+    return {
+      totalReleases,
+      deployedReleases,
+      scheduledReleases,
+      rollingReleases,
+      failedReleases,
+      draftReleases,
+      successRate,
+      avgDeployTime,
+      totalDownloads,
+      totalCommits,
+      releaseFrequency: totalReleases > 0 ? (totalReleases / 4).toFixed(1) : '0' // Releases per week (approx)
+    }
+  }, [releases])
+
+  // Filter releases based on search and filters
   const filteredReleases = useMemo(() => {
-    return mockReleases.filter(release => {
+    // Use mock data if no real data exists
+    const dataToFilter = releases.length > 0 ? releases.map(r => ({
+      id: r.id,
+      version: r.version,
+      name: r.release_name,
+      description: r.description || '',
+      changelog: r.changelog || '',
+      status: r.status as ReleaseStatus,
+      type: r.release_type as ReleaseType,
+      environment: r.environment as Environment,
+      tagName: r.git_tag || r.version,
+      branch: r.git_branch || 'main',
+      commitHash: r.build_number || 'HEAD',
+      author: { id: r.user_id, name: 'User', avatar: '' },
+      contributors: [],
+      commits: r.commits_count || 0,
+      additions: r.additions_count || 0,
+      deletions: r.deletions_count || 0,
+      filesChanged: r.files_changed || 0,
+      deployTime: r.deploy_time_minutes || 0,
+      coverage: r.coverage_percentage || 0,
+      isPrerelease: r.is_prerelease,
+      isDraft: r.is_draft,
+      isLatest: r.is_latest,
+      assets: [],
+      deployments: [],
+      createdAt: r.created_at,
+      publishedAt: r.deployed_at,
+      scheduledFor: r.scheduled_for,
+      deployedAt: r.deployed_at,
+      downloads: r.downloads_count || 0,
+      views: r.views_count || 0
+    })) : mockReleases
+
+    return dataToFilter.filter(release => {
       const matchesSearch = release.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         release.version.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = selectedStatus === 'all' || release.status === selectedStatus
       const matchesType = selectedType === 'all' || release.type === selectedType
       return matchesSearch && matchesStatus && matchesType
     })
-  }, [searchQuery, selectedStatus, selectedType])
+  }, [releases, searchQuery, selectedStatus, selectedType])
 
   const getStatusColor = (status: ReleaseStatus) => {
     switch (status) {
@@ -547,47 +1166,16 @@ export default function ReleasesClient() {
     setShowReleaseDialog(true)
   }
 
-  const stats = [
-    { label: 'Total Releases', value: mockStats.totalReleases.toString(), icon: Rocket, change: '+12', color: 'text-indigo-600' },
-    { label: 'Deployed', value: mockStats.deployedReleases.toString(), icon: CheckCircle, change: '+8', color: 'text-green-600' },
-    { label: 'Success Rate', value: `${mockStats.successRate}%`, icon: TrendingUp, change: '+2.3%', color: 'text-blue-600' },
-    { label: 'Avg Deploy', value: `${mockStats.avgDeployTime}min`, icon: Clock, change: '-0.5min', color: 'text-purple-600' },
-    { label: 'Downloads', value: formatNumber(mockStats.totalDownloads), icon: Download, change: '+2.3K', color: 'text-cyan-600' },
-    { label: 'Commits', value: formatNumber(mockStats.totalCommits), icon: GitCommit, change: '+156', color: 'text-pink-600' },
-    { label: 'Frequency', value: `${mockStats.releaseFrequency}/wk`, icon: Activity, change: '+0.3', color: 'text-orange-600' },
-    { label: 'Rolling', value: mockStats.rollingReleases.toString(), icon: RefreshCw, change: '1 active', color: 'text-teal-600' }
+  const statsDisplay = [
+    { label: 'Total Releases', value: stats.totalReleases.toString(), icon: Rocket, change: '+12', color: 'text-indigo-600' },
+    { label: 'Deployed', value: stats.deployedReleases.toString(), icon: CheckCircle, change: '+8', color: 'text-green-600' },
+    { label: 'Success Rate', value: `${stats.successRate}%`, icon: TrendingUp, change: '+2.3%', color: 'text-blue-600' },
+    { label: 'Avg Deploy', value: `${stats.avgDeployTime}min`, icon: Clock, change: '-0.5min', color: 'text-purple-600' },
+    { label: 'Downloads', value: formatNumber(stats.totalDownloads), icon: Download, change: '+2.3K', color: 'text-cyan-600' },
+    { label: 'Commits', value: formatNumber(stats.totalCommits), icon: GitCommit, change: '+156', color: 'text-pink-600' },
+    { label: 'Frequency', value: `${stats.releaseFrequency}/wk`, icon: Activity, change: '+0.3', color: 'text-orange-600' },
+    { label: 'Rolling', value: stats.rollingReleases.toString(), icon: RefreshCw, change: '1 active', color: 'text-teal-600' }
   ]
-
-  // Handlers
-  const handleCreateRelease = () => {
-    toast.info('Create Release', {
-      description: 'Opening release builder...'
-    })
-  }
-
-  const handleDeployRelease = (releaseName: string) => {
-    toast.success('Deploying release', {
-      description: `"${releaseName}" deployment started`
-    })
-  }
-
-  const handleRollbackRelease = (releaseName: string) => {
-    toast.info('Rolling back', {
-      description: `Rolling back "${releaseName}"...`
-    })
-  }
-
-  const handleExportReleases = () => {
-    toast.success('Exporting releases', {
-      description: 'Release history will be downloaded'
-    })
-  }
-
-  const handlePromoteRelease = (releaseName: string) => {
-    toast.success('Promoting release', {
-      description: `"${releaseName}" promoted to production`
-    })
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-6">
@@ -616,7 +1204,10 @@ export default function ReleasesClient() {
             <Button variant="outline" size="icon">
               <Filter className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+              onClick={() => setShowCreateDialog(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Release
             </Button>
@@ -625,18 +1216,27 @@ export default function ReleasesClient() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          {stats.map((stat, index) => (
-            <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <stat.icon className={`w-5 h-5 ${stat.color}`} />
-                  <span className="text-xs text-green-600 font-medium">{stat.change}</span>
-                </div>
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
-                <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
+          {isLoading ? (
+            <Card className="col-span-full bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+              <CardContent className="p-4 flex items-center justify-center">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-500" />
+                <span className="ml-2 text-gray-500">Loading statistics...</span>
               </CardContent>
             </Card>
-          ))}
+          ) : (
+            statsDisplay.map((stat, index) => (
+              <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                    <span className="text-xs text-green-600 font-medium">{stat.change}</span>
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
 
         {/* Main Content */}
@@ -682,37 +1282,37 @@ export default function ReleasesClient() {
                   <p className="text-indigo-100">Deploy, track, and manage your software releases</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleExportReleases}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
-                  <Button className="bg-white text-indigo-600 hover:bg-indigo-50">
+                  <Button className="bg-white text-indigo-600 hover:bg-indigo-50" onClick={() => setShowCreateDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />New Release
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.totalReleases}</div>
+                  <div className="text-2xl font-bold">{stats.totalReleases}</div>
                   <div className="text-sm text-indigo-100">Total</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.deployedReleases}</div>
+                  <div className="text-2xl font-bold">{stats.deployedReleases}</div>
                   <div className="text-sm text-indigo-100">Deployed</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.scheduledReleases}</div>
+                  <div className="text-2xl font-bold">{stats.scheduledReleases}</div>
                   <div className="text-sm text-indigo-100">Scheduled</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.successRate}%</div>
+                  <div className="text-2xl font-bold">{stats.successRate}%</div>
                   <div className="text-sm text-indigo-100">Success</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockStats.avgDeployTime}m</div>
+                  <div className="text-2xl font-bold">{stats.avgDeployTime}m</div>
                   <div className="text-sm text-indigo-100">Avg Deploy</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{formatNumber(mockStats.totalDownloads)}</div>
+                  <div className="text-2xl font-bold">{formatNumber(stats.totalDownloads)}</div>
                   <div className="text-sm text-indigo-100">Downloads</div>
                 </div>
               </div>
@@ -721,14 +1321,26 @@ export default function ReleasesClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-6 gap-4">
               {[
-                { icon: Plus, label: 'New Release', desc: 'Create release', color: 'indigo' },
-                { icon: Rocket, label: 'Deploy', desc: 'Deploy now', color: 'green' },
-                { icon: Calendar, label: 'Schedule', desc: 'Plan release', color: 'purple' },
-                { icon: RotateCcw, label: 'Rollback', desc: 'Revert changes', color: 'orange' },
-                { icon: Download, label: 'Assets', desc: 'Manage files', color: 'blue' },
-                { icon: BarChart3, label: 'Analytics', desc: 'View stats', color: 'cyan' }
+                { icon: Plus, label: 'New Release', desc: 'Create release', color: 'indigo', onClick: () => setShowCreateDialog(true) },
+                { icon: Rocket, label: 'Deploy', desc: 'Deploy now', color: 'green', onClick: () => {
+                  const scheduledRelease = releases.find(r => r.status === 'scheduled' || r.status === 'draft')
+                  if (scheduledRelease) openDeployDialog(scheduledRelease)
+                  else toast.info('No releases to deploy', { description: 'Create a new release first' })
+                }},
+                { icon: Calendar, label: 'Schedule', desc: 'Plan release', color: 'purple', onClick: () => setShowCreateDialog(true) },
+                { icon: RotateCcw, label: 'Rollback', desc: 'Revert changes', color: 'orange', onClick: () => {
+                  const deployedRelease = releases.find(r => r.status === 'deployed')
+                  if (deployedRelease) openRollbackDialog(deployedRelease)
+                  else toast.info('No deployed releases', { description: 'There are no deployed releases to rollback' })
+                }},
+                { icon: Download, label: 'Assets', desc: 'Manage files', color: 'blue', onClick: () => setActiveTab('assets') },
+                { icon: BarChart3, label: 'Analytics', desc: 'View stats', color: 'cyan', onClick: () => setActiveTab('analytics') }
               ].map(action => (
-                <Card key={action.label} className="p-3 hover:shadow-lg transition-all cursor-pointer group text-center bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <Card
+                  key={action.label}
+                  className="p-3 hover:shadow-lg transition-all cursor-pointer group text-center bg-white/80 dark:bg-gray-800/80 backdrop-blur"
+                  onClick={action.onClick}
+                >
                   <div className={`p-2 rounded-lg bg-${action.color}-100 dark:bg-${action.color}-900/30 mx-auto w-fit group-hover:scale-110 transition-transform`}>
                     <action.icon className={`w-5 h-5 text-${action.color}-600`} />
                   </div>
@@ -905,24 +1517,54 @@ export default function ReleasesClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             {release.status === 'scheduled' && (
-                              <Button size="sm" className="bg-indigo-500 text-white">
+                              <Button
+                                size="sm"
+                                className="bg-indigo-500 text-white"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  const dbRelease = releases.find(r => r.id === release.id)
+                                  if (dbRelease) openDeployDialog(dbRelease)
+                                }}
+                              >
                                 <Rocket className="w-3 h-3 mr-1" />
                                 Deploy Now
                               </Button>
                             )}
                             {release.status === 'rolling' && (
-                              <Button size="sm" variant="outline">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toast.info('Pausing deployment...', { description: 'This feature is coming soon' })
+                                }}
+                              >
                                 <Pause className="w-3 h-3 mr-1" />
                                 Pause
                               </Button>
                             )}
                             {release.status === 'deployed' && (
-                              <Button size="sm" variant="outline">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  const dbRelease = releases.find(r => r.id === release.id)
+                                  if (dbRelease) openRollbackDialog(dbRelease)
+                                }}
+                              >
                                 <RotateCcw className="w-3 h-3 mr-1" />
                                 Rollback
                               </Button>
                             )}
-                            <Button size="sm" variant="outline">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                openReleaseDialog(release)
+                              }}
+                            >
                               <Eye className="w-3 h-3 mr-1" />
                               View
                             </Button>
@@ -946,33 +1588,43 @@ export default function ReleasesClient() {
                   <p className="text-green-100">Track and monitor all deployment activities</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleExportReleases}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
-                  <Button className="bg-white text-green-600 hover:bg-green-50">
+                  <Button
+                    className="bg-white text-green-600 hover:bg-green-50"
+                    onClick={() => {
+                      const scheduledRelease = releases.find(r => r.status === 'scheduled' || r.status === 'draft')
+                      if (scheduledRelease) {
+                        openDeployDialog(scheduledRelease)
+                      } else {
+                        toast.info('No releases to deploy', { description: 'Create a new release or schedule one first' })
+                      }
+                    }}
+                  >
                     <Rocket className="w-4 h-4 mr-2" />Deploy Now
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-4 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">156</div>
+                  <div className="text-2xl font-bold">{deployments.length > 0 ? deployments.length : 156}</div>
                   <div className="text-sm text-green-100">Total Deploys</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">148</div>
+                  <div className="text-2xl font-bold">{deployments.length > 0 ? deployments.filter(d => d.status === 'success').length : 148}</div>
                   <div className="text-sm text-green-100">Successful</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">8</div>
+                  <div className="text-2xl font-bold">{deployments.length > 0 ? deployments.filter(d => d.status === 'failed').length : 8}</div>
                   <div className="text-sm text-green-100">Failed</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">95%</div>
+                  <div className="text-2xl font-bold">{deployments.length > 0 ? Math.round((deployments.filter(d => d.status === 'success').length / deployments.length) * 100) : 95}%</div>
                   <div className="text-sm text-green-100">Success Rate</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">3.8m</div>
+                  <div className="text-2xl font-bold">{deployments.length > 0 && deployments.filter(d => d.duration_minutes).length > 0 ? (deployments.filter(d => d.duration_minutes).reduce((sum, d) => sum + (d.duration_minutes || 0), 0) / deployments.filter(d => d.duration_minutes).length).toFixed(1) : '3.8'}m</div>
                   <div className="text-sm text-green-100">Avg Time</div>
                 </div>
               </div>
@@ -1102,17 +1754,27 @@ export default function ReleasesClient() {
                   <h2 className="text-2xl font-bold mb-2">Rollback History</h2>
                   <p className="text-yellow-100">Track and manage release rollbacks</p>
                 </div>
-                <Button className="bg-white text-yellow-600 hover:bg-yellow-50">
+                <Button
+                  className="bg-white text-yellow-600 hover:bg-yellow-50"
+                  onClick={() => {
+                    const deployedRelease = releases.find(r => r.status === 'deployed')
+                    if (deployedRelease) {
+                      openRollbackDialog(deployedRelease)
+                    } else {
+                      toast.info('No deployed releases', { description: 'There are no deployed releases to rollback' })
+                    }
+                  }}
+                >
                   <RotateCcw className="w-4 h-4 mr-2" />Initiate Rollback
                 </Button>
               </div>
               <div className="grid grid-cols-4 gap-4 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockRollbacks.length}</div>
+                  <div className="text-2xl font-bold">{rollbacks.length > 0 ? rollbacks.length : mockRollbacks.length}</div>
                   <div className="text-sm text-yellow-100">Total</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockRollbacks.filter(r => r.status === 'completed').length}</div>
+                  <div className="text-2xl font-bold">{rollbacks.length > 0 ? rollbacks.filter(r => r.status === 'completed').length : mockRollbacks.filter(r => r.status === 'completed').length}</div>
                   <div className="text-sm text-yellow-100">Completed</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -1891,23 +2553,53 @@ export default function ReleasesClient() {
               </ScrollArea>
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/releases/${selectedRelease.id}`)
+                      toast.success('Link copied to clipboard')
+                    }}
+                  >
                     <Copy className="w-4 h-4 mr-2" />
                     Copy Link
                   </Button>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      toast.info('Opening Git', { description: 'Redirecting to repository...' })
+                    }}
+                  >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View on Git
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">
                   {selectedRelease.status === 'deployed' && (
-                    <Button variant="outline" className="text-yellow-600">
+                    <Button
+                      variant="outline"
+                      className="text-yellow-600"
+                      onClick={() => {
+                        const dbRelease = releases.find(r => r.id === selectedRelease.id)
+                        if (dbRelease) {
+                          setShowReleaseDialog(false)
+                          openRollbackDialog(dbRelease)
+                        }
+                      }}
+                    >
                       <RotateCcw className="w-4 h-4 mr-2" />
                       Rollback
                     </Button>
                   )}
-                  <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                  <Button
+                    className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                    onClick={() => {
+                      const dbRelease = releases.find(r => r.id === selectedRelease.id)
+                      if (dbRelease) {
+                        setShowReleaseDialog(false)
+                        openEditDialog(dbRelease)
+                      }
+                    }}
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Release
                   </Button>
@@ -1915,6 +2607,450 @@ export default function ReleasesClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Release Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-indigo-600" />
+              Create New Release
+            </DialogTitle>
+            <DialogDescription>
+              Create a new release for your project. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="version">Version *</Label>
+                <Input
+                  id="version"
+                  placeholder="v1.0.0"
+                  value={formData.version}
+                  onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="release_name">Release Name *</Label>
+                <Input
+                  id="release_name"
+                  placeholder="Aurora Release"
+                  value={formData.release_name}
+                  onChange={(e) => setFormData({ ...formData, release_name: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Describe this release..."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="release_type">Release Type</Label>
+                <Select
+                  value={formData.release_type}
+                  onValueChange={(value: any) => setFormData({ ...formData, release_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="major">Major</SelectItem>
+                    <SelectItem value="minor">Minor</SelectItem>
+                    <SelectItem value="patch">Patch</SelectItem>
+                    <SelectItem value="hotfix">Hotfix</SelectItem>
+                    <SelectItem value="prerelease">Pre-release</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="environment">Environment</Label>
+                <Select
+                  value={formData.environment}
+                  onValueChange={(value: any) => setFormData({ ...formData, environment: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select environment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                    <SelectItem value="canary">Canary</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="git_branch">Git Branch</Label>
+                <Input
+                  id="git_branch"
+                  placeholder="main"
+                  value={formData.git_branch}
+                  onChange={(e) => setFormData({ ...formData, git_branch: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="git_tag">Git Tag</Label>
+                <Input
+                  id="git_tag"
+                  placeholder="v1.0.0"
+                  value={formData.git_tag}
+                  onChange={(e) => setFormData({ ...formData, git_tag: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="changelog">Changelog</Label>
+              <Textarea
+                id="changelog"
+                placeholder="## What's Changed&#10;- Feature 1&#10;- Bug fix 2"
+                className="min-h-[100px]"
+                value={formData.changelog}
+                onChange={(e) => setFormData({ ...formData, changelog: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="scheduled_for">Schedule Release (Optional)</Label>
+              <Input
+                id="scheduled_for"
+                type="datetime-local"
+                value={formData.scheduled_for}
+                onChange={(e) => setFormData({ ...formData, scheduled_for: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.is_draft}
+                  onChange={(e) => setFormData({ ...formData, is_draft: e.target.checked })}
+                  className="rounded"
+                />
+                <span className="text-sm">Save as draft</span>
+              </label>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.is_prerelease}
+                  onChange={(e) => setFormData({ ...formData, is_prerelease: e.target.checked })}
+                  className="rounded"
+                />
+                <span className="text-sm">Pre-release</span>
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateRelease}
+              disabled={isSaving || !formData.version || !formData.release_name}
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Release
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Release Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-indigo-600" />
+              Edit Release
+            </DialogTitle>
+            <DialogDescription>
+              Update the release details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_version">Version *</Label>
+                <Input
+                  id="edit_version"
+                  placeholder="v1.0.0"
+                  value={formData.version}
+                  onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_release_name">Release Name *</Label>
+                <Input
+                  id="edit_release_name"
+                  placeholder="Aurora Release"
+                  value={formData.release_name}
+                  onChange={(e) => setFormData({ ...formData, release_name: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit_description">Description</Label>
+              <Textarea
+                id="edit_description"
+                placeholder="Describe this release..."
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_release_type">Release Type</Label>
+                <Select
+                  value={formData.release_type}
+                  onValueChange={(value: any) => setFormData({ ...formData, release_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="major">Major</SelectItem>
+                    <SelectItem value="minor">Minor</SelectItem>
+                    <SelectItem value="patch">Patch</SelectItem>
+                    <SelectItem value="hotfix">Hotfix</SelectItem>
+                    <SelectItem value="prerelease">Pre-release</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_environment">Environment</Label>
+                <Select
+                  value={formData.environment}
+                  onValueChange={(value: any) => setFormData({ ...formData, environment: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select environment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                    <SelectItem value="canary">Canary</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit_changelog">Changelog</Label>
+              <Textarea
+                id="edit_changelog"
+                placeholder="## What's Changed&#10;- Feature 1&#10;- Bug fix 2"
+                className="min-h-[100px]"
+                value={formData.changelog}
+                onChange={(e) => setFormData({ ...formData, changelog: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUpdateRelease}
+              disabled={isSaving || !formData.version || !formData.release_name}
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Release Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete Release
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this release? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          {releaseToDelete && (
+            <div className="py-4">
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="font-medium">{releaseToDelete.release_name}</p>
+                <p className="text-sm text-gray-500">{releaseToDelete.version}</p>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteRelease}
+              disabled={isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Release
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Deploy Release Dialog */}
+      <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Rocket className="w-5 h-5 text-green-600" />
+              Deploy Release
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to deploy this release?
+            </DialogDescription>
+          </DialogHeader>
+          {releaseToDeploy && (
+            <div className="py-4">
+              <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                <p className="font-medium">{releaseToDeploy.release_name}</p>
+                <p className="text-sm text-gray-500">{releaseToDeploy.version}</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <Badge variant="outline">{releaseToDeploy.environment}</Badge>
+                  <Badge variant="outline">{releaseToDeploy.release_type}</Badge>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeployDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDeployRelease}
+              disabled={isDeploying}
+              className="bg-green-600 text-white hover:bg-green-700"
+            >
+              {isDeploying ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deploying...
+                </>
+              ) : (
+                <>
+                  <Rocket className="w-4 h-4 mr-2" />
+                  Start Deployment
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rollback Release Dialog */}
+      <Dialog open={showRollbackDialog} onOpenChange={setShowRollbackDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-yellow-600">
+              <RotateCcw className="w-5 h-5" />
+              Rollback Release
+            </DialogTitle>
+            <DialogDescription>
+              Rollback this release to a previous version.
+            </DialogDescription>
+          </DialogHeader>
+          {releaseToRollback && (
+            <div className="space-y-4 py-4">
+              <div className="p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                <p className="font-medium">Current: {releaseToRollback.release_name}</p>
+                <p className="text-sm text-gray-500">{releaseToRollback.version}</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="target_version">Target Version *</Label>
+                <Select value={targetVersion} onValueChange={setTargetVersion}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select target version" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {releases
+                      .filter(r => r.id !== releaseToRollback.id && r.status === 'deployed')
+                      .map(r => (
+                        <SelectItem key={r.id} value={r.version}>
+                          {r.version} - {r.release_name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="rollback_reason">Reason *</Label>
+                <Textarea
+                  id="rollback_reason"
+                  placeholder="Why are you rolling back this release?"
+                  value={rollbackReason}
+                  onChange={(e) => setRollbackReason(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRollbackDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleRollbackRelease}
+              disabled={isRollingBack || !rollbackReason || !targetVersion}
+              className="bg-yellow-600 text-white hover:bg-yellow-700"
+            >
+              {isRollingBack ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Rolling back...
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Initiate Rollback
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

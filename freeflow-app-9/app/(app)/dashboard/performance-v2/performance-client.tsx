@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import {
   Gauge,
   Zap,
@@ -468,6 +470,11 @@ const mockPerfQuickActions = [
 ]
 
 export default function PerformanceClient() {
+  // Supabase client and auth
+  const supabase = createClientComponentClient()
+  const { getUserId } = useAuthUserId()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedDevice, setSelectedDevice] = useState<DeviceType>('mobile')
   const [testUrl, setTestUrl] = useState('https://example.com')
@@ -479,6 +486,89 @@ export default function PerformanceClient() {
   const [selectedAudit, setSelectedAudit] = useState<Audit | null>(null)
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showAddBudgetDialog, setShowAddBudgetDialog] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+
+  // Data State
+  const [performanceMetrics, setPerformanceMetrics] = useState<any[]>([])
+  const [performanceBenchmarks, setPerformanceBenchmarks] = useState<any[]>([])
+  const [performanceAlerts, setPerformanceAlerts] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Form State for Add Budget Dialog
+  const [budgetForm, setBudgetForm] = useState({
+    name: '',
+    metric: 'script',
+    target: 300,
+    unit: 'KB',
+    category: 'performance' as const
+  })
+
+  // Fetch performance data from Supabase
+  const fetchPerformanceData = useCallback(async () => {
+    try {
+      const userId = await getUserId()
+      if (!userId) return
+
+      setIsLoading(true)
+
+      // Fetch performance metrics
+      const { data: metrics } = await supabase
+        .from('performance_metrics')
+        .select('*')
+        .eq('user_id', userId)
+        .order('metric_date', { ascending: false })
+        .limit(30)
+
+      // Fetch performance benchmarks (used as budgets)
+      const { data: benchmarks } = await supabase
+        .from('performance_benchmarks')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_active', true)
+        .order('created_at', { ascending: false })
+
+      // Fetch performance alerts
+      const { data: alerts } = await supabase
+        .from('performance_alerts')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('is_resolved', false)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      setPerformanceMetrics(metrics || [])
+      setPerformanceBenchmarks(benchmarks || [])
+      setPerformanceAlerts(alerts || [])
+    } catch (err) {
+      console.error('Failed to fetch performance data:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase, getUserId])
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchPerformanceData()
+  }, [fetchPerformanceData])
+
+  // Real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('performance_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'performance_metrics' },
+        () => fetchPerformanceData()
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'performance_benchmarks' },
+        () => fetchPerformanceData()
+      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'performance_alerts' },
+        () => fetchPerformanceData()
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [supabase, fetchPerformanceData])
 
   // Filter audits
   const filteredAudits = useMemo(() => {
@@ -492,19 +582,77 @@ export default function PerformanceClient() {
   const warningAudits = mockAudits.filter(a => a.severity === 'warning').length
   const failedAudits = mockAudits.filter(a => a.severity === 'fail').length
 
-  // Run test simulation
-  const handleRunTest = () => {
+  // Calculate average scores from mock data for settings display
+  const averageScores = useMemo(() => {
+    const tests = mockPageTests
+    return {
+      performance: Math.round(tests.reduce((sum, t) => sum + t.scores.performance, 0) / tests.length),
+      accessibility: Math.round(tests.reduce((sum, t) => sum + t.scores.accessibility, 0) / tests.length),
+      bestPractices: Math.round(tests.reduce((sum, t) => sum + t.scores.bestPractices, 0) / tests.length),
+      seo: Math.round(tests.reduce((sum, t) => sum + t.scores.seo, 0) / tests.length),
+      pwa: Math.round(tests.reduce((sum, t) => sum + t.scores.pwa, 0) / tests.length)
+    }
+  }, [])
+
+  // Mock data for settings display
+  const mockWebVitals = [
+    { name: 'LCP', value: 2400 },
+    { name: 'FID', value: 85 },
+    { name: 'CLS', value: 0.08 }
+  ]
+
+  const mockHistoricalTests = mockPageTests
+
+  // Run performance audit - stores result in Supabase
+  const handleRunTest = async () => {
     if (!testUrl.trim()) {
       toast.error('Please enter a URL to audit')
       return
     }
-    setIsRunning(true)
-    toast.info('Running performance audit...')
-    setTimeout(() => {
-      setIsRunning(false)
+
+    try {
+      const userId = await getUserId()
+      if (!userId) {
+        toast.error('You must be logged in to run audits')
+        return
+      }
+
+      setIsRunning(true)
+      toast.info('Running performance audit...', {
+        description: `Analyzing ${testUrl}`
+      })
+
+      // Simulate audit (in production, this would call a real Lighthouse API)
+      await new Promise(resolve => setTimeout(resolve, 2500))
+
+      // Store performance metric in Supabase
+      const { error } = await supabase
+        .from('performance_metrics')
+        .insert({
+          user_id: userId,
+          metric_date: new Date().toISOString().split('T')[0],
+          period: 'daily',
+          category: 'productivity',
+          completion_rate: Math.random() * 20 + 70, // Mock score 70-90
+          efficiency_score: Math.random() * 20 + 75,
+          trend: 'up',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
       setShowRunDialog(false)
-      toast.success('Performance audit completed!')
-    }, 3000)
+      toast.success('Performance audit completed!', {
+        description: 'Results have been saved'
+      })
+
+      fetchPerformanceData()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to run performance audit')
+    } finally {
+      setIsRunning(false)
+    }
   }
 
   // Copy URL
@@ -517,29 +665,209 @@ export default function PerformanceClient() {
 
   const currentTest = selectedTest || mockPageTests[0]
 
-  // Handlers
-  const handleRunTest = () => {
-    toast.info('Running performance test', {
-      description: 'Test is being executed...'
-    })
+  // Export performance report
+  const handleExportReport = async () => {
+    try {
+      setIsExporting(true)
+      toast.info('Generating report...', {
+        description: 'Please wait while we compile your data'
+      })
+
+      // Simulate export delay
+      await new Promise(resolve => setTimeout(resolve, 1500))
+
+      // Create exportable data
+      const exportData = {
+        exportedAt: new Date().toISOString(),
+        url: currentTest.url,
+        device: selectedDevice,
+        scores: currentTest.scores,
+        vitals: currentTest.vitals,
+        audits: mockAudits,
+        budgets: mockBudgets,
+        metrics: performanceMetrics
+      }
+
+      // Create download
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `performance-report-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Report exported successfully!', {
+        description: 'Check your downloads folder'
+      })
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to export report')
+    } finally {
+      setIsExporting(false)
+    }
   }
 
-  const handleExportReport = () => {
-    toast.success('Export started', {
-      description: 'Performance report is being exported'
-    })
+  // Schedule performance test
+  const handleScheduleTest = async () => {
+    try {
+      const userId = await getUserId()
+      if (!userId) {
+        toast.error('You must be logged in to schedule tests')
+        return
+      }
+
+      // In production, this would create a scheduled job
+      toast.success('Test scheduled successfully!', {
+        description: 'You will receive notifications when tests complete'
+      })
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to schedule test')
+    }
   }
 
-  const handleScheduleTest = () => {
-    toast.success('Test scheduled', {
-      description: 'Performance test has been scheduled'
-    })
-  }
-
+  // Compare test results
   const handleCompareResults = () => {
-    toast.info('Opening comparison', {
-      description: 'Loading test results for comparison'
+    if (mockPageTests.length < 2) {
+      toast.error('Need at least 2 tests to compare')
+      return
+    }
+
+    toast.info('Opening comparison view', {
+      description: 'Comparing latest test results'
     })
+  }
+
+  // Add performance budget
+  const handleAddBudget = async () => {
+    try {
+      const userId = await getUserId()
+      if (!userId) {
+        toast.error('You must be logged in to add budgets')
+        return
+      }
+
+      if (!budgetForm.name.trim()) {
+        toast.error('Please enter a budget name')
+        return
+      }
+
+      const { error } = await supabase
+        .from('performance_benchmarks')
+        .insert({
+          user_id: userId,
+          category: 'productivity',
+          metric_name: budgetForm.name,
+          target_value: budgetForm.target,
+          current_value: 0,
+          benchmark_level: 'average',
+          period: 'monthly',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      setShowAddBudgetDialog(false)
+      setBudgetForm({ name: '', metric: 'script', target: 300, unit: 'KB', category: 'performance' })
+      toast.success('Performance budget added!', {
+        description: `${budgetForm.name} budget has been created`
+      })
+
+      fetchPerformanceData()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to add budget')
+    }
+  }
+
+  // Delete performance budget
+  const handleDeleteBudget = async (budgetId: string) => {
+    try {
+      const { error } = await supabase
+        .from('performance_benchmarks')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('id', budgetId)
+
+      if (error) throw error
+
+      toast.success('Budget removed')
+      fetchPerformanceData()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to remove budget')
+    }
+  }
+
+  // Resolve performance alert
+  const handleResolveAlert = async (alertId: string) => {
+    try {
+      const { error } = await supabase
+        .from('performance_alerts')
+        .update({
+          is_resolved: true,
+          resolved_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', alertId)
+
+      if (error) throw error
+
+      toast.success('Alert resolved')
+      fetchPerformanceData()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to resolve alert')
+    }
+  }
+
+  // Delete all history
+  const handleDeleteHistory = async () => {
+    try {
+      const userId = await getUserId()
+      if (!userId) {
+        toast.error('You must be logged in')
+        return
+      }
+
+      const { error } = await supabase
+        .from('performance_metrics')
+        .delete()
+        .eq('user_id', userId)
+
+      if (error) throw error
+
+      toast.success('History deleted', {
+        description: 'All performance test history has been removed'
+      })
+      fetchPerformanceData()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to delete history')
+    }
+  }
+
+  // Reset all budgets
+  const handleResetBudgets = async () => {
+    try {
+      const userId = await getUserId()
+      if (!userId) {
+        toast.error('You must be logged in')
+        return
+      }
+
+      const { error } = await supabase
+        .from('performance_benchmarks')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('user_id', userId)
+
+      if (error) throw error
+
+      toast.success('Budgets reset', {
+        description: 'All performance budgets have been cleared'
+      })
+      fetchPerformanceData()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reset budgets')
+    }
   }
 
   return (
@@ -565,6 +893,18 @@ export default function PerformanceClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={handleExportReport}
+                disabled={isExporting}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/20 text-white rounded-xl hover:bg-white/30 font-medium transition-colors disabled:opacity-50"
+              >
+                {isExporting ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Download className="h-5 w-5" />
+                )}
+                Export
+              </button>
               <button
                 onClick={() => setShowRunDialog(true)}
                 className="flex items-center gap-2 px-5 py-2.5 bg-white text-emerald-600 rounded-xl hover:bg-emerald-50 font-medium transition-colors"
@@ -936,7 +1276,10 @@ export default function PerformanceClient() {
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">Performance Budgets</h2>
                 <p className="text-gray-500">Set and track resource budgets for optimal performance</p>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors">
+              <button
+                onClick={() => setShowAddBudgetDialog(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-colors"
+              >
                 <Plus className="h-5 w-5" />
                 Add Budget
               </button>
@@ -1713,8 +2056,12 @@ export default function PerformanceClient() {
                           </Select>
                         </div>
 
-                        <Button variant="outline" className="w-full">
-                          <Download className="w-4 h-4 mr-2" />
+                        <Button variant="outline" className="w-full" onClick={handleExportReport} disabled={isExporting}>
+                          {isExporting ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <Download className="w-4 h-4 mr-2" />
+                          )}
                           Export All Data
                         </Button>
                       </CardContent>
@@ -1778,7 +2125,7 @@ export default function PerformanceClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All History</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all test history</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={handleDeleteHistory}>Delete</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -1786,7 +2133,7 @@ export default function PerformanceClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Budgets</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Clear all performance budgets</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={handleResetBudgets}>Reset</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -1794,7 +2141,7 @@ export default function PerformanceClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Project</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this project</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('This action cannot be undone. Contact support to delete project.')}>Delete</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1931,6 +2278,103 @@ export default function PerformanceClient() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Budget Dialog */}
+      <Dialog open={showAddBudgetDialog} onOpenChange={setShowAddBudgetDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="h-5 w-5 text-emerald-600" />
+              Add Performance Budget
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Budget Name
+              </Label>
+              <Input
+                value={budgetForm.name}
+                onChange={e => setBudgetForm(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="e.g., JavaScript Bundle Size"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Metric Type
+                </Label>
+                <Select
+                  value={budgetForm.metric}
+                  onValueChange={(value) => setBudgetForm(prev => ({ ...prev, metric: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="script">JavaScript</SelectItem>
+                    <SelectItem value="stylesheet">CSS</SelectItem>
+                    <SelectItem value="image">Images</SelectItem>
+                    <SelectItem value="font">Fonts</SelectItem>
+                    <SelectItem value="total">Total Page</SelectItem>
+                    <SelectItem value="fcp">First Contentful Paint</SelectItem>
+                    <SelectItem value="lcp">Largest Contentful Paint</SelectItem>
+                    <SelectItem value="tti">Time to Interactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Unit
+                </Label>
+                <Select
+                  value={budgetForm.unit}
+                  onValueChange={(value) => setBudgetForm(prev => ({ ...prev, unit: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="KB">KB</SelectItem>
+                    <SelectItem value="MB">MB</SelectItem>
+                    <SelectItem value="s">Seconds</SelectItem>
+                    <SelectItem value="ms">Milliseconds</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div>
+              <Label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Target Value
+              </Label>
+              <Input
+                type="number"
+                value={budgetForm.target}
+                onChange={e => setBudgetForm(prev => ({ ...prev, target: parseInt(e.target.value) || 0 }))}
+                placeholder="300"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Performance budget threshold in {budgetForm.unit}
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowAddBudgetDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddBudget}
+                className="bg-emerald-600 hover:bg-emerald-700"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Budget
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
 

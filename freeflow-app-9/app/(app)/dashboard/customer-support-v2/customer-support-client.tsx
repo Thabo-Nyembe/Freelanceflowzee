@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -136,6 +137,56 @@ interface CustomerSupportClientProps {
   initialStats: any
 }
 
+// Database Types
+interface DbTicket {
+  id: string
+  user_id: string
+  ticket_code: string
+  subject: string
+  description: string | null
+  category: string
+  priority: string
+  status: string
+  customer_name: string | null
+  customer_email: string | null
+  customer_phone: string | null
+  assigned_to: string | null
+  assigned_at: string | null
+  channel: string
+  resolution_notes: string | null
+  resolved_at: string | null
+  first_response_at: string | null
+  sla_due_at: string | null
+  sla_breached: boolean
+  satisfaction_rating: number | null
+  tags: string[]
+  metadata: Record<string, any>
+  created_at: string
+  updated_at: string
+}
+
+interface TicketFormState {
+  subject: string
+  description: string
+  category: string
+  priority: string
+  channel: string
+  customer_name: string
+  customer_email: string
+  tags: string[]
+}
+
+const initialTicketForm: TicketFormState = {
+  subject: '',
+  description: '',
+  category: 'general',
+  priority: 'normal',
+  channel: 'email',
+  customer_name: '',
+  customer_email: '',
+  tags: [],
+}
+
 // Mock Data
 const mockCustomers: Customer[] = [
   { id: 'c1', name: 'Sarah Johnson', email: 'sarah@techcorp.com', avatar: '/avatars/sarah.jpg', phone: '+1-555-0123', company: 'TechCorp Inc', tier: 'enterprise', totalTickets: 15, satisfactionScore: 4.8, lastContact: '2024-01-18', tags: ['vip', 'technical'], notes: 'Prefers email communication' },
@@ -229,6 +280,8 @@ const mockSupportQuickActions = [
 ]
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {
+  const supabase = createClientComponentClient()
+
   const [activeTab, setActiveTab] = useState('tickets')
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)
   const [showTicketDialog, setShowTicketDialog] = useState(false)
@@ -242,10 +295,42 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [showAgentDialog, setShowAgentDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Supabase state
+  const [dbTickets, setDbTickets] = useState<DbTicket[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [ticketForm, setTicketForm] = useState<TicketFormState>(initialTicketForm)
+
+  // Fetch tickets from Supabase
+  const fetchTickets = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbTickets(data || [])
+    } catch (error) {
+      console.error('Error fetching tickets:', error)
+      toast.error('Failed to load tickets')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchTickets()
+  }, [fetchTickets])
+
   const tickets = mockTickets
   const agents = mockAgents
   const slas = mockSLAs
   const cannedResponses = mockCannedResponses
+  const customers = mockCustomers
 
   const filteredTickets = useMemo(() => {
     return tickets.filter(ticket => {
@@ -272,16 +357,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
     setShowTicketDialog(true)
   }
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     if (!messageInput.trim()) {
       toast.error('Please enter a message')
       return
     }
     if (!selectedTicket) return
 
-    // In production, this would call an API
-    toast.success(isInternalNote ? 'Internal note added' : 'Reply sent successfully')
-    setMessageInput('')
+    await handleSendTicketReply(selectedTicket.id, messageInput, isInternalNote)
   }
 
   const getStatusColor = (status: TicketStatus) => {
@@ -317,29 +400,204 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
     return colors[status]
   }
 
-  // Handlers
-  const handleAssignAgent = (conversation: Conversation) => {
-    toast.success('Agent assigned', {
-      description: `Ticket assigned successfully`
-    })
+  // Create ticket
+  const handleCreateTicket = async () => {
+    if (!ticketForm.subject.trim()) {
+      toast.error('Subject is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create tickets')
+        return
+      }
+
+      const { error } = await supabase.from('support_tickets').insert({
+        user_id: user.id,
+        subject: ticketForm.subject,
+        description: ticketForm.description || null,
+        category: ticketForm.category,
+        priority: ticketForm.priority,
+        channel: ticketForm.channel,
+        customer_name: ticketForm.customer_name || null,
+        customer_email: ticketForm.customer_email || null,
+        tags: ticketForm.tags,
+        status: 'open',
+      })
+
+      if (error) throw error
+
+      toast.success('Ticket created successfully')
+      setShowCreateDialog(false)
+      setTicketForm(initialTicketForm)
+      fetchTickets()
+    } catch (error) {
+      console.error('Error creating ticket:', error)
+      toast.error('Failed to create ticket')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleResolveTicket = (conversation: Conversation) => {
-    toast.success('Ticket resolved', {
-      description: 'Support ticket has been marked as resolved'
-    })
+  // Assign agent to ticket
+  const handleAssignAgent = async (ticketId: string, agentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({
+          assigned_to: agentId,
+          assigned_at: new Date().toISOString(),
+          status: 'in_progress',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', ticketId)
+
+      if (error) throw error
+
+      toast.success('Agent assigned', { description: 'Ticket assigned successfully' })
+      fetchTickets()
+    } catch (error) {
+      console.error('Error assigning agent:', error)
+      toast.error('Failed to assign agent')
+    }
   }
 
-  const handleEscalateTicket = (conversation: Conversation) => {
-    toast.info('Ticket escalated', {
-      description: 'Ticket has been escalated to senior support'
-    })
+  // Resolve ticket
+  const handleResolveTicket = async (ticketId: string, notes?: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({
+          status: 'resolved',
+          resolution_notes: notes || null,
+          resolved_at: new Date().toISOString(),
+          resolved_by: user?.id || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', ticketId)
+
+      if (error) throw error
+
+      toast.success('Ticket resolved', { description: 'Support ticket has been marked as resolved' })
+      setShowTicketDialog(false)
+      fetchTickets()
+    } catch (error) {
+      console.error('Error resolving ticket:', error)
+      toast.error('Failed to resolve ticket')
+    }
   }
 
-  const handleExportTickets = () => {
-    toast.success('Export started', {
-      description: 'Support data is being exported'
-    })
+  // Escalate ticket
+  const handleEscalateTicket = async (ticketId: string) => {
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({
+          priority: 'urgent',
+          status: 'in_progress',
+          metadata: { escalated: true, escalated_at: new Date().toISOString() },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', ticketId)
+
+      if (error) throw error
+
+      toast.info('Ticket escalated', { description: 'Ticket has been escalated to senior support' })
+      fetchTickets()
+    } catch (error) {
+      console.error('Error escalating ticket:', error)
+      toast.error('Failed to escalate ticket')
+    }
+  }
+
+  // Send reply to ticket
+  const handleSendTicketReply = async (ticketId: string, message: string, isInternal: boolean) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      const { error } = await supabase.from('support_ticket_replies').insert({
+        ticket_id: ticketId,
+        message: message,
+        is_internal: isInternal,
+        reply_type: isInternal ? 'note' : 'reply',
+        author_id: user?.id || null,
+        author_type: 'agent',
+      })
+
+      if (error) throw error
+
+      // Update first response time if not set
+      await supabase
+        .from('support_tickets')
+        .update({
+          first_response_at: new Date().toISOString(),
+          status: 'in_progress',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', ticketId)
+        .is('first_response_at', null)
+
+      toast.success(isInternal ? 'Internal note added' : 'Reply sent successfully')
+      setMessageInput('')
+    } catch (error) {
+      console.error('Error sending reply:', error)
+      toast.error('Failed to send reply')
+    }
+  }
+
+  // Delete ticket
+  const handleDeleteTicket = async (ticketId: string) => {
+    try {
+      const { error } = await supabase
+        .from('support_tickets')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', ticketId)
+
+      if (error) throw error
+
+      toast.success('Ticket deleted')
+      setShowTicketDialog(false)
+      fetchTickets()
+    } catch (error) {
+      console.error('Error deleting ticket:', error)
+      toast.error('Failed to delete ticket')
+    }
+  }
+
+  // Export tickets
+  const handleExportTickets = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('support_tickets')
+        .select('*')
+        .is('deleted_at', null)
+
+      if (error) throw error
+
+      const csv = [
+        ['ID', 'Subject', 'Status', 'Priority', 'Category', 'Created'].join(','),
+        ...(data || []).map(t =>
+          [t.ticket_code, t.subject, t.status, t.priority, t.category, t.created_at].join(',')
+        ),
+      ].join('\n')
+
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `support-tickets-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+
+      toast.success('Export started', { description: 'Support data is being exported' })
+    } catch (error) {
+      console.error('Error exporting:', error)
+      toast.error('Failed to export tickets')
+    }
   }
 
   return (
@@ -356,11 +614,11 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
               <p className="text-emerald-100 mt-1">Manage tickets, agents, and customer relationships</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={handleExportTickets}>
                 <Bot className="h-4 w-4 mr-2" />
-                AI Assist
+                Export
               </Button>
-              <Button className="bg-white text-emerald-600 hover:bg-emerald-50">
+              <Button className="bg-white text-emerald-600 hover:bg-emerald-50" onClick={() => setShowCreateDialog(true)}>
                 <MessageSquare className="h-4 w-4 mr-2" />
                 New Ticket
               </Button>
@@ -1774,12 +2032,15 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
                   </Card>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                    <Button
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700"
+                      onClick={() => handleResolveTicket(selectedTicket.id)}
+                    >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Solve
                     </Button>
-                    <Button variant="outline">
-                      <MoreVertical className="h-4 w-4" />
+                    <Button variant="outline" onClick={() => handleEscalateTicket(selectedTicket.id)}>
+                      <AlertTriangle className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
@@ -1976,6 +2237,108 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
 
       {/* Quick Actions Toolbar */}
       <QuickActionsToolbar actions={mockSupportQuickActions} />
+
+      {/* Create Ticket Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Ticket</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Subject *</Label>
+              <Input
+                value={ticketForm.subject}
+                onChange={(e) => setTicketForm({ ...ticketForm, subject: e.target.value })}
+                placeholder="Brief description of the issue"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <textarea
+                value={ticketForm.description}
+                onChange={(e) => setTicketForm({ ...ticketForm, description: e.target.value })}
+                placeholder="Detailed description..."
+                className="mt-1 w-full p-3 border rounded-lg text-sm resize-none h-24"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Priority</Label>
+                <Select value={ticketForm.priority} onValueChange={(v) => setTicketForm({ ...ticketForm, priority: v })}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Category</Label>
+                <Select value={ticketForm.category} onValueChange={(v) => setTicketForm({ ...ticketForm, category: v })}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="technical">Technical</SelectItem>
+                    <SelectItem value="billing">Billing</SelectItem>
+                    <SelectItem value="feature">Feature Request</SelectItem>
+                    <SelectItem value="bug">Bug Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Customer Name</Label>
+                <Input
+                  value={ticketForm.customer_name}
+                  onChange={(e) => setTicketForm({ ...ticketForm, customer_name: e.target.value })}
+                  placeholder="Customer name"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Customer Email</Label>
+                <Input
+                  type="email"
+                  value={ticketForm.customer_email}
+                  onChange={(e) => setTicketForm({ ...ticketForm, customer_email: e.target.value })}
+                  placeholder="customer@example.com"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Channel</Label>
+              <Select value={ticketForm.channel} onValueChange={(v) => setTicketForm({ ...ticketForm, channel: v })}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="chat">Chat</SelectItem>
+                  <SelectItem value="phone">Phone</SelectItem>
+                  <SelectItem value="web">Web</SelectItem>
+                  <SelectItem value="social">Social Media</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateTicket} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700">
+              {isSubmitting ? 'Creating...' : 'Create Ticket'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

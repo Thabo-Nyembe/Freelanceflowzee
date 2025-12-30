@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -203,6 +205,11 @@ const mockMobileAppQuickActions = [
 ]
 
 export default function MobileAppClient({ initialFeatures, initialVersions, initialStats }: MobileAppClientProps) {
+  const supabase = createClientComponentClient()
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedPlatform, setSelectedPlatform] = useState<Platform>('all')
   const [selectedBuild, setSelectedBuild] = useState<Build | null>(null)
@@ -211,6 +218,21 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   const [showReviewDialog, setShowReviewDialog] = useState(false)
   const [responseText, setResponseText] = useState('')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Form states
+  const [buildForm, setBuildForm] = useState({ version: '', buildNumber: '', platform: 'ios' as Platform, releaseType: 'beta' as ReleaseType })
+  const [campaignForm, setCampaignForm] = useState({ title: '', message: '', platform: 'all' as Platform, targetAudience: '' })
+  const [iapForm, setIapForm] = useState({ productId: '', name: '', type: 'subscription' as 'consumable' | 'non-consumable' | 'subscription', price: '' })
+
+  // Modal states
+  const [showCreateBuildModal, setShowCreateBuildModal] = useState(false)
+  const [showCreateCampaignModal, setShowCreateCampaignModal] = useState(false)
+  const [showCreateIapModal, setShowCreateIapModal] = useState(false)
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    getUserId().then(setUserId)
+  }, [getUserId])
 
   const builds = mockBuilds
   const reviews = mockReviews
@@ -272,36 +294,202 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     setShowReviewDialog(true)
   }
 
-  // Handlers
-  const handleCreateBuild = () => {
-    toast.info('Creating build', {
-      description: 'Initiating new app build...'
-    })
+  // CRUD Handlers
+  const handleCreateBuild = async () => {
+    if (!userId || !buildForm.version.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in version number' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_builds').insert({
+        user_id: userId,
+        version: buildForm.version,
+        build_number: buildForm.buildNumber,
+        platform: buildForm.platform,
+        release_type: buildForm.releaseType,
+        status: 'processing',
+        size: '0 MB',
+        min_os_version: buildForm.platform === 'ios' ? 'iOS 15.0' : 'Android 10'
+      })
+      if (error) throw error
+      toast.success('Build created', { description: `Build v${buildForm.version} is being processed` })
+      setBuildForm({ version: '', buildNumber: '', platform: 'ios', releaseType: 'beta' })
+      setShowCreateBuildModal(false)
+    } catch (err: any) {
+      toast.error('Failed to create build', { description: err.message })
+    } finally { setIsLoading(false) }
   }
 
-  const handleSubmitToStore = (platform: string) => {
-    toast.success('Submitting to store', {
-      description: `Submitting build to ${platform} store...`
-    })
+  const handleSubmitToStore = async (buildId: string, platform: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_builds').update({ status: 'submitted', submitted_at: new Date().toISOString() }).eq('id', buildId)
+      if (error) throw error
+      toast.success('Submitted to store', { description: `Build submitted to ${platform} for review` })
+    } catch (err: any) {
+      toast.error('Submission failed', { description: err.message })
+    } finally { setIsLoading(false) }
   }
 
-  const handleDownloadBuild = (buildVersion: string) => {
-    toast.success('Downloading build', {
-      description: `Build ${buildVersion} download starting...`
-    })
+  const handleDownloadBuild = async (buildId: string, buildVersion: string) => {
+    toast.success('Downloading build', { description: `Build v${buildVersion} download starting...` })
+    // Log download event
+    try {
+      await supabase.from('mobile_app_downloads').insert({ build_id: buildId, user_id: userId, downloaded_at: new Date().toISOString() })
+    } catch { /* ignore logging errors */ }
   }
 
-  const handleReplyToReview = (reviewerName: string) => {
-    toast.success('Reply sent', {
-      description: `Response sent to ${reviewerName}`
-    })
+  const handleDeleteBuild = async (buildId: string, buildVersion: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_builds').delete().eq('id', buildId)
+      if (error) throw error
+      toast.success('Build deleted', { description: `Build v${buildVersion} has been removed` })
+      setSelectedBuild(null)
+      setShowBuildDialog(false)
+    } catch (err: any) {
+      toast.error('Delete failed', { description: err.message })
+    } finally { setIsLoading(false) }
   }
 
-  const handleReportReview = (reviewId: string) => {
-    toast.info('Review reported', {
-      description: 'Review has been flagged for moderation'
-    })
+  const handleReplyToReview = async () => {
+    if (!selectedReview || !responseText.trim()) {
+      toast.error('Missing response', { description: 'Please write a response' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_review_responses').insert({
+        review_id: selectedReview.id,
+        user_id: userId,
+        response: responseText,
+        responded_at: new Date().toISOString()
+      })
+      if (error) throw error
+      toast.success('Reply sent', { description: `Response sent to ${selectedReview.author}` })
+      setResponseText('')
+      setShowReviewDialog(false)
+    } catch (err: any) {
+      toast.error('Reply failed', { description: err.message })
+    } finally { setIsLoading(false) }
   }
+
+  const handleReportReview = async (reviewId: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_review_reports').insert({
+        review_id: reviewId,
+        user_id: userId,
+        reason: 'inappropriate',
+        reported_at: new Date().toISOString()
+      })
+      if (error) throw error
+      toast.info('Review reported', { description: 'Review has been flagged for moderation' })
+    } catch (err: any) {
+      toast.error('Report failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleCreateCampaign = async () => {
+    if (!userId || !campaignForm.title.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in campaign title' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_push_campaigns').insert({
+        user_id: userId,
+        title: campaignForm.title,
+        message: campaignForm.message,
+        platform: campaignForm.platform,
+        target_audience: campaignForm.targetAudience,
+        status: 'draft'
+      })
+      if (error) throw error
+      toast.success('Campaign created', { description: `"${campaignForm.title}" is ready to schedule` })
+      setCampaignForm({ title: '', message: '', platform: 'all', targetAudience: '' })
+      setShowCreateCampaignModal(false)
+    } catch (err: any) {
+      toast.error('Failed to create campaign', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleSendCampaign = async (campaignId: string, campaignTitle: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_push_campaigns').update({ status: 'sent', sent_at: new Date().toISOString() }).eq('id', campaignId)
+      if (error) throw error
+      toast.success('Campaign sent', { description: `"${campaignTitle}" has been sent` })
+    } catch (err: any) {
+      toast.error('Send failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleDeleteCampaign = async (campaignId: string, campaignTitle: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_push_campaigns').delete().eq('id', campaignId)
+      if (error) throw error
+      toast.success('Campaign deleted', { description: `"${campaignTitle}" has been removed` })
+    } catch (err: any) {
+      toast.error('Delete failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleCreateIap = async () => {
+    if (!userId || !iapForm.productId.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in product ID' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_iaps').insert({
+        user_id: userId,
+        product_id: iapForm.productId,
+        name: iapForm.name,
+        type: iapForm.type,
+        price: iapForm.price,
+        status: 'pending'
+      })
+      if (error) throw error
+      toast.success('Product created', { description: `"${iapForm.name}" is pending approval` })
+      setIapForm({ productId: '', name: '', type: 'subscription', price: '' })
+      setShowCreateIapModal(false)
+    } catch (err: any) {
+      toast.error('Failed to create product', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleDeleteIap = async (iapId: string, iapName: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_iaps').delete().eq('id', iapId)
+      if (error) throw error
+      toast.success('Product deleted', { description: `"${iapName}" has been removed` })
+    } catch (err: any) {
+      toast.error('Delete failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleSaveSettings = async (section: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('mobile_app_settings').upsert({
+        user_id: userId,
+        section,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id,section' })
+      if (error) throw error
+      toast.success('Settings saved', { description: `${section} settings have been updated` })
+    } catch (err: any) {
+      toast.error('Save failed', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleRefreshData = useCallback(() => {
+    toast.success('Data refreshed', { description: 'All mobile app data has been updated' })
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
@@ -317,11 +505,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <p className="text-indigo-100 mt-1">Manage your iOS and Android applications</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={handleRefreshData}>
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Sync
               </Button>
-              <Button className="bg-white text-indigo-600 hover:bg-indigo-50">
+              <Button className="bg-white text-indigo-600 hover:bg-indigo-50" onClick={() => setShowCreateBuildModal(true)}>
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Build
               </Button>
@@ -640,7 +828,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>All Builds</CardTitle>
-                  <Button className="bg-indigo-600 hover:bg-indigo-700">
+                  <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => setShowCreateBuildModal(true)}>
                     <Upload className="h-4 w-4 mr-2" />
                     Upload Build
                   </Button>
@@ -976,7 +1164,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Push Campaigns</CardTitle>
-                      <Button className="bg-indigo-600 hover:bg-indigo-700">
+                      <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => setShowCreateCampaignModal(true)}>
                         <Bell className="h-4 w-4 mr-2" />
                         New Campaign
                       </Button>
@@ -1096,7 +1284,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>In-App Purchases</CardTitle>
-                      <Button className="bg-indigo-600 hover:bg-indigo-700">
+                      <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={() => setShowCreateIapModal(true)}>
                         <Package className="h-4 w-4 mr-2" />
                         Add Product
                       </Button>
@@ -1903,14 +2091,135 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                   <Button variant="outline" className="flex-1" onClick={() => setShowReviewDialog(false)}>
                     Cancel
                   </Button>
-                  <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700">
+                  <Button className="flex-1 bg-indigo-600 hover:bg-indigo-700" onClick={handleReplyToReview} disabled={isLoading}>
                     <Send className="h-4 w-4 mr-2" />
-                    Submit Response
+                    {isLoading ? 'Sending...' : 'Submit Response'}
                   </Button>
                 </div>
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Build Modal */}
+      <Dialog open={showCreateBuildModal} onOpenChange={setShowCreateBuildModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload New Build</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Version Number</Label>
+              <Input placeholder="e.g., 2.6.0" value={buildForm.version} onChange={(e) => setBuildForm({ ...buildForm, version: e.target.value })} />
+            </div>
+            <div>
+              <Label>Build Number</Label>
+              <Input placeholder="e.g., 260" value={buildForm.buildNumber} onChange={(e) => setBuildForm({ ...buildForm, buildNumber: e.target.value })} />
+            </div>
+            <div>
+              <Label>Platform</Label>
+              <Select value={buildForm.platform} onValueChange={(v: Platform) => setBuildForm({ ...buildForm, platform: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ios">iOS</SelectItem>
+                  <SelectItem value="android">Android</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Release Type</Label>
+              <Select value={buildForm.releaseType} onValueChange={(v: ReleaseType) => setBuildForm({ ...buildForm, releaseType: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beta">Beta</SelectItem>
+                  <SelectItem value="internal">Internal</SelectItem>
+                  <SelectItem value="production">Production</SelectItem>
+                  <SelectItem value="staged">Staged</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateBuildModal(false)}>Cancel</Button>
+              <Button onClick={handleCreateBuild} disabled={isLoading}>{isLoading ? 'Creating...' : 'Create Build'}</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Campaign Modal */}
+      <Dialog open={showCreateCampaignModal} onOpenChange={setShowCreateCampaignModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>New Push Campaign</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Campaign Title</Label>
+              <Input placeholder="e.g., New Feature Launch" value={campaignForm.title} onChange={(e) => setCampaignForm({ ...campaignForm, title: e.target.value })} />
+            </div>
+            <div>
+              <Label>Message</Label>
+              <Input placeholder="Push notification message" value={campaignForm.message} onChange={(e) => setCampaignForm({ ...campaignForm, message: e.target.value })} />
+            </div>
+            <div>
+              <Label>Platform</Label>
+              <Select value={campaignForm.platform} onValueChange={(v: Platform) => setCampaignForm({ ...campaignForm, platform: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Platforms</SelectItem>
+                  <SelectItem value="ios">iOS Only</SelectItem>
+                  <SelectItem value="android">Android Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Target Audience</Label>
+              <Input placeholder="e.g., All Users, Free Users" value={campaignForm.targetAudience} onChange={(e) => setCampaignForm({ ...campaignForm, targetAudience: e.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateCampaignModal(false)}>Cancel</Button>
+              <Button onClick={handleCreateCampaign} disabled={isLoading}>{isLoading ? 'Creating...' : 'Create Campaign'}</Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create IAP Modal */}
+      <Dialog open={showCreateIapModal} onOpenChange={setShowCreateIapModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add In-App Purchase</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Product ID</Label>
+              <Input placeholder="e.g., com.app.pro_monthly" value={iapForm.productId} onChange={(e) => setIapForm({ ...iapForm, productId: e.target.value })} />
+            </div>
+            <div>
+              <Label>Product Name</Label>
+              <Input placeholder="e.g., Pro Monthly" value={iapForm.name} onChange={(e) => setIapForm({ ...iapForm, name: e.target.value })} />
+            </div>
+            <div>
+              <Label>Product Type</Label>
+              <Select value={iapForm.type} onValueChange={(v: 'consumable' | 'non-consumable' | 'subscription') => setIapForm({ ...iapForm, type: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="subscription">Subscription</SelectItem>
+                  <SelectItem value="consumable">Consumable</SelectItem>
+                  <SelectItem value="non-consumable">Non-Consumable</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Price</Label>
+              <Input placeholder="e.g., $9.99/mo" value={iapForm.price} onChange={(e) => setIapForm({ ...iapForm, price: e.target.value })} />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateIapModal(false)}>Cancel</Button>
+              <Button onClick={handleCreateIap} disabled={isLoading}>{isLoading ? 'Creating...' : 'Add Product'}</Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

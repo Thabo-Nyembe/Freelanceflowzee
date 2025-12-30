@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useFAQs, FAQ } from '@/lib/hooks/use-faqs'
 import {
   HelpCircle,
   Plus,
@@ -435,10 +436,8 @@ const mockFAQQuickActions = [
 
 export default function FAQClient() {
   const [activeTab, setActiveTab] = useState('articles')
-  const [articles, setArticles] = useState<Article[]>(mockArticles)
   const [collections] = useState<Collection[]>(mockCollections)
   const [searchQueries] = useState<SearchQuery[]>(mockSearchQueries)
-  const [stats] = useState<KnowledgeBaseStats>(mockStats)
   const [helpCenterSettings] = useState<HelpCenterSettings>(mockHelpCenterSettings)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -448,6 +447,77 @@ export default function FAQClient() {
   const [showPreview, setShowPreview] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [articleToDelete, setArticleToDelete] = useState<string | null>(null)
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null)
+
+  // Form state for new/edit article
+  const [newArticle, setNewArticle] = useState({
+    title: '',
+    excerpt: '',
+    content: '',
+    collectionId: 'col-1',
+    status: 'draft' as 'draft' | 'published' | 'review' | 'archived',
+    tags: ''
+  })
+
+  // Supabase hook for FAQs
+  const { faqs: dbFaqs, stats: dbStats, loading: isLoading, createFAQ, updateFAQ, deleteFAQ, markHelpful } = useFAQs()
+
+  // Convert DB FAQs to Article format for display
+  const articles = useMemo(() => {
+    if (dbFaqs && dbFaqs.length > 0) {
+      return dbFaqs.map(faq => ({
+        id: faq.id,
+        title: faq.question,
+        slug: faq.question.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+        content: faq.answer,
+        excerpt: faq.answer.slice(0, 150) + (faq.answer.length > 150 ? '...' : ''),
+        status: faq.status,
+        collectionId: faq.category || 'col-1',
+        author: mockAuthors[0],
+        tags: faq.tags || [],
+        viewCount: faq.views_count || 0,
+        helpfulCount: faq.helpful_count || 0,
+        notHelpfulCount: faq.not_helpful_count || 0,
+        commentCount: 0,
+        shareCount: 0,
+        searchCount: faq.searches_count || 0,
+        avgReadTime: faq.average_read_time || 3,
+        createdAt: faq.created_at,
+        updatedAt: faq.updated_at,
+        publishedAt: faq.status === 'published' ? faq.updated_at : null,
+        featured: false,
+        pinned: faq.priority === 'high' || faq.priority === 'critical',
+        language: 'en',
+        translations: [],
+        relatedArticles: faq.related_faqs || [],
+        versions: []
+      }))
+    }
+    return mockArticles
+  }, [dbFaqs])
+
+  // Stats - use real data when available
+  const stats = useMemo(() => {
+    if (dbStats && dbStats.total > 0) {
+      return {
+        totalArticles: dbStats.total,
+        publishedArticles: dbStats.published,
+        draftArticles: dbStats.draft,
+        totalViews: dbStats.totalViews,
+        totalSearches: 0,
+        avgHelpfulRating: dbStats.avgHelpfulness,
+        articlesNeedingReview: dbStats.review,
+        unansweredQuestions: 0,
+        totalCollections: collections.length,
+        totalAuthors: mockAuthors.length
+      }
+    }
+    return mockStats
+  }, [dbStats, collections.length])
 
   const filteredArticles = useMemo(() => {
     return articles.filter(article => {
@@ -490,31 +560,187 @@ export default function FAQClient() {
     return num.toString()
   }
 
-  // Handlers
-  const handleCreateFAQ = () => {
-    toast.info('Create FAQ', {
-      description: 'Opening FAQ editor...'
+  // Reset form state
+  const resetForm = useCallback(() => {
+    setNewArticle({
+      title: '',
+      excerpt: '',
+      content: '',
+      collectionId: 'col-1',
+      status: 'draft',
+      tags: ''
     })
-    setShowAddDialog(true)
-  }
+    setEditingArticle(null)
+  }, [])
 
-  const handlePublishFAQ = (faq: FAQItem) => {
-    toast.success('FAQ published', {
-      description: `"${faq.question}" is now public`
-    })
-  }
+  // Create new article/FAQ
+  const handleCreateArticle = useCallback(async (publishImmediately = false) => {
+    if (!newArticle.title.trim()) {
+      toast.error('Validation Error', { description: 'Title is required' })
+      return
+    }
+    if (!newArticle.content.trim()) {
+      toast.error('Validation Error', { description: 'Content is required' })
+      return
+    }
 
-  const handleArchiveFAQ = (faq: FAQItem) => {
-    toast.success('FAQ archived', {
-      description: `"${faq.question}" has been archived`
-    })
-  }
+    try {
+      const tagsArray = newArticle.tags.split(',').map(t => t.trim()).filter(Boolean)
+      const { data, error } = await createFAQ({
+        question: newArticle.title,
+        answer: newArticle.content,
+        category: newArticle.collectionId,
+        status: publishImmediately ? 'published' : newArticle.status,
+        priority: 'medium',
+        tags: tagsArray,
+        views_count: 0,
+        helpful_count: 0,
+        not_helpful_count: 0,
+        searches_count: 0,
+        related_faqs: [],
+        average_read_time: Math.ceil(newArticle.content.split(' ').length / 200),
+        metadata: {}
+      })
 
-  const handleExportFAQs = () => {
-    toast.success('Export started', {
-      description: 'FAQs are being exported'
+      if (error) throw new Error(error)
+
+      toast.success('Article Created', {
+        description: publishImmediately
+          ? `"${newArticle.title}" has been published`
+          : `"${newArticle.title}" saved as draft`
+      })
+      setShowCreateDialog(false)
+      resetForm()
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to create article' })
+    }
+  }, [newArticle, createFAQ, resetForm])
+
+  // Update existing article/FAQ
+  const handleUpdateArticle = useCallback(async (articleId: string, updates: Partial<FAQ>) => {
+    try {
+      const { data, error } = await updateFAQ(articleId, updates)
+      if (error) throw new Error(error)
+      toast.success('Article Updated', { description: 'Changes have been saved' })
+      return data
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to update article' })
+      return null
+    }
+  }, [updateFAQ])
+
+  // Publish article
+  const handlePublishArticle = useCallback(async (article: Article) => {
+    try {
+      const { error } = await updateFAQ(article.id, { status: 'published' })
+      if (error) throw new Error(error)
+      toast.success('Article Published', { description: `"${article.title}" is now public` })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to publish article' })
+    }
+  }, [updateFAQ])
+
+  // Archive article
+  const handleArchiveArticle = useCallback(async (article: Article) => {
+    try {
+      const { error } = await updateFAQ(article.id, { status: 'archived' })
+      if (error) throw new Error(error)
+      toast.success('Article Archived', { description: `"${article.title}" has been archived` })
+      setSelectedArticle(null)
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to archive article' })
+    }
+  }, [updateFAQ])
+
+  // Delete article
+  const handleDeleteArticle = useCallback((articleId: string) => {
+    setArticleToDelete(articleId)
+    setShowDeleteDialog(true)
+  }, [])
+
+  const handleConfirmDelete = useCallback(async () => {
+    if (!articleToDelete) return
+
+    try {
+      const { success, error } = await deleteFAQ(articleToDelete)
+      if (error) throw new Error(error)
+      toast.success('Article Deleted', { description: 'Article has been permanently deleted' })
+      setShowDeleteDialog(false)
+      setArticleToDelete(null)
+      setSelectedArticle(null)
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to delete article' })
+    }
+  }, [articleToDelete, deleteFAQ])
+
+  // Mark article as helpful/not helpful
+  const handleMarkHelpful = useCallback(async (articleId: string, helpful: boolean) => {
+    try {
+      const { error } = await markHelpful(articleId, helpful)
+      if (error) throw new Error(error)
+      toast.success('Feedback Recorded', {
+        description: helpful ? 'Thank you for your feedback!' : 'We\'ll work to improve this article'
+      })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to record feedback' })
+    }
+  }, [markHelpful])
+
+  // Export articles to CSV
+  const handleExportArticles = useCallback(() => {
+    const csvContent = articles.map(a =>
+      `"${a.title.replace(/"/g, '""')}","${a.status}","${a.viewCount}","${a.helpfulCount}","${a.tags.join(';')}","${a.createdAt}"`
+    ).join('\n')
+
+    const blob = new Blob([`Title,Status,Views,Helpful,Tags,Created\n${csvContent}`], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `knowledge-base-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('Export Complete', { description: 'Articles exported to CSV file' })
+  }, [articles])
+
+  // Edit article - open dialog with pre-filled form
+  const handleEditArticle = useCallback((article: Article) => {
+    setNewArticle({
+      title: article.title,
+      excerpt: article.excerpt,
+      content: article.content,
+      collectionId: article.collectionId,
+      status: article.status,
+      tags: article.tags.join(', ')
     })
-  }
+    setEditingArticle(article)
+    setShowCreateDialog(true)
+  }, [])
+
+  // Save edited article
+  const handleSaveEditedArticle = useCallback(async () => {
+    if (!editingArticle) return
+
+    try {
+      const tagsArray = newArticle.tags.split(',').map(t => t.trim()).filter(Boolean)
+      const { error } = await updateFAQ(editingArticle.id, {
+        question: newArticle.title,
+        answer: newArticle.content,
+        category: newArticle.collectionId,
+        status: newArticle.status,
+        tags: tagsArray,
+        average_read_time: Math.ceil(newArticle.content.split(' ').length / 200)
+      })
+
+      if (error) throw new Error(error)
+
+      toast.success('Article Updated', { description: `"${newArticle.title}" has been updated` })
+      setShowCreateDialog(false)
+      resetForm()
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to update article' })
+    }
+  }, [editingArticle, newArticle, updateFAQ, resetForm])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900">
@@ -1207,8 +1433,11 @@ export default function FAQClient() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors">
-                    Export Settings
+                  <button
+                    onClick={handleExportArticles}
+                    className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium backdrop-blur-sm transition-colors"
+                  >
+                    Export Data
                   </button>
                   <button className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-medium transition-colors">
                     Save Changes
@@ -1680,10 +1909,13 @@ export default function FAQClient() {
                         Data Management
                       </h3>
                       <div className="grid grid-cols-2 gap-4">
-                        <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
+                        <button
+                          onClick={handleExportArticles}
+                          className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors"
+                        >
                           <Download className="w-5 h-5 text-blue-600 mb-2" />
                           <p className="font-medium">Export All Data</p>
-                          <p className="text-xs text-gray-500">Download all articles as JSON</p>
+                          <p className="text-xs text-gray-500">Download all articles as CSV</p>
                         </button>
                         <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
                           <Upload className="w-5 h-5 text-green-600 mb-2" />
@@ -1770,11 +2002,14 @@ export default function FAQClient() {
         </div>
       </div>
 
-      {/* Create Article Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+      {/* Create/Edit Article Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={(open) => {
+        setShowCreateDialog(open)
+        if (!open) resetForm()
+      }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle>Create New Article</DialogTitle>
+            <DialogTitle>{editingArticle ? 'Edit Article' : 'Create New Article'}</DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-120px)]">
             <div className="space-y-6 p-1">
@@ -1784,12 +2019,18 @@ export default function FAQClient() {
                   <input
                     type="text"
                     placeholder="Enter article title..."
+                    value={newArticle.title}
+                    onChange={(e) => setNewArticle(prev => ({ ...prev, title: e.target.value }))}
                     className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-lg"
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Collection</label>
-                  <select className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <select
+                    value={newArticle.collectionId}
+                    onChange={(e) => setNewArticle(prev => ({ ...prev, collectionId: e.target.value }))}
+                    className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                  >
                     {collections.map(col => (
                       <option key={col.id} value={col.id}>{col.icon} {col.name}</option>
                     ))}
@@ -1797,7 +2038,11 @@ export default function FAQClient() {
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                  <select className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
+                  <select
+                    value={newArticle.status}
+                    onChange={(e) => setNewArticle(prev => ({ ...prev, status: e.target.value as typeof newArticle.status }))}
+                    className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                  >
                     <option value="draft">Draft</option>
                     <option value="review">In Review</option>
                     <option value="published">Published</option>
@@ -1808,6 +2053,8 @@ export default function FAQClient() {
                   <textarea
                     rows={2}
                     placeholder="Brief description of the article..."
+                    value={newArticle.excerpt}
+                    onChange={(e) => setNewArticle(prev => ({ ...prev, excerpt: e.target.value }))}
                     className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
                   />
                 </div>
@@ -1815,13 +2062,15 @@ export default function FAQClient() {
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Content</label>
                   <div className="mt-1 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
                     <div className="flex items-center gap-1 p-2 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                      <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Edit className="w-4 h-4" /></button>
-                      <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Image className="w-4 h-4" /></button>
-                      <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Link className="w-4 h-4" /></button>
+                      <button type="button" className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Edit className="w-4 h-4" /></button>
+                      <button type="button" className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Image className="w-4 h-4" /></button>
+                      <button type="button" className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded"><Link className="w-4 h-4" /></button>
                     </div>
                     <textarea
                       rows={10}
                       placeholder="Write your article content here..."
+                      value={newArticle.content}
+                      onChange={(e) => setNewArticle(prev => ({ ...prev, content: e.target.value }))}
                       className="w-full px-4 py-3 bg-white dark:bg-gray-800 focus:outline-none"
                     />
                   </div>
@@ -1831,26 +2080,88 @@ export default function FAQClient() {
                   <input
                     type="text"
                     placeholder="Add tags separated by commas..."
+                    value={newArticle.tags}
+                    onChange={(e) => setNewArticle(prev => ({ ...prev, tags: e.target.value }))}
                     className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
                   />
                 </div>
               </div>
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button
-                  onClick={() => setShowCreateDialog(false)}
+                  onClick={() => {
+                    setShowCreateDialog(false)
+                    resetForm()
+                  }}
                   className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                  disabled={isLoading}
                 >
                   Cancel
                 </button>
-                <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
-                  Save as Draft
-                </button>
-                <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
-                  Publish
-                </button>
+                {editingArticle ? (
+                  <button
+                    onClick={handleSaveEditedArticle}
+                    disabled={isLoading}
+                    className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    Save Changes
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => handleCreateArticle(false)}
+                      disabled={isLoading}
+                      className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                      Save as Draft
+                    </button>
+                    <button
+                      onClick={() => handleCreateArticle(true)}
+                      disabled={isLoading}
+                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                      Publish
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Article</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete this article? This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => {
+                setShowDeleteDialog(false)
+                setArticleToDelete(null)
+              }}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleConfirmDelete}
+              disabled={isLoading}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium disabled:opacity-50 flex items-center gap-2"
+            >
+              {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+              Delete
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -1914,13 +2225,59 @@ export default function FAQClient() {
 
                 <div className="flex items-center justify-center gap-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                   <p className="text-sm text-gray-600 dark:text-gray-400">Was this article helpful?</p>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-500 hover:text-green-600 transition-colors">
+                  <button
+                    onClick={() => handleMarkHelpful(selectedArticle.id, true)}
+                    disabled={isLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-green-500 hover:text-green-600 transition-colors disabled:opacity-50"
+                  >
                     <ThumbsUp className="w-4 h-4" />
                     Yes
                   </button>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-red-500 hover:text-red-600 transition-colors">
+                  <button
+                    onClick={() => handleMarkHelpful(selectedArticle.id, false)}
+                    disabled={isLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-red-500 hover:text-red-600 transition-colors disabled:opacity-50"
+                  >
                     <ThumbsDown className="w-4 h-4" />
                     No
+                  </button>
+                </div>
+
+                {/* Article Actions */}
+                <div className="flex items-center justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => handleEditArticle(selectedArticle)}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
+                  {selectedArticle.status !== 'published' && (
+                    <button
+                      onClick={() => handlePublishArticle(selectedArticle)}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Publish
+                    </button>
+                  )}
+                  {selectedArticle.status !== 'archived' && (
+                    <button
+                      onClick={() => handleArchiveArticle(selectedArticle)}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      <Archive className="w-4 h-4" />
+                      Archive
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleDeleteArticle(selectedArticle.id)}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete
                   </button>
                 </div>
               </div>

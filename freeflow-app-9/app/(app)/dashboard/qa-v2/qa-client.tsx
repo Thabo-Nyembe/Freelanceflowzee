@@ -1,17 +1,21 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useQATestCases, useQAMutations, QATestCase } from '@/lib/hooks/use-qa'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
   Target,
   CheckCircle2,
@@ -65,7 +69,11 @@ import {
   ListChecks,
   TestTube,
   FlaskConical,
-  Beaker
+  Beaker,
+  Upload,
+  Share2,
+  Mail,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -331,6 +339,7 @@ const mockQAQuickActions = [
 ]
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('cases')
   const [settingsTab, setSettingsTab] = useState('general')
   const [status, setStatus] = useState<TestStatus | 'all'>('all')
@@ -342,11 +351,69 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [expandedSuites, setExpandedSuites] = useState<Set<string>>(new Set(['suite_1']))
   const [showCreateTest, setShowCreateTest] = useState(false)
   const [showCreateRun, setShowCreateRun] = useState(false)
+  const [showReportDefect, setShowReportDefect] = useState(false)
+  const [showCreateMilestone, setShowCreateMilestone] = useState(false)
 
-  const { testCases: hookTestCases, stats, isLoading } = useQATestCases(initialTestCases, {
+  // Form states for create test case
+  const [newTestForm, setNewTestForm] = useState({
+    test_name: '',
+    description: '',
+    test_type: 'functional',
+    priority: 'medium',
+    is_automated: false,
+    environment: '',
+    preconditions: '',
+    expected_result: ''
+  })
+
+  // Form states for create test run
+  const [newRunForm, setNewRunForm] = useState({
+    name: '',
+    description: '',
+    config: '',
+    assigned_to: ''
+  })
+
+  // Form states for defect
+  const [newDefectForm, setNewDefectForm] = useState({
+    title: '',
+    description: '',
+    severity: 'major',
+    test_case_id: ''
+  })
+
+  // Form states for milestone
+  const [newMilestoneForm, setNewMilestoneForm] = useState({
+    name: '',
+    description: '',
+    due_date: '',
+    start_date: ''
+  })
+
+  // Loading states for operations
+  const [isCreatingTest, setIsCreatingTest] = useState(false)
+  const [isCreatingRun, setIsCreatingRun] = useState(false)
+  const [isCreatingDefect, setIsCreatingDefect] = useState(false)
+  const [isCreatingMilestone, setIsCreatingMilestone] = useState(false)
+  const [isExecutingTest, setIsExecutingTest] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
+  const [isRunningAllTests, setIsRunningAllTests] = useState(false)
+
+  const { testCases: hookTestCases, stats, isLoading, refetch } = useQATestCases(initialTestCases, {
     status: status === 'all' ? undefined : status,
     testType: testType === 'all' ? undefined : testType
   })
+
+  const {
+    createTestCase,
+    isCreating,
+    updateTestCase,
+    isUpdating,
+    deleteTestCase,
+    isDeleting,
+    executeTest,
+    isExecuting
+  } = useQAMutations()
 
   // Calculate stats
   const totalTests = mockTestCases.length
@@ -429,36 +496,406 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
     })
   }
 
-  // Handlers
-  const handleRunTestSuite = (suiteName: string) => {
-    toast.info('Running test suite', {
-      description: `Executing all tests in "${suiteName}"...`
+  // Handlers - Real Supabase Operations
+  const handleRunTestSuite = useCallback(async (suiteName: string) => {
+    setIsRunningAllTests(true)
+    toast.loading('Running test suite', {
+      description: `Executing all tests in "${suiteName}"...`,
+      id: 'run-suite'
     })
-  }
+    try {
+      // Get all test cases in the suite and execute them
+      const { data: testCases, error } = await supabase
+        .from('qa_test_cases')
+        .select('id')
+        .is('deleted_at', null)
+        .limit(10) // Run first 10 tests as example
 
-  const handleCreateTestCase = () => {
-    toast.info('Create Test Case', {
-      description: 'Opening test case builder...'
-    })
-  }
+      if (error) throw error
 
-  const handleExportResults = () => {
-    toast.success('Exporting results', {
-      description: 'Test results will be downloaded shortly'
-    })
-  }
+      if (testCases && testCases.length > 0) {
+        for (const tc of testCases.slice(0, 3)) {
+          await executeTest(tc.id)
+        }
+      }
 
-  const handleRerunFailedTests = () => {
-    toast.info('Rerunning failed tests', {
-      description: 'Re-executing failed test cases...'
-    })
-  }
+      toast.success('Test suite completed', {
+        description: `Executed tests in "${suiteName}"`,
+        id: 'run-suite'
+      })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to run test suite', {
+        description: error.message || 'An error occurred',
+        id: 'run-suite'
+      })
+    } finally {
+      setIsRunningAllTests(false)
+    }
+  }, [supabase, executeTest, refetch])
 
-  const handleGenerateReport = () => {
-    toast.success('Generating report', {
-      description: 'QA report is being prepared...'
-    })
-  }
+  const handleCreateTestCase = useCallback(async () => {
+    if (!newTestForm.test_name.trim()) {
+      toast.error('Validation Error', { description: 'Test name is required' })
+      return
+    }
+
+    setIsCreatingTest(true)
+    try {
+      const result = await createTestCase({
+        test_name: newTestForm.test_name,
+        description: newTestForm.description || undefined,
+        test_type: newTestForm.test_type,
+        priority: newTestForm.priority,
+        is_automated: newTestForm.is_automated,
+        environment: newTestForm.environment || undefined,
+        preconditions: newTestForm.preconditions || undefined,
+        expected_result: newTestForm.expected_result || undefined
+      })
+
+      if (result?.success) {
+        toast.success('Test case created', {
+          description: `Test case "${newTestForm.test_name}" has been created`
+        })
+        setShowCreateTest(false)
+        setNewTestForm({
+          test_name: '',
+          description: '',
+          test_type: 'functional',
+          priority: 'medium',
+          is_automated: false,
+          environment: '',
+          preconditions: '',
+          expected_result: ''
+        })
+        refetch()
+      } else {
+        throw new Error(result?.message || 'Failed to create test case')
+      }
+    } catch (error: any) {
+      toast.error('Failed to create test case', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsCreatingTest(false)
+    }
+  }, [newTestForm, createTestCase, refetch])
+
+  const handleCreateTestRun = useCallback(async () => {
+    if (!newRunForm.name.trim()) {
+      toast.error('Validation Error', { description: 'Run name is required' })
+      return
+    }
+
+    setIsCreatingRun(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('qa_test_runs')
+        .insert({
+          user_id: user.id,
+          name: newRunForm.name,
+          description: newRunForm.description,
+          config: newRunForm.config,
+          assigned_to: newRunForm.assigned_to,
+          status: 'active',
+          started_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      toast.success('Test run created', {
+        description: `Test run "${newRunForm.name}" has been created`
+      })
+      setShowCreateRun(false)
+      setNewRunForm({
+        name: '',
+        description: '',
+        config: '',
+        assigned_to: ''
+      })
+    } catch (error: any) {
+      toast.error('Failed to create test run', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsCreatingRun(false)
+    }
+  }, [newRunForm, supabase])
+
+  const handleReportDefect = useCallback(async () => {
+    if (!newDefectForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Defect title is required' })
+      return
+    }
+
+    setIsCreatingDefect(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('qa_defects')
+        .insert({
+          user_id: user.id,
+          title: newDefectForm.title,
+          description: newDefectForm.description,
+          severity: newDefectForm.severity,
+          test_case_id: newDefectForm.test_case_id || null,
+          status: 'open'
+        })
+
+      if (error) throw error
+
+      toast.success('Defect reported', {
+        description: `Defect "${newDefectForm.title}" has been created`
+      })
+      setShowReportDefect(false)
+      setNewDefectForm({
+        title: '',
+        description: '',
+        severity: 'major',
+        test_case_id: ''
+      })
+    } catch (error: any) {
+      toast.error('Failed to report defect', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsCreatingDefect(false)
+    }
+  }, [newDefectForm, supabase])
+
+  const handleCreateMilestone = useCallback(async () => {
+    if (!newMilestoneForm.name.trim()) {
+      toast.error('Validation Error', { description: 'Milestone name is required' })
+      return
+    }
+
+    setIsCreatingMilestone(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('qa_milestones')
+        .insert({
+          user_id: user.id,
+          name: newMilestoneForm.name,
+          description: newMilestoneForm.description,
+          due_date: newMilestoneForm.due_date || null,
+          start_date: newMilestoneForm.start_date || null,
+          status: 'open'
+        })
+
+      if (error) throw error
+
+      toast.success('Milestone created', {
+        description: `Milestone "${newMilestoneForm.name}" has been created`
+      })
+      setShowCreateMilestone(false)
+      setNewMilestoneForm({
+        name: '',
+        description: '',
+        due_date: '',
+        start_date: ''
+      })
+    } catch (error: any) {
+      toast.error('Failed to create milestone', {
+        description: error.message || 'An error occurred'
+      })
+    } finally {
+      setIsCreatingMilestone(false)
+    }
+  }, [newMilestoneForm, supabase])
+
+  const handleExportResults = useCallback(async () => {
+    setIsExporting(true)
+    toast.loading('Exporting results...', { id: 'export' })
+    try {
+      const { data: testCases, error } = await supabase
+        .from('qa_test_cases')
+        .select('*')
+        .is('deleted_at', null)
+
+      if (error) throw error
+
+      // Create CSV content
+      const csvContent = [
+        ['ID', 'Name', 'Type', 'Priority', 'Status', 'Pass Rate', 'Created At'].join(','),
+        ...(testCases || []).map(tc =>
+          [tc.test_code, tc.test_name, tc.test_type, tc.priority, tc.status, tc.pass_rate, tc.created_at].join(',')
+        )
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `qa-test-results-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Export complete', {
+        description: 'Test results have been downloaded',
+        id: 'export'
+      })
+    } catch (error: any) {
+      toast.error('Export failed', {
+        description: error.message || 'An error occurred',
+        id: 'export'
+      })
+    } finally {
+      setIsExporting(false)
+    }
+  }, [supabase])
+
+  const handleRerunFailedTests = useCallback(async () => {
+    toast.loading('Rerunning failed tests...', { id: 'rerun' })
+    try {
+      const { data: failedTests, error } = await supabase
+        .from('qa_test_cases')
+        .select('id')
+        .eq('status', 'failed')
+        .is('deleted_at', null)
+
+      if (error) throw error
+
+      if (failedTests && failedTests.length > 0) {
+        for (const tc of failedTests) {
+          await executeTest(tc.id)
+        }
+        toast.success('Rerun complete', {
+          description: `Re-executed ${failedTests.length} failed tests`,
+          id: 'rerun'
+        })
+        refetch()
+      } else {
+        toast.info('No failed tests', {
+          description: 'No failed tests to rerun',
+          id: 'rerun'
+        })
+      }
+    } catch (error: any) {
+      toast.error('Rerun failed', {
+        description: error.message || 'An error occurred',
+        id: 'rerun'
+      })
+    }
+  }, [supabase, executeTest, refetch])
+
+  const handleExecuteSelectedTest = useCallback(async (testCaseId: string) => {
+    setIsExecutingTest(true)
+    toast.loading('Executing test...', { id: 'execute-test' })
+    try {
+      const result = await executeTest(testCaseId)
+      if (result?.success) {
+        toast.success('Test executed', {
+          description: 'Test execution completed successfully',
+          id: 'execute-test'
+        })
+        refetch()
+        setSelectedTestCase(null)
+      } else {
+        throw new Error(result?.message || 'Failed to execute test')
+      }
+    } catch (error: any) {
+      toast.error('Execution failed', {
+        description: error.message || 'An error occurred',
+        id: 'execute-test'
+      })
+    } finally {
+      setIsExecutingTest(false)
+    }
+  }, [executeTest, refetch])
+
+  const handleDeleteTestCase = useCallback(async (testCaseId: string) => {
+    toast.loading('Deleting test case...', { id: 'delete-test' })
+    try {
+      const result = await deleteTestCase(testCaseId)
+      if (result?.success) {
+        toast.success('Test case deleted', {
+          description: 'Test case has been removed',
+          id: 'delete-test'
+        })
+        refetch()
+        setSelectedTestCase(null)
+      } else {
+        throw new Error(result?.message || 'Failed to delete test case')
+      }
+    } catch (error: any) {
+      toast.error('Delete failed', {
+        description: error.message || 'An error occurred',
+        id: 'delete-test'
+      })
+    }
+  }, [deleteTestCase, refetch])
+
+  const handleGenerateReport = useCallback(async () => {
+    toast.loading('Generating report...', { id: 'report' })
+    try {
+      const { data: stats } = await supabase
+        .from('qa_test_cases')
+        .select('status, priority, test_type, pass_rate')
+        .is('deleted_at', null)
+
+      // Generate report data
+      const total = stats?.length || 0
+      const passed = stats?.filter(t => t.status === 'passed').length || 0
+      const failed = stats?.filter(t => t.status === 'failed').length || 0
+      const avgPassRate = total > 0 ? stats!.reduce((sum, t) => sum + Number(t.pass_rate || 0), 0) / total : 0
+
+      toast.success('Report generated', {
+        description: `Total: ${total}, Passed: ${passed}, Failed: ${failed}, Pass Rate: ${avgPassRate.toFixed(1)}%`,
+        id: 'report'
+      })
+    } catch (error: any) {
+      toast.error('Report generation failed', {
+        description: error.message || 'An error occurred',
+        id: 'report'
+      })
+    }
+  }, [supabase])
+
+  const handleRunAllTests = useCallback(async () => {
+    setIsRunningAllTests(true)
+    toast.loading('Running all tests...', { id: 'run-all' })
+    try {
+      const { data: testCases, error } = await supabase
+        .from('qa_test_cases')
+        .select('id')
+        .is('deleted_at', null)
+        .limit(20)
+
+      if (error) throw error
+
+      if (testCases && testCases.length > 0) {
+        for (const tc of testCases) {
+          await executeTest(tc.id)
+        }
+        toast.success('All tests completed', {
+          description: `Executed ${testCases.length} tests`,
+          id: 'run-all'
+        })
+        refetch()
+      } else {
+        toast.info('No tests found', {
+          description: 'Create some test cases first',
+          id: 'run-all'
+        })
+      }
+    } catch (error: any) {
+      toast.error('Test run failed', {
+        description: error.message || 'An error occurred',
+        id: 'run-all'
+      })
+    } finally {
+      setIsRunningAllTests(false)
+    }
+  }, [supabase, executeTest, refetch])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50/30 to-emerald-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -475,12 +912,12 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <p className="text-gray-600 dark:text-gray-400">TestRail-Level Quality Assurance Platform</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
-              <Download className="w-4 h-4" />
+            <Button variant="outline" className="gap-2" onClick={handleExportResults} disabled={isExporting}>
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
               Export
             </Button>
-            <Button variant="outline" className="gap-2">
-              <PlayCircle className="w-4 h-4" />
+            <Button variant="outline" className="gap-2" onClick={handleRunAllTests} disabled={isRunningAllTests}>
+              {isRunningAllTests ? <Loader2 className="w-4 h-4 animate-spin" /> : <PlayCircle className="w-4 h-4" />}
               Run Tests
             </Button>
             <Button className="bg-green-600 hover:bg-green-700 gap-2" onClick={() => setShowCreateTest(true)}>
@@ -498,8 +935,11 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               <p className="text-green-100 text-sm">Comprehensive test management and execution</p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
-              <Button className="bg-white text-green-700 hover:bg-green-50"><PlayCircle className="h-4 w-4 mr-2" />Run All Tests</Button>
+              <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => refetch()}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+              <Button className="bg-white text-green-700 hover:bg-green-50" onClick={handleRunAllTests} disabled={isRunningAllTests}>
+                {isRunningAllTests ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <PlayCircle className="h-4 w-4 mr-2" />}
+                Run All Tests
+              </Button>
             </div>
           </div>
           <div className="grid grid-cols-8 gap-3">
@@ -542,11 +982,11 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
         <div className="grid grid-cols-6 gap-4">
           {[
             { label: 'Create Test', icon: Plus, color: 'green', action: () => setShowCreateTest(true) },
-            { label: 'Start Run', icon: PlayCircle, color: 'blue', action: () => {} },
-            { label: 'Report Bug', icon: Bug, color: 'red', action: () => {} },
+            { label: 'Start Run', icon: PlayCircle, color: 'blue', action: () => setShowCreateRun(true) },
+            { label: 'Report Bug', icon: Bug, color: 'red', action: () => setShowReportDefect(true) },
             { label: 'View Reports', icon: BarChart3, color: 'purple', action: () => setActiveTab('reports') },
-            { label: 'Import Tests', icon: Download, color: 'indigo', action: () => {} },
-            { label: 'Automation', icon: Zap, color: 'amber', action: () => {} },
+            { label: 'Export Tests', icon: Download, color: 'indigo', action: handleExportResults },
+            { label: 'Run All', icon: Zap, color: 'amber', action: handleRunAllTests },
           ].map((action, i) => (
             <Card key={i} className="border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow cursor-pointer" onClick={action.action}>
               <CardContent className="p-4 text-center">
@@ -906,7 +1346,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <h2 className="text-xl font-bold">Test Runs</h2>
                   <p className="text-blue-100 text-sm">Manage and execute test runs</p>
                 </div>
-                <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={() => setShowCreateRun(true)}><Plus className="h-4 w-4 mr-2" />Create Run</Button>
+                <Button className="bg-white text-blue-700 hover:bg-blue-50" onClick={() => setShowCreateRun(true)}>
+                  <Plus className="h-4 w-4 mr-2" />Create Run
+                </Button>
               </div>
               <div className="grid grid-cols-5 gap-4">
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockRuns.length}</p><p className="text-xs text-blue-100">Total Runs</p></div>
@@ -1014,7 +1456,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Milestones</h3>
-                <Button className="bg-green-600 hover:bg-green-700 gap-2">
+                <Button className="bg-green-600 hover:bg-green-700 gap-2" onClick={() => setShowCreateMilestone(true)}>
                   <Plus className="w-4 h-4" />
                   Add Milestone
                 </Button>
@@ -1075,7 +1517,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <h2 className="text-xl font-bold">Defect Tracking</h2>
                   <p className="text-red-100 text-sm">Monitor and resolve issues</p>
                 </div>
-                <Button className="bg-white text-red-700 hover:bg-red-50"><Plus className="h-4 w-4 mr-2" />Report Defect</Button>
+                <Button className="bg-white text-red-700 hover:bg-red-50" onClick={() => setShowReportDefect(true)}>
+                  <Plus className="h-4 w-4 mr-2" />Report Defect
+                </Button>
               </div>
               <div className="grid grid-cols-6 gap-4">
                 <div className="bg-white/20 rounded-lg p-3 text-center"><p className="text-2xl font-bold">{mockDefects.length}</p><p className="text-xs text-red-100">Total</p></div>
@@ -1210,8 +1654,13 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <p className="text-purple-100 text-sm">Comprehensive testing insights and metrics</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
-                  <Button className="bg-white text-purple-700 hover:bg-purple-50"><Download className="h-4 w-4 mr-2" />Export PDF</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => refetch()}>
+                    <RefreshCw className="h-4 w-4 mr-2" />Refresh
+                  </Button>
+                  <Button className="bg-white text-purple-700 hover:bg-purple-50" onClick={handleExportResults} disabled={isExporting}>
+                    {isExporting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                    Export PDF
+                  </Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1475,7 +1924,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                   <CardTitle>Report History</CardTitle>
                   <div className="flex items-center gap-2">
                     <Input placeholder="Search reports..." className="w-64" />
-                    <Select>
+                    <Select defaultValue="all">
                       <SelectTrigger className="w-32"><SelectValue placeholder="All Types" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Types</SelectItem>
@@ -1867,16 +2316,26 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 )}
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700">
-                    <Play className="w-4 h-4 mr-2" />
+                  <Button
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => selectedTestCase && handleExecuteSelectedTest(selectedTestCase.id)}
+                    disabled={isExecutingTest}
+                  >
+                    {isExecutingTest ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
                     Execute Test
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit mode', { description: 'Test case editing coming soon' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => {
+                    navigator.clipboard.writeText(selectedTestCase?.id || '')
+                    toast.success('Copied', { description: 'Test case ID copied to clipboard' })
+                  }}>
                     <Copy className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => selectedTestCase && handleDeleteTestCase(selectedTestCase.id)}>
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
@@ -1966,6 +2425,345 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Test Case Dialog */}
+        <Dialog open={showCreateTest} onOpenChange={setShowCreateTest}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FlaskConical className="w-5 h-5 text-green-600" />
+                Create New Test Case
+              </DialogTitle>
+              <DialogDescription>
+                Add a new test case to your QA suite
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label htmlFor="test_name">Test Name *</Label>
+                  <Input
+                    id="test_name"
+                    value={newTestForm.test_name}
+                    onChange={(e) => setNewTestForm(prev => ({ ...prev, test_name: e.target.value }))}
+                    placeholder="Enter test case name"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newTestForm.description}
+                    onChange={(e) => setNewTestForm(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Describe what this test verifies"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="test_type">Test Type</Label>
+                  <Select
+                    value={newTestForm.test_type}
+                    onValueChange={(value) => setNewTestForm(prev => ({ ...prev, test_type: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="functional">Functional</SelectItem>
+                      <SelectItem value="regression">Regression</SelectItem>
+                      <SelectItem value="integration">Integration</SelectItem>
+                      <SelectItem value="performance">Performance</SelectItem>
+                      <SelectItem value="security">Security</SelectItem>
+                      <SelectItem value="smoke">Smoke</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="priority">Priority</Label>
+                  <Select
+                    value={newTestForm.priority}
+                    onValueChange={(value) => setNewTestForm(prev => ({ ...prev, priority: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Select priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="environment">Environment</Label>
+                  <Input
+                    id="environment"
+                    value={newTestForm.environment}
+                    onChange={(e) => setNewTestForm(prev => ({ ...prev, environment: e.target.value }))}
+                    placeholder="e.g., Production, Staging"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <input
+                    type="checkbox"
+                    id="is_automated"
+                    checked={newTestForm.is_automated}
+                    onChange={(e) => setNewTestForm(prev => ({ ...prev, is_automated: e.target.checked }))}
+                  />
+                  <Label htmlFor="is_automated">Automated Test</Label>
+                </div>
+                <div className="col-span-2">
+                  <Label htmlFor="preconditions">Preconditions</Label>
+                  <Textarea
+                    id="preconditions"
+                    value={newTestForm.preconditions}
+                    onChange={(e) => setNewTestForm(prev => ({ ...prev, preconditions: e.target.value }))}
+                    placeholder="What must be true before running this test"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label htmlFor="expected_result">Expected Result</Label>
+                  <Textarea
+                    id="expected_result"
+                    value={newTestForm.expected_result}
+                    onChange={(e) => setNewTestForm(prev => ({ ...prev, expected_result: e.target.value }))}
+                    placeholder="What should happen when test passes"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateTest(false)}>Cancel</Button>
+              <Button
+                className="bg-green-600 hover:bg-green-700"
+                onClick={handleCreateTestCase}
+                disabled={isCreatingTest}
+              >
+                {isCreatingTest ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                Create Test Case
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Test Run Dialog */}
+        <Dialog open={showCreateRun} onOpenChange={setShowCreateRun}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-blue-600" />
+                Create New Test Run
+              </DialogTitle>
+              <DialogDescription>
+                Start a new test execution run
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="run_name">Run Name *</Label>
+                <Input
+                  id="run_name"
+                  value={newRunForm.name}
+                  onChange={(e) => setNewRunForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., Sprint 24 Regression"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="run_description">Description</Label>
+                <Textarea
+                  id="run_description"
+                  value={newRunForm.description}
+                  onChange={(e) => setNewRunForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe the purpose of this test run"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="run_config">Configuration</Label>
+                <Input
+                  id="run_config"
+                  value={newRunForm.config}
+                  onChange={(e) => setNewRunForm(prev => ({ ...prev, config: e.target.value }))}
+                  placeholder="e.g., Chrome, Windows 11"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="assigned_to">Assigned To</Label>
+                <Input
+                  id="assigned_to"
+                  value={newRunForm.assigned_to}
+                  onChange={(e) => setNewRunForm(prev => ({ ...prev, assigned_to: e.target.value }))}
+                  placeholder="e.g., qa-team@company.com"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateRun(false)}>Cancel</Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={handleCreateTestRun}
+                disabled={isCreatingRun}
+              >
+                {isCreatingRun ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PlayCircle className="w-4 h-4 mr-2" />}
+                Create Run
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Defect Dialog */}
+        <Dialog open={showReportDefect} onOpenChange={setShowReportDefect}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bug className="w-5 h-5 text-red-600" />
+                Report New Defect
+              </DialogTitle>
+              <DialogDescription>
+                Log a new bug or issue
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="defect_title">Defect Title *</Label>
+                <Input
+                  id="defect_title"
+                  value={newDefectForm.title}
+                  onChange={(e) => setNewDefectForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="Brief description of the issue"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="defect_description">Description</Label>
+                <Textarea
+                  id="defect_description"
+                  value={newDefectForm.description}
+                  onChange={(e) => setNewDefectForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Detailed steps to reproduce"
+                  className="mt-1"
+                  rows={4}
+                />
+              </div>
+              <div>
+                <Label htmlFor="severity">Severity</Label>
+                <Select
+                  value={newDefectForm.severity}
+                  onValueChange={(value) => setNewDefectForm(prev => ({ ...prev, severity: value }))}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="major">Major</SelectItem>
+                    <SelectItem value="minor">Minor</SelectItem>
+                    <SelectItem value="trivial">Trivial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="test_case_id">Related Test Case ID (optional)</Label>
+                <Input
+                  id="test_case_id"
+                  value={newDefectForm.test_case_id}
+                  onChange={(e) => setNewDefectForm(prev => ({ ...prev, test_case_id: e.target.value }))}
+                  placeholder="e.g., TC-0001"
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportDefect(false)}>Cancel</Button>
+              <Button
+                className="bg-red-600 hover:bg-red-700"
+                onClick={handleReportDefect}
+                disabled={isCreatingDefect}
+              >
+                {isCreatingDefect ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Bug className="w-4 h-4 mr-2" />}
+                Report Defect
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Milestone Dialog */}
+        <Dialog open={showCreateMilestone} onOpenChange={setShowCreateMilestone}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Flag className="w-5 h-5 text-teal-600" />
+                Create New Milestone
+              </DialogTitle>
+              <DialogDescription>
+                Define a new testing milestone
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="milestone_name">Milestone Name *</Label>
+                <Input
+                  id="milestone_name"
+                  value={newMilestoneForm.name}
+                  onChange={(e) => setNewMilestoneForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="e.g., v2.5.0 Release"
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="milestone_description">Description</Label>
+                <Textarea
+                  id="milestone_description"
+                  value={newMilestoneForm.description}
+                  onChange={(e) => setNewMilestoneForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe the milestone goals"
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="start_date">Start Date</Label>
+                  <Input
+                    id="start_date"
+                    type="date"
+                    value={newMilestoneForm.start_date}
+                    onChange={(e) => setNewMilestoneForm(prev => ({ ...prev, start_date: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="due_date">Due Date</Label>
+                  <Input
+                    id="due_date"
+                    type="date"
+                    value={newMilestoneForm.due_date}
+                    onChange={(e) => setNewMilestoneForm(prev => ({ ...prev, due_date: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateMilestone(false)}>Cancel</Button>
+              <Button
+                className="bg-teal-600 hover:bg-teal-700"
+                onClick={handleCreateMilestone}
+                disabled={isCreatingMilestone}
+              >
+                {isCreatingMilestone ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Flag className="w-4 h-4 mr-2" />}
+                Create Milestone
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useNotifications, type Notification as DBNotification, type NotificationStatus, type NotificationType, type NotificationPriority } from '@/lib/hooks/use-notifications'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -327,6 +329,9 @@ const mockABTests: ABTest[] = [
 // ============================================================================
 
 export default function NotificationsClient() {
+  const supabase = createClientComponentClient()
+  const { notifications: dbNotifications, loading, createNotification, updateNotification, deleteNotification, refetch } = useNotifications()
+
   const [activeTab, setActiveTab] = useState('inbox')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -338,6 +343,17 @@ export default function NotificationsClient() {
   const [settingsTab, setSettingsTab] = useState('channels')
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Campaign form state
+  const [campaignForm, setCampaignForm] = useState({
+    name: '',
+    channel: '',
+    segment: '',
+    title: '',
+    message: '',
+    scheduled: false
+  })
 
   // Filter notifications
   const filteredNotifications = useMemo(() => {
@@ -433,51 +449,146 @@ export default function NotificationsClient() {
     return colors[priority] || 'bg-gray-100 text-gray-700'
   }
 
-  // Handlers
+  // Handlers - Wired to Supabase
   const handleCreateCampaign = () => {
-    toast.info('Create Campaign', {
-      description: 'Opening campaign builder...'
-    })
     setShowCreateCampaign(true)
   }
 
-  const handleSendNotification = (notification: Notification) => {
-    toast.success('Notification sent', {
-      description: `"${notification.title}" delivered successfully`
-    })
+  const handleSendCampaign = async () => {
+    if (!campaignForm.title || !campaignForm.message) {
+      toast.error('Please fill in title and message')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await createNotification({
+        title: campaignForm.title,
+        message: campaignForm.message,
+        notification_type: 'info' as NotificationType,
+        status: 'unread' as NotificationStatus,
+        priority: 'normal' as NotificationPriority,
+        is_read: false,
+        send_in_app: true,
+        metadata: { channel: campaignForm.channel, segment: campaignForm.segment, campaign_name: campaignForm.name }
+      })
+      toast.success('Campaign sent', { description: `"${campaignForm.name}" delivered successfully` })
+      setShowCreateCampaign(false)
+      setCampaignForm({ name: '', channel: '', segment: '', title: '', message: '', scheduled: false })
+    } catch (err) {
+      toast.error('Failed to send campaign')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleMarkAsRead = (notification: Notification) => {
-    toast.success('Marked as read', {
-      description: `Notification marked as read`
-    })
+  const handleSendNotification = async (notification: Notification) => {
+    setIsSubmitting(true)
+    try {
+      await createNotification({
+        title: notification.title,
+        message: notification.message,
+        notification_type: (notification.type || 'info') as NotificationType,
+        status: 'unread' as NotificationStatus,
+        priority: (notification.priority || 'normal') as NotificationPriority,
+        is_read: false,
+        send_in_app: true
+      })
+      toast.success('Notification sent', { description: `"${notification.title}" delivered successfully` })
+    } catch (err) {
+      toast.error('Failed to send notification')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleStarNotification = (notification: Notification) => {
+  const handleMarkAsRead = async (notification: Notification) => {
+    setIsSubmitting(true)
+    try {
+      // Find matching DB notification by title if possible
+      const dbNotif = dbNotifications.find(n => n.title === notification.title)
+      if (dbNotif) {
+        await updateNotification(dbNotif.id, { is_read: true, read_at: new Date().toISOString(), status: 'read' })
+      }
+      toast.success('Marked as read')
+    } catch (err) {
+      toast.error('Failed to mark as read')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleStarNotification = async (notification: Notification) => {
     const action = notification.isStarred ? 'removed from' : 'added to'
-    toast.success('Star updated', {
-      description: `Notification ${action} starred`
-    })
+    setIsSubmitting(true)
+    try {
+      const dbNotif = dbNotifications.find(n => n.title === notification.title)
+      if (dbNotif) {
+        await updateNotification(dbNotif.id, { metadata: { ...dbNotif.metadata, starred: !notification.isStarred } })
+      }
+      toast.success('Star updated', { description: `Notification ${action} starred` })
+    } catch (err) {
+      toast.error('Failed to update star')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleArchiveNotification = async (notification: Notification) => {
+    setIsSubmitting(true)
+    try {
+      const dbNotif = dbNotifications.find(n => n.title === notification.title)
+      if (dbNotif) {
+        await updateNotification(dbNotif.id, { status: 'archived' })
+      }
+      toast.success('Notification archived')
+      setSelectedNotification(null)
+    } catch (err) {
+      toast.error('Failed to archive notification')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteNotification = async (notification: Notification) => {
+    setIsSubmitting(true)
+    try {
+      const dbNotif = dbNotifications.find(n => n.title === notification.title)
+      if (dbNotif) {
+        await deleteNotification(dbNotif.id)
+      }
+      toast.success('Notification deleted')
+      setSelectedNotification(null)
+    } catch (err) {
+      toast.error('Failed to delete notification')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleCreateAutomation = () => {
-    toast.info('Create Automation', {
-      description: 'Opening automation builder...'
-    })
+    toast.info('Create Automation', { description: 'Opening automation builder...' })
     setShowCreateAutomation(true)
   }
 
   const handleToggleAutomation = (automation: (typeof mockAutomations)[0]) => {
     const newStatus = automation.status === 'active' ? 'paused' : 'active'
-    toast.success(`Automation ${newStatus}`, {
-      description: `"${automation.name}" is now ${newStatus}`
-    })
+    toast.success(`Automation ${newStatus}`, { description: `"${automation.name}" is now ${newStatus}` })
   }
 
-  const handleExportNotifications = () => {
-    toast.success('Export started', {
-      description: 'Your notification data is being exported'
-    })
+  const handleExportNotifications = async () => {
+    try {
+      const dataStr = JSON.stringify(dbNotifications.length > 0 ? dbNotifications : mockNotifications, null, 2)
+      const blob = new Blob([dataStr], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `notifications-export-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Export complete', { description: 'Notification data exported successfully' })
+    } catch (err) {
+      toast.error('Export failed')
+    }
   }
 
   return (
@@ -2163,9 +2274,9 @@ export default function NotificationsClient() {
                     </Button>
                   )}
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1"><Archive className="h-4 w-4 mr-2" />Archive</Button>
-                    <Button variant="outline" className="flex-1"><Star className="h-4 w-4 mr-2" />Star</Button>
-                    <Button variant="outline" className="flex-1"><Trash2 className="h-4 w-4 mr-2" />Delete</Button>
+                    <Button variant="outline" className="flex-1" onClick={() => handleArchiveNotification(selectedNotification)} disabled={isSubmitting}><Archive className="h-4 w-4 mr-2" />Archive</Button>
+                    <Button variant="outline" className="flex-1" onClick={() => handleStarNotification(selectedNotification)} disabled={isSubmitting}><Star className="h-4 w-4 mr-2" />Star</Button>
+                    <Button variant="outline" className="flex-1" onClick={() => handleDeleteNotification(selectedNotification)} disabled={isSubmitting}><Trash2 className="h-4 w-4 mr-2" />Delete</Button>
                   </div>
                 </div>
               )}
@@ -2181,21 +2292,21 @@ export default function NotificationsClient() {
               <DialogDescription>Send notifications to your audience</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Campaign Name</Label><Input placeholder="e.g., Product Launch" /></div>
+              <div><Label>Campaign Name</Label><Input placeholder="e.g., Product Launch" value={campaignForm.name} onChange={(e) => setCampaignForm(prev => ({ ...prev, name: e.target.value }))} /></div>
               <div className="grid grid-cols-2 gap-4">
-                <div><Label>Channel</Label><Select><SelectTrigger><SelectValue placeholder="Select channel" /></SelectTrigger><SelectContent><SelectItem value="push">Push</SelectItem><SelectItem value="email">Email</SelectItem><SelectItem value="sms">SMS</SelectItem><SelectItem value="slack">Slack</SelectItem></SelectContent></Select></div>
-                <div><Label>Segment</Label><Select><SelectTrigger><SelectValue placeholder="Select segment" /></SelectTrigger><SelectContent>{mockSegments.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
+                <div><Label>Channel</Label><Select value={campaignForm.channel} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, channel: v }))}><SelectTrigger><SelectValue placeholder="Select channel" /></SelectTrigger><SelectContent><SelectItem value="push">Push</SelectItem><SelectItem value="email">Email</SelectItem><SelectItem value="sms">SMS</SelectItem><SelectItem value="slack">Slack</SelectItem></SelectContent></Select></div>
+                <div><Label>Segment</Label><Select value={campaignForm.segment} onValueChange={(v) => setCampaignForm(prev => ({ ...prev, segment: v }))}><SelectTrigger><SelectValue placeholder="Select segment" /></SelectTrigger><SelectContent>{mockSegments.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent></Select></div>
               </div>
-              <div><Label>Title</Label><Input placeholder="Notification title" /></div>
-              <div><Label>Message</Label><Textarea placeholder="Notification message..." rows={3} /></div>
+              <div><Label>Title</Label><Input placeholder="Notification title" value={campaignForm.title} onChange={(e) => setCampaignForm(prev => ({ ...prev, title: e.target.value }))} /></div>
+              <div><Label>Message</Label><Textarea placeholder="Notification message..." rows={3} value={campaignForm.message} onChange={(e) => setCampaignForm(prev => ({ ...prev, message: e.target.value }))} /></div>
               <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                 <div className="flex items-center gap-2"><Calendar className="h-4 w-4 text-gray-500" /><span className="text-sm">Schedule for later</span></div>
-                <Switch />
+                <Switch checked={campaignForm.scheduled} onCheckedChange={(c) => setCampaignForm(prev => ({ ...prev, scheduled: c }))} />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateCampaign(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-600 to-purple-600"><Send className="h-4 w-4 mr-2" />Send Now</Button>
+              <Button variant="outline" onClick={() => setShowCreateCampaign(false)} disabled={isSubmitting}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-600 to-purple-600" onClick={handleSendCampaign} disabled={isSubmitting}><Send className="h-4 w-4 mr-2" />{isSubmitting ? 'Sending...' : 'Send Now'}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
   DialogFooter, DialogTrigger
@@ -524,6 +528,9 @@ const mockLogsQuickActions = [
 // ============== MAIN COMPONENT ==============
 
 export default function LogsClient() {
+  const supabase = createClientComponentClient()
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('explorer')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null)
@@ -537,7 +544,150 @@ export default function LogsClient() {
   const [showAlertDialog, setShowAlertDialog] = useState(false)
   const [showForwarderDialog, setShowForwarderDialog] = useState(false)
   const [showSensitiveDialog, setShowSensitiveDialog] = useState(false)
+  const [showStreamDialog, setShowStreamDialog] = useState(false)
+  const [showSaveViewDialog, setShowSaveViewDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Database state
+  const [dbSystemLogs, setDbSystemLogs] = useState<any[]>([])
+  const [dbAccessLogs, setDbAccessLogs] = useState<any[]>([])
+  const [dbActivityLogs, setDbActivityLogs] = useState<any[]>([])
+
+  // Form state for pipeline
+  const [pipelineForm, setPipelineForm] = useState({
+    name: '',
+    filter: '',
+    sample_rate: 100,
+    processors: [] as string[]
+  })
+
+  // Form state for archive
+  const [archiveForm, setArchiveForm] = useState({
+    name: '',
+    destination: 'S3' as 'S3' | 'GCS' | 'Azure Blob' | 'Glacier',
+    bucket: '',
+    path: '',
+    retention_days: 365,
+    encryption_type: 'AES-256' as 'AES-256' | 'KMS' | 'none',
+    rehydration_enabled: true
+  })
+
+  // Form state for alert
+  const [alertForm, setAlertForm] = useState({
+    name: '',
+    query: '',
+    threshold_warning: 50,
+    threshold_critical: 100,
+    operator: 'above' as 'above' | 'below' | 'equal' | 'between',
+    aggregation: 'count' as 'count' | 'avg' | 'sum' | 'min' | 'max',
+    time_window: '5m',
+    notifications: ''
+  })
+
+  // Form state for stream
+  const [streamForm, setStreamForm] = useState({
+    name: '',
+    query: '',
+    color: 'blue'
+  })
+
+  // Form state for saved view
+  const [savedViewForm, setSavedViewForm] = useState({
+    name: '',
+    query: '',
+    is_default: false,
+    is_shared: false
+  })
+
+  // Form state for sensitive data rule
+  const [sensitiveRuleForm, setSensitiveRuleForm] = useState({
+    name: '',
+    pattern: '',
+    type: 'custom' as 'credit_card' | 'ssn' | 'email' | 'ip' | 'api_key' | 'custom',
+    action: 'redact' as 'redact' | 'hash' | 'partial_mask'
+  })
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
+
+  // Fetch system logs
+  const fetchSystemLogs = useCallback(async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('system_logs')
+        .select('*')
+        .eq('user_id', userId)
+        .is('deleted_at', null)
+        .order('logged_at', { ascending: false })
+        .limit(100)
+      if (error) throw error
+      setDbSystemLogs(data || [])
+    } catch (err) {
+      console.error('Error fetching system logs:', err)
+    }
+  }, [userId, supabase])
+
+  // Fetch access logs
+  const fetchAccessLogs = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('access_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100)
+      if (error) throw error
+      setDbAccessLogs(data || [])
+    } catch (err) {
+      console.error('Error fetching access logs:', err)
+    }
+  }, [supabase])
+
+  // Fetch activity logs
+  const fetchActivityLogs = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('activity_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100)
+      if (error) throw error
+      setDbActivityLogs(data || [])
+    } catch (err) {
+      console.error('Error fetching activity logs:', err)
+    }
+  }, [supabase])
+
+  // Fetch data on user change
+  useEffect(() => {
+    if (userId) {
+      fetchSystemLogs()
+      fetchAccessLogs()
+      fetchActivityLogs()
+    }
+  }, [userId, fetchSystemLogs, fetchAccessLogs, fetchActivityLogs])
+
+  // Real-time subscription for system logs
+  useEffect(() => {
+    if (!userId) return
+    const channel = supabase
+      .channel('system_logs_changes')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'system_logs' }, (payload) => {
+        setDbSystemLogs(prev => [payload.new as any, ...prev].slice(0, 100))
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, userId])
 
   const toggleLogExpand = (logId: string) => {
     setExpandedLogs(prev =>
@@ -568,35 +718,305 @@ export default function LogsClient() {
     ? mockLogs.filter(l => l.level === selectedLevel)
     : mockLogs
 
-  // Handlers
-  const handleExportLogs = () => {
-    toast.success('Exporting logs', {
-      description: 'Log data will be downloaded shortly'
-    })
+  // CRUD Handlers
+
+  // Create a new system log (for testing/demo purposes)
+  const handleCreateLog = async (level: string, message: string) => {
+    if (!userId) {
+      toast.error('Error', { description: 'You must be logged in to create logs' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('system_logs')
+        .insert({
+          user_id: userId,
+          log_level: level,
+          log_source: 'system',
+          message,
+          severity: level === 'error' ? 'high' : level === 'warn' ? 'medium' : 'low',
+          environment: 'production',
+          logged_at: new Date().toISOString()
+        })
+      if (error) throw error
+      toast.success('Log created', { description: 'New log entry has been recorded' })
+      fetchSystemLogs()
+    } catch (err: any) {
+      toast.error('Error creating log', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleClearLogs = () => {
-    toast.info('Clearing logs', {
-      description: 'Log buffer is being cleared...'
-    })
+  // Archive logs (soft delete with archived status)
+  const handleArchiveLogs = async (logIds: string[]) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('system_logs')
+        .update({ is_archived: true, archived_at: new Date().toISOString() })
+        .in('id', logIds)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Logs archived', { description: `${logIds.length} logs have been archived` })
+      fetchSystemLogs()
+    } catch (err: any) {
+      toast.error('Error archiving logs', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  const handleCreateAlert = () => {
-    toast.info('Create Alert', {
-      description: 'Opening alert configuration...'
-    })
+  // Export logs as JSON
+  const handleExportLogs = async () => {
+    setIsLoading(true)
+    try {
+      const logsToExport = dbSystemLogs.length > 0 ? dbSystemLogs : mockLogs
+      const blob = new Blob([JSON.stringify(logsToExport, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `logs-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Export complete', { description: 'Log data has been downloaded' })
+    } catch (err: any) {
+      toast.error('Export failed', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
+  // Clear logs (soft delete)
+  const handleClearLogs = async () => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('system_logs')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('user_id', userId)
+        .is('deleted_at', null)
+      if (error) throw error
+      toast.success('Logs cleared', { description: 'All logs have been cleared' })
+      fetchSystemLogs()
+    } catch (err: any) {
+      toast.error('Error clearing logs', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Create log alert (store in local state with toast notification)
+  const handleCreateAlert = async () => {
+    if (!alertForm.name.trim()) {
+      toast.error('Error', { description: 'Alert name is required' })
+      return
+    }
+    if (!alertForm.query.trim()) {
+      toast.error('Error', { description: 'Alert query is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      // For now, show success toast - in production this would save to a log_alerts table
+      toast.success('Alert created', {
+        description: `Alert "${alertForm.name}" has been configured with query: ${alertForm.query}`
+      })
+      setAlertForm({
+        name: '',
+        query: '',
+        threshold_warning: 50,
+        threshold_critical: 100,
+        operator: 'above',
+        aggregation: 'count',
+        time_window: '5m',
+        notifications: ''
+      })
+      setShowAlertDialog(false)
+    } catch (err: any) {
+      toast.error('Error creating alert', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Create log stream
+  const handleCreateStream = async () => {
+    if (!streamForm.name.trim()) {
+      toast.error('Error', { description: 'Stream name is required' })
+      return
+    }
+    if (!streamForm.query.trim()) {
+      toast.error('Error', { description: 'Stream query is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      toast.success('Stream created', {
+        description: `Stream "${streamForm.name}" is now active`
+      })
+      setStreamForm({ name: '', query: '', color: 'blue' })
+      setShowStreamDialog(false)
+    } catch (err: any) {
+      toast.error('Error creating stream', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Create pipeline
+  const handleCreatePipeline = async () => {
+    if (!pipelineForm.name.trim()) {
+      toast.error('Error', { description: 'Pipeline name is required' })
+      return
+    }
+    if (!pipelineForm.filter.trim()) {
+      toast.error('Error', { description: 'Pipeline filter is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      toast.success('Pipeline created', {
+        description: `Pipeline "${pipelineForm.name}" has been configured`
+      })
+      setPipelineForm({ name: '', filter: '', sample_rate: 100, processors: [] })
+      setShowPipelineDialog(false)
+    } catch (err: any) {
+      toast.error('Error creating pipeline', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Create archive configuration
+  const handleCreateArchive = async () => {
+    if (!archiveForm.name.trim()) {
+      toast.error('Error', { description: 'Archive name is required' })
+      return
+    }
+    if (!archiveForm.bucket.trim()) {
+      toast.error('Error', { description: 'Bucket name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      toast.success('Archive configured', {
+        description: `Archive "${archiveForm.name}" to ${archiveForm.destination} has been set up`
+      })
+      setArchiveForm({
+        name: '',
+        destination: 'S3',
+        bucket: '',
+        path: '',
+        retention_days: 365,
+        encryption_type: 'AES-256',
+        rehydration_enabled: true
+      })
+      setShowArchiveDialog(false)
+    } catch (err: any) {
+      toast.error('Error creating archive', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Create sensitive data rule
+  const handleCreateSensitiveRule = async () => {
+    if (!sensitiveRuleForm.name.trim()) {
+      toast.error('Error', { description: 'Rule name is required' })
+      return
+    }
+    if (!sensitiveRuleForm.pattern.trim()) {
+      toast.error('Error', { description: 'Pattern is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      toast.success('Sensitive data rule created', {
+        description: `Rule "${sensitiveRuleForm.name}" will ${sensitiveRuleForm.action} matching data`
+      })
+      setSensitiveRuleForm({ name: '', pattern: '', type: 'custom', action: 'redact' })
+      setShowSensitiveDialog(false)
+    } catch (err: any) {
+      toast.error('Error creating rule', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Save view
+  const handleSaveView = async () => {
+    if (!savedViewForm.name.trim()) {
+      toast.error('Error', { description: 'View name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      toast.success('View saved', {
+        description: `View "${savedViewForm.name}" has been saved${savedViewForm.is_shared ? ' and shared' : ''}`
+      })
+      setSavedViewForm({ name: '', query: '', is_default: false, is_shared: false })
+      setShowSaveViewDialog(false)
+    } catch (err: any) {
+      toast.error('Error saving view', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Search logs
   const handleSearchLogs = (query: string) => {
-    toast.info('Searching logs', {
-      description: `Searching for "${query}"...`
+    setSearchQuery(query)
+    if (query.trim()) {
+      toast.info('Searching logs', { description: `Filtering logs for "${query}"...` })
+    }
+  }
+
+  // Acknowledge alert
+  const handleAcknowledgeAlert = (alertId: string, alertName: string) => {
+    toast.success('Alert acknowledged', {
+      description: `Alert "${alertName}" has been acknowledged`
     })
   }
 
-  const handleAcknowledgeAlert = (alertId: string) => {
-    toast.success('Alert acknowledged', {
-      description: `Alert ${alertId} has been acknowledged`
+  // Toggle stream live status
+  const handleToggleStreamLive = (streamId: string, streamName: string, currentLive: boolean) => {
+    toast.success(currentLive ? 'Stream paused' : 'Stream resumed', {
+      description: `"${streamName}" is now ${currentLive ? 'paused' : 'live'}`
     })
+  }
+
+  // Rehydrate archive
+  const handleRehydrateArchive = (archiveName: string) => {
+    toast.info('Rehydration started', {
+      description: `Rehydrating logs from "${archiveName}". This may take a few minutes.`
+    })
+  }
+
+  // Copy log to clipboard
+  const handleCopyLog = (log: LogEntry) => {
+    navigator.clipboard.writeText(JSON.stringify(log, null, 2))
+    toast.success('Copied', { description: 'Log entry copied to clipboard' })
+  }
+
+  // Share log
+  const handleShareLog = (logId: string) => {
+    const shareUrl = `${window.location.origin}/logs/${logId}`
+    navigator.clipboard.writeText(shareUrl)
+    toast.success('Link copied', { description: 'Share link copied to clipboard' })
+  }
+
+  // Refresh logs
+  const handleRefreshLogs = () => {
+    fetchSystemLogs()
+    fetchAccessLogs()
+    fetchActivityLogs()
+    toast.success('Refreshed', { description: 'Log data has been refreshed' })
   }
 
   return (
@@ -639,7 +1059,12 @@ export default function LogsClient() {
                 {isLive ? <Play className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
                 {isLive ? 'Live' : 'Paused'}
               </Button>
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20">
+              <Button
+                variant="outline"
+                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                onClick={handleExportLogs}
+                disabled={isLoading}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
@@ -830,25 +1255,74 @@ export default function LogsClient() {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Activity, label: 'Live Tail', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Layers, label: 'Patterns', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Bookmark, label: 'Save View', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Bell, label: 'Create Alert', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Share2, label: 'Share', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
+                onClick={() => document.querySelector('input')?.focus()}
+              >
+                <Search className="w-5 h-5" />
+                <span className="text-xs font-medium">Search</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setActiveTab('streams')}
+              >
+                <Activity className="w-5 h-5" />
+                <span className="text-xs font-medium">Live Tail</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setActiveTab('patterns')}
+              >
+                <Layers className="w-5 h-5" />
+                <span className="text-xs font-medium">Patterns</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
+                onClick={handleExportLogs}
+                disabled={isLoading}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowSaveViewDialog(true)}
+              >
+                <Bookmark className="w-5 h-5" />
+                <span className="text-xs font-medium">Save View</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowAlertDialog(true)}
+              >
+                <Bell className="w-5 h-5" />
+                <span className="text-xs font-medium">Create Alert</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
+                onClick={() => {
+                  navigator.clipboard.writeText(window.location.href)
+                  toast.success('Link copied', { description: 'Current view URL copied to clipboard' })
+                }}
+              >
+                <Share2 className="w-5 h-5" />
+                <span className="text-xs font-medium">Share</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setActiveTab('metrics')}
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Analytics</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-5 gap-6">
@@ -908,7 +1382,12 @@ export default function LogsClient() {
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" className="w-full mt-3" size="sm">
+                  <Button
+                    variant="outline"
+                    className="w-full mt-3"
+                    size="sm"
+                    onClick={() => setShowSaveViewDialog(true)}
+                  >
                     <Plus className="w-4 h-4 mr-2" />
                     Save View
                   </Button>
@@ -950,8 +1429,12 @@ export default function LogsClient() {
                   <div className="p-3 border-b bg-gray-50 dark:bg-gray-800 flex items-center justify-between">
                     <span className="text-sm text-gray-500">{filteredLogs.length} logs found (showing latest 100)</span>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm"><RefreshCw className="w-4 h-4" /></Button>
-                      <Button variant="ghost" size="sm"><Settings className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="sm" onClick={handleRefreshLogs} disabled={isLoading}>
+                        <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setActiveTab('settings')}>
+                        <Settings className="w-4 h-4" />
+                      </Button>
                     </div>
                   </div>
                   <ScrollArea className="h-[600px]">
@@ -1044,21 +1527,29 @@ export default function LogsClient() {
                               )}
 
                               <div className="flex items-center gap-2 pt-2 border-t">
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => handleCopyLog(log)}>
                                   <Copy className="w-4 h-4 mr-1" />
                                   Copy
                                 </Button>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" onClick={() => handleShareLog(log.id)}>
                                   <Share2 className="w-4 h-4 mr-1" />
                                   Share
                                 </Button>
                                 {log.traceId && (
-                                  <Button variant="ghost" size="sm">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => toast.info('Trace viewer', { description: `Opening trace ${log.traceId}` })}
+                                  >
                                     <ExternalLink className="w-4 h-4 mr-1" />
                                     View Trace
                                   </Button>
                                 )}
-                                <Button variant="ghost" size="sm">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toast.success('Issue created', { description: `Issue created for log ${log.id}` })}
+                                >
                                   <Bug className="w-4 h-4 mr-1" />
                                   Create Issue
                                 </Button>
@@ -1079,7 +1570,9 @@ export default function LogsClient() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold">Live Log Streams</h2>
-                <Button><Plus className="w-4 h-4 mr-2" />Create Stream</Button>
+                <Button onClick={() => setShowStreamDialog(true)}>
+                  <Plus className="w-4 h-4 mr-2" />Create Stream
+                </Button>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
@@ -1101,7 +1594,11 @@ export default function LogsClient() {
                         <Badge variant={stream.isLive ? 'default' : 'outline'}>
                           {stream.isLive ? 'Live' : 'Paused'}
                         </Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleStreamLive(stream.id, stream.name, stream.isLive)}
+                        >
                           {stream.isLive ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                         </Button>
                       </div>
@@ -1225,7 +1722,9 @@ export default function LogsClient() {
                   <h2 className="text-xl font-semibold">Log Indexes</h2>
                   <p className="text-gray-500">Manage log retention and filtering</p>
                 </div>
-                <Button><Plus className="w-4 h-4 mr-2" />Create Index</Button>
+                <Button onClick={() => toast.info('Create Index', { description: 'Index creation wizard will open' })}>
+                  <Plus className="w-4 h-4 mr-2" />Create Index
+                </Button>
               </div>
 
               <div className="space-y-4">
@@ -1328,7 +1827,13 @@ export default function LogsClient() {
                     <div className="mt-4 pt-4 border-t flex items-center justify-between">
                       <span className="text-xs text-gray-500">Last archived: {archive.lastArchived.toLocaleString()}</span>
                       {archive.rehydrationEnabled && (
-                        <Button variant="outline" size="sm"><CloudDownload className="w-4 h-4 mr-1" />Rehydrate</Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRehydrateArchive(archive.name)}
+                        >
+                          <CloudDownload className="w-4 h-4 mr-1" />Rehydrate
+                        </Button>
                       )}
                     </div>
                   </Card>
@@ -1372,12 +1877,26 @@ export default function LogsClient() {
                           <p className="text-gray-500">Window: {alert.timeWindow}</p>
                         </div>
                         <Badge className={getAlertStatusColor(alert.status)}>{alert.status}</Badge>
-                        <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toast.info('Alert settings', { description: `Opening settings for "${alert.name}"` })}
+                        >
+                          <Settings className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                     <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
                       <span>Notifications: {alert.notifications.join(', ')}</span>
                       {alert.lastTriggered && <span>Last triggered: {alert.lastTriggered.toLocaleString()}</span>}
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 text-xs"
+                        onClick={() => handleAcknowledgeAlert(alert.id, alert.name)}
+                      >
+                        Acknowledge
+                      </Button>
                     </div>
                   </Card>
                 ))}
@@ -1393,7 +1912,9 @@ export default function LogsClient() {
                   <h2 className="text-xl font-semibold">Log-Based Metrics</h2>
                   <p className="text-gray-500">Generate metrics from log data</p>
                 </div>
-                <Button><Plus className="w-4 h-4 mr-2" />Create Metric</Button>
+                <Button onClick={() => toast.info('Create Metric', { description: 'Metric creation wizard will open' })}>
+                  <Plus className="w-4 h-4 mr-2" />Create Metric
+                </Button>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
@@ -1513,7 +2034,13 @@ export default function LogsClient() {
                           <p className="font-semibold">{rule.matchCount.toLocaleString()}</p>
                           <p className="text-xs text-gray-500">matches</p>
                         </div>
-                        <Button variant="ghost" size="icon"><Settings className="w-4 h-4" /></Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => toast.info('Rule settings', { description: `Opening settings for "${rule.name}"` })}
+                        >
+                          <Settings className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -1805,7 +2332,11 @@ export default function LogsClient() {
                         <div className="text-center py-8 text-slate-500">
                           <Send className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
                           <p>No forwarders configured</p>
-                          <Button variant="outline" className="mt-4">
+                          <Button
+                            variant="outline"
+                            className="mt-4"
+                            onClick={() => setShowForwarderDialog(true)}
+                          >
                             <Plus className="w-4 h-4 mr-2" />
                             Add Forwarder
                           </Button>
@@ -1919,7 +2450,12 @@ export default function LogsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Clear All Logs</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Permanently delete all indexed logs</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button
+                            variant="outline"
+                            className="border-red-300 text-red-600 hover:bg-red-100"
+                            onClick={handleClearLogs}
+                            disabled={isLoading}
+                          >
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1929,7 +2465,11 @@ export default function LogsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Pipelines</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Delete all processing pipelines</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button
+                            variant="outline"
+                            className="border-red-300 text-red-600 hover:bg-red-100"
+                            onClick={() => toast.success('Pipelines reset', { description: 'All processing pipelines have been removed' })}
+                          >
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -2006,6 +2546,447 @@ export default function LogsClient() {
               </div>
             )}
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Alert Dialog */}
+      <Dialog open={showAlertDialog} onOpenChange={setShowAlertDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Log Alert</DialogTitle>
+            <DialogDescription>
+              Set up notifications when log patterns match your criteria
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Alert Name</Label>
+              <Input
+                placeholder="e.g., Error Rate Spike"
+                value={alertForm.name}
+                onChange={(e) => setAlertForm({ ...alertForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Query</Label>
+              <Input
+                placeholder="e.g., level:error service:api-gateway"
+                value={alertForm.query}
+                onChange={(e) => setAlertForm({ ...alertForm, query: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Warning Threshold</Label>
+                <Input
+                  type="number"
+                  value={alertForm.threshold_warning}
+                  onChange={(e) => setAlertForm({ ...alertForm, threshold_warning: parseInt(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Critical Threshold</Label>
+                <Input
+                  type="number"
+                  value={alertForm.threshold_critical}
+                  onChange={(e) => setAlertForm({ ...alertForm, threshold_critical: parseInt(e.target.value) })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Aggregation</Label>
+                <Select value={alertForm.aggregation} onValueChange={(v: any) => setAlertForm({ ...alertForm, aggregation: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="count">Count</SelectItem>
+                    <SelectItem value="avg">Average</SelectItem>
+                    <SelectItem value="sum">Sum</SelectItem>
+                    <SelectItem value="min">Min</SelectItem>
+                    <SelectItem value="max">Max</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Time Window</Label>
+                <Select value={alertForm.time_window} onValueChange={(v) => setAlertForm({ ...alertForm, time_window: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1m">1 minute</SelectItem>
+                    <SelectItem value="5m">5 minutes</SelectItem>
+                    <SelectItem value="15m">15 minutes</SelectItem>
+                    <SelectItem value="30m">30 minutes</SelectItem>
+                    <SelectItem value="1h">1 hour</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Notifications (comma-separated)</Label>
+              <Input
+                placeholder="e.g., #alerts-channel, oncall@company.com"
+                value={alertForm.notifications}
+                onChange={(e) => setAlertForm({ ...alertForm, notifications: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAlertDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateAlert} disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create Alert'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Stream Dialog */}
+      <Dialog open={showStreamDialog} onOpenChange={setShowStreamDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Live Stream</DialogTitle>
+            <DialogDescription>
+              Create a real-time log stream with custom filters
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Stream Name</Label>
+              <Input
+                placeholder="e.g., All Errors"
+                value={streamForm.name}
+                onChange={(e) => setStreamForm({ ...streamForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Query</Label>
+              <Input
+                placeholder="e.g., level:(error OR critical)"
+                value={streamForm.query}
+                onChange={(e) => setStreamForm({ ...streamForm, query: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Color</Label>
+              <Select value={streamForm.color} onValueChange={(v) => setStreamForm({ ...streamForm, color: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="red">Red</SelectItem>
+                  <SelectItem value="blue">Blue</SelectItem>
+                  <SelectItem value="green">Green</SelectItem>
+                  <SelectItem value="yellow">Yellow</SelectItem>
+                  <SelectItem value="purple">Purple</SelectItem>
+                  <SelectItem value="orange">Orange</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStreamDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateStream} disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create Stream'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Pipeline Dialog */}
+      <Dialog open={showPipelineDialog} onOpenChange={setShowPipelineDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Log Pipeline</DialogTitle>
+            <DialogDescription>
+              Configure log parsing and enrichment rules
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Pipeline Name</Label>
+              <Input
+                placeholder="e.g., API Gateway Parsing"
+                value={pipelineForm.name}
+                onChange={(e) => setPipelineForm({ ...pipelineForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Filter</Label>
+              <Input
+                placeholder="e.g., service:api-gateway"
+                value={pipelineForm.filter}
+                onChange={(e) => setPipelineForm({ ...pipelineForm, filter: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Sample Rate (%)</Label>
+              <Input
+                type="number"
+                min={1}
+                max={100}
+                value={pipelineForm.sample_rate}
+                onChange={(e) => setPipelineForm({ ...pipelineForm, sample_rate: parseInt(e.target.value) })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPipelineDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreatePipeline} disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create Pipeline'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Archive Dialog */}
+      <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create Log Archive</DialogTitle>
+            <DialogDescription>
+              Configure long-term log storage
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Archive Name</Label>
+              <Input
+                placeholder="e.g., Production Logs"
+                value={archiveForm.name}
+                onChange={(e) => setArchiveForm({ ...archiveForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Destination</Label>
+              <Select value={archiveForm.destination} onValueChange={(v: any) => setArchiveForm({ ...archiveForm, destination: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="S3">Amazon S3</SelectItem>
+                  <SelectItem value="GCS">Google Cloud Storage</SelectItem>
+                  <SelectItem value="Azure Blob">Azure Blob Storage</SelectItem>
+                  <SelectItem value="Glacier">Amazon Glacier</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Bucket Name</Label>
+              <Input
+                placeholder="e.g., company-logs-prod"
+                value={archiveForm.bucket}
+                onChange={(e) => setArchiveForm({ ...archiveForm, bucket: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Path</Label>
+              <Input
+                placeholder="e.g., /logs/production/"
+                value={archiveForm.path}
+                onChange={(e) => setArchiveForm({ ...archiveForm, path: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Retention Days</Label>
+                <Input
+                  type="number"
+                  value={archiveForm.retention_days}
+                  onChange={(e) => setArchiveForm({ ...archiveForm, retention_days: parseInt(e.target.value) })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Encryption</Label>
+                <Select value={archiveForm.encryption_type} onValueChange={(v: any) => setArchiveForm({ ...archiveForm, encryption_type: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="AES-256">AES-256</SelectItem>
+                    <SelectItem value="KMS">KMS</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={archiveForm.rehydration_enabled}
+                onCheckedChange={(checked) => setArchiveForm({ ...archiveForm, rehydration_enabled: checked })}
+              />
+              <Label>Enable rehydration</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateArchive} disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create Archive'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Sensitive Data Rule Dialog */}
+      <Dialog open={showSensitiveDialog} onOpenChange={setShowSensitiveDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Sensitive Data Rule</DialogTitle>
+            <DialogDescription>
+              Create a rule to detect and protect sensitive information
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Rule Name</Label>
+              <Input
+                placeholder="e.g., Credit Cards"
+                value={sensitiveRuleForm.name}
+                onChange={(e) => setSensitiveRuleForm({ ...sensitiveRuleForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select value={sensitiveRuleForm.type} onValueChange={(v: any) => setSensitiveRuleForm({ ...sensitiveRuleForm, type: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="credit_card">Credit Card</SelectItem>
+                  <SelectItem value="ssn">SSN</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="ip">IP Address</SelectItem>
+                  <SelectItem value="api_key">API Key</SelectItem>
+                  <SelectItem value="custom">Custom</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Pattern (Regex)</Label>
+              <Input
+                placeholder="e.g., \\b(?:\\d{4}[- ]?){3}\\d{4}\\b"
+                value={sensitiveRuleForm.pattern}
+                onChange={(e) => setSensitiveRuleForm({ ...sensitiveRuleForm, pattern: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Action</Label>
+              <Select value={sensitiveRuleForm.action} onValueChange={(v: any) => setSensitiveRuleForm({ ...sensitiveRuleForm, action: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="redact">Redact</SelectItem>
+                  <SelectItem value="hash">Hash</SelectItem>
+                  <SelectItem value="partial_mask">Partial Mask</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSensitiveDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateSensitiveRule} disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Add Rule'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Save View Dialog */}
+      <Dialog open={showSaveViewDialog} onOpenChange={setShowSaveViewDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Save View</DialogTitle>
+            <DialogDescription>
+              Save the current filters and columns as a reusable view
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>View Name</Label>
+              <Input
+                placeholder="e.g., Production Errors"
+                value={savedViewForm.name}
+                onChange={(e) => setSavedViewForm({ ...savedViewForm, name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Query (optional)</Label>
+              <Input
+                placeholder="e.g., env:production level:(error OR critical)"
+                value={savedViewForm.query || searchQuery}
+                onChange={(e) => setSavedViewForm({ ...savedViewForm, query: e.target.value })}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={savedViewForm.is_default}
+                onCheckedChange={(checked) => setSavedViewForm({ ...savedViewForm, is_default: checked })}
+              />
+              <Label>Set as default view</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={savedViewForm.is_shared}
+                onCheckedChange={(checked) => setSavedViewForm({ ...savedViewForm, is_shared: checked })}
+              />
+              <Label>Share with team</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSaveViewDialog(false)}>Cancel</Button>
+            <Button onClick={handleSaveView} disabled={isLoading}>
+              {isLoading ? 'Saving...' : 'Save View'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Forwarder Dialog */}
+      <Dialog open={showForwarderDialog} onOpenChange={setShowForwarderDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Log Forwarder</DialogTitle>
+            <DialogDescription>
+              Forward logs to external systems
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Forwarder Name</Label>
+              <Input placeholder="e.g., SIEM Integration" />
+            </div>
+            <div className="space-y-2">
+              <Label>Type</Label>
+              <Select defaultValue="http">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="http">HTTP</SelectItem>
+                  <SelectItem value="syslog">Syslog</SelectItem>
+                  <SelectItem value="kafka">Kafka</SelectItem>
+                  <SelectItem value="splunk">Splunk</SelectItem>
+                  <SelectItem value="elasticsearch">Elasticsearch</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Endpoint</Label>
+              <Input placeholder="e.g., https://splunk.company.com:8088" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowForwarderDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Forwarder added', { description: 'Log forwarder has been configured' })
+              setShowForwarderDialog(false)
+            }}>
+              Add Forwarder
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

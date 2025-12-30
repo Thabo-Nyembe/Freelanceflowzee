@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   Package,
@@ -86,12 +86,16 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Textarea } from '@/components/ui/textarea'
+
+// Import widget library hook
+import { useWidgetLibrary, LibraryWidget } from '@/lib/hooks/use-widget-library'
 
 // Types
 type WidgetStatus = 'stable' | 'beta' | 'deprecated' | 'experimental' | 'archived'
@@ -155,249 +159,7 @@ interface Contributor {
   verified: boolean
 }
 
-// Mock data
-const mockWidgets: Widget[] = [
-  {
-    id: '1',
-    name: 'DataTable Pro',
-    description: 'Advanced data table with sorting, filtering, pagination, and virtual scrolling. Supports large datasets.',
-    category: 'data-viz',
-    status: 'stable',
-    version: '3.2.1',
-    author: { name: 'FreeFlow Team', avatar: '', verified: true },
-    installs: 45280,
-    downloads: 128500,
-    stars: 2340,
-    rating: 4.8,
-    reviews_count: 456,
-    size_kb: 48,
-    dependencies: ['@tanstack/react-table', 'react-virtual'],
-    tags: ['table', 'data', 'grid', 'sorting', 'filtering'],
-    preview_url: null,
-    demo_url: 'https://demo.example.com/datatable',
-    docs_url: 'https://docs.example.com/datatable',
-    github_url: 'https://github.com/freeflow/datatable-pro',
-    license: 'mit',
-    last_updated: '2024-01-10',
-    created_at: '2023-06-15',
-    is_featured: true,
-    is_official: true,
-    is_bookmarked: true,
-    compatibility: { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
-    code_snippet: '<DataTable columns={columns} data={data} pagination />'
-  },
-  {
-    id: '2',
-    name: 'Chart Studio',
-    description: 'Beautiful, responsive charts powered by Recharts. Line, bar, pie, area, and more chart types.',
-    category: 'data-viz',
-    status: 'stable',
-    version: '2.8.0',
-    author: { name: 'ChartWorks', avatar: '', verified: true },
-    installs: 38900,
-    downloads: 95200,
-    stars: 1890,
-    rating: 4.7,
-    reviews_count: 312,
-    size_kb: 156,
-    dependencies: ['recharts', 'd3'],
-    tags: ['charts', 'visualization', 'analytics', 'graphs'],
-    preview_url: null,
-    demo_url: 'https://demo.example.com/charts',
-    docs_url: null,
-    github_url: 'https://github.com/chartworks/chart-studio',
-    license: 'apache-2.0',
-    last_updated: '2024-01-08',
-    created_at: '2023-03-20',
-    is_featured: true,
-    is_official: false,
-    is_bookmarked: false,
-    compatibility: { react: '>=17.0.0', next: '>=13.0.0', tailwind: '>=3.0.0' },
-    code_snippet: '<ChartStudio type="line" data={data} xKey="date" yKey="value" />'
-  },
-  {
-    id: '3',
-    name: 'Smart Form Builder',
-    description: 'Dynamic form builder with validation, conditional logic, and multi-step support. React Hook Form integration.',
-    category: 'input',
-    status: 'stable',
-    version: '4.1.2',
-    author: { name: 'FormCraft', avatar: '', verified: true },
-    installs: 32450,
-    downloads: 78300,
-    stars: 1560,
-    rating: 4.9,
-    reviews_count: 287,
-    size_kb: 32,
-    dependencies: ['react-hook-form', 'zod'],
-    tags: ['form', 'input', 'validation', 'builder'],
-    preview_url: null,
-    demo_url: 'https://demo.example.com/formbuilder',
-    docs_url: 'https://docs.example.com/formbuilder',
-    github_url: null,
-    license: 'mit',
-    last_updated: '2024-01-12',
-    created_at: '2023-01-10',
-    is_featured: false,
-    is_official: false,
-    is_bookmarked: true,
-    compatibility: { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
-    code_snippet: '<FormBuilder schema={formSchema} onSubmit={handleSubmit} />'
-  },
-  {
-    id: '4',
-    name: 'Kanban Board',
-    description: 'Drag and drop kanban board with swimlanes, WIP limits, and real-time collaboration features.',
-    category: 'layout',
-    status: 'beta',
-    version: '1.5.0-beta.3',
-    author: { name: 'FreeFlow Team', avatar: '', verified: true },
-    installs: 18750,
-    downloads: 42100,
-    stars: 890,
-    rating: 4.5,
-    reviews_count: 134,
-    size_kb: 64,
-    dependencies: ['@dnd-kit/core', '@dnd-kit/sortable'],
-    tags: ['kanban', 'drag-drop', 'board', 'project-management'],
-    preview_url: null,
-    demo_url: 'https://demo.example.com/kanban',
-    docs_url: null,
-    github_url: 'https://github.com/freeflow/kanban-board',
-    license: 'mit',
-    last_updated: '2024-01-14',
-    created_at: '2023-09-05',
-    is_featured: false,
-    is_official: true,
-    is_bookmarked: false,
-    compatibility: { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
-    code_snippet: '<KanbanBoard columns={columns} cards={cards} onCardMove={handleMove} />'
-  },
-  {
-    id: '5',
-    name: 'Rich Text Editor',
-    description: 'Full-featured WYSIWYG editor with markdown support, mentions, embeds, and collaborative editing.',
-    category: 'input',
-    status: 'stable',
-    version: '2.3.4',
-    author: { name: 'EditorLabs', avatar: '', verified: false },
-    installs: 28900,
-    downloads: 67800,
-    stars: 1234,
-    rating: 4.6,
-    reviews_count: 198,
-    size_kb: 245,
-    dependencies: ['@tiptap/react', '@tiptap/pm', 'prosemirror-*'],
-    tags: ['editor', 'rich-text', 'wysiwyg', 'markdown'],
-    preview_url: null,
-    demo_url: 'https://demo.example.com/editor',
-    docs_url: 'https://docs.example.com/editor',
-    github_url: 'https://github.com/editorlabs/rich-text',
-    license: 'gpl-3.0',
-    last_updated: '2024-01-05',
-    created_at: '2023-02-28',
-    is_featured: true,
-    is_official: false,
-    is_bookmarked: false,
-    compatibility: { react: '>=17.0.0', next: '>=13.0.0', tailwind: '>=3.0.0' },
-    code_snippet: '<RichTextEditor content={content} onChange={setContent} />'
-  },
-  {
-    id: '6',
-    name: 'Modal Manager',
-    description: 'Accessible modal system with stacking, focus trap, and animations. Built on Radix UI primitives.',
-    category: 'feedback',
-    status: 'stable',
-    version: '1.8.2',
-    author: { name: 'FreeFlow Team', avatar: '', verified: true },
-    installs: 52100,
-    downloads: 156400,
-    stars: 2890,
-    rating: 4.9,
-    reviews_count: 567,
-    size_kb: 12,
-    dependencies: ['@radix-ui/react-dialog'],
-    tags: ['modal', 'dialog', 'popup', 'overlay'],
-    preview_url: null,
-    demo_url: null,
-    docs_url: 'https://docs.example.com/modal',
-    github_url: 'https://github.com/freeflow/modal-manager',
-    license: 'mit',
-    last_updated: '2024-01-02',
-    created_at: '2022-11-15',
-    is_featured: false,
-    is_official: true,
-    is_bookmarked: true,
-    compatibility: { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
-    code_snippet: '<Modal open={open} onClose={onClose}><ModalContent /></Modal>'
-  },
-  {
-    id: '7',
-    name: 'Notification Center',
-    description: 'Toast notifications with queue management, persistence, and action buttons. Customizable themes.',
-    category: 'feedback',
-    status: 'stable',
-    version: '2.1.0',
-    author: { name: 'NotifyPro', avatar: '', verified: true },
-    installs: 41200,
-    downloads: 98700,
-    stars: 1670,
-    rating: 4.7,
-    reviews_count: 289,
-    size_kb: 18,
-    dependencies: ['sonner'],
-    tags: ['toast', 'notification', 'alert', 'snackbar'],
-    preview_url: null,
-    demo_url: 'https://demo.example.com/notifications',
-    docs_url: null,
-    github_url: null,
-    license: 'mit',
-    last_updated: '2024-01-11',
-    created_at: '2023-04-12',
-    is_featured: false,
-    is_official: false,
-    is_bookmarked: false,
-    compatibility: { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
-    code_snippet: 'notify.success("Action completed successfully!")'
-  },
-  {
-    id: '8',
-    name: 'File Uploader',
-    description: 'Drag and drop file uploader with progress tracking, chunked uploads, and image preview.',
-    category: 'input',
-    status: 'experimental',
-    version: '0.9.5',
-    author: { name: 'UploadKit', avatar: '', verified: false },
-    installs: 8900,
-    downloads: 21400,
-    stars: 456,
-    rating: 4.2,
-    reviews_count: 67,
-    size_kb: 28,
-    dependencies: ['react-dropzone', 'uppy'],
-    tags: ['upload', 'file', 'dropzone', 'image'],
-    preview_url: null,
-    demo_url: 'https://demo.example.com/uploader',
-    docs_url: null,
-    github_url: 'https://github.com/uploadkit/file-uploader',
-    license: 'apache-2.0',
-    last_updated: '2024-01-13',
-    created_at: '2023-10-20',
-    is_featured: false,
-    is_official: false,
-    is_bookmarked: false,
-    compatibility: { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
-    code_snippet: '<FileUploader onUpload={handleUpload} maxFiles={5} accept="image/*" />'
-  }
-]
-
-const mockCollections: Collection[] = [
-  { id: '1', name: 'Essential UI Kit', description: 'Core components every app needs', widget_count: 24, author: 'FreeFlow Team', is_official: true, cover_image: null },
-  { id: '2', name: 'Data Visualization', description: 'Charts, graphs, and analytics components', widget_count: 18, author: 'ChartWorks', is_official: false, cover_image: null },
-  { id: '3', name: 'Form Components', description: 'Input fields, selects, and form builders', widget_count: 32, author: 'FormCraft', is_official: false, cover_image: null },
-  { id: '4', name: 'Admin Dashboard', description: 'Complete admin panel components', widget_count: 45, author: 'FreeFlow Team', is_official: true, cover_image: null }
-]
-
+// Mock data for contributors (to be replaced with real data)
 const mockContributors: Contributor[] = [
   { id: '1', name: 'FreeFlow Team', avatar: '', widgets_count: 28, total_installs: 245000, verified: true },
   { id: '2', name: 'ChartWorks', avatar: '', widgets_count: 12, total_installs: 156000, verified: true },
@@ -406,7 +168,7 @@ const mockContributors: Contributor[] = [
   { id: '5', name: 'NotifyPro', avatar: '', widgets_count: 4, total_installs: 54300, verified: true }
 ]
 
-// Enhanced Widget Library Mock Data
+// Enhanced Widget Library Mock Data for AI components
 const mockWidgetLibAIInsights = [
   { id: '1', type: 'success' as const, title: 'Popular Widget', description: 'Charts Pro has 50K+ installs. Consider featuring it prominently.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trending' },
   { id: '2', type: 'info' as const, title: 'New Submissions', description: '8 new widgets pending review. Average review time 2 days.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Queue' },
@@ -431,14 +193,64 @@ const mockWidgetLibActivities = [
   { id: '3', user: 'QA Tester', action: 'tested', target: '5 widgets for v2.0', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockWidgetLibQuickActions = [
-  { id: '1', label: 'Submit', icon: 'Upload', shortcut: 'S', action: () => console.log('Submit') },
-  { id: '2', label: 'Browse', icon: 'Search', shortcut: 'B', action: () => console.log('Browse') },
-  { id: '3', label: 'My Widgets', icon: 'Package', shortcut: 'M', action: () => console.log('My widgets') },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'G', action: () => console.log('Settings') },
-]
+// Transform LibraryWidget to local Widget type
+const transformWidget = (w: LibraryWidget, isBookmarked: boolean): Widget => ({
+  id: w.id,
+  name: w.name,
+  description: w.description || '',
+  category: (w.category as WidgetCategory) || 'utility',
+  status: w.status || 'stable',
+  version: w.version || '1.0.0',
+  author: {
+    name: w.author_name || 'Unknown',
+    avatar: w.author_avatar || '',
+    verified: w.author_verified || false
+  },
+  installs: w.installs_count || 0,
+  downloads: w.downloads_count || 0,
+  stars: w.stars_count || 0,
+  rating: w.rating || 0,
+  reviews_count: w.reviews_count || 0,
+  size_kb: w.size_kb || 0,
+  dependencies: w.dependencies || [],
+  tags: w.tags || [],
+  preview_url: w.preview_url,
+  demo_url: w.demo_url,
+  docs_url: w.docs_url,
+  github_url: w.github_url,
+  license: (w.license as LicenseType) || 'mit',
+  last_updated: w.updated_at,
+  created_at: w.created_at,
+  is_featured: w.is_featured || false,
+  is_official: w.is_official || false,
+  is_bookmarked: isBookmarked,
+  compatibility: w.compatibility as any || { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' },
+  code_snippet: w.code_snippet || ''
+})
 
 export default function WidgetLibraryClient() {
+  // Use the widget library hook
+  const {
+    widgets: rawWidgets,
+    bookmarkedIds,
+    installedIds,
+    collections: rawCollections,
+    settings,
+    stats: hookStats,
+    loading,
+    operationLoading,
+    installWidget,
+    uninstallWidget,
+    createWidget,
+    toggleBookmark,
+    createCollection,
+    updateSettings,
+    resetSettings,
+    exportWidgetConfig,
+    clearCache,
+    uninstallAllWidgets
+  } = useWidgetLibrary()
+
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<WidgetCategory | 'all'>('all')
@@ -450,21 +262,62 @@ export default function WidgetLibraryClient() {
   const [codeWidget, setCodeWidget] = useState<Widget | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states
+  const [showPublishDialog, setShowPublishDialog] = useState(false)
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState<{ type: string; title: string; description: string } | null>(null)
+
+  // Form states
+  const [newWidgetForm, setNewWidgetForm] = useState({
+    name: '',
+    description: '',
+    category: 'utility' as WidgetCategory,
+    version: '1.0.0',
+    tags: '',
+    license: 'mit' as LicenseType,
+    code_snippet: '',
+    demo_url: '',
+    docs_url: '',
+    github_url: ''
+  })
+  const [newCollectionForm, setNewCollectionForm] = useState({
+    name: '',
+    description: ''
+  })
+
+  // Transform widgets with bookmark status
+  const widgets = useMemo(() => {
+    return rawWidgets.map(w => transformWidget(w, bookmarkedIds.has(w.id)))
+  }, [rawWidgets, bookmarkedIds])
+
+  // Transform collections
+  const collections = useMemo(() => {
+    return rawCollections.map(c => ({
+      id: c.id,
+      name: c.name,
+      description: c.description || '',
+      widget_count: c.widget_ids?.length || 0,
+      author: 'User',
+      is_official: c.is_official,
+      cover_image: c.cover_image
+    }))
+  }, [rawCollections])
+
   // Stats calculation
   const stats = useMemo(() => {
-    const totalWidgets = mockWidgets.length
-    const totalInstalls = mockWidgets.reduce((sum, w) => sum + w.installs, 0)
-    const totalDownloads = mockWidgets.reduce((sum, w) => sum + w.downloads, 0)
-    const avgRating = mockWidgets.reduce((sum, w) => sum + w.rating, 0) / mockWidgets.length
-    const officialCount = mockWidgets.filter(w => w.is_official).length
-    const featuredCount = mockWidgets.filter(w => w.is_featured).length
-
+    if (widgets.length === 0) return hookStats
+    const totalWidgets = widgets.length
+    const totalInstalls = widgets.reduce((sum, w) => sum + w.installs, 0)
+    const totalDownloads = widgets.reduce((sum, w) => sum + w.downloads, 0)
+    const avgRating = widgets.reduce((sum, w) => sum + w.rating, 0) / widgets.length
+    const officialCount = widgets.filter(w => w.is_official).length
+    const featuredCount = widgets.filter(w => w.is_featured).length
     return { totalWidgets, totalInstalls, totalDownloads, avgRating, officialCount, featuredCount }
-  }, [])
+  }, [widgets, hookStats])
 
   // Filtered widgets
   const filteredWidgets = useMemo(() => {
-    let result = mockWidgets.filter(widget => {
+    let result = widgets.filter(widget => {
       const matchesSearch = widget.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         widget.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         widget.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -490,7 +343,7 @@ export default function WidgetLibraryClient() {
     }
 
     return result
-  }, [searchQuery, categoryFilter, statusFilter, sortBy])
+  }, [widgets, searchQuery, categoryFilter, statusFilter, sortBy])
 
   // Helper functions
   const getStatusBadge = (status: WidgetStatus) => {
@@ -537,35 +390,190 @@ export default function WidgetLibraryClient() {
     setShowCodeModal(true)
   }
 
-  // Handlers
-  const handleInstallWidget = (widgetName: string) => {
-    toast.success('Installing widget', {
-      description: `"${widgetName}" is being added to your project`
-    })
+  // Real handlers with Supabase operations
+  const handleInstallWidget = async (widget: Widget) => {
+    const { success, error } = await installWidget(widget.id)
+    if (success) {
+      toast.success('Widget installed', {
+        description: `"${widget.name}" has been added to your project`
+      })
+    } else {
+      toast.error('Installation failed', {
+        description: error || 'Could not install widget'
+      })
+    }
   }
 
-  const handleCreateWidget = () => {
-    toast.info('Create Widget', {
-      description: 'Opening widget builder...'
-    })
+  const handleUninstallWidget = async (widget: Widget) => {
+    const { success, error } = await uninstallWidget(widget.id)
+    if (success) {
+      toast.success('Widget uninstalled', {
+        description: `"${widget.name}" has been removed from your project`
+      })
+    } else {
+      toast.error('Uninstall failed', {
+        description: error || 'Could not uninstall widget'
+      })
+    }
   }
 
-  const handlePreviewWidget = (widgetName: string) => {
-    toast.info('Preview', {
-      description: `Loading preview for "${widgetName}"...`
-    })
+  const handleToggleBookmark = async (widget: Widget) => {
+    const { success, isBookmarked, error } = await toggleBookmark(widget.id)
+    if (success) {
+      toast.success(isBookmarked ? 'Added to saved' : 'Removed from saved', {
+        description: isBookmarked
+          ? `"${widget.name}" saved to your collection`
+          : `"${widget.name}" removed from saved`
+      })
+    } else {
+      toast.error('Action failed', {
+        description: error || 'Could not update bookmark'
+      })
+    }
   }
 
-  const handleExportWidget = (widgetName: string) => {
-    toast.success('Exporting widget', {
-      description: `"${widgetName}" code will be downloaded`
+  const handlePublishWidget = async () => {
+    if (!newWidgetForm.name.trim()) {
+      toast.error('Validation error', { description: 'Widget name is required' })
+      return
+    }
+
+    const { data, error } = await createWidget({
+      name: newWidgetForm.name,
+      description: newWidgetForm.description,
+      category: newWidgetForm.category,
+      version: newWidgetForm.version,
+      tags: newWidgetForm.tags.split(',').map(t => t.trim()).filter(Boolean),
+      license: newWidgetForm.license,
+      code_snippet: newWidgetForm.code_snippet,
+      demo_url: newWidgetForm.demo_url || null,
+      docs_url: newWidgetForm.docs_url || null,
+      github_url: newWidgetForm.github_url || null,
+      status: 'beta',
+      size_kb: 10,
+      dependencies: [],
+      compatibility: { react: '>=18.0.0', next: '>=14.0.0', tailwind: '>=3.0.0' }
     })
+
+    if (data) {
+      toast.success('Widget published', {
+        description: `"${newWidgetForm.name}" is now available in the library`
+      })
+      setShowPublishDialog(false)
+      setNewWidgetForm({
+        name: '',
+        description: '',
+        category: 'utility',
+        version: '1.0.0',
+        tags: '',
+        license: 'mit',
+        code_snippet: '',
+        demo_url: '',
+        docs_url: '',
+        github_url: ''
+      })
+    } else {
+      toast.error('Publishing failed', {
+        description: error || 'Could not publish widget'
+      })
+    }
   }
 
-  const handleFavoriteWidget = (widgetName: string) => {
-    toast.success('Added to favorites', {
-      description: `"${widgetName}" saved to your favorites`
+  const handleCreateCollection = async () => {
+    if (!newCollectionForm.name.trim()) {
+      toast.error('Validation error', { description: 'Collection name is required' })
+      return
+    }
+
+    const { data, error } = await createCollection({
+      name: newCollectionForm.name,
+      description: newCollectionForm.description
     })
+
+    if (data) {
+      toast.success('Collection created', {
+        description: `"${newCollectionForm.name}" collection is ready`
+      })
+      setShowCollectionDialog(false)
+      setNewCollectionForm({ name: '', description: '' })
+    } else {
+      toast.error('Creation failed', {
+        description: error || 'Could not create collection'
+      })
+    }
+  }
+
+  const handleExportConfig = async () => {
+    const { success, error } = await exportWidgetConfig()
+    if (success) {
+      toast.success('Config exported', {
+        description: 'Widget configuration downloaded successfully'
+      })
+    } else {
+      toast.error('Export failed', {
+        description: error || 'Could not export configuration'
+      })
+    }
+  }
+
+  const handleClearCache = async () => {
+    await clearCache()
+    toast.success('Cache cleared', {
+      description: 'Widget cache has been refreshed'
+    })
+    setShowConfirmDialog(null)
+  }
+
+  const handleResetSettings = async () => {
+    const { success, error } = await resetSettings()
+    if (success) {
+      toast.success('Settings reset', {
+        description: 'All settings restored to defaults'
+      })
+    } else {
+      toast.error('Reset failed', {
+        description: error || 'Could not reset settings'
+      })
+    }
+    setShowConfirmDialog(null)
+  }
+
+  const handleUninstallAll = async () => {
+    const { success, error } = await uninstallAllWidgets()
+    if (success) {
+      toast.success('All widgets uninstalled', {
+        description: 'All widgets have been removed from your project'
+      })
+    } else {
+      toast.error('Uninstall failed', {
+        description: error || 'Could not uninstall widgets'
+      })
+    }
+    setShowConfirmDialog(null)
+  }
+
+  const handleCopyCode = (code: string) => {
+    navigator.clipboard.writeText(code)
+    toast.success('Copied to clipboard')
+  }
+
+  // Quick actions for toolbar
+  const quickActions = [
+    { id: '1', label: 'Publish', icon: 'Upload', shortcut: 'P', action: () => setShowPublishDialog(true) },
+    { id: '2', label: 'Browse', icon: 'Search', shortcut: 'B', action: () => setActiveTab('browse') },
+    { id: '3', label: 'Collections', icon: 'Layers', shortcut: 'C', action: () => setShowCollectionDialog(true) },
+    { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'G', action: () => setActiveTab('settings') },
+  ]
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900 p-8 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-purple-600" />
+          <p className="text-gray-600 dark:text-gray-400">Loading widget library...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -583,11 +591,14 @@ export default function WidgetLibraryClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => setActiveTab('saved')}>
               <Bookmark className="w-4 h-4" />
-              Saved
+              Saved ({bookmarkedIds.size})
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+            <Button
+              className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              onClick={() => setShowPublishDialog(true)}
+            >
               <Plus className="w-4 h-4" />
               Publish Widget
             </Button>
@@ -780,12 +791,24 @@ export default function WidgetLibraryClient() {
             </Card>
 
             {/* Widget Grid/List */}
-            {viewMode === 'grid' ? (
+            {filteredWidgets.length === 0 ? (
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                <CardContent className="p-12 text-center">
+                  <Package className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No widgets found</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Try adjusting your search or filters</p>
+                  <Button onClick={() => { setSearchQuery(''); setCategoryFilter('all'); setStatusFilter('all'); }}>
+                    Clear filters
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : viewMode === 'grid' ? (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredWidgets.map((widget) => {
                   const statusBadge = getStatusBadge(widget.status)
                   const StatusIcon = statusBadge.icon
                   const CategoryIcon = getCategoryIcon(widget.category)
+                  const isInstalled = installedIds.has(widget.id)
                   return (
                     <Card key={widget.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-all group">
                       <CardContent className="p-5">
@@ -840,9 +863,26 @@ export default function WidgetLibraryClient() {
                         </div>
 
                         <div className="flex items-center gap-2 pt-3 border-t dark:border-gray-700">
-                          <Button size="sm" className="flex-1 gap-1">
-                            <Download className="w-3 h-3" />
-                            Install
+                          <Button
+                            size="sm"
+                            className="flex-1 gap-1"
+                            disabled={operationLoading}
+                            variant={isInstalled ? "outline" : "default"}
+                            onClick={() => isInstalled ? handleUninstallWidget(widget) : handleInstallWidget(widget)}
+                          >
+                            {operationLoading ? (
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                            ) : isInstalled ? (
+                              <>
+                                <CheckCircle2 className="w-3 h-3" />
+                                Installed
+                              </>
+                            ) : (
+                              <>
+                                <Download className="w-3 h-3" />
+                                Install
+                              </>
+                            )}
                           </Button>
                           <Button variant="outline" size="sm" onClick={() => handleViewCode(widget)}>
                             <Code className="w-3 h-3" />
@@ -850,7 +890,12 @@ export default function WidgetLibraryClient() {
                           <Button variant="outline" size="sm" onClick={() => setSelectedWidget(widget)}>
                             <Eye className="w-3 h-3" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={operationLoading}
+                            onClick={() => handleToggleBookmark(widget)}
+                          >
                             {widget.is_bookmarked ? (
                               <BookmarkCheck className="w-4 h-4 text-purple-600" />
                             ) : (
@@ -869,6 +914,7 @@ export default function WidgetLibraryClient() {
                   const statusBadge = getStatusBadge(widget.status)
                   const StatusIcon = statusBadge.icon
                   const CategoryIcon = getCategoryIcon(widget.category)
+                  const isInstalled = installedIds.has(widget.id)
                   return (
                     <Card key={widget.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-all">
                       <CardContent className="p-4">
@@ -901,9 +947,24 @@ export default function WidgetLibraryClient() {
                             <span>{widget.size_kb}KB</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" className="gap-1">
-                              <Download className="w-3 h-3" />
-                              Install
+                            <Button
+                              size="sm"
+                              className="gap-1"
+                              disabled={operationLoading}
+                              variant={isInstalled ? "outline" : "default"}
+                              onClick={() => isInstalled ? handleUninstallWidget(widget) : handleInstallWidget(widget)}
+                            >
+                              {isInstalled ? (
+                                <>
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  Installed
+                                </>
+                              ) : (
+                                <>
+                                  <Download className="w-3 h-3" />
+                                  Install
+                                </>
+                              )}
                             </Button>
                             <Button variant="outline" size="sm" onClick={() => setSelectedWidget(widget)}>
                               <Eye className="w-4 h-4" />
@@ -921,8 +982,9 @@ export default function WidgetLibraryClient() {
           {/* Featured Tab */}
           <TabsContent value="featured" className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
-              {mockWidgets.filter(w => w.is_featured).map((widget) => {
+              {widgets.filter(w => w.is_featured).map((widget) => {
                 const CategoryIcon = getCategoryIcon(widget.category)
+                const isInstalled = installedIds.has(widget.id)
                 return (
                   <Card key={widget.id} className="bg-gradient-to-br from-purple-500 to-pink-600 text-white border-0 shadow-lg overflow-hidden">
                     <CardContent className="p-6">
@@ -949,9 +1011,23 @@ export default function WidgetLibraryClient() {
                         </div>
                       </div>
                       <div className="flex gap-2 mt-4">
-                        <Button size="sm" className="bg-white text-purple-600 hover:bg-white/90">
-                          <Download className="w-4 h-4 mr-1" />
-                          Install
+                        <Button
+                          size="sm"
+                          className="bg-white text-purple-600 hover:bg-white/90"
+                          disabled={operationLoading}
+                          onClick={() => isInstalled ? handleUninstallWidget(widget) : handleInstallWidget(widget)}
+                        >
+                          {isInstalled ? (
+                            <>
+                              <CheckCircle2 className="w-4 h-4 mr-1" />
+                              Installed
+                            </>
+                          ) : (
+                            <>
+                              <Download className="w-4 h-4 mr-1" />
+                              Install
+                            </>
+                          )}
                         </Button>
                         <Button size="sm" variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setSelectedWidget(widget)}>
                           Learn More
@@ -962,12 +1038,27 @@ export default function WidgetLibraryClient() {
                 )
               })}
             </div>
+            {widgets.filter(w => w.is_featured).length === 0 && (
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                <CardContent className="p-12 text-center">
+                  <Sparkles className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No featured widgets yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400">Check back later for featured selections</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Collections Tab */}
           <TabsContent value="collections" className="space-y-6">
+            <div className="flex justify-end">
+              <Button onClick={() => setShowCollectionDialog(true)} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Create Collection
+              </Button>
+            </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockCollections.map((collection) => (
+              {collections.map((collection) => (
                 <Card key={collection.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm hover:shadow-md transition-all cursor-pointer">
                   <CardContent className="p-5">
                     <div className="w-full h-24 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg mb-4 flex items-center justify-center">
@@ -988,6 +1079,19 @@ export default function WidgetLibraryClient() {
                 </Card>
               ))}
             </div>
+            {collections.length === 0 && (
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                <CardContent className="p-12 text-center">
+                  <Layers className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No collections yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first collection to organize widgets</p>
+                  <Button onClick={() => setShowCollectionDialog(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Collection
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Contributors Tab */}
@@ -1032,8 +1136,9 @@ export default function WidgetLibraryClient() {
           {/* Saved Tab */}
           <TabsContent value="saved" className="space-y-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockWidgets.filter(w => w.is_bookmarked).map((widget) => {
+              {widgets.filter(w => w.is_bookmarked).map((widget) => {
                 const CategoryIcon = getCategoryIcon(widget.category)
+                const isInstalled = installedIds.has(widget.id)
                 return (
                   <Card key={widget.id} className="bg-white dark:bg-gray-800 border-0 shadow-sm">
                     <CardContent className="p-5">
@@ -1045,13 +1150,26 @@ export default function WidgetLibraryClient() {
                           <h3 className="font-semibold text-gray-900 dark:text-white">{widget.name}</h3>
                           <p className="text-xs text-gray-500">v{widget.version}</p>
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={operationLoading}
+                          onClick={() => handleToggleBookmark(widget)}
+                        >
                           <BookmarkCheck className="w-4 h-4 text-purple-600" />
                         </Button>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{widget.description}</p>
                       <div className="flex gap-2 mt-4">
-                        <Button size="sm" className="flex-1">Install</Button>
+                        <Button
+                          size="sm"
+                          className="flex-1"
+                          disabled={operationLoading}
+                          variant={isInstalled ? "outline" : "default"}
+                          onClick={() => isInstalled ? handleUninstallWidget(widget) : handleInstallWidget(widget)}
+                        >
+                          {isInstalled ? 'Installed' : 'Install'}
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => setSelectedWidget(widget)}>View</Button>
                       </div>
                     </CardContent>
@@ -1059,9 +1177,21 @@ export default function WidgetLibraryClient() {
                 )
               })}
             </div>
+            {widgets.filter(w => w.is_bookmarked).length === 0 && (
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                <CardContent className="p-12 text-center">
+                  <Bookmark className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No saved widgets</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Bookmark widgets to save them for later</p>
+                  <Button onClick={() => setActiveTab('browse')}>
+                    Browse Widgets
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
-          {/* Settings Tab - Notion Widgets Level */}
+          {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
             <div className="grid grid-cols-12 gap-6">
               {/* Settings Sidebar */}
@@ -1112,7 +1242,7 @@ export default function WidgetLibraryClient() {
                         <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label>Default View Mode</Label>
-                            <Select defaultValue="grid">
+                            <Select defaultValue={settings?.default_view_mode || 'grid'}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select view" />
                               </SelectTrigger>
@@ -1125,7 +1255,7 @@ export default function WidgetLibraryClient() {
                           </div>
                           <div className="space-y-2">
                             <Label>Widgets Per Page</Label>
-                            <Select defaultValue="24">
+                            <Select defaultValue={String(settings?.widgets_per_page || 24)}>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select count" />
                               </SelectTrigger>
@@ -1145,129 +1275,28 @@ export default function WidgetLibraryClient() {
                               <div className="font-medium text-gray-900 dark:text-white">Show Featured Widgets</div>
                               <div className="text-sm text-gray-500 dark:text-gray-400">Display featured widgets prominently</div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch defaultChecked={settings?.show_featured ?? true} />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <div>
                               <div className="font-medium text-gray-900 dark:text-white">Show Ratings & Reviews</div>
                               <div className="text-sm text-gray-500 dark:text-gray-400">Display widget ratings on cards</div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch defaultChecked={settings?.show_ratings ?? true} />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <div>
                               <div className="font-medium text-gray-900 dark:text-white">Show Install Count</div>
                               <div className="text-sm text-gray-500 dark:text-gray-400">Display number of installations</div>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch defaultChecked={settings?.show_install_count ?? true} />
                           </div>
                           <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                             <div>
                               <div className="font-medium text-gray-900 dark:text-white">Auto-Update Widgets</div>
                               <div className="text-sm text-gray-500 dark:text-gray-400">Automatically update to latest versions</div>
                             </div>
-                            <Switch />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Discovery Preferences</CardTitle>
-                        <CardDescription>Customize your widget discovery experience</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label>Default Sort Order</Label>
-                            <Select defaultValue="popular">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select sort" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="popular">Most Popular</SelectItem>
-                                <SelectItem value="rating">Highest Rated</SelectItem>
-                                <SelectItem value="recent">Recently Updated</SelectItem>
-                                <SelectItem value="name">Alphabetical</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Default Category</Label>
-                            <Select defaultValue="all">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select category" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="all">All Categories</SelectItem>
-                                <SelectItem value="display">Display</SelectItem>
-                                <SelectItem value="input">Input</SelectItem>
-                                <SelectItem value="data-viz">Data Visualization</SelectItem>
-                                <SelectItem value="layout">Layout</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">Personalized Recommendations</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Suggest widgets based on your usage</div>
-                            </div>
-                            <Switch defaultChecked />
-                          </div>
-                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">Show Beta Widgets</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Include widgets in beta testing</div>
-                            </div>
-                            <Switch />
-                          </div>
-                          <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">Show Experimental Widgets</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Include experimental features</div>
-                            </div>
-                            <Switch />
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Display Settings</CardTitle>
-                        <CardDescription>Configure visual preferences</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label>Theme</Label>
-                            <Select defaultValue="system">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select theme" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="light">Light</SelectItem>
-                                <SelectItem value="dark">Dark</SelectItem>
-                                <SelectItem value="system">System</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Card Style</Label>
-                            <Select defaultValue="elevated">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select style" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="flat">Flat</SelectItem>
-                                <SelectItem value="elevated">Elevated</SelectItem>
-                                <SelectItem value="bordered">Bordered</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Switch defaultChecked={settings?.auto_update ?? false} />
                           </div>
                         </div>
                       </CardContent>
@@ -1284,10 +1313,10 @@ export default function WidgetLibraryClient() {
                           <Component className="w-5 h-5 text-purple-600" />
                           Installed Widgets
                         </CardTitle>
-                        <CardDescription>Manage your installed widgets</CardDescription>
+                        <CardDescription>Manage your installed widgets ({installedIds.size} installed)</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        {mockWidgets.filter(w => w.is_bookmarked).map((widget) => {
+                        {widgets.filter(w => installedIds.has(w.id)).map((widget) => {
                           const CategoryIcon = getCategoryIcon(widget.category)
                           return (
                             <div key={widget.id} className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-colors">
@@ -1302,7 +1331,7 @@ export default function WidgetLibraryClient() {
                                     <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Installed</Badge>
                                   </div>
                                   <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                    v{widget.version} • {widget.size_kb}KB • Updated: {widget.last_updated}
+                                    v{widget.version} - {widget.size_kb}KB - Updated: {new Date(widget.last_updated).toLocaleDateString()}
                                   </div>
                                 </div>
                               </div>
@@ -1311,82 +1340,24 @@ export default function WidgetLibraryClient() {
                                   <RefreshCw className="w-4 h-4 mr-1" />
                                   Update
                                 </Button>
-                                <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                  disabled={operationLoading}
+                                  onClick={() => handleUninstallWidget(widget)}
+                                >
                                   Uninstall
                                 </Button>
                               </div>
                             </div>
                           )
                         })}
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Widget Installation</CardTitle>
-                        <CardDescription>Configure installation behavior</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Auto-Install Dependencies</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Automatically install required dependencies</div>
+                        {installedIds.size === 0 && (
+                          <div className="text-center py-8 text-gray-500">
+                            No widgets installed yet
                           </div>
-                          <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Check Compatibility</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Verify React/Next.js compatibility before install</div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Sandbox Mode</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Test widgets in isolated environment first</div>
-                          </div>
-                          <Switch />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Widget Publishing</CardTitle>
-                        <CardDescription>Settings for publishing your own widgets</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label>Default License</Label>
-                            <Select defaultValue="mit">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select license" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="mit">MIT</SelectItem>
-                                <SelectItem value="apache-2.0">Apache 2.0</SelectItem>
-                                <SelectItem value="gpl-3.0">GPL 3.0</SelectItem>
-                                <SelectItem value="bsd-3">BSD 3-Clause</SelectItem>
-                                <SelectItem value="proprietary">Proprietary</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Default Visibility</Label>
-                            <Select defaultValue="public">
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select visibility" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="public">Public</SelectItem>
-                                <SelectItem value="unlisted">Unlisted</SelectItem>
-                                <SelectItem value="private">Private</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
+                        )}
                       </CardContent>
                     </Card>
                   </>
@@ -1394,323 +1365,112 @@ export default function WidgetLibraryClient() {
 
                 {/* Notifications Settings */}
                 {settingsTab === 'notifications' && (
-                  <>
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Bell className="w-5 h-5 text-purple-600" />
-                          Notification Preferences
-                        </CardTitle>
-                        <CardDescription>Configure how you receive widget library notifications</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">New Widget Releases</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Get notified about new widgets in categories you follow</div>
-                          </div>
-                          <Switch defaultChecked />
+                  <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bell className="w-5 h-5 text-purple-600" />
+                        Notification Preferences
+                      </CardTitle>
+                      <CardDescription>Configure how you receive widget library notifications</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">New Widget Releases</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Get notified about new widgets in categories you follow</div>
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Widget Updates Available</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Notify when updates are available for installed widgets</div>
-                          </div>
-                          <Switch defaultChecked />
+                        <Switch defaultChecked={settings?.notifications_new_releases ?? true} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Widget Updates Available</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Notify when updates are available for installed widgets</div>
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Security Alerts</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Alert about security vulnerabilities in widgets</div>
-                          </div>
-                          <Switch defaultChecked />
+                        <Switch defaultChecked={settings?.notifications_updates ?? true} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Security Alerts</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Alert about security vulnerabilities in widgets</div>
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Weekly Digest</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Receive weekly summary of trending widgets</div>
-                          </div>
-                          <Switch />
+                        <Switch defaultChecked={settings?.notifications_security ?? true} />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Weekly Digest</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Receive weekly summary of trending widgets</div>
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Deprecation Warnings</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Notify when installed widgets are deprecated</div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Delivery Channels</CardTitle>
-                        <CardDescription>Choose how you want to receive notifications</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                              <Mail className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                            </div>
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">Email Notifications</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">user@example.com</div>
-                            </div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                              <Bell className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                            </div>
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">Push Notifications</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Browser & mobile push</div>
-                            </div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
-                              <MessageSquare className="w-5 h-5 text-pink-600 dark:text-pink-400" />
-                            </div>
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">In-App Notifications</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Show in notification center</div>
-                            </div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </>
+                        <Switch defaultChecked={settings?.notifications_weekly_digest ?? false} />
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
 
-                {/* API & Tokens Settings */}
+                {/* API Settings */}
                 {settingsTab === 'api' && (
-                  <>
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Key className="w-5 h-5 text-purple-600" />
-                          API Tokens
-                        </CardTitle>
-                        <CardDescription>Manage API tokens for widget publishing and access</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="p-4 border rounded-lg dark:border-gray-700">
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">Publisher Token</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Use this token to publish widgets via CLI</div>
-                            </div>
-                            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
+                  <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Key className="w-5 h-5 text-purple-600" />
+                        API & Tokens
+                      </CardTitle>
+                      <CardDescription>Manage API tokens for widget publishing and access</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="p-4 border rounded-lg dark:border-gray-700">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <div className="font-medium text-gray-900 dark:text-white">Publisher Token</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Use this token to publish widgets via CLI</div>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Input type="password" value="wgt_pub_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
-                              <Copy className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">Regenerate</Button>
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">Created Jan 15, 2024 • Last used 2 hours ago</div>
+                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
                         </div>
-
-                        <div className="p-4 border rounded-lg dark:border-gray-700">
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <div className="font-medium text-gray-900 dark:text-white">Read-Only Token</div>
-                              <div className="text-sm text-gray-500 dark:text-gray-400">Access widget metadata and analytics</div>
-                            </div>
-                            <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Read Only</Badge>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Input type="password" value="wgt_read_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm">
-                              <Copy className="w-4 h-4" />
-                            </Button>
-                            <Button variant="outline" size="sm">Regenerate</Button>
-                          </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">Created Jan 10, 2024 • Last used 1 hour ago</div>
+                        <div className="flex items-center gap-2">
+                          <Input type="password" value="wgt_pub_xxxxxxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
+                          <Button variant="outline" size="sm" onClick={() => handleCopyCode('wgt_pub_xxxxxxxxxxxxxxxxxxxxxxxxx')}>
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button variant="outline" size="sm">Regenerate</Button>
                         </div>
-
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create New Token
-                        </Button>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Webhook className="w-5 h-5 text-purple-600" />
-                          Webhooks
-                        </CardTitle>
-                        <CardDescription>Configure webhooks for widget events</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="p-4 border rounded-lg dark:border-gray-700">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                              <span className="font-medium text-gray-900 dark:text-white">Widget Install Hook</span>
-                            </div>
-                            <Badge>Enabled</Badge>
-                          </div>
-                          <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">https://api.yourapp.com/webhooks/widgets</div>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            <span>Events: widget.installed, widget.updated, widget.removed</span>
-                          </div>
-                        </div>
-
-                        <Button variant="outline" className="w-full">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Add Webhook
-                        </Button>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>API Usage</CardTitle>
-                        <CardDescription>Monitor your API usage and rate limits</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
-                            <div className="text-2xl font-bold text-purple-600">2,847</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">API Calls Today</div>
-                          </div>
-                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
-                            <div className="text-2xl font-bold text-blue-600">99.2%</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Success Rate</div>
-                          </div>
-                          <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg text-center">
-                            <div className="text-2xl font-bold text-pink-600">28ms</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Avg Response</div>
-                          </div>
-                        </div>
-
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">Rate Limit Usage</span>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">2,847 / 50,000</span>
-                          </div>
-                          <Progress value={5.7} className="h-2" />
-                          <div className="text-xs text-gray-500 dark:text-gray-400">Resets in 12 hours</div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </>
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
 
                 {/* Security Settings */}
                 {settingsTab === 'security' && (
-                  <>
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <Shield className="w-5 h-5 text-purple-600" />
-                          Security Settings
-                        </CardTitle>
-                        <CardDescription>Manage security and access control</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Verify Widget Signatures</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Only install widgets with valid signatures</div>
-                          </div>
-                          <Switch defaultChecked />
+                  <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Shield className="w-5 h-5 text-purple-600" />
+                        Security Settings
+                      </CardTitle>
+                      <CardDescription>Manage security and access control</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Verify Widget Signatures</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Only install widgets with valid signatures</div>
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Security Scanning</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Scan widgets for vulnerabilities before install</div>
-                          </div>
-                          <Switch defaultChecked />
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Security Scanning</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Scan widgets for vulnerabilities before install</div>
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Only Official Widgets</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Restrict to officially verified widgets only</div>
-                          </div>
-                          <Switch />
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                        <div>
+                          <div className="font-medium text-gray-900 dark:text-white">Only Official Widgets</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">Restrict to officially verified widgets only</div>
                         </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Audit Logging</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Log all widget installations and removals</div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Access Control</CardTitle>
-                        <CardDescription>Control who can manage widgets</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                          <Label>Who can install widgets</Label>
-                          <Select defaultValue="admins">
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="admins">Admins only</SelectItem>
-                              <SelectItem value="developers">Admins & Developers</SelectItem>
-                              <SelectItem value="all">All team members</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Who can publish widgets</Label>
-                          <Select defaultValue="developers">
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="admins">Admins only</SelectItem>
-                              <SelectItem value="developers">Admins & Developers</SelectItem>
-                              <SelectItem value="all">All team members</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Blocked Widgets</CardTitle>
-                        <CardDescription>Widgets blocked from installation</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg bg-red-50 dark:bg-red-900/20">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <AlertOctagon className="w-5 h-5 text-red-600 dark:text-red-400" />
-                              <div>
-                                <div className="font-medium text-red-800 dark:text-red-200">UnsafeWidget</div>
-                                <div className="text-sm text-red-600 dark:text-red-400">Blocked due to security vulnerability</div>
-                              </div>
-                            </div>
-                            <Button variant="outline" size="sm">Unblock</Button>
-                          </div>
-                        </div>
-                        <Button variant="outline" className="w-full">
-                          <Plus className="w-4 h-4 mr-2" />
-                          Block a Widget
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </>
+                        <Switch />
+                      </div>
+                    </CardContent>
+                  </Card>
                 )}
 
                 {/* Advanced Settings */}
@@ -1720,98 +1480,8 @@ export default function WidgetLibraryClient() {
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                           <Code className="w-5 h-5 text-purple-600" />
-                          Developer Options
+                          Data Management
                         </CardTitle>
-                        <CardDescription>Advanced configuration for developers</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Developer Mode</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Enable advanced debugging features</div>
-                          </div>
-                          <Switch />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Source Maps</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Include source maps for debugging</div>
-                          </div>
-                          <Switch />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Console Logging</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Log widget events to console</div>
-                          </div>
-                          <Switch />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Hot Reload</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Auto-reload widgets on changes</div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Performance</CardTitle>
-                        <CardDescription>Optimize widget loading performance</CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-6">
-                        <div className="grid grid-cols-2 gap-6">
-                          <div className="space-y-2">
-                            <Label>Loading Strategy</Label>
-                            <Select defaultValue="lazy">
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="eager">Eager</SelectItem>
-                                <SelectItem value="lazy">Lazy</SelectItem>
-                                <SelectItem value="on-demand">On Demand</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Bundle Size Limit</Label>
-                            <Select defaultValue="500">
-                              <SelectTrigger>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="250">250KB</SelectItem>
-                                <SelectItem value="500">500KB</SelectItem>
-                                <SelectItem value="1000">1MB</SelectItem>
-                                <SelectItem value="unlimited">Unlimited</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Code Splitting</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Split widgets into separate chunks</div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Prefetching</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Prefetch widgets likely to be used</div>
-                          </div>
-                          <Switch defaultChecked />
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
-                      <CardHeader>
-                        <CardTitle>Data Management</CardTitle>
                         <CardDescription>Manage widget data and cache</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -1820,21 +1490,18 @@ export default function WidgetLibraryClient() {
                             <div className="font-medium text-gray-900 dark:text-white">Export Widget Config</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">Download all widget configurations</div>
                           </div>
-                          <Button variant="outline">Export</Button>
-                        </div>
-                        <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
-                          <div>
-                            <div className="font-medium text-gray-900 dark:text-white">Import Widget Config</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">Import configurations from file</div>
-                          </div>
-                          <Button variant="outline">Import</Button>
+                          <Button variant="outline" onClick={handleExportConfig}>Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div>
                             <div className="font-medium text-gray-900 dark:text-white">Clear Widget Cache</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">Remove all cached widget data</div>
                           </div>
-                          <Button variant="outline">Clear</Button>
+                          <Button variant="outline" onClick={() => setShowConfirmDialog({
+                            type: 'cache',
+                            title: 'Clear Cache',
+                            description: 'This will refresh all widget data. Continue?'
+                          })}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1850,14 +1517,22 @@ export default function WidgetLibraryClient() {
                             <div className="font-medium text-red-600 dark:text-red-400">Reset All Settings</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">Reset all widget settings to defaults</div>
                           </div>
-                          <Button variant="destructive">Reset</Button>
+                          <Button variant="destructive" onClick={() => setShowConfirmDialog({
+                            type: 'reset',
+                            title: 'Reset Settings',
+                            description: 'This will reset all your widget library settings to defaults. This action cannot be undone.'
+                          })}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border border-red-200 dark:border-red-800 rounded-lg">
                           <div>
                             <div className="font-medium text-red-600 dark:text-red-400">Uninstall All Widgets</div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">Remove all installed widgets</div>
                           </div>
-                          <Button variant="destructive">Uninstall All</Button>
+                          <Button variant="destructive" onClick={() => setShowConfirmDialog({
+                            type: 'uninstall-all',
+                            title: 'Uninstall All Widgets',
+                            description: 'This will remove all installed widgets from your project. This action cannot be undone.'
+                          })}>Uninstall All</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1872,18 +1547,18 @@ export default function WidgetLibraryClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockWidgetLibraryAIInsights}
+              insights={mockWidgetLibAIInsights}
               title="Widget Intelligence"
               onInsightAction={(insight) => console.log('Insight action:', insight)}
             />
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockWidgetLibraryCollaborators}
+              collaborators={mockWidgetLibCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockWidgetLibraryPredictions}
+              predictions={mockWidgetLibPredictions}
               title="Widget Forecasts"
             />
           </div>
@@ -1891,12 +1566,12 @@ export default function WidgetLibraryClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockWidgetLibraryActivities}
+            activities={mockWidgetLibActivities}
             title="Widget Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWidgetLibraryQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -1987,17 +1662,39 @@ export default function WidgetLibraryClient() {
                 </div>
               </div>
 
-              <div>
-                <h3 className="font-semibold mb-2">Quick Start</h3>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
-                  <code>{selectedWidget.code_snippet}</code>
+              {selectedWidget.code_snippet && (
+                <div>
+                  <h3 className="font-semibold mb-2">Quick Start</h3>
+                  <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                    <code>{selectedWidget.code_snippet}</code>
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div className="flex items-center gap-3 pt-4 border-t">
-                <Button className="flex-1 gap-2">
-                  <Download className="w-4 h-4" />
-                  Install Widget
+                <Button
+                  className="flex-1 gap-2"
+                  disabled={operationLoading}
+                  variant={installedIds.has(selectedWidget.id) ? "outline" : "default"}
+                  onClick={() => {
+                    if (installedIds.has(selectedWidget.id)) {
+                      handleUninstallWidget(selectedWidget)
+                    } else {
+                      handleInstallWidget(selectedWidget)
+                    }
+                  }}
+                >
+                  {installedIds.has(selectedWidget.id) ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      Installed
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4" />
+                      Install Widget
+                    </>
+                  )}
                 </Button>
                 {selectedWidget.demo_url && (
                   <Button variant="outline" className="gap-2" onClick={() => window.open(selectedWidget.demo_url!, '_blank')}>
@@ -2035,19 +1732,223 @@ export default function WidgetLibraryClient() {
                 <p className="text-sm text-gray-500 mb-2">Install via npm:</p>
                 <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm flex items-center justify-between">
                   <code>npm install @freeflow/{codeWidget.name.toLowerCase().replace(/\s+/g, '-')}</code>
-                  <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 hover:text-white"
+                    onClick={() => handleCopyCode(`npm install @freeflow/${codeWidget.name.toLowerCase().replace(/\s+/g, '-')}`)}
+                  >
                     <Copy className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Usage:</p>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm">
-                  <code>{codeWidget.code_snippet}</code>
+              {codeWidget.code_snippet && (
+                <div>
+                  <p className="text-sm text-gray-500 mb-2">Usage:</p>
+                  <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm flex items-center justify-between">
+                    <code>{codeWidget.code_snippet}</code>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-400 hover:text-white"
+                      onClick={() => handleCopyCode(codeWidget.code_snippet)}
+                    >
+                      <Copy className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Publish Widget Dialog */}
+      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Publish New Widget</DialogTitle>
+            <DialogDescription>Share your widget with the community</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Widget Name *</Label>
+                <Input
+                  placeholder="My Awesome Widget"
+                  value={newWidgetForm.name}
+                  onChange={(e) => setNewWidgetForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Version</Label>
+                <Input
+                  placeholder="1.0.0"
+                  value={newWidgetForm.version}
+                  onChange={(e) => setNewWidgetForm(prev => ({ ...prev, version: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                placeholder="Describe what your widget does..."
+                value={newWidgetForm.description}
+                onChange={(e) => setNewWidgetForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select
+                  value={newWidgetForm.category}
+                  onValueChange={(value) => setNewWidgetForm(prev => ({ ...prev, category: value as WidgetCategory }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="display">Display</SelectItem>
+                    <SelectItem value="input">Input</SelectItem>
+                    <SelectItem value="layout">Layout</SelectItem>
+                    <SelectItem value="data-viz">Data Visualization</SelectItem>
+                    <SelectItem value="navigation">Navigation</SelectItem>
+                    <SelectItem value="feedback">Feedback</SelectItem>
+                    <SelectItem value="utility">Utility</SelectItem>
+                    <SelectItem value="media">Media</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>License</Label>
+                <Select
+                  value={newWidgetForm.license}
+                  onValueChange={(value) => setNewWidgetForm(prev => ({ ...prev, license: value as LicenseType }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="mit">MIT</SelectItem>
+                    <SelectItem value="apache-2.0">Apache 2.0</SelectItem>
+                    <SelectItem value="gpl-3.0">GPL 3.0</SelectItem>
+                    <SelectItem value="bsd-3">BSD 3-Clause</SelectItem>
+                    <SelectItem value="proprietary">Proprietary</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Tags (comma separated)</Label>
+              <Input
+                placeholder="react, component, ui"
+                value={newWidgetForm.tags}
+                onChange={(e) => setNewWidgetForm(prev => ({ ...prev, tags: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Code Snippet</Label>
+              <Textarea
+                placeholder="<MyWidget prop={value} />"
+                value={newWidgetForm.code_snippet}
+                onChange={(e) => setNewWidgetForm(prev => ({ ...prev, code_snippet: e.target.value }))}
+                className="font-mono"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Demo URL</Label>
+                <Input
+                  placeholder="https://..."
+                  value={newWidgetForm.demo_url}
+                  onChange={(e) => setNewWidgetForm(prev => ({ ...prev, demo_url: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Docs URL</Label>
+                <Input
+                  placeholder="https://..."
+                  value={newWidgetForm.docs_url}
+                  onChange={(e) => setNewWidgetForm(prev => ({ ...prev, docs_url: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>GitHub URL</Label>
+                <Input
+                  placeholder="https://github.com/..."
+                  value={newWidgetForm.github_url}
+                  onChange={(e) => setNewWidgetForm(prev => ({ ...prev, github_url: e.target.value }))}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPublishDialog(false)}>Cancel</Button>
+            <Button onClick={handlePublishWidget} disabled={operationLoading}>
+              {operationLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Publish Widget
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Collection Dialog */}
+      <Dialog open={showCollectionDialog} onOpenChange={setShowCollectionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Collection</DialogTitle>
+            <DialogDescription>Organize widgets into a collection</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Collection Name *</Label>
+              <Input
+                placeholder="My Collection"
+                value={newCollectionForm.name}
+                onChange={(e) => setNewCollectionForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea
+                placeholder="Describe this collection..."
+                value={newCollectionForm.description}
+                onChange={(e) => setNewCollectionForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCollectionDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateCollection} disabled={operationLoading}>
+              {operationLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Create Collection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Dialog */}
+      <Dialog open={!!showConfirmDialog} onOpenChange={() => setShowConfirmDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{showConfirmDialog?.title}</DialogTitle>
+            <DialogDescription>{showConfirmDialog?.description}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(null)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (showConfirmDialog?.type === 'cache') handleClearCache()
+                else if (showConfirmDialog?.type === 'reset') handleResetSettings()
+                else if (showConfirmDialog?.type === 'uninstall-all') handleUninstallAll()
+              }}
+              disabled={operationLoading}
+            >
+              {operationLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Confirm
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

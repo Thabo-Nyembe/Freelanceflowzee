@@ -105,28 +105,30 @@ export function useBookings(options: UseBookingsOptions = {}) {
 
   const { data, loading, error, refetch } = useSupabaseQuery<Booking>(queryOptions)
 
-  const { mutate: create } = useSupabaseMutation<Booking>({
-    table: 'bookings',
-    operation: 'insert'
+  const { create, update, remove } = useSupabaseMutation({
+    table: 'bookings'
   })
 
-  const { mutate: update } = useSupabaseMutation<Booking>({
-    table: 'bookings',
-    operation: 'update'
-  })
+  // Wrapper functions with proper typing
+  const createBooking = async (bookingData: Partial<Booking>) => {
+    return await create(bookingData)
+  }
 
-  const { mutate: remove } = useSupabaseMutation<Booking>({
-    table: 'bookings',
-    operation: 'delete'
-  })
+  const updateBooking = async (id: string, bookingData: Partial<Booking>) => {
+    return await update(id, bookingData)
+  }
+
+  const deleteBooking = async (id: string) => {
+    return await remove(id)
+  }
 
   return {
     bookings: data,
     loading,
     error,
-    createBooking: create,
-    updateBooking: update,
-    deleteBooking: remove,
+    createBooking,
+    updateBooking,
+    deleteBooking,
     refetch
   }
 }

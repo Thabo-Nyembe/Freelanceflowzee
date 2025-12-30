@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useWebhooks, useWebhookEventTypes, Webhook, WebhookEventType } from '@/lib/hooks/use-webhooks'
 import {
   Webhook as WebhookIcon,
@@ -396,6 +397,21 @@ export default function WebhooksClient({
   initialEventTypes,
   initialStats
 }: WebhooksClientProps) {
+  // Supabase client
+  const supabase = createClientComponentClient()
+
+  // Use the webhooks hook for CRUD operations
+  const {
+    webhooks,
+    loading: webhooksLoading,
+    createWebhook,
+    updateWebhook,
+    deleteWebhook,
+    toggleStatus,
+    testWebhook,
+    stats
+  } = useWebhooks(initialWebhooks, initialStats)
+
   const [activeTab, setActiveTab] = useState('endpoints')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<WebhookStatus | 'all'>('all')
@@ -406,6 +422,60 @@ export default function WebhooksClient({
   const [showTestDialog, setShowTestDialog] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Users', 'Orders', 'Payments']))
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Form state for create/edit webhook
+  const [formData, setFormData] = useState({
+    name: '',
+    url: '',
+    description: '',
+    events: [] as string[],
+    retry_count: 3,
+    timeout_ms: 30000,
+    verify_ssl: true,
+    custom_headers: {} as Record<string, string>
+  })
+
+  // Reset form when dialog opens/closes
+  const openCreateDialog = useCallback(() => {
+    setFormData({
+      name: '',
+      url: '',
+      description: '',
+      events: [],
+      retry_count: 3,
+      timeout_ms: 30000,
+      verify_ssl: true,
+      custom_headers: {}
+    })
+    setSelectedEndpoint(null)
+    setShowEndpointDialog(true)
+  }, [])
+
+  const openEditDialog = useCallback((endpoint: WebhookEndpoint) => {
+    setFormData({
+      name: endpoint.name,
+      url: endpoint.url,
+      description: endpoint.description,
+      events: endpoint.events,
+      retry_count: endpoint.retryPolicy?.maxRetries || 3,
+      timeout_ms: 30000,
+      verify_ssl: true,
+      custom_headers: endpoint.headers || {}
+    })
+    setSelectedEndpoint(endpoint)
+    setShowEndpointDialog(true)
+  }, [])
+
+  // Filter webhooks from Supabase data
+  const filteredWebhooks = useMemo(() => {
+    return webhooks.filter(webhook => {
+      const matchesSearch = webhook.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        webhook.url.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || webhook.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [webhooks, searchQuery, statusFilter])
 
   const filteredEndpoints = useMemo(() => {
     return mockEndpoints.filter(endpoint => {
@@ -471,50 +541,122 @@ export default function WebhooksClient({
     setExpandedCategories(newExpanded)
   }
 
-  const handleCreateEndpoint = () => {
-    toast.info('Create Endpoint', {
-      description: 'Opening webhook endpoint form...'
-    })
-    setShowEndpointDialog(true)
+  // CRUD Handlers with Supabase integration
+  const handleSaveWebhook = async () => {
+    if (!formData.name || !formData.url) {
+      toast.error('Validation Error', { description: 'Name and URL are required' })
+      return
+    }
+
+    setIsSaving(true)
+    try {
+      if (selectedEndpoint) {
+        // Update existing webhook
+        const result = await updateWebhook(selectedEndpoint.id, {
+          name: formData.name,
+          url: formData.url,
+          description: formData.description,
+          events: formData.events,
+          retry_count: formData.retry_count,
+          timeout_ms: formData.timeout_ms,
+          verify_ssl: formData.verify_ssl,
+          custom_headers: formData.custom_headers
+        })
+        if (result.success) {
+          toast.success('Webhook updated', { description: `"${formData.name}" has been updated` })
+          setShowEndpointDialog(false)
+        } else {
+          toast.error('Update failed', { description: result.error })
+        }
+      } else {
+        // Create new webhook
+        const result = await createWebhook({
+          name: formData.name,
+          url: formData.url,
+          description: formData.description,
+          events: formData.events,
+          retry_count: formData.retry_count,
+          timeout_ms: formData.timeout_ms,
+          verify_ssl: formData.verify_ssl,
+          custom_headers: formData.custom_headers,
+          status: 'active'
+        })
+        if (result.success) {
+          toast.success('Webhook created', { description: `"${formData.name}" has been created` })
+          setShowEndpointDialog(false)
+        } else {
+          toast.error('Creation failed', { description: result.error })
+        }
+      }
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  // Handlers
-  const handleTestWebhook = () => {
-    toast.info('Test Webhook', {
-      description: 'Sending test payload...'
-    })
-    setShowTestDialog(true)
+  const handleDeleteWebhook = async (id: string, name: string) => {
+    const result = await deleteWebhook(id)
+    if (result.success) {
+      toast.success('Webhook deleted', { description: `"${name}" has been deleted` })
+    } else {
+      toast.error('Delete failed', { description: result.error })
+    }
+  }
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'paused' : 'active'
+    const result = await toggleStatus(id, newStatus as 'active' | 'paused')
+    if (result.success) {
+      toast.success('Status updated', { description: `Webhook is now ${newStatus}` })
+    } else {
+      toast.error('Status update failed', { description: result.error })
+    }
+  }
+
+  const handleTestWebhookDelivery = async (id: string) => {
+    toast.info('Testing webhook', { description: 'Sending test payload...' })
+    const result = await testWebhook(id)
+    if (result.success) {
+      toast.success('Test sent', { description: 'Test delivery has been queued' })
+    } else {
+      toast.error('Test failed', { description: result.error })
+    }
+    setShowTestDialog(false)
   }
 
   const handleCopyUrl = (url: string) => {
     navigator.clipboard.writeText(url)
-    toast.success('URL copied', {
-      description: 'Webhook URL copied to clipboard'
-    })
+    toast.success('URL copied', { description: 'Webhook URL copied to clipboard' })
   }
 
-  const handleRotateSecret = () => {
-    toast.success('Secret rotated', {
-      description: 'New signing secret has been generated'
-    })
+  const handleRotateSecret = async (id: string) => {
+    const newSecret = `whsec_${crypto.randomUUID().replace(/-/g, '')}`
+    const result = await updateWebhook(id, { secret: newSecret })
+    if (result.success) {
+      toast.success('Secret rotated', { description: 'New signing secret has been generated' })
+    } else {
+      toast.error('Rotation failed', { description: result.error })
+    }
   }
 
-  const handleCreateWebhook = () => {
-    toast.info('Create Webhook', {
-      description: 'Opening webhook builder...'
-    })
-  }
-
-  const handleDisableWebhook = (webhookName: string) => {
-    toast.info('Webhook disabled', {
-      description: `"${webhookName}" has been disabled`
-    })
+  const handleEventToggle = (eventName: string) => {
+    setFormData(prev => ({
+      ...prev,
+      events: prev.events.includes(eventName)
+        ? prev.events.filter(e => e !== eventName)
+        : [...prev.events, eventName]
+    }))
   }
 
   const handleExportWebhooks = () => {
-    toast.success('Exporting webhooks', {
-      description: 'Webhook configuration will be downloaded'
-    })
+    const exportData = JSON.stringify(webhooks, null, 2)
+    const blob = new Blob([exportData], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'webhooks-export.json'
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Exported', { description: 'Webhook configuration downloaded' })
   }
 
   return (
@@ -537,8 +679,9 @@ export default function WebhooksClient({
                 Zapier Level
               </span>
               <button
-                onClick={() => { setSelectedEndpoint(null); setShowEndpointDialog(true); }}
+                onClick={openCreateDialog}
                 className="px-4 py-2 bg-white text-emerald-600 rounded-lg font-medium hover:bg-white/90 transition-colors flex items-center gap-2"
+                disabled={webhooksLoading}
               >
                 <Plus className="w-4 h-4" />
                 Create Webhook
@@ -553,44 +696,44 @@ export default function WebhooksClient({
                 <WebhookIcon className="w-4 h-4" />
                 Endpoints
               </div>
-              <div className="text-2xl font-bold">{mockStats.totalEndpoints}</div>
-              <div className="text-xs text-white/60">{mockStats.activeEndpoints} active</div>
+              <div className="text-2xl font-bold">{stats.total}</div>
+              <div className="text-xs text-white/60">{stats.active} active</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <Send className="w-4 h-4" />
                 Total Deliveries
               </div>
-              <div className="text-2xl font-bold">{(mockStats.totalDeliveries / 1000).toFixed(1)}K</div>
-              <div className="text-xs text-white/60">{mockStats.deliveriesToday} today</div>
+              <div className="text-2xl font-bold">{stats.totalDeliveries > 1000 ? `${(stats.totalDeliveries / 1000).toFixed(1)}K` : stats.totalDeliveries}</div>
+              <div className="text-xs text-white/60">{stats.successfulDeliveries} successful</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <CheckCircle className="w-4 h-4" />
                 Success Rate
               </div>
-              <div className="text-2xl font-bold text-green-300">{mockStats.successRate}%</div>
+              <div className="text-2xl font-bold text-green-300">{stats.avgSuccessRate.toFixed(1)}%</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <Timer className="w-4 h-4" />
                 Avg Latency
               </div>
-              <div className="text-2xl font-bold">{mockStats.avgResponseTime}ms</div>
+              <div className="text-2xl font-bold">{Math.round(stats.avgResponseTime)}ms</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <AlertCircle className="w-4 h-4" />
                 Failed
               </div>
-              <div className="text-2xl font-bold text-red-300">{mockStats.failedDeliveries}</div>
+              <div className="text-2xl font-bold text-red-300">{stats.failed}</div>
             </div>
             <div className="bg-white/10 backdrop-blur rounded-xl p-4">
               <div className="flex items-center gap-2 text-white/70 text-sm mb-1">
                 <Zap className="w-4 h-4" />
-                This Week
+                Paused
               </div>
-              <div className="text-2xl font-bold">{(mockStats.deliveriesThisWeek / 1000).toFixed(1)}K</div>
+              <div className="text-2xl font-bold">{stats.paused}</div>
             </div>
           </div>
         </div>
@@ -682,95 +825,137 @@ export default function WebhooksClient({
 
             {/* Endpoints List */}
             <div className="space-y-4">
-              {filteredEndpoints.map((endpoint) => (
+              {webhooksLoading && <div className="text-center py-8 text-gray-500">Loading webhooks...</div>}
+              {!webhooksLoading && filteredWebhooks.length === 0 && (
+                <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700">
+                  <WebhookIcon className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No webhooks yet</h3>
+                  <p className="text-gray-500 dark:text-gray-400 mb-4">Create your first webhook to start receiving events</p>
+                  <button onClick={openCreateDialog} className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700">
+                    <Plus className="w-4 h-4 inline mr-2" />Create Webhook
+                  </button>
+                </div>
+              )}
+              {filteredWebhooks.map((webhook) => (
                 <div
-                  key={endpoint.id}
+                  key={webhook.id}
                   className="bg-white dark:bg-gray-800 rounded-xl border dark:border-gray-700 overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="p-5">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-start gap-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                          endpoint.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
-                          endpoint.status === 'paused' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' :
+                          webhook.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' :
+                          webhook.status === 'paused' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400' :
                           'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                         }`}>
                           <WebhookIcon className="w-6 h-6" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-white">{endpoint.name}</h3>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 ${getStatusColor(endpoint.status)}`}>
-                              {getStatusIcon(endpoint.status)}
-                              {endpoint.status}
-                            </span>
+                            <h3 className="font-semibold text-gray-900 dark:text-white">{webhook.name}</h3>
+                            <button
+                              onClick={() => handleToggleStatus(webhook.id, webhook.status)}
+                              className={`px-2 py-0.5 rounded-full text-xs font-medium flex items-center gap-1 cursor-pointer hover:opacity-80 ${getStatusColor(webhook.status)}`}
+                              title="Click to toggle status"
+                            >
+                              {getStatusIcon(webhook.status)}
+                              {webhook.status}
+                            </button>
                           </div>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{endpoint.description}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{webhook.description || 'No description'}</p>
                           <div className="flex items-center gap-2 text-sm">
                             <Globe className="w-4 h-4 text-gray-400" />
                             <code className="font-mono text-gray-600 dark:text-gray-400 text-xs bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
-                              {endpoint.url}
+                              {webhook.url}
                             </code>
+                            <button onClick={() => handleCopyUrl(webhook.url)} className="p-1 hover:bg-gray-200 dark:hover:bg-gray-600 rounded" title="Copy URL">
+                              <Copy className="w-3 h-3 text-gray-400" />
+                            </button>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => { setSelectedEndpoint(endpoint); setShowTestDialog(true); }}
+                          onClick={() => handleTestWebhookDelivery(webhook.id)}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
                           title="Test Webhook"
                         >
                           <TestTube className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => { setSelectedEndpoint(endpoint); setShowEndpointDialog(true); }}
+                          onClick={() => openEditDialog({
+                            id: webhook.id,
+                            name: webhook.name,
+                            url: webhook.url,
+                            description: webhook.description || '',
+                            status: webhook.status as WebhookStatus,
+                            events: webhook.events,
+                            authType: 'none' as AuthType,
+                            secret: webhook.secret || '',
+                            headers: webhook.custom_headers,
+                            retryPolicy: { maxRetries: webhook.retry_count, backoffType: 'exponential', initialDelay: 1000 },
+                            rateLimiting: { enabled: false, requestsPerMinute: 60 },
+                            filters: [],
+                            totalDeliveries: webhook.total_deliveries,
+                            successfulDeliveries: webhook.successful_deliveries,
+                            failedDeliveries: webhook.failed_deliveries,
+                            successRate: webhook.success_rate,
+                            avgResponseTime: webhook.avg_response_time_ms,
+                            lastDeliveryAt: webhook.last_delivery_at,
+                            lastDeliveryStatus: null,
+                            createdAt: webhook.created_at,
+                            updatedAt: webhook.updated_at
+                          })}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400"
                           title="Edit"
                         >
                           <Edit className="w-4 h-4" />
                         </button>
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-gray-600 dark:text-gray-400">
-                          <MoreHorizontal className="w-4 h-4" />
+                        <button
+                          onClick={() => handleDeleteWebhook(webhook.id, webhook.name)}
+                          className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg text-gray-600 dark:text-gray-400 hover:text-red-600"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
                     {/* Events */}
                     <div className="flex flex-wrap gap-1 mb-4">
-                      {endpoint.events.map((event) => (
+                      {webhook.events.map((event) => (
                         <span key={event} className="px-2 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded text-xs font-mono">
                           {event}
                         </span>
                       ))}
+                      {webhook.events.length === 0 && <span className="text-gray-400 text-xs">No events subscribed</span>}
                     </div>
 
                     {/* Metrics */}
                     <div className="grid grid-cols-5 gap-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg text-sm">
                       <div>
                         <div className="text-gray-500 dark:text-gray-400 text-xs">Deliveries</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{endpoint.totalDeliveries.toLocaleString()}</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{webhook.total_deliveries.toLocaleString()}</div>
                       </div>
                       <div>
                         <div className="text-gray-500 dark:text-gray-400 text-xs">Success Rate</div>
-                        <div className={`font-semibold ${endpoint.successRate >= 99 ? 'text-green-600 dark:text-green-400' : endpoint.successRate >= 95 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}`}>
-                          {endpoint.successRate}%
+                        <div className={`font-semibold ${webhook.success_rate >= 99 ? 'text-green-600 dark:text-green-400' : webhook.success_rate >= 95 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}`}>
+                          {webhook.success_rate.toFixed(1)}%
                         </div>
                       </div>
                       <div>
                         <div className="text-gray-500 dark:text-gray-400 text-xs">Avg Latency</div>
-                        <div className="font-semibold text-gray-900 dark:text-white">{endpoint.avgResponseTime}ms</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{webhook.avg_response_time_ms}ms</div>
                       </div>
                       <div>
-                        <div className="text-gray-500 dark:text-gray-400 text-xs">Auth</div>
-                        <div className="font-semibold text-gray-900 dark:text-white flex items-center gap-1">
-                          {getAuthIcon(endpoint.authType)}
-                          {endpoint.authType}
-                        </div>
+                        <div className="text-gray-500 dark:text-gray-400 text-xs">Retries</div>
+                        <div className="font-semibold text-gray-900 dark:text-white">{webhook.retry_count}</div>
                       </div>
                       <div>
                         <div className="text-gray-500 dark:text-gray-400 text-xs">Last Delivery</div>
                         <div className="font-semibold text-gray-900 dark:text-white">
-                          {endpoint.lastDeliveryAt ? new Date(endpoint.lastDeliveryAt).toLocaleTimeString() : 'Never'}
+                          {webhook.last_delivery_at ? new Date(webhook.last_delivery_at).toLocaleTimeString() : 'Never'}
                         </div>
                       </div>
                     </div>
@@ -867,7 +1052,7 @@ export default function WebhooksClient({
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockLogs.length}</p>
+                    <p className="text-3xl font-bold">{mockDeliveryLogs.length}</p>
                     <p className="text-amber-200 text-sm">Log Entries</p>
                   </div>
                 </div>
@@ -1728,19 +1913,21 @@ export default function WebhooksClient({
           <ScrollArea className="flex-1 pr-4">
             <div className="space-y-4 py-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
                 <input
                   type="text"
-                  defaultValue={selectedEndpoint?.name || ''}
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:text-white"
                   placeholder="My Webhook"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Endpoint URL</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Endpoint URL *</label>
                 <input
                   type="url"
-                  defaultValue={selectedEndpoint?.url || ''}
+                  value={formData.url}
+                  onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:text-white font-mono text-sm"
                   placeholder="https://example.com/webhook"
                 />
@@ -1748,7 +1935,8 @@ export default function WebhooksClient({
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
                 <textarea
-                  defaultValue={selectedEndpoint?.description || ''}
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                   rows={2}
                   className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:text-white"
                   placeholder="What does this webhook do?"
@@ -1756,22 +1944,23 @@ export default function WebhooksClient({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Authentication</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Timeout (ms)</label>
                   <select
-                    defaultValue={selectedEndpoint?.authType || 'none'}
+                    value={formData.timeout_ms}
+                    onChange={(e) => setFormData(prev => ({ ...prev, timeout_ms: parseInt(e.target.value) }))}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg dark:text-white"
                   >
-                    <option value="none">None</option>
-                    <option value="api_key">API Key</option>
-                    <option value="bearer">Bearer Token</option>
-                    <option value="basic">Basic Auth</option>
-                    <option value="hmac">HMAC Signature</option>
+                    <option value="10000">10 seconds</option>
+                    <option value="30000">30 seconds</option>
+                    <option value="60000">60 seconds</option>
+                    <option value="120000">2 minutes</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Max Retries</label>
                   <select
-                    defaultValue={selectedEndpoint?.retryPolicy.maxRetries || 3}
+                    value={formData.retry_count}
+                    onChange={(e) => setFormData(prev => ({ ...prev, retry_count: parseInt(e.target.value) }))}
                     className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg dark:text-white"
                   >
                     <option value="0">No retries</option>
@@ -1788,7 +1977,8 @@ export default function WebhooksClient({
                     <label key={event.id} className="flex items-center gap-2 text-sm cursor-pointer">
                       <input
                         type="checkbox"
-                        defaultChecked={selectedEndpoint?.events.includes(event.name)}
+                        checked={formData.events.includes(event.name)}
+                        onChange={() => handleEventToggle(event.name)}
                         className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
                       />
                       <span className="font-mono text-gray-700 dark:text-gray-300">{event.name}</span>
@@ -1796,16 +1986,31 @@ export default function WebhooksClient({
                   ))}
                 </div>
               </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.verify_ssl}
+                  onChange={(e) => setFormData(prev => ({ ...prev, verify_ssl: e.target.checked }))}
+                  className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <label className="text-sm text-gray-700 dark:text-gray-300">Verify SSL certificate</label>
+              </div>
             </div>
           </ScrollArea>
           <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
             <button
               onClick={() => setShowEndpointDialog(false)}
               className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              disabled={isSaving}
             >
               Cancel
             </button>
-            <button className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700">
+            <button
+              onClick={handleSaveWebhook}
+              disabled={isSaving || !formData.name || !formData.url}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            >
+              {isSaving && <RefreshCw className="w-4 h-4 animate-spin" />}
               {selectedEndpoint ? 'Save Changes' : 'Create Webhook'}
             </button>
           </div>

@@ -1,13 +1,17 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -65,6 +69,11 @@ import {
   Sparkles
 } from 'lucide-react'
 
+// Hooks
+import { useIntegrations, type Integration } from '@/lib/hooks/use-integrations'
+import { useWorkflows, type Workflow as WorkflowType, type WorkflowStats } from '@/lib/hooks/use-workflows'
+import { useWebhooks, type Webhook as WebhookType, type WebhookStats } from '@/lib/hooks/use-webhooks'
+
 // Enhanced & Competitive Upgrade Components
 import {
   AIInsightsPanel,
@@ -78,53 +87,10 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Types
-type ZapStatus = 'active' | 'paused' | 'error' | 'draft'
+type ZapStatus = 'active' | 'paused' | 'error' | 'draft' | 'completed' | 'failed' | 'archived'
 type TaskStatus = 'success' | 'failed' | 'running' | 'waiting'
 type AppCategory = 'all' | 'marketing' | 'productivity' | 'communication' | 'storage' | 'payments' | 'crm' | 'development' | 'social'
 type WebhookMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-
-interface AppIntegration {
-  id: string
-  name: string
-  icon: string
-  category: AppCategory
-  description: string
-  isConnected: boolean
-  connectedAt?: string
-  lastSync?: string
-  tasksRun: number
-  scopes: string[]
-  popularity: number
-  isPremium: boolean
-}
-
-interface ZapStep {
-  id: string
-  type: 'trigger' | 'action' | 'filter' | 'delay'
-  appId: string
-  appName: string
-  appIcon: string
-  event: string
-  config: Record<string, unknown>
-  order: number
-}
-
-interface Zap {
-  id: string
-  name: string
-  description: string
-  status: ZapStatus
-  trigger: ZapStep
-  actions: ZapStep[]
-  createdAt: string
-  updatedAt: string
-  lastRun?: string
-  taskCount: number
-  successRate: number
-  avgExecutionTime: number
-  folder?: string
-  tags: string[]
-}
 
 interface Task {
   id: string
@@ -145,20 +111,6 @@ interface Task {
   dataOut?: Record<string, unknown>
 }
 
-interface WebhookEndpoint {
-  id: string
-  name: string
-  url: string
-  method: WebhookMethod
-  secret: string
-  isActive: boolean
-  createdAt: string
-  lastTriggered?: string
-  triggerCount: number
-  headers: Record<string, string>
-  zapId?: string
-}
-
 interface UsageStats {
   tasksUsed: number
   tasksLimit: number
@@ -172,234 +124,27 @@ interface UsageStats {
   tasksLastMonth: number
 }
 
-// Mock Data
-const mockApps: AppIntegration[] = [
-  { id: '1', name: 'Slack', icon: '💬', category: 'communication', description: 'Send messages and notifications to Slack channels', isConnected: true, connectedAt: '2024-01-10', lastSync: '2024-01-15T14:30:00', tasksRun: 15420, scopes: ['chat:write', 'channels:read', 'users:read'], popularity: 98, isPremium: false },
-  { id: '2', name: 'Gmail', icon: '📧', category: 'communication', description: 'Send and receive emails through Gmail', isConnected: true, connectedAt: '2024-01-05', lastSync: '2024-01-15T14:25:00', tasksRun: 8930, scopes: ['gmail.send', 'gmail.readonly'], popularity: 97, isPremium: false },
-  { id: '3', name: 'Salesforce', icon: '☁️', category: 'crm', description: 'Manage leads, contacts, and opportunities', isConnected: true, connectedAt: '2024-01-08', lastSync: '2024-01-15T14:00:00', tasksRun: 6250, scopes: ['api', 'refresh_token'], popularity: 95, isPremium: true },
-  { id: '4', name: 'Google Sheets', icon: '📊', category: 'productivity', description: 'Read and write data to spreadsheets', isConnected: true, connectedAt: '2024-01-12', lastSync: '2024-01-15T14:20:00', tasksRun: 12340, scopes: ['spreadsheets', 'drive.readonly'], popularity: 96, isPremium: false },
-  { id: '5', name: 'Stripe', icon: '💳', category: 'payments', description: 'Process payments and manage subscriptions', isConnected: true, connectedAt: '2024-01-03', lastSync: '2024-01-15T14:10:00', tasksRun: 4560, scopes: ['read_only', 'webhooks'], popularity: 94, isPremium: false },
-  { id: '6', name: 'HubSpot', icon: '🧡', category: 'crm', description: 'CRM, marketing, and sales automation', isConnected: false, tasksRun: 0, scopes: [], popularity: 93, isPremium: false },
-  { id: '7', name: 'Notion', icon: '📝', category: 'productivity', description: 'Create and manage pages and databases', isConnected: true, connectedAt: '2024-01-14', lastSync: '2024-01-15T13:45:00', tasksRun: 2180, scopes: ['read_content', 'insert_content'], popularity: 91, isPremium: false },
-  { id: '8', name: 'GitHub', icon: '🐙', category: 'development', description: 'Manage repositories, issues, and PRs', isConnected: true, connectedAt: '2024-01-02', lastSync: '2024-01-15T14:35:00', tasksRun: 7890, scopes: ['repo', 'notifications'], popularity: 92, isPremium: false },
-  { id: '9', name: 'Shopify', icon: '🛍️', category: 'payments', description: 'E-commerce orders and inventory', isConnected: false, tasksRun: 0, scopes: [], popularity: 89, isPremium: false },
-  { id: '10', name: 'Twitter/X', icon: '🐦', category: 'social', description: 'Post tweets and monitor mentions', isConnected: false, tasksRun: 0, scopes: [], popularity: 88, isPremium: false },
-  { id: '11', name: 'Dropbox', icon: '📦', category: 'storage', description: 'Store and sync files in the cloud', isConnected: true, connectedAt: '2024-01-11', lastSync: '2024-01-15T12:00:00', tasksRun: 3450, scopes: ['files.content.read', 'files.content.write'], popularity: 87, isPremium: false },
-  { id: '12', name: 'Mailchimp', icon: '🐵', category: 'marketing', description: 'Email marketing and automation', isConnected: false, tasksRun: 0, scopes: [], popularity: 86, isPremium: false },
-  { id: '13', name: 'Trello', icon: '📋', category: 'productivity', description: 'Manage boards, lists, and cards', isConnected: true, connectedAt: '2024-01-09', lastSync: '2024-01-15T11:30:00', tasksRun: 5670, scopes: ['read', 'write'], popularity: 85, isPremium: false },
-  { id: '14', name: 'Airtable', icon: '🗃️', category: 'productivity', description: 'Database-spreadsheet hybrid', isConnected: false, tasksRun: 0, scopes: [], popularity: 84, isPremium: false },
-  { id: '15', name: 'Jira', icon: '🔵', category: 'development', description: 'Issue tracking and project management', isConnected: true, connectedAt: '2024-01-07', lastSync: '2024-01-15T14:15:00', tasksRun: 4230, scopes: ['read:jira-work', 'write:jira-work'], popularity: 90, isPremium: false },
-  { id: '16', name: 'Zendesk', icon: '🎧', category: 'communication', description: 'Customer support ticketing', isConnected: false, tasksRun: 0, scopes: [], popularity: 83, isPremium: true }
-]
+// Form state types
+interface IntegrationFormData {
+  name: string
+  provider: string
+  description: string
+  category: string
+  icon: string
+}
 
-const mockZaps: Zap[] = [
-  {
-    id: 'zap-1',
-    name: 'New Lead to Slack + Sheets',
-    description: 'When a new lead is created in Salesforce, notify Slack and add to Google Sheets',
-    status: 'active',
-    trigger: { id: 'step-1', type: 'trigger', appId: '3', appName: 'Salesforce', appIcon: '☁️', event: 'New Lead', config: {}, order: 1 },
-    actions: [
-      { id: 'step-2', type: 'action', appId: '1', appName: 'Slack', appIcon: '💬', event: 'Send Message', config: { channel: '#sales' }, order: 2 },
-      { id: 'step-3', type: 'action', appId: '4', appName: 'Google Sheets', appIcon: '📊', event: 'Add Row', config: { spreadsheetId: 'xxx' }, order: 3 }
-    ],
-    createdAt: '2024-01-02',
-    updatedAt: '2024-01-14',
-    lastRun: '2024-01-15T14:30:00',
-    taskCount: 2456,
-    successRate: 99.2,
-    avgExecutionTime: 1.8,
-    folder: 'Sales',
-    tags: ['sales', 'notifications']
-  },
-  {
-    id: 'zap-2',
-    name: 'GitHub Issue to Jira',
-    description: 'Sync GitHub issues to Jira for project tracking',
-    status: 'active',
-    trigger: { id: 'step-1', type: 'trigger', appId: '8', appName: 'GitHub', appIcon: '🐙', event: 'New Issue', config: { repo: 'main' }, order: 1 },
-    actions: [
-      { id: 'step-2', type: 'action', appId: '15', appName: 'Jira', appIcon: '🔵', event: 'Create Issue', config: { project: 'DEV' }, order: 2 }
-    ],
-    createdAt: '2024-01-05',
-    updatedAt: '2024-01-12',
-    lastRun: '2024-01-15T13:45:00',
-    taskCount: 892,
-    successRate: 98.5,
-    avgExecutionTime: 2.3,
-    folder: 'Development',
-    tags: ['development', 'sync']
-  },
-  {
-    id: 'zap-3',
-    name: 'Payment Received Notification',
-    description: 'Notify team when Stripe payment is received',
-    status: 'active',
-    trigger: { id: 'step-1', type: 'trigger', appId: '5', appName: 'Stripe', appIcon: '💳', event: 'Payment Succeeded', config: {}, order: 1 },
-    actions: [
-      { id: 'step-2', type: 'action', appId: '1', appName: 'Slack', appIcon: '💬', event: 'Send Message', config: { channel: '#payments' }, order: 2 },
-      { id: 'step-3', type: 'action', appId: '2', appName: 'Gmail', appIcon: '📧', event: 'Send Email', config: { to: 'finance@company.com' }, order: 3 }
-    ],
-    createdAt: '2024-01-03',
-    updatedAt: '2024-01-10',
-    lastRun: '2024-01-15T14:15:00',
-    taskCount: 1567,
-    successRate: 99.8,
-    avgExecutionTime: 1.5,
-    folder: 'Finance',
-    tags: ['payments', 'notifications']
-  },
-  {
-    id: 'zap-4',
-    name: 'Email Attachment to Dropbox',
-    description: 'Save email attachments to Dropbox automatically',
-    status: 'paused',
-    trigger: { id: 'step-1', type: 'trigger', appId: '2', appName: 'Gmail', appIcon: '📧', event: 'New Email with Attachment', config: { label: 'attachments' }, order: 1 },
-    actions: [
-      { id: 'step-2', type: 'action', appId: '11', appName: 'Dropbox', appIcon: '📦', event: 'Upload File', config: { folder: '/attachments' }, order: 2 }
-    ],
-    createdAt: '2024-01-08',
-    updatedAt: '2024-01-14',
-    lastRun: '2024-01-14T10:00:00',
-    taskCount: 456,
-    successRate: 97.3,
-    avgExecutionTime: 3.2,
-    folder: 'Automation',
-    tags: ['files', 'email']
-  },
-  {
-    id: 'zap-5',
-    name: 'Trello Card to Notion',
-    description: 'Create Notion page when Trello card is completed',
-    status: 'error',
-    trigger: { id: 'step-1', type: 'trigger', appId: '13', appName: 'Trello', appIcon: '📋', event: 'Card Moved to Done', config: { board: 'Main' }, order: 1 },
-    actions: [
-      { id: 'step-2', type: 'action', appId: '7', appName: 'Notion', appIcon: '📝', event: 'Create Page', config: { database: 'Completed Tasks' }, order: 2 }
-    ],
-    createdAt: '2024-01-10',
-    updatedAt: '2024-01-15',
-    lastRun: '2024-01-15T12:00:00',
-    taskCount: 234,
-    successRate: 85.2,
-    avgExecutionTime: 2.1,
-    folder: 'Productivity',
-    tags: ['sync', 'documentation']
-  },
-  {
-    id: 'zap-6',
-    name: 'Daily Digest Email',
-    description: 'Send daily summary of Salesforce activities via Gmail',
-    status: 'draft',
-    trigger: { id: 'step-1', type: 'trigger', appId: '3', appName: 'Salesforce', appIcon: '☁️', event: 'Schedule', config: { time: '08:00' }, order: 1 },
-    actions: [
-      { id: 'step-2', type: 'action', appId: '2', appName: 'Gmail', appIcon: '📧', event: 'Send Email', config: { to: 'team@company.com' }, order: 2 }
-    ],
-    createdAt: '2024-01-14',
-    updatedAt: '2024-01-15',
-    taskCount: 0,
-    successRate: 0,
-    avgExecutionTime: 0,
-    folder: 'Reports',
-    tags: ['scheduled', 'reports']
-  }
-]
+interface WorkflowFormData {
+  name: string
+  description: string
+  type: WorkflowType['type']
+  priority: WorkflowType['priority']
+}
 
-const mockTasks: Task[] = [
-  {
-    id: 'task-1',
-    zapId: 'zap-1',
-    zapName: 'New Lead to Slack + Sheets',
-    status: 'success',
-    startedAt: '2024-01-15T14:30:00',
-    completedAt: '2024-01-15T14:30:02',
-    duration: 1.8,
-    steps: [
-      { stepId: 'step-1', stepName: 'Salesforce: New Lead', status: 'success', data: { leadId: 'LD-001', name: 'John Smith' } },
-      { stepId: 'step-2', stepName: 'Slack: Send Message', status: 'success', data: { messageTs: '123456' } },
-      { stepId: 'step-3', stepName: 'Google Sheets: Add Row', status: 'success', data: { rowNumber: 156 } }
-    ],
-    dataIn: { leadId: 'LD-001', name: 'John Smith', email: 'john@example.com', company: 'Acme Inc' },
-    dataOut: { slackMessageId: '123456', sheetsRow: 156 }
-  },
-  {
-    id: 'task-2',
-    zapId: 'zap-3',
-    zapName: 'Payment Received Notification',
-    status: 'success',
-    startedAt: '2024-01-15T14:15:00',
-    completedAt: '2024-01-15T14:15:01',
-    duration: 1.2,
-    steps: [
-      { stepId: 'step-1', stepName: 'Stripe: Payment Succeeded', status: 'success', data: { amount: 9900, currency: 'usd' } },
-      { stepId: 'step-2', stepName: 'Slack: Send Message', status: 'success' },
-      { stepId: 'step-3', stepName: 'Gmail: Send Email', status: 'success' }
-    ],
-    dataIn: { paymentId: 'pi_xxx', amount: 9900, customer: 'cus_xxx' },
-    dataOut: { slackSent: true, emailSent: true }
-  },
-  {
-    id: 'task-3',
-    zapId: 'zap-5',
-    zapName: 'Trello Card to Notion',
-    status: 'failed',
-    startedAt: '2024-01-15T12:00:00',
-    completedAt: '2024-01-15T12:00:03',
-    duration: 2.8,
-    steps: [
-      { stepId: 'step-1', stepName: 'Trello: Card Moved', status: 'success', data: { cardId: 'card-123' } },
-      { stepId: 'step-2', stepName: 'Notion: Create Page', status: 'failed', error: 'API rate limit exceeded. Please retry after 60 seconds.' }
-    ],
-    dataIn: { cardId: 'card-123', title: 'Complete feature X' }
-  },
-  {
-    id: 'task-4',
-    zapId: 'zap-2',
-    zapName: 'GitHub Issue to Jira',
-    status: 'running',
-    startedAt: '2024-01-15T14:35:00',
-    duration: 0,
-    steps: [
-      { stepId: 'step-1', stepName: 'GitHub: New Issue', status: 'success', data: { issueNumber: 456 } },
-      { stepId: 'step-2', stepName: 'Jira: Create Issue', status: 'running' }
-    ],
-    dataIn: { issueNumber: 456, title: 'Bug in login page' }
-  },
-  {
-    id: 'task-5',
-    zapId: 'zap-1',
-    zapName: 'New Lead to Slack + Sheets',
-    status: 'success',
-    startedAt: '2024-01-15T14:00:00',
-    completedAt: '2024-01-15T14:00:02',
-    duration: 1.9,
-    steps: [
-      { stepId: 'step-1', stepName: 'Salesforce: New Lead', status: 'success' },
-      { stepId: 'step-2', stepName: 'Slack: Send Message', status: 'success' },
-      { stepId: 'step-3', stepName: 'Google Sheets: Add Row', status: 'success' }
-    ],
-    dataIn: { leadId: 'LD-002', name: 'Jane Doe', email: 'jane@example.com' },
-    dataOut: { slackMessageId: '123457', sheetsRow: 155 }
-  }
-]
-
-const mockWebhooks: WebhookEndpoint[] = [
-  { id: 'wh-1', name: 'Order Webhook', url: 'https://hooks.zapier.com/catch/xxx/order', method: 'POST', secret: 'whsec_xxx123', isActive: true, createdAt: '2024-01-05', lastTriggered: '2024-01-15T14:20:00', triggerCount: 1234, headers: { 'Content-Type': 'application/json' }, zapId: 'zap-3' },
-  { id: 'wh-2', name: 'Customer Signup', url: 'https://hooks.zapier.com/catch/xxx/signup', method: 'POST', secret: 'whsec_xxx456', isActive: true, createdAt: '2024-01-08', lastTriggered: '2024-01-15T13:45:00', triggerCount: 567, headers: { 'Content-Type': 'application/json' } },
-  { id: 'wh-3', name: 'Form Submission', url: 'https://hooks.zapier.com/catch/xxx/form', method: 'POST', secret: 'whsec_xxx789', isActive: false, createdAt: '2024-01-10', triggerCount: 89, headers: {} },
-  { id: 'wh-4', name: 'Status Update', url: 'https://hooks.zapier.com/catch/xxx/status', method: 'PUT', secret: 'whsec_xxx012', isActive: true, createdAt: '2024-01-12', lastTriggered: '2024-01-15T10:00:00', triggerCount: 234, headers: { 'Authorization': 'Bearer xxx' } }
-]
-
-const mockUsageStats: UsageStats = {
-  tasksUsed: 15420,
-  tasksLimit: 50000,
-  zapsActive: 4,
-  zapsLimit: 20,
-  appsConnected: 10,
-  webhooksActive: 3,
-  avgTaskDuration: 2.1,
-  successRate: 98.2,
-  tasksThisMonth: 4560,
-  tasksLastMonth: 3890
+interface WebhookFormData {
+  name: string
+  description: string
+  url: string
+  events: string[]
 }
 
 // Helper functions
@@ -407,8 +152,12 @@ const getStatusColor = (status: ZapStatus) => {
   switch (status) {
     case 'active': return 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
     case 'paused': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-    case 'error': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    case 'error':
+    case 'failed': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     case 'draft': return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
+    case 'completed': return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    case 'archived': return 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+    default: return 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400'
   }
 }
 
@@ -430,7 +179,7 @@ const getTaskStatusIcon = (status: TaskStatus) => {
   }
 }
 
-const getCategoryIcon = (category: AppCategory) => {
+const getCategoryIcon = (category: AppCategory | string) => {
   switch (category) {
     case 'marketing': return <Mail className="w-4 h-4" />
     case 'productivity': return <FileText className="w-4 h-4" />
@@ -464,9 +213,24 @@ const formatDuration = (seconds: number) => {
   return `${seconds.toFixed(1)}s`
 }
 
+// Default icon for integrations
+const getDefaultIcon = (category: string) => {
+  const icons: Record<string, string> = {
+    communication: 'message-square',
+    productivity: 'file-text',
+    marketing: 'mail',
+    payments: 'credit-card',
+    crm: 'users',
+    development: 'code',
+    storage: 'cloud',
+    social: 'globe'
+  }
+  return icons[category] || 'plug'
+}
+
 // Enhanced Competitive Upgrade Data
 const mockIntegrationsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Sync Status', description: 'All 24 integrations syncing successfully.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Status' },
+  { id: '1', type: 'success' as const, title: 'Sync Status', description: 'All integrations syncing successfully.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Status' },
   { id: '2', type: 'info' as const, title: 'API Usage', description: '85% of monthly API quota used. 5 days remaining.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Usage' },
   { id: '3', type: 'warning' as const, title: 'Auth Expiring', description: '3 OAuth tokens expire in 7 days. Re-auth required.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Authentication' },
 ]
@@ -489,43 +253,130 @@ const mockIntegrationsActivities = [
   { id: '3', user: 'System', action: 'triggered', target: '150 automation tasks', timestamp: '3h ago', type: 'success' as const },
 ]
 
-const mockIntegrationsQuickActions = [
-  { id: '1', label: 'New Zap', icon: 'Zap', shortcut: 'N', action: () => console.log('New zap') },
-  { id: '2', label: 'Apps', icon: 'Grid', shortcut: 'A', action: () => console.log('Apps') },
-  { id: '3', label: 'Webhooks', icon: 'Webhook', shortcut: 'W', action: () => console.log('Webhooks') },
-  { id: '4', label: 'Logs', icon: 'FileText', shortcut: 'L', action: () => console.log('Logs') },
+// Mock tasks for history (will be replaced with real data when workflow_executions table is available)
+const mockTasks: Task[] = [
+  {
+    id: 'task-1',
+    zapId: 'zap-1',
+    zapName: 'New Lead to Slack + Sheets',
+    status: 'success',
+    startedAt: new Date().toISOString(),
+    completedAt: new Date().toISOString(),
+    duration: 1.8,
+    steps: [
+      { stepId: 'step-1', stepName: 'Trigger: New Lead', status: 'success', data: { leadId: 'LD-001' } },
+      { stepId: 'step-2', stepName: 'Slack: Send Message', status: 'success', data: { messageTs: '123456' } },
+    ],
+    dataIn: { leadId: 'LD-001', name: 'John Smith', email: 'john@example.com' },
+    dataOut: { slackMessageId: '123456' }
+  },
 ]
 
 export default function IntegrationsClient() {
   const [activeTab, setActiveTab] = useState('zaps')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<AppCategory>('all')
-  const [selectedZap, setSelectedZap] = useState<Zap | null>(null)
+  const [selectedZap, setSelectedZap] = useState<WorkflowType | null>(null)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
-  const [selectedApp, setSelectedApp] = useState<AppIntegration | null>(null)
-  const [selectedWebhook, setSelectedWebhook] = useState<WebhookEndpoint | null>(null)
+  const [selectedApp, setSelectedApp] = useState<Integration | null>(null)
+  const [selectedWebhook, setSelectedWebhook] = useState<WebhookType | null>(null)
   const [showConnectedOnly, setShowConnectedOnly] = useState(false)
   const [zapFilter, setZapFilter] = useState<ZapStatus | 'all'>('all')
 
+  // Dialog states
+  const [showCreateIntegrationDialog, setShowCreateIntegrationDialog] = useState(false)
+  const [showCreateZapDialog, setShowCreateZapDialog] = useState(false)
+  const [showCreateWebhookDialog, setShowCreateWebhookDialog] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Form states
+  const [integrationForm, setIntegrationForm] = useState<IntegrationFormData>({
+    name: '',
+    provider: '',
+    description: '',
+    category: 'productivity',
+    icon: ''
+  })
+
+  const [workflowForm, setWorkflowForm] = useState<WorkflowFormData>({
+    name: '',
+    description: '',
+    type: 'integration',
+    priority: 'medium'
+  })
+
+  const [webhookForm, setWebhookForm] = useState<WebhookFormData>({
+    name: '',
+    description: '',
+    url: '',
+    events: []
+  })
+
+  // Hooks for real data
+  const {
+    integrations,
+    stats: integrationStats,
+    loading: integrationsLoading,
+    fetchIntegrations,
+    createIntegration,
+    updateIntegration,
+    deleteIntegration,
+    connectIntegration,
+    disconnectIntegration,
+    syncIntegration
+  } = useIntegrations()
+
+  const {
+    workflows,
+    stats: workflowStats,
+    loading: workflowsLoading,
+    fetchWorkflows,
+    createWorkflow,
+    updateWorkflow,
+    deleteWorkflow,
+    startWorkflow,
+    pauseWorkflow,
+    resumeWorkflow
+  } = useWorkflows()
+
+  const {
+    webhooks,
+    stats: webhookStats,
+    loading: webhooksLoading,
+    fetchWebhooks,
+    createWebhook,
+    updateWebhook,
+    deleteWebhook,
+    toggleStatus: toggleWebhookStatus,
+    testWebhook
+  } = useWebhooks()
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchIntegrations()
+    fetchWorkflows()
+    fetchWebhooks()
+  }, [fetchIntegrations, fetchWorkflows, fetchWebhooks])
+
   // Computed values
   const filteredApps = useMemo(() => {
-    return mockApps.filter(app => {
+    return integrations.filter(app => {
       const matchesSearch = app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (app.description || '').toLowerCase().includes(searchTerm.toLowerCase())
       const matchesCategory = selectedCategory === 'all' || app.category === selectedCategory
-      const matchesConnected = !showConnectedOnly || app.isConnected
+      const matchesConnected = !showConnectedOnly || app.is_connected
       return matchesSearch && matchesCategory && matchesConnected
-    }).sort((a, b) => b.popularity - a.popularity)
-  }, [searchTerm, selectedCategory, showConnectedOnly])
+    })
+  }, [integrations, searchTerm, selectedCategory, showConnectedOnly])
 
   const filteredZaps = useMemo(() => {
-    return mockZaps.filter(zap => {
+    return workflows.filter(zap => {
       const matchesSearch = zap.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        zap.description.toLowerCase().includes(searchTerm.toLowerCase())
+        (zap.description || '').toLowerCase().includes(searchTerm.toLowerCase())
       const matchesStatus = zapFilter === 'all' || zap.status === zapFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchTerm, zapFilter])
+  }, [workflows, searchTerm, zapFilter])
 
   const filteredTasks = useMemo(() => {
     return mockTasks.filter(task => {
@@ -545,38 +396,219 @@ export default function IntegrationsClient() {
     { value: 'social', label: 'Social' }
   ]
 
-  const usagePercent = (mockUsageStats.tasksUsed / mockUsageStats.tasksLimit) * 100
-
-  // Handlers
-  const handleConnectApp = (appName: string) => {
-    toast.info('Connecting app', {
-      description: `Setting up connection to ${appName}...`
-    })
+  // Usage stats combining real data
+  const usageStats: UsageStats = {
+    tasksUsed: workflowStats.completedSteps,
+    tasksLimit: 50000,
+    zapsActive: workflowStats.active,
+    zapsLimit: 20,
+    appsConnected: integrationStats.connected,
+    webhooksActive: webhookStats.active,
+    avgTaskDuration: 2.1,
+    successRate: webhookStats.avgSuccessRate || 98.2,
+    tasksThisMonth: workflowStats.totalSteps,
+    tasksLastMonth: Math.max(0, workflowStats.totalSteps - 100)
   }
 
-  const handleDisconnectApp = (appName: string) => {
-    toast.info('Disconnecting app', {
-      description: `Removing ${appName} connection...`
+  const usagePercent = (usageStats.tasksUsed / usageStats.tasksLimit) * 100
+
+  // Integration Handlers
+  const handleCreateIntegration = async () => {
+    if (!integrationForm.name || !integrationForm.provider) {
+      toast.error('Please fill in required fields')
+      return
+    }
+
+    setIsSubmitting(true)
+    const result = await createIntegration({
+      name: integrationForm.name,
+      provider: integrationForm.provider,
+      description: integrationForm.description,
+      category: integrationForm.category,
+      icon: integrationForm.icon || getDefaultIcon(integrationForm.category),
+      status: 'disconnected',
+      is_connected: false,
+      config: {},
+      permissions: [],
+      api_calls_count: 0,
+      data_synced_count: 0,
+      metadata: {}
     })
+
+    setIsSubmitting(false)
+    if (result) {
+      toast.success('Integration created successfully')
+      setShowCreateIntegrationDialog(false)
+      setIntegrationForm({ name: '', provider: '', description: '', category: 'productivity', icon: '' })
+    }
   }
 
-  const handleCreateZap = () => {
-    toast.info('Create Zap', {
-      description: 'Opening automation builder...'
-    })
+  const handleConnectApp = async (app: Integration) => {
+    toast.info('Connecting app', { description: `Setting up connection to ${app.name}...` })
+    const result = await connectIntegration(app.id)
+    if (result) {
+      toast.success('App connected', { description: `${app.name} is now connected` })
+    }
   }
 
-  const handleTestConnection = (appName: string) => {
-    toast.success('Testing connection', {
-      description: `Testing ${appName} connection...`
-    })
+  const handleDisconnectApp = async (app: Integration) => {
+    const result = await disconnectIntegration(app.id)
+    if (result) {
+      toast.info('App disconnected', { description: `${app.name} has been disconnected` })
+    }
+    setSelectedApp(null)
   }
 
-  const handleRefreshToken = (appName: string) => {
-    toast.success('Token refreshed', {
-      description: `${appName} authentication updated`
-    })
+  const handleSyncApp = async (app: Integration) => {
+    toast.info('Syncing...', { description: `Synchronizing ${app.name} data...` })
+    await syncIntegration(app.id)
   }
+
+  const handleDeleteIntegration = async (app: Integration) => {
+    const result = await deleteIntegration(app.id)
+    if (result) {
+      toast.success('Integration removed', { description: `${app.name} has been removed` })
+      setSelectedApp(null)
+    }
+  }
+
+  // Workflow/Zap Handlers
+  const handleCreateZap = async () => {
+    if (!workflowForm.name) {
+      toast.error('Please enter a workflow name')
+      return
+    }
+
+    setIsSubmitting(true)
+    const result = await createWorkflow({
+      name: workflowForm.name,
+      description: workflowForm.description,
+      type: workflowForm.type,
+      priority: workflowForm.priority,
+      status: 'draft',
+      total_steps: 0,
+      current_step: 0,
+      steps_config: [],
+      approvals_required: 0,
+      approvals_received: 0,
+      completion_rate: 0,
+      assigned_to: [],
+      dependencies: [],
+      tags: [],
+      metadata: {}
+    })
+
+    setIsSubmitting(false)
+    if (result.success) {
+      toast.success('Zap created successfully')
+      setShowCreateZapDialog(false)
+      setWorkflowForm({ name: '', description: '', type: 'integration', priority: 'medium' })
+    } else {
+      toast.error('Failed to create zap', { description: result.error })
+    }
+  }
+
+  const handleToggleZapStatus = async (zap: WorkflowType) => {
+    if (zap.status === 'active') {
+      const result = await pauseWorkflow(zap.id)
+      if (result.success) {
+        toast.info('Zap paused', { description: `${zap.name} has been paused` })
+      }
+    } else if (zap.status === 'paused' || zap.status === 'draft') {
+      const result = zap.status === 'paused' ? await resumeWorkflow(zap.id) : await startWorkflow(zap.id)
+      if (result.success) {
+        toast.success('Zap activated', { description: `${zap.name} is now running` })
+      }
+    }
+  }
+
+  const handleDeleteZap = async (zap: WorkflowType) => {
+    const result = await deleteWorkflow(zap.id)
+    if (result.success) {
+      toast.success('Zap deleted', { description: `${zap.name} has been removed` })
+      setSelectedZap(null)
+    }
+  }
+
+  // Webhook Handlers
+  const handleCreateWebhook = async () => {
+    if (!webhookForm.name || !webhookForm.url) {
+      toast.error('Please fill in required fields')
+      return
+    }
+
+    setIsSubmitting(true)
+    const result = await createWebhook({
+      name: webhookForm.name,
+      description: webhookForm.description,
+      url: webhookForm.url,
+      events: webhookForm.events.length > 0 ? webhookForm.events : ['*'],
+      status: 'active',
+      total_deliveries: 0,
+      successful_deliveries: 0,
+      failed_deliveries: 0,
+      success_rate: 100,
+      avg_response_time_ms: 0,
+      consecutive_failures: 0,
+      retry_count: 3,
+      retry_delay_seconds: 60,
+      timeout_ms: 30000,
+      verify_ssl: true,
+      custom_headers: {},
+      tags: [],
+      metadata: {}
+    })
+
+    setIsSubmitting(false)
+    if (result.success) {
+      toast.success('Webhook created successfully')
+      setShowCreateWebhookDialog(false)
+      setWebhookForm({ name: '', description: '', url: '', events: [] })
+    } else {
+      toast.error('Failed to create webhook', { description: result.error })
+    }
+  }
+
+  const handleToggleWebhook = async (webhook: WebhookType) => {
+    const newStatus = webhook.status === 'active' ? 'paused' : 'active'
+    const result = await toggleWebhookStatus(webhook.id, newStatus)
+    if (result.success) {
+      toast.success(`Webhook ${newStatus === 'active' ? 'activated' : 'paused'}`)
+    }
+  }
+
+  const handleTestWebhook = async (webhook: WebhookType) => {
+    toast.info('Testing webhook...', { description: `Sending test payload to ${webhook.name}` })
+    const result = await testWebhook(webhook.id)
+    if (result.success) {
+      toast.success('Test sent', { description: 'Check your endpoint for the test payload' })
+    } else {
+      toast.error('Test failed', { description: result.error })
+    }
+  }
+
+  const handleDeleteWebhook = async (webhook: WebhookType) => {
+    const result = await deleteWebhook(webhook.id)
+    if (result.success) {
+      toast.success('Webhook deleted', { description: `${webhook.name} has been removed` })
+      setSelectedWebhook(null)
+    }
+  }
+
+  const handleCopyUrl = (url: string) => {
+    navigator.clipboard.writeText(url)
+    toast.success('URL copied to clipboard')
+  }
+
+  // Quick actions
+  const mockIntegrationsQuickActions = [
+    { id: '1', label: 'New Zap', icon: 'Zap', shortcut: 'N', action: () => setShowCreateZapDialog(true) },
+    { id: '2', label: 'Apps', icon: 'Grid', shortcut: 'A', action: () => setShowCreateIntegrationDialog(true) },
+    { id: '3', label: 'Webhooks', icon: 'Webhook', shortcut: 'W', action: () => setShowCreateWebhookDialog(true) },
+    { id: '4', label: 'Refresh', icon: 'RefreshCw', shortcut: 'R', action: () => { fetchIntegrations(); fetchWorkflows(); fetchWebhooks() } },
+  ]
+
+  const isLoading = integrationsLoading || workflowsLoading || webhooksLoading
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -593,11 +625,15 @@ export default function IntegrationsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={() => { fetchIntegrations(); fetchWorkflows(); fetchWebhooks() }} disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
             <Button variant="outline" size="sm">
               <History className="w-4 h-4 mr-2" />
               Task History
             </Button>
-            <Button className="bg-gradient-to-r from-orange-500 to-red-600 text-white">
+            <Button className="bg-gradient-to-r from-orange-500 to-red-600 text-white" onClick={() => setShowCreateZapDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Create Zap
             </Button>
@@ -612,8 +648,8 @@ export default function IntegrationsClient() {
                 <Zap className="w-4 h-4" />
                 <span className="text-xs font-medium">Active Zaps</span>
               </div>
-              <p className="text-2xl font-bold">{mockUsageStats.zapsActive}</p>
-              <p className="text-xs text-muted-foreground">of {mockUsageStats.zapsLimit}</p>
+              <p className="text-2xl font-bold">{usageStats.zapsActive}</p>
+              <p className="text-xs text-muted-foreground">of {usageStats.zapsLimit}</p>
             </CardContent>
           </Card>
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -622,8 +658,8 @@ export default function IntegrationsClient() {
                 <Activity className="w-4 h-4" />
                 <span className="text-xs font-medium">Tasks Used</span>
               </div>
-              <p className="text-2xl font-bold">{formatNumber(mockUsageStats.tasksUsed)}</p>
-              <p className="text-xs text-muted-foreground">of {formatNumber(mockUsageStats.tasksLimit)}</p>
+              <p className="text-2xl font-bold">{formatNumber(usageStats.tasksUsed)}</p>
+              <p className="text-xs text-muted-foreground">of {formatNumber(usageStats.tasksLimit)}</p>
             </CardContent>
           </Card>
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -632,7 +668,7 @@ export default function IntegrationsClient() {
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-xs font-medium">Success Rate</span>
               </div>
-              <p className="text-2xl font-bold">{mockUsageStats.successRate}%</p>
+              <p className="text-2xl font-bold">{usageStats.successRate.toFixed(1)}%</p>
               <p className="text-xs text-muted-foreground">last 30 days</p>
             </CardContent>
           </Card>
@@ -642,7 +678,7 @@ export default function IntegrationsClient() {
                 <Clock className="w-4 h-4" />
                 <span className="text-xs font-medium">Avg Duration</span>
               </div>
-              <p className="text-2xl font-bold">{mockUsageStats.avgTaskDuration}s</p>
+              <p className="text-2xl font-bold">{usageStats.avgTaskDuration}s</p>
               <p className="text-xs text-muted-foreground">per task</p>
             </CardContent>
           </Card>
@@ -652,7 +688,7 @@ export default function IntegrationsClient() {
                 <Plug className="w-4 h-4" />
                 <span className="text-xs font-medium">Connected</span>
               </div>
-              <p className="text-2xl font-bold">{mockUsageStats.appsConnected}</p>
+              <p className="text-2xl font-bold">{usageStats.appsConnected}</p>
               <p className="text-xs text-muted-foreground">apps</p>
             </CardContent>
           </Card>
@@ -662,7 +698,7 @@ export default function IntegrationsClient() {
                 <Webhook className="w-4 h-4" />
                 <span className="text-xs font-medium">Webhooks</span>
               </div>
-              <p className="text-2xl font-bold">{mockUsageStats.webhooksActive}</p>
+              <p className="text-2xl font-bold">{usageStats.webhooksActive}</p>
               <p className="text-xs text-muted-foreground">active</p>
             </CardContent>
           </Card>
@@ -672,8 +708,12 @@ export default function IntegrationsClient() {
                 <TrendingUp className="w-4 h-4" />
                 <span className="text-xs font-medium">This Month</span>
               </div>
-              <p className="text-2xl font-bold">{formatNumber(mockUsageStats.tasksThisMonth)}</p>
-              <p className="text-xs text-green-600">+{Math.round(((mockUsageStats.tasksThisMonth - mockUsageStats.tasksLastMonth) / mockUsageStats.tasksLastMonth) * 100)}%</p>
+              <p className="text-2xl font-bold">{formatNumber(usageStats.tasksThisMonth)}</p>
+              <p className="text-xs text-green-600">
+                {usageStats.tasksLastMonth > 0
+                  ? `+${Math.round(((usageStats.tasksThisMonth - usageStats.tasksLastMonth) / usageStats.tasksLastMonth) * 100)}%`
+                  : 'N/A'}
+              </p>
             </CardContent>
           </Card>
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -741,16 +781,16 @@ export default function IntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockZaps.length}</p>
+                    <p className="text-3xl font-bold">{workflows.length}</p>
                     <p className="text-orange-200 text-sm">Total Zaps</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockZaps.filter(z => z.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{workflowStats.active}</p>
                     <p className="text-orange-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockZaps.reduce((sum, z) => sum + z.taskCount, 0).toLocaleString()}</p>
-                    <p className="text-orange-200 text-sm">Tasks</p>
+                    <p className="text-3xl font-bold">{workflowStats.totalSteps.toLocaleString()}</p>
+                    <p className="text-orange-200 text-sm">Steps</p>
                   </div>
                 </div>
               </div>
@@ -759,19 +799,20 @@ export default function IntegrationsClient() {
             {/* Zaps Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Create Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Zap, label: 'Templates', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Play, label: 'Run All', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
-                { icon: Pause, label: 'Pause All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: History, label: 'History', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'Create Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowCreateZapDialog(true) },
+                { icon: Zap, label: 'Templates', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Templates coming soon') },
+                { icon: Play, label: 'Run All', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Running all active zaps...') },
+                { icon: Pause, label: 'Pause All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.info('Pausing all zaps...') },
+                { icon: History, label: 'History', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('tasks') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('analytics') },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Exporting zaps...') },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -806,7 +847,7 @@ export default function IntegrationsClient() {
               <Button
                 variant={zapFilter === 'error' ? 'default' : 'outline'}
                 size="sm"
-                onClick={() => setZapFilter('error')}
+                onClick={() => setZapFilter('failed')}
               >
                 <AlertTriangle className="w-3 h-3 mr-1" />
                 Error
@@ -821,72 +862,83 @@ export default function IntegrationsClient() {
               </Button>
             </div>
 
-            <div className="grid gap-4">
-              {filteredZaps.map(zap => (
-                <Card key={zap.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedZap(zap)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        {/* Zap Flow Visualization */}
-                        <div className="flex items-center gap-1">
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xl">
-                            {zap.trigger.appIcon}
-                          </div>
-                          <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                          {zap.actions.map((action, idx) => (
-                            <div key={action.id} className="flex items-center gap-1">
-                              <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xl">
-                                {action.appIcon}
-                              </div>
-                              {idx < zap.actions.length - 1 && (
-                                <ArrowRight className="w-4 h-4 text-muted-foreground" />
-                              )}
+            {workflowsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+              </div>
+            ) : filteredZaps.length === 0 ? (
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardContent className="py-12 text-center">
+                  <Zap className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Zaps Found</h3>
+                  <p className="text-muted-foreground mb-4">Create your first automation to get started</p>
+                  <Button onClick={() => setShowCreateZapDialog(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Zap
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {filteredZaps.map(zap => (
+                  <Card key={zap.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedZap(zap)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-1">
+                            <div className="w-10 h-10 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+                              <Workflow className="w-5 h-5 text-orange-600" />
                             </div>
-                          ))}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold">{zap.name}</h3>
-                            <Badge className={getStatusColor(zap.status)}>{zap.status}</Badge>
+                            <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                              <Zap className="w-5 h-5 text-blue-600" />
+                            </div>
                           </div>
-                          <p className="text-sm text-muted-foreground">{zap.description}</p>
-                          <div className="flex items-center gap-4 mt-1">
-                            {zap.lastRun && (
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold">{zap.name}</h3>
+                              <Badge className={getStatusColor(zap.status)}>{zap.status}</Badge>
+                              <Badge variant="outline">{zap.type}</Badge>
+                            </div>
+                            <p className="text-sm text-muted-foreground">{zap.description || 'No description'}</p>
+                            <div className="flex items-center gap-4 mt-1">
+                              {zap.started_at && (
+                                <span className="text-xs text-muted-foreground">
+                                  Started: {formatDate(zap.started_at)}
+                                </span>
+                              )}
                               <span className="text-xs text-muted-foreground">
-                                Last run: {formatDate(zap.lastRun)}
+                                {zap.total_steps} steps
                               </span>
-                            )}
-                            <span className="text-xs text-muted-foreground">
-                              {formatNumber(zap.taskCount)} tasks
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {zap.successRate}% success
-                            </span>
+                              <span className="text-xs text-muted-foreground">
+                                {zap.completion_rate}% complete
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {zap.status === 'active' ? (
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          {zap.status === 'active' ? (
+                            <Button variant="outline" size="sm" onClick={() => handleToggleZapStatus(zap)}>
+                              <Pause className="w-4 h-4" />
+                            </Button>
+                          ) : zap.status !== 'completed' ? (
+                            <Button variant="outline" size="sm" onClick={() => handleToggleZapStatus(zap)}>
+                              <Play className="w-4 h-4" />
+                            </Button>
+                          ) : null}
                           <Button variant="outline" size="sm">
-                            <Pause className="w-4 h-4" />
+                            <Edit className="w-4 h-4" />
                           </Button>
-                        ) : zap.status !== 'draft' ? (
-                          <Button variant="outline" size="sm">
-                            <Play className="w-4 h-4" />
+                          <Button variant="ghost" size="sm">
+                            <MoreHorizontal className="w-4 h-4" />
                           </Button>
-                        ) : null}
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
-                        </Button>
+                        </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Apps Tab */}
@@ -900,11 +952,11 @@ export default function IntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApps.length}</p>
+                    <p className="text-3xl font-bold">{integrations.length}</p>
                     <p className="text-blue-200 text-sm">Apps</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApps.filter(a => a.isConnected).length}</p>
+                    <p className="text-3xl font-bold">{integrationStats.connected}</p>
                     <p className="text-blue-200 text-sm">Connected</p>
                   </div>
                   <div className="text-center">
@@ -918,19 +970,20 @@ export default function IntegrationsClient() {
             {/* Apps Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Link, label: 'Connect', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Key, label: 'API Keys', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Shield, label: 'OAuth', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'Add App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateIntegrationDialog(true) },
+                { icon: Link, label: 'Connect', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Select an app to connect') },
+                { icon: Key, label: 'API Keys', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('settings') },
+                { icon: Shield, label: 'OAuth', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('OAuth settings') },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => { fetchIntegrations(); toast.success('Integrations synced') } },
+                { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setActiveTab('tasks') },
+                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Exporting integrations...') },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -963,51 +1016,66 @@ export default function IntegrationsClient() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredApps.map(app => (
-                <Card key={app.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedApp(app)}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="text-3xl">{app.icon}</div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold">{app.name}</h3>
-                            {app.isPremium && (
-                              <Badge variant="secondary" className="text-xs">Premium</Badge>
-                            )}
+            {integrationsLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+              </div>
+            ) : filteredApps.length === 0 ? (
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardContent className="py-12 text-center">
+                  <Plug className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Apps Found</h3>
+                  <p className="text-muted-foreground mb-4">Add your first integration to get started</p>
+                  <Button onClick={() => setShowCreateIntegrationDialog(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add Integration
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredApps.map(app => (
+                  <Card key={app.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedApp(app)}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="text-3xl">{app.icon || getCategoryIcon(app.category || 'all')}</div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold">{app.name}</h3>
+                            </div>
+                            <p className="text-xs text-muted-foreground capitalize">{app.category || 'General'}</p>
                           </div>
-                          <p className="text-xs text-muted-foreground capitalize">{app.category}</p>
                         </div>
+                        {app.is_connected && (
+                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Connected
+                          </Badge>
+                        )}
                       </div>
-                      {app.isConnected && (
-                        <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Connected
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{app.description}</p>
-                    {app.isConnected ? (
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">
-                          {formatNumber(app.tasksRun)} tasks run
-                        </span>
-                        <Button variant="outline" size="sm" className="h-7">
-                          <Settings className="w-3 h-3 mr-1" />
-                          Manage
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{app.description || 'No description'}</p>
+                      {app.is_connected ? (
+                        <div className="flex items-center justify-between text-xs" onClick={(e) => e.stopPropagation()}>
+                          <span className="text-muted-foreground">
+                            {formatNumber(app.api_calls_count)} API calls
+                          </span>
+                          <Button variant="outline" size="sm" className="h-7" onClick={() => setSelectedApp(app)}>
+                            <Settings className="w-3 h-3 mr-1" />
+                            Manage
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button className="w-full" size="sm" onClick={(e) => { e.stopPropagation(); handleConnectApp(app) }}>
+                          <Plug className="w-3 h-3 mr-1" />
+                          Connect
                         </Button>
-                      </div>
-                    ) : (
-                      <Button className="w-full" size="sm">
-                        <Plug className="w-3 h-3 mr-1" />
-                        Connect
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Task History Tab */}
@@ -1021,15 +1089,15 @@ export default function IntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTasks.length}</p>
+                    <p className="text-3xl font-bold">{filteredTasks.length}</p>
                     <p className="text-emerald-200 text-sm">Total Tasks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTasks.filter(t => t.status === 'success').length}</p>
+                    <p className="text-3xl font-bold">{filteredTasks.filter(t => t.status === 'success').length}</p>
                     <p className="text-emerald-200 text-sm">Succeeded</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockTasks.filter(t => t.status === 'error').length}</p>
+                    <p className="text-3xl font-bold">{filteredTasks.filter(t => t.status === 'failed').length}</p>
                     <p className="text-emerald-200 text-sm">Failed</p>
                   </div>
                 </div>
@@ -1052,6 +1120,7 @@ export default function IntegrationsClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.info(`${action.label} action`)}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1079,11 +1148,11 @@ export default function IntegrationsClient() {
                               </div>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
                                 <span>{formatDate(task.startedAt)}</span>
-                                <span>•</span>
+                                <span>-</span>
                                 <span>{task.steps.length} steps</span>
                                 {task.duration > 0 && (
                                   <>
-                                    <span>•</span>
+                                    <span>-</span>
                                     <span>{formatDuration(task.duration)}</span>
                                   </>
                                 )}
@@ -1092,7 +1161,7 @@ export default function IntegrationsClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             {task.status === 'failed' && (
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Replaying task...') }}>
                                 <RotateCcw className="w-3 h-3 mr-1" />
                                 Replay
                               </Button>
@@ -1142,15 +1211,15 @@ export default function IntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWebhooks.length}</p>
+                    <p className="text-3xl font-bold">{webhooks.length}</p>
                     <p className="text-purple-200 text-sm">Endpoints</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWebhooks.filter(w => w.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{webhookStats.active}</p>
                     <p className="text-purple-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockWebhooks.reduce((sum, w) => sum + w.successRate, 0) / mockWebhooks.length}%</p>
+                    <p className="text-3xl font-bold">{webhookStats.avgSuccessRate.toFixed(0)}%</p>
                     <p className="text-purple-200 text-sm">Success</p>
                   </div>
                 </div>
@@ -1160,19 +1229,20 @@ export default function IntegrationsClient() {
             {/* Webhooks Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: RefreshCw, label: 'Retry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Key, label: 'Secrets', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Shield, label: 'Verify', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Eye, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Download, label: 'Export', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: Plus, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowCreateWebhookDialog(true) },
+                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Select a webhook to test') },
+                { icon: RefreshCw, label: 'Retry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Retrying failed deliveries...') },
+                { icon: Key, label: 'Secrets', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Webhook secrets') },
+                { icon: Shield, label: 'Verify', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('SSL verification settings') },
+                { icon: Eye, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Webhook logs') },
+                { icon: Download, label: 'Export', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.info('Exporting webhooks...') },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1182,66 +1252,90 @@ export default function IntegrationsClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Webhook Endpoints</h2>
-              <Button>
+              <Button onClick={() => setShowCreateWebhookDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Webhook
               </Button>
             </div>
 
-            <div className="grid gap-4">
-              {mockWebhooks.map(webhook => (
-                <Card key={webhook.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-lg ${webhook.isActive ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
-                          <Webhook className={`w-5 h-5 ${webhook.isActive ? 'text-green-600' : 'text-gray-500'}`} />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-semibold">{webhook.name}</h3>
-                            <Badge variant="outline">{webhook.method}</Badge>
-                            {webhook.isActive ? (
-                              <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
-                            ) : (
-                              <Badge variant="secondary">Inactive</Badge>
-                            )}
+            {webhooksLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
+              </div>
+            ) : webhooks.length === 0 ? (
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                <CardContent className="py-12 text-center">
+                  <Webhook className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Webhooks Found</h3>
+                  <p className="text-muted-foreground mb-4">Create your first webhook endpoint</p>
+                  <Button onClick={() => setShowCreateWebhookDialog(true)}>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Webhook
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {webhooks.map(webhook => (
+                  <Card key={webhook.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${webhook.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' : 'bg-gray-100 dark:bg-gray-700'}`}>
+                            <Webhook className={`w-5 h-5 ${webhook.status === 'active' ? 'text-green-600' : 'text-gray-500'}`} />
                           </div>
-                          <div className="flex items-center gap-2 mt-1">
-                            <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-mono">
-                              {webhook.url}
-                            </code>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                              <Copy className="w-3 h-3" />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold">{webhook.name}</h3>
+                              {webhook.status === 'active' ? (
+                                <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
+                              ) : (
+                                <Badge variant="secondary">{webhook.status}</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <code className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded font-mono max-w-md truncate">
+                                {webhook.url}
+                              </code>
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => handleCopyUrl(webhook.url)}>
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <p className="text-sm font-medium">{formatNumber(webhook.total_deliveries)}</p>
+                            <p className="text-xs text-muted-foreground">deliveries</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium">{webhook.success_rate.toFixed(0)}%</p>
+                            <p className="text-xs text-muted-foreground">success</p>
+                          </div>
+                          {webhook.last_delivery_at && (
+                            <div className="text-right">
+                              <p className="text-sm font-medium">{formatDate(webhook.last_delivery_at)}</p>
+                              <p className="text-xs text-muted-foreground">last delivery</p>
+                            </div>
+                          )}
+                          <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => handleTestWebhook(webhook)}>
+                              <Play className="w-4 h-4" />
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => setSelectedWebhook(webhook)}>
+                              <Settings className="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleDeleteWebhook(webhook)}>
+                              <Trash2 className="w-4 h-4 text-red-500" />
                             </Button>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="text-right">
-                          <p className="text-sm font-medium">{formatNumber(webhook.triggerCount)}</p>
-                          <p className="text-xs text-muted-foreground">triggers</p>
-                        </div>
-                        {webhook.lastTriggered && (
-                          <div className="text-right">
-                            <p className="text-sm font-medium">{formatDate(webhook.lastTriggered)}</p>
-                            <p className="text-xs text-muted-foreground">last triggered</p>
-                          </div>
-                        )}
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm" onClick={() => setSelectedWebhook(webhook)}>
-                            <Settings className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Analytics Tab */}
@@ -1255,15 +1349,15 @@ export default function IntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockZaps.reduce((sum, z) => sum + z.taskCount, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{workflowStats.totalSteps.toLocaleString()}</p>
                     <p className="text-cyan-200 text-sm">Total Tasks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">99.2%</p>
+                    <p className="text-3xl font-bold">{usageStats.successRate.toFixed(1)}%</p>
                     <p className="text-cyan-200 text-sm">Success Rate</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">45ms</p>
+                    <p className="text-3xl font-bold">{(webhookStats.avgResponseTime || 45).toFixed(0)}ms</p>
                     <p className="text-cyan-200 text-sm">Avg Latency</p>
                   </div>
                 </div>
@@ -1286,6 +1380,7 @@ export default function IntegrationsClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.info(`${action.label} analytics`)}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1340,22 +1435,22 @@ export default function IntegrationsClient() {
                           fill="none"
                           stroke="#22c55e"
                           strokeWidth="12"
-                          strokeDasharray={`${2 * Math.PI * 70 * 0.982} ${2 * Math.PI * 70}`}
+                          strokeDasharray={`${2 * Math.PI * 70 * (usageStats.successRate / 100)} ${2 * Math.PI * 70}`}
                         />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <span className="text-3xl font-bold">98.2%</span>
+                        <span className="text-3xl font-bold">{usageStats.successRate.toFixed(1)}%</span>
                         <span className="text-xs text-muted-foreground">Success</span>
                       </div>
                     </div>
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-green-500" />
-                        <span className="text-sm">Successful: 15,142</span>
+                        <span className="text-sm">Successful: {webhookStats.successfulDeliveries}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 rounded-full bg-red-500" />
-                        <span className="text-sm">Failed: 278</span>
+                        <span className="text-sm">Failed: {webhookStats.totalDeliveries - webhookStats.successfulDeliveries}</span>
                       </div>
                     </div>
                   </div>
@@ -1366,19 +1461,19 @@ export default function IntegrationsClient() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Layers className="w-5 h-5" />
-                    Top Zaps by Usage
+                    Top Workflows by Usage
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockZaps.slice(0, 5).sort((a, b) => b.taskCount - a.taskCount).map((zap, idx) => (
-                      <div key={zap.id} className="flex items-center gap-3">
+                    {workflows.slice(0, 5).map((workflow, idx) => (
+                      <div key={workflow.id} className="flex items-center gap-3">
                         <span className="text-lg font-bold text-muted-foreground w-6">{idx + 1}</span>
                         <div className="flex-1">
-                          <p className="font-medium text-sm">{zap.name}</p>
+                          <p className="font-medium text-sm">{workflow.name}</p>
                           <div className="flex items-center gap-2 mt-1">
-                            <Progress value={(zap.taskCount / mockZaps[0].taskCount) * 100} className="h-2 flex-1" />
-                            <span className="text-xs text-muted-foreground w-16 text-right">{formatNumber(zap.taskCount)}</span>
+                            <Progress value={workflow.completion_rate} className="h-2 flex-1" />
+                            <span className="text-xs text-muted-foreground w-16 text-right">{workflow.total_steps} steps</span>
                           </div>
                         </div>
                       </div>
@@ -1396,15 +1491,15 @@ export default function IntegrationsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockApps.filter(a => a.isConnected).slice(0, 6).map(app => (
+                    {integrations.filter(a => a.is_connected).slice(0, 6).map(app => (
                       <div key={app.id} className="flex items-center gap-3">
-                        <div className="text-xl">{app.icon}</div>
+                        <div className="text-xl">{app.icon || getCategoryIcon(app.category || 'all')}</div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-sm font-medium">{app.name}</span>
-                            <span className="text-xs text-muted-foreground">{formatNumber(app.tasksRun)}</span>
+                            <span className="text-xs text-muted-foreground">{formatNumber(app.api_calls_count)}</span>
                           </div>
-                          <Progress value={(app.tasksRun / mockApps[0].tasksRun) * 100} className="h-2" />
+                          <Progress value={Math.min(100, (app.api_calls_count / Math.max(1, integrations[0]?.api_calls_count || 1)) * 100)} className="h-2" />
                         </div>
                       </div>
                     ))}
@@ -1429,13 +1524,13 @@ export default function IntegrationsClient() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-sm">Production Key</p>
-                        <code className="text-xs text-muted-foreground">zk_live_•••••••••••••••</code>
+                        <code className="text-xs text-muted-foreground">zk_live_********************</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => toast.info('Revealing key...')}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_live_xxx'); toast.success('Copied!') }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1445,19 +1540,19 @@ export default function IntegrationsClient() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-sm">Test Key</p>
-                        <code className="text-xs text-muted-foreground">zk_test_•••••••••••••••</code>
+                        <code className="text-xs text-muted-foreground">zk_test_********************</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => toast.info('Revealing key...')}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_test_xxx'); toast.success('Copied!') }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full" onClick={() => toast.info('Regenerating keys...')}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Regenerate Keys
                   </Button>
@@ -1480,7 +1575,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">Enabled</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">Manage</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Managing 2FA...')}>Manage</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center gap-3">
@@ -1490,7 +1585,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">3 IPs configured</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">Configure</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Configuring IPs...')}>Configure</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center gap-3">
@@ -1500,7 +1595,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">90-day retention</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm">View</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Viewing audit logs...')}>View</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1520,14 +1615,14 @@ export default function IntegrationsClient() {
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span>Tasks</span>
-                          <span>{formatNumber(mockUsageStats.tasksUsed)} / {formatNumber(mockUsageStats.tasksLimit)}</span>
+                          <span>{formatNumber(usageStats.tasksUsed)} / {formatNumber(usageStats.tasksLimit)}</span>
                         </div>
                         <Progress value={usagePercent} className="h-2" />
                         <div className="flex items-center justify-between text-sm">
                           <span>Zaps</span>
-                          <span>{mockUsageStats.zapsActive} / {mockUsageStats.zapsLimit}</span>
+                          <span>{usageStats.zapsActive} / {usageStats.zapsLimit}</span>
                         </div>
-                        <Progress value={(mockUsageStats.zapsActive / mockUsageStats.zapsLimit) * 100} className="h-2" />
+                        <Progress value={(usageStats.zapsActive / usageStats.zapsLimit) * 100} className="h-2" />
                       </div>
                     </div>
                     <div className="md:col-span-2 space-y-4">
@@ -1542,10 +1637,10 @@ export default function IntegrationsClient() {
                         </div>
                       </div>
                       <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1">
+                        <Button variant="outline" className="flex-1" onClick={() => toast.info('Viewing invoices...')}>
                           View Invoices
                         </Button>
-                        <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-600">
+                        <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-600" onClick={() => toast.info('Upgrading plan...')}>
                           Upgrade Plan
                         </Button>
                       </div>
@@ -1563,7 +1658,7 @@ export default function IntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integrations Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.info(`Action: ${insight.title}`)}
             />
           </div>
           <div className="space-y-6">
@@ -1598,87 +1693,80 @@ export default function IntegrationsClient() {
                 <Zap className="w-5 h-5" />
                 {selectedZap?.name}
               </DialogTitle>
-              <DialogDescription>{selectedZap?.description}</DialogDescription>
+              <DialogDescription>{selectedZap?.description || 'No description'}</DialogDescription>
             </DialogHeader>
             {selectedZap && (
               <div className="space-y-6">
                 <div className="flex items-center gap-2">
                   <Badge className={getStatusColor(selectedZap.status)}>{selectedZap.status}</Badge>
+                  <Badge variant="outline">{selectedZap.type}</Badge>
+                  <Badge variant="outline">{selectedZap.priority} priority</Badge>
                   {selectedZap.tags.map(tag => (
                     <Badge key={tag} variant="outline">{tag}</Badge>
                   ))}
                 </div>
 
-                {/* Workflow Visualization */}
+                {/* Workflow Info */}
                 <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                  <h4 className="font-medium mb-4">Workflow</h4>
-                  <div className="space-y-4">
-                    {/* Trigger */}
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-2xl">
-                        {selectedZap.trigger.appIcon}
-                      </div>
-                      <div className="flex-1">
-                        <Badge className="mb-1">Trigger</Badge>
-                        <p className="font-medium">{selectedZap.trigger.appName}</p>
-                        <p className="text-sm text-muted-foreground">{selectedZap.trigger.event}</p>
-                      </div>
+                  <h4 className="font-medium mb-4">Workflow Details</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Steps</p>
+                      <p className="font-medium">{selectedZap.total_steps}</p>
                     </div>
-                    {/* Actions */}
-                    {selectedZap.actions.map((action, idx) => (
-                      <div key={action.id} className="flex items-center gap-3 ml-6">
-                        <div className="w-0.5 h-8 bg-gray-300 dark:bg-gray-600 -mt-8 ml-5" />
-                        <div className="w-12 h-12 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-2xl">
-                          {action.appIcon}
-                        </div>
-                        <div className="flex-1">
-                          <Badge variant="secondary" className="mb-1">Action {idx + 1}</Badge>
-                          <p className="font-medium">{action.appName}</p>
-                          <p className="text-sm text-muted-foreground">{action.event}</p>
-                        </div>
-                      </div>
-                    ))}
+                    <div>
+                      <p className="text-sm text-muted-foreground">Current Step</p>
+                      <p className="font-medium">{selectedZap.current_step}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Completion Rate</p>
+                      <p className="font-medium">{selectedZap.completion_rate}%</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Approvals</p>
+                      <p className="font-medium">{selectedZap.approvals_received}/{selectedZap.approvals_required}</p>
+                    </div>
                   </div>
                 </div>
 
                 {/* Stats */}
                 <div className="grid grid-cols-4 gap-4">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                    <p className="text-2xl font-bold">{formatNumber(selectedZap.taskCount)}</p>
-                    <p className="text-xs text-muted-foreground">Total Tasks</p>
+                    <p className="text-2xl font-bold">{selectedZap.total_steps}</p>
+                    <p className="text-xs text-muted-foreground">Total Steps</p>
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                    <p className="text-2xl font-bold text-green-600">{selectedZap.successRate}%</p>
-                    <p className="text-xs text-muted-foreground">Success Rate</p>
+                    <p className="text-2xl font-bold text-green-600">{selectedZap.completion_rate}%</p>
+                    <p className="text-xs text-muted-foreground">Completion</p>
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                    <p className="text-2xl font-bold">{selectedZap.avgExecutionTime}s</p>
-                    <p className="text-xs text-muted-foreground">Avg Duration</p>
+                    <p className="text-2xl font-bold">{selectedZap.current_step}</p>
+                    <p className="text-xs text-muted-foreground">Current Step</p>
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                    <p className="text-2xl font-bold">{selectedZap.actions.length + 1}</p>
-                    <p className="text-xs text-muted-foreground">Steps</p>
+                    <p className="text-2xl font-bold">{selectedZap.assigned_to.length}</p>
+                    <p className="text-xs text-muted-foreground">Assigned</p>
                   </div>
                 </div>
 
                 <div className="flex gap-3">
                   {selectedZap.status === 'active' ? (
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => handleToggleZapStatus(selectedZap)}>
                       <Pause className="w-4 h-4 mr-2" />
                       Pause Zap
                     </Button>
                   ) : (
-                    <Button className="flex-1">
+                    <Button className="flex-1" onClick={() => handleToggleZapStatus(selectedZap)}>
                       <Play className="w-4 h-4 mr-2" />
                       Turn On
                     </Button>
                   )}
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Editing zap...')}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Zap
                   </Button>
-                  <Button variant="outline">
-                    <Copy className="w-4 h-4" />
+                  <Button variant="destructive" onClick={() => handleDeleteZap(selectedZap)}>
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
@@ -1757,7 +1845,7 @@ export default function IntegrationsClient() {
                 </div>
 
                 {selectedTask.status === 'failed' && (
-                  <Button className="w-full">
+                  <Button className="w-full" onClick={() => toast.info('Replaying task...')}>
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Replay Task
                   </Button>
@@ -1772,63 +1860,64 @@ export default function IntegrationsClient() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-3">
-                <span className="text-3xl">{selectedApp?.icon}</span>
+                <span className="text-3xl">{selectedApp?.icon || getCategoryIcon(selectedApp?.category || 'all')}</span>
                 {selectedApp?.name}
               </DialogTitle>
-              <DialogDescription>{selectedApp?.description}</DialogDescription>
+              <DialogDescription>{selectedApp?.description || 'No description'}</DialogDescription>
             </DialogHeader>
             {selectedApp && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="capitalize">{selectedApp.category}</Badge>
-                  {selectedApp.isPremium && <Badge>Premium</Badge>}
-                  {selectedApp.isConnected && (
+                  <Badge variant="outline" className="capitalize">{selectedApp.category || 'General'}</Badge>
+                  {selectedApp.is_connected && (
                     <Badge className="bg-green-100 text-green-700">Connected</Badge>
                   )}
                 </div>
 
-                {selectedApp.isConnected ? (
+                {selectedApp.is_connected ? (
                   <>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-xs text-muted-foreground">Connected Since</p>
-                        <p className="font-medium">{selectedApp.connectedAt}</p>
+                        <p className="font-medium">{selectedApp.connected_at ? formatDate(selectedApp.connected_at) : 'N/A'}</p>
                       </div>
                       <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Tasks Run</p>
-                        <p className="font-medium">{formatNumber(selectedApp.tasksRun)}</p>
+                        <p className="text-xs text-muted-foreground">API Calls</p>
+                        <p className="font-medium">{formatNumber(selectedApp.api_calls_count)}</p>
                       </div>
                     </div>
 
-                    <div>
-                      <h4 className="font-medium mb-2">Permissions</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedApp.scopes.map(scope => (
-                          <Badge key={scope} variant="outline" className="text-xs">{scope}</Badge>
-                        ))}
+                    {selectedApp.permissions.length > 0 && (
+                      <div>
+                        <h4 className="font-medium mb-2">Permissions</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedApp.permissions.map(scope => (
+                            <Badge key={scope} variant="outline" className="text-xs">{scope}</Badge>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="flex gap-3">
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1" onClick={() => handleSyncApp(selectedApp)}>
                         <RefreshCw className="w-4 h-4 mr-2" />
-                        Reconnect
+                        Sync Now
                       </Button>
-                      <Button variant="destructive" className="flex-1">
+                      <Button variant="destructive" className="flex-1" onClick={() => handleDisconnectApp(selectedApp)}>
                         Disconnect
                       </Button>
                     </div>
                   </>
                 ) : (
-                  <Button className="w-full">
+                  <Button className="w-full" onClick={() => handleConnectApp(selectedApp)}>
                     <Plug className="w-4 h-4 mr-2" />
                     Connect {selectedApp.name}
                   </Button>
                 )}
 
-                <Button variant="outline" className="w-full">
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View Documentation
+                <Button variant="outline" className="w-full" onClick={() => handleDeleteIntegration(selectedApp)}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Remove Integration
                 </Button>
               </div>
             )}
@@ -1847,11 +1936,10 @@ export default function IntegrationsClient() {
             {selectedWebhook && (
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline">{selectedWebhook.method}</Badge>
-                  {selectedWebhook.isActive ? (
+                  {selectedWebhook.status === 'active' ? (
                     <Badge className="bg-green-100 text-green-700">Active</Badge>
                   ) : (
-                    <Badge variant="secondary">Inactive</Badge>
+                    <Badge variant="secondary">{selectedWebhook.status}</Badge>
                   )}
                 </div>
 
@@ -1861,46 +1949,237 @@ export default function IntegrationsClient() {
                     <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded overflow-x-auto">
                       {selectedWebhook.url}
                     </code>
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={() => handleCopyUrl(selectedWebhook.url)}>
                       <Copy className="w-4 h-4" />
                     </Button>
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-sm font-medium">Secret Key</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">
-                      {selectedWebhook.secret.substring(0, 12)}•••••••
-                    </code>
-                    <Button variant="ghost" size="sm">
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                {selectedWebhook.secret && (
+                  <div>
+                    <label className="text-sm font-medium">Secret Key</label>
+                    <div className="flex items-center gap-2 mt-1">
+                      <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">
+                        {selectedWebhook.secret.substring(0, 12)}********************
+                      </code>
+                      <Button variant="ghost" size="sm" onClick={() => toast.info('Revealing secret...')}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Total Triggers</p>
-                    <p className="font-medium">{formatNumber(selectedWebhook.triggerCount)}</p>
+                    <p className="text-xs text-muted-foreground">Total Deliveries</p>
+                    <p className="font-medium">{formatNumber(selectedWebhook.total_deliveries)}</p>
                   </div>
                   <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                    <p className="text-xs text-muted-foreground">Created</p>
-                    <p className="font-medium">{selectedWebhook.createdAt}</p>
+                    <p className="text-xs text-muted-foreground">Success Rate</p>
+                    <p className="font-medium">{selectedWebhook.success_rate.toFixed(0)}%</p>
                   </div>
                 </div>
 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => handleTestWebhook(selectedWebhook)}>
                     Test Webhook
                   </Button>
-                  <Button variant="destructive" className="flex-1">
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
+                  <Button variant={selectedWebhook.status === 'active' ? 'outline' : 'default'} className="flex-1" onClick={() => handleToggleWebhook(selectedWebhook)}>
+                    {selectedWebhook.status === 'active' ? 'Pause' : 'Activate'}
                   </Button>
                 </div>
+                <Button variant="destructive" className="w-full" onClick={() => handleDeleteWebhook(selectedWebhook)}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Integration Dialog */}
+        <Dialog open={showCreateIntegrationDialog} onOpenChange={setShowCreateIntegrationDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Integration</DialogTitle>
+              <DialogDescription>Connect a new app to your workflow</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="int-name">Name *</Label>
+                <Input
+                  id="int-name"
+                  placeholder="e.g., Slack"
+                  value={integrationForm.name}
+                  onChange={(e) => setIntegrationForm({ ...integrationForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="int-provider">Provider *</Label>
+                <Input
+                  id="int-provider"
+                  placeholder="e.g., slack.com"
+                  value={integrationForm.provider}
+                  onChange={(e) => setIntegrationForm({ ...integrationForm, provider: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="int-category">Category</Label>
+                <Select
+                  value={integrationForm.category}
+                  onValueChange={(value) => setIntegrationForm({ ...integrationForm, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="communication">Communication</SelectItem>
+                    <SelectItem value="productivity">Productivity</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="payments">Payments</SelectItem>
+                    <SelectItem value="crm">CRM</SelectItem>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="storage">Storage</SelectItem>
+                    <SelectItem value="social">Social</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="int-desc">Description</Label>
+                <Textarea
+                  id="int-desc"
+                  placeholder="What does this integration do?"
+                  value={integrationForm.description}
+                  onChange={(e) => setIntegrationForm({ ...integrationForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateIntegrationDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateIntegration} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                Add Integration
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Zap Dialog */}
+        <Dialog open={showCreateZapDialog} onOpenChange={setShowCreateZapDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Zap</DialogTitle>
+              <DialogDescription>Set up a new automation workflow</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="zap-name">Name *</Label>
+                <Input
+                  id="zap-name"
+                  placeholder="e.g., New Lead Notification"
+                  value={workflowForm.name}
+                  onChange={(e) => setWorkflowForm({ ...workflowForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="zap-type">Type</Label>
+                <Select
+                  value={workflowForm.type}
+                  onValueChange={(value: WorkflowType['type']) => setWorkflowForm({ ...workflowForm, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="integration">Integration</SelectItem>
+                    <SelectItem value="approval">Approval</SelectItem>
+                    <SelectItem value="review">Review</SelectItem>
+                    <SelectItem value="processing">Processing</SelectItem>
+                    <SelectItem value="notification">Notification</SelectItem>
+                    <SelectItem value="data-sync">Data Sync</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="zap-priority">Priority</Label>
+                <Select
+                  value={workflowForm.priority}
+                  onValueChange={(value: WorkflowType['priority']) => setWorkflowForm({ ...workflowForm, priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="zap-desc">Description</Label>
+                <Textarea
+                  id="zap-desc"
+                  placeholder="What does this automation do?"
+                  value={workflowForm.description}
+                  onChange={(e) => setWorkflowForm({ ...workflowForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateZapDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateZap} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Zap className="w-4 h-4 mr-2" />}
+                Create Zap
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Webhook Dialog */}
+        <Dialog open={showCreateWebhookDialog} onOpenChange={setShowCreateWebhookDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Create New Webhook</DialogTitle>
+              <DialogDescription>Set up a new webhook endpoint</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="wh-name">Name *</Label>
+                <Input
+                  id="wh-name"
+                  placeholder="e.g., Order Webhook"
+                  value={webhookForm.name}
+                  onChange={(e) => setWebhookForm({ ...webhookForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="wh-url">URL *</Label>
+                <Input
+                  id="wh-url"
+                  placeholder="https://your-endpoint.com/webhook"
+                  value={webhookForm.url}
+                  onChange={(e) => setWebhookForm({ ...webhookForm, url: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="wh-desc">Description</Label>
+                <Textarea
+                  id="wh-desc"
+                  placeholder="What is this webhook for?"
+                  value={webhookForm.description}
+                  onChange={(e) => setWebhookForm({ ...webhookForm, description: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateWebhookDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateWebhook} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Webhook className="w-4 h-4 mr-2" />}
+                Create Webhook
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

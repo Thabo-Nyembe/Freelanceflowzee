@@ -1,6 +1,8 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -141,6 +143,9 @@ const mockActivities = analyticsActivities
 const mockQuickActions = analyticsQuickActions
 
 export default function AnalyticsClient() {
+  const supabase = createClientComponentClient()
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [timeRange, setTimeRange] = useState('30d')
   const [searchQuery, setSearchQuery] = useState('')
@@ -153,6 +158,115 @@ export default function AnalyticsClient() {
   const [isLive, setIsLive] = useState(true)
   const [cohortType, setCohortType] = useState<'retention' | 'revenue' | 'engagement'>('retention')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Database state
+  const [dbFunnels, setDbFunnels] = useState<any[]>([])
+  const [dbReports, setDbReports] = useState<any[]>([])
+  const [dbDashboards, setDbDashboards] = useState<any[]>([])
+  const [dbMetrics, setDbMetrics] = useState<any[]>([])
+
+  // Form state for creating funnel
+  const [funnelForm, setFunnelForm] = useState({
+    name: '',
+    description: '',
+    steps: [] as { name: string; event_name: string }[]
+  })
+
+  // Form state for creating report
+  const [reportForm, setReportForm] = useState({
+    name: '',
+    type: 'scheduled' as 'scheduled' | 'one-time',
+    frequency: 'weekly' as 'daily' | 'weekly' | 'monthly',
+    format: 'pdf' as 'pdf' | 'csv' | 'excel',
+    recipients: ''
+  })
+
+  // Form state for creating dashboard
+  const [dashboardForm, setDashboardForm] = useState({
+    name: '',
+    description: '',
+    is_default: false
+  })
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const id = await getUserId()
+      setUserId(id)
+    }
+    fetchUserId()
+  }, [getUserId])
+
+  // Fetch data from Supabase
+  const fetchFunnels = useCallback(async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('analytics_conversion_funnels')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setDbFunnels(data || [])
+    } catch (err) {
+      console.error('Error fetching funnels:', err)
+    }
+  }, [userId, supabase])
+
+  const fetchReports = useCallback(async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('analytics_reports')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setDbReports(data || [])
+    } catch (err) {
+      console.error('Error fetching reports:', err)
+    }
+  }, [userId, supabase])
+
+  const fetchDashboards = useCallback(async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('analytics_dashboards')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setDbDashboards(data || [])
+    } catch (err) {
+      console.error('Error fetching dashboards:', err)
+    }
+  }, [userId, supabase])
+
+  const fetchMetrics = useCallback(async () => {
+    if (!userId) return
+    try {
+      const { data, error } = await supabase
+        .from('analytics_metrics')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      setDbMetrics(data || [])
+    } catch (err) {
+      console.error('Error fetching metrics:', err)
+    }
+  }, [userId, supabase])
+
+  useEffect(() => {
+    if (userId) {
+      fetchFunnels()
+      fetchReports()
+      fetchDashboards()
+      fetchMetrics()
+    }
+  }, [userId, fetchFunnels, fetchReports, fetchDashboards, fetchMetrics])
 
   // Filter metrics
   const filteredMetrics = useMemo(() => {
@@ -162,35 +276,287 @@ export default function AnalyticsClient() {
     )
   }, [searchQuery])
 
-  // Handlers
+  // CRUD Operations
+  const handleCreateFunnel = async () => {
+    if (!userId) {
+      toast.error('Error', { description: 'You must be logged in to create a funnel' })
+      return
+    }
+    if (!funnelForm.name.trim()) {
+      toast.error('Error', { description: 'Funnel name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('analytics_conversion_funnels')
+        .insert({
+          user_id: userId,
+          name: funnelForm.name,
+          description: funnelForm.description,
+          steps: funnelForm.steps,
+          status: 'active',
+          total_conversion: 0
+        })
+        .select()
+        .single()
+      if (error) throw error
+      toast.success('Funnel created', { description: `"${funnelForm.name}" has been created` })
+      setFunnelForm({ name: '', description: '', steps: [] })
+      setShowCreateFunnel(false)
+      fetchFunnels()
+    } catch (err: any) {
+      toast.error('Error creating funnel', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteFunnel = async (funnelId: string) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_conversion_funnels')
+        .delete()
+        .eq('id', funnelId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Funnel deleted', { description: 'Funnel has been removed' })
+      fetchFunnels()
+    } catch (err: any) {
+      toast.error('Error deleting funnel', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCreateReport = async () => {
+    if (!userId) {
+      toast.error('Error', { description: 'You must be logged in to create a report' })
+      return
+    }
+    if (!reportForm.name.trim()) {
+      toast.error('Error', { description: 'Report name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const recipients = reportForm.recipients.split(',').map(r => r.trim()).filter(Boolean)
+      const { data, error } = await supabase
+        .from('analytics_reports')
+        .insert({
+          user_id: userId,
+          name: reportForm.name,
+          type: reportForm.type,
+          frequency: reportForm.type === 'scheduled' ? reportForm.frequency : null,
+          format: reportForm.format,
+          recipients,
+          status: 'active',
+          last_run: new Date().toISOString()
+        })
+        .select()
+        .single()
+      if (error) throw error
+      toast.success('Report created', { description: `"${reportForm.name}" has been created` })
+      setReportForm({ name: '', type: 'scheduled', frequency: 'weekly', format: 'pdf', recipients: '' })
+      setShowCreateReport(false)
+      fetchReports()
+    } catch (err: any) {
+      toast.error('Error creating report', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleRunReport = async (reportId: string, reportName: string) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_reports')
+        .update({ last_run: new Date().toISOString() })
+        .eq('id', reportId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Report running', { description: `"${reportName}" is being generated` })
+      fetchReports()
+    } catch (err: any) {
+      toast.error('Error running report', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteReport = async (reportId: string) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_reports')
+        .delete()
+        .eq('id', reportId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Report deleted', { description: 'Report has been removed' })
+      fetchReports()
+    } catch (err: any) {
+      toast.error('Error deleting report', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleCreateDashboard = async () => {
+    if (!userId) {
+      toast.error('Error', { description: 'You must be logged in to create a dashboard' })
+      return
+    }
+    if (!dashboardForm.name.trim()) {
+      toast.error('Error', { description: 'Dashboard name is required' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('analytics_dashboards')
+        .insert({
+          user_id: userId,
+          name: dashboardForm.name,
+          description: dashboardForm.description,
+          is_default: dashboardForm.is_default,
+          widgets: [],
+          shared_with: [],
+          last_viewed: new Date().toISOString()
+        })
+        .select()
+        .single()
+      if (error) throw error
+      toast.success('Dashboard created', { description: `"${dashboardForm.name}" has been created` })
+      setDashboardForm({ name: '', description: '', is_default: false })
+      setShowCreateDashboard(false)
+      fetchDashboards()
+    } catch (err: any) {
+      toast.error('Error creating dashboard', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteDashboard = async (dashboardId: string) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_dashboards')
+        .delete()
+        .eq('id', dashboardId)
+        .eq('user_id', userId)
+      if (error) throw error
+      toast.success('Dashboard deleted', { description: 'Dashboard has been removed' })
+      fetchDashboards()
+    } catch (err: any) {
+      toast.error('Error deleting dashboard', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleShareDashboard = async (dashboardId: string) => {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/dashboard/analytics-v2?dashboard=${dashboardId}`)
+      toast.success('Link copied', { description: 'Dashboard share link copied to clipboard' })
+    } catch (err) {
+      toast.error('Failed to copy link', { description: 'Please try again' })
+    }
+  }
+
+  const handleDuplicateDashboard = async (dashboard: any) => {
+    if (!userId) return
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('analytics_dashboards')
+        .insert({
+          user_id: userId,
+          name: `${dashboard.name} (Copy)`,
+          description: dashboard.description,
+          is_default: false,
+          widgets: dashboard.widgets || [],
+          shared_with: [],
+          last_viewed: new Date().toISOString()
+        })
+        .select()
+        .single()
+      if (error) throw error
+      toast.success('Dashboard duplicated', { description: `"${dashboard.name}" has been duplicated` })
+      fetchDashboards()
+    } catch (err: any) {
+      toast.error('Error duplicating dashboard', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // UI Handlers
   const handleNotifications = () => {
-    toast.info('Notifications', {
-      description: 'Opening notification settings...'
-    })
+    setSettingsTab('notifications')
+    setActiveTab('settings')
+    toast.info('Notifications', { description: 'Opening notification settings...' })
   }
 
-  const handleExport = () => {
-    toast.success('Export started', {
-      description: 'Your analytics report is being generated'
-    })
+  const handleExport = async () => {
+    toast.success('Export started', { description: 'Your analytics report is being generated' })
+    // In production, this would trigger a real export job
   }
 
-  const handleShare = () => {
-    toast.success('Link copied', {
-      description: 'Share link copied to clipboard'
-    })
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    } catch (err) {
+      toast.error('Failed to copy link', { description: 'Please try again' })
+    }
   }
 
   const handleFilters = () => {
-    toast.info('Filters', {
-      description: 'Opening filter panel...'
-    })
+    toast.info('Filters', { description: 'Opening filter panel...' })
   }
 
-  const handleRefresh = () => {
-    toast.success('Data refreshed', {
-      description: 'Analytics data updated'
-    })
+  const handleRefresh = async () => {
+    setIsLoading(true)
+    try {
+      await Promise.all([fetchFunnels(), fetchReports(), fetchDashboards(), fetchMetrics()])
+      toast.success('Data refreshed', { description: 'Analytics data updated' })
+    } catch (err) {
+      toast.error('Refresh failed', { description: 'Please try again' })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleSetupAlert = async () => {
+    if (!userId || !selectedMetric) return
+    setIsLoading(true)
+    try {
+      const { error } = await supabase
+        .from('analytics_alerts')
+        .insert({
+          user_id: userId,
+          metric_name: selectedMetric.name,
+          metric_type: selectedMetric.type,
+          threshold_type: 'above',
+          threshold_value: selectedMetric.value * 1.2,
+          is_active: true,
+          notification_channels: ['email', 'in_app']
+        })
+      if (error) throw error
+      toast.success('Alert created', { description: `Alert set for "${selectedMetric.name}"` })
+    } catch (err: any) {
+      toast.error('Error creating alert', { description: err.message })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   // Format value based on type
@@ -394,16 +760,16 @@ export default function AnalyticsClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'New Metric', desc: 'Create custom', color: 'text-indigo-500' },
-                { icon: Target, label: 'New Funnel', desc: 'Track conversions', color: 'text-purple-500' },
-                { icon: FileText, label: 'New Report', desc: 'Schedule reports', color: 'text-pink-500' },
-                { icon: Layout, label: 'Dashboard', desc: 'Create view', color: 'text-blue-500' },
-                { icon: Bell, label: 'Alert', desc: 'Set threshold', color: 'text-amber-500' },
-                { icon: Share2, label: 'Share', desc: 'Export data', color: 'text-green-500' },
-                { icon: Activity, label: 'Live View', desc: 'Real-time', color: 'text-red-500' },
-                { icon: Zap, label: 'Automate', desc: 'Set triggers', color: 'text-cyan-500' },
+                { icon: Plus, label: 'New Metric', desc: 'Create custom', color: 'text-indigo-500', action: () => setActiveTab('metrics') },
+                { icon: Target, label: 'New Funnel', desc: 'Track conversions', color: 'text-purple-500', action: () => setShowCreateFunnel(true) },
+                { icon: FileText, label: 'New Report', desc: 'Schedule reports', color: 'text-pink-500', action: () => setShowCreateReport(true) },
+                { icon: Layout, label: 'Dashboard', desc: 'Create view', color: 'text-blue-500', action: () => setShowCreateDashboard(true) },
+                { icon: Bell, label: 'Alert', desc: 'Set threshold', color: 'text-amber-500', action: handleNotifications },
+                { icon: Share2, label: 'Share', desc: 'Export data', color: 'text-green-500', action: handleShare },
+                { icon: Activity, label: 'Live View', desc: 'Real-time', color: 'text-red-500', action: () => setActiveTab('realtime') },
+                { icon: Zap, label: 'Automate', desc: 'Set triggers', color: 'text-cyan-500', action: () => { setSettingsTab('advanced'); setActiveTab('settings') } },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -662,30 +1028,42 @@ export default function AnalyticsClient() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {mockFunnels.map((funnel) => (
-                <Card key={funnel.id} className="hover:shadow-lg transition-all cursor-pointer" onClick={() => setSelectedFunnel(funnel)}>
-                  <CardHeader>
+              {/* Show database funnels first, then mock funnels as fallback */}
+              {(dbFunnels.length > 0 ? dbFunnels : mockFunnels).map((funnel) => (
+                <Card key={funnel.id} className="hover:shadow-lg transition-all cursor-pointer group">
+                  <CardHeader onClick={() => setSelectedFunnel(funnel)}>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{funnel.name}</CardTitle>
                       <Badge variant={funnel.status === 'active' ? 'default' : 'secondary'}>{funnel.status}</Badge>
                     </div>
-                    <CardDescription>Overall conversion: {funnel.totalConversion}%</CardDescription>
+                    <CardDescription>Overall conversion: {funnel.totalConversion || funnel.total_conversion || 0}%</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {funnel.steps.map((step, idx) => (
+                      {(funnel.steps || []).map((step: any, idx: number) => (
                         <div key={idx} className="flex items-center gap-2">
                           <div className="text-xs text-gray-500 w-6">{idx + 1}</div>
                           <div className="flex-1">
-                            <Progress value={step.conversion} className="h-2" />
+                            <Progress value={step.conversion || 0} className="h-2" />
                           </div>
-                          <div className="text-xs text-gray-500 w-12 text-right">{step.conversion}%</div>
+                          <div className="text-xs text-gray-500 w-12 text-right">{step.conversion || 0}%</div>
                         </div>
                       ))}
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center justify-between text-sm text-gray-500">
-                      <span>{funnel.steps.length} steps</span>
-                      <span>Created {funnel.createdAt}</span>
+                      <span>{(funnel.steps || []).length} steps</span>
+                      <div className="flex items-center gap-2">
+                        <span>Created {funnel.createdAt || (funnel.created_at ? new Date(funnel.created_at).toLocaleDateString() : 'Recently')}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
+                          onClick={(e) => { e.stopPropagation(); handleDeleteFunnel(funnel.id) }}
+                          disabled={isLoading}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -1014,7 +1392,8 @@ export default function AnalyticsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockReports.map((report) => (
+              {/* Show database reports first, then mock reports as fallback */}
+              {(dbReports.length > 0 ? dbReports : mockReports).map((report) => (
                 <Card key={report.id} className="hover:shadow-lg transition-all">
                   <CardHeader>
                     <div className="flex items-center justify-between">
@@ -1029,26 +1408,37 @@ export default function AnalyticsClient() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-500">Format</span>
-                        <Badge variant="outline">{report.format.toUpperCase()}</Badge>
+                        <Badge variant="outline">{(report.format || 'pdf').toUpperCase()}</Badge>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-500">Last Run</span>
-                        <span>{report.lastRun}</span>
+                        <span>{report.lastRun || report.last_run ? new Date(report.lastRun || report.last_run).toLocaleDateString() : 'Never'}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-500">Recipients</span>
-                        <span>{report.recipients.length} email(s)</span>
+                        <span>{(report.recipients || []).length} email(s)</span>
                       </div>
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                        disabled={isLoading}
+                        onClick={() => handleRunReport(report.id, report.name)}
+                      >
                         <Play className="h-4 w-4 mr-1" />
                         Run Now
                       </Button>
                       <Button variant="outline" size="sm">
                         <Edit3 className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isLoading}
+                        onClick={() => handleDeleteReport(report.id)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1117,16 +1507,23 @@ export default function AnalyticsClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockDashboards.map((dashboard) => (
+              {/* Show database dashboards first, then mock dashboards as fallback */}
+              {(dbDashboards.length > 0 ? dbDashboards : mockDashboards).map((dashboard) => (
                 <Card key={dashboard.id} className="hover:shadow-lg transition-all cursor-pointer group">
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg flex items-center gap-2">
                         {dashboard.name}
-                        {dashboard.isDefault && <Badge variant="secondary" className="text-xs">Default</Badge>}
+                        {(dashboard.isDefault || dashboard.is_default) && <Badge variant="secondary" className="text-xs">Default</Badge>}
                       </CardTitle>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100">
-                        <MoreVertical className="h-4 w-4" />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="opacity-0 group-hover:opacity-100"
+                        onClick={() => handleDeleteDashboard(dashboard.id)}
+                        disabled={isLoading}
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </CardHeader>
@@ -1137,11 +1534,11 @@ export default function AnalyticsClient() {
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Last viewed</span>
-                        <span>{dashboard.lastViewed}</span>
+                        <span>{dashboard.lastViewed || dashboard.last_viewed ? new Date(dashboard.lastViewed || dashboard.last_viewed).toLocaleDateString() : 'Never'}</span>
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-gray-500">Shared with</span>
-                        <span>{dashboard.sharedWith.join(', ')}</span>
+                        <span>{(dashboard.sharedWith || dashboard.shared_with || []).length > 0 ? (dashboard.sharedWith || dashboard.shared_with).join(', ') : 'No one'}</span>
                       </div>
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center gap-2">
@@ -1149,10 +1546,19 @@ export default function AnalyticsClient() {
                         <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShareDashboard(dashboard.id)}
+                      >
                         <Share2 className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={isLoading}
+                        onClick={() => handleDuplicateDashboard(dashboard)}
+                      >
                         <Copy className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1790,7 +2196,9 @@ export default function AnalyticsClient() {
                   <div className="text-center py-8">
                     <Bell className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                     <p className="text-sm text-gray-500">No alerts configured for this metric</p>
-                    <Button className="mt-3">Set Up Alert</Button>
+                    <Button className="mt-3" onClick={handleSetupAlert} disabled={isLoading}>
+                      {isLoading ? 'Setting up...' : 'Set Up Alert'}
+                    </Button>
                   </div>
                 </TabsContent>
                 <TabsContent value="correlations" className="mt-4">
@@ -1810,6 +2218,182 @@ export default function AnalyticsClient() {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Create Funnel Dialog */}
+        <Dialog open={showCreateFunnel} onOpenChange={setShowCreateFunnel}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Funnel</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="funnel-name">Funnel Name</Label>
+                <Input
+                  id="funnel-name"
+                  placeholder="e.g., Sign-up Funnel"
+                  value={funnelForm.name}
+                  onChange={(e) => setFunnelForm({ ...funnelForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="funnel-description">Description</Label>
+                <Textarea
+                  id="funnel-description"
+                  placeholder="Describe this funnel..."
+                  value={funnelForm.description}
+                  onChange={(e) => setFunnelForm({ ...funnelForm, description: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowCreateFunnel(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateFunnel} disabled={isLoading}>
+                  {isLoading ? 'Creating...' : 'Create Funnel'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Report Dialog */}
+        <Dialog open={showCreateReport} onOpenChange={setShowCreateReport}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Report</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="report-name">Report Name</Label>
+                <Input
+                  id="report-name"
+                  placeholder="e.g., Weekly Performance Report"
+                  value={reportForm.name}
+                  onChange={(e) => setReportForm({ ...reportForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Report Type</Label>
+                <Select
+                  value={reportForm.type}
+                  onValueChange={(v: 'scheduled' | 'one-time') => setReportForm({ ...reportForm, type: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="one-time">One-time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {reportForm.type === 'scheduled' && (
+                <div>
+                  <Label>Frequency</Label>
+                  <Select
+                    value={reportForm.frequency}
+                    onValueChange={(v: 'daily' | 'weekly' | 'monthly') => setReportForm({ ...reportForm, frequency: v })}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">Daily</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div>
+                <Label>Format</Label>
+                <Select
+                  value={reportForm.format}
+                  onValueChange={(v: 'pdf' | 'csv' | 'excel') => setReportForm({ ...reportForm, format: v })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pdf">PDF</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="excel">Excel</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="report-recipients">Recipients (comma-separated emails)</Label>
+                <Input
+                  id="report-recipients"
+                  placeholder="email@example.com, another@example.com"
+                  value={reportForm.recipients}
+                  onChange={(e) => setReportForm({ ...reportForm, recipients: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowCreateReport(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateReport} disabled={isLoading}>
+                  {isLoading ? 'Creating...' : 'Create Report'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Dashboard Dialog */}
+        <Dialog open={showCreateDashboard} onOpenChange={setShowCreateDashboard}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Dashboard</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <Label htmlFor="dashboard-name">Dashboard Name</Label>
+                <Input
+                  id="dashboard-name"
+                  placeholder="e.g., Executive Overview"
+                  value={dashboardForm.name}
+                  onChange={(e) => setDashboardForm({ ...dashboardForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="dashboard-description">Description</Label>
+                <Textarea
+                  id="dashboard-description"
+                  placeholder="Describe this dashboard..."
+                  value={dashboardForm.description}
+                  onChange={(e) => setDashboardForm({ ...dashboardForm, description: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <Label>Set as Default</Label>
+                  <p className="text-sm text-gray-500">Make this your default dashboard</p>
+                </div>
+                <Switch
+                  checked={dashboardForm.is_default}
+                  onCheckedChange={(checked) => setDashboardForm({ ...dashboardForm, is_default: checked })}
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowCreateDashboard(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreateDashboard} disabled={isLoading}>
+                  {isLoading ? 'Creating...' : 'Create Dashboard'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* AI-Powered Insights Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">

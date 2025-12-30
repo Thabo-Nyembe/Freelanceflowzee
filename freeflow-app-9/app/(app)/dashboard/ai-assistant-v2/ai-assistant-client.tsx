@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
   Bot,
   Send,
@@ -88,59 +89,17 @@ import {
   aiAssistantQuickActions,
 } from '@/lib/mock-data/adapters'
 
+import { useAIAssistant, AIConversation, AIMessage } from '@/lib/hooks/use-ai-assistant'
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Types
-type MessageRole = 'user' | 'assistant' | 'system' | 'tool'
 type ModelType = 'gpt-4o' | 'gpt-4-turbo' | 'gpt-3.5-turbo' | 'claude-3-opus' | 'claude-3-sonnet' | 'claude-3-haiku'
-type ConversationMode = 'chat' | 'code' | 'analysis' | 'creative' | 'research'
+type ConversationMode = 'chat' | 'code' | 'analysis' | 'creative'
 type AssistantType = 'general' | 'code' | 'writer' | 'analyst' | 'researcher' | 'custom'
 type FileType = 'document' | 'code' | 'image' | 'data' | 'audio'
-
-interface Message {
-  id: string
-  role: MessageRole
-  content: string
-  model: ModelType
-  tokens: { input: number; output: number }
-  createdAt: Date
-  toolCalls?: ToolCall[]
-  attachments?: Attachment[]
-  feedback?: 'positive' | 'negative' | null
-  isStreaming?: boolean
-}
-
-interface ToolCall {
-  id: string
-  name: string
-  arguments: Record<string, unknown>
-  result?: string
-  status: 'pending' | 'running' | 'completed' | 'error'
-}
-
-interface Attachment {
-  id: string
-  name: string
-  type: FileType
-  size: number
-  url: string
-}
-
-interface Conversation {
-  id: string
-  title: string
-  mode: ConversationMode
-  model: ModelType
-  messages: number
-  tokens: number
-  starred: boolean
-  archived: boolean
-  createdAt: Date
-  updatedAt: Date
-  systemPrompt?: string
-}
 
 interface Assistant {
   id: string
@@ -199,205 +158,25 @@ interface DailyUsage {
   messages: number
 }
 
-// Mock Data
-const mockConversations: Conversation[] = [
-  {
-    id: '1',
-    title: 'Building a React Dashboard',
-    mode: 'code',
-    model: 'gpt-4o',
-    messages: 24,
-    tokens: 15420,
-    starred: true,
-    archived: false,
-    createdAt: new Date('2024-12-20'),
-    updatedAt: new Date('2024-12-23'),
-    systemPrompt: 'You are a senior React developer...'
-  },
-  {
-    id: '2',
-    title: 'Market Analysis Q4 2024',
-    mode: 'analysis',
-    model: 'claude-3-opus',
-    messages: 18,
-    tokens: 12300,
-    starred: true,
-    archived: false,
-    createdAt: new Date('2024-12-19'),
-    updatedAt: new Date('2024-12-22')
-  },
-  {
-    id: '3',
-    title: 'Blog Post: AI Trends',
-    mode: 'creative',
-    model: 'gpt-4-turbo',
-    messages: 12,
-    tokens: 8500,
-    starred: false,
-    archived: false,
-    createdAt: new Date('2024-12-18'),
-    updatedAt: new Date('2024-12-21')
-  },
-  {
-    id: '4',
-    title: 'API Integration Help',
-    mode: 'code',
-    model: 'gpt-4o',
-    messages: 35,
-    tokens: 22100,
-    starred: false,
-    archived: false,
-    createdAt: new Date('2024-12-17'),
-    updatedAt: new Date('2024-12-20')
-  },
-  {
-    id: '5',
-    title: 'Research: Quantum Computing',
-    mode: 'research',
-    model: 'claude-3-sonnet',
-    messages: 28,
-    tokens: 19800,
-    starred: false,
-    archived: true,
-    createdAt: new Date('2024-12-15'),
-    updatedAt: new Date('2024-12-18')
-  }
-]
-
-const mockMessages: Message[] = [
-  {
-    id: '1',
-    role: 'user',
-    content: 'Can you help me build a dashboard component with charts and stats?',
-    model: 'gpt-4o',
-    tokens: { input: 18, output: 0 },
-    createdAt: new Date('2024-12-23T10:00:00')
-  },
-  {
-    id: '2',
-    role: 'assistant',
-    content: `I'd be happy to help you build a dashboard component! Here's a comprehensive approach:
-
-## Dashboard Structure
-
-\`\`\`tsx
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-
-const data = [
-  { name: 'Jan', value: 400 },
-  { name: 'Feb', value: 300 },
-  { name: 'Mar', value: 600 },
-  { name: 'Apr', value: 800 },
-  { name: 'May', value: 500 }
-]
-
-export function DashboardStats() {
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <StatCard title="Total Revenue" value="$45,231" change="+20.1%" />
-      <StatCard title="Subscriptions" value="2,350" change="+180.1%" />
-      <StatCard title="Sales" value="12,234" change="+19%" />
-      <StatCard title="Active Now" value="573" change="+201" />
-    </div>
-  )
-}
-\`\`\`
-
-## Key Features to Include:
-
-1. **Stat Cards** - Display key metrics with trend indicators
-2. **Charts** - Area, line, and bar charts for data visualization
-3. **Data Tables** - For detailed information
-4. **Filters** - Date range and category filters
-
-Would you like me to expand on any specific part?`,
-    model: 'gpt-4o',
-    tokens: { input: 0, output: 342 },
-    createdAt: new Date('2024-12-23T10:00:15'),
-    toolCalls: [
-      {
-        id: 't1',
-        name: 'code_interpreter',
-        arguments: { language: 'typescript' },
-        status: 'completed'
-      }
-    ]
-  },
-  {
-    id: '3',
-    role: 'user',
-    content: 'Yes, please show me how to implement the stat cards with animations',
-    model: 'gpt-4o',
-    tokens: { input: 14, output: 0 },
-    createdAt: new Date('2024-12-23T10:02:00')
-  },
-  {
-    id: '4',
-    role: 'assistant',
-    content: `Here's an animated stat card component using Framer Motion:
-
-\`\`\`tsx
-import { motion } from 'framer-motion'
-import { ArrowUp, ArrowDown } from 'lucide-react'
-
-interface StatCardProps {
-  title: string
-  value: string
-  change: string
-  trend: 'up' | 'down'
+// Form state interfaces
+interface AssistantFormState {
+  name: string
+  description: string
+  model: ModelType
+  systemPrompt: string
+  temperature: number
+  tools: string[]
 }
 
-export function AnimatedStatCard({ title, value, change, trend }: StatCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      whileHover={{ scale: 1.02 }}
-      className="rounded-xl border bg-card p-6 shadow-sm"
-    >
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-medium text-muted-foreground">{title}</p>
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          {trend === 'up' ? (
-            <ArrowUp className="h-4 w-4 text-green-500" />
-          ) : (
-            <ArrowDown className="h-4 w-4 text-red-500" />
-          )}
-        </motion.div>
-      </div>
-      <motion.p
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="text-2xl font-bold"
-      >
-        {value}
-      </motion.p>
-      <p className={\`text-xs \${trend === 'up' ? 'text-green-500' : 'text-red-500'}\`}>
-        {change} from last month
-      </p>
-    </motion.div>
-  )
+interface PromptFormState {
+  name: string
+  description: string
+  prompt: string
+  category: string
+  variables: string[]
 }
-\`\`\`
 
-This includes:
-- Fade-in animation on mount
-- Scale animation on hover
-- Staggered animations for different elements
-- Trend indicator with icon`,
-    model: 'gpt-4o',
-    tokens: { input: 0, output: 428 },
-    createdAt: new Date('2024-12-23T10:02:20')
-  }
-]
-
+// Mock Data for assistants (will be replaced with Supabase integration)
 const mockAssistants: Assistant[] = [
   {
     id: '1',
@@ -591,8 +370,7 @@ const modeConfig: Record<ConversationMode, { icon: React.ReactNode; label: strin
   chat: { icon: <MessageSquare className="h-4 w-4" />, label: 'Chat', color: 'blue' },
   code: { icon: <Code className="h-4 w-4" />, label: 'Code', color: 'green' },
   analysis: { icon: <BarChart3 className="h-4 w-4" />, label: 'Analysis', color: 'purple' },
-  creative: { icon: <Palette className="h-4 w-4" />, label: 'Creative', color: 'pink' },
-  research: { icon: <BookOpen className="h-4 w-4" />, label: 'Research', color: 'orange' }
+  creative: { icon: <Palette className="h-4 w-4" />, label: 'Creative', color: 'pink' }
 }
 
 // Helper Functions
@@ -610,18 +388,20 @@ const formatBytes = (bytes: number): string => {
 
 const formatCost = (cost: number): string => `$${cost.toFixed(2)}`
 
-const formatDate = (date: Date): string => {
+const formatDate = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit'
-  }).format(date)
+  }).format(d)
 }
 
-const formatRelativeTime = (date: Date): string => {
+const formatRelativeTime = (date: Date | string): string => {
+  const d = typeof date === 'string' ? new Date(date) : date
   const now = new Date()
-  const diff = now.getTime() - date.getTime()
+  const diff = now.getTime() - d.getTime()
   const minutes = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days = Math.floor(diff / 86400000)
@@ -637,13 +417,12 @@ const getModeColor = (mode: ConversationMode): string => {
     chat: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
     code: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
     analysis: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
-    creative: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
-    research: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300'
+    creative: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300'
   }
-  return colors[mode]
+  return colors[mode] || colors.chat
 }
 
-const getModelColor = (model: ModelType): string => {
+const getModelColor = (model: string): string => {
   if (model.startsWith('gpt')) return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
   return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
 }
@@ -692,16 +471,35 @@ const mockAIAssistantQuickActions = [
 ]
 
 export default function AIAssistantClient() {
+  const supabase = createClientComponentClient()
+
+  // Use the AI Assistant hook for real Supabase operations
+  const {
+    conversations,
+    messages,
+    activeConversation,
+    stats,
+    isLoading,
+    isSending,
+    error,
+    fetchConversations,
+    fetchMessages,
+    createConversation,
+    sendMessage,
+    updateConversation,
+    deleteConversation,
+    toggleStar: hookToggleStar,
+    toggleArchive,
+    setActiveConversation
+  } = useAIAssistant()
+
   const [activeTab, setActiveTab] = useState('chat')
-  const [conversations, setConversations] = useState<Conversation[]>(mockConversations)
-  const [messages, setMessages] = useState<Message[]>(mockMessages)
   const [assistants, setAssistants] = useState<Assistant[]>(mockAssistants)
   const [prompts, setPrompts] = useState<PromptTemplate[]>(mockPrompts)
   const [files, setFiles] = useState<KnowledgeFile[]>(mockFiles)
   const [usageStats] = useState<UsageStats>(mockUsageStats)
   const [dailyUsage] = useState<DailyUsage[]>(mockDailyUsage)
 
-  const [activeConversation, setActiveConversation] = useState<Conversation | null>(mockConversations[0])
   const [selectedModel, setSelectedModel] = useState<ModelType>('gpt-4o')
   const [selectedMode, setSelectedMode] = useState<ConversationMode>('chat')
   const [inputMessage, setInputMessage] = useState('')
@@ -715,20 +513,52 @@ export default function AIAssistantClient() {
   const [selectedPrompt, setSelectedPrompt] = useState<PromptTemplate | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [showNewPrompt, setShowNewPrompt] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+
+  // Form states
+  const [assistantForm, setAssistantForm] = useState<AssistantFormState>({
+    name: '',
+    description: '',
+    model: 'gpt-4o',
+    systemPrompt: '',
+    temperature: 0.7,
+    tools: []
+  })
+
+  const [promptForm, setPromptForm] = useState<PromptFormState>({
+    name: '',
+    description: '',
+    prompt: '',
+    category: 'Development',
+    variables: []
+  })
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
 
+  // Fetch conversations on mount
+  useEffect(() => {
+    fetchConversations()
+  }, [fetchConversations])
+
+  // Fetch messages when active conversation changes
+  useEffect(() => {
+    if (activeConversation) {
+      fetchMessages(activeConversation.id)
+    }
+  }, [activeConversation?.id, fetchMessages])
+
   // Filtered data
   const filteredConversations = useMemo(() => {
     return conversations.filter(c =>
-      !c.archived &&
+      !c.is_archived &&
       (searchQuery === '' || c.title.toLowerCase().includes(searchQuery.toLowerCase()))
     )
   }, [conversations, searchQuery])
 
   const starredConversations = useMemo(() =>
-    conversations.filter(c => c.starred && !c.archived),
+    conversations.filter(c => c.is_starred && !c.is_archived),
     [conversations]
   )
 
@@ -745,71 +575,119 @@ export default function AIAssistantClient() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Handle send message
+  // Handle send message - real Supabase operation
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputMessage,
-      model: selectedModel,
-      tokens: { input: Math.floor(inputMessage.length / 4), output: 0 },
-      createdAt: new Date()
-    }
-
-    setMessages(prev => [...prev, newMessage])
-    setInputMessage('')
-    setIsTyping(true)
-
-    // Simulate AI response
-    setTimeout(() => {
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'I understand your request. Let me help you with that...\n\nHere\'s a comprehensive solution based on your requirements.',
-        model: selectedModel,
-        tokens: { input: 0, output: 45 },
-        createdAt: new Date()
+    try {
+      // Create conversation if none active
+      if (!activeConversation) {
+        const newConv = await createConversation(
+          'New Chat',
+          selectedMode,
+          selectedModel
+        )
+        toast.success('Conversation created', {
+          description: 'New conversation started'
+        })
       }
-      setMessages(prev => [...prev, response])
+
+      // Send the message
+      setIsTyping(true)
+      await sendMessage(inputMessage, 'user')
+      setInputMessage('')
+
+      // Simulate AI response (in production, this would be an API call)
+      setTimeout(async () => {
+        await sendMessage(
+          'I understand your request. Let me help you with that...\n\nHere\'s a comprehensive solution based on your requirements.',
+          'assistant'
+        )
+        setIsTyping(false)
+      }, 1500)
+
+      toast.success('Message sent', {
+        description: 'Your message has been sent'
+      })
+    } catch (err) {
+      console.error('Error sending message:', err)
+      toast.error('Failed to send message', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
       setIsTyping(false)
-    }, 1500)
+    }
   }
 
   // Handle copy message
   const handleCopy = (id: string, content: string) => {
     navigator.clipboard.writeText(content)
     setCopiedId(id)
+    toast.success('Copied to clipboard', {
+      description: 'Message content has been copied'
+    })
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  // Handle new conversation
-  const handleNewConversation = () => {
-    const newConv: Conversation = {
-      id: Date.now().toString(),
-      title: 'New Chat',
-      mode: selectedMode,
-      model: selectedModel,
-      messages: 0,
-      tokens: 0,
-      starred: false,
-      archived: false,
-      createdAt: new Date(),
-      updatedAt: new Date()
+  // Handle new conversation - real Supabase operation
+  const handleNewConversation = async () => {
+    try {
+      await createConversation('New Chat', selectedMode, selectedModel)
+      toast.success('Conversation created', {
+        description: 'New conversation started successfully'
+      })
+    } catch (err) {
+      console.error('Error creating conversation:', err)
+      toast.error('Failed to create conversation', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
     }
-    setConversations(prev => [newConv, ...prev])
-    setActiveConversation(newConv)
-    setMessages([])
   }
 
-  // Toggle star
-  const toggleStar = (id: string) => {
-    setConversations(prev =>
-      prev.map(c => c.id === id ? { ...c, starred: !c.starred } : c)
-    )
-    if (activeConversation?.id === id) {
-      setActiveConversation(prev => prev ? { ...prev, starred: !prev.starred } : null)
+  // Toggle star - real Supabase operation
+  const toggleStar = async (id: string) => {
+    try {
+      await hookToggleStar(id)
+      const conv = conversations.find(c => c.id === id)
+      toast.success(conv?.is_starred ? 'Removed from starred' : 'Added to starred', {
+        description: `Conversation has been ${conv?.is_starred ? 'unstarred' : 'starred'}`
+      })
+    } catch (err) {
+      console.error('Error toggling star:', err)
+      toast.error('Failed to update conversation', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Handle delete conversation - real Supabase operation
+  const handleDeleteConversation = async (id: string) => {
+    try {
+      await deleteConversation(id)
+      setShowDeleteConfirm(null)
+      toast.success('Conversation deleted', {
+        description: 'The conversation has been removed'
+      })
+    } catch (err) {
+      console.error('Error deleting conversation:', err)
+      toast.error('Failed to delete conversation', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Handle archive conversation - real Supabase operation
+  const handleArchiveConversation = async (id: string) => {
+    try {
+      await toggleArchive(id)
+      const conv = conversations.find(c => c.id === id)
+      toast.success(conv?.is_archived ? 'Conversation restored' : 'Conversation archived', {
+        description: `Conversation has been ${conv?.is_archived ? 'restored' : 'archived'}`
+      })
+    } catch (err) {
+      console.error('Error archiving conversation:', err)
+      toast.error('Failed to archive conversation', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
     }
   }
 
@@ -818,34 +696,334 @@ export default function AIAssistantClient() {
     setInputMessage(prompt.prompt)
     setActiveTab('chat')
     inputRef.current?.focus()
+    toast.info('Prompt loaded', {
+      description: 'Prompt template has been loaded into the input'
+    })
+  }
+
+  // Handle create assistant - Supabase operation
+  const handleCreateAssistant = async () => {
+    if (!assistantForm.name.trim()) {
+      toast.error('Name required', {
+        description: 'Please enter a name for the assistant'
+      })
+      return
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data, error: insertError } = await supabase
+        .from('ai_assistants')
+        .insert({
+          user_id: user.id,
+          name: assistantForm.name,
+          description: assistantForm.description,
+          model: assistantForm.model,
+          system_prompt: assistantForm.systemPrompt,
+          temperature: assistantForm.temperature,
+          tools: assistantForm.tools
+        })
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+
+      // Add to local state
+      const newAssistant: Assistant = {
+        id: data.id,
+        name: assistantForm.name,
+        description: assistantForm.description,
+        type: 'custom',
+        model: assistantForm.model,
+        systemPrompt: assistantForm.systemPrompt,
+        temperature: assistantForm.temperature,
+        tools: assistantForm.tools,
+        files: [],
+        icon: '🤖',
+        color: 'violet',
+        usageCount: 0,
+        createdAt: new Date()
+      }
+
+      setAssistants(prev => [newAssistant, ...prev])
+      setShowNewAssistant(false)
+      setAssistantForm({
+        name: '',
+        description: '',
+        model: 'gpt-4o',
+        systemPrompt: '',
+        temperature: 0.7,
+        tools: []
+      })
+
+      toast.success('Assistant created', {
+        description: `${assistantForm.name} has been created successfully`
+      })
+    } catch (err) {
+      console.error('Error creating assistant:', err)
+      toast.error('Failed to create assistant', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Handle create prompt - Supabase operation
+  const handleCreatePrompt = async () => {
+    if (!promptForm.name.trim() || !promptForm.prompt.trim()) {
+      toast.error('Required fields missing', {
+        description: 'Please enter a name and prompt template'
+      })
+      return
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Extract variables from prompt
+      const variableMatches = promptForm.prompt.match(/\{\{(\w+)\}\}/g) || []
+      const variables = variableMatches.map(v => v.replace(/\{\{|\}\}/g, ''))
+
+      const { data, error: insertError } = await supabase
+        .from('ai_prompt_templates')
+        .insert({
+          user_id: user.id,
+          name: promptForm.name,
+          description: promptForm.description,
+          prompt: promptForm.prompt,
+          category: promptForm.category,
+          variables
+        })
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+
+      const newPrompt: PromptTemplate = {
+        id: data.id,
+        name: promptForm.name,
+        description: promptForm.description,
+        prompt: promptForm.prompt,
+        category: promptForm.category,
+        variables,
+        usageCount: 0,
+        starred: false
+      }
+
+      setPrompts(prev => [newPrompt, ...prev])
+      setShowNewPrompt(false)
+      setPromptForm({
+        name: '',
+        description: '',
+        prompt: '',
+        category: 'Development',
+        variables: []
+      })
+
+      toast.success('Prompt template created', {
+        description: `${promptForm.name} has been saved to your library`
+      })
+    } catch (err) {
+      console.error('Error creating prompt:', err)
+      toast.error('Failed to create prompt', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Handle file upload - Supabase operation
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Determine file type
+      let fileType: FileType = 'document'
+      if (file.name.match(/\.(js|ts|py|java|cpp|go|rs)$/i)) fileType = 'code'
+      else if (file.name.match(/\.(png|jpg|jpeg|gif|svg)$/i)) fileType = 'image'
+      else if (file.name.match(/\.(csv|json|xlsx|xls)$/i)) fileType = 'data'
+      else if (file.name.match(/\.(mp3|wav|ogg)$/i)) fileType = 'audio'
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('ai-knowledge-files')
+        .upload(`${user.id}/${Date.now()}-${file.name}`, file)
+
+      if (uploadError) throw uploadError
+
+      // Save metadata to database
+      const { data, error: insertError } = await supabase
+        .from('ai_knowledge_files')
+        .insert({
+          user_id: user.id,
+          name: file.name,
+          file_type: fileType,
+          size: file.size,
+          storage_path: uploadData.path,
+          status: 'processing'
+        })
+        .select()
+        .single()
+
+      if (insertError) throw insertError
+
+      const newFile: KnowledgeFile = {
+        id: data.id,
+        name: file.name,
+        type: fileType,
+        size: file.size,
+        chunks: 0,
+        status: 'processing',
+        uploadedAt: new Date()
+      }
+
+      setFiles(prev => [newFile, ...prev])
+
+      toast.success('File uploaded', {
+        description: `${file.name} is being processed`
+      })
+
+      // Simulate processing completion
+      setTimeout(() => {
+        setFiles(prev => prev.map(f =>
+          f.id === newFile.id ? { ...f, status: 'ready', chunks: Math.floor(file.size / 1000) } : f
+        ))
+        toast.success('File ready', {
+          description: `${file.name} has been processed and is ready to use`
+        })
+      }, 3000)
+    } catch (err) {
+      console.error('Error uploading file:', err)
+      toast.error('Failed to upload file', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Handle file delete - Supabase operation
+  const handleDeleteFile = async (fileId: string) => {
+    try {
+      const { error } = await supabase
+        .from('ai_knowledge_files')
+        .delete()
+        .eq('id', fileId)
+
+      if (error) throw error
+
+      setFiles(prev => prev.filter(f => f.id !== fileId))
+      toast.success('File deleted', {
+        description: 'The file has been removed from your knowledge base'
+      })
+    } catch (err) {
+      console.error('Error deleting file:', err)
+      toast.error('Failed to delete file', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Handle export chat
+  const handleExportChat = async () => {
+    if (!activeConversation || messages.length === 0) {
+      toast.error('No messages to export', {
+        description: 'Start a conversation first'
+      })
+      return
+    }
+
+    try {
+      const exportData = {
+        conversation: activeConversation,
+        messages: messages.map(m => ({
+          role: m.role,
+          content: m.content,
+          timestamp: m.created_at
+        })),
+        exportedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `chat-export-${activeConversation.id}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Chat exported', {
+        description: 'Your conversation has been exported as JSON'
+      })
+    } catch (err) {
+      console.error('Error exporting chat:', err)
+      toast.error('Failed to export chat', {
+        description: 'Please try again'
+      })
+    }
+  }
+
+  // Handle clear history
+  const handleClearHistory = async () => {
+    if (!activeConversation) return
+
+    try {
+      // Delete all messages for this conversation
+      const { error } = await supabase
+        .from('ai_messages')
+        .delete()
+        .eq('conversation_id', activeConversation.id)
+
+      if (error) throw error
+
+      // Refresh messages
+      fetchMessages(activeConversation.id)
+
+      toast.success('History cleared', {
+        description: 'Conversation history has been cleared'
+      })
+    } catch (err) {
+      console.error('Error clearing history:', err)
+      toast.error('Failed to clear history', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Handle save conversation (update title)
+  const handleSaveConversation = async () => {
+    if (!activeConversation) return
+
+    try {
+      const title = window.prompt('Enter conversation title:', activeConversation.title)
+      if (!title || title === activeConversation.title) return
+
+      await updateConversation(activeConversation.id, { title })
+
+      toast.success('Conversation saved', {
+        description: 'Title has been updated'
+      })
+    } catch (err) {
+      console.error('Error saving conversation:', err)
+      toast.error('Failed to save conversation', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
   }
 
   // Quota percentage
   const quotaPercentage = (usageStats.quotaUsed / usageStats.quotaLimit) * 100
 
-  // Handlers
-  const handleSaveConversation = () => {
-    toast.success('Conversation saved', {
-      description: 'This conversation has been saved'
-    })
-  }
-
-  const handleClearHistory = () => {
-    toast.success('History cleared', {
-      description: 'Conversation history has been cleared'
-    })
-  }
-
-  const handleExportChat = () => {
-    toast.success('Export started', {
-      description: 'Chat is being exported'
-    })
-  }
-
-  const handleCreatePrompt = () => {
-    toast.info('Create Prompt', {
-      description: 'Opening prompt template editor...'
-    })
+  // Combined usage stats from hook and mock
+  const combinedStats = {
+    ...usageStats,
+    conversations: stats.totalConversations || usageStats.conversations,
+    messages: stats.totalMessages || usageStats.messages
   }
 
   return (
@@ -887,28 +1065,28 @@ export default function AIAssistantClient() {
                 <MessageSquare className="h-4 w-4" />
                 Conversations
               </div>
-              <p className="text-2xl font-bold">{usageStats.conversations}</p>
+              <p className="text-2xl font-bold">{combinedStats.conversations}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
               <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
                 <Zap className="h-4 w-4" />
                 Total Tokens
               </div>
-              <p className="text-2xl font-bold">{formatTokens(usageStats.totalTokens)}</p>
+              <p className="text-2xl font-bold">{formatTokens(combinedStats.totalTokens)}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
               <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
                 <BarChart3 className="h-4 w-4" />
                 Total Cost
               </div>
-              <p className="text-2xl font-bold">{formatCost(usageStats.totalCost)}</p>
+              <p className="text-2xl font-bold">{formatCost(combinedStats.totalCost)}</p>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
               <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
                 <Clock className="h-4 w-4" />
                 Avg Response
               </div>
-              <p className="text-2xl font-bold">{usageStats.avgResponseTime}s</p>
+              <p className="text-2xl font-bold">{combinedStats.avgResponseTime}s</p>
             </div>
             <div className="bg-white/10 rounded-xl p-4 backdrop-blur-sm">
               <div className="flex items-center gap-2 text-violet-200 text-sm mb-1">
@@ -1018,9 +1196,10 @@ export default function AIAssistantClient() {
 
                 <button
                   onClick={handleNewConversation}
-                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
+                  disabled={isLoading}
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors disabled:opacity-50"
                 >
-                  <Plus className="h-4 w-4" />
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
                   New Chat
                 </button>
               </div>
@@ -1081,44 +1260,64 @@ export default function AIAssistantClient() {
                         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
                           Recent
                         </h3>
-                        {filteredConversations.map(conv => (
-                          <button
-                            key={conv.id}
-                            onClick={() => setActiveConversation(conv)}
-                            className={`w-full p-3 rounded-xl text-left transition-all group ${
-                              activeConversation?.id === conv.id
-                                ? 'bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800'
-                                : 'hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent'
-                            }`}
-                          >
-                            <div className="flex items-start justify-between mb-1">
-                              <span className="font-medium text-gray-900 dark:text-white truncate flex-1">
-                                {conv.title}
-                              </span>
-                              <button
-                                onClick={e => {
-                                  e.stopPropagation()
-                                  toggleStar(conv.id)
-                                }}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                              >
-                                {conv.starred ? (
-                                  <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                                ) : (
-                                  <StarOff className="h-4 w-4 text-gray-400" />
-                                )}
-                              </button>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-gray-500">
-                              <span className={`px-2 py-0.5 rounded-full ${getModeColor(conv.mode)}`}>
-                                {conv.mode}
-                              </span>
-                              <span>{conv.messages} msgs</span>
-                              <span>•</span>
-                              <span>{formatRelativeTime(conv.updatedAt)}</span>
-                            </div>
-                          </button>
-                        ))}
+                        {isLoading && conversations.length === 0 ? (
+                          <div className="flex items-center justify-center py-8">
+                            <Loader2 className="h-6 w-6 animate-spin text-violet-600" />
+                          </div>
+                        ) : filteredConversations.length === 0 ? (
+                          <div className="text-center py-8 text-gray-500">
+                            <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">No conversations yet</p>
+                          </div>
+                        ) : (
+                          filteredConversations.map(conv => (
+                            <button
+                              key={conv.id}
+                              onClick={() => setActiveConversation(conv)}
+                              className={`w-full p-3 rounded-xl text-left transition-all group ${
+                                activeConversation?.id === conv.id
+                                  ? 'bg-violet-50 dark:bg-violet-900/30 border border-violet-200 dark:border-violet-800'
+                                  : 'hover:bg-gray-50 dark:hover:bg-gray-700 border border-transparent'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between mb-1">
+                                <span className="font-medium text-gray-900 dark:text-white truncate flex-1">
+                                  {conv.title}
+                                </span>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button
+                                    onClick={e => {
+                                      e.stopPropagation()
+                                      toggleStar(conv.id)
+                                    }}
+                                  >
+                                    {conv.is_starred ? (
+                                      <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                                    ) : (
+                                      <StarOff className="h-4 w-4 text-gray-400" />
+                                    )}
+                                  </button>
+                                  <button
+                                    onClick={e => {
+                                      e.stopPropagation()
+                                      setShowDeleteConfirm(conv.id)
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <span className={`px-2 py-0.5 rounded-full ${getModeColor(conv.mode)}`}>
+                                  {conv.mode}
+                                </span>
+                                <span>{conv.message_count} msgs</span>
+                                <span>•</span>
+                                <span>{formatRelativeTime(conv.updated_at)}</span>
+                              </div>
+                            </button>
+                          ))
+                        )}
                       </div>
                     </ScrollArea>
                   </div>
@@ -1147,11 +1346,11 @@ export default function AIAssistantClient() {
                               {activeConversation.mode}
                             </span>
                             <span className={`px-2 py-0.5 rounded-full ${getModelColor(activeConversation.model)}`}>
-                              {models.find(m => m.id === activeConversation.model)?.name}
+                              {models.find(m => m.id === activeConversation.model)?.name || activeConversation.model}
                             </span>
-                            <span>{activeConversation.messages} messages</span>
+                            <span>{activeConversation.message_count} messages</span>
                             <span>•</span>
-                            <span>{formatTokens(activeConversation.tokens)} tokens</span>
+                            <span>{formatTokens(activeConversation.total_tokens)} tokens</span>
                           </>
                         )}
                       </div>
@@ -1164,17 +1363,23 @@ export default function AIAssistantClient() {
                           onClick={() => toggleStar(activeConversation.id)}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         >
-                          {activeConversation.starred ? (
+                          {activeConversation.is_starred ? (
                             <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
                           ) : (
                             <StarOff className="h-5 w-5 text-gray-400" />
                           )}
                         </button>
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                        <button
+                          onClick={handleExportChat}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
                           <Share className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         </button>
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                          <MoreVertical className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        <button
+                          onClick={handleSaveConversation}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        >
+                          <Save className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         </button>
                       </>
                     )}
@@ -1245,31 +1450,12 @@ export default function AIAssistantClient() {
                                 <div className="prose prose-sm dark:prose-invert max-w-none whitespace-pre-wrap">
                                   {message.content}
                                 </div>
-
-                                {/* Tool Calls */}
-                                {message.toolCalls && message.toolCalls.length > 0 && (
-                                  <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Tools used:</p>
-                                    <div className="flex flex-wrap gap-2">
-                                      {message.toolCalls.map(tool => (
-                                        <span
-                                          key={tool.id}
-                                          className="inline-flex items-center gap-1 px-2 py-1 bg-white/50 dark:bg-gray-600 rounded-lg text-xs"
-                                        >
-                                          <Terminal className="h-3 w-3" />
-                                          {tool.name}
-                                          <CheckCircle className="h-3 w-3 text-green-500" />
-                                        </span>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
                               </div>
 
                               {/* Message Actions */}
                               <div className={`flex items-center gap-2 mt-2 ${message.role === 'user' ? 'justify-end' : ''}`}>
                                 <span className="text-xs text-gray-400">
-                                  {formatDate(message.createdAt)}
+                                  {formatDate(message.created_at)}
                                 </span>
                                 {message.role === 'assistant' && (
                                   <>
@@ -1365,17 +1551,20 @@ export default function AIAssistantClient() {
                             <Wand2 className="h-4 w-4" />
                             Enhance
                           </button>
-                          <button className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                          <button
+                            onClick={() => setActiveTab('prompts')}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+                          >
                             <Sparkles className="h-4 w-4" />
                             Templates
                           </button>
                         </div>
                         <button
                           onClick={handleSendMessage}
-                          disabled={!inputMessage.trim() || isTyping}
+                          disabled={!inputMessage.trim() || isTyping || isSending}
                           className="flex items-center gap-2 px-5 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                          {isTyping ? (
+                          {isTyping || isSending ? (
                             <Loader2 className="h-5 w-5 animate-spin" />
                           ) : (
                             <Send className="h-5 w-5" />
@@ -1473,7 +1662,10 @@ export default function AIAssistantClient() {
                       className="pl-10 pr-4 py-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-violet-500 text-sm"
                     />
                   </div>
-                  <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors">
+                  <button
+                    onClick={() => setShowNewPrompt(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
+                  >
                     <Plus className="h-5 w-5" />
                     New Prompt
                   </button>
@@ -1545,10 +1737,16 @@ export default function AIAssistantClient() {
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white">Knowledge Base</h2>
                   <p className="text-gray-500 dark:text-gray-400">Upload files to enhance AI context</p>
                 </div>
-                <button className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors">
+                <label className="flex items-center gap-2 px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors cursor-pointer">
                   <Upload className="h-5 w-5" />
                   Upload Files
-                </button>
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                    accept=".pdf,.doc,.docx,.txt,.csv,.json,.xlsx,.xls,.js,.ts,.py,.java,.md"
+                  />
+                </label>
               </div>
 
               <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -1612,8 +1810,11 @@ export default function AIAssistantClient() {
                             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
                               <Download className="h-4 w-4 text-gray-400" />
                             </button>
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                              <Trash2 className="h-4 w-4 text-gray-400" />
+                            <button
+                              onClick={() => handleDeleteFile(file.id)}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4 text-gray-400 hover:text-red-500" />
                             </button>
                           </div>
                         </td>
@@ -1644,7 +1845,7 @@ export default function AIAssistantClient() {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-gray-900 dark:text-white">Monthly Quota</h3>
                   <span className="text-sm text-gray-500">
-                    {formatTokens(usageStats.quotaUsed)} / {formatTokens(usageStats.quotaLimit)} tokens
+                    {formatTokens(combinedStats.quotaUsed)} / {formatTokens(combinedStats.quotaLimit)} tokens
                   </span>
                 </div>
                 <div className="w-full h-4 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -1670,7 +1871,7 @@ export default function AIAssistantClient() {
                     <span className="text-sm text-gray-500">Input Tokens</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {formatTokens(usageStats.inputTokens)}
+                    {formatTokens(combinedStats.inputTokens)}
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -1681,7 +1882,7 @@ export default function AIAssistantClient() {
                     <span className="text-sm text-gray-500">Output Tokens</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {formatTokens(usageStats.outputTokens)}
+                    {formatTokens(combinedStats.outputTokens)}
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -1692,7 +1893,7 @@ export default function AIAssistantClient() {
                     <span className="text-sm text-gray-500">Total Messages</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {usageStats.messages.toLocaleString()}
+                    {combinedStats.messages.toLocaleString()}
                   </p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -1703,7 +1904,7 @@ export default function AIAssistantClient() {
                     <span className="text-sm text-gray-500">Total Cost</span>
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {formatCost(usageStats.totalCost)}
+                    {formatCost(combinedStats.totalCost)}
                   </p>
                 </div>
               </div>
@@ -1821,6 +2022,8 @@ export default function AIAssistantClient() {
                 <input
                   type="text"
                   placeholder="My Assistant"
+                  value={assistantForm.name}
+                  onChange={e => setAssistantForm(prev => ({ ...prev, name: e.target.value }))}
                   className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500"
                 />
               </div>
@@ -1828,7 +2031,11 @@ export default function AIAssistantClient() {
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Model
                 </label>
-                <select className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500">
+                <select
+                  value={assistantForm.model}
+                  onChange={e => setAssistantForm(prev => ({ ...prev, model: e.target.value as ModelType }))}
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500"
+                >
                   {models.map(m => (
                     <option key={m.id} value={m.id}>{m.name} ({m.provider})</option>
                   ))}
@@ -1842,6 +2049,8 @@ export default function AIAssistantClient() {
               <input
                 type="text"
                 placeholder="What does this assistant do?"
+                value={assistantForm.description}
+                onChange={e => setAssistantForm(prev => ({ ...prev, description: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500"
               />
             </div>
@@ -1852,20 +2061,23 @@ export default function AIAssistantClient() {
               <textarea
                 rows={4}
                 placeholder="You are a helpful assistant that..."
+                value={assistantForm.systemPrompt}
+                onChange={e => setAssistantForm(prev => ({ ...prev, systemPrompt: e.target.value }))}
                 className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 resize-none"
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Temperature
+                  Temperature: {assistantForm.temperature}
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="2"
                   step="0.1"
-                  defaultValue="0.7"
+                  value={assistantForm.temperature}
+                  onChange={e => setAssistantForm(prev => ({ ...prev, temperature: parseFloat(e.target.value) }))}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -1881,7 +2093,19 @@ export default function AIAssistantClient() {
                   {['code_interpreter', 'file_search', 'web_search'].map(tool => (
                     <button
                       key={tool}
-                      className="px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-900/30 transition-colors"
+                      onClick={() => {
+                        setAssistantForm(prev => ({
+                          ...prev,
+                          tools: prev.tools.includes(tool)
+                            ? prev.tools.filter(t => t !== tool)
+                            : [...prev.tools, tool]
+                        }))
+                      }}
+                      className={`px-3 py-1.5 border rounded-lg text-sm transition-colors ${
+                        assistantForm.tools.includes(tool)
+                          ? 'border-violet-500 bg-violet-50 dark:bg-violet-900/30 text-violet-700'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-violet-500'
+                      }`}
                     >
                       {tool}
                     </button>
@@ -1896,10 +2120,126 @@ export default function AIAssistantClient() {
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors">
+              <button
+                onClick={handleCreateAssistant}
+                className="px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
+              >
                 Create Assistant
               </button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Prompt Dialog */}
+      <Dialog open={showNewPrompt} onOpenChange={setShowNewPrompt}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-violet-600" />
+              Create Prompt Template
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="My Prompt"
+                  value={promptForm.name}
+                  onChange={e => setPromptForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Category
+                </label>
+                <select
+                  value={promptForm.category}
+                  onChange={e => setPromptForm(prev => ({ ...prev, category: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500"
+                >
+                  <option value="Development">Development</option>
+                  <option value="Content">Content</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Productivity">Productivity</option>
+                  <option value="Research">Research</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description
+              </label>
+              <input
+                type="text"
+                placeholder="What does this prompt do?"
+                value={promptForm.description}
+                onChange={e => setPromptForm(prev => ({ ...prev, description: e.target.value }))}
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Prompt Template (use {'{{variable}}'} for placeholders)
+              </label>
+              <textarea
+                rows={6}
+                placeholder="Enter your prompt template..."
+                value={promptForm.prompt}
+                onChange={e => setPromptForm(prev => ({ ...prev, prompt: e.target.value }))}
+                className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 focus:ring-2 focus:ring-violet-500 resize-none font-mono text-sm"
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowNewPrompt(false)}
+                className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreatePrompt}
+                className="px-4 py-2 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors"
+              >
+                Create Prompt
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={!!showDeleteConfirm} onOpenChange={() => setShowDeleteConfirm(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="h-5 w-5" />
+              Delete Conversation
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete this conversation? This action cannot be undone.
+            </p>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setShowDeleteConfirm(null)}
+              className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => showDeleteConfirm && handleDeleteConversation(showDeleteConfirm)}
+              className="px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors"
+            >
+              Delete
+            </button>
           </div>
         </DialogContent>
       </Dialog>
@@ -1956,16 +2296,14 @@ export default function AIAssistantClient() {
               </button>
             </div>
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-3">API Keys</h4>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-3">Danger Zone</h4>
               <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-900 rounded-xl font-mono text-sm">
-                    sk-...********************************xyz
-                  </div>
-                  <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  </button>
-                </div>
+                <button
+                  onClick={handleClearHistory}
+                  className="w-full px-4 py-2 border border-red-200 dark:border-red-800 text-red-600 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors text-left"
+                >
+                  Clear Current Conversation History
+                </button>
               </div>
             </div>
           </div>

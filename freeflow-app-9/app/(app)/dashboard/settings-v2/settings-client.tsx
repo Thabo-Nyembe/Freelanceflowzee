@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -282,18 +283,131 @@ const mockSettingsQuickActions = [
 ]
 
 export default function SettingsClient() {
+  const supabase = createClientComponentClient()
+  const [userId, setUserId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Form state with Supabase data
   const [profile, setProfile] = useState<UserProfile>(mockProfile)
-  const [security] = useState<SecuritySettings>(mockSecurity)
-  const [sessions] = useState<Session[]>(mockSessions)
-  const [integrations] = useState<Integration[]>(mockIntegrations)
+  const [security, setSecurity] = useState<SecuritySettings>(mockSecurity)
+  const [sessions, setSessions] = useState<Session[]>(mockSessions)
+  const [integrations, setIntegrations] = useState<Integration[]>(mockIntegrations)
   const [notifications, setNotifications] = useState<NotificationPreference[]>(mockNotifications)
-  const [billing] = useState<BillingInfo>(mockBilling)
-  const [invoices] = useState<Invoice[]>(mockInvoices)
+  const [billing, setBilling] = useState<BillingInfo>(mockBilling)
+  const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices)
 
   const [theme, setTheme] = useState<ThemeMode>('system')
   const [showPassword, setShowPassword] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [saveMessage, setSaveMessage] = useState('')
+
+  // Password form state
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+
+  // Fetch user and settings on mount
+  useEffect(() => {
+    const fetchUserAndSettings = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        setUserId(user.id)
+
+        // Fetch user settings
+        const { data: settings } = await supabase
+          .from('user_settings')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
+
+        if (settings) {
+          setProfile(prev => ({
+            ...prev,
+            id: user.id,
+            email: user.email || prev.email,
+            firstName: settings.first_name || prev.firstName,
+            lastName: settings.last_name || prev.lastName,
+            displayName: settings.display_name || prev.displayName,
+            bio: settings.bio || prev.bio,
+            avatar: settings.avatar_url || prev.avatar,
+            timezone: settings.timezone || prev.timezone,
+            language: settings.locale || prev.language
+          }))
+          setSecurity(prev => ({
+            ...prev,
+            twoFactorEnabled: settings.two_factor_enabled || false,
+            twoFactorMethod: settings.two_factor_method || 'app'
+          }))
+          setTheme(settings.theme || 'system')
+        }
+
+        // Fetch user sessions
+        const { data: sessionsData } = await supabase
+          .from('user_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('last_active_at', { ascending: false })
+
+        if (sessionsData?.length) {
+          setSessions(sessionsData.map((s: any) => ({
+            id: s.id,
+            device: s.device_name || 'Unknown Device',
+            browser: s.browser || 'Unknown Browser',
+            location: s.location || 'Unknown',
+            ipAddress: s.ip_address || '',
+            lastActive: s.last_active_at,
+            status: s.is_active ? 'active' : 'expired',
+            isCurrent: s.is_current || false
+          })))
+        }
+
+        // Fetch integrations
+        const { data: integrationsData } = await supabase
+          .from('integrations')
+          .select('*')
+          .eq('user_id', user.id)
+
+        if (integrationsData?.length) {
+          setIntegrations(integrationsData.map((i: any) => ({
+            id: i.id,
+            name: i.name,
+            icon: i.icon || 'globe',
+            status: i.status,
+            connectedAt: i.connected_at,
+            scopes: i.permissions || [],
+            lastSync: i.last_sync_at
+          })))
+        }
+
+        // Fetch notification preferences
+        const { data: notifData } = await supabase
+          .from('notification_preferences')
+          .select('*')
+          .eq('user_id', user.id)
+
+        if (notifData) {
+          const prefs = Array.isArray(notifData) ? notifData : [notifData]
+          if (prefs.length) {
+            setNotifications(prefs.map((n: any) => ({
+              id: n.id,
+              category: n.category || 'General',
+              email: n.email_enabled ?? true,
+              push: n.push_enabled ?? true,
+              inApp: n.in_app_enabled ?? true,
+              sms: n.sms_enabled ?? false
+            })))
+          }
+        }
+
+      } catch (error) {
+        console.error('Error fetching settings:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchUserAndSettings()
+  }, [supabase])
 
   // Stats
   const stats = useMemo(() => {
@@ -347,12 +461,229 @@ export default function SettingsClient() {
     return `${diffDays}d ago`
   }
 
-  const handleSave = async (section: string) => {
+  // Save profile to Supabase
+  const handleSaveProfile = async () => {
+    if (!userId) return
     setIsSaving(true)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setSaveMessage(`${section} saved successfully!`)
-    setIsSaving(false)
-    setTimeout(() => setSaveMessage(''), 3000)
+    try {
+      const { error } = await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: userId,
+          first_name: profile.firstName,
+          last_name: profile.lastName,
+          display_name: profile.displayName,
+          bio: profile.bio,
+          timezone: profile.timezone,
+          locale: profile.language,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' })
+
+      if (error) throw error
+      toast.success('Profile saved', { description: 'Your profile has been updated' })
+      setSaveMessage('Profile saved successfully!')
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to save profile' })
+    } finally {
+      setIsSaving(false)
+      setTimeout(() => setSaveMessage(''), 3000)
+    }
+  }
+
+  // Save notifications to Supabase
+  const handleSaveNotifications = async () => {
+    if (!userId) return
+    setIsSaving(true)
+    try {
+      for (const notif of notifications) {
+        await supabase
+          .from('notification_preferences')
+          .upsert({
+            id: notif.id,
+            user_id: userId,
+            category: notif.category,
+            email_enabled: notif.email,
+            push_enabled: notif.push,
+            in_app_enabled: notif.inApp,
+            sms_enabled: notif.sms,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'id' })
+      }
+      toast.success('Notifications saved', { description: 'Your preferences have been updated' })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to save notifications' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update password
+  const handleUpdatePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+    if (newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+    setIsSaving(true)
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword })
+      if (error) throw error
+      toast.success('Password updated', { description: 'Your password has been changed' })
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setSecurity(prev => ({ ...prev, passwordLastChanged: new Date().toISOString() }))
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to update password' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Toggle 2FA
+  const handleToggle2FA = async () => {
+    if (!userId) return
+    setIsSaving(true)
+    try {
+      const newValue = !security.twoFactorEnabled
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ two_factor_enabled: newValue, updated_at: new Date().toISOString() })
+        .eq('user_id', userId)
+
+      if (error) throw error
+      setSecurity(prev => ({ ...prev, twoFactorEnabled: newValue }))
+      toast.success(newValue ? '2FA enabled' : '2FA disabled', {
+        description: newValue ? 'Two-factor authentication is now active' : 'Two-factor authentication has been disabled'
+      })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to toggle 2FA' })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Revoke session
+  const handleRevokeSession = async (sessionId: string) => {
+    try {
+      const { error } = await supabase
+        .from('user_sessions')
+        .update({ is_active: false, revoked_at: new Date().toISOString() })
+        .eq('id', sessionId)
+
+      if (error) throw error
+      setSessions(prev => prev.filter(s => s.id !== sessionId))
+      toast.success('Session revoked', { description: 'Device has been logged out' })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to revoke session' })
+    }
+  }
+
+  // Revoke all sessions
+  const handleRevokeAllSessions = async () => {
+    if (!userId) return
+    try {
+      const { error } = await supabase
+        .from('user_sessions')
+        .update({ is_active: false, revoked_at: new Date().toISOString() })
+        .eq('user_id', userId)
+        .neq('is_current', true)
+
+      if (error) throw error
+      setSessions(prev => prev.filter(s => s.isCurrent))
+      toast.success('All sessions revoked', { description: 'All other devices have been logged out' })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to revoke sessions' })
+    }
+  }
+
+  // Connect/disconnect integration
+  const handleToggleIntegration = async (integrationId: string) => {
+    const integration = integrations.find(i => i.id === integrationId)
+    if (!integration) return
+
+    try {
+      const isConnecting = integration.status !== 'connected'
+      const { error } = await supabase
+        .from('integrations')
+        .update({
+          status: isConnecting ? 'connected' : 'disconnected',
+          is_connected: isConnecting,
+          connected_at: isConnecting ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', integrationId)
+
+      if (error) throw error
+      setIntegrations(prev => prev.map(i =>
+        i.id === integrationId
+          ? { ...i, status: isConnecting ? 'connected' : 'disconnected', connectedAt: isConnecting ? new Date().toISOString() : null }
+          : i
+      ))
+      toast.success(isConnecting ? 'Connected' : 'Disconnected', {
+        description: `${integration.name} has been ${isConnecting ? 'connected' : 'disconnected'}`
+      })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to update integration' })
+    }
+  }
+
+  // Save theme
+  const handleSaveTheme = async (newTheme: ThemeMode) => {
+    if (!userId) return
+    setTheme(newTheme)
+    try {
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ theme: newTheme, updated_at: new Date().toISOString() })
+        .eq('user_id', userId)
+
+      if (error) throw error
+      toast.success('Theme updated', { description: `Theme set to ${newTheme}` })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to save theme' })
+    }
+  }
+
+  // Export data
+  const handleExportData = async () => {
+    if (!userId) return
+    toast.info('Exporting data', { description: 'Preparing your data export...' })
+    try {
+      const { data: settings } = await supabase.from('user_settings').select('*').eq('user_id', userId).single()
+      const { data: sessions } = await supabase.from('user_sessions').select('*').eq('user_id', userId)
+      const { data: integrations } = await supabase.from('integrations').select('*').eq('user_id', userId)
+
+      const exportData = { settings, sessions, integrations, exportedAt: new Date().toISOString() }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `settings-export-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Data exported', { description: 'Your data has been downloaded' })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to export data' })
+    }
+  }
+
+  // Delete account
+  const handleDeleteAccount = async () => {
+    toast.warning('Delete Account', {
+      description: 'This action cannot be undone. Please contact support to delete your account.',
+      duration: 5000
+    })
+  }
+
+  // Legacy handler for compatibility
+  const handleSave = async (section: string) => {
+    if (section === 'Profile') await handleSaveProfile()
+    else if (section === 'Notifications') await handleSaveNotifications()
+    else if (section === 'Password') await handleUpdatePassword()
   }
 
   const toggleNotification = (id: string, field: keyof NotificationPreference) => {
@@ -372,36 +703,6 @@ export default function SettingsClient() {
     { label: 'Account Age', value: '1y 2m', change: 0, icon: Calendar, color: 'from-teal-500 to-green-500' }
   ]
 
-  // Handlers
-  const handleResetPassword = () => {
-    toast.info('Reset Password', {
-      description: 'Password reset email will be sent'
-    })
-  }
-
-  const handleEnable2FA = () => {
-    toast.success('2FA enabled', {
-      description: 'Two-factor authentication is now active'
-    })
-  }
-
-  const handleExportData = () => {
-    toast.success('Exporting data', {
-      description: 'Your account data will be downloaded'
-    })
-  }
-
-  const handleRevokeSession = (sessionId: string) => {
-    toast.info('Session revoked', {
-      description: 'Device has been logged out'
-    })
-  }
-
-  const handleDeleteAccount = () => {
-    toast.info('Delete Account', {
-      description: 'Please confirm account deletion...'
-    })
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -424,7 +725,7 @@ export default function SettingsClient() {
                 {saveMessage}
               </Badge>
             )}
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleExportData}>
               <Download className="w-4 h-4 mr-2" />
               Export Data
             </Button>
@@ -507,9 +808,9 @@ export default function SettingsClient() {
                     <p className="text-3xl font-bold">85%</p>
                     <p className="text-blue-200 text-sm">Complete</p>
                   </div>
-                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={handleSaveProfile} disabled={isSaving}>
                     <Save className="w-4 h-4 mr-2" />
-                    Save Changes
+                    {isSaving ? 'Saving...' : 'Save Changes'}
                   </Button>
                 </div>
               </div>
@@ -626,7 +927,7 @@ export default function SettingsClient() {
                       />
                     </div>
 
-                    <Button onClick={() => handleSave('Profile')} disabled={isSaving}>
+                    <Button onClick={handleSaveProfile} disabled={isSaving}>
                       <Save className="w-4 h-4 mr-2" />
                       {isSaving ? 'Saving...' : 'Save Changes'}
                     </Button>
@@ -760,7 +1061,7 @@ export default function SettingsClient() {
                     <div>
                       <label className="text-sm font-medium mb-2 block">Current Password</label>
                       <div className="relative">
-                        <Input type={showPassword ? 'text' : 'password'} placeholder="Enter current password" />
+                        <Input type={showPassword ? 'text' : 'password'} placeholder="Enter current password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
                         <Button variant="ghost" size="icon" className="absolute right-2 top-1/2 -translate-y-1/2" onClick={() => setShowPassword(!showPassword)}>
                           {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </Button>
@@ -768,14 +1069,16 @@ export default function SettingsClient() {
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-2 block">New Password</label>
-                      <Input type="password" placeholder="Enter new password" />
+                      <Input type="password" placeholder="Enter new password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-2 block">Confirm New Password</label>
-                      <Input type="password" placeholder="Confirm new password" />
+                      <Input type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
                     </div>
                     <p className="text-xs text-gray-500">Last changed {formatTimeAgo(security.passwordLastChanged)}</p>
-                    <Button onClick={() => handleSave('Password')}>Update Password</Button>
+                    <Button onClick={handleUpdatePassword} disabled={isSaving || !newPassword}>
+                      {isSaving ? 'Updating...' : 'Update Password'}
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -797,8 +1100,8 @@ export default function SettingsClient() {
                           </p>
                         </div>
                       </div>
-                      <Button variant={security.twoFactorEnabled ? 'outline' : 'default'}>
-                        {security.twoFactorEnabled ? 'Manage' : 'Enable'}
+                      <Button variant={security.twoFactorEnabled ? 'outline' : 'default'} onClick={handleToggle2FA} disabled={isSaving}>
+                        {security.twoFactorEnabled ? 'Disable' : 'Enable'}
                       </Button>
                     </div>
                   </CardContent>
@@ -808,7 +1111,7 @@ export default function SettingsClient() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Active Sessions</CardTitle>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={handleRevokeAllSessions}>
                         <LogOut className="w-4 h-4 mr-2" />
                         Sign Out All
                       </Button>
@@ -834,7 +1137,7 @@ export default function SettingsClient() {
                             </div>
                           </div>
                           {!session.isCurrent && (
-                            <Button variant="ghost" size="sm" className="text-red-600">
+                            <Button variant="ghost" size="sm" className="text-red-600" onClick={() => handleRevokeSession(session.id)}>
                               <LogOut className="w-4 h-4" />
                             </Button>
                           )}
@@ -996,7 +1299,9 @@ export default function SettingsClient() {
                   </table>
                 </div>
                 <div className="mt-6">
-                  <Button onClick={() => handleSave('Notifications')}>Save Preferences</Button>
+                  <Button onClick={handleSaveNotifications} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Preferences'}
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -1082,6 +1387,7 @@ export default function SettingsClient() {
                     <Button
                       variant={integration.status === 'connected' ? 'outline' : 'default'}
                       className="w-full"
+                      onClick={() => handleToggleIntegration(integration.id)}
                     >
                       {integration.status === 'connected' ? (
                         <>
@@ -1301,7 +1607,7 @@ export default function SettingsClient() {
                     ].map((option) => (
                       <button
                         key={option.value}
-                        onClick={() => setTheme(option.value as ThemeMode)}
+                        onClick={() => handleSaveTheme(option.value as ThemeMode)}
                         className={`p-4 rounded-lg border-2 flex flex-col items-center gap-2 transition-all ${
                           theme === option.value
                             ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
@@ -1544,7 +1850,7 @@ export default function SettingsClient() {
                     </div>
 
                     <div className="flex gap-3">
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1" onClick={handleExportData}>
                         <Download className="w-4 h-4 mr-2" />
                         Export All Data
                       </Button>
@@ -1750,7 +2056,7 @@ export default function SettingsClient() {
                         <p className="font-medium text-red-600">Delete Account</p>
                         <p className="text-sm text-muted-foreground">Permanently delete your account and all data</p>
                       </div>
-                      <Button variant="destructive">
+                      <Button variant="destructive" onClick={handleDeleteAccount}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Delete
                       </Button>

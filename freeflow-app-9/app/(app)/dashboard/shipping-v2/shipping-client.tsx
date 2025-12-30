@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -96,6 +97,83 @@ import {
   shippingActivities,
   shippingQuickActions,
 } from '@/lib/mock-data/adapters'
+
+// ============================================================================
+// DATABASE TYPES
+// ============================================================================
+
+interface DbShipment {
+  id: string
+  user_id: string
+  shipment_code: string
+  tracking_number: string | null
+  order_id: string | null
+  status: string
+  method: string
+  carrier: string | null
+  origin_address: string | null
+  origin_city: string | null
+  origin_state: string | null
+  origin_country: string
+  origin_postal: string | null
+  recipient_name: string | null
+  recipient_email: string | null
+  recipient_phone: string | null
+  destination_address: string | null
+  destination_city: string | null
+  destination_state: string | null
+  destination_country: string
+  destination_postal: string | null
+  item_count: number
+  weight_lbs: number
+  dimensions_length: number | null
+  dimensions_width: number | null
+  dimensions_height: number | null
+  shipping_cost: number
+  insurance_value: number
+  declared_value: number
+  estimated_delivery: string | null
+  actual_delivery: string | null
+  shipped_at: string | null
+  signature_required: boolean
+  saturday_delivery: boolean
+  is_priority: boolean
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+interface ShipmentFormState {
+  recipient_name: string
+  recipient_email: string
+  destination_address: string
+  destination_city: string
+  destination_state: string
+  destination_postal: string
+  destination_country: string
+  carrier: string
+  method: string
+  weight_lbs: number
+  item_count: number
+  signature_required: boolean
+  is_priority: boolean
+}
+
+const initialFormState: ShipmentFormState = {
+  recipient_name: '',
+  recipient_email: '',
+  destination_address: '',
+  destination_city: '',
+  destination_state: '',
+  destination_postal: '',
+  destination_country: 'US',
+  carrier: 'FedEx',
+  method: 'standard',
+  weight_lbs: 1,
+  item_count: 1,
+  signature_required: false,
+  is_priority: false,
+}
 
 // ============================================================================
 // TYPES & INTERFACES - ShipStation Level Shipping Platform
@@ -688,6 +766,7 @@ const formatTime = (dateString: string) => {
 // ============================================================================
 
 export default function ShippingClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('shipments')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null)
@@ -695,7 +774,39 @@ export default function ShippingClient() {
   const [selectedOrders, setSelectedOrders] = useState<string[]>([])
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Filtered data
+  // Database state
+  const [dbShipments, setDbShipments] = useState<DbShipment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [formState, setFormState] = useState<ShipmentFormState>(initialFormState)
+
+  // Fetch shipments from Supabase
+  const fetchShipments = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('shipments')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbShipments(data || [])
+    } catch (error) {
+      console.error('Error fetching shipments:', error)
+      toast.error('Failed to load shipments')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchShipments()
+  }, [fetchShipments])
+
+  // Filtered data (combines mock + db)
   const filteredShipments = useMemo(() => {
     return mockShipments.filter(shipment => {
       const matchesSearch = shipment.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -708,41 +819,206 @@ export default function ShippingClient() {
 
   const pendingOrders = mockOrders.filter(o => o.status === 'awaiting_shipment')
 
-  // Handlers
-  const handleCreateShipment = () => {
-    toast.info('Create Shipment', {
-      description: 'Opening shipment form...'
-    })
+  // Create shipment in Supabase
+  const handleCreateShipment = async () => {
+    if (!formState.recipient_name.trim()) {
+      toast.error('Recipient name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create shipments')
+        return
+      }
+
+      const { error } = await supabase.from('shipments').insert({
+        user_id: user.id,
+        recipient_name: formState.recipient_name,
+        recipient_email: formState.recipient_email,
+        destination_address: formState.destination_address,
+        destination_city: formState.destination_city,
+        destination_state: formState.destination_state,
+        destination_postal: formState.destination_postal,
+        destination_country: formState.destination_country,
+        carrier: formState.carrier,
+        method: formState.method,
+        weight_lbs: formState.weight_lbs,
+        item_count: formState.item_count,
+        signature_required: formState.signature_required,
+        is_priority: formState.is_priority,
+        status: 'pending',
+        tracking_number: `TRK${Date.now()}`,
+      })
+
+      if (error) throw error
+
+      toast.success('Shipment created successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      fetchShipments()
+    } catch (error) {
+      console.error('Error creating shipment:', error)
+      toast.error('Failed to create shipment')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handlePrintLabel = (shipment: Shipment) => {
-    toast.success('Label ready', {
-      description: `Shipping label for ${shipment.trackingNumber} is ready to print`
-    })
+  // Update shipment status
+  const handleUpdateStatus = async (shipmentId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('shipments')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', shipmentId)
+
+      if (error) throw error
+
+      toast.success(`Status updated to ${newStatus}`)
+      fetchShipments()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('Failed to update status')
+    }
   }
 
-  const handleTrackShipment = (shipment: Shipment) => {
-    toast.info('Tracking', {
-      description: `Opening tracking for ${shipment.trackingNumber}`
-    })
+  // Delete shipment
+  const handleDeleteShipment = async (shipmentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('shipments')
+        .delete()
+        .eq('id', shipmentId)
+
+      if (error) throw error
+
+      toast.success('Shipment deleted')
+      fetchShipments()
+    } catch (error) {
+      console.error('Error deleting shipment:', error)
+      toast.error('Failed to delete shipment')
+    }
   }
 
-  const handleBatchShip = () => {
-    toast.success('Batch shipment created', {
-      description: `${selectedOrders.length} orders queued for shipment`
-    })
+  // Print label handler
+  const handlePrintLabel = async (shipment: Shipment) => {
+    try {
+      // Update status to label_created if pending
+      if (shipment.status === 'pending') {
+        await supabase
+          .from('shipments')
+          .update({ status: 'label_created', updated_at: new Date().toISOString() })
+          .eq('tracking_number', shipment.trackingNumber)
+      }
+      toast.success('Label ready', {
+        description: `Shipping label for ${shipment.trackingNumber} is ready to print`
+      })
+      fetchShipments()
+    } catch (error) {
+      console.error('Error:', error)
+      toast.error('Failed to generate label')
+    }
   }
 
-  const handleCancelShipment = (trackingNumber: string) => {
-    toast.info('Shipment cancelled', {
-      description: `Shipment ${trackingNumber} has been cancelled`
-    })
+  // Track shipment handler
+  const handleTrackShipment = async (shipment: Shipment) => {
+    try {
+      // Add tracking event
+      await supabase.from('shipment_tracking').insert({
+        shipment_id: shipment.id,
+        status: 'Tracking viewed',
+        description: 'Customer viewed tracking information',
+        location: shipment.destination.city || 'Unknown',
+      })
+      toast.info('Tracking', {
+        description: `Opening tracking for ${shipment.trackingNumber}`
+      })
+    } catch (error) {
+      console.error('Error:', error)
+    }
   }
 
-  const handleExportShipments = () => {
-    toast.success('Exporting shipments', {
-      description: 'Shipping report will be downloaded'
-    })
+  // Batch ship handler
+  const handleBatchShip = async () => {
+    if (selectedOrders.length === 0) {
+      toast.error('No orders selected')
+      return
+    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Create shipments for selected orders
+      const shipmentsToCreate = selectedOrders.map(orderId => ({
+        user_id: user.id,
+        order_id: orderId,
+        status: 'processing',
+        method: 'standard',
+        carrier: 'FedEx',
+        tracking_number: `BATCH${Date.now()}${orderId}`,
+      }))
+
+      const { error } = await supabase.from('shipments').insert(shipmentsToCreate)
+      if (error) throw error
+
+      toast.success('Batch shipment created', {
+        description: `${selectedOrders.length} orders queued for shipment`
+      })
+      setSelectedOrders([])
+      fetchShipments()
+    } catch (error) {
+      console.error('Error:', error)
+      toast.error('Failed to create batch shipment')
+    }
+  }
+
+  // Cancel shipment
+  const handleCancelShipment = async (trackingNumber: string) => {
+    try {
+      const { error } = await supabase
+        .from('shipments')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .eq('tracking_number', trackingNumber)
+
+      if (error) throw error
+
+      toast.info('Shipment cancelled', {
+        description: `Shipment ${trackingNumber} has been cancelled`
+      })
+      fetchShipments()
+    } catch (error) {
+      console.error('Error:', error)
+      toast.error('Failed to cancel shipment')
+    }
+  }
+
+  // Export shipments
+  const handleExportShipments = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('shipments')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `shipments-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Exporting shipments', {
+        description: 'Shipping report downloaded'
+      })
+    } catch (error) {
+      console.error('Error:', error)
+      toast.error('Failed to export shipments')
+    }
   }
 
   return (
@@ -769,7 +1045,10 @@ export default function ShippingClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+            <Button
+              onClick={() => setShowCreateDialog(true)}
+              className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Shipment
             </Button>
@@ -920,7 +1199,7 @@ export default function ShippingClient() {
                 ))}
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleExportShipments}>
                   <Download className="w-4 h-4 mr-2" />
                   Export
                 </Button>
@@ -930,6 +1209,50 @@ export default function ShippingClient() {
                 </Button>
               </div>
             </div>
+
+            {/* Database Shipments Display */}
+            {dbShipments.length > 0 && (
+              <div className="space-y-2 mb-4">
+                <h3 className="text-sm font-medium text-gray-500">Your Shipments ({dbShipments.length})</h3>
+                {dbShipments.slice(0, 5).map(shipment => (
+                  <Card key={shipment.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 flex items-center justify-center text-white">
+                            <Package className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <p className="font-medium">{shipment.recipient_name || 'Unnamed'}</p>
+                            <p className="text-xs text-gray-500">{shipment.tracking_number}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={shipment.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
+                            {shipment.status}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleUpdateStatus(shipment.id, 'shipped')}
+                          >
+                            Ship
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500"
+                            onClick={() => handleDeleteShipment(shipment.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
 
             <div className="space-y-4">
               {filteredShipments.map(shipment => (
@@ -1069,7 +1392,7 @@ export default function ShippingClient() {
               </h3>
               <div className="flex items-center gap-2">
                 {selectedOrders.length > 0 && (
-                  <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                  <Button onClick={handleBatchShip} className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
                     <Printer className="w-4 h-4 mr-2" />
                     Create Labels ({selectedOrders.length})
                   </Button>
@@ -2225,6 +2548,147 @@ export default function ShippingClient() {
             variant="grid"
           />
         </div>
+
+        {/* Create Shipment Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center text-white">
+                  <Plus className="w-5 h-5" />
+                </div>
+                Create New Shipment
+              </DialogTitle>
+              <DialogDescription>Fill in the shipment details below</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Recipient Name *</Label>
+                  <Input
+                    value={formState.recipient_name}
+                    onChange={(e) => setFormState({ ...formState, recipient_name: e.target.value })}
+                    placeholder="John Doe"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Recipient Email</Label>
+                  <Input
+                    value={formState.recipient_email}
+                    onChange={(e) => setFormState({ ...formState, recipient_email: e.target.value })}
+                    placeholder="john@example.com"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label>Destination Address</Label>
+                <Input
+                  value={formState.destination_address}
+                  onChange={(e) => setFormState({ ...formState, destination_address: e.target.value })}
+                  placeholder="123 Main St"
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>City</Label>
+                  <Input
+                    value={formState.destination_city}
+                    onChange={(e) => setFormState({ ...formState, destination_city: e.target.value })}
+                    placeholder="New York"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>State</Label>
+                  <Input
+                    value={formState.destination_state}
+                    onChange={(e) => setFormState({ ...formState, destination_state: e.target.value })}
+                    placeholder="NY"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Postal Code</Label>
+                  <Input
+                    value={formState.destination_postal}
+                    onChange={(e) => setFormState({ ...formState, destination_postal: e.target.value })}
+                    placeholder="10001"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Carrier</Label>
+                  <Input
+                    value={formState.carrier}
+                    onChange={(e) => setFormState({ ...formState, carrier: e.target.value })}
+                    placeholder="FedEx"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Method</Label>
+                  <Input
+                    value={formState.method}
+                    onChange={(e) => setFormState({ ...formState, method: e.target.value })}
+                    placeholder="standard"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Weight (lbs)</Label>
+                  <Input
+                    type="number"
+                    value={formState.weight_lbs}
+                    onChange={(e) => setFormState({ ...formState, weight_lbs: parseFloat(e.target.value) || 0 })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Item Count</Label>
+                  <Input
+                    type="number"
+                    value={formState.item_count}
+                    onChange={(e) => setFormState({ ...formState, item_count: parseInt(e.target.value) || 1 })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={formState.signature_required}
+                    onCheckedChange={(checked) => setFormState({ ...formState, signature_required: !!checked })}
+                  />
+                  <Label>Signature Required</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={formState.is_priority}
+                    onCheckedChange={(checked) => setFormState({ ...formState, is_priority: !!checked })}
+                  />
+                  <Label>Priority Shipment</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+              <Button
+                onClick={handleCreateShipment}
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
+              >
+                {isSubmitting ? 'Creating...' : 'Create Shipment'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Shipment Detail Dialog */}
         <Dialog open={!!selectedShipment} onOpenChange={() => setSelectedShipment(null)}>

@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAllocations, useAllocationMutations, type Allocation as DBAllocation } from '@/lib/hooks/use-allocations'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -16,7 +18,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Users,
   Briefcase,
@@ -65,7 +71,8 @@ import {
   Coffee,
   Plane,
   HeartPulse,
-  Home
+  Home,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -705,13 +712,66 @@ const mockAllocationQuickActions = [
 // MAIN COMPONENT
 // ============================================================================
 
+// Form state type
+interface AllocationForm {
+  resource_name: string
+  resource_role: string
+  project_name: string
+  allocation_type: string
+  status: string
+  priority: string
+  hours_per_week: number
+  allocated_hours: number
+  start_date: string
+  end_date: string
+  billable_rate: number
+  notes: string
+}
+
+const initialFormState: AllocationForm = {
+  resource_name: '',
+  resource_role: '',
+  project_name: '',
+  allocation_type: 'full-time',
+  status: 'pending',
+  priority: 'medium',
+  hours_per_week: 40,
+  allocated_hours: 0,
+  start_date: '',
+  end_date: '',
+  billable_rate: 150,
+  notes: '',
+}
+
 export default function AllocationClient() {
+  const supabase = createClientComponentClient()
+
+  // Supabase hooks
+  const { allocations: dbAllocations, stats: dbStats, isLoading, refetch } = useAllocations()
+  const {
+    createAllocation,
+    updateAllocation,
+    deleteAllocation,
+    activateAllocation,
+    completeAllocation,
+    cancelAllocation,
+    isCreating,
+    isUpdating,
+    isDeleting
+  } = useAllocationMutations()
+
   const [activeTab, setActiveTab] = useState('allocations')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AllocationStatus | 'all'>('all')
   const [selectedAllocation, setSelectedAllocation] = useState<Allocation | null>(null)
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
+
+  // Form state
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [formData, setFormData] = useState<AllocationForm>(initialFormState)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   // Filtered data
   const filteredAllocations = useMemo(() => {
@@ -749,35 +809,135 @@ export default function AllocationClient() {
     }
   }, [])
 
-  // Handlers
-  const handleCreateAllocation = () => {
-    toast.info('Create Allocation', {
-      description: 'Opening allocation form...'
-    })
+  // CRUD Handlers
+  const handleCreateAllocation = async () => {
+    if (!formData.resource_name || !formData.project_name) {
+      toast.error('Validation Error', { description: 'Resource and Project names are required' })
+      return
+    }
+    try {
+      await createAllocation({
+        resource_name: formData.resource_name,
+        resource_role: formData.resource_role,
+        project_name: formData.project_name,
+        allocation_type: formData.allocation_type,
+        status: formData.status,
+        priority: formData.priority,
+        hours_per_week: formData.hours_per_week,
+        allocated_hours: formData.allocated_hours,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
+        billable_rate: formData.billable_rate,
+        notes: formData.notes,
+      })
+      toast.success('Allocation Created', { description: `${formData.resource_name} allocated to ${formData.project_name}` })
+      setShowCreateDialog(false)
+      setFormData(initialFormState)
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to create allocation', { description: error.message })
+    }
   }
 
-  const handleApproveAllocation = (resourceName: string) => {
-    toast.success('Allocation approved', {
-      description: `${resourceName}'s allocation has been approved`
-    })
+  const handleUpdateAllocation = async () => {
+    if (!editingId) return
+    try {
+      await updateAllocation({
+        id: editingId,
+        updates: {
+          resource_name: formData.resource_name,
+          resource_role: formData.resource_role,
+          project_name: formData.project_name,
+          allocation_type: formData.allocation_type,
+          status: formData.status,
+          priority: formData.priority,
+          hours_per_week: formData.hours_per_week,
+          allocated_hours: formData.allocated_hours,
+          start_date: formData.start_date || null,
+          end_date: formData.end_date || null,
+          billable_rate: formData.billable_rate,
+          notes: formData.notes,
+        }
+      })
+      toast.success('Allocation Updated', { description: 'Changes saved successfully' })
+      setShowEditDialog(false)
+      setSelectedAllocation(null)
+      setEditingId(null)
+      setFormData(initialFormState)
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to update allocation', { description: error.message })
+    }
   }
 
-  const handleRejectAllocation = (resourceName: string) => {
-    toast.info('Allocation rejected', {
-      description: `${resourceName}'s allocation request was declined`
+  const handleDeleteAllocation = async (id: string, resourceName: string) => {
+    try {
+      await deleteAllocation(id)
+      toast.success('Allocation Deleted', { description: `${resourceName}'s allocation removed` })
+      setSelectedAllocation(null)
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to delete allocation', { description: error.message })
+    }
+  }
+
+  const handleApproveAllocation = async (id: string, resourceName: string) => {
+    try {
+      await activateAllocation(id)
+      toast.success('Allocation Approved', { description: `${resourceName}'s allocation is now active` })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to approve allocation', { description: error.message })
+    }
+  }
+
+  const handleCompleteAllocation = async (id: string, resourceName: string) => {
+    try {
+      await completeAllocation(id)
+      toast.success('Allocation Completed', { description: `${resourceName}'s allocation marked complete` })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to complete allocation', { description: error.message })
+    }
+  }
+
+  const handleCancelAllocation = async (id: string, resourceName: string) => {
+    try {
+      await cancelAllocation(id)
+      toast.info('Allocation Cancelled', { description: `${resourceName}'s allocation was cancelled` })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to cancel allocation', { description: error.message })
+    }
+  }
+
+  const openEditDialog = (allocation: Allocation) => {
+    setFormData({
+      resource_name: allocation.resource_name,
+      resource_role: allocation.resource_role,
+      project_name: allocation.project_name,
+      allocation_type: allocation.allocation_type,
+      status: allocation.status,
+      priority: allocation.priority,
+      hours_per_week: allocation.hours_per_week,
+      allocated_hours: 0,
+      start_date: allocation.start_date,
+      end_date: allocation.end_date,
+      billable_rate: allocation.billable_rate,
+      notes: allocation.notes,
     })
+    setEditingId(allocation.id)
+    setShowEditDialog(true)
   }
 
   const handleExportAllocations = () => {
-    toast.success('Exporting allocations', {
-      description: 'Allocation report will be downloaded'
-    })
+    toast.success('Exporting allocations', { description: 'Allocation report will be downloaded' })
   }
 
-  const handleOptimizeAllocations = () => {
-    toast.info('Optimizing allocations', {
-      description: 'AI is analyzing resource distribution...'
-    })
+  const handleRefresh = async () => {
+    toast.info('Refreshing...', { description: 'Fetching latest data' })
+    await refetch()
+    toast.success('Refreshed', { description: 'Data updated successfully' })
   }
 
   return (
@@ -795,11 +955,14 @@ export default function AllocationClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+              {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
               Refresh
             </Button>
-            <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white"
+              onClick={() => { setFormData(initialFormState); setShowCreateDialog(true) }}
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Allocation
             </Button>
@@ -896,19 +1059,20 @@ export default function AllocationClient() {
             {/* Allocations Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Allocation', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
+                { icon: Plus, label: 'New Allocation', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => { setFormData(initialFormState); setShowCreateDialog(true) } },
+                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Assign Resource', { description: 'Select a resource to assign' }) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('schedule') },
+                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Time Entry', { description: 'Time tracking feature' }) },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Approve Allocations', { description: 'Select pending allocations to approve' }) },
+                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('Transfer Resource', { description: 'Transfer allocation between projects' }) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('reports') },
+                { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1870,18 +2034,286 @@ export default function AllocationClient() {
                   )}
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        openEditDialog(selectedAllocation)
+                        setSelectedAllocation(null)
+                      }}
+                    >
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
                     </Button>
-                    <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700">
-                      <Trash2 className="w-4 h-4 mr-2" />
+                    <Button
+                      variant="outline"
+                      className="flex-1 text-red-600 hover:text-red-700"
+                      disabled={isDeleting}
+                      onClick={() => handleDeleteAllocation(selectedAllocation.id, selectedAllocation.resource_name)}
+                    >
+                      {isDeleting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
                       Delete
                     </Button>
                   </div>
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Allocation Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Allocation</DialogTitle>
+              <DialogDescription>Assign a resource to a project</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="resource_name">Resource Name *</Label>
+                  <Input
+                    id="resource_name"
+                    value={formData.resource_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, resource_name: e.target.value }))}
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="resource_role">Role</Label>
+                  <Input
+                    id="resource_role"
+                    value={formData.resource_role}
+                    onChange={(e) => setFormData(prev => ({ ...prev, resource_role: e.target.value }))}
+                    placeholder="Senior Developer"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project_name">Project Name *</Label>
+                <Input
+                  id="project_name"
+                  value={formData.project_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, project_name: e.target.value }))}
+                  placeholder="Platform Redesign"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Allocation Type</Label>
+                  <Select
+                    value={formData.allocation_type}
+                    onValueChange={(v) => setFormData(prev => ({ ...prev, allocation_type: v }))}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="full-time">Full-time</SelectItem>
+                      <SelectItem value="part-time">Part-time</SelectItem>
+                      <SelectItem value="contract">Contract</SelectItem>
+                      <SelectItem value="temporary">Temporary</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select
+                    value={formData.priority}
+                    onValueChange={(v) => setFormData(prev => ({ ...prev, priority: v }))}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="hours_per_week">Hours/Week</Label>
+                  <Input
+                    id="hours_per_week"
+                    type="number"
+                    value={formData.hours_per_week}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hours_per_week: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="billable_rate">Bill Rate ($/hr)</Label>
+                  <Input
+                    id="billable_rate"
+                    type="number"
+                    value={formData.billable_rate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, billable_rate: Number(e.target.value) }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="start_date">Start Date</Label>
+                  <Input
+                    id="start_date"
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="end_date">End Date</Label>
+                  <Input
+                    id="end_date"
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Allocation notes..."
+                  rows={2}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateAllocation} disabled={isCreating}>
+                {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                Create
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Allocation Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Allocation</DialogTitle>
+              <DialogDescription>Update allocation details</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_resource_name">Resource Name *</Label>
+                  <Input
+                    id="edit_resource_name"
+                    value={formData.resource_name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, resource_name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_resource_role">Role</Label>
+                  <Input
+                    id="edit_resource_role"
+                    value={formData.resource_role}
+                    onChange={(e) => setFormData(prev => ({ ...prev, resource_role: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_project_name">Project Name *</Label>
+                <Input
+                  id="edit_project_name"
+                  value={formData.project_name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, project_name: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(v) => setFormData(prev => ({ ...prev, status: v }))}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select
+                    value={formData.priority}
+                    onValueChange={(v) => setFormData(prev => ({ ...prev, priority: v }))}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_hours">Hours/Week</Label>
+                  <Input
+                    id="edit_hours"
+                    type="number"
+                    value={formData.hours_per_week}
+                    onChange={(e) => setFormData(prev => ({ ...prev, hours_per_week: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_rate">Bill Rate ($/hr)</Label>
+                  <Input
+                    id="edit_rate"
+                    type="number"
+                    value={formData.billable_rate}
+                    onChange={(e) => setFormData(prev => ({ ...prev, billable_rate: Number(e.target.value) }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_start">Start Date</Label>
+                  <Input
+                    id="edit_start"
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_end">End Date</Label>
+                  <Input
+                    id="edit_end"
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_notes">Notes</Label>
+                <Textarea
+                  id="edit_notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                  rows={2}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditDialog(false); setEditingId(null) }}>Cancel</Button>
+              <Button onClick={handleUpdateAllocation} disabled={isUpdating}>
+                {isUpdating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Edit className="w-4 h-4 mr-2" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 

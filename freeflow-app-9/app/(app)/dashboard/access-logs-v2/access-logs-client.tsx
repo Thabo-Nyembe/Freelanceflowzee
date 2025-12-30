@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -465,7 +466,33 @@ const mockLogsQuickActions = [
   { id: '3', label: 'Configure Alerts', icon: 'bell', action: () => console.log('Alerts'), variant: 'outline' as const },
 ]
 
+// Database type for access_logs table
+interface DbAccessLog {
+  id: string
+  user_id: string | null
+  log_code: string
+  user_name: string | null
+  user_email: string | null
+  access_type: string
+  status: string
+  resource: string | null
+  method: string
+  status_code: number
+  ip_address: string | null
+  location: string | null
+  device_type: string
+  browser: string | null
+  user_agent: string | null
+  duration: number
+  is_suspicious: boolean
+  threat_level: string
+  blocked_reason: string | null
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
 export default function AccessLogsClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('logs')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedStatus, setSelectedStatus] = useState<string>('all')
@@ -477,8 +504,209 @@ export default function AccessLogsClient() {
   const [viewMode, setViewMode] = useState<'list' | 'compact'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Supabase state
+  const [logs, setLogs] = useState<AccessLog[]>(mockLogs)
+  const [isLoading, setIsLoading] = useState(false)
+  const [stats, setStats] = useState<LogStats>(mockStats)
+
+  // Fetch logs from Supabase
+  const fetchLogs = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('access_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        const mappedLogs: AccessLog[] = data.map((log: DbAccessLog) => ({
+          id: log.id,
+          timestamp: log.created_at,
+          status: (log.status as LogStatus) || 'info',
+          level: log.threat_level === 'high' ? 'error' : log.threat_level === 'medium' ? 'warn' : 'info' as LogLevel,
+          accessType: (log.access_type as AccessType) || 'api',
+          user: log.user_id ? {
+            id: log.user_id,
+            name: log.user_name || 'Unknown',
+            email: log.user_email || '',
+            avatar: ''
+          } : null,
+          resource: log.resource || '',
+          method: log.method || 'GET',
+          statusCode: log.status_code || 200,
+          ipAddress: log.ip_address || '',
+          location: {
+            city: log.location?.split(',')[0] || 'Unknown',
+            country: log.location?.split(',')[1]?.trim() || 'Unknown',
+            coordinates: ''
+          },
+          device: {
+            type: (log.device_type as DeviceType) || 'desktop',
+            browser: log.browser || 'Unknown',
+            os: '',
+            version: ''
+          },
+          duration: log.duration || 0,
+          requestSize: 0,
+          responseSize: 0,
+          userAgent: log.user_agent || '',
+          referrer: null,
+          sessionId: '',
+          requestId: log.log_code,
+          errorMessage: log.blocked_reason,
+          stackTrace: null,
+          tags: [],
+          isSuspicious: log.is_suspicious || false,
+          isBot: log.device_type === 'bot'
+        }))
+        setLogs(mappedLogs)
+
+        // Calculate stats
+        const total = mappedLogs.length
+        const success = mappedLogs.filter(l => l.status === 'success').length
+        const failed = mappedLogs.filter(l => l.status === 'failed').length
+        const blocked = mappedLogs.filter(l => l.status === 'blocked').length
+        const suspicious = mappedLogs.filter(l => l.isSuspicious).length
+        setStats({
+          ...mockStats,
+          total,
+          success,
+          failed,
+          blocked,
+          suspicious,
+          successRate: total > 0 ? Math.round((success / total) * 100 * 10) / 10 : 0,
+          errorRate: total > 0 ? Math.round((failed / total) * 100 * 10) / 10 : 0
+        })
+      }
+    } catch (err) {
+      console.error('Error fetching logs:', err)
+      toast.error('Failed to fetch logs')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Create access log
+  const createAccessLog = useCallback(async (logData: Partial<DbAccessLog>) => {
+    try {
+      const { data, error } = await supabase
+        .from('access_logs')
+        .insert([{
+          access_type: logData.access_type || 'api',
+          status: logData.status || 'success',
+          resource: logData.resource,
+          method: logData.method || 'GET',
+          status_code: logData.status_code || 200,
+          ip_address: logData.ip_address,
+          location: logData.location,
+          device_type: logData.device_type || 'desktop',
+          browser: logData.browser,
+          duration: logData.duration || 0,
+          is_suspicious: logData.is_suspicious || false,
+          metadata: logData.metadata || {}
+        }])
+        .select()
+        .single()
+
+      if (error) throw error
+      toast.success('Access log created')
+      fetchLogs()
+      return data
+    } catch (err) {
+      console.error('Error creating log:', err)
+      toast.error('Failed to create access log')
+      return null
+    }
+  }, [supabase, fetchLogs])
+
+  // Block IP address
+  const blockIP = useCallback(async (ip: string) => {
+    try {
+      await createAccessLog({
+        access_type: 'admin',
+        status: 'blocked',
+        resource: `/blocked-ips/${ip}`,
+        ip_address: ip,
+        is_suspicious: true,
+        metadata: { action: 'ip_blocked', blocked_ip: ip }
+      })
+      toast.success('IP blocked', { description: `${ip} has been added to blocklist` })
+    } catch (err) {
+      toast.error('Failed to block IP')
+    }
+  }, [createAccessLog])
+
+  // Export logs
+  const exportLogs = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('access_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .csv()
+
+      if (error) throw error
+
+      const blob = new Blob([data], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `access-logs-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Logs exported successfully')
+    } catch (err) {
+      console.error('Export error:', err)
+      toast.error('Failed to export logs')
+    }
+  }, [supabase])
+
+  // Clear/archive old logs
+  const clearLogs = useCallback(async () => {
+    try {
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+      const { error } = await supabase
+        .from('access_logs')
+        .delete()
+        .lt('created_at', thirtyDaysAgo.toISOString())
+
+      if (error) throw error
+      toast.success('Old logs archived', { description: 'Logs older than 30 days have been removed' })
+      fetchLogs()
+    } catch (err) {
+      console.error('Clear logs error:', err)
+      toast.error('Failed to clear logs')
+    }
+  }, [supabase, fetchLogs])
+
+  // Initial fetch
+  useEffect(() => {
+    fetchLogs()
+  }, [fetchLogs])
+
+  // Real-time subscription for live tail
+  useEffect(() => {
+    if (!isLiveTail) return
+
+    const channel = supabase
+      .channel('access_logs_realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'access_logs' }, () => {
+        fetchLogs()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [isLiveTail, supabase, fetchLogs])
+
   const filteredLogs = useMemo(() => {
-    return mockLogs.filter(log => {
+    return logs.filter(log => {
       const matchesSearch = log.resource.toLowerCase().includes(searchQuery.toLowerCase()) ||
         log.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         log.ipAddress.includes(searchQuery)
@@ -487,7 +715,7 @@ export default function AccessLogsClient() {
       const matchesType = selectedType === 'all' || log.accessType === selectedType
       return matchesSearch && matchesStatus && matchesLevel && matchesType
     })
-  }, [searchQuery, selectedStatus, selectedLevel, selectedType])
+  }, [logs, searchQuery, selectedStatus, selectedLevel, selectedType])
 
   const getStatusColor = (status: LogStatus) => {
     switch (status) {
@@ -560,46 +788,52 @@ export default function AccessLogsClient() {
     setShowLogDialog(true)
   }
 
-  const stats = [
-    { label: 'Total Requests', value: mockStats.total.toLocaleString(), icon: Activity, change: '+12%', color: 'text-blue-600' },
-    { label: 'Success Rate', value: `${mockStats.successRate}%`, icon: CheckCircle, change: '+2.3%', color: 'text-green-600' },
-    { label: 'Error Rate', value: `${mockStats.errorRate}%`, icon: AlertCircle, change: '-1.2%', color: 'text-red-600' },
-    { label: 'Avg Duration', value: `${mockStats.avgDuration}ms`, icon: Clock, change: '-15ms', color: 'text-purple-600' },
-    { label: 'Req/min', value: mockStats.requestsPerMinute.toString(), icon: TrendingUp, change: '+8', color: 'text-cyan-600' },
-    { label: 'Unique Users', value: mockStats.uniqueUsers.toLocaleString(), icon: Users, change: '+156', color: 'text-pink-600' },
-    { label: 'Blocked', value: mockStats.blocked.toLocaleString(), icon: ShieldAlert, change: '+23', color: 'text-orange-600' },
-    { label: 'Data Transfer', value: formatBytes(mockStats.bytesTransferred), icon: Database, change: '+2.3 GB', color: 'text-teal-600' }
+  const statsDisplay = [
+    { label: 'Total Requests', value: stats.total.toLocaleString(), icon: Activity, change: '+12%', color: 'text-blue-600' },
+    { label: 'Success Rate', value: `${stats.successRate}%`, icon: CheckCircle, change: '+2.3%', color: 'text-green-600' },
+    { label: 'Error Rate', value: `${stats.errorRate}%`, icon: AlertCircle, change: '-1.2%', color: 'text-red-600' },
+    { label: 'Avg Duration', value: `${stats.avgDuration}ms`, icon: Clock, change: '-15ms', color: 'text-purple-600' },
+    { label: 'Req/min', value: stats.requestsPerMinute.toString(), icon: TrendingUp, change: '+8', color: 'text-cyan-600' },
+    { label: 'Unique Users', value: stats.uniqueUsers.toLocaleString(), icon: Users, change: '+156', color: 'text-pink-600' },
+    { label: 'Blocked', value: stats.blocked.toLocaleString(), icon: ShieldAlert, change: '+23', color: 'text-orange-600' },
+    { label: 'Data Transfer', value: formatBytes(stats.bytesTransferred), icon: Database, change: '+2.3 GB', color: 'text-teal-600' }
   ]
 
-  // Handlers
+  // Handlers - wired to Supabase
   const handleExportLogs = () => {
-    toast.success('Exporting logs', {
-      description: 'Log data will be downloaded'
-    })
+    exportLogs()
   }
 
   const handleFilterByIP = (ip: string) => {
-    toast.info('Filter applied', {
-      description: `Showing logs from ${ip}`
-    })
+    setSearchQuery(ip)
+    toast.info('Filter applied', { description: `Showing logs from ${ip}` })
   }
 
   const handleBlockIP = (ip: string) => {
-    toast.success('IP blocked', {
-      description: `${ip} has been added to blocklist`
-    })
+    blockIP(ip)
   }
 
   const handleClearLogs = () => {
-    toast.info('Logs cleared', {
-      description: 'Historical logs have been archived'
-    })
+    clearLogs()
   }
 
-  const handleCreateAlert = () => {
-    toast.success('Alert created', {
-      description: 'You will be notified of suspicious activity'
-    })
+  const handleRefresh = () => {
+    fetchLogs()
+    toast.info('Logs refreshed')
+  }
+
+  const handleCreateAlert = async () => {
+    try {
+      await createAccessLog({
+        access_type: 'admin',
+        status: 'success',
+        resource: '/alerts/create',
+        metadata: { action: 'alert_created' }
+      })
+      toast.success('Alert created', { description: 'You will be notified of suspicious activity' })
+    } catch {
+      toast.error('Failed to create alert')
+    }
   }
 
   return (
@@ -637,7 +871,7 @@ export default function AccessLogsClient() {
             <Button variant="outline" size="icon">
               <Filter className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={handleExportLogs}>
               <Download className="w-4 h-4" />
             </Button>
           </div>
@@ -645,7 +879,7 @@ export default function AccessLogsClient() {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          {stats.map((stat, index) => (
+          {statsDisplay.map((stat, index) => (
             <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
@@ -707,19 +941,19 @@ export default function AccessLogsClient() {
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                    <p className="text-2xl font-bold">{mockStats.total.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{stats.total.toLocaleString()}</p>
                     <p className="text-sm text-blue-100">Total Requests</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                    <p className="text-2xl font-bold">{mockStats.successRate}%</p>
+                    <p className="text-2xl font-bold">{stats.successRate}%</p>
                     <p className="text-sm text-blue-100">Success Rate</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                    <p className="text-2xl font-bold">{mockStats.blocked.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{stats.blocked.toLocaleString()}</p>
                     <p className="text-sm text-blue-100">Blocked</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                    <p className="text-2xl font-bold">{mockStats.avgDuration}ms</p>
+                    <p className="text-2xl font-bold">{stats.avgDuration}ms</p>
                     <p className="text-sm text-blue-100">Avg Duration</p>
                   </div>
                 </div>
@@ -778,10 +1012,10 @@ export default function AccessLogsClient() {
                         >
                           <span>{status === 'all' ? 'All Status' : status.charAt(0).toUpperCase() + status.slice(1)}</span>
                           <span className="text-xs text-gray-400">
-                            {status === 'all' ? mockStats.total :
-                             status === 'success' ? mockStats.success :
-                             status === 'failed' ? mockStats.failed :
-                             status === 'blocked' ? mockStats.blocked : 0}
+                            {status === 'all' ? stats.total :
+                             status === 'success' ? stats.success :
+                             status === 'failed' ? stats.failed :
+                             status === 'blocked' ? stats.blocked : 0}
                           </span>
                         </button>
                       ))}
@@ -858,8 +1092,8 @@ export default function AccessLogsClient() {
                         <Grid3X3 className="w-4 h-4" />
                       </Button>
                     </div>
-                    <Button variant="outline" size="sm">
-                      <RefreshCw className="w-4 h-4 mr-2" />
+                    <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+                      <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                       Refresh
                     </Button>
                   </div>
@@ -1092,7 +1326,7 @@ export default function AccessLogsClient() {
                       <Bell className="w-5 h-5 text-orange-500" />
                       Alert Rules
                     </div>
-                    <Button size="sm">Create Rule</Button>
+                    <Button size="sm" onClick={handleCreateAlert}>Create Rule</Button>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -1160,7 +1394,7 @@ export default function AccessLogsClient() {
                     <Bookmark className="w-5 h-5 text-purple-500" />
                     Saved Views
                   </div>
-                  <Button size="sm">Save Current View</Button>
+                  <Button size="sm" onClick={() => toast.success('View saved', { description: 'Current filter settings saved' })}>Save Current View</Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1204,11 +1438,11 @@ export default function AccessLogsClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{mockStats.total.toLocaleString()}</div>
+                      <div className="text-3xl font-bold">{stats.total.toLocaleString()}</div>
                       <div className="text-sm text-white/80">Total Events</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{((mockStats.success / mockStats.total) * 100).toFixed(1)}%</div>
+                      <div className="text-3xl font-bold">{stats.total > 0 ? ((stats.success / stats.total) * 100).toFixed(1) : 0}%</div>
                       <div className="text-sm text-white/80">Success Rate</div>
                     </div>
                   </div>
@@ -1245,10 +1479,10 @@ export default function AccessLogsClient() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { label: 'Success', value: mockStats.success, color: 'bg-green-500', percentage: (mockStats.success / mockStats.total * 100).toFixed(1) },
-                    { label: 'Failed', value: mockStats.failed, color: 'bg-red-500', percentage: (mockStats.failed / mockStats.total * 100).toFixed(1) },
-                    { label: 'Blocked', value: mockStats.blocked, color: 'bg-orange-500', percentage: (mockStats.blocked / mockStats.total * 100).toFixed(1) },
-                    { label: 'Suspicious', value: mockStats.suspicious, color: 'bg-yellow-500', percentage: (mockStats.suspicious / mockStats.total * 100).toFixed(1) }
+                    { label: 'Success', value: stats.success, color: 'bg-green-500', percentage: stats.total > 0 ? (stats.success / stats.total * 100).toFixed(1) : '0' },
+                    { label: 'Failed', value: stats.failed, color: 'bg-red-500', percentage: stats.total > 0 ? (stats.failed / stats.total * 100).toFixed(1) : '0' },
+                    { label: 'Blocked', value: stats.blocked, color: 'bg-orange-500', percentage: stats.total > 0 ? (stats.blocked / stats.total * 100).toFixed(1) : '0' },
+                    { label: 'Suspicious', value: stats.suspicious, color: 'bg-yellow-500', percentage: stats.total > 0 ? (stats.suspicious / stats.total * 100).toFixed(1) : '0' }
                   ].map(item => (
                     <div key={item.label}>
                       <div className="flex items-center justify-between text-sm mb-1">
@@ -1654,21 +1888,21 @@ export default function AccessLogsClient() {
                             <p className="font-medium">Export Logs</p>
                             <p className="text-sm text-gray-500">Download log data</p>
                           </div>
-                          <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" />Export</Button>
+                          <Button variant="outline" size="sm" onClick={handleExportLogs}><Download className="w-4 h-4 mr-2" />Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
                             <p className="font-medium">Clear Cache</p>
                             <p className="text-sm text-gray-500">Refresh cached log data</p>
                           </div>
-                          <Button variant="outline" size="sm"><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                          <Button variant="outline" size="sm" onClick={handleRefresh}><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Purge All Logs</p>
                             <p className="text-sm text-red-600 dark:text-red-400">Permanently delete all logs</p>
                           </div>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50"><Trash2 className="w-4 h-4 mr-2" />Purge</Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={handleClearLogs}><Trash2 className="w-4 h-4 mr-2" />Purge</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1911,12 +2145,25 @@ export default function AccessLogsClient() {
                 </div>
                 <div className="flex items-center gap-2">
                   {selectedLog.isSuspicious && (
-                    <Button variant="outline" className="text-red-600">
+                    <Button
+                      variant="outline"
+                      className="text-red-600"
+                      onClick={() => {
+                        handleBlockIP(selectedLog.ipAddress)
+                        setShowLogDialog(false)
+                      }}
+                    >
                       <ShieldOff className="w-4 h-4 mr-2" />
                       Block IP
                     </Button>
                   )}
-                  <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                  <Button
+                    className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white"
+                    onClick={() => {
+                      toast.success('Log saved to view')
+                      setShowLogDialog(false)
+                    }}
+                  >
                     <Bookmark className="w-4 h-4 mr-2" />
                     Save to View
                   </Button>

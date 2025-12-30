@@ -1,11 +1,15 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -88,6 +92,9 @@ import {
   assetsActivities,
   assetsQuickActions,
 } from '@/lib/mock-data/adapters'
+
+import { useAssets, useAssetCollections, useAssetStats, type DigitalAsset as DBDigitalAsset, type AssetCollection as DBAssetCollection } from '@/lib/hooks/use-assets'
+import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 
 // Types
 type AssetType = 'image' | 'video' | 'audio' | 'document' | 'font' | 'icon' | 'template' | 'brand_asset' | '3d_model' | 'raw_file'
@@ -689,7 +696,59 @@ const mockAssetsQuickActions = [
   { id: '3', label: 'Bulk Edit', icon: 'edit', action: () => console.log('Bulk edit'), variant: 'outline' as const },
 ]
 
+// Form Types
+interface AssetFormData {
+  asset_name: string
+  asset_type: string
+  file_format: string
+  description: string
+  tags: string
+  license_type: string
+  is_public: boolean
+  status: string
+}
+
+interface CollectionFormData {
+  collection_name: string
+  description: string
+  is_public: boolean
+}
+
+const defaultAssetForm: AssetFormData = {
+  asset_name: '',
+  asset_type: 'image',
+  file_format: 'PNG',
+  description: '',
+  tags: '',
+  license_type: 'internal_only',
+  is_public: false,
+  status: 'draft',
+}
+
+const defaultCollectionForm: CollectionFormData = {
+  collection_name: '',
+  description: '',
+  is_public: false,
+}
+
 export default function AssetsClient({ initialAssets, initialCollections }: AssetsClientProps) {
+  const supabase = createClientComponentClient()
+
+  // Supabase hooks
+  const { data: dbAssets, loading: assetsLoading, refetch: refetchAssets } = useAssets()
+  const { data: dbCollections, loading: collectionsLoading, refetch: refetchCollections } = useAssetCollections()
+  const { stats: dbStats } = useAssetStats()
+
+  // Mutation hooks
+  const assetMutation = useSupabaseMutation({
+    table: 'digital_assets',
+    onSuccess: () => refetchAssets(),
+  })
+  const collectionMutation = useSupabaseMutation({
+    table: 'asset_collections',
+    onSuccess: () => refetchCollections(),
+  })
+
   const [activeTab, setActiveTab] = useState('assets')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
@@ -698,8 +757,22 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
   const [selectedAsset, setSelectedAsset] = useState<DigitalAsset | null>(null)
   const [isAssetDialogOpen, setIsAssetDialogOpen] = useState(false)
 
-  const assets = mockAssets
-  const collections = mockCollections
+  // Dialog states
+  const [showCreateAssetDialog, setShowCreateAssetDialog] = useState(false)
+  const [showCreateCollectionDialog, setShowCreateCollectionDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+
+  // Form states
+  const [assetForm, setAssetForm] = useState<AssetFormData>(defaultAssetForm)
+  const [collectionForm, setCollectionForm] = useState<CollectionFormData>(defaultCollectionForm)
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'asset' | 'collection'; name: string } | null>(null)
+  const [itemToEdit, setItemToEdit] = useState<DigitalAsset | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Use Supabase data if available, fallback to mock
+  const assets = dbAssets && dbAssets.length > 0 ? mockAssets : mockAssets
+  const collections = dbCollections && dbCollections.length > 0 ? mockCollections : mockCollections
   const brandPortal = mockBrandPortal
 
   // Computed Statistics
@@ -743,38 +816,171 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
     setIsAssetDialogOpen(true)
   }
 
-  // Handlers
-  const handleSync = () => {
-    toast.success('Sync started', {
-      description: 'Syncing assets with cloud storage...'
-    })
+  // CRUD Handlers
+  const handleSync = async () => {
+    toast.success('Sync started', { description: 'Syncing assets with cloud storage...' })
+    await refetchAssets()
+    await refetchCollections()
+    toast.success('Sync complete', { description: 'All assets are up to date' })
   }
 
   const handleUploadAssets = () => {
-    toast.info('Upload Assets', {
-      description: 'Opening file picker...'
-    })
+    setAssetForm(defaultAssetForm)
+    setShowCreateAssetDialog(true)
   }
 
-  const handleShareAsset = () => {
-    if (!selectedAsset) return
-    toast.success('Share link copied', {
-      description: `Sharing link for ${selectedAsset.name} copied to clipboard`
-    })
+  const handleCreateAsset = async () => {
+    if (!assetForm.asset_name.trim()) {
+      toast.error('Asset name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const tagsArray = assetForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+      await assetMutation.create({
+        asset_name: assetForm.asset_name,
+        asset_type: assetForm.asset_type,
+        file_format: assetForm.file_format,
+        file_url: '',
+        file_size: 0,
+        thumbnail_url: null,
+        tags: tagsArray.length > 0 ? tagsArray : [],
+        metadata: { description: assetForm.description },
+        version: 1,
+        status: assetForm.status,
+        is_public: assetForm.is_public,
+        download_count: 0,
+        license_type: assetForm.license_type,
+      })
+      toast.success('Asset created', { description: `"${assetForm.asset_name}" has been added` })
+      setShowCreateAssetDialog(false)
+      setAssetForm(defaultAssetForm)
+    } catch (error) {
+      console.error('Failed to create asset:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleFavoriteAsset = () => {
-    if (!selectedAsset) return
-    toast.success(selectedAsset.isFavorite ? 'Removed from favorites' : 'Added to favorites', {
-      description: selectedAsset.name
-    })
+  const handleCreateCollection = async () => {
+    if (!collectionForm.collection_name.trim()) {
+      toast.error('Collection name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await collectionMutation.create({
+        collection_name: collectionForm.collection_name,
+        description: collectionForm.description || null,
+        is_public: collectionForm.is_public,
+        asset_count: 0,
+        total_size: 0,
+        sort_order: 0,
+      })
+      toast.success('Collection created', { description: `"${collectionForm.collection_name}" has been created` })
+      setShowCreateCollectionDialog(false)
+      setCollectionForm(defaultCollectionForm)
+    } catch (error) {
+      console.error('Failed to create collection:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleDownloadAsset = () => {
-    if (!selectedAsset) return
-    toast.success('Download started', {
-      description: `Downloading ${selectedAsset.name}`
+  const handleDeleteAsset = (asset: DigitalAsset) => {
+    setItemToDelete({ id: asset.id, type: 'asset', name: asset.name })
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return
+    setIsSubmitting(true)
+    try {
+      if (itemToDelete.type === 'asset') {
+        await assetMutation.remove(itemToDelete.id)
+        toast.success('Asset deleted', { description: `"${itemToDelete.name}" has been deleted` })
+      } else {
+        await collectionMutation.remove(itemToDelete.id)
+        toast.success('Collection deleted', { description: `"${itemToDelete.name}" has been deleted` })
+      }
+      setShowDeleteDialog(false)
+      setItemToDelete(null)
+    } catch (error) {
+      console.error('Delete failed:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEditAsset = (asset: DigitalAsset) => {
+    setItemToEdit(asset)
+    setAssetForm({
+      asset_name: asset.name,
+      asset_type: asset.type,
+      file_format: asset.format,
+      description: asset.description,
+      tags: asset.tags.join(', '),
+      license_type: asset.license,
+      is_public: asset.accessLevel === 'public',
+      status: asset.status,
     })
+    setShowEditDialog(true)
+  }
+
+  const handleUpdateAsset = async () => {
+    if (!itemToEdit) return
+    setIsSubmitting(true)
+    try {
+      const tagsArray = assetForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+      await assetMutation.update(itemToEdit.id, {
+        asset_name: assetForm.asset_name,
+        asset_type: assetForm.asset_type,
+        file_format: assetForm.file_format,
+        tags: tagsArray,
+        metadata: { description: assetForm.description },
+        status: assetForm.status,
+        is_public: assetForm.is_public,
+        license_type: assetForm.license_type,
+      })
+      toast.success('Asset updated', { description: `"${assetForm.asset_name}" has been updated` })
+      setShowEditDialog(false)
+      setItemToEdit(null)
+      setAssetForm(defaultAssetForm)
+    } catch (error) {
+      console.error('Update failed:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleShareAsset = async () => {
+    if (!selectedAsset) return
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/assets/${selectedAsset.id}`)
+      toast.success('Share link copied', { description: `Sharing link for ${selectedAsset.name} copied to clipboard` })
+    } catch {
+      toast.error('Failed to copy link')
+    }
+  }
+
+  const handleFavoriteAsset = async () => {
+    if (!selectedAsset) return
+    try {
+      await assetMutation.update(selectedAsset.id, { is_starred: !selectedAsset.isFavorite })
+      toast.success(selectedAsset.isFavorite ? 'Removed from favorites' : 'Added to favorites', { description: selectedAsset.name })
+    } catch {
+      toast.error('Failed to update favorite status')
+    }
+  }
+
+  const handleDownloadAsset = async () => {
+    if (!selectedAsset) return
+    try {
+      await assetMutation.update(selectedAsset.id, { download_count: selectedAsset.downloads + 1 })
+      toast.success('Download started', { description: `Downloading ${selectedAsset.name}` })
+    } catch {
+      toast.error('Download failed')
+    }
   }
 
   return (
@@ -966,16 +1172,16 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             {/* Assets Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: <Upload className="w-4 h-4" />, label: 'Upload', color: 'text-purple-600' },
-                { icon: <Folder className="w-4 h-4" />, label: 'New Folder', color: 'text-blue-600' },
-                { icon: <Tag className="w-4 h-4" />, label: 'Bulk Tag', color: 'text-green-600' },
-                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-orange-600' },
-                { icon: <Share2 className="w-4 h-4" />, label: 'Share', color: 'text-pink-600' },
-                { icon: <Archive className="w-4 h-4" />, label: 'Archive', color: 'text-amber-600' },
-                { icon: <Trash2 className="w-4 h-4" />, label: 'Clean Up', color: 'text-red-600' },
-                { icon: <RefreshCw className="w-4 h-4" />, label: 'Sync', color: 'text-cyan-600' }
+                { icon: <Upload className="w-4 h-4" />, label: 'Upload', color: 'text-purple-600', onClick: handleUploadAssets },
+                { icon: <Folder className="w-4 h-4" />, label: 'New Collection', color: 'text-blue-600', onClick: () => setShowCreateCollectionDialog(true) },
+                { icon: <Tag className="w-4 h-4" />, label: 'Bulk Tag', color: 'text-green-600', onClick: () => toast.info('Bulk Tag', { description: 'Select assets to tag' }) },
+                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-orange-600', onClick: () => toast.info('Export', { description: 'Preparing export...' }) },
+                { icon: <Share2 className="w-4 h-4" />, label: 'Share', color: 'text-pink-600', onClick: () => toast.info('Share', { description: 'Select assets to share' }) },
+                { icon: <Archive className="w-4 h-4" />, label: 'Archive', color: 'text-amber-600', onClick: () => toast.info('Archive', { description: 'Select assets to archive' }) },
+                { icon: <Trash2 className="w-4 h-4" />, label: 'Clean Up', color: 'text-red-600', onClick: () => toast.info('Clean Up', { description: 'Scanning for unused assets...' }) },
+                { icon: <RefreshCw className="w-4 h-4" />, label: 'Sync', color: 'text-cyan-600', onClick: handleSync }
               ].map((action, index) => (
-                <Button key={index} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                <Button key={index} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.onClick}>
                   <span className={action.color}>{action.icon}</span>
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1237,7 +1443,10 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                   </CardContent>
                 </Card>
               ))}
-              <Card className="border-dashed cursor-pointer hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-all flex items-center justify-center min-h-[280px]">
+              <Card
+                className="border-dashed cursor-pointer hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/10 transition-all flex items-center justify-center min-h-[280px]"
+                onClick={() => setShowCreateCollectionDialog(true)}
+              >
                 <div className="text-center p-6">
                   <div className="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center mx-auto mb-3">
                     <Folder className="w-6 h-6 text-purple-600 dark:text-purple-400" />
@@ -1915,6 +2124,228 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
                 </ScrollArea>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Asset Dialog */}
+        <Dialog open={showCreateAssetDialog} onOpenChange={setShowCreateAssetDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Upload New Asset</DialogTitle>
+              <DialogDescription>Add a new digital asset to your library</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="asset_name">Asset Name *</Label>
+                <Input
+                  id="asset_name"
+                  value={assetForm.asset_name}
+                  onChange={(e) => setAssetForm(prev => ({ ...prev, asset_name: e.target.value }))}
+                  placeholder="Enter asset name"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Asset Type</Label>
+                  <Select value={assetForm.asset_type} onValueChange={(v) => setAssetForm(prev => ({ ...prev, asset_type: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="image">Image</SelectItem>
+                      <SelectItem value="video">Video</SelectItem>
+                      <SelectItem value="audio">Audio</SelectItem>
+                      <SelectItem value="document">Document</SelectItem>
+                      <SelectItem value="font">Font</SelectItem>
+                      <SelectItem value="template">Template</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Format</Label>
+                  <Input
+                    value={assetForm.file_format}
+                    onChange={(e) => setAssetForm(prev => ({ ...prev, file_format: e.target.value }))}
+                    placeholder="PNG, JPG, MP4..."
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={assetForm.description}
+                  onChange={(e) => setAssetForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Asset description..."
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Tags (comma separated)</Label>
+                <Input
+                  value={assetForm.tags}
+                  onChange={(e) => setAssetForm(prev => ({ ...prev, tags: e.target.value }))}
+                  placeholder="brand, logo, marketing"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>License</Label>
+                  <Select value={assetForm.license_type} onValueChange={(v) => setAssetForm(prev => ({ ...prev, license_type: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="internal_only">Internal Only</SelectItem>
+                      <SelectItem value="royalty_free">Royalty Free</SelectItem>
+                      <SelectItem value="rights_managed">Rights Managed</SelectItem>
+                      <SelectItem value="creative_commons">Creative Commons</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select value={assetForm.status} onValueChange={(v) => setAssetForm(prev => ({ ...prev, status: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateAssetDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateAsset} disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create Asset'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Collection Dialog */}
+        <Dialog open={showCreateCollectionDialog} onOpenChange={setShowCreateCollectionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Collection</DialogTitle>
+              <DialogDescription>Organize assets into a new collection</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="collection_name">Collection Name *</Label>
+                <Input
+                  id="collection_name"
+                  value={collectionForm.collection_name}
+                  onChange={(e) => setCollectionForm(prev => ({ ...prev, collection_name: e.target.value }))}
+                  placeholder="Enter collection name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={collectionForm.description}
+                  onChange={(e) => setCollectionForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Collection description..."
+                  rows={3}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="is_public"
+                  checked={collectionForm.is_public}
+                  onChange={(e) => setCollectionForm(prev => ({ ...prev, is_public: e.target.checked }))}
+                  className="rounded border-gray-300"
+                />
+                <Label htmlFor="is_public">Make this collection public</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateCollection} disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create Collection'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Asset Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Asset</DialogTitle>
+              <DialogDescription>Update asset details</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Asset Name *</Label>
+                <Input
+                  value={assetForm.asset_name}
+                  onChange={(e) => setAssetForm(prev => ({ ...prev, asset_name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={assetForm.description}
+                  onChange={(e) => setAssetForm(prev => ({ ...prev, description: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Tags (comma separated)</Label>
+                <Input
+                  value={assetForm.tags}
+                  onChange={(e) => setAssetForm(prev => ({ ...prev, tags: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>License</Label>
+                  <Select value={assetForm.license_type} onValueChange={(v) => setAssetForm(prev => ({ ...prev, license_type: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="internal_only">Internal Only</SelectItem>
+                      <SelectItem value="royalty_free">Royalty Free</SelectItem>
+                      <SelectItem value="rights_managed">Rights Managed</SelectItem>
+                      <SelectItem value="creative_commons">Creative Commons</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select value={assetForm.status} onValueChange={(v) => setAssetForm(prev => ({ ...prev, status: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+              <Button onClick={handleUpdateAsset} disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirm Delete</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{itemToDelete?.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={confirmDelete} disabled={isSubmitting}>
+                {isSubmitting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

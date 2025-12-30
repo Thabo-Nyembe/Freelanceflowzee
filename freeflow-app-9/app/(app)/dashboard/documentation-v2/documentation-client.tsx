@@ -9,10 +9,21 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+
+// Import the Supabase documentation hook for real database operations
+import {
+  useDocumentationCRUD,
+  Documentation as SupabaseDoc,
+  DocStatus,
+  DocType,
+  DocCategory,
+  CreateDocumentationInput
+} from '@/lib/hooks/use-documentation'
 import {
   FileText, Plus, Search, Filter, Eye, Edit, Trash2, Star, Clock, Users,
   BookOpen, FolderOpen, ChevronRight, ChevronDown, MessageSquare, History,
@@ -20,7 +31,8 @@ import {
   ExternalLink, SortAsc, Calendar, CheckCircle2, Code, GitBranch, GitCommit,
   Zap, TrendingUp, BarChart3, Download, Upload, Sparkles, Lightbulb, Layout,
   RefreshCw, Bell, Shield, Database, Webhook, Languages, FileCheck, Rocket,
-  ArrowUpRight, ArrowDownRight, Layers, Target, Activity, PenTool, Megaphone
+  ArrowUpRight, ArrowDownRight, Layers, Target, Activity, PenTool, Megaphone,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -355,6 +367,153 @@ export default function DocumentationClient() {
   const [selectedLocale, setSelectedLocale] = useState<DocLocale | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Supabase CRUD hook for real database operations
+  const {
+    docs: supabaseDocs,
+    stats: supabaseStats,
+    loading: docsLoading,
+    mutating,
+    createDoc,
+    updateDoc,
+    deleteDoc,
+    publishDoc,
+    archiveDoc,
+    toggleLike,
+    submitFeedback,
+    refetch: refetchDocs
+  } = useDocumentationCRUD()
+
+  // Dialog states for CRUD operations
+  const [showCreateDocDialog, setShowCreateDocDialog] = useState(false)
+  const [showEditDocDialog, setShowEditDocDialog] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [docToEdit, setDocToEdit] = useState<SupabaseDoc | null>(null)
+  const [docToDelete, setDocToDelete] = useState<SupabaseDoc | null>(null)
+
+  // Form state for create/edit documentation
+  const [docFormData, setDocFormData] = useState<CreateDocumentationInput>({
+    title: '',
+    description: '',
+    content: '',
+    status: 'draft',
+    doc_type: 'guide',
+    category: 'getting-started',
+    author: '',
+    version: 'v1.0',
+    tags: []
+  })
+
+  // Reset form data
+  const resetDocForm = () => {
+    setDocFormData({
+      title: '',
+      description: '',
+      content: '',
+      status: 'draft',
+      doc_type: 'guide',
+      category: 'getting-started',
+      author: '',
+      version: 'v1.0',
+      tags: []
+    })
+  }
+
+  // Open edit dialog with doc data
+  const openEditDialog = (doc: SupabaseDoc) => {
+    setDocToEdit(doc)
+    setDocFormData({
+      title: doc.title,
+      description: doc.description || '',
+      content: doc.content || '',
+      status: doc.status,
+      doc_type: doc.doc_type,
+      category: doc.category,
+      author: doc.author || '',
+      version: doc.version,
+      tags: doc.tags || []
+    })
+    setShowEditDocDialog(true)
+  }
+
+  // Handle create documentation - REAL Supabase operation
+  const handleCreateDocSubmit = async () => {
+    if (!docFormData.title) {
+      toast.error('Please enter a title')
+      return
+    }
+    try {
+      await createDoc(docFormData)
+      setShowCreateDocDialog(false)
+      resetDocForm()
+    } catch (error) {
+      console.error('Error creating documentation:', error)
+    }
+  }
+
+  // Handle update documentation - REAL Supabase operation
+  const handleUpdateDocSubmit = async () => {
+    if (!docToEdit || !docFormData.title) {
+      toast.error('Please enter a title')
+      return
+    }
+    try {
+      await updateDoc(docToEdit.id, docFormData)
+      setShowEditDocDialog(false)
+      setDocToEdit(null)
+      resetDocForm()
+    } catch (error) {
+      console.error('Error updating documentation:', error)
+    }
+  }
+
+  // Handle delete documentation - REAL Supabase operation
+  const handleDeleteDocConfirm = async () => {
+    if (!docToDelete) return
+    try {
+      await deleteDoc(docToDelete.id)
+      setShowDeleteConfirm(false)
+      setDocToDelete(null)
+    } catch (error) {
+      console.error('Error deleting documentation:', error)
+    }
+  }
+
+  // Handle publish documentation - REAL Supabase operation
+  const handlePublishDocReal = async (doc: SupabaseDoc) => {
+    try {
+      await publishDoc(doc.id)
+    } catch (error) {
+      console.error('Error publishing documentation:', error)
+    }
+  }
+
+  // Handle archive documentation - REAL Supabase operation
+  const handleArchiveDocReal = async (doc: SupabaseDoc) => {
+    try {
+      await archiveDoc(doc.id)
+    } catch (error) {
+      console.error('Error archiving documentation:', error)
+    }
+  }
+
+  // Handle like - REAL Supabase operation
+  const handleLikeReal = async (docId: string) => {
+    try {
+      await toggleLike(docId, true)
+    } catch (error) {
+      console.error('Error liking documentation:', error)
+    }
+  }
+
+  // Handle feedback - REAL Supabase operation
+  const handleFeedbackReal = async (docId: string, helpful: boolean) => {
+    try {
+      await submitFeedback(docId, helpful)
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+    }
+  }
+
   const stats = useMemo(() => ({
     totalSpaces: mockSpaces.length,
     totalPages: mockPages.length,
@@ -412,11 +571,11 @@ export default function DocumentationClient() {
     { label: 'Satisfaction', value: `${stats.satisfaction}%`, icon: ThumbsUp, gradient: 'from-teal-500 to-emerald-500' }
   ]
 
-  // Handlers
+  // Handlers - Updated to use real Supabase operations where applicable
   const handleCreatePage = () => {
-    toast.info('Create Page', {
-      description: 'Opening documentation editor...'
-    })
+    // Open the create documentation dialog
+    resetDocForm()
+    setShowCreateDocDialog(true)
   }
 
   const handleEditPage = (pageTitle: string) => {
@@ -493,9 +652,16 @@ export default function DocumentationClient() {
   }
 
   const handleUseTemplate = (templateName: string) => {
-    toast.info('Use Template', {
-      description: `Creating page from "${templateName}" template...`
-    })
+    // Pre-fill the form based on template and open create dialog
+    resetDocForm()
+    setDocFormData(prev => ({
+      ...prev,
+      title: `New ${templateName}`,
+      doc_type: templateName.toLowerCase().includes('api') ? 'api-reference' :
+                templateName.toLowerCase().includes('tutorial') ? 'tutorial' :
+                templateName.toLowerCase().includes('troubleshoot') ? 'troubleshooting' : 'guide'
+    }))
+    setShowCreateDocDialog(true)
   }
 
   const handleEditChangelog = (changelogTitle: string) => {
@@ -575,6 +741,30 @@ export default function DocumentationClient() {
       description: 'New documentation space created successfully'
     })
     setShowNewSpace(false)
+  }
+
+  // Helper to get status badge color for Supabase docs
+  const getSupabaseDocStatusColor = (status: DocStatus): string => {
+    const colors: Record<DocStatus, string> = {
+      published: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+      draft: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+      archived: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-400',
+      review: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    }
+    return colors[status]
+  }
+
+  // Helper to get doc type badge color
+  const getDocTypeColor = (docType: DocType): string => {
+    const colors: Record<DocType, string> = {
+      guide: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+      'api-reference': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+      tutorial: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+      concept: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
+      quickstart: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400',
+      troubleshooting: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    }
+    return colors[docType]
   }
 
   return (
@@ -2044,6 +2234,425 @@ export default function DocumentationClient() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Create Documentation Dialog - REAL Supabase */}
+        <Dialog open={showCreateDocDialog} onOpenChange={setShowCreateDocDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-purple-600" />
+                Create New Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label>Title *</Label>
+                  <Input
+                    placeholder="Documentation Title"
+                    value={docFormData.title}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Document Type</Label>
+                  <Select
+                    value={docFormData.doc_type}
+                    onValueChange={(value: DocType) => setDocFormData(prev => ({ ...prev, doc_type: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="guide">Guide</SelectItem>
+                      <SelectItem value="api-reference">API Reference</SelectItem>
+                      <SelectItem value="tutorial">Tutorial</SelectItem>
+                      <SelectItem value="concept">Concept</SelectItem>
+                      <SelectItem value="quickstart">Quickstart</SelectItem>
+                      <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <Select
+                    value={docFormData.category}
+                    onValueChange={(value: DocCategory) => setDocFormData(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="getting-started">Getting Started</SelectItem>
+                      <SelectItem value="features">Features</SelectItem>
+                      <SelectItem value="integrations">Integrations</SelectItem>
+                      <SelectItem value="api">API</SelectItem>
+                      <SelectItem value="sdk">SDK</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select
+                    value={docFormData.status}
+                    onValueChange={(value: DocStatus) => setDocFormData(prev => ({ ...prev, status: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="review">In Review</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Version</Label>
+                  <Input
+                    placeholder="v1.0"
+                    value={docFormData.version}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, version: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    placeholder="Brief description of this documentation..."
+                    value={docFormData.description || ''}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, description: e.target.value }))}
+                    className="mt-1"
+                    rows={2}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Content</Label>
+                  <Textarea
+                    placeholder="Write your documentation content here (Markdown supported)..."
+                    value={docFormData.content || ''}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, content: e.target.value }))}
+                    className="mt-1 font-mono"
+                    rows={8}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Author</Label>
+                  <Input
+                    placeholder="Author name"
+                    value={docFormData.author || ''}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, author: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowCreateDocDialog(false); resetDocForm() }}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-fuchsia-600"
+                onClick={handleCreateDocSubmit}
+                disabled={mutating}
+              >
+                {mutating ? 'Creating...' : 'Create Documentation'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Documentation Dialog - REAL Supabase */}
+        <Dialog open={showEditDocDialog} onOpenChange={setShowEditDocDialog}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Edit className="h-5 w-5 text-purple-600" />
+                Edit Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label>Title *</Label>
+                  <Input
+                    placeholder="Documentation Title"
+                    value={docFormData.title}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, title: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Document Type</Label>
+                  <Select
+                    value={docFormData.doc_type}
+                    onValueChange={(value: DocType) => setDocFormData(prev => ({ ...prev, doc_type: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="guide">Guide</SelectItem>
+                      <SelectItem value="api-reference">API Reference</SelectItem>
+                      <SelectItem value="tutorial">Tutorial</SelectItem>
+                      <SelectItem value="concept">Concept</SelectItem>
+                      <SelectItem value="quickstart">Quickstart</SelectItem>
+                      <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Category</Label>
+                  <Select
+                    value={docFormData.category}
+                    onValueChange={(value: DocCategory) => setDocFormData(prev => ({ ...prev, category: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="getting-started">Getting Started</SelectItem>
+                      <SelectItem value="features">Features</SelectItem>
+                      <SelectItem value="integrations">Integrations</SelectItem>
+                      <SelectItem value="api">API</SelectItem>
+                      <SelectItem value="sdk">SDK</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <Select
+                    value={docFormData.status}
+                    onValueChange={(value: DocStatus) => setDocFormData(prev => ({ ...prev, status: value }))}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="review">In Review</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Version</Label>
+                  <Input
+                    placeholder="v1.0"
+                    value={docFormData.version}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, version: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Description</Label>
+                  <Textarea
+                    placeholder="Brief description of this documentation..."
+                    value={docFormData.description || ''}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, description: e.target.value }))}
+                    className="mt-1"
+                    rows={2}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Content</Label>
+                  <Textarea
+                    placeholder="Write your documentation content here (Markdown supported)..."
+                    value={docFormData.content || ''}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, content: e.target.value }))}
+                    className="mt-1 font-mono"
+                    rows={8}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Author</Label>
+                  <Input
+                    placeholder="Author name"
+                    value={docFormData.author || ''}
+                    onChange={(e) => setDocFormData(prev => ({ ...prev, author: e.target.value }))}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditDocDialog(false); setDocToEdit(null); resetDocForm() }}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-purple-600 to-fuchsia-600"
+                onClick={handleUpdateDocSubmit}
+                disabled={mutating}
+              >
+                {mutating ? 'Updating...' : 'Update Documentation'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog - REAL Supabase */}
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3 text-red-600">
+                <Trash2 className="h-5 w-5" />
+                Delete Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete <strong>"{docToDelete?.title}"</strong>?
+                This action cannot be undone.
+              </p>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowDeleteConfirm(false); setDocToDelete(null) }}>Cancel</Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteDocConfirm}
+                disabled={mutating}
+              >
+                {mutating ? 'Deleting...' : 'Delete Documentation'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Supabase Documentation Section - Real Data from Database */}
+        {supabaseDocs && supabaseDocs.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="h-5 w-5 text-purple-600" />
+                    Your Documentation (Supabase)
+                  </CardTitle>
+                  <CardDescription>
+                    {supabaseStats.total} total documents | {supabaseStats.published} published | {supabaseStats.draft} drafts | {supabaseStats.review} in review
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => refetchDocs()}>
+                    <RefreshCw className={`h-4 w-4 mr-2 ${docsLoading ? 'animate-spin' : ''}`} />
+                    Refresh
+                  </Button>
+                  <Button size="sm" onClick={handleCreatePage}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Document
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {supabaseDocs.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <FileText className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h4 className="font-medium truncate">{doc.title}</h4>
+                            <Badge className={getSupabaseDocStatusColor(doc.status)}>{doc.status}</Badge>
+                            <Badge className={getDocTypeColor(doc.doc_type)}>{doc.doc_type}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500 truncate">{doc.description || 'No description'}</p>
+                          <div className="flex items-center gap-4 text-xs text-gray-400 mt-1">
+                            <span className="flex items-center gap-1">
+                              <Eye className="h-3 w-3" />
+                              {doc.views_count} views
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <ThumbsUp className="h-3 w-3" />
+                              {doc.likes_count} likes
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {doc.read_time} min read
+                            </span>
+                            <span>v{doc.version}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {doc.status === 'draft' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePublishDocReal(doc)}
+                            disabled={mutating}
+                          >
+                            <Globe className="h-4 w-4 mr-1" />
+                            Publish
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleLikeReal(doc.id)}
+                          disabled={mutating}
+                        >
+                          <ThumbsUp className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditDialog(doc)}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => { setDocToDelete(doc); setShowDeleteConfirm(true) }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Empty State for Supabase Documentation */}
+        {supabaseDocs && supabaseDocs.length === 0 && !docsLoading && (
+          <Card className="mt-8">
+            <CardContent className="py-12">
+              <div className="text-center">
+                <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium mb-2">No Documentation Yet</h3>
+                <p className="text-gray-500 mb-4">Get started by creating your first documentation page.</p>
+                <Button onClick={handleCreatePage}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Documentation
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Loading State */}
+        {docsLoading && (
+          <Card className="mt-8">
+            <CardContent className="py-12">
+              <div className="text-center">
+                <RefreshCw className="h-8 w-8 text-purple-600 mx-auto mb-4 animate-spin" />
+                <p className="text-gray-500">Loading documentation...</p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

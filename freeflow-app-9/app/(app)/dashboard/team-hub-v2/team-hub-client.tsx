@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -101,7 +102,8 @@ import {
   Terminal,
   History,
   AlertTriangle,
-  Upload
+  Upload,
+  Loader2
 } from 'lucide-react'
 
 // Competitive Upgrade Components
@@ -455,7 +457,38 @@ const mockUserGroups: UserGroup[] = [
   { id: 'ug3', handle: 'leadership', name: 'Leadership', description: 'Company leadership', memberCount: 5, members: ['1', '2', '3'], createdBy: 'Sarah Johnson', isDefault: true }
 ]
 
+// Database Types
+interface DbTeamMember {
+  id: string
+  user_id: string
+  name: string
+  email: string
+  avatar: string | null
+  bio: string | null
+  role: string
+  role_level: string
+  department: string
+  phone: string | null
+  location: string | null
+  timezone: string
+  status: string
+  availability: string
+  last_seen: string | null
+  skills: string[]
+  start_date: string | null
+  projects_count: number
+  tasks_completed: number
+  rating: number
+  settings: Record<string, unknown>
+  metadata: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
 export default function TeamHubClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [members] = useState<TeamMember[]>(mockMembers)
   const [channels] = useState<Channel[]>(mockChannels)
   const [messages] = useState<Message[]>(mockMessages)
@@ -473,6 +506,145 @@ export default function TeamHubClient() {
   const [statusFilter, setStatusFilter] = useState<MemberStatus | 'all'>('all')
   const [showSearch, setShowSearch] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Data State
+  const [dbMembers, setDbMembers] = useState<DbTeamMember[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Dialog State
+  const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
+
+  // Form State
+  const [memberForm, setMemberForm] = useState({
+    name: '',
+    email: '',
+    role: '',
+    department: 'development',
+    phone: '',
+    location: '',
+    timezone: 'UTC',
+    bio: '',
+    skills: ''
+  })
+
+  // Fetch team members
+  const fetchMembers = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('team_members')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbMembers(data || [])
+    } catch (error) {
+      console.error('Error fetching team members:', error)
+      toast.error('Failed to load team members')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Create team member
+  const handleCreateMember = async () => {
+    if (!memberForm.name || !memberForm.email) {
+      toast.error('Name and email are required')
+      return
+    }
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to add team members')
+        return
+      }
+
+      const { error } = await supabase.from('team_members').insert({
+        user_id: user.id,
+        name: memberForm.name,
+        email: memberForm.email,
+        role: memberForm.role || 'Member',
+        department: memberForm.department,
+        phone: memberForm.phone || null,
+        location: memberForm.location || null,
+        timezone: memberForm.timezone,
+        bio: memberForm.bio || null,
+        skills: memberForm.skills ? memberForm.skills.split(',').map(s => s.trim()) : []
+      })
+
+      if (error) throw error
+
+      toast.success('Team member added successfully')
+      setShowCreateMemberDialog(false)
+      resetMemberForm()
+      fetchMembers()
+    } catch (error) {
+      console.error('Error creating team member:', error)
+      toast.error('Failed to add team member')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update member status
+  const handleUpdateMemberStatus = async (memberId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', memberId)
+
+      if (error) throw error
+      toast.success(`Status updated to ${newStatus}`)
+      fetchMembers()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('Failed to update status')
+    }
+  }
+
+  // Delete team member
+  const handleDeleteMember = async (memberId: string) => {
+    try {
+      const { error } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('id', memberId)
+
+      if (error) throw error
+      toast.success('Team member removed')
+      fetchMembers()
+    } catch (error) {
+      console.error('Error deleting member:', error)
+      toast.error('Failed to remove team member')
+    }
+  }
+
+  // Reset form
+  const resetMemberForm = () => {
+    setMemberForm({
+      name: '',
+      email: '',
+      role: '',
+      department: 'development',
+      phone: '',
+      location: '',
+      timezone: 'UTC',
+      bio: '',
+      skills: ''
+    })
+  }
+
+  // Load data on mount
+  useEffect(() => {
+    fetchMembers()
+  }, [fetchMembers])
 
   // Stats
   const stats = useMemo(() => {
@@ -642,9 +814,7 @@ export default function TeamHubClient() {
   }
 
   const handleInviteMember = () => {
-    toast.info('Invite Member', {
-      description: 'Generating invitation link...'
-    })
+    setShowCreateMemberDialog(true)
   }
 
   const handleSetReminder = () => {
@@ -652,6 +822,10 @@ export default function TeamHubClient() {
       description: 'You will be notified at the scheduled time'
     })
   }
+
+  // Combined stats from mock + db
+  const combinedMemberCount = members.length + dbMembers.length
+  const dbOnlineCount = dbMembers.filter(m => m.status === 'online').length
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -677,7 +851,7 @@ export default function TeamHubClient() {
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{stats.totalMentions}</span>
               )}
             </Button>
-            <Button className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+            <Button className="bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={handleInviteMember}>
               <UserPlus className="w-4 h-4 mr-2" />
               Invite
             </Button>
@@ -770,19 +944,20 @@ export default function TeamHubClient() {
             {/* Members Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: UserPlus, label: 'Invite', color: 'bg-purple-500' },
-                { icon: Mail, label: 'Email All', color: 'bg-blue-500' },
-                { icon: UserCheck, label: 'Approve', color: 'bg-green-500' },
-                { icon: Shield, label: 'Roles', color: 'bg-orange-500' },
-                { icon: Crown, label: 'Admins', color: 'bg-yellow-500' },
-                { icon: Download, label: 'Export', color: 'bg-pink-500' },
-                { icon: Filter, label: 'Filter', color: 'bg-indigo-500' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-500' }
+                { icon: UserPlus, label: 'Invite', color: 'bg-purple-500', onClick: handleInviteMember },
+                { icon: Mail, label: 'Email All', color: 'bg-blue-500', onClick: () => toast.info('Email feature coming soon') },
+                { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: () => toast.info('Approval queue is empty') },
+                { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => toast.info('Opening role management...') },
+                { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => toast.info('Admin settings') },
+                { icon: Download, label: 'Export', color: 'bg-pink-500', onClick: () => toast.success('Exporting team data...') },
+                { icon: Filter, label: 'Filter', color: 'bg-indigo-500', onClick: () => toast.info('Filter options') },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500', onClick: () => setSettingsTab('members') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200"
+                  onClick={action.onClick}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -862,6 +1037,62 @@ export default function TeamHubClient() {
                   </CardContent>
                 </Card>
               ))}
+
+              {/* Database Members */}
+              {isLoading ? (
+                <Card className="border-0 shadow-sm">
+                  <CardContent className="p-8 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                  </CardContent>
+                </Card>
+              ) : (
+                dbMembers.map(member => (
+                  <Card key={member.id} className="border-0 shadow-sm hover:shadow-md transition-all cursor-pointer group border-l-4 border-l-green-500">
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="relative">
+                          <Avatar className="w-12 h-12">
+                            <AvatarFallback className="bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+                              {member.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-gray-900 ${member.status === 'online' ? 'bg-green-500' : member.status === 'busy' ? 'bg-red-500' : 'bg-gray-400'}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold text-gray-900 dark:text-white truncate">{member.name}</h4>
+                            <Badge variant="outline" className="text-xs">DB</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500 truncate">{member.email}</p>
+                          <p className="text-xs text-gray-400 truncate">{member.role}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
+                        <span className="capitalize">{member.department}</span>
+                        <span>{member.location || member.timezone}</span>
+                      </div>
+
+                      {member.skills && member.skills.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {member.skills.slice(0, 3).map((skill, i) => (
+                            <Badge key={i} variant="secondary" className="text-xs">{skill}</Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="outline" size="sm" className="flex-1 h-8" onClick={(e) => { e.stopPropagation(); handleUpdateMemberStatus(member.id, member.status === 'online' ? 'offline' : 'online') }}>
+                          {member.status === 'online' ? 'Set Offline' : 'Set Online'}
+                        </Button>
+                        <Button variant="outline" size="sm" className="h-8 px-2 text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); handleDeleteMember(member.id) }}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </TabsContent>
 
@@ -1955,6 +2186,117 @@ export default function TeamHubClient() {
 
         {/* Quick Actions Toolbar */}
         <QuickActionsToolbar actions={teamHubQuickActions} />
+
+        {/* Create Member Dialog */}
+        <Dialog open={showCreateMemberDialog} onOpenChange={setShowCreateMemberDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-green-500" />
+                Add Team Member
+              </DialogTitle>
+              <DialogDescription>Add a new member to your team</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <Label>Name *</Label>
+                  <Input
+                    value={memberForm.name}
+                    onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
+                    placeholder="John Doe"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Email *</Label>
+                  <Input
+                    type="email"
+                    value={memberForm.email}
+                    onChange={(e) => setMemberForm({ ...memberForm, email: e.target.value })}
+                    placeholder="john@example.com"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Role</Label>
+                  <Input
+                    value={memberForm.role}
+                    onChange={(e) => setMemberForm({ ...memberForm, role: e.target.value })}
+                    placeholder="Developer"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Department</Label>
+                  <select
+                    value={memberForm.department}
+                    onChange={(e) => setMemberForm({ ...memberForm, department: e.target.value })}
+                    className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="development">Development</option>
+                    <option value="design">Design</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="sales">Sales</option>
+                    <option value="support">Support</option>
+                    <option value="management">Management</option>
+                    <option value="operations">Operations</option>
+                    <option value="qa">QA</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Phone</Label>
+                  <Input
+                    value={memberForm.phone}
+                    onChange={(e) => setMemberForm({ ...memberForm, phone: e.target.value })}
+                    placeholder="+1 555-0123"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Location</Label>
+                  <Input
+                    value={memberForm.location}
+                    onChange={(e) => setMemberForm({ ...memberForm, location: e.target.value })}
+                    placeholder="New York, USA"
+                    className="mt-1"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label>Skills (comma-separated)</Label>
+                  <Input
+                    value={memberForm.skills}
+                    onChange={(e) => setMemberForm({ ...memberForm, skills: e.target.value })}
+                    placeholder="React, TypeScript, Node.js"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateMemberDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateMember}
+                disabled={isSaving || !memberForm.name || !memberForm.email}
+                className="bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Add Member
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

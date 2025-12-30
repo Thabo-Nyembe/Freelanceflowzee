@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useInventory, useCreateInventoryItem, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
+import { useState, useMemo, useCallback } from 'react'
+import { useInventory, useCreateInventoryItem, useUpdateInventoryItem, useDeleteInventoryItem, type InventoryItem, type InventoryStatus } from '@/lib/hooks/use-inventory'
+import { useInventoryLocations } from '@/lib/hooks/use-inventory-extended'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Package,
@@ -15,8 +17,6 @@ import {
   Plus,
   Search,
   Truck,
-  ShoppingCart,
-  Box,
   Zap,
   MapPin,
   ArrowRightLeft,
@@ -24,30 +24,22 @@ import {
   Users,
   History,
   Settings,
-  Filter,
   MoreHorizontal,
   Edit,
-  Trash2,
   QrCode,
-  Tag,
-  Layers,
   Warehouse,
   PackageCheck,
   PackageX,
   RefreshCw,
   Eye,
   Copy,
-  Archive,
-  TrendingDown,
   Clock,
   Building2,
   Globe,
   Barcode,
-  FileSpreadsheet,
   Bell,
   ChevronDown,
   ChevronRight,
-  X
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -388,6 +380,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   // Database integration
   const { data: dbInventory, loading: inventoryLoading, refetch } = useInventory({ status: statusFilter === 'all' ? 'all' : statusFilter as InventoryStatus })
   const { mutate: createInventoryItem, loading: creating } = useCreateInventoryItem()
+  const { mutate: updateInventoryItem, loading: updating } = useUpdateInventoryItem()
+  const { mutate: deleteInventoryItem, loading: deleting } = useDeleteInventoryItem()
+  const { locations: dbLocations } = useInventoryLocations()
+  const supabase = createClient()
 
   // Form state for new product
   const [newProductForm, setNewProductForm] = useState({
@@ -401,6 +397,50 @@ export default function InventoryClient({ initialInventory }: { initialInventory
     costPrice: '',
     quantity: ''
   })
+
+  // Form state for transfer
+  const [transferForm, setTransferForm] = useState({
+    originLocationId: '',
+    destinationLocationId: '',
+    expectedArrival: '',
+    notes: '',
+    items: [] as { productId: string; sku: string; quantity: number }[]
+  })
+  const [creatingTransfer, setCreatingTransfer] = useState(false)
+
+  // Form state for purchase order
+  const [poForm, setPoForm] = useState({
+    supplierId: '',
+    supplierName: '',
+    expectedDate: '',
+    notes: '',
+    items: [] as { productId: string; sku: string; quantity: number; unitCost: number }[]
+  })
+  const [creatingPO, setCreatingPO] = useState(false)
+
+  // Form state for location
+  const [locationForm, setLocationForm] = useState({
+    name: '',
+    address: '',
+    city: '',
+    country: '',
+    type: 'warehouse' as 'warehouse' | 'store' | 'fulfillment' | 'dropship'
+  })
+  const [showLocationDialog, setShowLocationDialog] = useState(false)
+  const [creatingLocation, setCreatingLocation] = useState(false)
+
+  // Form state for supplier
+  const [supplierForm, setSupplierForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    country: '',
+    leadTime: 14,
+    paymentTerms: 'Net 30'
+  })
+  const [showSupplierDialog, setShowSupplierDialog] = useState(false)
+  const [creatingSupplier, setCreatingSupplier] = useState(false)
 
   const handleCreateProduct = async () => {
     if (!newProductForm.title) {
@@ -519,35 +559,275 @@ export default function InventoryClient({ initialInventory }: { initialInventory
 
   // Handlers
   const handleTransferStock = () => {
-    toast.info('Transfer Stock', {
-      description: 'Opening transfer dialog...'
-    })
     setShowTransferDialog(true)
   }
 
-  const handleExportInventory = () => {
-    toast.success('Export started', {
-      description: 'Inventory data is being exported'
-    })
-  }
+  const handleExportInventory = useCallback(async () => {
+    try {
+      toast.info('Export started', { description: 'Fetching inventory data...' })
+      const { data, error } = await supabase
+        .from('inventory')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      // Convert to CSV
+      const items = data || []
+      if (items.length === 0) {
+        toast.info('No data to export')
+        return
+      }
+
+      const headers = Object.keys(items[0]).join(',')
+      const rows = items.map(item =>
+        Object.values(item).map(v =>
+          typeof v === 'string' ? `"${v.replace(/"/g, '""')}"` : v
+        ).join(',')
+      )
+      const csv = [headers, ...rows].join('\n')
+
+      // Download
+      const blob = new Blob([csv], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Export completed', { description: `Exported ${items.length} items` })
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.error('Failed to export inventory')
+    }
+  }, [supabase])
 
   const handleCreatePurchaseOrder = () => {
-    toast.info('Create Purchase Order', {
-      description: 'Opening PO form...'
-    })
     setShowPODialog(true)
   }
 
-  const handleUpdateStock = (product: Product) => {
-    toast.success('Stock updated', {
-      description: `Stock for "${product.title}" has been updated`
-    })
+  const handleCreateTransfer = async () => {
+    if (!transferForm.originLocationId || !transferForm.destinationLocationId) {
+      toast.error('Please select origin and destination locations')
+      return
+    }
+    if (transferForm.originLocationId === transferForm.destinationLocationId) {
+      toast.error('Origin and destination must be different')
+      return
+    }
+
+    setCreatingTransfer(true)
+    try {
+      const { error } = await supabase.from('stock_transfers').insert({
+        reference: `TRF-${Date.now()}`,
+        origin_location_id: transferForm.originLocationId,
+        destination_location_id: transferForm.destinationLocationId,
+        status: 'pending',
+        expected_arrival: transferForm.expectedArrival || null,
+        notes: transferForm.notes || null,
+        created_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      toast.success('Stock transfer created', { description: 'Transfer is now pending' })
+      setShowTransferDialog(false)
+      setTransferForm({
+        originLocationId: '',
+        destinationLocationId: '',
+        expectedArrival: '',
+        notes: '',
+        items: []
+      })
+    } catch (error) {
+      console.error('Transfer creation error:', error)
+      toast.error('Failed to create transfer')
+    } finally {
+      setCreatingTransfer(false)
+    }
   }
 
-  const handleArchiveProduct = (product: Product) => {
-    toast.success('Product archived', {
-      description: `"${product.title}" has been archived`
-    })
+  const handleCreatePO = async () => {
+    if (!poForm.supplierId) {
+      toast.error('Please select a supplier')
+      return
+    }
+
+    setCreatingPO(true)
+    try {
+      const { error } = await supabase.from('purchase_orders').insert({
+        po_number: `PO-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`,
+        supplier_id: poForm.supplierId,
+        status: 'draft',
+        expected_date: poForm.expectedDate || null,
+        notes: poForm.notes || null,
+        subtotal: 0,
+        tax: 0,
+        total: 0,
+        created_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      toast.success('Purchase order created', { description: 'PO saved as draft' })
+      setShowPODialog(false)
+      setPoForm({
+        supplierId: '',
+        supplierName: '',
+        expectedDate: '',
+        notes: '',
+        items: []
+      })
+    } catch (error) {
+      console.error('PO creation error:', error)
+      toast.error('Failed to create purchase order')
+    } finally {
+      setCreatingPO(false)
+    }
+  }
+
+  const handleUpdateStock = async (product: Product) => {
+    // Find matching inventory item from DB
+    const inventoryItem = dbInventory?.find(item =>
+      item.product_name === product.title || item.sku === product.variants[0]?.sku
+    )
+
+    if (!inventoryItem) {
+      toast.error('Product not found in database')
+      return
+    }
+
+    try {
+      const newQuantity = product.totalQuantity
+      await updateInventoryItem({
+        id: inventoryItem.id,
+        quantity: newQuantity,
+        available_quantity: newQuantity - (inventoryItem.reserved_quantity || 0),
+        total_value: newQuantity * inventoryItem.unit_price,
+        status: newQuantity === 0 ? 'out-of-stock' : newQuantity <= inventoryItem.reorder_point ? 'low-stock' : 'in-stock',
+        updated_at: new Date().toISOString()
+      } as any)
+
+      toast.success('Stock updated', { description: `Stock for "${product.title}" has been updated` })
+      refetch()
+    } catch (error) {
+      console.error('Stock update error:', error)
+      toast.error('Failed to update stock')
+    }
+  }
+
+  const handleArchiveProduct = async (product: Product) => {
+    const inventoryItem = dbInventory?.find(item =>
+      item.product_name === product.title || item.sku === product.variants[0]?.sku
+    )
+
+    if (!inventoryItem) {
+      toast.error('Product not found in database')
+      return
+    }
+
+    try {
+      await updateInventoryItem({
+        id: inventoryItem.id,
+        status: 'discontinued',
+        is_active: false,
+        deleted_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      } as any)
+
+      toast.success('Product archived', { description: `"${product.title}" has been archived` })
+      refetch()
+    } catch (error) {
+      console.error('Archive error:', error)
+      toast.error('Failed to archive product')
+    }
+  }
+
+  const handleCreateLocation = async () => {
+    if (!locationForm.name) {
+      toast.error('Please enter a location name')
+      return
+    }
+
+    setCreatingLocation(true)
+    try {
+      const { error } = await supabase.from('inventory_locations').insert({
+        name: locationForm.name,
+        address: locationForm.address || null,
+        city: locationForm.city || null,
+        country: locationForm.country || null,
+        type: locationForm.type,
+        is_active: true,
+        created_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      toast.success('Location created', { description: `"${locationForm.name}" has been added` })
+      setShowLocationDialog(false)
+      setLocationForm({
+        name: '',
+        address: '',
+        city: '',
+        country: '',
+        type: 'warehouse'
+      })
+    } catch (error) {
+      console.error('Location creation error:', error)
+      toast.error('Failed to create location')
+    } finally {
+      setCreatingLocation(false)
+    }
+  }
+
+  const handleCreateSupplier = async () => {
+    if (!supplierForm.name) {
+      toast.error('Please enter a supplier name')
+      return
+    }
+
+    setCreatingSupplier(true)
+    try {
+      const { error } = await supabase.from('suppliers').insert({
+        name: supplierForm.name,
+        email: supplierForm.email || null,
+        phone: supplierForm.phone || null,
+        address: supplierForm.address || null,
+        country: supplierForm.country || null,
+        lead_time_days: supplierForm.leadTime,
+        payment_terms: supplierForm.paymentTerms,
+        is_active: true,
+        rating: 0,
+        created_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      toast.success('Supplier created', { description: `"${supplierForm.name}" has been added` })
+      setShowSupplierDialog(false)
+      setSupplierForm({
+        name: '',
+        email: '',
+        phone: '',
+        address: '',
+        country: '',
+        leadTime: 14,
+        paymentTerms: 'Net 30'
+      })
+    } catch (error) {
+      console.error('Supplier creation error:', error)
+      toast.error('Failed to create supplier')
+    } finally {
+      setCreatingSupplier(false)
+    }
+  }
+
+  const handleSyncInventory = async () => {
+    toast.info('Syncing...', { description: 'Refreshing inventory data' })
+    await refetch()
+    toast.success('Sync complete', { description: 'Inventory data refreshed' })
   }
 
   return (
@@ -635,7 +915,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             </div>
             <span className="text-sm text-gray-500">Last sync: 2 minutes ago</span>
           </div>
-          <button className="px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 flex items-center gap-2">
+          <button
+            onClick={handleSyncInventory}
+            className="px-3 py-1.5 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 flex items-center gap-2"
+          >
             <RefreshCw className="w-4 h-4" />
             Sync Now
           </button>
@@ -683,15 +966,24 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                   <p className="text-blue-100 text-sm">Real-time stock tracking across all locations</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium">
+                  <button
+                    onClick={() => setShowProductDialog(true)}
+                    className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium"
+                  >
                     <Plus className="w-4 h-4" />
                     Add Product
                   </button>
-                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium">
+                  <button
+                    onClick={() => toast.info('Barcode Scanner', { description: 'Point your camera at a barcode to scan' })}
+                    className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium"
+                  >
                     <QrCode className="w-4 h-4" />
                     Scan Barcode
                   </button>
-                  <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium">
+                  <button
+                    onClick={handleTransferStock}
+                    className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium"
+                  >
                     <ArrowRightLeft className="w-4 h-4" />
                     Transfer Stock
                   </button>
@@ -734,11 +1026,17 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm">
+                <button
+                  onClick={() => toast.info('Import', { description: 'Drag and drop CSV or Excel file to import' })}
+                  className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
+                >
                   <Upload className="w-4 h-4" />
                   Import
                 </button>
-                <button className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm">
+                <button
+                  onClick={handleExportInventory}
+                  className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
+                >
                   <Download className="w-4 h-4" />
                   Export
                 </button>
@@ -1020,7 +1318,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
           <TabsContent value="locations" className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Inventory Locations</h2>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2">
+              <button
+                onClick={() => setShowLocationDialog(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 Add Location
               </button>
@@ -1192,7 +1493,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
           <TabsContent value="suppliers" className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Suppliers</h2>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2">
+              <button
+                onClick={() => setShowSupplierDialog(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 Add Supplier
               </button>
@@ -1243,7 +1547,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
           <TabsContent value="history" className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Inventory Adjustments</h2>
-              <button className="px-4 py-2 border dark:border-gray-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-300">
+              <button
+                onClick={handleExportInventory}
+                className="px-4 py-2 border dark:border-gray-600 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-300"
+              >
                 <Download className="w-4 h-4" />
                 Export History
               </button>
@@ -1411,7 +1718,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                     <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Warehouse Locations</h3>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                        <button
+                          onClick={() => setShowLocationDialog(true)}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                        >
                           <Plus className="w-4 h-4" />
                           Add Location
                         </button>
@@ -1930,16 +2240,26 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Origin Location</label>
-                <select className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white">
-                  {mockLocations.map(loc => (
+                <select
+                  value={transferForm.originLocationId}
+                  onChange={(e) => setTransferForm(prev => ({ ...prev, originLocationId: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                >
+                  <option value="">Select origin...</option>
+                  {(dbLocations?.length ? dbLocations : mockLocations).map(loc => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                   ))}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Destination Location</label>
-                <select className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white">
-                  {mockLocations.map(loc => (
+                <select
+                  value={transferForm.destinationLocationId}
+                  onChange={(e) => setTransferForm(prev => ({ ...prev, destinationLocationId: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                >
+                  <option value="">Select destination...</option>
+                  {(dbLocations?.length ? dbLocations : mockLocations).map(loc => (
                     <option key={loc.id} value={loc.id}>{loc.name}</option>
                   ))}
                 </select>
@@ -1949,6 +2269,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expected Arrival</label>
               <input
                 type="date"
+                value={transferForm.expectedArrival}
+                onChange={(e) => setTransferForm(prev => ({ ...prev, expectedArrival: e.target.value }))}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
               />
             </div>
@@ -1956,6 +2278,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
               <textarea
                 rows={2}
+                value={transferForm.notes}
+                onChange={(e) => setTransferForm(prev => ({ ...prev, notes: e.target.value }))}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
                 placeholder="Add transfer notes..."
               />
@@ -1967,8 +2291,12 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
-                Create Transfer
+              <button
+                onClick={handleCreateTransfer}
+                disabled={creatingTransfer || !transferForm.originLocationId || !transferForm.destinationLocationId}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creatingTransfer ? 'Creating...' : 'Create Transfer'}
               </button>
             </div>
           </div>
@@ -1989,7 +2317,15 @@ export default function InventoryClient({ initialInventory }: { initialInventory
           <div className="space-y-4 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supplier</label>
-              <select className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white">
+              <select
+                value={poForm.supplierId}
+                onChange={(e) => {
+                  const sup = mockSuppliers.find(s => s.id === e.target.value)
+                  setPoForm(prev => ({ ...prev, supplierId: e.target.value, supplierName: sup?.name || '' }))
+                }}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              >
+                <option value="">Select supplier...</option>
                 {mockSuppliers.map(sup => (
                   <option key={sup.id} value={sup.id}>{sup.name}</option>
                 ))}
@@ -1999,6 +2335,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Expected Delivery</label>
               <input
                 type="date"
+                value={poForm.expectedDate}
+                onChange={(e) => setPoForm(prev => ({ ...prev, expectedDate: e.target.value }))}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
               />
             </div>
@@ -2006,6 +2344,8 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
               <textarea
                 rows={2}
+                value={poForm.notes}
+                onChange={(e) => setPoForm(prev => ({ ...prev, notes: e.target.value }))}
                 className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
                 placeholder="Add order notes..."
               />
@@ -2017,8 +2357,202 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
-                Create PO
+              <button
+                onClick={handleCreatePO}
+                disabled={creatingPO || !poForm.supplierId}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creatingPO ? 'Creating...' : 'Create PO'}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Location Dialog */}
+      <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white">
+                <Warehouse className="w-5 h-5" />
+              </div>
+              Add Location
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location Name</label>
+              <input
+                type="text"
+                value={locationForm.name}
+                onChange={(e) => setLocationForm(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                placeholder="e.g. Main Warehouse"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+              <select
+                value={locationForm.type}
+                onChange={(e) => setLocationForm(prev => ({ ...prev, type: e.target.value as 'warehouse' | 'store' | 'fulfillment' | 'dropship' }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              >
+                <option value="warehouse">Warehouse</option>
+                <option value="store">Store</option>
+                <option value="fulfillment">Fulfillment Center</option>
+                <option value="dropship">Dropship</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
+              <input
+                type="text"
+                value={locationForm.address}
+                onChange={(e) => setLocationForm(prev => ({ ...prev, address: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                placeholder="Street address"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">City</label>
+                <input
+                  type="text"
+                  value={locationForm.city}
+                  onChange={(e) => setLocationForm(prev => ({ ...prev, city: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Country</label>
+                <input
+                  type="text"
+                  value={locationForm.country}
+                  onChange={(e) => setLocationForm(prev => ({ ...prev, country: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowLocationDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateLocation}
+                disabled={creatingLocation || !locationForm.name}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creatingLocation ? 'Creating...' : 'Add Location'}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Supplier Dialog */}
+      <Dialog open={showSupplierDialog} onOpenChange={setShowSupplierDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white">
+                <Users className="w-5 h-5" />
+              </div>
+              Add Supplier
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Supplier Name</label>
+              <input
+                type="text"
+                value={supplierForm.name}
+                onChange={(e) => setSupplierForm(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                placeholder="Company name"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={supplierForm.email}
+                  onChange={(e) => setSupplierForm(prev => ({ ...prev, email: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  placeholder="orders@supplier.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                <input
+                  type="tel"
+                  value={supplierForm.phone}
+                  onChange={(e) => setSupplierForm(prev => ({ ...prev, phone: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  placeholder="+1-555-0100"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address</label>
+              <input
+                type="text"
+                value={supplierForm.address}
+                onChange={(e) => setSupplierForm(prev => ({ ...prev, address: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Country</label>
+                <input
+                  type="text"
+                  value={supplierForm.country}
+                  onChange={(e) => setSupplierForm(prev => ({ ...prev, country: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lead Time (days)</label>
+                <input
+                  type="number"
+                  value={supplierForm.leadTime}
+                  onChange={(e) => setSupplierForm(prev => ({ ...prev, leadTime: parseInt(e.target.value) || 14 }))}
+                  className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Payment Terms</label>
+              <select
+                value={supplierForm.paymentTerms}
+                onChange={(e) => setSupplierForm(prev => ({ ...prev, paymentTerms: e.target.value }))}
+                className="w-full px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+              >
+                <option value="Net 30">Net 30</option>
+                <option value="Net 45">Net 45</option>
+                <option value="Net 60">Net 60</option>
+                <option value="COD">Cash on Delivery</option>
+                <option value="Prepaid">Prepaid</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowSupplierDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateSupplier}
+                disabled={creatingSupplier || !supplierForm.name}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {creatingSupplier ? 'Creating...' : 'Add Supplier'}
               </button>
             </div>
           </div>

@@ -1,7 +1,15 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
+import { useCommunity } from '@/lib/hooks/use-community'
+import {
+  useCommunityEvents,
+  useCommunityMembers,
+  useCommunityPosts,
+  useCommunityGroups
+} from '@/lib/hooks/use-community-extended'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
@@ -488,6 +496,7 @@ const getModActionColor = (type: ModActionType): string => {
 // ============== MAIN COMPONENT ==============
 
 export default function CommunityClient() {
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('chat')
   const [selectedChannel, setSelectedChannel] = useState<Channel>(mockChannelCategories[1].channels[0])
   const [messageInput, setMessageInput] = useState('')
@@ -497,8 +506,51 @@ export default function CommunityClient() {
   const [showMemberProfile, setShowMemberProfile] = useState(false)
   const [showServerSettings, setShowServerSettings] = useState(false)
   const [showEventDialog, setShowEventDialog] = useState(false)
+  const [showCreateEvent, setShowCreateEvent] = useState(false)
+  const [showCreateRole, setShowCreateRole] = useState(false)
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Form states for dialogs
+  const [channelForm, setChannelForm] = useState({
+    name: '',
+    type: 'text' as ChannelType,
+    description: '',
+    isPrivate: false
+  })
+
+  const [eventForm, setEventForm] = useState({
+    name: '',
+    description: '',
+    entityType: 'voice' as 'voice' | 'stage' | 'external',
+    scheduledStart: '',
+    scheduledEnd: '',
+    location: ''
+  })
+
+  const [roleForm, setRoleForm] = useState({
+    name: '',
+    color: '#6b7280',
+    isHoisted: false,
+    isMentionable: false
+  })
+
+  // Supabase hooks
+  const { communities, loading: communitiesLoading, createCommunity, updateCommunity, deleteCommunity, refetch: refetchCommunities } = useCommunity()
+  const { data: communityEvents, isLoading: eventsLoading, refresh: refreshEvents } = useCommunityEvents()
+  const { data: communityMembers, isLoading: membersLoading, refresh: refreshMembers } = useCommunityMembers(communities?.[0]?.id)
+  const { data: communityPosts, isLoading: postsLoading, refresh: refreshPosts } = useCommunityPosts()
+
+  // Get current user
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) setUserId(user.id)
+    }
+    getUser()
+  }, [supabase])
 
   const stats: ServerStats = useMemo(() => ({
     totalMembers: 1250,
@@ -519,7 +571,7 @@ export default function CommunityClient() {
 
   const handleSendMessage = useCallback(() => {
     if (!messageInput.trim()) return
-    setMessageInput('')
+    handleSendMessageSubmit()
   }, [messageInput])
 
   const handleViewMember = (member: Member) => {
@@ -527,35 +579,357 @@ export default function CommunityClient() {
     setShowMemberProfile(true)
   }
 
-  // Handlers
-  const handleCreateChannel = () => {
-    toast.info('Create Channel', {
-      description: 'Opening channel builder...'
-    })
+  // Handlers - Real Supabase Operations
+
+  // Create Channel Handler
+  const handleCreateChannel = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to create a channel' })
+      return
+    }
+
+    if (!channelForm.name.trim()) {
+      toast.error('Validation error', { description: 'Channel name is required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.from('community_channels').insert({
+        user_id: userId,
+        name: channelForm.name.toLowerCase().replace(/\s+/g, '-'),
+        channel_type: channelForm.type,
+        description: channelForm.description,
+        is_private: channelForm.isPrivate,
+        community_id: communities?.[0]?.id,
+        position: 0,
+        member_count: 0,
+        unread_count: 0
+      })
+
+      if (error) throw error
+
+      toast.success('Channel created', { description: `#${channelForm.name} has been created successfully` })
+      setShowCreateChannel(false)
+      setChannelForm({ name: '', type: 'text', description: '', isPrivate: false })
+    } catch (error: any) {
+      toast.error('Failed to create channel', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleInviteMember = () => {
-    toast.info('Invite Member', {
-      description: 'Generating invite link...'
-    })
+  // Invite Member Handler
+  const handleInviteMember = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to invite members' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Generate a unique invite code
+      const inviteCode = Math.random().toString(36).substring(2, 10).toUpperCase()
+
+      const { error } = await supabase.from('community_invites').insert({
+        user_id: userId,
+        community_id: communities?.[0]?.id,
+        invite_code: inviteCode,
+        uses: 0,
+        max_uses: 100,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
+      })
+
+      if (error) throw error
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(`${window.location.origin}/invite/${inviteCode}`)
+      toast.success('Invite link created', { description: 'Invite link has been copied to clipboard' })
+    } catch (error: any) {
+      toast.error('Failed to create invite', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleBanMember = (memberName: string) => {
-    toast.info('Member banned', {
-      description: `${memberName} has been banned from the community`
-    })
+  // Ban Member Handler
+  const handleBanMember = async (memberId: string, memberName: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to moderate members' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.from('community_mod_actions').insert({
+        user_id: userId,
+        community_id: communities?.[0]?.id,
+        target_user_id: memberId,
+        action_type: 'ban',
+        reason: 'Banned by moderator'
+      })
+
+      if (error) throw error
+
+      // Update member status
+      await supabase.from('community_members')
+        .update({ status: 'banned', banned_at: new Date().toISOString() })
+        .eq('user_id', memberId)
+        .eq('community_id', communities?.[0]?.id)
+
+      toast.success('Member banned', { description: `${memberName} has been banned from the community` })
+      refreshMembers()
+    } catch (error: any) {
+      toast.error('Failed to ban member', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handlePinMessage = (messageId: string) => {
-    toast.success('Message pinned', {
-      description: 'Message has been pinned to the channel'
-    })
+  // Pin Message Handler
+  const handlePinMessage = async (messageId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to pin messages' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.from('community_posts')
+        .update({ is_pinned: true, pinned_at: new Date().toISOString(), pinned_by: userId })
+        .eq('id', messageId)
+
+      if (error) throw error
+
+      toast.success('Message pinned', { description: 'Message has been pinned to the channel' })
+      refreshPosts()
+    } catch (error: any) {
+      toast.error('Failed to pin message', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleCreateEvent = () => {
-    toast.info('Create Event', {
-      description: 'Opening event scheduler...'
-    })
+  // Create Event Handler
+  const handleCreateEvent = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to create events' })
+      return
+    }
+
+    if (!eventForm.name.trim() || !eventForm.scheduledStart) {
+      toast.error('Validation error', { description: 'Event name and start time are required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.from('community_events').insert({
+        user_id: userId,
+        community_id: communities?.[0]?.id,
+        name: eventForm.name,
+        description: eventForm.description,
+        entity_type: eventForm.entityType,
+        start_date: new Date(eventForm.scheduledStart).toISOString(),
+        end_date: eventForm.scheduledEnd ? new Date(eventForm.scheduledEnd).toISOString() : null,
+        location: eventForm.location,
+        status: 'scheduled',
+        interested_count: 0
+      })
+
+      if (error) throw error
+
+      toast.success('Event created', { description: `"${eventForm.name}" has been scheduled` })
+      setShowCreateEvent(false)
+      setEventForm({ name: '', description: '', entityType: 'voice', scheduledStart: '', scheduledEnd: '', location: '' })
+      refreshEvents()
+    } catch (error: any) {
+      toast.error('Failed to create event', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Create Role Handler
+  const handleCreateRole = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to create roles' })
+      return
+    }
+
+    if (!roleForm.name.trim()) {
+      toast.error('Validation error', { description: 'Role name is required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.from('community_roles').insert({
+        user_id: userId,
+        community_id: communities?.[0]?.id,
+        name: roleForm.name,
+        color: roleForm.color,
+        is_hoisted: roleForm.isHoisted,
+        is_mentionable: roleForm.isMentionable,
+        position: mockRoles.length,
+        member_count: 0,
+        permissions: ['read', 'send_messages']
+      })
+
+      if (error) throw error
+
+      toast.success('Role created', { description: `"${roleForm.name}" role has been created` })
+      setShowCreateRole(false)
+      setRoleForm({ name: '', color: '#6b7280', isHoisted: false, isMentionable: false })
+    } catch (error: any) {
+      toast.error('Failed to create role', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Send Message Handler
+  const handleSendMessageSubmit = async () => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to send messages' })
+      return
+    }
+
+    if (!messageInput.trim()) return
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.from('community_posts').insert({
+        user_id: userId,
+        community_id: communities?.[0]?.id,
+        channel_id: selectedChannel.id,
+        content: messageInput,
+        post_type: 'message',
+        is_pinned: false
+      })
+
+      if (error) throw error
+
+      setMessageInput('')
+      refreshPosts()
+    } catch (error: any) {
+      toast.error('Failed to send message', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Mark Event as Interested Handler
+  const handleEventInterest = async (eventId: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to mark interest' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Check if already interested
+      const { data: existing } = await supabase
+        .from('community_event_attendees')
+        .select('id')
+        .eq('event_id', eventId)
+        .eq('user_id', userId)
+        .single()
+
+      if (existing) {
+        // Remove interest
+        await supabase.from('community_event_attendees').delete().eq('id', existing.id)
+        toast.success('Interest removed', { description: 'You are no longer interested in this event' })
+      } else {
+        // Add interest
+        await supabase.from('community_event_attendees').insert({
+          event_id: eventId,
+          user_id: userId,
+          status: 'interested'
+        })
+        toast.success('Interest marked', { description: 'You have marked interest in this event' })
+      }
+
+      refreshEvents()
+    } catch (error: any) {
+      toast.error('Failed to update interest', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Update Community Settings Handler
+  const handleUpdateSettings = async (settings: Record<string, any>) => {
+    if (!userId || !communities?.[0]?.id) {
+      toast.error('Authentication required', { description: 'Please sign in to update settings' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await updateCommunity({ ...settings }, communities[0].id)
+      if (result) {
+        toast.success('Settings updated', { description: 'Community settings have been saved' })
+        refetchCommunities()
+      }
+    } catch (error: any) {
+      toast.error('Failed to update settings', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Delete Community Handler
+  const handleDeleteCommunity = async () => {
+    if (!userId || !communities?.[0]?.id) {
+      toast.error('Authentication required', { description: 'Please sign in to delete community' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await deleteCommunity(communities[0].id)
+      if (result) {
+        toast.success('Community deleted', { description: 'The community has been permanently deleted' })
+        refetchCommunities()
+      }
+    } catch (error: any) {
+      toast.error('Failed to delete community', { description: error.message || 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Add Reaction Handler
+  const handleAddReaction = async (postId: string, emoji: string) => {
+    if (!userId) {
+      toast.error('Authentication required', { description: 'Please sign in to react' })
+      return
+    }
+
+    try {
+      const { data: existing } = await supabase
+        .from('community_post_likes')
+        .select('id')
+        .eq('post_id', postId)
+        .eq('user_id', userId)
+        .eq('reaction_type', emoji)
+        .single()
+
+      if (existing) {
+        await supabase.from('community_post_likes').delete().eq('id', existing.id)
+      } else {
+        await supabase.from('community_post_likes').insert({
+          post_id: postId,
+          user_id: userId,
+          reaction_type: emoji
+        })
+      }
+
+      refreshPosts()
+    } catch (error: any) {
+      toast.error('Failed to add reaction', { description: error.message || 'An unexpected error occurred' })
+    }
   }
 
   return (
@@ -836,7 +1210,7 @@ export default function CommunityClient() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input placeholder="Search members..." className="pl-9" />
               </div>
-              <Button><UserPlus className="w-4 h-4 mr-2" />Invite Members</Button>
+              <Button onClick={handleInviteMember} disabled={isSubmitting}><UserPlus className="w-4 h-4 mr-2" />Invite Members</Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mockMembers.map(member => (
@@ -871,7 +1245,7 @@ export default function CommunityClient() {
           <TabsContent value="events" className="flex-1 p-4 m-0 overflow-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Community Events</h2>
-              <Button><Plus className="w-4 h-4 mr-2" />Create Event</Button>
+              <Button onClick={() => setShowCreateEvent(true)} disabled={isSubmitting}><Plus className="w-4 h-4 mr-2" />Create Event</Button>
             </div>
             <div className="grid gap-4">
               {mockEvents.map(event => (
@@ -897,7 +1271,7 @@ export default function CommunityClient() {
                           <span className="flex items-center gap-1"><Users className="w-4 h-4" />{event.interestedCount} interested</span>
                         </div>
                       </div>
-                      <Button variant="outline">Interested</Button>
+                      <Button variant="outline" onClick={() => handleEventInterest(event.id)} disabled={isSubmitting}>Interested</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -909,7 +1283,7 @@ export default function CommunityClient() {
           <TabsContent value="roles" className="flex-1 p-4 m-0 overflow-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Server Roles</h2>
-              <Button><Plus className="w-4 h-4 mr-2" />Create Role</Button>
+              <Button onClick={() => setShowCreateRole(true)} disabled={isSubmitting}><Plus className="w-4 h-4 mr-2" />Create Role</Button>
             </div>
             <div className="space-y-3">
               {mockRoles.map(role => (
@@ -1585,7 +1959,14 @@ export default function CommunityClient() {
                           </div>
                         ))}
 
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          disabled={isSubmitting}
+                          onClick={async () => {
+                            toast.info('Bot Store', { description: 'Opening bot marketplace...' })
+                          }}
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Add Bot or App
                         </Button>
@@ -1620,7 +2001,35 @@ export default function CommunityClient() {
                           </Select>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          disabled={isSubmitting}
+                          onClick={async () => {
+                            if (!userId) {
+                              toast.error('Authentication required', { description: 'Please sign in to create webhooks' })
+                              return
+                            }
+                            setIsSubmitting(true)
+                            try {
+                              const webhookToken = Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2)
+                              const { error } = await supabase.from('community_webhooks').insert({
+                                user_id: userId,
+                                community_id: communities?.[0]?.id,
+                                name: 'New Webhook',
+                                channel_id: selectedChannel.id,
+                                token: webhookToken,
+                                is_active: true
+                              })
+                              if (error) throw error
+                              toast.success('Webhook created', { description: 'New webhook has been created successfully' })
+                            } catch (error: any) {
+                              toast.error('Failed to create webhook', { description: error.message })
+                            } finally {
+                              setIsSubmitting(false)
+                            }
+                          }}
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Webhook
                         </Button>
@@ -1707,7 +2116,41 @@ export default function CommunityClient() {
                           <Switch defaultChecked />
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          disabled={isSubmitting}
+                          onClick={async () => {
+                            if (!userId) {
+                              toast.error('Authentication required', { description: 'Please sign in to export data' })
+                              return
+                            }
+                            setIsSubmitting(true)
+                            try {
+                              const { data, error } = await supabase.from('community')
+                                .select('*, community_members(*), community_posts(*), community_events(*)')
+                                .eq('id', communities?.[0]?.id)
+                                .single()
+                              if (error) throw error
+
+                              const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `community-export-${new Date().toISOString().split('T')[0]}.json`
+                              document.body.appendChild(a)
+                              a.click()
+                              document.body.removeChild(a)
+                              URL.revokeObjectURL(url)
+
+                              toast.success('Export complete', { description: 'Server data has been exported' })
+                            } catch (error: any) {
+                              toast.error('Failed to export data', { description: error.message })
+                            } finally {
+                              setIsSubmitting(false)
+                            }
+                          }}
+                        >
                           <Download className="w-4 h-4 mr-2" />
                           Export Server Data
                         </Button>
@@ -1763,7 +2206,30 @@ export default function CommunityClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Prune Members</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove inactive members</p>
                           </div>
-                          <Button variant="destructive" size="sm">Prune</Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={isSubmitting}
+                            onClick={async () => {
+                              if (!confirm('Are you sure you want to prune inactive members? This action cannot be undone.')) return
+                              setIsSubmitting(true)
+                              try {
+                                const { error } = await supabase.from('community_members')
+                                  .update({ status: 'pruned', pruned_at: new Date().toISOString() })
+                                  .eq('community_id', communities?.[0]?.id)
+                                  .lt('last_active_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+                                if (error) throw error
+                                toast.success('Members pruned', { description: 'Inactive members have been removed' })
+                                refreshMembers()
+                              } catch (error: any) {
+                                toast.error('Failed to prune members', { description: error.message })
+                              } finally {
+                                setIsSubmitting(false)
+                              }
+                            }}
+                          >
+                            Prune
+                          </Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -1771,7 +2237,29 @@ export default function CommunityClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Messages</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Clear all server message history</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete All</Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={isSubmitting}
+                            onClick={async () => {
+                              if (!confirm('Are you sure you want to delete all messages? This action cannot be undone.')) return
+                              setIsSubmitting(true)
+                              try {
+                                const { error } = await supabase.from('community_posts')
+                                  .update({ deleted_at: new Date().toISOString() })
+                                  .eq('community_id', communities?.[0]?.id)
+                                if (error) throw error
+                                toast.success('Messages deleted', { description: 'All messages have been deleted' })
+                                refreshPosts()
+                              } catch (error: any) {
+                                toast.error('Failed to delete messages', { description: error.message })
+                              } finally {
+                                setIsSubmitting(false)
+                              }
+                            }}
+                          >
+                            Delete All
+                          </Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -1779,7 +2267,17 @@ export default function CommunityClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Server</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this server</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete Server</Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={isSubmitting}
+                            onClick={() => {
+                              if (!confirm('Are you absolutely sure you want to delete this server? This action is permanent and cannot be undone.')) return
+                              handleDeleteCommunity()
+                            }}
+                          >
+                            Delete Server
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1870,14 +2368,182 @@ export default function CommunityClient() {
             <div><Label>Channel Type</Label>
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {[{ type: 'text', icon: <Hash />, label: 'Text' }, { type: 'voice', icon: <Volume2 />, label: 'Voice' }, { type: 'forum', icon: <MessageCircle />, label: 'Forum' }, { type: 'announcement', icon: <Megaphone />, label: 'Announcement' }].map(item => (
-                  <button key={item.type} className="p-3 border rounded-lg hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2">{item.icon}{item.label}</button>
+                  <button
+                    key={item.type}
+                    onClick={() => setChannelForm(prev => ({ ...prev, type: item.type as ChannelType }))}
+                    className={`p-3 border rounded-lg hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2 ${channelForm.type === item.type ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : ''}`}
+                  >
+                    {item.icon}{item.label}
+                  </button>
                 ))}
               </div>
             </div>
-            <div><Label>Channel Name</Label><Input placeholder="new-channel" className="mt-1" /></div>
-            <div className="flex items-center gap-2"><Switch id="private" /><Label htmlFor="private">Private Channel</Label></div>
+            <div>
+              <Label>Channel Name</Label>
+              <Input
+                placeholder="new-channel"
+                className="mt-1"
+                value={channelForm.name}
+                onChange={(e) => setChannelForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Description (optional)</Label>
+              <Input
+                placeholder="What is this channel about?"
+                className="mt-1"
+                value={channelForm.description}
+                onChange={(e) => setChannelForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="private"
+                checked={channelForm.isPrivate}
+                onCheckedChange={(checked) => setChannelForm(prev => ({ ...prev, isPrivate: checked }))}
+              />
+              <Label htmlFor="private">Private Channel</Label>
+            </div>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setShowCreateChannel(false)}>Cancel</Button><Button className="bg-orange-500 hover:bg-orange-600">Create Channel</Button></DialogFooter>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateChannel(false)}>Cancel</Button>
+            <Button className="bg-orange-500 hover:bg-orange-600" onClick={handleCreateChannel} disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Channel'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Event Dialog */}
+      <Dialog open={showCreateEvent} onOpenChange={setShowCreateEvent}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Create Event</DialogTitle><DialogDescription>Schedule a new community event</DialogDescription></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Event Name</Label>
+              <Input
+                placeholder="Weekly Community Hangout"
+                className="mt-1"
+                value={eventForm.name}
+                onChange={(e) => setEventForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                placeholder="What's this event about?"
+                className="mt-1"
+                value={eventForm.description}
+                onChange={(e) => setEventForm(prev => ({ ...prev, description: e.target.value }))}
+              />
+            </div>
+            <div><Label>Event Type</Label>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {[{ type: 'voice', icon: <Volume2 />, label: 'Voice' }, { type: 'stage', icon: <Radio />, label: 'Stage' }, { type: 'external', icon: <ExternalLink />, label: 'External' }].map(item => (
+                  <button
+                    key={item.type}
+                    onClick={() => setEventForm(prev => ({ ...prev, entityType: item.type as 'voice' | 'stage' | 'external' }))}
+                    className={`p-3 border rounded-lg hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 flex items-center gap-2 ${eventForm.entityType === item.type ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20' : ''}`}
+                  >
+                    {item.icon}{item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Start Date & Time</Label>
+                <Input
+                  type="datetime-local"
+                  className="mt-1"
+                  value={eventForm.scheduledStart}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, scheduledStart: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label>End Date & Time (optional)</Label>
+                <Input
+                  type="datetime-local"
+                  className="mt-1"
+                  value={eventForm.scheduledEnd}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, scheduledEnd: e.target.value }))}
+                />
+              </div>
+            </div>
+            {eventForm.entityType === 'external' && (
+              <div>
+                <Label>Location</Label>
+                <Input
+                  placeholder="Event location or URL"
+                  className="mt-1"
+                  value={eventForm.location}
+                  onChange={(e) => setEventForm(prev => ({ ...prev, location: e.target.value }))}
+                />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateEvent(false)}>Cancel</Button>
+            <Button className="bg-orange-500 hover:bg-orange-600" onClick={handleCreateEvent} disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Event'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Role Dialog */}
+      <Dialog open={showCreateRole} onOpenChange={setShowCreateRole}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Create Role</DialogTitle><DialogDescription>Add a new role to the server</DialogDescription></DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Role Name</Label>
+              <Input
+                placeholder="New Role"
+                className="mt-1"
+                value={roleForm.name}
+                onChange={(e) => setRoleForm(prev => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div>
+              <Label>Role Color</Label>
+              <div className="flex items-center gap-3 mt-1">
+                <Input
+                  type="color"
+                  className="w-12 h-10 p-1"
+                  value={roleForm.color}
+                  onChange={(e) => setRoleForm(prev => ({ ...prev, color: e.target.value }))}
+                />
+                <Input
+                  value={roleForm.color}
+                  onChange={(e) => setRoleForm(prev => ({ ...prev, color: e.target.value }))}
+                  className="flex-1"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="hoisted"
+                checked={roleForm.isHoisted}
+                onCheckedChange={(checked) => setRoleForm(prev => ({ ...prev, isHoisted: checked }))}
+              />
+              <Label htmlFor="hoisted">Display role members separately</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                id="mentionable"
+                checked={roleForm.isMentionable}
+                onCheckedChange={(checked) => setRoleForm(prev => ({ ...prev, isMentionable: checked }))}
+              />
+              <Label htmlFor="mentionable">Allow anyone to @mention this role</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateRole(false)}>Cancel</Button>
+            <Button className="bg-orange-500 hover:bg-orange-600" onClick={handleCreateRole} disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create Role'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

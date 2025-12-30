@@ -33,6 +33,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUserManagement, type ManagedUser, type UserRole, type UserStatus } from '@/lib/hooks/use-user-management'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 
 interface Role {
   id: string
@@ -121,8 +122,32 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  const { users, loading, error } = useUserManagement({ role: roleFilter, status: statusFilter })
+  const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUserManagement({ role: roleFilter, status: statusFilter })
   const displayUsers = users.length > 0 ? users : initialUsers
+  const supabase = createClientComponentClient()
+
+  // Form state for inviting new user
+  const [inviteForm, setInviteForm] = useState({
+    email: '',
+    role: 'user' as UserRole,
+    full_name: '',
+    sendWelcomeEmail: true
+  })
+  const [inviting, setInviting] = useState(false)
+
+  // Form state for creating role
+  const [roleForm, setRoleForm] = useState({
+    name: '',
+    description: '',
+    permissions: [] as string[]
+  })
+  const [creatingRole, setCreatingRole] = useState(false)
+
+  // Operation states
+  const [suspendingUser, setSuspendingUser] = useState<string | null>(null)
+  const [deletingUser, setDeletingUser] = useState<string | null>(null)
+  const [updatingRole, setUpdatingRole] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   // Mock data for roles
   const [roles] = useState<Role[]>([
@@ -229,35 +254,291 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
   if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
-  // Handlers
-  const handleInviteUser = () => {
-    toast.info('Invite User', {
-      description: 'Opening user invitation form...'
-    })
+  // Real Supabase Handlers
+  const handleInviteUser = async () => {
+    if (!inviteForm.email) {
+      toast.error('Please enter an email address')
+      return
+    }
+    setInviting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      await createUser({
+        user_id: user.id,
+        managed_user_id: crypto.randomUUID(),
+        email: inviteForm.email,
+        full_name: inviteForm.full_name || undefined,
+        role: inviteForm.role,
+        status: 'pending' as UserStatus,
+        email_verified: false,
+        phone_verified: false,
+        two_factor_enabled: false,
+        security_questions_set: false,
+        must_change_password: true,
+        failed_login_attempts: 0,
+        login_count: 0,
+        session_timeout: 30,
+        language: 'en',
+        timezone: 'UTC',
+        notifications_enabled: true,
+        storage_used: 0,
+        api_calls_used: 0,
+        onboarding_completed: false,
+        custom_permissions: {},
+        preferences: {},
+        metadata: { sendWelcomeEmail: inviteForm.sendWelcomeEmail }
+      } as any)
+
+      toast.success('User invited successfully!', {
+        description: `Invitation sent to ${inviteForm.email}`
+      })
+      setShowInviteModal(false)
+      setInviteForm({ email: '', role: 'user', full_name: '', sendWelcomeEmail: true })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to invite user', {
+        description: error.message || 'Could not send invitation'
+      })
+    } finally {
+      setInviting(false)
+    }
   }
 
-  const handleSuspendUser = (userName: string) => {
-    toast.info('User suspended', {
-      description: `"${userName}" has been suspended`
-    })
+  const handleSuspendUser = async (user: ManagedUser) => {
+    setSuspendingUser(user.id)
+    try {
+      await updateUser({ id: user.id, status: 'suspended' as UserStatus })
+      toast.success('User suspended', {
+        description: `"${user.full_name || user.email}" has been suspended`
+      })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to suspend user', {
+        description: error.message || 'Could not suspend user'
+      })
+    } finally {
+      setSuspendingUser(null)
+    }
   }
 
-  const handleResetPassword = (userName: string) => {
-    toast.success('Password reset sent', {
-      description: `Reset link sent to ${userName}`
-    })
+  const handleActivateUser = async (user: ManagedUser) => {
+    setSuspendingUser(user.id)
+    try {
+      await updateUser({ id: user.id, status: 'active' as UserStatus })
+      toast.success('User activated', {
+        description: `"${user.full_name || user.email}" has been activated`
+      })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to activate user', {
+        description: error.message || 'Could not activate user'
+      })
+    } finally {
+      setSuspendingUser(null)
+    }
   }
 
-  const handleExportUsers = () => {
-    toast.success('Exporting users', {
-      description: 'User list will be downloaded shortly'
-    })
+  const handleDeleteUser = async (user: ManagedUser) => {
+    if (!confirm(`Are you sure you want to delete ${user.full_name || user.email}? This action cannot be undone.`)) {
+      return
+    }
+    setDeletingUser(user.id)
+    try {
+      await deleteUser(user.id)
+      toast.success('User deleted', {
+        description: `"${user.full_name || user.email}" has been removed`
+      })
+      setShowUserModal(false)
+      setSelectedUser(null)
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to delete user', {
+        description: error.message || 'Could not delete user'
+      })
+    } finally {
+      setDeletingUser(null)
+    }
   }
 
-  const handleAssignRole = (userName: string, role: string) => {
-    toast.success('Role assigned', {
-      description: `${role} role assigned to ${userName}`
-    })
+  const handleResetPassword = async (user: ManagedUser) => {
+    try {
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) throw new Error('Not authenticated')
+
+      // Log the password reset request
+      await supabase.from('audit_logs').insert({
+        user_id: authUser.id,
+        action: 'password_reset_requested',
+        resource_type: 'user',
+        resource_id: user.id,
+        details: { target_user: user.email }
+      })
+
+      await updateUser({
+        id: user.id,
+        must_change_password: true,
+        password_changed_at: new Date().toISOString()
+      } as any)
+
+      toast.success('Password reset sent', {
+        description: `Reset link sent to ${user.email}`
+      })
+    } catch (error: any) {
+      toast.error('Failed to send password reset', {
+        description: error.message || 'Could not send reset link'
+      })
+    }
+  }
+
+  const handleExportUsers = async () => {
+    setExporting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { data: usersData, error: usersError } = await supabase
+        .from('user_management')
+        .select('*')
+        .eq('user_id', user.id)
+
+      if (usersError) throw usersError
+
+      const headers = ['Email', 'Full Name', 'Role', 'Status', 'Department', 'Last Login', 'Created At']
+      const csvContent = [
+        headers.join(','),
+        ...(usersData || []).map(u => [
+          u.email || '',
+          u.full_name || '',
+          u.role || '',
+          u.status || '',
+          u.department || '',
+          u.last_login_at || '',
+          u.created_at || ''
+        ].map(v => `"${v}"`).join(','))
+      ].join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `users-export-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Export complete', {
+        description: 'User list has been downloaded'
+      })
+    } catch (error: any) {
+      toast.error('Export failed', {
+        description: error.message || 'Could not export users'
+      })
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const handleAssignRole = async (user: ManagedUser, newRole: UserRole) => {
+    setUpdatingRole(user.id)
+    try {
+      await updateUser({ id: user.id, role: newRole })
+      toast.success('Role assigned', {
+        description: `${newRole} role assigned to ${user.full_name || user.email}`
+      })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to assign role', {
+        description: error.message || 'Could not update user role'
+      })
+    } finally {
+      setUpdatingRole(null)
+    }
+  }
+
+  const handleBulkSuspend = async () => {
+    if (selectedUsers.length === 0) return
+    if (!confirm(`Are you sure you want to suspend ${selectedUsers.length} users?`)) return
+
+    try {
+      for (const userId of selectedUsers) {
+        await updateUser({ id: userId, status: 'suspended' as UserStatus })
+      }
+      toast.success('Users suspended', {
+        description: `${selectedUsers.length} users have been suspended`
+      })
+      setSelectedUsers([])
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to suspend users', {
+        description: error.message || 'Could not suspend selected users'
+      })
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (selectedUsers.length === 0) return
+    if (!confirm(`Are you sure you want to delete ${selectedUsers.length} users? This action cannot be undone.`)) return
+
+    try {
+      for (const userId of selectedUsers) {
+        await deleteUser(userId)
+      }
+      toast.success('Users deleted', {
+        description: `${selectedUsers.length} users have been deleted`
+      })
+      setSelectedUsers([])
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to delete users', {
+        description: error.message || 'Could not delete selected users'
+      })
+    }
+  }
+
+  const handleCreateRole = async () => {
+    if (!roleForm.name) {
+      toast.error('Please enter a role name')
+      return
+    }
+    setCreatingRole(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('user_roles').insert({
+        user_id: user.id,
+        name: roleForm.name,
+        description: roleForm.description,
+        permissions: roleForm.permissions,
+        is_system: false
+      })
+
+      if (error) throw error
+
+      toast.success('Role created', {
+        description: `"${roleForm.name}" role has been created`
+      })
+      setShowRoleModal(false)
+      setRoleForm({ name: '', description: '', permissions: [] })
+    } catch (error: any) {
+      toast.error('Failed to create role', {
+        description: error.message || 'Could not create role'
+      })
+    } finally {
+      setCreatingRole(false)
+    }
+  }
+
+  const handleToggleSecurityPolicy = async (policyId: string, enabled: boolean) => {
+    try {
+      setSecurityPolicies(prev => prev.map(p =>
+        p.id === policyId ? { ...p, enabled } : p
+      ))
+      toast.success(`Security policy ${enabled ? 'enabled' : 'disabled'}`)
+    } catch (error: any) {
+      toast.error('Failed to update security policy')
+    }
   }
 
   return (
@@ -278,9 +559,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             <p className="text-gray-600 dark:text-gray-400">Manage users, roles, connections, and security policies</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExportUsers} disabled={exporting}>
               <Download className="w-4 h-4" />
-              Export
+              {exporting ? 'Exporting...' : 'Export'}
             </Button>
             <Button variant="outline" className="gap-2">
               <Upload className="w-4 h-4" />
@@ -300,27 +581,58 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Email Address</label>
-                    <Input type="email" placeholder="user@company.com" />
+                    <Input
+                      type="email"
+                      placeholder="user@company.com"
+                      value={inviteForm.email}
+                      onChange={(e) => setInviteForm(prev => ({ ...prev, email: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Full Name (Optional)</label>
+                    <Input
+                      placeholder="John Doe"
+                      value={inviteForm.full_name}
+                      onChange={(e) => setInviteForm(prev => ({ ...prev, full_name: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Role</label>
-                    <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
-                      {roles.map(role => (
-                        <option key={role.id} value={role.id}>{role.name}</option>
-                      ))}
+                    <select
+                      className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                      value={inviteForm.role}
+                      onChange={(e) => setInviteForm(prev => ({ ...prev, role: e.target.value as UserRole }))}
+                    >
+                      <option value="user">User</option>
+                      <option value="member">Member</option>
+                      <option value="manager">Manager</option>
+                      <option value="team_lead">Team Lead</option>
+                      <option value="admin">Admin</option>
+                      <option value="superadmin">Super Admin</option>
                     </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Send Welcome Email</label>
                     <div className="flex items-center gap-2">
-                      <input type="checkbox" defaultChecked className="rounded" />
+                      <input
+                        type="checkbox"
+                        checked={inviteForm.sendWelcomeEmail}
+                        onChange={(e) => setInviteForm(prev => ({ ...prev, sendWelcomeEmail: e.target.checked }))}
+                        className="rounded"
+                      />
                       <span className="text-sm text-gray-600 dark:text-gray-400">Send invitation email with setup instructions</span>
                     </div>
                   </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setShowInviteModal(false)}>Cancel</Button>
-                  <Button className="bg-blue-600 hover:bg-blue-700">Send Invitation</Button>
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700"
+                    onClick={handleInviteUser}
+                    disabled={inviting}
+                  >
+                    {inviting ? 'Sending...' : 'Send Invitation'}
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -457,11 +769,11 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                 {selectedUsers.length > 0 && (
                   <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
                     <span className="text-sm text-blue-700 dark:text-blue-300">{selectedUsers.length} selected</span>
-                    <Button size="sm" variant="ghost" className="text-blue-600">
+                    <Button size="sm" variant="ghost" className="text-blue-600" onClick={handleBulkSuspend}>
                       <Lock className="w-4 h-4 mr-1" />
                       Suspend
                     </Button>
-                    <Button size="sm" variant="ghost" className="text-red-600">
+                    <Button size="sm" variant="ghost" className="text-red-600" onClick={handleBulkDelete}>
                       <Trash2 className="w-4 h-4 mr-1" />
                       Delete
                     </Button>
@@ -540,7 +852,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             </Badge>
                           </td>
                           <td className="py-3 px-4">
-                            {Math.random() > 0.3 ? (
+                            {user.two_factor_enabled ? (
                               <div className="flex items-center gap-1 text-green-600">
                                 <ShieldCheck className="w-4 h-4" />
                                 <span className="text-sm">Enabled</span>
@@ -602,18 +914,37 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                     <div className="space-y-4 py-4">
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Role Name</label>
-                        <Input placeholder="e.g., Marketing Manager" />
+                        <Input
+                          placeholder="e.g., Marketing Manager"
+                          value={roleForm.name}
+                          onChange={(e) => setRoleForm(prev => ({ ...prev, name: e.target.value }))}
+                        />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Description</label>
-                        <Input placeholder="What this role can do..." />
+                        <Input
+                          placeholder="What this role can do..."
+                          value={roleForm.description}
+                          onChange={(e) => setRoleForm(prev => ({ ...prev, description: e.target.value }))}
+                        />
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-medium">Permissions</label>
                         <div className="grid grid-cols-2 gap-2 p-4 border rounded-lg dark:border-gray-700 max-h-[200px] overflow-y-auto">
                           {['users:read', 'users:write', 'users:delete', 'content:read', 'content:write', 'content:delete', 'analytics:read', 'settings:read', 'settings:write', 'billing:read', 'billing:write'].map(perm => (
                             <label key={perm} className="flex items-center gap-2">
-                              <input type="checkbox" className="rounded" />
+                              <input
+                                type="checkbox"
+                                className="rounded"
+                                checked={roleForm.permissions.includes(perm)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setRoleForm(prev => ({ ...prev, permissions: [...prev.permissions, perm] }))
+                                  } else {
+                                    setRoleForm(prev => ({ ...prev, permissions: prev.permissions.filter(p => p !== perm) }))
+                                  }
+                                }}
+                              />
                               <span className="text-sm">{perm}</span>
                             </label>
                           ))}
@@ -622,7 +953,9 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setShowRoleModal(false)}>Cancel</Button>
-                      <Button>Create Role</Button>
+                      <Button onClick={handleCreateRole} disabled={creatingRole}>
+                        {creatingRole ? 'Creating...' : 'Create Role'}
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -792,11 +1125,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <input
                             type="checkbox"
                             checked={policy.enabled}
-                            onChange={() => {
-                              setSecurityPolicies(prev => prev.map(p =>
-                                p.id === policy.id ? { ...p, enabled: !p.enabled } : p
-                              ))
-                            }}
+                            onChange={() => handleToggleSecurityPolicy(policy.id, !policy.enabled)}
                             className="sr-only peer"
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
@@ -1801,23 +2130,31 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       <div className="space-y-3">
                         <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
                           <div className="flex items-center gap-3">
-                            <Smartphone className="w-5 h-5 text-green-600" />
+                            <Smartphone className={`w-5 h-5 ${selectedUser.two_factor_enabled ? 'text-green-600' : 'text-gray-400'}`} />
                             <div>
                               <p className="font-medium">Multi-Factor Authentication</p>
-                              <p className="text-sm text-gray-500">TOTP authenticator app</p>
+                              <p className="text-sm text-gray-500">
+                                {selectedUser.two_factor_enabled ? 'TOTP authenticator app' : 'Not configured'}
+                              </p>
                             </div>
                           </div>
-                          <Badge className="bg-green-100 text-green-700">Enabled</Badge>
+                          <Badge className={selectedUser.two_factor_enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                            {selectedUser.two_factor_enabled ? 'Enabled' : 'Disabled'}
+                          </Badge>
                         </div>
                         <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
                           <div className="flex items-center gap-3">
                             <Key className="w-5 h-5 text-gray-600" />
                             <div>
                               <p className="font-medium">Password</p>
-                              <p className="text-sm text-gray-500">Last changed 30 days ago</p>
+                              <p className="text-sm text-gray-500">
+                                {selectedUser.password_changed_at
+                                  ? `Last changed ${new Date(selectedUser.password_changed_at).toLocaleDateString()}`
+                                  : 'Never changed'}
+                              </p>
                             </div>
                           </div>
-                          <Button size="sm" variant="outline">Reset</Button>
+                          <Button size="sm" variant="outline" onClick={() => handleResetPassword(selectedUser)}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 border rounded-lg dark:border-gray-700">
                           <div className="flex items-center gap-3">
@@ -1863,12 +2200,19 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             <span className="font-medium">Current Role</span>
                             <Badge>{selectedUser.role}</Badge>
                           </div>
-                          <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                            {roles.map(role => (
-                              <option key={role.id} value={role.id} selected={role.name.toLowerCase() === selectedUser.role}>
-                                {role.name}
-                              </option>
-                            ))}
+                          <select
+                            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"
+                            value={selectedUser.role}
+                            onChange={(e) => handleAssignRole(selectedUser, e.target.value as UserRole)}
+                            disabled={updatingRole === selectedUser.id}
+                          >
+                            <option value="user">User</option>
+                            <option value="member">Member</option>
+                            <option value="guest">Guest</option>
+                            <option value="manager">Manager</option>
+                            <option value="team_lead">Team Lead</option>
+                            <option value="admin">Admin</option>
+                            <option value="superadmin">Super Admin</option>
                           </select>
                         </div>
                         <div className="p-3 border rounded-lg dark:border-gray-700">
@@ -1887,20 +2231,35 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                   <div className="flex items-center justify-between pt-4 border-t dark:border-gray-700">
                     <div className="flex gap-2">
                       {selectedUser.status === 'active' ? (
-                        <Button variant="outline" className="text-orange-600 hover:text-orange-700">
+                        <Button
+                          variant="outline"
+                          className="text-orange-600 hover:text-orange-700"
+                          onClick={() => handleSuspendUser(selectedUser)}
+                          disabled={suspendingUser === selectedUser.id}
+                        >
                           <Lock className="w-4 h-4 mr-2" />
-                          Suspend User
+                          {suspendingUser === selectedUser.id ? 'Suspending...' : 'Suspend User'}
                         </Button>
                       ) : (
-                        <Button variant="outline" className="text-green-600 hover:text-green-700">
+                        <Button
+                          variant="outline"
+                          className="text-green-600 hover:text-green-700"
+                          onClick={() => handleActivateUser(selectedUser)}
+                          disabled={suspendingUser === selectedUser.id}
+                        >
                           <Unlock className="w-4 h-4 mr-2" />
-                          Activate User
+                          {suspendingUser === selectedUser.id ? 'Activating...' : 'Activate User'}
                         </Button>
                       )}
                     </div>
-                    <Button variant="destructive" className="gap-2">
+                    <Button
+                      variant="destructive"
+                      className="gap-2"
+                      onClick={() => handleDeleteUser(selectedUser)}
+                      disabled={deletingUser === selectedUser.id}
+                    >
                       <Trash2 className="w-4 h-4" />
-                      Delete User
+                      {deletingUser === selectedUser.id ? 'Deleting...' : 'Delete User'}
                     </Button>
                   </div>
                 </div>

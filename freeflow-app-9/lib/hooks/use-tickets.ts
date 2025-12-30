@@ -1,7 +1,6 @@
 'use client'
 
-import { useSupabaseQuery } from './use-supabase-query'
-import { useSupabaseMutation } from './use-supabase-mutation'
+import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
 import { useMemo } from 'react'
 
 export interface SupportTicket {
@@ -55,11 +54,7 @@ export function useTickets(initialData?: SupportTicket[], filters?: TicketFilter
   const query = useSupabaseQuery<SupportTicket>({
     table: 'support_tickets',
     select: '*',
-    filters: [
-      { column: 'deleted_at', operator: 'is', value: null }
-    ],
-    orderBy: { column: 'created_at', ascending: false },
-    initialData
+    orderBy: { column: 'created_at', ascending: false }
   })
 
   const filteredTickets = useMemo(() => {
@@ -114,7 +109,8 @@ export function useTickets(initialData?: SupportTicket[], filters?: TicketFilter
   return {
     ...query,
     tickets: filteredTickets,
-    stats
+    stats,
+    isLoading: query.loading
   }
 }
 
@@ -122,62 +118,39 @@ export function useTicketMessages(ticketId?: string) {
   return useSupabaseQuery<TicketMessage>({
     table: 'ticket_messages',
     select: '*',
-    filters: ticketId ? [{ column: 'ticket_id', operator: 'eq', value: ticketId }] : [],
-    orderBy: { column: 'created_at', ascending: true },
-    enabled: !!ticketId
+    filters: ticketId ? { ticket_id: ticketId } : {},
+    orderBy: { column: 'created_at', ascending: true }
   })
 }
 
 export function useTicketMutations() {
-  const createTicket = useSupabaseMutation<SupportTicket>({
-    table: 'support_tickets',
-    operation: 'insert',
-    invalidateQueries: ['support_tickets']
-  })
-
-  const updateTicket = useSupabaseMutation<SupportTicket>({
-    table: 'support_tickets',
-    operation: 'update',
-    invalidateQueries: ['support_tickets']
-  })
-
-  const deleteTicket = useSupabaseMutation<SupportTicket>({
-    table: 'support_tickets',
-    operation: 'update',
-    invalidateQueries: ['support_tickets']
-  })
-
-  const assignTicket = useSupabaseMutation<SupportTicket>({
-    table: 'support_tickets',
-    operation: 'update',
-    invalidateQueries: ['support_tickets']
+  const ticketMutation = useSupabaseMutation<SupportTicket>({
+    table: 'support_tickets'
   })
 
   return {
-    createTicket: createTicket.mutate,
-    updateTicket: updateTicket.mutate,
-    deleteTicket: (id: string) => deleteTicket.mutate({ id, deleted_at: new Date().toISOString() }),
-    assignTicket: (id: string, assignedTo: string, assignedName: string) => assignTicket.mutate({
-      id,
-      assigned_to: assignedTo,
-      assigned_name: assignedName,
-      status: 'in-progress'
-    }),
-    isCreating: createTicket.isLoading,
-    isUpdating: updateTicket.isLoading,
-    isDeleting: deleteTicket.isLoading
+    createTicket: (data: Partial<SupportTicket>) => ticketMutation.mutate(data),
+    updateTicket: (data: Partial<SupportTicket> & { id: string }) => ticketMutation.mutate(data, data.id),
+    deleteTicket: (id: string) => ticketMutation.remove(id),
+    assignTicket: (id: string, assignedTo: string, assignedName: string) =>
+      ticketMutation.mutate({
+        assigned_to: assignedTo,
+        assigned_name: assignedName,
+        status: 'in-progress'
+      }, id),
+    isCreating: ticketMutation.loading,
+    isUpdating: ticketMutation.loading,
+    isDeleting: ticketMutation.loading
   }
 }
 
 export function useTicketMessageMutations() {
-  const createMessage = useSupabaseMutation<TicketMessage>({
-    table: 'ticket_messages',
-    operation: 'insert',
-    invalidateQueries: ['ticket_messages']
+  const messageMutation = useSupabaseMutation<TicketMessage>({
+    table: 'ticket_messages'
   })
 
   return {
-    createMessage: createMessage.mutate,
-    isCreating: createMessage.isLoading
+    createMessage: (data: Partial<TicketMessage>) => messageMutation.mutate(data),
+    isCreating: messageMutation.loading
   }
 }

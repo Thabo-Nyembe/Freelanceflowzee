@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
 import {
   Shield, Users, Lock, Key, Crown, UserCheck, UserX, Plus,
@@ -8,8 +8,9 @@ import {
   Trash2, Power, PowerOff, CheckCircle, AlertCircle, XCircle,
   Building2, Globe, Clock, Calendar, TrendingUp, BarChart3,
   FileText, AlertTriangle, ShieldCheck, ShieldAlert, Fingerprint,
-  UserPlus, UsersRound, FolderLock, KeyRound, Layers, Bell
+  UserPlus, UsersRound, FolderLock, KeyRound, Layers, Bell, Loader2
 } from 'lucide-react'
+import { useRoles, type UserRole } from '@/lib/hooks/use-roles'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -33,6 +34,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 
 // Types
 type RoleStatus = 'active' | 'inactive' | 'deprecated' | 'pending'
@@ -435,6 +440,20 @@ const mockRolesQuickActions = [
   { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
 ]
 
+// Initial form state for creating/editing roles
+const initialRoleFormState = {
+  name: '',
+  description: '',
+  role_code: '',
+  type: 'user' as 'admin' | 'manager' | 'user' | 'viewer' | 'custom',
+  status: 'active' as 'active' | 'inactive' | 'deprecated',
+  access_level: 'read' as 'full' | 'write' | 'read' | 'restricted',
+  can_delegate: false,
+  is_default: false,
+  permissions: [] as string[],
+  tags: [] as string[],
+}
+
 export default function RolesClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
@@ -442,17 +461,78 @@ export default function RolesClient() {
   const [typeFilter, setTypeFilter] = useState<RoleType | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Supabase hooks
+  const {
+    roles: dbRoles,
+    loading: rolesLoading,
+    createRole,
+    updateRole,
+    deleteRole,
+    activateRole,
+    deactivateRole,
+    cloneRole,
+    fetchRoles
+  } = useRoles()
+
+  // Dialog states
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [cloneDialogOpen, setCloneDialogOpen] = useState(false)
+  const [roleToDelete, setRoleToDelete] = useState<string | null>(null)
+  const [roleToClone, setRoleToClone] = useState<{ id: string; name: string } | null>(null)
+  const [cloneName, setCloneName] = useState('')
+  const [editingRole, setEditingRole] = useState<UserRole | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Form state
+  const [formState, setFormState] = useState(initialRoleFormState)
+
+  // Reset form
+  const resetForm = () => {
+    setFormState(initialRoleFormState)
+  }
+
+  // Map database roles to display format (combine with mock data for display)
+  const combinedRoles = useMemo(() => {
+    const dbRolesMapped: Role[] = dbRoles.map(r => ({
+      id: r.id,
+      name: r.name,
+      description: r.description || '',
+      roleCode: r.role_code,
+      type: r.type as RoleType,
+      status: r.status as RoleStatus,
+      accessLevel: r.access_level as AccessLevel,
+      permissions: [],
+      totalUsers: r.total_users || 0,
+      activeUsers: r.active_users || 0,
+      isSystem: r.is_system,
+      isDefault: r.is_default,
+      canDelegate: r.can_delegate,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at,
+      createdBy: r.created_by || 'System',
+      tags: r.tags || [],
+      hierarchy: 1,
+      childRoles: [],
+      groups: []
+    }))
+    // Return database roles if available, otherwise fallback to mock
+    return dbRolesMapped.length > 0 ? dbRolesMapped : mockRoles
+  }, [dbRoles])
+
   // Computed stats
   const stats = useMemo(() => {
-    const totalUsers = mockRoles.reduce((sum, r) => sum + r.totalUsers, 0)
-    const activeUsers = mockRoles.reduce((sum, r) => sum + r.activeUsers, 0)
-    const systemRoles = mockRoles.filter(r => r.isSystem).length
-    const customRoles = mockRoles.filter(r => !r.isSystem).length
-    const activeRoles = mockRoles.filter(r => r.status === 'active').length
+    const rolesData = combinedRoles.length > 0 ? combinedRoles : mockRoles
+    const totalUsers = rolesData.reduce((sum, r) => sum + r.totalUsers, 0)
+    const activeUsers = rolesData.reduce((sum, r) => sum + r.activeUsers, 0)
+    const systemRoles = rolesData.filter(r => r.isSystem).length
+    const customRoles = rolesData.filter(r => !r.isSystem).length
+    const activeRoles = rolesData.filter(r => r.status === 'active').length
     const activePolicies = mockPolicies.filter(p => p.active).length
 
     return {
-      totalRoles: mockRoles.length,
+      totalRoles: rolesData.length,
       activeRoles,
       systemRoles,
       customRoles,
@@ -461,11 +541,12 @@ export default function RolesClient() {
       totalPermissions: mockPermissions.length,
       activePolicies
     }
-  }, [])
+  }, [combinedRoles])
 
   // Filtered roles
   const filteredRoles = useMemo(() => {
-    return mockRoles.filter(role => {
+    const rolesData = combinedRoles.length > 0 ? combinedRoles : mockRoles
+    return rolesData.filter(role => {
       const matchesSearch = searchQuery === '' ||
         role.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         role.roleCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -473,7 +554,7 @@ export default function RolesClient() {
       const matchesType = typeFilter === 'all' || role.type === typeFilter
       return matchesSearch && matchesType
     })
-  }, [searchQuery, typeFilter])
+  }, [searchQuery, typeFilter, combinedRoles])
 
   // Grouped permissions by category
   const permissionsByCategory = useMemo(() => {
@@ -489,19 +570,186 @@ export default function RolesClient() {
 
   // Handlers
   const handleCreateRole = () => {
-    toast.info('Create Role', { description: 'Opening role builder...' })
+    resetForm()
+    setCreateDialogOpen(true)
   }
-  const handleEditRole = (roleName: string) => {
-    toast.info('Edit Role', { description: `Editing "${roleName}" permissions...` })
+
+  const handleSubmitCreate = async () => {
+    if (!formState.name.trim()) {
+      toast.error('Validation Error', { description: 'Role name is required' })
+      return
+    }
+    if (!formState.role_code.trim()) {
+      toast.error('Validation Error', { description: 'Role code is required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await createRole({
+        name: formState.name,
+        description: formState.description || null,
+        role_code: formState.role_code.toUpperCase().replace(/\s+/g, '_'),
+        type: formState.type,
+        status: formState.status,
+        access_level: formState.access_level,
+        can_delegate: formState.can_delegate,
+        is_default: formState.is_default,
+        permissions: formState.permissions,
+        tags: formState.tags,
+      })
+      setCreateDialogOpen(false)
+      resetForm()
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
   }
-  const handleDeleteRole = (roleName: string) => {
-    toast.info('Role Deleted', { description: `"${roleName}" has been removed` })
+
+  const handleEditRole = (role: Role) => {
+    // Find the database role
+    const dbRole = dbRoles.find(r => r.id === role.id)
+    if (dbRole) {
+      setEditingRole(dbRole)
+      setFormState({
+        name: dbRole.name,
+        description: dbRole.description || '',
+        role_code: dbRole.role_code,
+        type: dbRole.type,
+        status: dbRole.status,
+        access_level: dbRole.access_level,
+        can_delegate: dbRole.can_delegate,
+        is_default: dbRole.is_default,
+        permissions: dbRole.permissions || [],
+        tags: dbRole.tags || [],
+      })
+      setEditDialogOpen(true)
+    } else {
+      toast.info('Edit Role', { description: `Viewing "${role.name}" (mock data)` })
+    }
   }
-  const handleDuplicateRole = (roleName: string) => {
-    toast.success('Role Duplicated', { description: `Copy of "${roleName}" created` })
+
+  const handleSubmitEdit = async () => {
+    if (!editingRole) return
+    if (!formState.name.trim()) {
+      toast.error('Validation Error', { description: 'Role name is required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await updateRole(editingRole.id, {
+        name: formState.name,
+        description: formState.description || null,
+        type: formState.type,
+        status: formState.status,
+        access_level: formState.access_level,
+        can_delegate: formState.can_delegate,
+        is_default: formState.is_default,
+        permissions: formState.permissions,
+        tags: formState.tags,
+      })
+      setEditDialogOpen(false)
+      setEditingRole(null)
+      resetForm()
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
   }
+
+  const handleDeleteRole = (roleId: string, roleName: string, isSystem: boolean) => {
+    if (isSystem) {
+      toast.error('Cannot Delete', { description: 'System roles cannot be deleted' })
+      return
+    }
+    setRoleToDelete(roleId)
+    setDeleteDialogOpen(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!roleToDelete) return
+
+    setIsSubmitting(true)
+    try {
+      await deleteRole(roleToDelete)
+      setDeleteDialogOpen(false)
+      setRoleToDelete(null)
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDuplicateRole = (role: Role) => {
+    setRoleToClone({ id: role.id, name: role.name })
+    setCloneName(`${role.name} (Copy)`)
+    setCloneDialogOpen(true)
+  }
+
+  const handleConfirmClone = async () => {
+    if (!roleToClone || !cloneName.trim()) {
+      toast.error('Validation Error', { description: 'Clone name is required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await cloneRole(roleToClone.id, cloneName)
+      setCloneDialogOpen(false)
+      setRoleToClone(null)
+      setCloneName('')
+    } catch (error) {
+      // Error is handled by the hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleToggleRoleStatus = async (roleId: string, currentStatus: string) => {
+    try {
+      if (currentStatus === 'active') {
+        await deactivateRole(roleId)
+      } else {
+        await activateRole(roleId)
+      }
+    } catch (error) {
+      // Error is handled by the hook
+    }
+  }
+
   const handleAssignRole = (roleName: string) => {
     toast.info('Assign Role', { description: `Assigning "${roleName}" to users...` })
+  }
+
+  const handleRefreshRoles = async () => {
+    toast.info('Refreshing', { description: 'Fetching latest roles...' })
+    await fetchRoles()
+    toast.success('Refreshed', { description: 'Role data updated' })
+  }
+
+  const handleExportRoles = () => {
+    const exportData = combinedRoles.map(r => ({
+      name: r.name,
+      code: r.roleCode,
+      type: r.type,
+      status: r.status,
+      accessLevel: r.accessLevel,
+      totalUsers: r.totalUsers,
+      isSystem: r.isSystem,
+      createdAt: r.createdAt
+    }))
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `roles-export-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Exported', { description: 'Roles data exported successfully' })
   }
 
   return (
@@ -524,7 +772,7 @@ export default function RolesClient() {
               </div>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button variant="outline" className="flex items-center gap-2" onClick={handleExportRoles}>
                 <Download className="w-4 h-4" />
                 Export
               </Button>
@@ -606,7 +854,7 @@ export default function RolesClient() {
                     <p className="text-purple-100 text-sm">Enterprise-grade role-based access control</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleRefreshRoles}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
                     <Button onClick={handleCreateRole} className="bg-white text-purple-700 hover:bg-purple-50"><Plus className="h-4 w-4 mr-2" />New Role</Button>
                   </div>
                 </div>
@@ -671,7 +919,7 @@ export default function RolesClient() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {mockRoles.slice(0, 5).map((role) => (
+                      {combinedRoles.slice(0, 5).map((role) => (
                         <div key={role.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                           <div className="flex items-center gap-4">
                             <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-lg">
@@ -685,7 +933,7 @@ export default function RolesClient() {
                           <div className="text-right">
                             <Badge className={getTypeColor(role.type)}>{role.type}</Badge>
                             <div className="mt-2 w-32">
-                              <Progress value={(role.activeUsers / role.totalUsers) * 100} className="h-2" />
+                              <Progress value={role.totalUsers > 0 ? (role.activeUsers / role.totalUsers) * 100 : 0} className="h-2" />
                               <p className="text-xs text-gray-500 mt-1">{role.activeUsers} active</p>
                             </div>
                           </div>
@@ -768,7 +1016,7 @@ export default function RolesClient() {
                   <CardHeader className="pb-2"><CardTitle className="text-sm">Top Assigned Roles</CardTitle></CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      {mockRoles.slice(0, 4).sort((a, b) => b.totalUsers - a.totalUsers).map((role, i) => (
+                      {[...combinedRoles].sort((a, b) => b.totalUsers - a.totalUsers).slice(0, 4).map((role, i) => (
                         <div key={i} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-gray-500">{i + 1}.</span>
@@ -807,8 +1055,8 @@ export default function RolesClient() {
                     <div className="space-y-2">
                       <Button onClick={handleCreateRole} variant="outline" className="w-full justify-start text-sm"><Plus className="w-4 h-4 mr-2" />Create New Role</Button>
                       <Button onClick={() => handleAssignRole('selected role')} variant="outline" className="w-full justify-start text-sm"><UserPlus className="w-4 h-4 mr-2" />Assign Users</Button>
-                      <Button variant="outline" className="w-full justify-start text-sm"><Download className="w-4 h-4 mr-2" />Export Report</Button>
-                      <Button variant="outline" className="w-full justify-start text-sm"><RefreshCw className="w-4 h-4 mr-2" />Sync Directory</Button>
+                      <Button onClick={handleExportRoles} variant="outline" className="w-full justify-start text-sm"><Download className="w-4 h-4 mr-2" />Export Report</Button>
+                      <Button onClick={handleRefreshRoles} variant="outline" className="w-full justify-start text-sm"><RefreshCw className="w-4 h-4 mr-2" />Sync Directory</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -817,8 +1065,8 @@ export default function RolesClient() {
               {/* Role Analytics Summary */}
               <div className="grid grid-cols-4 gap-4">
                 {[
-                  { label: 'Avg Users/Role', value: Math.round(stats.totalUsers / stats.totalRoles), trend: '+12%', color: 'purple' },
-                  { label: 'Delegation Rate', value: `${Math.round((mockRoles.filter(r => r.canDelegate).length / mockRoles.length) * 100)}%`, trend: '+5%', color: 'blue' },
+                  { label: 'Avg Users/Role', value: stats.totalRoles > 0 ? Math.round(stats.totalUsers / stats.totalRoles) : 0, trend: '+12%', color: 'purple' },
+                  { label: 'Delegation Rate', value: `${combinedRoles.length > 0 ? Math.round((combinedRoles.filter(r => r.canDelegate).length / combinedRoles.length) * 100) : 0}%`, trend: '+5%', color: 'blue' },
                   { label: 'Custom Roles', value: stats.customRoles, trend: '+3', color: 'green' },
                   { label: 'Active Sessions', value: '1,245', trend: '-8%', color: 'amber' },
                 ].map((item, i) => (
@@ -884,7 +1132,7 @@ export default function RolesClient() {
                     <p className="text-indigo-100 text-sm">Configure and manage access roles</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleExportRoles}><Download className="h-4 w-4 mr-2" />Export</Button>
                     <Button onClick={handleCreateRole} className="bg-white text-indigo-700 hover:bg-indigo-50"><Plus className="h-4 w-4 mr-2" />Create Role</Button>
                   </div>
                 </div>
@@ -902,11 +1150,11 @@ export default function RolesClient() {
                     <p className="text-xs text-indigo-100">Active</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockRoles.filter(r => r.status === 'inactive').length}</p>
+                    <p className="text-2xl font-bold">{combinedRoles.filter(r => r.status === 'inactive').length}</p>
                     <p className="text-xs text-indigo-100">Inactive</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockRoles.filter(r => r.canDelegate).length}</p>
+                    <p className="text-2xl font-bold">{combinedRoles.filter(r => r.canDelegate).length}</p>
                     <p className="text-xs text-indigo-100">Delegatable</p>
                   </div>
                 </div>
@@ -915,12 +1163,12 @@ export default function RolesClient() {
               {/* Role Types Distribution */}
               <div className="grid grid-cols-6 gap-4">
                 {[
-                  { type: 'admin', count: mockRoles.filter(r => r.type === 'admin').length, color: 'red', icon: Crown },
-                  { type: 'manager', count: mockRoles.filter(r => r.type === 'manager').length, color: 'orange', icon: Users },
-                  { type: 'user', count: mockRoles.filter(r => r.type === 'user').length, color: 'blue', icon: UserCheck },
-                  { type: 'viewer', count: mockRoles.filter(r => r.type === 'viewer').length, color: 'green', icon: Eye },
-                  { type: 'custom', count: mockRoles.filter(r => r.type === 'custom').length, color: 'purple', icon: Shield },
-                  { type: 'service', count: mockRoles.filter(r => r.type === 'service').length, color: 'gray', icon: KeyRound },
+                  { type: 'admin', count: combinedRoles.filter(r => r.type === 'admin').length, color: 'red', icon: Crown },
+                  { type: 'manager', count: combinedRoles.filter(r => r.type === 'manager').length, color: 'orange', icon: Users },
+                  { type: 'user', count: combinedRoles.filter(r => r.type === 'user').length, color: 'blue', icon: UserCheck },
+                  { type: 'viewer', count: combinedRoles.filter(r => r.type === 'viewer').length, color: 'green', icon: Eye },
+                  { type: 'custom', count: combinedRoles.filter(r => r.type === 'custom').length, color: 'purple', icon: Shield },
+                  { type: 'service', count: combinedRoles.filter(r => r.type === 'service').length, color: 'gray', icon: KeyRound },
                 ].map((item, i) => (
                   <Card key={i} className={`bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg cursor-pointer hover:shadow-xl transition-all ${typeFilter === item.type ? 'ring-2 ring-purple-500' : ''}`} onClick={() => setTypeFilter(item.type as any)}>
                     <CardContent className="p-4 text-center">
@@ -1007,14 +1255,14 @@ export default function RolesClient() {
                         ))}
                       </div>
                       <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
-                        <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditRole(role.name)}>
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditRole(role)}>
                           <Eye className="w-4 h-4 mr-1" /> View
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleDuplicateRole(role.name)}>
+                        <Button size="sm" variant="outline" onClick={() => handleDuplicateRole(role)}>
                           <Copy className="w-4 h-4" />
                         </Button>
                         {!role.isSystem && (
-                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteRole(role.name)}>
+                          <Button size="sm" variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteRole(role.id, role.name, role.isSystem)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         )}
@@ -1841,10 +2089,10 @@ export default function RolesClient() {
                         <div className="space-y-3">
                           <h4 className="font-medium">Data Management</h4>
                           <div className="grid grid-cols-2 gap-3">
-                            <Button variant="outline" className="justify-start"><Download className="w-4 h-4 mr-2" />Export Roles & Permissions</Button>
-                            <Button variant="outline" className="justify-start"><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
-                            <Button variant="outline" className="justify-start"><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
-                            <Button variant="outline" className="justify-start"><RefreshCw className="w-4 h-4 mr-2" />Sync with Directory</Button>
+                            <Button variant="outline" className="justify-start" onClick={handleExportRoles}><Download className="w-4 h-4 mr-2" />Export Roles & Permissions</Button>
+                            <Button variant="outline" className="justify-start" onClick={() => toast.info('Export', { description: 'Exporting audit logs...' })}><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
+                            <Button variant="outline" className="justify-start" onClick={() => toast.info('Export', { description: 'Exporting user assignments...' })}><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
+                            <Button variant="outline" className="justify-start" onClick={handleRefreshRoles}><RefreshCw className="w-4 h-4 mr-2" />Sync with Directory</Button>
                           </div>
                         </div>
                         <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
@@ -1898,6 +2146,370 @@ export default function RolesClient() {
           </div>
         </div>
       </div>
+
+      {/* Create Role Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5 text-purple-600" />
+              Create New Role
+            </DialogTitle>
+            <DialogDescription>
+              Define a new role with specific permissions and access levels
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="role-name">Role Name *</Label>
+                <Input
+                  id="role-name"
+                  placeholder="e.g., Project Manager"
+                  value={formState.name}
+                  onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role-code">Role Code *</Label>
+                <Input
+                  id="role-code"
+                  placeholder="e.g., PROJECT_MANAGER"
+                  value={formState.role_code}
+                  onChange={(e) => setFormState(prev => ({ ...prev, role_code: e.target.value.toUpperCase().replace(/\s+/g, '_') }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role-description">Description</Label>
+              <Textarea
+                id="role-description"
+                placeholder="Describe the purpose and scope of this role..."
+                value={formState.description}
+                onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Role Type</Label>
+                <Select
+                  value={formState.type}
+                  onValueChange={(value: any) => setFormState(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={formState.status}
+                  onValueChange={(value: any) => setFormState(prev => ({ ...prev, status: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="deprecated">Deprecated</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Access Level</Label>
+                <Select
+                  value={formState.access_level}
+                  onValueChange={(value: any) => setFormState(prev => ({ ...prev, access_level: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full">Full Access</SelectItem>
+                    <SelectItem value="write">Write</SelectItem>
+                    <SelectItem value="read">Read Only</SelectItem>
+                    <SelectItem value="restricted">Restricted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-6 pt-2">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="can-delegate"
+                  checked={formState.can_delegate}
+                  onCheckedChange={(checked) => setFormState(prev => ({ ...prev, can_delegate: checked }))}
+                />
+                <Label htmlFor="can-delegate">Can Delegate</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is-default"
+                  checked={formState.is_default}
+                  onCheckedChange={(checked) => setFormState(prev => ({ ...prev, is_default: checked }))}
+                />
+                <Label htmlFor="is-default">Default Role</Label>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitCreate}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Role
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Role Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-600" />
+              Edit Role
+            </DialogTitle>
+            <DialogDescription>
+              Modify role settings and permissions
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-role-name">Role Name *</Label>
+                <Input
+                  id="edit-role-name"
+                  value={formState.name}
+                  onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-role-code">Role Code</Label>
+                <Input
+                  id="edit-role-code"
+                  value={formState.role_code}
+                  disabled
+                  className="bg-gray-100"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-role-description">Description</Label>
+              <Textarea
+                id="edit-role-description"
+                value={formState.description}
+                onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Role Type</Label>
+                <Select
+                  value={formState.type}
+                  onValueChange={(value: any) => setFormState(prev => ({ ...prev, type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="viewer">Viewer</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={formState.status}
+                  onValueChange={(value: any) => setFormState(prev => ({ ...prev, status: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="deprecated">Deprecated</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Access Level</Label>
+                <Select
+                  value={formState.access_level}
+                  onValueChange={(value: any) => setFormState(prev => ({ ...prev, access_level: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full">Full Access</SelectItem>
+                    <SelectItem value="write">Write</SelectItem>
+                    <SelectItem value="read">Read Only</SelectItem>
+                    <SelectItem value="restricted">Restricted</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex items-center gap-6 pt-2">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="edit-can-delegate"
+                  checked={formState.can_delegate}
+                  onCheckedChange={(checked) => setFormState(prev => ({ ...prev, can_delegate: checked }))}
+                />
+                <Label htmlFor="edit-can-delegate">Can Delegate</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="edit-is-default"
+                  checked={formState.is_default}
+                  onCheckedChange={(checked) => setFormState(prev => ({ ...prev, is_default: checked }))}
+                />
+                <Label htmlFor="edit-is-default">Default Role</Label>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => { setEditDialogOpen(false); setEditingRole(null); resetForm() }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmitEdit}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clone Role Dialog */}
+      <Dialog open={cloneDialogOpen} onOpenChange={setCloneDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Copy className="w-5 h-5 text-purple-600" />
+              Clone Role
+            </DialogTitle>
+            <DialogDescription>
+              Create a copy of "{roleToClone?.name}" with a new name
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="clone-name">New Role Name *</Label>
+              <Input
+                id="clone-name"
+                placeholder="Enter name for the cloned role"
+                value={cloneName}
+                onChange={(e) => setCloneName(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => { setCloneDialogOpen(false); setRoleToClone(null); setCloneName('') }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirmClone}
+              disabled={isSubmitting || !cloneName.trim()}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Cloning...
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4 mr-2" />
+                  Clone Role
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete Role
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this role? This action cannot be undone.
+              Any users assigned to this role will lose their permissions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => { setDeleteDialogOpen(false); setRoleToDelete(null) }}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isSubmitting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete Role
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

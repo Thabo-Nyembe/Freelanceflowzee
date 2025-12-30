@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo, useRef } from 'react'
+import { useState, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
   MessageSquare,
   Send,
@@ -100,6 +101,11 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Progress } from '@/components/ui/progress'
+import { useConversations, useDirectMessages, useMessagingMutations, Conversation, DirectMessage as DBDirectMessage } from '@/lib/hooks/use-messaging'
 
 // ============================================================================
 // TYPE DEFINITIONS - Slack/Discord Level
@@ -364,6 +370,22 @@ const quickReactions = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉'
 // ============================================================================
 
 export default function MessagingClient() {
+  // Supabase client
+  const supabase = createClientComponentClient()
+
+  // Supabase hooks for real data
+  const { conversations, loading: conversationsLoading, refetch: refetchConversations } = useConversations({ type: 'channel' })
+  const { conversations: dmConversations, loading: dmsLoading, refetch: refetchDMs } = useConversations({ type: 'direct' })
+  const {
+    createConversation,
+    updateConversation,
+    deleteConversation,
+    sendMessage,
+    updateMessage,
+    deleteMessage
+  } = useMessagingMutations()
+
+  // UI State
   const [activeView, setActiveView] = useState<'channels' | 'dms' | 'threads' | 'search' | 'settings' | 'analytics'>('channels')
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(mockChannels[0])
   const [selectedDM, setSelectedDM] = useState<DirectMessage | null>(null)
@@ -387,6 +409,29 @@ export default function MessagingClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const messageEndRef = useRef<HTMLDivElement>(null)
 
+  // New Channel Form State
+  const [newChannelName, setNewChannelName] = useState('')
+  const [newChannelDescription, setNewChannelDescription] = useState('')
+  const [newChannelType, setNewChannelType] = useState<'public' | 'private'>('public')
+  const [isCreatingChannel, setIsCreatingChannel] = useState(false)
+
+  // Message editing state
+  const [isSavingEdit, setIsSavingEdit] = useState(false)
+
+  // Current user state
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+
+  // Get current user on mount
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        setCurrentUserId(user.id)
+      }
+    }
+    getCurrentUser()
+  }, [supabase])
+
   const currentChannelMessages = useMemo(() => {
     if (!selectedChannel) return []
     return messages.filter(m => m.channelId === selectedChannel.id && !m.parentId)
@@ -408,16 +453,21 @@ export default function MessagingClient() {
     ))
   }
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!messageInput.trim() || !selectedChannel) return
+
+    const tempId = `msg-${Date.now()}`
+    const now = new Date().toISOString()
+
+    // Optimistic UI update
     const newMessage: Message = {
-      id: `msg-${Date.now()}`,
+      id: tempId,
       channelId: selectedChannel.id,
       threadId: null,
       parentId: null,
       author: currentUser,
       content: messageInput,
-      timestamp: new Date().toISOString(),
+      timestamp: now,
       editedAt: null,
       reactions: [],
       attachments: [],
@@ -430,6 +480,45 @@ export default function MessagingClient() {
     }
     setMessages(prev => [...prev, newMessage])
     setMessageInput('')
+
+    // Save to Supabase
+    try {
+      // Find the conversation ID for this channel
+      const channelConversation = conversations.find(c =>
+        c.conversation_name === selectedChannel.name
+      )
+
+      const result = await sendMessage.create({
+        conversation_id: channelConversation?.id || null,
+        content: messageInput,
+        content_type: 'text',
+        sender_id: currentUserId || '',
+        sender_name: currentUser.name,
+        sender_email: currentUser.email,
+        sender_avatar: currentUser.avatar,
+        status: 'sent',
+        is_edited: false,
+        is_forwarded: false,
+        is_reply: false,
+        attachments: [],
+        attachment_count: 0,
+        reactions: {},
+        reaction_count: 0,
+        sent_at: now,
+        metadata: { channel_id: selectedChannel.id }
+      })
+
+      if (result) {
+        // Update the message ID with the real one from DB
+        setMessages(prev => prev.map(m =>
+          m.id === tempId ? { ...m, id: result.id } : m
+        ))
+      }
+    } catch (error) {
+      console.error('Failed to save message:', error)
+      // Message is already in local state, so user sees it
+      // In a real app, you might want to mark it as "failed to send"
+    }
   }
 
   const handleReaction = (messageId: string, emoji: string) => {
@@ -511,28 +600,358 @@ export default function MessagingClient() {
   }
 
   // Handlers
-  const handleCreateChannel = () => {
-    toast.info('Create Channel', {
-      description: 'Opening channel creation form...'
-    })
+  const handleCreateChannel = async () => {
+    if (!newChannelName.trim()) {
+      toast.error('Channel name required', {
+        description: 'Please enter a name for the channel'
+      })
+      return
+    }
+
+    // Validate channel name (no spaces or periods)
+    if (/[\s.]/.test(newChannelName)) {
+      toast.error('Invalid channel name', {
+        description: 'Channel names cannot have spaces or periods'
+      })
+      return
+    }
+
+    setIsCreatingChannel(true)
+    try {
+      const result = await createConversation.create({
+        conversation_name: newChannelName.toLowerCase(),
+        conversation_type: newChannelType === 'public' ? 'channel' : 'group',
+        status: 'active',
+        participant_count: 1,
+        is_pinned: false,
+        is_starred: false,
+        is_muted: false,
+        unread_count: 0,
+        notification_enabled: true,
+        metadata: {
+          description: newChannelDescription,
+          is_private: newChannelType === 'private'
+        }
+      })
+
+      if (result) {
+        toast.success('Channel created', {
+          description: `#${newChannelName} has been created successfully`
+        })
+        setShowNewChannel(false)
+        setNewChannelName('')
+        setNewChannelDescription('')
+        setNewChannelType('public')
+        refetchConversations()
+      }
+    } catch (error) {
+      toast.error('Failed to create channel', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    } finally {
+      setIsCreatingChannel(false)
+    }
   }
 
-  const handlePinMessage = (message: Message) => {
-    toast.success('Message pinned', {
-      description: 'Message has been pinned to this channel'
-    })
+  const handlePinMessage = async (message: Message) => {
+    try {
+      // Update message in local state immediately for optimistic UI
+      setMessages(prev => prev.map(m =>
+        m.id === message.id ? { ...m, isPinned: !m.isPinned } : m
+      ))
+
+      // If we have a real message ID (from DB), update in Supabase
+      if (message.id && !message.id.startsWith('msg-')) {
+        await updateMessage.update(message.id, {
+          is_pinned: !message.isPinned
+        })
+      }
+
+      toast.success(message.isPinned ? 'Message unpinned' : 'Message pinned', {
+        description: message.isPinned
+          ? 'Message has been unpinned from this channel'
+          : 'Message has been pinned to this channel'
+      })
+    } catch (error) {
+      // Revert on error
+      setMessages(prev => prev.map(m =>
+        m.id === message.id ? { ...m, isPinned: message.isPinned } : m
+      ))
+      toast.error('Failed to update pin status', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
-  const handleReactToMessage = (message: Message, emoji: string) => {
-    toast.success('Reaction added', {
-      description: `Added ${emoji} to message`
-    })
+  const handleReactToMessage = async (message: Message, emoji: string) => {
+    try {
+      // Update local state for optimistic UI
+      handleReaction(message.id, emoji)
+
+      // If we have a real message ID, update in Supabase
+      if (message.id && !message.id.startsWith('msg-')) {
+        const currentReactions = message.reactions || []
+        const existingReaction = currentReactions.find(r => r.emoji === emoji)
+        let updatedReactions
+
+        if (existingReaction?.reacted) {
+          // Remove reaction
+          updatedReactions = currentReactions.filter(r => r.emoji !== emoji || r.count > 1)
+        } else {
+          // Add reaction
+          updatedReactions = [...currentReactions, { emoji, count: 1, users: [currentUserId || ''], reacted: true }]
+        }
+
+        await updateMessage.update(message.id, {
+          reactions: updatedReactions
+        })
+      }
+
+      toast.success('Reaction updated', {
+        description: `${emoji} reaction updated`
+      })
+    } catch (error) {
+      toast.error('Failed to add reaction', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
-  const handleSearchMessages = () => {
-    toast.info('Searching', {
-      description: 'Opening advanced search...'
-    })
+  const handleSearchMessages = async () => {
+    if (!searchQuery.trim()) {
+      toast.info('Enter search term', {
+        description: 'Type something to search for messages'
+      })
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const { data, error } = await supabase
+        .from('direct_messages')
+        .select('*')
+        .ilike('content', `%${searchQuery}%`)
+        .order('sent_at', { ascending: false })
+        .limit(50)
+
+      if (error) throw error
+
+      const results: SearchResult[] = (data || []).map((msg: any) => ({
+        type: 'message' as const,
+        message: {
+          id: msg.id,
+          channelId: msg.conversation_id || '',
+          threadId: null,
+          parentId: msg.reply_to_id,
+          author: {
+            id: msg.sender_id,
+            name: msg.sender_name || 'Unknown',
+            displayName: msg.sender_name?.toLowerCase().replace(/\s/g, '') || 'unknown',
+            avatar: msg.sender_avatar || '',
+            email: msg.sender_email || '',
+            status: 'online' as const,
+            statusMessage: null,
+            role: 'member' as const,
+            lastSeen: msg.sent_at
+          },
+          content: msg.content,
+          timestamp: msg.sent_at,
+          editedAt: msg.edited_at,
+          reactions: msg.reactions ? Object.entries(msg.reactions).map(([emoji, data]: [string, any]) => ({
+            emoji,
+            count: data.count || 1,
+            users: data.users || [],
+            reacted: data.users?.includes(currentUserId) || false
+          })) : [],
+          attachments: msg.attachments || [],
+          mentions: [],
+          isPinned: false,
+          isBookmarked: false,
+          replyCount: 0,
+          isEdited: msg.is_edited,
+          isDeleted: false
+        },
+        relevance: 1
+      }))
+
+      setSearchResults(results)
+      toast.success('Search complete', {
+        description: `Found ${results.length} matching messages`
+      })
+    } catch (error) {
+      toast.error('Search failed', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
+  // Save edited message to Supabase
+  const handleSaveEditedMessage = async (messageId: string) => {
+    if (!editContent.trim()) return
+
+    setIsSavingEdit(true)
+    try {
+      // Update local state immediately
+      setMessages(prev => prev.map(m =>
+        m.id === messageId ? { ...m, content: editContent, isEdited: true, editedAt: new Date().toISOString() } : m
+      ))
+      setEditingMessage(null)
+
+      // If it's a real DB message, update in Supabase
+      if (messageId && !messageId.startsWith('msg-')) {
+        await updateMessage.update(messageId, {
+          content: editContent,
+          is_edited: true,
+          edited_at: new Date().toISOString()
+        })
+      }
+
+      toast.success('Message updated', {
+        description: 'Your message has been edited'
+      })
+    } catch (error) {
+      toast.error('Failed to update message', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    } finally {
+      setIsSavingEdit(false)
+    }
+  }
+
+  // Delete message
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      // Remove from local state immediately
+      setMessages(prev => prev.filter(m => m.id !== messageId))
+
+      // If it's a real DB message, delete in Supabase
+      if (messageId && !messageId.startsWith('msg-')) {
+        await deleteMessage.remove(messageId)
+      }
+
+      toast.success('Message deleted', {
+        description: 'The message has been removed'
+      })
+    } catch (error) {
+      toast.error('Failed to delete message', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }
+
+  // Bookmark message
+  const handleBookmarkMessage = async (message: Message) => {
+    try {
+      setMessages(prev => prev.map(m =>
+        m.id === message.id ? { ...m, isBookmarked: !m.isBookmarked } : m
+      ))
+
+      if (message.id && !message.id.startsWith('msg-')) {
+        await updateMessage.update(message.id, {
+          metadata: { ...((message as any).metadata || {}), is_bookmarked: !message.isBookmarked }
+        })
+      }
+
+      toast.success(message.isBookmarked ? 'Bookmark removed' : 'Message bookmarked', {
+        description: message.isBookmarked
+          ? 'Message removed from bookmarks'
+          : 'Message saved to your bookmarks'
+      })
+    } catch (error) {
+      setMessages(prev => prev.map(m =>
+        m.id === message.id ? { ...m, isBookmarked: message.isBookmarked } : m
+      ))
+      toast.error('Failed to update bookmark', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }
+
+  // Toggle channel mute
+  const handleToggleChannelMute = async () => {
+    if (!selectedChannel) return
+
+    try {
+      // Find the conversation in the DB
+      const channelConversation = conversations.find(c =>
+        c.conversation_name === selectedChannel.name
+      )
+
+      if (channelConversation) {
+        await updateConversation.update(channelConversation.id, {
+          is_muted: !selectedChannel.isMuted
+        })
+        refetchConversations()
+      }
+
+      toast.success(selectedChannel.isMuted ? 'Channel unmuted' : 'Channel muted', {
+        description: selectedChannel.isMuted
+          ? 'You will now receive notifications from this channel'
+          : 'Notifications for this channel are now muted'
+      })
+    } catch (error) {
+      toast.error('Failed to update channel settings', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }
+
+  // Toggle channel pin
+  const handleToggleChannelPin = async () => {
+    if (!selectedChannel) return
+
+    try {
+      const channelConversation = conversations.find(c =>
+        c.conversation_name === selectedChannel.name
+      )
+
+      if (channelConversation) {
+        await updateConversation.update(channelConversation.id, {
+          is_pinned: !selectedChannel.isPinned
+        })
+        refetchConversations()
+      }
+
+      toast.success(selectedChannel.isPinned ? 'Channel unpinned' : 'Channel pinned', {
+        description: selectedChannel.isPinned
+          ? 'Channel removed from pinned list'
+          : 'Channel pinned to top of your list'
+      })
+    } catch (error) {
+      toast.error('Failed to update channel settings', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }
+
+  // Leave channel
+  const handleLeaveChannel = async () => {
+    if (!selectedChannel) return
+
+    try {
+      const channelConversation = conversations.find(c =>
+        c.conversation_name === selectedChannel.name
+      )
+
+      if (channelConversation) {
+        await updateConversation.update(channelConversation.id, {
+          status: 'archived'
+        })
+        refetchConversations()
+      }
+
+      toast.success('Left channel', {
+        description: `You have left #${selectedChannel.name}`
+      })
+      setShowChannelSettings(false)
+      setSelectedChannel(null)
+    } catch (error) {
+      toast.error('Failed to leave channel', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   return (
@@ -1399,23 +1818,21 @@ export default function MessagingClient() {
                               type="text"
                               value={editContent}
                               onChange={(e) => setEditContent(e.target.value)}
+                              onKeyDown={(e) => e.key === 'Enter' && handleSaveEditedMessage(message.id)}
                               className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-sm"
                               autoFocus
                             />
                             <button
-                              onClick={() => {
-                                setMessages(prev => prev.map(m =>
-                                  m.id === message.id ? { ...m, content: editContent, isEdited: true, editedAt: new Date().toISOString() } : m
-                                ))
-                                setEditingMessage(null)
-                              }}
-                              className="px-3 py-2 bg-green-500 text-white rounded-lg text-sm"
+                              onClick={() => handleSaveEditedMessage(message.id)}
+                              disabled={isSavingEdit}
+                              className="px-3 py-2 bg-green-500 hover:bg-green-600 disabled:bg-green-400 text-white rounded-lg text-sm flex items-center gap-1"
                             >
+                              {isSavingEdit ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
                               Save
                             </button>
                             <button
                               onClick={() => setEditingMessage(null)}
-                              className="px-3 py-2 bg-gray-200 dark:bg-gray-700 rounded-lg text-sm"
+                              className="px-3 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg text-sm"
                             >
                               Cancel
                             </button>
@@ -1521,10 +1938,25 @@ export default function MessagingClient() {
                           <MessageSquare className="w-4 h-4 text-gray-500" />
                         </button>
                         <button
+                          onClick={() => handleBookmarkMessage(message)}
                           className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                          title="Bookmark"
+                          title={message.isBookmarked ? "Remove bookmark" : "Bookmark"}
                         >
-                          <Bookmark className="w-4 h-4 text-gray-500" />
+                          <Bookmark className={`w-4 h-4 ${message.isBookmarked ? 'text-yellow-500 fill-yellow-500' : 'text-gray-500'}`} />
+                        </button>
+                        <button
+                          onClick={() => handlePinMessage(message)}
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                          title={message.isPinned ? "Unpin message" : "Pin message"}
+                        >
+                          <Pin className={`w-4 h-4 ${message.isPinned ? 'text-indigo-500' : 'text-gray-500'}`} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMessage(message.id)}
+                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                          title="Delete message"
+                        >
+                          <Trash2 className="w-4 h-4 text-gray-500 hover:text-red-500" />
                         </button>
                         <button
                           className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
@@ -1764,9 +2196,12 @@ export default function MessagingClient() {
                   <p className="font-medium">Mute channel</p>
                   <p className="text-sm text-gray-500">Mute notifications from this channel</p>
                 </div>
-                <button className={`w-12 h-6 rounded-full transition-colors ${
-                  selectedChannel?.isMuted ? 'bg-indigo-600' : 'bg-gray-300'
-                }`}>
+                <button
+                  onClick={handleToggleChannelMute}
+                  className={`w-12 h-6 rounded-full transition-colors ${
+                    selectedChannel?.isMuted ? 'bg-indigo-600' : 'bg-gray-300'
+                  }`}
+                >
                   <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
                     selectedChannel?.isMuted ? 'translate-x-6' : 'translate-x-0.5'
                   }`} />
@@ -1777,15 +2212,21 @@ export default function MessagingClient() {
                   <p className="font-medium">Pin channel</p>
                   <p className="text-sm text-gray-500">Keep this channel at the top</p>
                 </div>
-                <button className={`w-12 h-6 rounded-full transition-colors ${
-                  selectedChannel?.isPinned ? 'bg-indigo-600' : 'bg-gray-300'
-                }`}>
+                <button
+                  onClick={handleToggleChannelPin}
+                  className={`w-12 h-6 rounded-full transition-colors ${
+                    selectedChannel?.isPinned ? 'bg-indigo-600' : 'bg-gray-300'
+                  }`}
+                >
                   <div className={`w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${
                     selectedChannel?.isPinned ? 'translate-x-6' : 'translate-x-0.5'
                   }`} />
                 </button>
               </div>
-              <button className="w-full p-4 text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-2">
+              <button
+                onClick={handleLeaveChannel}
+                className="w-full p-4 text-left text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-2"
+              >
                 <LogOut className="w-4 h-4" />
                 Leave channel
               </button>
@@ -1828,7 +2269,14 @@ export default function MessagingClient() {
       </div>
 
       {/* New Channel Dialog */}
-      <Dialog open={showNewChannel} onOpenChange={setShowNewChannel}>
+      <Dialog open={showNewChannel} onOpenChange={(open) => {
+        setShowNewChannel(open)
+        if (!open) {
+          setNewChannelName('')
+          setNewChannelDescription('')
+          setNewChannelType('public')
+        }
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create a channel</DialogTitle>
@@ -1837,13 +2285,29 @@ export default function MessagingClient() {
             <div>
               <label className="text-sm font-medium">Channel type</label>
               <div className="mt-2 grid grid-cols-2 gap-2">
-                <button className="p-4 border-2 border-indigo-500 rounded-lg text-left">
-                  <Hash className="w-6 h-6 mb-2 text-indigo-600" />
+                <button
+                  type="button"
+                  onClick={() => setNewChannelType('public')}
+                  className={`p-4 border-2 rounded-lg text-left transition-colors ${
+                    newChannelType === 'public'
+                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Hash className={`w-6 h-6 mb-2 ${newChannelType === 'public' ? 'text-indigo-600' : 'text-gray-600'}`} />
                   <p className="font-medium">Public</p>
                   <p className="text-sm text-gray-500">Anyone can join</p>
                 </button>
-                <button className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-lg text-left hover:border-gray-300">
-                  <Lock className="w-6 h-6 mb-2 text-gray-600" />
+                <button
+                  type="button"
+                  onClick={() => setNewChannelType('private')}
+                  className={`p-4 border-2 rounded-lg text-left transition-colors ${
+                    newChannelType === 'private'
+                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Lock className={`w-6 h-6 mb-2 ${newChannelType === 'private' ? 'text-indigo-600' : 'text-gray-600'}`} />
                   <p className="font-medium">Private</p>
                   <p className="text-sm text-gray-500">Invite only</p>
                 </button>
@@ -1857,8 +2321,10 @@ export default function MessagingClient() {
                 </span>
                 <input
                   type="text"
+                  value={newChannelName}
+                  onChange={(e) => setNewChannelName(e.target.value.toLowerCase().replace(/[\s.]/g, '-'))}
                   placeholder="e.g. marketing"
-                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-r-lg bg-white dark:bg-gray-800"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-r-lg bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
               <p className="mt-1 text-xs text-gray-500">Names can't have spaces or periods</p>
@@ -1867,20 +2333,34 @@ export default function MessagingClient() {
               <label className="text-sm font-medium">Description (optional)</label>
               <input
                 type="text"
+                value={newChannelDescription}
+                onChange={(e) => setNewChannelDescription(e.target.value)}
                 placeholder="What's this channel about?"
-                className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div className="flex justify-end gap-2 pt-4">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setShowNewChannel(false)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+                disabled={isCreatingChannel}
               >
                 Cancel
-              </button>
-              <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
-                Create Channel
-              </button>
+              </Button>
+              <Button
+                onClick={handleCreateChannel}
+                disabled={isCreatingChannel || !newChannelName.trim()}
+                className="bg-indigo-600 hover:bg-indigo-700"
+              >
+                {isCreatingChannel ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Channel'
+                )}
+              </Button>
             </div>
           </div>
         </DialogContent>

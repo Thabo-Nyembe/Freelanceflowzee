@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import {
   Activity,
@@ -58,7 +59,9 @@ import {
   Workflow,
   Cog,
   Link,
-  Wrench
+  Wrench,
+  Trash2,
+  Edit2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -85,6 +88,9 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 // Types
 type ServiceStatus = 'healthy' | 'degraded' | 'critical' | 'unknown'
@@ -178,6 +184,61 @@ interface SLO {
   indicator: 'availability' | 'latency' | 'error_rate'
   status: 'met' | 'at_risk' | 'breached'
   history: { date: string; value: number }[]
+}
+
+// Database types
+interface DbHealthScore {
+  id: string
+  user_id: string
+  health_code: string
+  customer_name: string
+  customer_id: string | null
+  account_type: string
+  overall_score: number
+  category: string
+  trend: string
+  previous_score: number
+  score_change: number
+  product_usage: number
+  engagement: number
+  support_health: number
+  financial: number
+  sentiment: number
+  risk_factors: number
+  opportunities: number
+  notes: string | null
+  tags: string[]
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+interface HealthScoreFormState {
+  customer_name: string
+  account_type: string
+  overall_score: number
+  category: string
+  trend: string
+  product_usage: number
+  engagement: number
+  support_health: number
+  financial: number
+  sentiment: number
+  notes: string
+}
+
+const initialFormState: HealthScoreFormState = {
+  customer_name: '',
+  account_type: 'standard',
+  overall_score: 50,
+  category: 'fair',
+  trend: 'stable',
+  product_usage: 50,
+  engagement: 50,
+  support_health: 50,
+  financial: 50,
+  sentiment: 50,
+  notes: '',
 }
 
 // Mock Data
@@ -616,6 +677,9 @@ const mockHealthScoreQuickActions = [
 ]
 
 export default function HealthScoreClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedService, setSelectedService] = useState<ServiceHealth | null>(null)
@@ -623,6 +687,14 @@ export default function HealthScoreClient() {
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [timeRange, setTimeRange] = useState<'1h' | '4h' | '1d' | '7d' | '30d'>('1d')
+
+  // Database State
+  const [dbHealthScores, setDbHealthScores] = useState<DbHealthScore[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [formState, setFormState] = useState<HealthScoreFormState>(initialFormState)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   // Computed stats
   const overallHealth = useMemo(() => {
@@ -640,6 +712,179 @@ export default function HealthScoreClient() {
   }, [])
 
   const openIncidents = mockIncidents.filter(i => i.status !== 'resolved').length
+
+  // Generate health code
+  const generateHealthCode = () => `HS-${Date.now().toString(36).toUpperCase()}`
+
+  // Fetch health scores from Supabase
+  const fetchHealthScores = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('health_scores')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbHealthScores(data || [])
+    } catch (error) {
+      console.error('Error fetching health scores:', error)
+      toast.error('Failed to load health scores')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchHealthScores()
+  }, [fetchHealthScores])
+
+  // Create health score
+  const handleCreateHealthScore = async () => {
+    if (!formState.customer_name.trim()) {
+      toast.error('Customer name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create health scores')
+        return
+      }
+
+      const { error } = await supabase.from('health_scores').insert({
+        user_id: user.id,
+        health_code: generateHealthCode(),
+        customer_name: formState.customer_name,
+        account_type: formState.account_type,
+        overall_score: formState.overall_score,
+        category: formState.category,
+        trend: formState.trend,
+        product_usage: formState.product_usage,
+        engagement: formState.engagement,
+        support_health: formState.support_health,
+        financial: formState.financial,
+        sentiment: formState.sentiment,
+        notes: formState.notes || null,
+      })
+
+      if (error) throw error
+
+      toast.success('Health score created successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      fetchHealthScores()
+    } catch (error) {
+      console.error('Error creating health score:', error)
+      toast.error('Failed to create health score')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Update health score
+  const handleUpdateHealthScore = async () => {
+    if (!editingId || !formState.customer_name.trim()) {
+      toast.error('Customer name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const current = dbHealthScores.find(h => h.id === editingId)
+      const { error } = await supabase
+        .from('health_scores')
+        .update({
+          customer_name: formState.customer_name,
+          account_type: formState.account_type,
+          overall_score: formState.overall_score,
+          previous_score: current?.overall_score || 0,
+          score_change: formState.overall_score - (current?.overall_score || 0),
+          category: formState.category,
+          trend: formState.trend,
+          product_usage: formState.product_usage,
+          engagement: formState.engagement,
+          support_health: formState.support_health,
+          financial: formState.financial,
+          sentiment: formState.sentiment,
+          notes: formState.notes || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editingId)
+
+      if (error) throw error
+
+      toast.success('Health score updated successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      setEditingId(null)
+      fetchHealthScores()
+    } catch (error) {
+      console.error('Error updating health score:', error)
+      toast.error('Failed to update health score')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Delete health score (soft delete)
+  const handleDeleteHealthScore = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('health_scores')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success('Health score deleted')
+      fetchHealthScores()
+    } catch (error) {
+      console.error('Error deleting health score:', error)
+      toast.error('Failed to delete health score')
+    }
+  }
+
+  // Edit health score
+  const handleEditHealthScore = (healthScore: DbHealthScore) => {
+    setFormState({
+      customer_name: healthScore.customer_name,
+      account_type: healthScore.account_type,
+      overall_score: healthScore.overall_score,
+      category: healthScore.category,
+      trend: healthScore.trend,
+      product_usage: healthScore.product_usage,
+      engagement: healthScore.engagement,
+      support_health: healthScore.support_health,
+      financial: healthScore.financial,
+      sentiment: healthScore.sentiment,
+      notes: healthScore.notes || '',
+    })
+    setEditingId(healthScore.id)
+    setShowCreateDialog(true)
+  }
+
+  // Refresh metrics handler
+  const handleRefreshMetrics = async () => {
+    toast.info('Refreshing metrics', { description: 'Fetching latest health data...' })
+    setLoading(true)
+    await fetchHealthScores()
+    toast.success('Metrics refreshed')
+  }
+
+  // Combined stats from DB + mock data
+  const combinedOverallHealth = useMemo(() => {
+    const dbAvg = dbHealthScores.length > 0
+      ? dbHealthScores.reduce((sum, h) => sum + h.overall_score, 0) / dbHealthScores.length
+      : 0
+    return dbHealthScores.length > 0 ? Math.round((overallHealth + dbAvg) / 2) : overallHealth
+  }, [overallHealth, dbHealthScores])
 
   const getStatusColor = (status: ServiceStatus) => {
     switch (status) {
@@ -694,35 +939,16 @@ export default function HealthScoreClient() {
     }
   }
 
-  // Handlers
-  const handleRefreshMetrics = () => {
-    toast.info('Refreshing metrics', {
-      description: 'Fetching latest health data...'
-    })
-  }
-
   const handleRunDiagnostics = () => {
-    toast.info('Running diagnostics', {
-      description: 'Performing system health check...'
-    })
+    toast.info('Running diagnostics', { description: 'Performing system health check...' })
   }
 
   const handleExportHealth = () => {
-    toast.success('Exporting health report', {
-      description: 'Health metrics will be downloaded'
-    })
+    toast.success('Exporting health report', { description: 'Health metrics will be downloaded' })
   }
 
   const handleConfigureAlerts = () => {
-    toast.info('Configure Alerts', {
-      description: 'Opening alert configuration...'
-    })
-  }
-
-  const handleViewServiceDetails = (serviceName: string) => {
-    toast.info('Service Details', {
-      description: `Loading details for "${serviceName}"...`
-    })
+    toast.info('Configure Alerts', { description: 'Opening alert configuration...' })
   }
 
   return (
@@ -837,7 +1063,7 @@ export default function HealthScoreClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{overallScore}%</p>
+                    <p className="text-3xl font-bold">{combinedOverallHealth}%</p>
                     <p className="text-emerald-200 text-sm">Health Score</p>
                   </div>
                   <div className="text-center">
@@ -854,25 +1080,67 @@ export default function HealthScoreClient() {
 
             {/* Overview Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Activity, label: 'Dashboard', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: RefreshCw, label: 'Refresh', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Bell, label: 'Alerts', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: BarChart3, label: 'Metrics', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: FileText, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Shield, label: 'Security', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                onClick={() => setShowCreateDialog(true)}
+                className="h-20 flex-col gap-2 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 hover:scale-105 transition-all duration-200"
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">Add Score</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleRefreshMetrics}
+                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
+              >
+                <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+                <span className="text-xs font-medium">Refresh</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleConfigureAlerts}
+                className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
+              >
+                <Bell className="w-5 h-5" />
+                <span className="text-xs font-medium">Alerts</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleRunDiagnostics}
+                className="h-20 flex-col gap-2 bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 hover:scale-105 transition-all duration-200"
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Metrics</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+              >
+                <FileText className="w-5 h-5" />
+                <span className="text-xs font-medium">Reports</span>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={handleExportHealth}
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+              >
+                <Shield className="w-5 h-5" />
+                <span className="text-xs font-medium">Security</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -943,6 +1211,69 @@ export default function HealthScoreClient() {
                 </ScrollArea>
               </div>
             </div>
+
+            {/* Customer Health Scores from Database */}
+            {dbHealthScores.length > 0 && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Customer Health Scores</h2>
+                  <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+                    <Plus className="w-4 h-4 mr-1" /> Add Score
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {dbHealthScores.slice(0, 6).map(score => (
+                    <div key={score.id} className="p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-900 dark:text-white truncate">{score.customer_name}</span>
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                          score.category === 'excellent' ? 'bg-green-500/10 text-green-500' :
+                          score.category === 'good' ? 'bg-emerald-500/10 text-emerald-500' :
+                          score.category === 'fair' ? 'bg-yellow-500/10 text-yellow-500' :
+                          score.category === 'poor' ? 'bg-orange-500/10 text-orange-500' :
+                          'bg-red-500/10 text-red-500'
+                        }`}>
+                          {score.category}
+                        </span>
+                      </div>
+                      <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                        {score.overall_score}%
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-2">
+                        <span className={`flex items-center gap-1 ${
+                          score.trend === 'improving' ? 'text-green-500' :
+                          score.trend === 'declining' ? 'text-red-500' : 'text-gray-500'
+                        }`}>
+                          {score.trend === 'improving' ? <TrendingUp className="w-3 h-3" /> :
+                           score.trend === 'declining' ? <TrendingDown className="w-3 h-3" /> :
+                           <Minus className="w-3 h-3" />}
+                          {score.trend}
+                        </span>
+                        <span>·</span>
+                        <span>{score.account_type}</span>
+                      </div>
+                      <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-3">
+                        <div
+                          className={`h-full transition-all ${
+                            score.overall_score >= 80 ? 'bg-green-500' :
+                            score.overall_score >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${score.overall_score}%` }}
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="flex-1" onClick={() => handleEditHealthScore(score)}>
+                          Edit
+                        </Button>
+                        <Button size="sm" variant="outline" className="text-red-500 hover:bg-red-50" onClick={() => handleDeleteHealthScore(score.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* SLO Summary */}
             <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
@@ -1146,15 +1477,15 @@ export default function HealthScoreClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockInfrastructure.length}</p>
+                    <p className="text-3xl font-bold">{mockHosts.length}</p>
                     <p className="text-amber-200 text-sm">Resources</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockInfrastructure.filter(i => i.status === 'healthy').length}</p>
+                    <p className="text-3xl font-bold">{mockHosts.filter(i => i.status === 'healthy').length}</p>
                     <p className="text-amber-200 text-sm">Healthy</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(mockInfrastructure.reduce((sum, i) => sum + i.cpu, 0) / mockInfrastructure.length).toFixed(0)}%</p>
+                    <p className="text-3xl font-bold">{(mockHosts.reduce((sum, i) => sum + i.cpu, 0) / mockHosts.length).toFixed(0)}%</p>
                     <p className="text-amber-200 text-sm">Avg CPU</p>
                   </div>
                 </div>
@@ -1329,11 +1660,11 @@ export default function HealthScoreClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAlertRules.length}</p>
+                    <p className="text-3xl font-bold">{mockAlerts.length}</p>
                     <p className="text-rose-200 text-sm">Rules</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockAlertRules.filter(a => a.isActive).length}</p>
+                    <p className="text-3xl font-bold">{mockAlerts.filter(a => a.enabled).length}</p>
                     <p className="text-rose-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
@@ -1909,6 +2240,163 @@ export default function HealthScoreClient() {
                 )}
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create/Edit Health Score Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={(open) => {
+          setShowCreateDialog(open)
+          if (!open) {
+            setFormState(initialFormState)
+            setEditingId(null)
+          }
+        }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{editingId ? 'Edit Health Score' : 'Create Health Score'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="customer_name">Customer Name *</Label>
+                <Input
+                  id="customer_name"
+                  value={formState.customer_name}
+                  onChange={(e) => setFormState(prev => ({ ...prev, customer_name: e.target.value }))}
+                  placeholder="Enter customer name"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="account_type">Account Type</Label>
+                  <select
+                    id="account_type"
+                    value={formState.account_type}
+                    onChange={(e) => setFormState(prev => ({ ...prev, account_type: e.target.value }))}
+                    className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  >
+                    <option value="standard">Standard</option>
+                    <option value="premium">Premium</option>
+                    <option value="enterprise">Enterprise</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="overall_score">Overall Score</Label>
+                  <Input
+                    id="overall_score"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formState.overall_score}
+                    onChange={(e) => setFormState(prev => ({ ...prev, overall_score: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="category">Category</Label>
+                  <select
+                    id="category"
+                    value={formState.category}
+                    onChange={(e) => setFormState(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  >
+                    <option value="excellent">Excellent</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="trend">Trend</Label>
+                  <select
+                    id="trend"
+                    value={formState.trend}
+                    onChange={(e) => setFormState(prev => ({ ...prev, trend: e.target.value }))}
+                    className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  >
+                    <option value="improving">Improving</option>
+                    <option value="stable">Stable</option>
+                    <option value="declining">Declining</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="product_usage">Product Usage</Label>
+                  <Input
+                    id="product_usage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formState.product_usage}
+                    onChange={(e) => setFormState(prev => ({ ...prev, product_usage: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="engagement">Engagement</Label>
+                  <Input
+                    id="engagement"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formState.engagement}
+                    onChange={(e) => setFormState(prev => ({ ...prev, engagement: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="support_health">Support</Label>
+                  <Input
+                    id="support_health"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formState.support_health}
+                    onChange={(e) => setFormState(prev => ({ ...prev, support_health: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="financial">Financial</Label>
+                  <Input
+                    id="financial"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formState.financial}
+                    onChange={(e) => setFormState(prev => ({ ...prev, financial: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sentiment">Sentiment</Label>
+                  <Input
+                    id="sentiment"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={formState.sentiment}
+                    onChange={(e) => setFormState(prev => ({ ...prev, sentiment: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={formState.notes}
+                  onChange={(e) => setFormState(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Additional notes..."
+                  rows={3}
+                />
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+                <Button onClick={editingId ? handleUpdateHealthScore : handleCreateHealthScore} disabled={isSubmitting}>
+                  {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
 

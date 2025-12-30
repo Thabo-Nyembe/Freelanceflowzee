@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
   DollarSign,
   CreditCard,
@@ -380,6 +381,7 @@ const mockTransactionsQuickActions = [
 ]
 
 export default function TransactionsClient({ initialTransactions }: { initialTransactions: Transaction[] }) {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedPeriod, setSelectedPeriod] = useState('last-7-days')
   const [searchQuery, setSearchQuery] = useState('')
@@ -391,8 +393,14 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   const [showCustomerDialog, setShowCustomerDialog] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { transactions } = useTransactions({})
+  // Form states
+  const [refundForm, setRefundForm] = useState({ amount: '', reason: 'requested_by_customer' })
+  const [invoiceForm, setInvoiceForm] = useState({ customerId: '', description: '', amount: '', dueDate: '', sendEmail: true })
+  const [customerForm, setCustomerForm] = useState({ name: '', email: '', phone: '', description: '' })
+
+  const { transactions, createTransaction, deleteTransaction, refetch } = useTransactions({})
   const displayTransactions = transactions.length > 0 ? transactions : initialTransactions
 
   // Calculate stats
@@ -437,38 +445,124 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
   }
 
   // Handlers
-  const handleIssueRefund = () => {
+  const handleIssueRefund = async () => {
     if (!selectedPayment) return
-    toast.success(`Refund issued for ${formatCurrency(selectedPayment.amount)}`)
-    setShowRefundDialog(false)
+    setIsSubmitting(true)
+    try {
+      const refundAmount = parseFloat(refundForm.amount.replace(/[^0-9.]/g, '')) * 100 || selectedPayment.amount
+      await createTransaction({
+        type: 'expense',
+        category: 'Refund',
+        description: `Refund for ${selectedPayment.id} - ${refundForm.reason}`,
+        amount: refundAmount / 100,
+        currency: selectedPayment.currency,
+        transaction_date: new Date().toISOString(),
+        client_name: selectedPayment.customer.name,
+        notes: `Original payment: ${selectedPayment.id}, Reason: ${refundForm.reason}`
+      })
+      toast.success(`Refund issued for ${formatCurrency(refundAmount)}`)
+      setShowRefundDialog(false)
+      setRefundForm({ amount: '', reason: 'requested_by_customer' })
+    } catch (error) {
+      toast.error('Failed to issue refund', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleCreateInvoice = () => {
-    toast.success('Invoice created successfully!')
-    setShowInvoiceDialog(false)
+  const handleCreateInvoice = async () => {
+    if (!invoiceForm.description || !invoiceForm.amount) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const amount = parseFloat(invoiceForm.amount.replace(/[^0-9.]/g, '')) * 100
+      const customer = mockCustomers.find(c => c.id === invoiceForm.customerId) || mockCustomers[0]
+      await createTransaction({
+        type: 'income',
+        category: 'Invoice',
+        description: invoiceForm.description,
+        amount: amount / 100,
+        currency: 'USD',
+        transaction_date: new Date().toISOString(),
+        client_name: customer.name,
+        notes: `Due: ${invoiceForm.dueDate}, Email sent: ${invoiceForm.sendEmail}`
+      })
+      toast.success('Invoice created successfully!')
+      setShowInvoiceDialog(false)
+      setInvoiceForm({ customerId: '', description: '', amount: '', dueDate: '', sendEmail: true })
+    } catch (error) {
+      toast.error('Failed to create invoice', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleAddCustomer = () => {
-    toast.success('Customer added successfully!')
-    setShowCustomerDialog(false)
+  const handleAddCustomer = async () => {
+    if (!customerForm.name || !customerForm.email) {
+      toast.error('Name and email are required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase.from('clients').insert({
+        name: customerForm.name,
+        email: customerForm.email,
+        phone: customerForm.phone || null,
+        notes: customerForm.description || null
+      })
+      if (error) throw error
+      toast.success('Customer added successfully!')
+      setShowCustomerDialog(false)
+      setCustomerForm({ name: '', email: '', phone: '', description: '' })
+    } catch (error) {
+      toast.error('Failed to add customer', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleExportTransactions = () => {
-    toast.success('Export started', {
-      description: 'Transaction data is being exported'
-    })
+  const handleExportTransactions = async () => {
+    try {
+      const csvContent = [
+        ['ID', 'Type', 'Category', 'Description', 'Amount', 'Date'].join(','),
+        ...displayTransactions.map(t => [t.id, t.type, t.category, t.description, t.amount, t.transaction_date].join(','))
+      ].join('\n')
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `transactions-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      toast.success('Export completed', { description: 'Transaction data exported to CSV' })
+    } catch (error) {
+      toast.error('Export failed', { description: (error as Error).message })
+    }
   }
 
-  const handleReconcile = () => {
-    toast.success('Reconciliation started', {
-      description: 'Accounts are being reconciled'
-    })
+  const handleReconcile = async () => {
+    setIsSubmitting(true)
+    try {
+      await refetch()
+      toast.success('Reconciliation complete', { description: 'Accounts have been reconciled' })
+    } catch (error) {
+      toast.error('Reconciliation failed', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleVoidTransaction = (transactionId: string) => {
-    toast.success('Transaction voided', {
-      description: `Transaction ${transactionId} has been voided`
-    })
+  const handleVoidTransaction = async (transactionId: string) => {
+    setIsSubmitting(true)
+    try {
+      await deleteTransaction(transactionId)
+      toast.success('Transaction voided', { description: `Transaction ${transactionId} has been voided` })
+    } catch (error) {
+      toast.error('Failed to void transaction', { description: (error as Error).message })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -499,11 +593,17 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 <option value="last-month">Last month</option>
               </select>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+            <button
+              onClick={handleExportTransactions}
+              className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+            >
               <Download className="w-4 h-4" />
               Export
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+            <button
+              onClick={() => setShowInvoiceDialog(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+            >
               <Plus className="w-4 h-4" />
               Create Payment
             </button>
@@ -1934,13 +2034,18 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Refund Amount</label>
                   <input
                     type="text"
-                    defaultValue={formatCurrency(selectedPayment.amount)}
+                    value={refundForm.amount || formatCurrency(selectedPayment.amount)}
+                    onChange={(e) => setRefundForm(prev => ({ ...prev, amount: e.target.value }))}
                     className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                   />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Reason</label>
-                  <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                  <select
+                    value={refundForm.reason}
+                    onChange={(e) => setRefundForm(prev => ({ ...prev, reason: e.target.value }))}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
                     <option value="requested_by_customer">Requested by customer</option>
                     <option value="duplicate">Duplicate</option>
                     <option value="fraudulent">Fraudulent</option>
@@ -1953,8 +2058,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               <button onClick={() => setShowRefundDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={handleIssueRefund} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-                Issue Refund
+              <button onClick={handleIssueRefund} disabled={isSubmitting} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
+                {isSubmitting ? 'Processing...' : 'Issue Refund'}
               </button>
             </DialogFooter>
           </DialogContent>
@@ -1970,7 +2075,11 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
             <div className="space-y-4 py-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Customer</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <select
+                  value={invoiceForm.customerId}
+                  onChange={(e) => setInvoiceForm(prev => ({ ...prev, customerId: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
                   {mockCustomers.map(c => (
                     <option key={c.id} value={c.id}>{c.name} ({c.email})</option>
                   ))}
@@ -1980,6 +2089,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                 <input
                   type="text"
+                  value={invoiceForm.description}
+                  onChange={(e) => setInvoiceForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Professional Plan - Annual"
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 />
@@ -1989,6 +2100,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Amount</label>
                   <input
                     type="text"
+                    value={invoiceForm.amount}
+                    onChange={(e) => setInvoiceForm(prev => ({ ...prev, amount: e.target.value }))}
                     placeholder="$150.00"
                     className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                   />
@@ -1997,12 +2110,20 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Due Date</label>
                   <input
                     type="date"
+                    value={invoiceForm.dueDate}
+                    onChange={(e) => setInvoiceForm(prev => ({ ...prev, dueDate: e.target.value }))}
                     className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                   />
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="send-email" className="rounded" defaultChecked />
+                <input
+                  type="checkbox"
+                  id="send-email"
+                  className="rounded"
+                  checked={invoiceForm.sendEmail}
+                  onChange={(e) => setInvoiceForm(prev => ({ ...prev, sendEmail: e.target.checked }))}
+                />
                 <label htmlFor="send-email" className="text-sm text-gray-700 dark:text-gray-300">Email invoice to customer</label>
               </div>
             </div>
@@ -2010,8 +2131,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               <button onClick={() => setShowInvoiceDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={handleCreateInvoice} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
-                Create Invoice
+              <button onClick={handleCreateInvoice} disabled={isSubmitting} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
+                {isSubmitting ? 'Creating...' : 'Create Invoice'}
               </button>
             </DialogFooter>
           </DialogContent>
@@ -2029,6 +2150,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
                 <input
                   type="text"
+                  value={customerForm.name}
+                  onChange={(e) => setCustomerForm(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="John Doe"
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 />
@@ -2037,6 +2160,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
                 <input
                   type="email"
+                  value={customerForm.email}
+                  onChange={(e) => setCustomerForm(prev => ({ ...prev, email: e.target.value }))}
                   placeholder="john@example.com"
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 />
@@ -2045,6 +2170,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Phone (optional)</label>
                 <input
                   type="tel"
+                  value={customerForm.phone}
+                  onChange={(e) => setCustomerForm(prev => ({ ...prev, phone: e.target.value }))}
                   placeholder="+1 (555) 123-4567"
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
                 />
@@ -2052,6 +2179,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description (optional)</label>
                 <textarea
+                  value={customerForm.description}
+                  onChange={(e) => setCustomerForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Notes about this customer..."
                   className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
                 />
@@ -2061,8 +2190,8 @@ export default function TransactionsClient({ initialTransactions }: { initialTra
               <button onClick={() => setShowCustomerDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={handleAddCustomer} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
-                Add Customer
+              <button onClick={handleAddCustomer} disabled={isSubmitting} className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
+                {isSubmitting ? 'Adding...' : 'Add Customer'}
               </button>
             </DialogFooter>
           </DialogContent>

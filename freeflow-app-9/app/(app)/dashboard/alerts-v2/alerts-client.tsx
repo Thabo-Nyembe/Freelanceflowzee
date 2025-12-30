@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useAlerts, Alert as DBAlert } from '@/lib/hooks/use-alerts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -395,9 +396,100 @@ export default function AlertsClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
-  // Filter alerts
+  // Real Supabase hook
+  const {
+    alerts: dbAlerts,
+    stats: dbStats,
+    isLoading,
+    error,
+    fetchAlerts,
+    createAlert,
+    updateAlert,
+    acknowledgeAlert,
+    resolveAlert,
+    escalateAlert,
+    snoozeAlert,
+    deleteAlert
+  } = useAlerts()
+
+  // Create alert form state
+  const [newAlertForm, setNewAlertForm] = useState({
+    title: '',
+    description: '',
+    severity: 'info' as DBAlert['severity'],
+    category: 'other' as DBAlert['category'],
+    source: 'manual',
+    tags: [] as string[],
+    tagInput: ''
+  })
+
+  // Fetch alerts on mount
+  useEffect(() => {
+    fetchAlerts()
+  }, [fetchAlerts])
+
+  // Map DB alerts to UI Alert format
+  const mappedAlerts: Alert[] = useMemo(() => {
+    return dbAlerts.map(a => ({
+      id: a.id,
+      title: a.title,
+      description: a.description || '',
+      severity: mapDBSeverityToUI(a.severity),
+      status: mapDBStatusToUI(a.status),
+      service: a.source_type || a.source || 'Unknown',
+      source: a.source,
+      triggeredAt: a.triggered_at,
+      acknowledgedAt: a.acknowledged_at || undefined,
+      resolvedAt: a.resolved_at || undefined,
+      acknowledgedBy: a.assigned_to || undefined,
+      resolvedBy: a.assigned_to || undefined,
+      incidentNumber: a.alert_code,
+      deduplicationKey: a.source_id || undefined,
+      occurrences: a.occurrences,
+      escalationLevel: a.escalation_level,
+      tags: a.tags,
+      impactedUsers: (a.metadata as Record<string, number>)?.impacted_users,
+      runbook: (a.metadata as Record<string, string>)?.runbook
+    }))
+  }, [dbAlerts])
+
+  // Helper functions to map DB types to UI types
+  function mapDBSeverityToUI(severity: DBAlert['severity']): AlertSeverity {
+    const mapping: Record<DBAlert['severity'], AlertSeverity> = {
+      'critical': 'critical',
+      'error': 'high',
+      'warning': 'medium',
+      'info': 'info'
+    }
+    return mapping[severity] || 'info'
+  }
+
+  function mapDBStatusToUI(status: DBAlert['status']): AlertStatus {
+    const mapping: Record<DBAlert['status'], AlertStatus> = {
+      'active': 'triggered',
+      'acknowledged': 'acknowledged',
+      'resolved': 'resolved',
+      'snoozed': 'suppressed',
+      'escalated': 'triggered'
+    }
+    return mapping[status] || 'triggered'
+  }
+
+  function mapUISeverityToDB(severity: AlertSeverity): DBAlert['severity'] {
+    const mapping: Record<AlertSeverity, DBAlert['severity']> = {
+      'critical': 'critical',
+      'high': 'error',
+      'medium': 'warning',
+      'low': 'info',
+      'info': 'info'
+    }
+    return mapping[severity] || 'info'
+  }
+
+  // Filter alerts - use mapped DB alerts, falling back to mock if empty
+  const alertsToFilter = mappedAlerts.length > 0 ? mappedAlerts : mockAlerts
   const filteredAlerts = useMemo(() => {
-    return mockAlerts.filter(alert => {
+    return alertsToFilter.filter(alert => {
       const matchesSearch = alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            alert.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            alert.service.toLowerCase().includes(searchQuery.toLowerCase())
@@ -405,17 +497,29 @@ export default function AlertsClient() {
       const matchesStatus = selectedStatus === 'all' || alert.status === selectedStatus
       return matchesSearch && matchesSeverity && matchesStatus
     })
-  }, [searchQuery, selectedSeverity, selectedStatus])
+  }, [alertsToFilter, searchQuery, selectedSeverity, selectedStatus])
 
-  // Stats
+  // Stats - use real DB stats when available
   const alertStats = useMemo(() => {
-    const triggered = mockAlerts.filter(a => a.status === 'triggered').length
-    const acknowledged = mockAlerts.filter(a => a.status === 'acknowledged').length
-    const resolved = mockAlerts.filter(a => a.status === 'resolved').length
-    const critical = mockAlerts.filter(a => a.severity === 'critical').length
-    const high = mockAlerts.filter(a => a.severity === 'high').length
-    return { total: mockAlerts.length, triggered, acknowledged, resolved, critical, high }
-  }, [])
+    const alertsSource = mappedAlerts.length > 0 ? mappedAlerts : mockAlerts
+    const triggered = alertsSource.filter(a => a.status === 'triggered').length
+    const acknowledged = alertsSource.filter(a => a.status === 'acknowledged').length
+    const resolved = alertsSource.filter(a => a.status === 'resolved').length
+    const critical = alertsSource.filter(a => a.severity === 'critical').length
+    const high = alertsSource.filter(a => a.severity === 'high').length
+    return {
+      total: alertsSource.length,
+      triggered,
+      acknowledged,
+      resolved,
+      critical,
+      high,
+      // Include DB stats if available
+      active: dbStats?.active || triggered,
+      avgResponseTime: dbStats?.avgResponseTime || 0,
+      avgResolutionTime: dbStats?.avgResolutionTime || 0
+    }
+  }, [mappedAlerts, dbStats])
 
   const stats = [
     { label: 'Active Alerts', value: (alertStats.triggered + alertStats.acknowledged).toString(), change: '+5', icon: BellRing, color: 'from-red-500 to-red-600' },
@@ -480,19 +584,93 @@ export default function AlertsClient() {
     return `${Math.floor(diffHours / 24)}d ago`
   }
 
-  // Handlers
-  const handleCreateAlert = () => {
-    toast.info('Create Alert', { description: 'Opening alert configuration...' })
+  // Handlers - Real Supabase operations
+  const handleCreateAlert = async () => {
+    if (!newAlertForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Alert title is required' })
+      return
+    }
+    try {
+      await createAlert({
+        title: newAlertForm.title,
+        description: newAlertForm.description || null,
+        severity: newAlertForm.severity,
+        category: newAlertForm.category,
+        source: newAlertForm.source,
+        tags: newAlertForm.tags,
+        status: 'active',
+        triggered_at: new Date().toISOString()
+      })
+      toast.success('Alert Created', { description: `"${newAlertForm.title}" has been created` })
+      setShowCreateDialog(false)
+      setNewAlertForm({
+        title: '',
+        description: '',
+        severity: 'info',
+        category: 'other',
+        source: 'manual',
+        tags: [],
+        tagInput: ''
+      })
+    } catch (err) {
+      toast.error('Failed to Create Alert', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
   }
-  const handleAcknowledgeAlert = (alertId: string) => {
-    toast.success('Alert Acknowledged', { description: `Alert #${alertId} has been acknowledged` })
+
+  const handleAcknowledgeAlert = async (alertId: string) => {
+    try {
+      await acknowledgeAlert(alertId)
+      toast.success('Alert Acknowledged', { description: `Alert has been acknowledged` })
+    } catch (err) {
+      toast.error('Failed to Acknowledge', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
   }
-  const handleMuteAlert = (alertName: string) => {
-    toast.info('Alert Muted', { description: `"${alertName}" muted for 1 hour` })
+
+  const handleResolveAlert = async (alertId: string) => {
+    try {
+      await resolveAlert(alertId)
+      toast.success('Alert Resolved', { description: `Alert has been resolved` })
+    } catch (err) {
+      toast.error('Failed to Resolve', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
   }
-  const handleDeleteAlert = (alertId: string) => {
-    toast.info('Alert Deleted', { description: `Alert #${alertId} has been removed` })
+
+  const handleEscalateAlert = async (alertId: string) => {
+    try {
+      await escalateAlert(alertId)
+      toast.success('Alert Escalated', { description: `Alert has been escalated to the next tier` })
+    } catch (err) {
+      toast.error('Failed to Escalate', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
   }
+
+  const handleMuteAlert = async (alertId: string, alertName: string) => {
+    try {
+      await snoozeAlert(alertId, 60) // 60 minutes
+      toast.info('Alert Snoozed', { description: `"${alertName}" snoozed for 1 hour` })
+    } catch (err) {
+      toast.error('Failed to Snooze', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
+  }
+
+  const handleDeleteAlert = async (alertId: string) => {
+    try {
+      await deleteAlert(alertId)
+      toast.success('Alert Deleted', { description: `Alert has been removed` })
+    } catch (err) {
+      toast.error('Failed to Delete', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
+  }
+
+  const handleDismissAlert = async (alertId: string) => {
+    try {
+      await updateAlert(alertId, { status: 'resolved', resolved_at: new Date().toISOString() })
+      toast.info('Alert Dismissed', { description: `Alert has been dismissed` })
+    } catch (err) {
+      toast.error('Failed to Dismiss', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
+  }
+
   const handleExportAlerts = () => {
     toast.success('Exporting Alerts', { description: 'Alert history will be downloaded' })
   }
@@ -527,13 +705,37 @@ export default function AlertsClient() {
             </Button>
             <Button
               className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
-              onClick={() => { setShowCreateDialog(true); handleCreateAlert() }}
+              onClick={() => setShowCreateDialog(true)}
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Alert
             </Button>
           </div>
         </div>
+
+        {/* Loading & Error States */}
+        {isLoading && (
+          <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+            <CardContent className="p-4 flex items-center gap-3">
+              <RefreshCw className="h-5 w-5 animate-spin text-blue-600" />
+              <span className="text-blue-700 dark:text-blue-300">Loading alerts from database...</span>
+            </CardContent>
+          </Card>
+        )}
+        {error && (
+          <Card className="border-red-200 bg-red-50 dark:bg-red-900/20">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="h-5 w-5 text-red-600" />
+                <span className="text-red-700 dark:text-red-300">Error: {error}</span>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => fetchAlerts()}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -652,6 +854,21 @@ export default function AlertsClient() {
             <Card className="border-gray-200 dark:border-gray-700">
               <CardContent className="p-0">
                 <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                  {filteredAlerts.length === 0 && !isLoading && (
+                    <div className="p-12 text-center">
+                      <Bell className="h-12 w-12 mx-auto text-gray-300 mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No alerts found</h3>
+                      <p className="text-gray-500 mb-4">
+                        {searchQuery || selectedSeverity !== 'all' || selectedStatus !== 'all'
+                          ? 'Try adjusting your filters'
+                          : 'Create your first alert to get started'}
+                      </p>
+                      <Button onClick={() => setShowCreateDialog(true)}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Alert
+                      </Button>
+                    </div>
+                  )}
                   {filteredAlerts.map(alert => (
                     <div
                       key={alert.id}
@@ -719,7 +936,7 @@ export default function AlertsClient() {
                           </Button>
                         )}
                         {alert.status !== 'resolved' && (
-                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.success('Alert Resolved', { description: `Alert #${alert.id} has been resolved` }) }}>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleResolveAlert(alert.id) }}>
                             Resolve
                           </Button>
                         )}
@@ -1923,28 +2140,28 @@ export default function AlertsClient() {
 
                   <div className="flex gap-3 pt-4 border-t">
                     {selectedAlert.status === 'triggered' && (
-                      <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { handleAcknowledgeAlert(selectedAlert.id); setSelectedAlert(null) }}>
+                      <Button className="bg-blue-600 hover:bg-blue-700" onClick={async () => { await handleAcknowledgeAlert(selectedAlert.id); setSelectedAlert(null) }}>
                         <CheckCircle2 className="h-4 w-4 mr-2" />
                         Acknowledge
                       </Button>
                     )}
                     {selectedAlert.status !== 'resolved' && (
                       <>
-                        <Button variant="outline" onClick={() => toast.info('Alert Escalated', { description: `Alert #${selectedAlert.id} has been escalated to the next tier` })}>
+                        <Button variant="outline" onClick={async () => { await handleEscalateAlert(selectedAlert.id); setSelectedAlert(null) }}>
                           <ArrowUp className="h-4 w-4 mr-2" />
                           Escalate
                         </Button>
-                        <Button className="bg-green-600 hover:bg-green-700" onClick={() => { toast.success('Alert Resolved', { description: `Alert #${selectedAlert.id} has been resolved` }); setSelectedAlert(null) }}>
+                        <Button className="bg-green-600 hover:bg-green-700" onClick={async () => { await handleResolveAlert(selectedAlert.id); setSelectedAlert(null) }}>
                           <CheckCircle2 className="h-4 w-4 mr-2" />
                           Resolve
                         </Button>
                       </>
                     )}
-                    <Button variant="outline" onClick={() => handleMuteAlert(selectedAlert.title)}>
+                    <Button variant="outline" onClick={async () => { await handleMuteAlert(selectedAlert.id, selectedAlert.title); setSelectedAlert(null) }}>
                       <VolumeX className="h-4 w-4 mr-2" />
                       Snooze
                     </Button>
-                    <Button variant="ghost" className="ml-auto text-red-600" onClick={() => { handleDeleteAlert(selectedAlert.id); setSelectedAlert(null) }}>
+                    <Button variant="ghost" className="ml-auto text-red-600" onClick={async () => { await handleDeleteAlert(selectedAlert.id); setSelectedAlert(null) }}>
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete
                     </Button>
@@ -1952,6 +2169,140 @@ export default function AlertsClient() {
                 </div>
               )}
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Alert Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Alert</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Title *</Label>
+                <Input
+                  placeholder="Alert title..."
+                  value={newAlertForm.title}
+                  onChange={(e) => setNewAlertForm(prev => ({ ...prev, title: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input
+                  placeholder="Describe the alert..."
+                  value={newAlertForm.description}
+                  onChange={(e) => setNewAlertForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Severity</Label>
+                  <Select
+                    value={newAlertForm.severity}
+                    onValueChange={(value) => setNewAlertForm(prev => ({ ...prev, severity: value as DBAlert['severity'] }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="warning">Warning</SelectItem>
+                      <SelectItem value="info">Info</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <Select
+                    value={newAlertForm.category}
+                    onValueChange={(value) => setNewAlertForm(prev => ({ ...prev, category: value as DBAlert['category'] }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="performance">Performance</SelectItem>
+                      <SelectItem value="security">Security</SelectItem>
+                      <SelectItem value="availability">Availability</SelectItem>
+                      <SelectItem value="capacity">Capacity</SelectItem>
+                      <SelectItem value="compliance">Compliance</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Source</Label>
+                <Input
+                  placeholder="manual"
+                  value={newAlertForm.source}
+                  onChange={(e) => setNewAlertForm(prev => ({ ...prev, source: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Tags</Label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add tag..."
+                    value={newAlertForm.tagInput}
+                    onChange={(e) => setNewAlertForm(prev => ({ ...prev, tagInput: e.target.value }))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && newAlertForm.tagInput.trim()) {
+                        e.preventDefault()
+                        setNewAlertForm(prev => ({
+                          ...prev,
+                          tags: [...prev.tags, prev.tagInput.trim()],
+                          tagInput: ''
+                        }))
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      if (newAlertForm.tagInput.trim()) {
+                        setNewAlertForm(prev => ({
+                          ...prev,
+                          tags: [...prev.tags, prev.tagInput.trim()],
+                          tagInput: ''
+                        }))
+                      }
+                    }}
+                  >
+                    Add
+                  </Button>
+                </div>
+                {newAlertForm.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {newAlertForm.tags.map((tag, i) => (
+                      <Badge key={i} variant="outline" className="cursor-pointer" onClick={() => {
+                        setNewAlertForm(prev => ({
+                          ...prev,
+                          tags: prev.tags.filter((_, idx) => idx !== i)
+                        }))
+                      }}>
+                        {tag} <XCircle className="h-3 w-3 ml-1" />
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
+                onClick={handleCreateAlert}
+              >
+                Create Alert
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

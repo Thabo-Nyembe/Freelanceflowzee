@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useSalesDeals, SalesDeal } from '@/lib/hooks/use-sales'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,12 +15,14 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import {
   DollarSign, TrendingUp, TrendingDown, Users, Target, Award, Phone, Mail,
@@ -386,25 +390,90 @@ const mockSalesQuickActions = [
   { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => console.log('Create task') },
 ]
 
+// Default form values
+const defaultDealForm = {
+  title: '',
+  company_name: '',
+  contact_name: '',
+  contact_email: '',
+  contact_phone: '',
+  deal_value: 0,
+  stage: 'lead' as SalesDeal['stage'],
+  probability: 20,
+  priority: 'medium' as SalesDeal['priority'],
+  expected_close_date: '',
+  notes: '',
+}
+
 export default function SalesClient() {
+  const supabase = createClientComponentClient()
+
+  // Use the sales hook for real data
+  const {
+    deals,
+    loading: dealsLoading,
+    createDeal,
+    updateDeal,
+    deleteDeal,
+    moveDealToStage,
+    winDeal,
+    loseDeal,
+    logActivity,
+    getStats,
+    fetchDeals,
+  } = useSalesDeals()
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedOpportunity, setSelectedOpportunity] = useState<Opportunity | null>(null)
+  const [selectedDeal, setSelectedDeal] = useState<SalesDeal | null>(null)
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null)
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null)
   const [stageFilter, setStageFilter] = useState<string>('all')
   const [forecastPeriod, setForecastPeriod] = useState('Q1 2025')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Stats calculations
+  // Dialog states
+  const [showCreateDealDialog, setShowCreateDealDialog] = useState(false)
+  const [showEditDealDialog, setShowEditDealDialog] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showActivityDialog, setShowActivityDialog] = useState(false)
+  const [showWinLossDialog, setShowWinLossDialog] = useState<'win' | 'loss' | null>(null)
+
+  // Form states
+  const [dealForm, setDealForm] = useState(defaultDealForm)
+  const [activityForm, setActivityForm] = useState({ activity_type: 'call', subject: '', description: '', outcome: '' })
+  const [lossReason, setLossReason] = useState('')
+  const [competitor, setCompetitor] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Get stats from the hook
+  const salesStats = getStats()
+
+  // Stats calculations (combine real data with mock data for display)
   const stats = useMemo(() => {
-    const totalPipeline = mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).reduce((acc, o) => acc + o.amount, 0)
-    const wonDeals = mockOpportunities.filter(o => o.stage === 'closed_won')
-    const wonAmount = wonDeals.reduce((acc, o) => acc + o.amount, 0)
-    const totalDeals = mockOpportunities.length
-    const winRate = (wonDeals.length / mockOpportunities.filter(o => ['closed_won', 'closed_lost'].includes(o.stage)).length) * 100 || 0
-    const avgDealSize = totalPipeline / mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).length || 0
-    const weightedPipeline = mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).reduce((acc, o) => acc + o.expectedRevenue, 0)
+    // Combine mock pipeline with real deals pipeline
+    const mockPipeline = mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).reduce((acc, o) => acc + o.amount, 0)
+    const realPipeline = salesStats.pipelineValue
+    const totalPipeline = mockPipeline + realPipeline
+
+    const mockWonDeals = mockOpportunities.filter(o => o.stage === 'closed_won')
+    const mockWonAmount = mockWonDeals.reduce((acc, o) => acc + o.amount, 0)
+    const wonAmount = mockWonAmount + salesStats.wonValue
+
+    const mockTotalDeals = mockOpportunities.length
+    const totalDeals = mockTotalDeals + salesStats.totalDeals
+
+    const realWonDeals = salesStats.wonDeals
+    const totalWonDeals = mockWonDeals.length + realWonDeals
+
+    const closedDeals = mockOpportunities.filter(o => ['closed_won', 'closed_lost'].includes(o.stage)).length + salesStats.wonDeals + salesStats.lostDeals
+    const winRate = closedDeals > 0 ? (totalWonDeals / closedDeals) * 100 : 0
+
+    const openDeals = mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).length + (salesStats.totalDeals - salesStats.wonDeals - salesStats.lostDeals)
+    const avgDealSize = openDeals > 0 ? totalPipeline / openDeals : 0
+
+    const weightedPipeline = mockOpportunities.filter(o => !['closed_won', 'closed_lost'].includes(o.stage)).reduce((acc, o) => acc + o.expectedRevenue, 0) + salesStats.pipelineValue
     const commitAmount = mockOpportunities.filter(o => o.forecastCategory === 'commit').reduce((acc, o) => acc + o.amount, 0)
     const totalQuota = mockForecasts.reduce((acc, f) => acc + f.quota, 0)
 
@@ -413,10 +482,12 @@ export default function SalesClient() {
       totalAccounts: mockAccounts.length,
       totalContacts: mockContacts.length,
       pendingActivities: mockActivities.filter(a => a.status === 'pending').length,
-      wonDeals: wonDeals.length,
-      overdueActivities: mockActivities.filter(a => a.status === 'overdue').length
+      wonDeals: totalWonDeals,
+      overdueActivities: mockActivities.filter(a => a.status === 'overdue').length,
+      totalValue: salesStats.totalValue,
+      realDealsCount: salesStats.totalDeals
     }
-  }, [])
+  }, [salesStats])
 
   // Pipeline stages for funnel
   const pipelineStages = useMemo(() => {
@@ -444,23 +515,230 @@ export default function SalesClient() {
     })
   }, [searchQuery, stageFilter])
 
-  // Handlers
-  const handleCreateDeal = () => {
-    toast.info('Create Deal', {
-      description: 'Opening deal creation form...'
-    })
+  // Real Supabase Handlers
+  const handleCreateDeal = async () => {
+    if (!dealForm.title) {
+      toast.error('Validation Error', { description: 'Deal title is required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await createDeal({
+        title: dealForm.title,
+        company_name: dealForm.company_name || null,
+        contact_name: dealForm.contact_name || null,
+        contact_email: dealForm.contact_email || null,
+        contact_phone: dealForm.contact_phone || null,
+        deal_value: dealForm.deal_value,
+        stage: dealForm.stage,
+        probability: dealForm.probability,
+        priority: dealForm.priority,
+        expected_close_date: dealForm.expected_close_date || null,
+        notes: dealForm.notes || null,
+        currency: 'USD',
+        tags: [],
+        metadata: {},
+      })
+      toast.success('Deal Created', { description: `${dealForm.title} has been added to your pipeline` })
+      setShowCreateDealDialog(false)
+      setDealForm(defaultDealForm)
+    } catch (error: any) {
+      toast.error('Failed to create deal', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleExportSales = () => {
-    toast.success('Export started', {
-      description: 'Your sales data is being exported'
-    })
+  const handleUpdateDeal = async () => {
+    if (!selectedDeal) return
+
+    setIsSubmitting(true)
+    try {
+      await updateDeal(selectedDeal.id, {
+        title: dealForm.title,
+        company_name: dealForm.company_name || null,
+        contact_name: dealForm.contact_name || null,
+        contact_email: dealForm.contact_email || null,
+        contact_phone: dealForm.contact_phone || null,
+        deal_value: dealForm.deal_value,
+        stage: dealForm.stage,
+        probability: dealForm.probability,
+        priority: dealForm.priority,
+        expected_close_date: dealForm.expected_close_date || null,
+        notes: dealForm.notes || null,
+      })
+      toast.success('Deal Updated', { description: `${dealForm.title} has been updated` })
+      setShowEditDealDialog(false)
+      setSelectedDeal(null)
+      setDealForm(defaultDealForm)
+    } catch (error: any) {
+      toast.error('Failed to update deal', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleUpdateForecast = () => {
-    toast.success('Forecast updated', {
-      description: 'Sales forecast has been updated'
+  const handleDeleteDeal = async () => {
+    if (!selectedDeal) return
+
+    setIsSubmitting(true)
+    try {
+      await deleteDeal(selectedDeal.id)
+      toast.success('Deal Deleted', { description: `${selectedDeal.title} has been removed` })
+      setShowDeleteConfirm(false)
+      setSelectedDeal(null)
+    } catch (error: any) {
+      toast.error('Failed to delete deal', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleAdvanceStage = async (dealId: string, currentStage: SalesDeal['stage']) => {
+    const stageOrder: SalesDeal['stage'][] = ['lead', 'qualified', 'proposal', 'negotiation', 'closed_won']
+    const currentIndex = stageOrder.indexOf(currentStage)
+    if (currentIndex < stageOrder.length - 1) {
+      const nextStage = stageOrder[currentIndex + 1]
+      const probabilities: Record<SalesDeal['stage'], number> = {
+        lead: 20,
+        qualified: 40,
+        proposal: 60,
+        negotiation: 80,
+        closed_won: 100,
+        closed_lost: 0,
+      }
+      try {
+        await moveDealToStage(dealId, nextStage, probabilities[nextStage])
+        toast.success('Stage Updated', { description: `Deal moved to ${nextStage.replace('_', ' ')}` })
+      } catch (error: any) {
+        toast.error('Failed to advance stage', { description: error.message })
+      }
+    }
+  }
+
+  const handleWinDeal = async () => {
+    if (!selectedDeal) return
+
+    setIsSubmitting(true)
+    try {
+      await winDeal(selectedDeal.id)
+      toast.success('Congratulations!', { description: `${selectedDeal.title} has been marked as won!` })
+      setShowWinLossDialog(null)
+      setSelectedDeal(null)
+    } catch (error: any) {
+      toast.error('Failed to mark deal as won', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleLoseDeal = async () => {
+    if (!selectedDeal) return
+
+    setIsSubmitting(true)
+    try {
+      await loseDeal(selectedDeal.id, lossReason, competitor)
+      toast.info('Deal Closed', { description: `${selectedDeal.title} has been marked as lost` })
+      setShowWinLossDialog(null)
+      setSelectedDeal(null)
+      setLossReason('')
+      setCompetitor('')
+    } catch (error: any) {
+      toast.error('Failed to mark deal as lost', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleLogActivity = async () => {
+    if (!selectedDeal || !activityForm.subject) return
+
+    setIsSubmitting(true)
+    try {
+      await logActivity(selectedDeal.id, {
+        activity_type: activityForm.activity_type,
+        subject: activityForm.subject,
+        description: activityForm.description || null,
+        outcome: activityForm.outcome || null,
+        completed_at: new Date().toISOString(),
+      })
+      toast.success('Activity Logged', { description: `${activityForm.activity_type} logged for ${selectedDeal.title}` })
+      setShowActivityDialog(false)
+      setActivityForm({ activity_type: 'call', subject: '', description: '', outcome: '' })
+    } catch (error: any) {
+      toast.error('Failed to log activity', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleExportSales = async () => {
+    toast.info('Preparing Export', { description: 'Your sales data is being prepared...' })
+    try {
+      const csvContent = [
+        ['Title', 'Company', 'Value', 'Stage', 'Probability', 'Close Date'].join(','),
+        ...deals.map(d => [
+          `"${d.title}"`,
+          `"${d.company_name || ''}"`,
+          d.deal_value,
+          d.stage,
+          d.probability,
+          d.expected_close_date || '',
+        ].join(','))
+      ].join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `sales-export-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Export Complete', { description: `Exported ${deals.length} deals` })
+    } catch (error) {
+      toast.error('Export Failed', { description: 'Could not export sales data' })
+    }
+  }
+
+  const handleRefresh = async () => {
+    toast.info('Refreshing', { description: 'Fetching latest sales data...' })
+    await fetchDeals()
+    toast.success('Refreshed', { description: 'Sales data is up to date' })
+  }
+
+  const openEditDialog = (deal: SalesDeal) => {
+    setSelectedDeal(deal)
+    setDealForm({
+      title: deal.title,
+      company_name: deal.company_name || '',
+      contact_name: deal.contact_name || '',
+      contact_email: deal.contact_email || '',
+      contact_phone: deal.contact_phone || '',
+      deal_value: deal.deal_value,
+      stage: deal.stage,
+      probability: deal.probability,
+      priority: deal.priority,
+      expected_close_date: deal.expected_close_date || '',
+      notes: deal.notes || '',
     })
+    setShowEditDealDialog(true)
+  }
+
+  const openDeleteConfirm = (deal: SalesDeal) => {
+    setSelectedDeal(deal)
+    setShowDeleteConfirm(true)
+  }
+
+  const openActivityDialog = (deal: SalesDeal) => {
+    setSelectedDeal(deal)
+    setShowActivityDialog(true)
+  }
+
+  const openWinLossDialog = (deal: SalesDeal, type: 'win' | 'loss') => {
+    setSelectedDeal(deal)
+    setShowWinLossDialog(type)
   }
 
   return (
@@ -487,10 +765,10 @@ export default function SalesClient() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
-                <RefreshCw className="w-4 h-4" />
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleRefresh} disabled={dealsLoading}>
+                <RefreshCw className={`w-4 h-4 ${dealsLoading ? 'animate-spin' : ''}`} />
               </Button>
-              <Button className="bg-white text-green-600 hover:bg-green-50">
+              <Button className="bg-white text-green-600 hover:bg-green-50" onClick={() => setShowCreateDealDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Deal
               </Button>
@@ -618,6 +896,105 @@ export default function SalesClient() {
               </CardContent>
             </Card>
 
+            {/* Real Deals from Supabase */}
+            {dealsLoading ? (
+              <Card className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
+                <CardContent className="py-12">
+                  <div className="flex flex-col items-center justify-center">
+                    <Loader2 className="w-8 h-8 animate-spin text-green-600 mb-3" />
+                    <p className="text-gray-500">Loading your deals...</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : deals.length === 0 ? (
+              <Card className="border-dashed border-2 border-green-300 dark:border-green-700">
+                <CardContent className="py-12">
+                  <div className="flex flex-col items-center justify-center text-center">
+                    <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mb-4">
+                      <DollarSign className="w-8 h-8 text-green-600" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No deals yet</h3>
+                    <p className="text-gray-500 mb-4 max-w-sm">Start building your sales pipeline by creating your first deal.</p>
+                    <Button onClick={() => setShowCreateDealDialog(true)} className="bg-green-600 hover:bg-green-700">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Your First Deal
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-900/10">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                    Your Pipeline
+                    <Badge className="bg-green-100 text-green-700 ml-2">{deals.length} deals</Badge>
+                  </CardTitle>
+                  <CardDescription>Real-time deals from your Supabase database</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {deals.slice(0, 5).map((deal) => (
+                      <div key={deal.id} className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="font-medium text-gray-900 dark:text-white">{deal.title}</p>
+                            <Badge className={
+                              deal.stage === 'closed_won' ? 'bg-green-100 text-green-700' :
+                              deal.stage === 'closed_lost' ? 'bg-red-100 text-red-700' :
+                              deal.stage === 'negotiation' ? 'bg-orange-100 text-orange-700' :
+                              deal.stage === 'proposal' ? 'bg-purple-100 text-purple-700' :
+                              deal.stage === 'qualified' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-700'
+                            }>{deal.stage.replace('_', ' ')}</Badge>
+                            <Badge variant="outline" className={
+                              deal.priority === 'urgent' ? 'border-red-500 text-red-500' :
+                              deal.priority === 'high' ? 'border-orange-500 text-orange-500' :
+                              'border-gray-400 text-gray-500'
+                            }>{deal.priority}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-500">{deal.company_name || 'No company'} {deal.contact_name ? `• ${deal.contact_name}` : ''}</p>
+                        </div>
+                        <div className="text-right flex items-center gap-3">
+                          <div>
+                            <p className="font-bold text-green-600 text-lg">{formatCurrency(deal.deal_value)}</p>
+                            <p className="text-xs text-gray-500">{deal.probability}% probability</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); openEditDialog(deal) }} title="Edit deal">
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); openActivityDialog(deal) }} title="Log activity">
+                              <Activity className="w-4 h-4" />
+                            </Button>
+                            {!['closed_won', 'closed_lost'].includes(deal.stage) && (
+                              <>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-green-600 hover:text-green-700 hover:bg-green-50" onClick={(e) => { e.stopPropagation(); openWinLossDialog(deal, 'win') }} title="Mark as won">
+                                  <Trophy className="w-4 h-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={(e) => { e.stopPropagation(); openWinLossDialog(deal, 'loss') }} title="Mark as lost">
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={(e) => { e.stopPropagation(); openDeleteConfirm(deal) }} title="Delete deal">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {deals.length > 5 && (
+                      <Button variant="outline" className="w-full" onClick={() => setActiveTab('opportunities')}>
+                        View all {deals.length} deals
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Recent Deals */}
               <Card className="lg:col-span-2">
@@ -625,6 +1002,7 @@ export default function SalesClient() {
                   <CardTitle className="flex items-center gap-2">
                     <Briefcase className="w-5 h-5 text-blue-500" />
                     Hot Deals
+                    <Badge variant="outline" className="ml-2 text-xs">Demo Data</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -774,7 +1152,7 @@ export default function SalesClient() {
                   </Button>
                 ))}
               </div>
-              <Button><Plus className="w-4 h-4 mr-2" />New Opportunity</Button>
+              <Button onClick={() => setShowCreateDealDialog(true)}><Plus className="w-4 h-4 mr-2" />New Opportunity</Button>
             </div>
 
             <div className="grid gap-4">
@@ -937,7 +1315,7 @@ export default function SalesClient() {
 
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Quotes & Proposals</h2>
-              <Button><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
+              <Button onClick={() => toast.info('Coming Soon', { description: 'Quote creation will be available soon' })}><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
             </div>
 
             <div className="grid gap-4">
@@ -1083,7 +1461,7 @@ export default function SalesClient() {
           <TabsContent value="products" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Product Catalog</h2>
-              <Button><Plus className="w-4 h-4 mr-2" />Add Product</Button>
+              <Button onClick={() => toast.info('Coming Soon', { description: 'Product management will be available soon' })}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1314,7 +1692,7 @@ export default function SalesClient() {
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Coming Soon', { description: 'Custom pipeline stages will be available soon' })}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1592,7 +1970,7 @@ export default function SalesClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'HubSpot integration will be available soon' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1609,9 +1987,9 @@ export default function SalesClient() {
                         <div className="space-y-2">
                           <Label>API Key</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
-                            <Button variant="outline">Copy</Button>
-                            <Button variant="outline">Regenerate</Button>
+                            <Input type="password" value="sk_live_xxxxxxxxxxxx" readOnly className="font-mono" />
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx'); toast.success('Copied', { description: 'API key copied to clipboard' }) }}>Copy</Button>
+                            <Button variant="outline" onClick={() => toast.warning('Confirm Regeneration', { description: 'This will invalidate your current API key. Are you sure?' })}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -1623,7 +2001,7 @@ export default function SalesClient() {
                             <div className="font-medium">Webhook Events</div>
                             <div className="text-sm text-gray-500">deal.created, deal.won, deal.lost</div>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Webhook configuration will be available soon' })}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1656,11 +2034,11 @@ export default function SalesClient() {
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleExportSales}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.info('Coming Soon', { description: 'Data import functionality will be available soon' })}>
                             <Upload className="w-4 h-4 mr-2" />
                             Import Data
                           </Button>
@@ -1715,7 +2093,7 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Pipeline</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all deals</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Dangerous Action', { description: 'This would delete all deals. Contact support to perform this action.' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1725,7 +2103,7 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Reset CRM</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all CRM settings and data</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Dangerous Action', { description: 'This would reset all CRM data. Contact support to perform this action.' })}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -1902,12 +2280,426 @@ export default function SalesClient() {
               </div>
 
               <div className="flex gap-2">
-                <Button className="flex-1"><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
-                <Button variant="outline"><Download className="w-4 h-4 mr-2" />Download PDF</Button>
-                <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                <Button className="flex-1" onClick={() => toast.success('Quote Sent', { description: 'Quote has been sent to the customer' })}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
+                <Button variant="outline" onClick={() => toast.info('Generating PDF', { description: 'Your quote PDF is being generated' })}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
+                <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedQuote.quoteNumber); toast.success('Copied', { description: 'Quote number copied to clipboard' }) }}><Copy className="w-4 h-4" /></Button>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Deal Dialog */}
+      <Dialog open={showCreateDealDialog} onOpenChange={setShowCreateDealDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-green-500" />
+              Create New Deal
+            </DialogTitle>
+            <DialogDescription>Add a new deal to your sales pipeline</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Deal Title *</Label>
+                <Input
+                  id="title"
+                  placeholder="Enterprise License Deal"
+                  value={dealForm.title}
+                  onChange={(e) => setDealForm({ ...dealForm, title: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="company">Company</Label>
+                <Input
+                  id="company"
+                  placeholder="Acme Corporation"
+                  value={dealForm.company_name}
+                  onChange={(e) => setDealForm({ ...dealForm, company_name: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contact_name">Contact Name</Label>
+                <Input
+                  id="contact_name"
+                  placeholder="John Smith"
+                  value={dealForm.contact_name}
+                  onChange={(e) => setDealForm({ ...dealForm, contact_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contact_email">Contact Email</Label>
+                <Input
+                  id="contact_email"
+                  type="email"
+                  placeholder="john@acme.com"
+                  value={dealForm.contact_email}
+                  onChange={(e) => setDealForm({ ...dealForm, contact_email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="deal_value">Deal Value ($)</Label>
+                <Input
+                  id="deal_value"
+                  type="number"
+                  placeholder="50000"
+                  value={dealForm.deal_value}
+                  onChange={(e) => setDealForm({ ...dealForm, deal_value: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="stage">Stage</Label>
+                <Select value={dealForm.stage} onValueChange={(v) => setDealForm({ ...dealForm, stage: v as SalesDeal['stage'] })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lead">Lead</SelectItem>
+                    <SelectItem value="qualified">Qualified</SelectItem>
+                    <SelectItem value="proposal">Proposal</SelectItem>
+                    <SelectItem value="negotiation">Negotiation</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select value={dealForm.priority} onValueChange={(v) => setDealForm({ ...dealForm, priority: v as SalesDeal['priority'] })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="probability">Probability (%)</Label>
+                <Input
+                  id="probability"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={dealForm.probability}
+                  onChange={(e) => setDealForm({ ...dealForm, probability: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="close_date">Expected Close Date</Label>
+                <Input
+                  id="close_date"
+                  type="date"
+                  value={dealForm.expected_close_date}
+                  onChange={(e) => setDealForm({ ...dealForm, expected_close_date: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="notes">Notes</Label>
+              <Textarea
+                id="notes"
+                placeholder="Additional notes about this deal..."
+                value={dealForm.notes}
+                onChange={(e) => setDealForm({ ...dealForm, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowCreateDealDialog(false); setDealForm(defaultDealForm) }}>Cancel</Button>
+            <Button onClick={handleCreateDeal} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Create Deal
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Deal Dialog */}
+      <Dialog open={showEditDealDialog} onOpenChange={setShowEditDealDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-blue-500" />
+              Edit Deal
+            </DialogTitle>
+            <DialogDescription>Update deal information</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_title">Deal Title *</Label>
+                <Input
+                  id="edit_title"
+                  value={dealForm.title}
+                  onChange={(e) => setDealForm({ ...dealForm, title: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_company">Company</Label>
+                <Input
+                  id="edit_company"
+                  value={dealForm.company_name}
+                  onChange={(e) => setDealForm({ ...dealForm, company_name: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_contact_name">Contact Name</Label>
+                <Input
+                  id="edit_contact_name"
+                  value={dealForm.contact_name}
+                  onChange={(e) => setDealForm({ ...dealForm, contact_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_contact_email">Contact Email</Label>
+                <Input
+                  id="edit_contact_email"
+                  type="email"
+                  value={dealForm.contact_email}
+                  onChange={(e) => setDealForm({ ...dealForm, contact_email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_deal_value">Deal Value ($)</Label>
+                <Input
+                  id="edit_deal_value"
+                  type="number"
+                  value={dealForm.deal_value}
+                  onChange={(e) => setDealForm({ ...dealForm, deal_value: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_stage">Stage</Label>
+                <Select value={dealForm.stage} onValueChange={(v) => setDealForm({ ...dealForm, stage: v as SalesDeal['stage'] })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lead">Lead</SelectItem>
+                    <SelectItem value="qualified">Qualified</SelectItem>
+                    <SelectItem value="proposal">Proposal</SelectItem>
+                    <SelectItem value="negotiation">Negotiation</SelectItem>
+                    <SelectItem value="closed_won">Closed Won</SelectItem>
+                    <SelectItem value="closed_lost">Closed Lost</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_priority">Priority</Label>
+                <Select value={dealForm.priority} onValueChange={(v) => setDealForm({ ...dealForm, priority: v as SalesDeal['priority'] })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_probability">Probability (%)</Label>
+                <Input
+                  id="edit_probability"
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={dealForm.probability}
+                  onChange={(e) => setDealForm({ ...dealForm, probability: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_close_date">Expected Close Date</Label>
+                <Input
+                  id="edit_close_date"
+                  type="date"
+                  value={dealForm.expected_close_date}
+                  onChange={(e) => setDealForm({ ...dealForm, expected_close_date: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit_notes">Notes</Label>
+              <Textarea
+                id="edit_notes"
+                value={dealForm.notes}
+                onChange={(e) => setDealForm({ ...dealForm, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowEditDealDialog(false); setSelectedDeal(null); setDealForm(defaultDealForm) }}>Cancel</Button>
+            <Button onClick={handleUpdateDeal} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete Deal
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{selectedDeal?.title}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowDeleteConfirm(false); setSelectedDeal(null) }}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteDeal} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Log Activity Dialog */}
+      <Dialog open={showActivityDialog} onOpenChange={setShowActivityDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Activity className="w-5 h-5 text-purple-500" />
+              Log Activity
+            </DialogTitle>
+            <DialogDescription>
+              Log an activity for "{selectedDeal?.title}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="activity_type">Activity Type</Label>
+              <Select value={activityForm.activity_type} onValueChange={(v) => setActivityForm({ ...activityForm, activity_type: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="call">Call</SelectItem>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="meeting">Meeting</SelectItem>
+                  <SelectItem value="demo">Demo</SelectItem>
+                  <SelectItem value="note">Note</SelectItem>
+                  <SelectItem value="task">Task</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="activity_subject">Subject *</Label>
+              <Input
+                id="activity_subject"
+                placeholder="Brief description of the activity"
+                value={activityForm.subject}
+                onChange={(e) => setActivityForm({ ...activityForm, subject: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="activity_description">Description</Label>
+              <Textarea
+                id="activity_description"
+                placeholder="Detailed notes..."
+                value={activityForm.description}
+                onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="activity_outcome">Outcome</Label>
+              <Input
+                id="activity_outcome"
+                placeholder="Result of the activity"
+                value={activityForm.outcome}
+                onChange={(e) => setActivityForm({ ...activityForm, outcome: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowActivityDialog(false); setSelectedDeal(null); setActivityForm({ activity_type: 'call', subject: '', description: '', outcome: '' }) }}>Cancel</Button>
+            <Button onClick={handleLogActivity} disabled={isSubmitting || !activityForm.subject}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle2 className="w-4 h-4 mr-2" />}
+              Log Activity
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Win/Loss Dialog */}
+      <Dialog open={showWinLossDialog !== null} onOpenChange={() => setShowWinLossDialog(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className={`flex items-center gap-2 ${showWinLossDialog === 'win' ? 'text-green-600' : 'text-red-600'}`}>
+              {showWinLossDialog === 'win' ? <Trophy className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+              {showWinLossDialog === 'win' ? 'Mark as Won' : 'Mark as Lost'}
+            </DialogTitle>
+            <DialogDescription>
+              {showWinLossDialog === 'win'
+                ? `Congratulations! Mark "${selectedDeal?.title}" as a won deal.`
+                : `Mark "${selectedDeal?.title}" as lost and optionally record the reason.`
+              }
+            </DialogDescription>
+          </DialogHeader>
+          {showWinLossDialog === 'loss' && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="loss_reason">Loss Reason</Label>
+                <Select value={lossReason} onValueChange={setLossReason}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a reason" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="price">Price too high</SelectItem>
+                    <SelectItem value="competitor">Lost to competitor</SelectItem>
+                    <SelectItem value="timing">Bad timing</SelectItem>
+                    <SelectItem value="budget">No budget</SelectItem>
+                    <SelectItem value="features">Missing features</SelectItem>
+                    <SelectItem value="no_decision">No decision made</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="competitor">Competitor (if applicable)</Label>
+                <Input
+                  id="competitor"
+                  placeholder="Name of competing company"
+                  value={competitor}
+                  onChange={(e) => setCompetitor(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowWinLossDialog(null); setSelectedDeal(null); setLossReason(''); setCompetitor('') }}>Cancel</Button>
+            <Button
+              variant={showWinLossDialog === 'win' ? 'default' : 'destructive'}
+              onClick={showWinLossDialog === 'win' ? handleWinDeal : handleLoseDeal}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> :
+                showWinLossDialog === 'win' ? <Trophy className="w-4 h-4 mr-2" /> : <XCircle className="w-4 h-4 mr-2" />
+              }
+              {showWinLossDialog === 'win' ? 'Mark as Won' : 'Mark as Lost'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

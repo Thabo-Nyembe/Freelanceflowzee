@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
@@ -424,7 +426,28 @@ const mockDataExportQuickActions = [
   { id: '3', label: 'View Logs', icon: 'terminal', action: () => console.log('View logs'), variant: 'outline' as const },
 ]
 
+// Database export type
+interface DataExport {
+  id: string
+  user_id: string
+  export_name: string
+  description: string | null
+  export_format: 'csv' | 'json' | 'xml' | 'pdf' | 'xlsx' | 'sql' | 'parquet' | 'avro'
+  export_type: 'manual' | 'scheduled' | 'automated' | 'api_triggered' | 'webhook'
+  data_source: string
+  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'scheduled' | 'cancelled' | 'expired'
+  progress_percentage: number
+  total_records: number
+  processed_records: number
+  file_size_mb: number
+  scheduled_at: string | null
+  started_at: string | null
+  completed_at: string | null
+  created_at: string
+}
+
 export default function DataExportClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('pipelines')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSource, setSelectedSource] = useState<DataSource | null>(null)
@@ -432,6 +455,40 @@ export default function DataExportClient() {
   const [showNewPipelineDialog, setShowNewPipelineDialog] = useState(false)
   const [showSchemaDialog, setShowSchemaDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Supabase state
+  const [dataExports, setDataExports] = useState<DataExport[]>([])
+  const [loading, setLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    export_name: '',
+    description: '',
+    export_format: 'csv' as const,
+    export_type: 'manual' as const,
+    data_source: 'users' as const,
+  })
+
+  // Fetch data exports from Supabase
+  const fetchDataExports = useCallback(async () => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('data_exports')
+        .select('*')
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDataExports(data || [])
+    } catch (error: any) {
+      toast.error('Failed to load exports', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchDataExports()
+  }, [fetchDataExports])
 
   const getSourceStatusColor = (status: DataSource['status']) => {
     switch (status) {
@@ -481,35 +538,106 @@ export default function DataExportClient() {
     successRate: mockPipelines.reduce((sum, p) => sum + p.metrics.successRate, 0) / mockPipelines.length
   }), [])
 
-  // Handlers
-  const handleCreateExport = () => {
-    toast.info('Create Export', {
-      description: 'Opening export wizard...'
-    })
+  // CRUD Handlers
+  const handleCreateExport = async () => {
+    if (!formData.export_name.trim()) {
+      toast.error('Export name required')
+      return
+    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('data_exports').insert({
+        user_id: user.id,
+        export_name: formData.export_name,
+        description: formData.description || null,
+        export_format: formData.export_format,
+        export_type: formData.export_type,
+        data_source: formData.data_source,
+        status: 'pending',
+      })
+      if (error) throw error
+      toast.success('Export created', { description: formData.export_name })
+      setFormData({ export_name: '', description: '', export_format: 'csv', export_type: 'manual', data_source: 'users' })
+      fetchDataExports()
+    } catch (error: any) {
+      toast.error('Failed to create export', { description: error.message })
+    }
   }
 
-  const handleRunExport = (exportName: string) => {
-    toast.success('Export started', {
-      description: `${exportName} is now running`
-    })
+  const handleRunExport = async (exportId: string, exportName: string) => {
+    try {
+      const { error } = await supabase
+        .from('data_exports')
+        .update({ status: 'in_progress', started_at: new Date().toISOString() })
+        .eq('id', exportId)
+      if (error) throw error
+      toast.success('Export started', { description: `${exportName} is now running` })
+      fetchDataExports()
+    } catch (error: any) {
+      toast.error('Failed to start export', { description: error.message })
+    }
   }
 
-  const handleScheduleExport = (exportName: string) => {
-    toast.info('Schedule export', {
-      description: `Setting up schedule for ${exportName}`
-    })
+  const handleScheduleExport = async (exportId: string, exportName: string) => {
+    try {
+      const scheduledAt = new Date(Date.now() + 3600000).toISOString() // 1 hour from now
+      const { error } = await supabase
+        .from('data_exports')
+        .update({ status: 'scheduled', scheduled_at: scheduledAt })
+        .eq('id', exportId)
+      if (error) throw error
+      toast.success('Export scheduled', { description: `${exportName} scheduled for 1 hour` })
+      fetchDataExports()
+    } catch (error: any) {
+      toast.error('Failed to schedule export', { description: error.message })
+    }
   }
 
-  const handleDownloadExport = (exportId: string) => {
-    toast.success('Downloading export', {
-      description: 'File will be ready shortly'
-    })
+  const handleDownloadExport = async (exportId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('data_exports')
+        .select('download_url, export_name')
+        .eq('id', exportId)
+        .single()
+      if (error) throw error
+      if (data?.download_url) {
+        window.open(data.download_url, '_blank')
+      }
+      toast.success('Downloading export', { description: data?.export_name || 'File ready' })
+    } catch (error: any) {
+      toast.error('Download failed', { description: error.message })
+    }
   }
 
-  const handleDeleteExport = (exportName: string) => {
-    toast.info('Export deleted', {
-      description: `${exportName} has been removed`
-    })
+  const handleDeleteExport = async (exportId: string, exportName: string) => {
+    try {
+      const { error } = await supabase
+        .from('data_exports')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', exportId)
+      if (error) throw error
+      toast.success('Export deleted', { description: `${exportName} has been removed` })
+      fetchDataExports()
+    } catch (error: any) {
+      toast.error('Failed to delete export', { description: error.message })
+    }
+  }
+
+  const handleCancelExport = async (exportId: string, exportName: string) => {
+    try {
+      const { error } = await supabase
+        .from('data_exports')
+        .update({ status: 'cancelled' })
+        .eq('id', exportId)
+      if (error) throw error
+      toast.success('Export cancelled', { description: exportName })
+      fetchDataExports()
+    } catch (error: any) {
+      toast.error('Failed to cancel export', { description: error.message })
+    }
   }
 
   return (
@@ -972,16 +1100,70 @@ export default function DataExportClient() {
             </div>
 
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Export Jobs</h2>
+              <h2 className="text-lg font-semibold">Export Jobs {loading && <RefreshCw className="w-4 h-4 ml-2 animate-spin inline" />}</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filter
+                <Button variant="outline" onClick={fetchDataExports}>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
                 </Button>
-                <Button>
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Export
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Plus className="w-4 h-4 mr-2" />
+                      New Export
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Export</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Export Name</Label>
+                        <Input
+                          placeholder="Q4 Financial Report"
+                          value={formData.export_name}
+                          onChange={(e) => setFormData(f => ({ ...f, export_name: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Description</Label>
+                        <Input
+                          placeholder="Optional description"
+                          value={formData.description}
+                          onChange={(e) => setFormData(f => ({ ...f, description: e.target.value }))}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Format</Label>
+                          <Select value={formData.export_format} onValueChange={(v: any) => setFormData(f => ({ ...f, export_format: v }))}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="csv">CSV</SelectItem>
+                              <SelectItem value="json">JSON</SelectItem>
+                              <SelectItem value="xlsx">Excel</SelectItem>
+                              <SelectItem value="parquet">Parquet</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Data Source</Label>
+                          <Select value={formData.data_source} onValueChange={(v: any) => setFormData(f => ({ ...f, data_source: v }))}>
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="users">Users</SelectItem>
+                              <SelectItem value="customers">Customers</SelectItem>
+                              <SelectItem value="orders">Orders</SelectItem>
+                              <SelectItem value="analytics">Analytics</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <Button className="w-full" onClick={handleCreateExport}>Create Export</Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
 
@@ -993,11 +1175,55 @@ export default function DataExportClient() {
                   <div>Progress</div>
                   <div>Records</div>
                   <div>Size</div>
-                  <div>Destination</div>
+                  <div>Source</div>
                   <div>Actions</div>
                 </div>
               </div>
               <ScrollArea className="h-[400px]">
+                {/* Real Supabase data */}
+                {dataExports.map(exp => (
+                  <div key={exp.id} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div className="grid grid-cols-7 gap-4 items-center">
+                      <div>
+                        <p className="font-medium">{exp.export_name}</p>
+                        <p className="text-xs text-gray-500">{exp.export_format.toUpperCase()}</p>
+                      </div>
+                      <div>
+                        <Badge className={getJobStatusColor(exp.status as ExportJob['status'])}>
+                          {exp.status}
+                        </Badge>
+                      </div>
+                      <div>
+                        <Progress value={exp.progress_percentage} className="h-2" />
+                        <p className="text-xs text-gray-500 mt-1">{exp.progress_percentage}%</p>
+                      </div>
+                      <div className="text-sm">{exp.processed_records.toLocaleString()}</div>
+                      <div className="text-sm">{formatBytes(exp.file_size_mb)}</div>
+                      <div className="text-sm text-gray-500 truncate">{exp.data_source}</div>
+                      <div className="flex items-center gap-1">
+                        {exp.status === 'completed' && (
+                          <Button variant="ghost" size="icon" onClick={() => handleDownloadExport(exp.id)}>
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        )}
+                        {exp.status === 'pending' && (
+                          <Button variant="ghost" size="icon" onClick={() => handleRunExport(exp.id, exp.export_name)}>
+                            <Play className="w-4 h-4 text-green-500" />
+                          </Button>
+                        )}
+                        {exp.status === 'in_progress' && (
+                          <Button variant="ghost" size="icon" onClick={() => handleCancelExport(exp.id, exp.export_name)}>
+                            <XCircle className="w-4 h-4 text-red-500" />
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteExport(exp.id, exp.export_name)}>
+                          <Trash2 className="w-4 h-4 text-red-400" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {/* Mock fallback data */}
                 {mockExportJobs.map(job => (
                   <div key={job.id} className="p-4 border-b hover:bg-gray-50 dark:hover:bg-gray-800">
                     <div className="grid grid-cols-7 gap-4 items-center">

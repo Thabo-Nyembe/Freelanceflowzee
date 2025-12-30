@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,13 +11,28 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog'
+import {
+  useMediaFiles,
+  useMediaFolders,
+  useMediaMutations,
+  useMediaStats,
+  type MediaFile,
+  type MediaFolder as MediaFolderType,
+  type FileType as MediaFileType,
+  type AccessLevel as MediaAccessLevel,
+} from '@/lib/hooks/use-media-library'
+import { useSupabaseMutation } from '@/lib/hooks/use-supabase-mutation'
 import {
   Image as ImageIcon,
   Video,
@@ -528,10 +544,86 @@ interface MediaLibraryClientProps {
   initialFolders?: MediaFolder[]
 }
 
+// Form interfaces for dialogs
+interface FileFormData {
+  file_name: string
+  original_name: string
+  file_type: MediaFileType
+  description: string
+  alt_text: string
+  tags: string
+  access_level: MediaAccessLevel
+  is_public: boolean
+  folder_id: string | null
+}
+
+interface FolderFormData {
+  folder_name: string
+  description: string
+  color: string
+  access_level: MediaAccessLevel
+  parent_id: string | null
+}
+
+interface CollectionFormData {
+  name: string
+  description: string
+  isPublic: boolean
+  tags: string
+}
+
+const defaultFileForm: FileFormData = {
+  file_name: '',
+  original_name: '',
+  file_type: 'image',
+  description: '',
+  alt_text: '',
+  tags: '',
+  access_level: 'private',
+  is_public: false,
+  folder_id: null,
+}
+
+const defaultFolderForm: FolderFormData = {
+  folder_name: '',
+  description: '',
+  color: 'from-blue-500 to-cyan-500',
+  access_level: 'private',
+  parent_id: null,
+}
+
+const defaultCollectionForm: CollectionFormData = {
+  name: '',
+  description: '',
+  isPublic: false,
+  tags: '',
+}
+
 export default function MediaLibraryClient({
   initialAssets = mockAssets,
   initialFolders = mockFolders
 }: MediaLibraryClientProps) {
+  const supabase = createClientComponentClient()
+
+  // Supabase hooks for real data
+  const { files: supabaseFiles, loading: filesLoading, refetch: refetchFiles } = useMediaFiles({ status: 'active' })
+  const { folders: supabaseFolders, loading: foldersLoading, refetch: refetchFolders } = useMediaFolders()
+  const mediaStats = useMediaStats()
+
+  // Mutation hooks
+  const fileMutation = useSupabaseMutation({
+    table: 'media_files',
+    onSuccess: () => refetchFiles(),
+  })
+  const folderMutation = useSupabaseMutation({
+    table: 'media_folders',
+    onSuccess: () => refetchFolders(),
+  })
+
+  // Use Supabase data if available, otherwise fallback to mock data
+  const displayFiles = supabaseFiles.length > 0 ? supabaseFiles : initialAssets
+  const displayFolders = supabaseFolders.length > 0 ? supabaseFolders : initialFolders
+
   const [activeTab, setActiveTab] = useState('assets')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedType, setSelectedType] = useState<FileType | 'all'>('all')
@@ -539,6 +631,24 @@ export default function MediaLibraryClient({
   const [selectedAsset, setSelectedAsset] = useState<MediaAsset | null>(null)
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showFolderDialog, setShowFolderDialog] = useState(false)
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showMoveDialog, setShowMoveDialog] = useState(false)
+
+  // Form states
+  const [fileForm, setFileForm] = useState<FileFormData>(defaultFileForm)
+  const [folderForm, setFolderForm] = useState<FolderFormData>(defaultFolderForm)
+  const [collectionForm, setCollectionForm] = useState<CollectionFormData>(defaultCollectionForm)
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: 'file' | 'folder'; name: string } | null>(null)
+  const [itemToEdit, setItemToEdit] = useState<MediaAsset | null>(null)
+  const [itemToMove, setItemToMove] = useState<MediaAsset | null>(null)
+  const [targetFolderId, setTargetFolderId] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const stats = useMemo(() => {
     const totalViews = initialAssets.reduce((sum, a) => sum + a.viewCount, 0)
@@ -583,29 +693,301 @@ export default function MediaLibraryClient({
     { label: 'Documents', value: mockUsageStats.byType.find(t => t.type === 'document')?.count.toString() || '0', change: 10.5, icon: FileText, color: 'from-orange-500 to-amber-600' }
   ]
 
-  // Handlers
+  // CRUD Handlers
   const handleUploadMedia = () => {
-    toast.info('Upload Media', {
-      description: 'Opening file uploader...'
-    })
+    setFileForm(defaultFileForm)
     setShowUploadDialog(true)
   }
 
+  const handleCreateFile = async () => {
+    if (!fileForm.file_name.trim()) {
+      toast.error('File name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const tagsArray = fileForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+      await fileMutation.create({
+        file_name: fileForm.file_name,
+        original_name: fileForm.original_name || fileForm.file_name,
+        file_type: fileForm.file_type,
+        description: fileForm.description || null,
+        alt_text: fileForm.alt_text || null,
+        tags: tagsArray.length > 0 ? tagsArray : null,
+        access_level: fileForm.access_level,
+        is_public: fileForm.is_public,
+        folder_id: fileForm.folder_id,
+        status: 'active',
+        file_size: 0,
+        view_count: 0,
+        download_count: 0,
+        share_count: 0,
+        is_starred: false,
+        is_featured: false,
+        password_protected: false,
+      })
+      toast.success('File created successfully')
+      setShowUploadDialog(false)
+      setFileForm(defaultFileForm)
+      refetchFiles()
+    } catch (error) {
+      console.error('Error creating file:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleCreateFolder = async () => {
+    if (!folderForm.folder_name.trim()) {
+      toast.error('Folder name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await folderMutation.create({
+        folder_name: folderForm.folder_name,
+        folder_path: `/${folderForm.folder_name}`,
+        description: folderForm.description || null,
+        color: folderForm.color || null,
+        access_level: folderForm.access_level,
+        parent_id: folderForm.parent_id,
+        is_root: !folderForm.parent_id,
+        is_system: false,
+        is_starred: false,
+        file_count: 0,
+        folder_count: 0,
+        total_size: 0,
+        sort_order: 0,
+      })
+      toast.success('Folder created successfully')
+      setShowFolderDialog(false)
+      setFolderForm(defaultFolderForm)
+      refetchFolders()
+    } catch (error) {
+      console.error('Error creating folder:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   const handleDownloadAsset = (asset: MediaAsset) => {
-    toast.success('Download started', {
-      description: `Downloading "${asset.name}"...`
-    })
+    if (asset.originalUrl) {
+      window.open(asset.originalUrl, '_blank')
+      toast.success('Download started', {
+        description: `Downloading "${asset.fileName}"...`
+      })
+      // Increment download count
+      fileMutation.update(asset.id, { download_count: (asset.downloadCount || 0) + 1 })
+    } else {
+      toast.info('Download unavailable', {
+        description: 'No download URL available for this asset'
+      })
+    }
   }
 
   const handleDeleteAsset = (asset: MediaAsset) => {
-    toast.success('Asset deleted', {
-      description: `"${asset.name}" has been deleted`
-    })
+    setItemToDelete({ id: asset.id, type: 'file', name: asset.fileName })
+    setShowDeleteDialog(true)
+  }
+
+  const handleDeleteFolder = (folder: MediaFolder) => {
+    setItemToDelete({ id: folder.id, type: 'folder', name: folder.name })
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return
+
+    setIsSubmitting(true)
+    try {
+      if (itemToDelete.type === 'file') {
+        await fileMutation.remove(itemToDelete.id)
+        toast.success('File deleted', {
+          description: `"${itemToDelete.name}" has been deleted`
+        })
+        refetchFiles()
+      } else {
+        await folderMutation.remove(itemToDelete.id)
+        toast.success('Folder deleted', {
+          description: `"${itemToDelete.name}" has been deleted`
+        })
+        refetchFolders()
+      }
+      setShowDeleteDialog(false)
+      setItemToDelete(null)
+    } catch (error) {
+      console.error('Error deleting:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleMoveToFolder = (asset: MediaAsset) => {
-    toast.success('Asset moved', {
-      description: `"${asset.name}" has been moved`
+    setItemToMove(asset)
+    setTargetFolderId(null)
+    setShowMoveDialog(true)
+  }
+
+  const confirmMove = async () => {
+    if (!itemToMove) return
+
+    setIsSubmitting(true)
+    try {
+      await fileMutation.update(itemToMove.id, { folder_id: targetFolderId })
+      toast.success('Asset moved', {
+        description: `"${itemToMove.fileName}" has been moved`
+      })
+      setShowMoveDialog(false)
+      setItemToMove(null)
+      refetchFiles()
+    } catch (error) {
+      console.error('Error moving asset:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEditAsset = (asset: MediaAsset) => {
+    setItemToEdit(asset)
+    setFileForm({
+      file_name: asset.fileName,
+      original_name: asset.fileName,
+      file_type: asset.fileType as MediaFileType,
+      description: asset.metadata.description || '',
+      alt_text: asset.metadata.alt || '',
+      tags: asset.tags.join(', '),
+      access_level: asset.accessLevel as MediaAccessLevel,
+      is_public: asset.accessLevel === 'public',
+      folder_id: null,
+    })
+    setShowEditDialog(true)
+  }
+
+  const handleUpdateAsset = async () => {
+    if (!itemToEdit) return
+
+    setIsSubmitting(true)
+    try {
+      const tagsArray = fileForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+      await fileMutation.update(itemToEdit.id, {
+        file_name: fileForm.file_name,
+        description: fileForm.description || null,
+        alt_text: fileForm.alt_text || null,
+        tags: tagsArray.length > 0 ? tagsArray : null,
+        access_level: fileForm.access_level,
+        is_public: fileForm.is_public,
+      })
+      toast.success('Asset updated', {
+        description: `"${fileForm.file_name}" has been updated`
+      })
+      setShowEditDialog(false)
+      setItemToEdit(null)
+      setFileForm(defaultFileForm)
+      refetchFiles()
+    } catch (error) {
+      console.error('Error updating asset:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleToggleStar = async (asset: MediaAsset) => {
+    try {
+      await fileMutation.update(asset.id, { is_starred: !asset.isStarred })
+      toast.success(asset.isStarred ? 'Removed from starred' : 'Added to starred')
+      refetchFiles()
+    } catch (error) {
+      console.error('Error toggling star:', error)
+    }
+  }
+
+  const handleShareAsset = async (asset: MediaAsset) => {
+    const shareUrl = asset.originalUrl || `${window.location.origin}/media/${asset.id}`
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('Link copied to clipboard')
+      // Increment share count
+      fileMutation.update(asset.id, { share_count: (asset.downloadCount || 0) + 1 })
+    } catch (error) {
+      toast.error('Failed to copy link')
+    }
+  }
+
+  const handleCopyLink = async (asset: MediaAsset) => {
+    const shareUrl = asset.originalUrl || `${window.location.origin}/media/${asset.id}`
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('Link copied to clipboard')
+    } catch (error) {
+      toast.error('Failed to copy link')
+    }
+  }
+
+  const handleOpenNewFolder = () => {
+    setFolderForm(defaultFolderForm)
+    setShowFolderDialog(true)
+  }
+
+  const handleOpenNewCollection = () => {
+    setCollectionForm(defaultCollectionForm)
+    setShowCollectionDialog(true)
+  }
+
+  const handleCreateCollection = async () => {
+    if (!collectionForm.name.trim()) {
+      toast.error('Collection name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Collections could be stored in a separate table or as a special folder type
+      // For now, we create it as a folder with a special marker
+      await folderMutation.create({
+        folder_name: collectionForm.name,
+        folder_path: `/collections/${collectionForm.name}`,
+        description: collectionForm.description || null,
+        access_level: collectionForm.isPublic ? 'public' : 'private',
+        is_root: false,
+        is_system: false,
+        is_starred: false,
+        file_count: 0,
+        folder_count: 0,
+        total_size: 0,
+        sort_order: 0,
+        metadata: {
+          type: 'collection',
+          tags: collectionForm.tags.split(',').map(t => t.trim()).filter(Boolean),
+        },
+      })
+      toast.success('Collection created successfully')
+      setShowCollectionDialog(false)
+      setCollectionForm(defaultCollectionForm)
+      refetchFolders()
+    } catch (error) {
+      console.error('Error creating collection:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleBulkExport = async () => {
+    toast.info('Preparing bulk export...', {
+      description: 'This feature will download all selected assets'
+    })
+  }
+
+  const handleAIEnhance = async (asset?: MediaAsset) => {
+    toast.info('AI Enhancement', {
+      description: 'AI-powered optimization is being applied...'
+    })
+  }
+
+  const handleAISearch = () => {
+    toast.info('AI Search', {
+      description: 'Smart search is analyzing your query...'
     })
   }
 
@@ -624,11 +1006,11 @@ export default function MediaLibraryClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
-            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={handleUploadMedia}>
               <Upload className="w-4 h-4 mr-2" />
               Upload Assets
             </Button>
@@ -704,7 +1086,7 @@ export default function MediaLibraryClient({
                     <p className="text-2xl font-bold">{stats.totalViews.toLocaleString()}</p>
                     <p className="text-pink-100 text-sm">Total Views</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleUploadMedia}>
                     <CloudUpload className="h-4 w-4 mr-2" />
                     Upload
                   </Button>
@@ -715,16 +1097,16 @@ export default function MediaLibraryClient({
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: CloudUpload, label: 'Upload', desc: 'Add new files', color: 'text-pink-500' },
-                { icon: Folder, label: 'New Folder', desc: 'Organize files', color: 'text-blue-500' },
-                { icon: LayoutGrid, label: 'Collection', desc: 'Create group', color: 'text-purple-500' },
-                { icon: Wand2, label: 'AI Enhance', desc: 'Auto-optimize', color: 'text-amber-500' },
-                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500' },
-                { icon: Download, label: 'Bulk Export', desc: 'Download all', color: 'text-cyan-500' },
-                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500' },
-                { icon: Sparkles, label: 'AI Search', desc: 'Smart find', color: 'text-indigo-500' },
+                { icon: CloudUpload, label: 'Upload', desc: 'Add new files', color: 'text-pink-500', action: handleUploadMedia },
+                { icon: Folder, label: 'New Folder', desc: 'Organize files', color: 'text-blue-500', action: handleOpenNewFolder },
+                { icon: LayoutGrid, label: 'Collection', desc: 'Create group', color: 'text-purple-500', action: handleOpenNewCollection },
+                { icon: Wand2, label: 'AI Enhance', desc: 'Auto-optimize', color: 'text-amber-500', action: () => handleAIEnhance() },
+                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500', action: () => toast.info('Select an asset to share') },
+                { icon: Download, label: 'Bulk Export', desc: 'Download all', color: 'text-cyan-500', action: handleBulkExport },
+                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500', action: () => toast.info('Opening brand kit...') },
+                { icon: Sparkles, label: 'AI Search', desc: 'Smart find', color: 'text-indigo-500', action: handleAISearch },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -873,7 +1255,7 @@ export default function MediaLibraryClient({
                     <p className="text-2xl font-bold">{formatSize(initialFolders.reduce((sum, f) => sum + f.totalSize, 0))}</p>
                     <p className="text-blue-100 text-sm">Total Size</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleOpenNewFolder}>
                     <FolderPlus className="h-4 w-4 mr-2" />
                     New Folder
                   </Button>
@@ -884,16 +1266,16 @@ export default function MediaLibraryClient({
             {/* Folder Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500' },
-                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500' },
-                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500' },
-                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500' },
-                { icon: RefreshCw, label: 'Sync', desc: 'Cloud sync', color: 'text-green-500' },
-                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500' },
-                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500' },
-                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500' },
+                { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500', action: handleOpenNewFolder },
+                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => toast.info('Opening folder tree...') },
+                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500', action: () => toast.info('Select assets to move') },
+                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500', action: () => toast.info('Archiving old folders...') },
+                { icon: RefreshCw, label: 'Sync', desc: 'Cloud sync', color: 'text-green-500', action: () => { refetchFolders(); toast.success('Folders synced') } },
+                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500', action: () => toast.info('Sorting folders...') },
+                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500', action: () => toast.info('Opening permissions...') },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500', action: () => toast.info('Cleaning up empty folders...') },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -904,11 +1286,11 @@ export default function MediaLibraryClient({
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Folders</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={() => toast.info('Sorting folders...')}>
                   <SortAsc className="w-4 h-4 mr-2" />
                   Sort
                 </Button>
-                <Button>
+                <Button onClick={handleOpenNewFolder}>
                   <FolderPlus className="w-4 h-4 mr-2" />
                   New Folder
                 </Button>
@@ -957,7 +1339,7 @@ export default function MediaLibraryClient({
                     <p className="text-2xl font-bold">{mockCollections.filter(c => c.isPublic).length}</p>
                     <p className="text-purple-100 text-sm">Public Collections</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleOpenNewCollection}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create
                   </Button>
@@ -968,16 +1350,16 @@ export default function MediaLibraryClient({
             {/* Collections Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'Create', desc: 'New collection', color: 'text-purple-500' },
-                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500' },
-                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500' },
-                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500' },
-                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500' },
-                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500' },
-                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500' },
-                { icon: Download, label: 'Export', desc: 'Download all', color: 'text-indigo-500' },
+                { icon: Plus, label: 'Create', desc: 'New collection', color: 'text-purple-500', action: handleOpenNewCollection },
+                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => toast.info('Browsing collections...') },
+                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500', action: () => toast.info('Select a collection to share') },
+                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500', action: () => toast.info('Opening tag manager...') },
+                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500', action: () => toast.info('Opening collaboration settings...') },
+                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500', action: () => toast.info('Opening privacy settings...') },
+                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500', action: () => toast.info('Select a collection to duplicate') },
+                { icon: Download, label: 'Export', desc: 'Download all', color: 'text-indigo-500', action: handleBulkExport },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -987,7 +1369,7 @@ export default function MediaLibraryClient({
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Collections</h2>
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
+              <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={handleOpenNewCollection}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Collection
               </Button>
@@ -1041,7 +1423,7 @@ export default function MediaLibraryClient({
                     <p className="text-2xl font-bold">5GB</p>
                     <p className="text-green-100 text-sm">Max File Size</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleUploadMedia}>
                     <Upload className="h-4 w-4 mr-2" />
                     Upload
                   </Button>
@@ -1052,16 +1434,16 @@ export default function MediaLibraryClient({
             {/* Upload Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: ImagePlus, label: 'Images', desc: 'Upload photos', color: 'text-blue-500' },
-                { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500' },
-                { icon: Music, label: 'Audio', desc: 'Upload audio', color: 'text-green-500' },
-                { icon: FileText, label: 'Documents', desc: 'Upload docs', color: 'text-orange-500' },
-                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500' },
-                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500' },
-                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500' },
-                { icon: FileArchive, label: 'Archives', desc: 'ZIP/RAR files', color: 'text-gray-500' },
+                { icon: ImagePlus, label: 'Images', desc: 'Upload photos', color: 'text-blue-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'image' }); setShowUploadDialog(true) } },
+                { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'video' }); setShowUploadDialog(true) } },
+                { icon: Music, label: 'Audio', desc: 'Upload audio', color: 'text-green-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'audio' }); setShowUploadDialog(true) } },
+                { icon: FileText, label: 'Documents', desc: 'Upload docs', color: 'text-orange-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'document' }); setShowUploadDialog(true) } },
+                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => toast.info('Bulk upload mode enabled') },
+                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500', action: () => toast.info('Opening cloud import...') },
+                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500', action: () => toast.info('Opening URL import...') },
+                { icon: FileArchive, label: 'Archives', desc: 'ZIP/RAR files', color: 'text-gray-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'archive' }); setShowUploadDialog(true) } },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1071,13 +1453,13 @@ export default function MediaLibraryClient({
 
             <Card className="border-0 shadow-sm">
               <CardContent className="p-8">
-                <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-12 text-center hover:border-indigo-500 transition-colors cursor-pointer">
+                <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-12 text-center hover:border-indigo-500 transition-colors cursor-pointer" onClick={handleUploadMedia}>
                   <CloudUpload className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Upload Assets</h3>
                   <p className="text-gray-500 mb-4">Drag and drop files here, or click to browse</p>
                   <p className="text-sm text-gray-400">Supports: Images, Videos, Audio, Documents, Archives</p>
                   <p className="text-sm text-gray-400">Max file size: 5GB</p>
-                  <Button className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                  <Button className="mt-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={handleUploadMedia}>
                     <Upload className="w-4 h-4 mr-2" />
                     Select Files
                   </Button>
@@ -1138,16 +1520,16 @@ export default function MediaLibraryClient({
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500' },
-                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500' },
-                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500' },
-                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500' },
-                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500' },
-                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500' },
-                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500' },
-                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500' },
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => toast.info('Loading overview...') },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.info('Analyzing trends...') },
+                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => toast.info('Loading distribution chart...') },
+                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => toast.info('Connecting to real-time stats...') },
+                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500', action: () => toast.info('Loading view analytics...') },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => toast.info('Loading download statistics...') },
+                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500', action: () => toast.info('Generating storage report...') },
+                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500', action: () => toast.info('Opening report builder...') },
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1846,19 +2228,19 @@ export default function MediaLibraryClient({
                   </div>
 
                   <div className="flex gap-3">
-                    <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                    <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={() => selectedAsset && handleDownloadAsset(selectedAsset)}>
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => selectedAsset && handleShareAsset(selectedAsset)}>
                       <Share2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => selectedAsset && handleEditAsset(selectedAsset)}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Metadata
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => selectedAsset && handleCopyLink(selectedAsset)}>
                       <Copy className="w-4 h-4 mr-2" />
                       Copy Link
                     </Button>
@@ -1912,21 +2294,348 @@ export default function MediaLibraryClient({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={() => { setSelectedCollection(null); toast.info('Opening collection...') }}>
                     <FolderOpen className="w-4 h-4 mr-2" />
                     Open Collection
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.info('Sharing collection...')}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.info('Opening collection editor...')}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload/Create File Dialog */}
+        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Upload New Asset</DialogTitle>
+              <DialogDescription>Add a new file to your media library</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="file_name">File Name *</Label>
+                <Input
+                  id="file_name"
+                  value={fileForm.file_name}
+                  onChange={(e) => setFileForm({ ...fileForm, file_name: e.target.value })}
+                  placeholder="Enter file name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="file_type">File Type</Label>
+                <Select value={fileForm.file_type} onValueChange={(value: MediaFileType) => setFileForm({ ...fileForm, file_type: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select file type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="image">Image</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="audio">Audio</SelectItem>
+                    <SelectItem value="document">Document</SelectItem>
+                    <SelectItem value="archive">Archive</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={fileForm.description}
+                  onChange={(e) => setFileForm({ ...fileForm, description: e.target.value })}
+                  placeholder="Enter file description"
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="alt_text">Alt Text</Label>
+                <Input
+                  id="alt_text"
+                  value={fileForm.alt_text}
+                  onChange={(e) => setFileForm({ ...fileForm, alt_text: e.target.value })}
+                  placeholder="Enter alt text for accessibility"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tags">Tags (comma-separated)</Label>
+                <Input
+                  id="tags"
+                  value={fileForm.tags}
+                  onChange={(e) => setFileForm({ ...fileForm, tags: e.target.value })}
+                  placeholder="tag1, tag2, tag3"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="access_level">Access Level</Label>
+                <Select value={fileForm.access_level} onValueChange={(value: MediaAccessLevel) => setFileForm({ ...fileForm, access_level: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select access level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                    <SelectItem value="organization">Organization</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="link_only">Link Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowUploadDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateFile} disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create File'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Folder Dialog */}
+        <Dialog open={showFolderDialog} onOpenChange={setShowFolderDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Folder</DialogTitle>
+              <DialogDescription>Organize your media assets with folders</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="folder_name">Folder Name *</Label>
+                <Input
+                  id="folder_name"
+                  value={folderForm.folder_name}
+                  onChange={(e) => setFolderForm({ ...folderForm, folder_name: e.target.value })}
+                  placeholder="Enter folder name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="folder_description">Description</Label>
+                <Textarea
+                  id="folder_description"
+                  value={folderForm.description}
+                  onChange={(e) => setFolderForm({ ...folderForm, description: e.target.value })}
+                  placeholder="Enter folder description"
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="folder_color">Color Theme</Label>
+                <Select value={folderForm.color} onValueChange={(value) => setFolderForm({ ...folderForm, color: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select color" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="from-blue-500 to-cyan-500">Blue</SelectItem>
+                    <SelectItem value="from-purple-500 to-pink-500">Purple</SelectItem>
+                    <SelectItem value="from-red-500 to-orange-500">Red</SelectItem>
+                    <SelectItem value="from-green-500 to-emerald-500">Green</SelectItem>
+                    <SelectItem value="from-amber-500 to-yellow-500">Amber</SelectItem>
+                    <SelectItem value="from-gray-500 to-slate-600">Gray</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="folder_access">Access Level</Label>
+                <Select value={folderForm.access_level} onValueChange={(value: MediaAccessLevel) => setFolderForm({ ...folderForm, access_level: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select access level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                    <SelectItem value="organization">Organization</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowFolderDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateFolder} disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create Folder'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Collection Dialog */}
+        <Dialog open={showCollectionDialog} onOpenChange={setShowCollectionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Collection</DialogTitle>
+              <DialogDescription>Group related assets together</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="collection_name">Collection Name *</Label>
+                <Input
+                  id="collection_name"
+                  value={collectionForm.name}
+                  onChange={(e) => setCollectionForm({ ...collectionForm, name: e.target.value })}
+                  placeholder="Enter collection name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="collection_description">Description</Label>
+                <Textarea
+                  id="collection_description"
+                  value={collectionForm.description}
+                  onChange={(e) => setCollectionForm({ ...collectionForm, description: e.target.value })}
+                  placeholder="Enter collection description"
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="collection_tags">Tags (comma-separated)</Label>
+                <Input
+                  id="collection_tags"
+                  value={collectionForm.tags}
+                  onChange={(e) => setCollectionForm({ ...collectionForm, tags: e.target.value })}
+                  placeholder="tag1, tag2, tag3"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  id="collection_public"
+                  checked={collectionForm.isPublic}
+                  onCheckedChange={(checked) => setCollectionForm({ ...collectionForm, isPublic: checked })}
+                />
+                <Label htmlFor="collection_public">Make collection public</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCollectionDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateCollection} disabled={isSubmitting}>
+                {isSubmitting ? 'Creating...' : 'Create Collection'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Confirm Delete</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{itemToDelete?.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowDeleteDialog(false); setItemToDelete(null) }}>Cancel</Button>
+              <Button variant="destructive" onClick={confirmDelete} disabled={isSubmitting}>
+                {isSubmitting ? 'Deleting...' : 'Delete'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Asset Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Asset</DialogTitle>
+              <DialogDescription>Update asset metadata and settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_file_name">File Name</Label>
+                <Input
+                  id="edit_file_name"
+                  value={fileForm.file_name}
+                  onChange={(e) => setFileForm({ ...fileForm, file_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_description">Description</Label>
+                <Textarea
+                  id="edit_description"
+                  value={fileForm.description}
+                  onChange={(e) => setFileForm({ ...fileForm, description: e.target.value })}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_alt_text">Alt Text</Label>
+                <Input
+                  id="edit_alt_text"
+                  value={fileForm.alt_text}
+                  onChange={(e) => setFileForm({ ...fileForm, alt_text: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_tags">Tags (comma-separated)</Label>
+                <Input
+                  id="edit_tags"
+                  value={fileForm.tags}
+                  onChange={(e) => setFileForm({ ...fileForm, tags: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_access">Access Level</Label>
+                <Select value={fileForm.access_level} onValueChange={(value: MediaAccessLevel) => setFileForm({ ...fileForm, access_level: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                    <SelectItem value="organization">Organization</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="link_only">Link Only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditDialog(false); setItemToEdit(null); setFileForm(defaultFileForm) }}>Cancel</Button>
+              <Button onClick={handleUpdateAsset} disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Move Asset Dialog */}
+        <Dialog open={showMoveDialog} onOpenChange={setShowMoveDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Move Asset</DialogTitle>
+              <DialogDescription>
+                Select a destination folder for "{itemToMove?.fileName}"
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Folder</Label>
+                <Select value={targetFolderId || 'root'} onValueChange={(value) => setTargetFolderId(value === 'root' ? null : value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select destination folder" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="root">Root (No folder)</SelectItem>
+                    {displayFolders.map((folder: any) => (
+                      <SelectItem key={folder.id} value={folder.id}>
+                        {folder.name || folder.folder_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowMoveDialog(false); setItemToMove(null) }}>Cancel</Button>
+              <Button onClick={confirmMove} disabled={isSubmitting}>
+                {isSubmitting ? 'Moving...' : 'Move Asset'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

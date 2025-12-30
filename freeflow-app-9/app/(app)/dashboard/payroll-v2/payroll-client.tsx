@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -11,6 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import {
   DollarSign,
   Users,
@@ -187,6 +190,50 @@ interface PayrollStats {
   monthlyDeductions: number
   pendingApprovals: number
   upcomingPayRuns: number
+}
+
+// Database types
+interface DbPayrollRun {
+  id: string
+  user_id: string
+  run_code: string
+  period: string
+  pay_date: string
+  status: string
+  total_employees: number
+  total_amount: number
+  processed_count: number
+  pending_count: number
+  failed_count: number
+  department: string | null
+  approved_by: string | null
+  approved_date: string | null
+  currency: string
+  notes: string | null
+  configuration: Record<string, unknown>
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+interface PayrollFormState {
+  period: string
+  pay_date: string
+  status: string
+  total_employees: number
+  total_amount: number
+  department: string
+  notes: string
+}
+
+const initialFormState: PayrollFormState = {
+  period: '',
+  pay_date: '',
+  status: 'draft',
+  total_employees: 0,
+  total_amount: 0,
+  department: '',
+  notes: '',
 }
 
 // Mock data
@@ -622,12 +669,220 @@ const formatCurrencyDetailed = (amount: number) => {
 }
 
 export default function PayrollClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('pay-runs')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPayRun, setSelectedPayRun] = useState<PayRun | null>(null)
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [showPayRunDialog, setShowPayRunDialog] = useState(false)
   const [showEmployeeDialog, setShowEmployeeDialog] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+
+  // Database State
+  const [dbPayrollRuns, setDbPayrollRuns] = useState<DbPayrollRun[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formState, setFormState] = useState<PayrollFormState>(initialFormState)
+  const [editingId, setEditingId] = useState<string | null>(null)
+
+  // Generate run code
+  const generateRunCode = () => `PR-${Date.now().toString(36).toUpperCase()}`
+
+  // Fetch payroll runs from Supabase
+  const fetchPayrollRuns = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('payroll_runs')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbPayrollRuns(data || [])
+    } catch (error) {
+      console.error('Error fetching payroll runs:', error)
+      toast.error('Failed to load payroll runs')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchPayrollRuns()
+  }, [fetchPayrollRuns])
+
+  // Create payroll run
+  const handleCreatePayrollRun = async () => {
+    if (!formState.period.trim()) {
+      toast.error('Period is required')
+      return
+    }
+    if (!formState.pay_date) {
+      toast.error('Pay date is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create payroll runs')
+        return
+      }
+
+      const { error } = await supabase.from('payroll_runs').insert({
+        user_id: user.id,
+        run_code: generateRunCode(),
+        period: formState.period,
+        pay_date: formState.pay_date,
+        status: formState.status,
+        total_employees: formState.total_employees,
+        total_amount: formState.total_amount,
+        processed_count: 0,
+        pending_count: formState.total_employees,
+        failed_count: 0,
+        department: formState.department || null,
+        notes: formState.notes || null,
+      })
+
+      if (error) throw error
+
+      toast.success('Payroll run created successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error creating payroll run:', error)
+      toast.error('Failed to create payroll run')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Update payroll run
+  const handleUpdatePayrollRun = async () => {
+    if (!editingId || !formState.period.trim()) {
+      toast.error('Period is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase
+        .from('payroll_runs')
+        .update({
+          period: formState.period,
+          pay_date: formState.pay_date,
+          status: formState.status,
+          total_employees: formState.total_employees,
+          total_amount: formState.total_amount,
+          department: formState.department || null,
+          notes: formState.notes || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editingId)
+
+      if (error) throw error
+
+      toast.success('Payroll run updated successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      setEditingId(null)
+      fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error updating payroll run:', error)
+      toast.error('Failed to update payroll run')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Delete payroll run (soft delete)
+  const handleDeletePayrollRun = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('payroll_runs')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success('Payroll run deleted')
+      fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error deleting payroll run:', error)
+      toast.error('Failed to delete payroll run')
+    }
+  }
+
+  // Edit payroll run
+  const handleEditPayrollRun = (run: DbPayrollRun) => {
+    setFormState({
+      period: run.period,
+      pay_date: run.pay_date,
+      status: run.status,
+      total_employees: run.total_employees,
+      total_amount: run.total_amount,
+      department: run.department || '',
+      notes: run.notes || '',
+    })
+    setEditingId(run.id)
+    setShowCreateDialog(true)
+  }
+
+  // Approve payroll run
+  const handleApprovePayrollRunDb = async (id: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error } = await supabase
+        .from('payroll_runs')
+        .update({
+          status: 'approved',
+          approved_by: user?.email || 'System',
+          approved_date: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success('Payroll run approved')
+      fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error approving payroll run:', error)
+      toast.error('Failed to approve payroll run')
+    }
+  }
+
+  // Process payroll run
+  const handleProcessPayrollRunDb = async (id: string) => {
+    try {
+      const run = dbPayrollRuns.find(r => r.id === id)
+      const { error } = await supabase
+        .from('payroll_runs')
+        .update({
+          status: 'processing',
+          processed_count: Math.floor((run?.total_employees || 0) * 0.5),
+          pending_count: Math.ceil((run?.total_employees || 0) * 0.5),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id)
+
+      if (error) throw error
+
+      toast.success('Payroll processing started')
+      fetchPayrollRuns()
+    } catch (error) {
+      console.error('Error processing payroll run:', error)
+      toast.error('Failed to process payroll run')
+    }
+  }
 
   // Stats
   const stats: PayrollStats = useMemo(() => ({
@@ -668,8 +923,9 @@ export default function PayrollClient() {
   }
 
   const handleRunPayroll = () => {
-    toast.info('Starting payroll run...')
-    // In production, this would open a creation dialog or navigate to payroll run form
+    setFormState(initialFormState)
+    setEditingId(null)
+    setShowCreateDialog(true)
   }
 
   const handleApprovePayRun = () => {
@@ -694,6 +950,13 @@ export default function PayrollClient() {
     toast.success('Generating payslips', {
       description: 'Payslips are being generated'
     })
+  }
+
+  const handleRefresh = async () => {
+    toast.info('Refreshing payroll data...')
+    setLoading(true)
+    await fetchPayrollRuns()
+    toast.success('Payroll data refreshed')
   }
 
   return (
@@ -913,15 +1176,15 @@ export default function PayrollClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{payRuns.length}</p>
+                    <p className="text-3xl font-bold">{filteredPayRuns.length + dbPayrollRuns.length}</p>
                     <p className="text-green-200 text-sm">Total Runs</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{payRuns.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">{filteredPayRuns.filter(r => r.status === 'completed').length + dbPayrollRuns.filter(r => r.status === 'completed').length}</p>
                     <p className="text-green-200 text-sm">Completed</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{payRuns.filter(r => r.status === 'pending').length}</p>
+                    <p className="text-3xl font-bold">{filteredPayRuns.filter(r => r.status === 'pending_approval').length + dbPayrollRuns.filter(r => r.status === 'pending_approval' || r.status === 'draft').length}</p>
                     <p className="text-green-200 text-sm">Pending</p>
                   </div>
                 </div>
@@ -930,25 +1193,70 @@ export default function PayrollClient() {
 
             {/* Pay Runs Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: Plus, label: 'New Run', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: PlayCircle, label: 'Process', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: CheckCircle, label: 'Approve', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: FileText, label: 'Reports', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: History, label: 'History', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
+                onClick={handleRunPayroll}
+              >
+                <Plus className="w-5 h-5" />
+                <span className="text-xs font-medium">New Run</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 hover:scale-105 transition-all duration-200"
+                onClick={handleProcessPayments}
+              >
+                <PlayCircle className="w-5 h-5" />
+                <span className="text-xs font-medium">Process</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
+                onClick={() => toast.info('Select a pay run to approve')}
+              >
+                <CheckCircle className="w-5 h-5" />
+                <span className="text-xs font-medium">Approve</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 hover:scale-105 transition-all duration-200"
+                onClick={handleExportPayroll}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+                onClick={handleGeneratePayslips}
+              >
+                <FileText className="w-5 h-5" />
+                <span className="text-xs font-medium">Reports</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+                onClick={() => toast.info('Analytics view coming soon')}
+              >
+                <BarChart3 className="w-5 h-5" />
+                <span className="text-xs font-medium">Analytics</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+                onClick={handleRefresh}
+              >
+                <RefreshCw className="w-5 h-5" />
+                <span className="text-xs font-medium">Refresh</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setActiveTab('settings')}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1029,6 +1337,107 @@ export default function PayrollClient() {
                     </CardContent>
                   </Card>
                 ))}
+
+                {/* Database Payroll Runs */}
+                {dbPayrollRuns.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                      <DollarSign className="w-5 h-5 text-green-500" />
+                      Your Payroll Runs
+                    </h3>
+                    {dbPayrollRuns.map((run) => (
+                      <Card
+                        key={run.id}
+                        className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all mb-3"
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-gray-900 dark:text-white">{run.period}</h3>
+                                <Badge className={getStatusColor(run.status as PayRunStatus)}>
+                                  {run.status.replace('_', ' ')}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">{run.run_code}</Badge>
+                              </div>
+                              <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  Pay date: {run.pay_date}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Users className="w-3 h-3" />
+                                  {run.total_employees} employees
+                                </span>
+                                {run.department && (
+                                  <span className="flex items-center gap-1">
+                                    <Building2 className="w-3 h-3" />
+                                    {run.department}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                                {formatCurrency(run.total_amount)}
+                              </div>
+                              <div className="text-xs text-gray-500">Total amount</div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-4 pt-3 border-t dark:border-gray-700">
+                            <div className="text-center">
+                              <div className="text-sm font-semibold text-blue-600">{run.processed_count}/{run.total_employees}</div>
+                              <div className="text-xs text-gray-500">Processed</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-sm font-semibold text-yellow-600">{run.pending_count}</div>
+                              <div className="text-xs text-gray-500">Pending</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-sm font-semibold text-red-600">{run.failed_count}</div>
+                              <div className="text-xs text-gray-500">Failed</div>
+                            </div>
+                          </div>
+
+                          {run.approved_by && (
+                            <div className="mt-3 pt-3 border-t dark:border-gray-700 text-sm text-gray-500">
+                              Approved by {run.approved_by} on {new Date(run.approved_date!).toLocaleDateString()}
+                            </div>
+                          )}
+
+                          <div className="flex gap-2 mt-4 pt-3 border-t dark:border-gray-700">
+                            {run.status === 'draft' && (
+                              <>
+                                <Button size="sm" variant="outline" onClick={() => handleEditPayrollRun(run)}>
+                                  <Edit className="w-4 h-4 mr-1" /> Edit
+                                </Button>
+                                <Button size="sm" variant="outline" className="text-green-600" onClick={() => handleApprovePayrollRunDb(run.id)}>
+                                  <CheckCircle className="w-4 h-4 mr-1" /> Approve
+                                </Button>
+                              </>
+                            )}
+                            {run.status === 'approved' && (
+                              <Button size="sm" variant="outline" className="text-emerald-600" onClick={() => handleProcessPayrollRunDb(run.id)}>
+                                <PlayCircle className="w-4 h-4 mr-1" /> Process
+                              </Button>
+                            )}
+                            <Button size="sm" variant="outline" className="text-red-600 ml-auto" onClick={() => handleDeletePayrollRun(run.id)}>
+                              <Trash2 className="w-4 h-4 mr-1" /> Delete
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                {loading && (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="w-6 h-6 animate-spin text-gray-400" />
+                    <span className="ml-2 text-gray-500">Loading payroll runs...</span>
+                  </div>
+                )}
               </div>
 
               {/* Pay Run Summary */}
@@ -1132,15 +1541,15 @@ export default function PayrollClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{employees.length}</p>
+                    <p className="text-3xl font-bold">{filteredEmployees.length}</p>
                     <p className="text-blue-200 text-sm">Total Employees</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{employees.filter(e => e.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{filteredEmployees.filter(e => e.status === 'active').length}</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{employees.filter(e => e.paymentMethod === 'direct_deposit').length}</p>
+                    <p className="text-3xl font-bold">{filteredEmployees.filter(e => e.paymentMethod === 'direct_deposit').length}</p>
                     <p className="text-blue-200 text-sm">Direct Deposit</p>
                   </div>
                 </div>
@@ -1251,15 +1660,15 @@ export default function PayrollClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{taxes.length}</p>
+                    <p className="text-3xl font-bold">{mockTaxFilings.length}</p>
                     <p className="text-amber-200 text-sm">Tax Types</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{taxes.filter(t => t.status === 'filed').length}</p>
+                    <p className="text-3xl font-bold">{mockTaxFilings.filter(t => t.status === 'filed' || t.status === 'accepted').length}</p>
                     <p className="text-amber-200 text-sm">Filed</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{taxes.filter(t => t.status === 'pending').length}</p>
+                    <p className="text-3xl font-bold">{mockTaxFilings.filter(t => t.status === 'pending').length}</p>
                     <p className="text-amber-200 text-sm">Pending</p>
                   </div>
                 </div>
@@ -1409,11 +1818,11 @@ export default function PayrollClient() {
                     <p className="text-pink-200 text-sm">Total Plans</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBenefits.filter(b => b.enrolled > 0).length}</p>
+                    <p className="text-3xl font-bold">{mockBenefits.filter(b => b.enrolledCount > 0).length}</p>
                     <p className="text-pink-200 text-sm">Active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockBenefits.reduce((sum, b) => sum + b.enrolled, 0)}</p>
+                    <p className="text-3xl font-bold">{mockBenefits.reduce((sum, b) => sum + b.enrolledCount, 0)}</p>
                     <p className="text-pink-200 text-sm">Enrolled</p>
                   </div>
                 </div>
@@ -1500,15 +1909,15 @@ export default function PayrollClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{timeEntries.length}</p>
+                    <p className="text-3xl font-bold">{mockTimeEntries.length}</p>
                     <p className="text-cyan-200 text-sm">Entries</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{timeEntries.reduce((sum, t) => sum + t.hours, 0)}</p>
+                    <p className="text-3xl font-bold">{mockTimeEntries.reduce((sum, t) => sum + t.totalHours, 0)}</p>
                     <p className="text-cyan-200 text-sm">Total Hours</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{timeEntries.filter(t => t.status === 'approved').length}</p>
+                    <p className="text-3xl font-bold">{mockTimeEntries.filter(t => t.status === 'approved').length}</p>
                     <p className="text-cyan-200 text-sm">Approved</p>
                   </div>
                 </div>
@@ -1895,6 +2304,96 @@ export default function PayrollClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create/Edit Payroll Run Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>{editingId ? 'Edit Payroll Run' : 'Create Payroll Run'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="period">Period *</Label>
+                <Input
+                  id="period"
+                  placeholder="e.g., January 1-15, 2025"
+                  value={formState.period}
+                  onChange={(e) => setFormState({ ...formState, period: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pay_date">Pay Date *</Label>
+                <Input
+                  id="pay_date"
+                  type="date"
+                  value={formState.pay_date}
+                  onChange={(e) => setFormState({ ...formState, pay_date: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="total_employees">Employees</Label>
+                  <Input
+                    id="total_employees"
+                    type="number"
+                    min="0"
+                    value={formState.total_employees}
+                    onChange={(e) => setFormState({ ...formState, total_employees: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="total_amount">Total Amount ($)</Label>
+                  <Input
+                    id="total_amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formState.total_amount}
+                    onChange={(e) => setFormState({ ...formState, total_amount: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="department">Department</Label>
+                <Input
+                  id="department"
+                  placeholder="e.g., Engineering, Sales"
+                  value={formState.department}
+                  onChange={(e) => setFormState({ ...formState, department: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Additional notes..."
+                  value={formState.notes}
+                  onChange={(e) => setFormState({ ...formState, notes: e.target.value })}
+                />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowCreateDialog(false)
+                    setFormState(initialFormState)
+                    setEditingId(null)
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+                  onClick={editingId ? handleUpdatePayrollRun : handleCreatePayrollRun}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

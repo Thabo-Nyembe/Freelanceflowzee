@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Zap, Calendar, Target, BarChart3, Clock, Users, Flag,
   Settings, Plus, Search, Filter, LayoutGrid, List, ChevronRight,
@@ -23,8 +24,17 @@ import {
   Layers, Hash, GitBranch, Bug, FileText, Lightbulb, MessageSquare,
   Activity, Eye, RefreshCw, Sparkles, Bell, Award, RotateCcw,
   ArrowRight, GripVertical, MoreVertical, Flame, Coffee, Webhook, Key, Shield,
-  HardDrive, AlertOctagon, CreditCard, Sliders, Mail, Globe, Download, Copy
+  HardDrive, AlertOctagon, CreditCard, Sliders, Mail, Globe, Download, Copy, Trash2
 } from 'lucide-react'
+
+// Import Supabase hooks for real data operations
+import {
+  useSprints,
+  useSprintTasks,
+  useSprintMutations,
+  type Sprint as DbSprint,
+  type SprintTask as DbSprintTask,
+} from '@/lib/hooks/use-sprints'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -412,8 +422,75 @@ export default function SprintsClient() {
   const [statusFilter, setStatusFilter] = useState<SprintStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Calculate stats
+  // Dialog states for real operations
+  const [showCreateSprintDialog, setShowCreateSprintDialog] = useState(false)
+  const [showCreateTaskDialog, setShowCreateTaskDialog] = useState(false)
+  const [showDeleteConfirmDialog, setShowDeleteConfirmDialog] = useState(false)
+  const [sprintToDelete, setSprintToDelete] = useState<string | null>(null)
+  const [selectedSprintForTask, setSelectedSprintForTask] = useState<string | null>(null)
+
+  // Form states for creating sprint
+  const [newSprintName, setNewSprintName] = useState('')
+  const [newSprintGoal, setNewSprintGoal] = useState('')
+  const [newSprintTeamName, setNewSprintTeamName] = useState('')
+  const [newSprintStartDate, setNewSprintStartDate] = useState('')
+  const [newSprintEndDate, setNewSprintEndDate] = useState('')
+  const [newSprintCapacity, setNewSprintCapacity] = useState('80')
+
+  // Form states for creating task
+  const [newTaskTitle, setNewTaskTitle] = useState('')
+  const [newTaskDescription, setNewTaskDescription] = useState('')
+  const [newTaskPriority, setNewTaskPriority] = useState('medium')
+  const [newTaskStoryPoints, setNewTaskStoryPoints] = useState('3')
+  const [newTaskEstimatedHours, setNewTaskEstimatedHours] = useState('8')
+
+  // ============================================================================
+  // REAL SUPABASE DATA HOOKS
+  // ============================================================================
+  const { sprints: dbSprints, stats: dbStats, isLoading: isLoadingSprints, refetch: refetchSprints } = useSprints()
+  const { tasks: dbTasks, isLoading: isLoadingTasks, refetch: refetchTasks } = useSprintTasks()
+  const {
+    createSprint,
+    updateSprint,
+    deleteSprint,
+    startSprint,
+    completeSprint,
+    createTask,
+    updateTask,
+    completeTask,
+    isCreatingSprint,
+    isUpdatingSprint,
+    isDeletingSprint,
+    isStartingSprint,
+    isCompletingSprint,
+    isCreatingTask,
+    isUpdatingTask,
+    isCompletingTask,
+  } = useSprintMutations()
+
+  // Calculate stats - combine mock data with real DB data
   const stats = useMemo(() => {
+    // Use real DB stats if available, otherwise fall back to mock
+    const useDbData = dbSprints.length > 0
+
+    if (useDbData) {
+      return {
+        total: dbStats.total,
+        active: dbStats.active,
+        planning: dbStats.planning,
+        completed: dbStats.completed,
+        avgVelocity: Math.round(dbStats.avgVelocity),
+        completionRate: Math.round(dbStats.completionRate),
+        totalStoryPoints: mockSprints.reduce((sum, s) => sum + s.total_story_points, 0),
+        completedPoints: mockSprints.reduce((sum, s) => sum + s.completed_story_points, 0),
+        totalTasks: dbStats.totalTasks,
+        completedTasks: dbStats.completedTasks,
+        blockedTasks: mockSprints.reduce((sum, s) => sum + s.blocked_tasks, 0),
+        backlogItems: backlogTasks.length,
+      }
+    }
+
+    // Fallback to mock data
     const total = mockSprints.length
     const active = mockSprints.filter(s => s.status === 'active').length
     const planning = mockSprints.filter(s => s.status === 'planning').length
@@ -431,7 +508,7 @@ export default function SprintsClient() {
       totalStoryPoints, completedPoints, totalTasks, completedTasks, blockedTasks,
       backlogItems: backlogTasks.length,
     }
-  }, [])
+  }, [dbSprints, dbStats])
 
   // Filter sprints
   const filteredSprints = useMemo(() => {
@@ -464,62 +541,318 @@ export default function SprintsClient() {
     return groups
   }, [activeSprint])
 
-  // Handlers
+  // ============================================================================
+  // REAL SUPABASE HANDLERS
+  // ============================================================================
+
+  // Reset form states
+  const resetSprintForm = () => {
+    setNewSprintName('')
+    setNewSprintGoal('')
+    setNewSprintTeamName('')
+    setNewSprintStartDate('')
+    setNewSprintEndDate('')
+    setNewSprintCapacity('80')
+  }
+
+  const resetTaskForm = () => {
+    setNewTaskTitle('')
+    setNewTaskDescription('')
+    setNewTaskPriority('medium')
+    setNewTaskStoryPoints('3')
+    setNewTaskEstimatedHours('8')
+  }
+
+  // Create Sprint - opens dialog
   const handleCreateSprint = () => {
-    toast.info('Create Sprint', {
-      description: 'Opening sprint planning wizard...'
-    })
+    resetSprintForm()
+    setShowCreateSprintDialog(true)
   }
 
-  const handleStartSprint = (sprintName: string) => {
-    toast.success('Sprint Started', {
-      description: `"${sprintName}" is now active`
-    })
+  // Submit Create Sprint to Supabase
+  const handleSubmitCreateSprint = async () => {
+    if (!newSprintName.trim()) {
+      toast.error('Validation Error', {
+        description: 'Sprint name is required'
+      })
+      return
+    }
+
+    try {
+      await createSprint({
+        name: newSprintName,
+        goal: newSprintGoal || null,
+        team_name: newSprintTeamName || null,
+        start_date: newSprintStartDate || null,
+        end_date: newSprintEndDate || null,
+        capacity: parseInt(newSprintCapacity) || 80,
+        status: 'planning',
+        total_tasks: 0,
+        completed_tasks: 0,
+        in_progress_tasks: 0,
+        blocked_tasks: 0,
+        velocity: 0,
+        committed: 0,
+        burned: 0,
+        days_remaining: newSprintEndDate
+          ? Math.ceil((new Date(newSprintEndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+          : 14,
+      })
+
+      toast.success('Sprint Created', {
+        description: `"${newSprintName}" has been created successfully`
+      })
+      setShowCreateSprintDialog(false)
+      resetSprintForm()
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Create Sprint', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
   }
 
-  const handleCompleteSprint = (sprintName: string) => {
-    toast.success('Sprint Completed', {
-      description: `"${sprintName}" has been completed`
-    })
+  // Start Sprint - real Supabase operation
+  const handleStartSprint = async (sprintId: string, sprintName: string) => {
+    try {
+      await startSprint(sprintId)
+      toast.success('Sprint Started', {
+        description: `"${sprintName}" is now active`
+      })
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Start Sprint', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
   }
 
-  const handleAddTask = () => {
-    toast.info('Add Task', {
-      description: 'Opening task creation form...'
-    })
+  // Complete Sprint - real Supabase operation
+  const handleCompleteSprint = async (sprintId: string, sprintName: string) => {
+    try {
+      await completeSprint({ id: sprintId })
+      toast.success('Sprint Completed', {
+        description: `"${sprintName}" has been completed`
+      })
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Complete Sprint', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
   }
 
-  const handleMoveTask = (taskName: string, status: string) => {
-    toast.info('Task Moved', {
-      description: `"${taskName}" moved to ${status}`
-    })
+  // Delete Sprint - with confirmation
+  const handleDeleteSprintClick = (sprintId: string) => {
+    setSprintToDelete(sprintId)
+    setShowDeleteConfirmDialog(true)
   }
 
-  const handleSync = () => {
+  const handleConfirmDeleteSprint = async () => {
+    if (!sprintToDelete) return
+
+    try {
+      await deleteSprint(sprintToDelete)
+      toast.success('Sprint Deleted', {
+        description: 'Sprint has been deleted successfully'
+      })
+      setShowDeleteConfirmDialog(false)
+      setSprintToDelete(null)
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Delete Sprint', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
+  }
+
+  // Add Task - opens dialog
+  const handleAddTask = (sprintId?: string) => {
+    resetTaskForm()
+    setSelectedSprintForTask(sprintId || null)
+    setShowCreateTaskDialog(true)
+  }
+
+  // Submit Create Task to Supabase
+  const handleSubmitCreateTask = async () => {
+    if (!newTaskTitle.trim()) {
+      toast.error('Validation Error', {
+        description: 'Task title is required'
+      })
+      return
+    }
+
+    if (!selectedSprintForTask) {
+      toast.error('Validation Error', {
+        description: 'Please select a sprint for this task'
+      })
+      return
+    }
+
+    try {
+      await createTask({
+        sprint_id: selectedSprintForTask,
+        title: newTaskTitle,
+        description: newTaskDescription || null,
+        priority: newTaskPriority,
+        story_points: parseInt(newTaskStoryPoints) || 3,
+        estimated_hours: parseInt(newTaskEstimatedHours) || 8,
+        status: 'todo',
+        progress: 0,
+        actual_hours: 0,
+        labels: [],
+      })
+
+      toast.success('Task Created', {
+        description: `"${newTaskTitle}" has been added to the sprint`
+      })
+      setShowCreateTaskDialog(false)
+      resetTaskForm()
+      refetchTasks()
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Create Task', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
+  }
+
+  // Update Task Status - real Supabase operation
+  const handleMoveTask = async (taskId: string, taskName: string, newStatus: string) => {
+    try {
+      await updateTask({
+        id: taskId,
+        updates: { status: newStatus }
+      })
+      toast.info('Task Moved', {
+        description: `"${taskName}" moved to ${newStatus.replace('_', ' ')}`
+      })
+      refetchTasks()
+    } catch (error) {
+      toast.error('Failed to Move Task', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
+  }
+
+  // Complete Task - real Supabase operation
+  const handleCompleteTask = async (taskId: string, taskName: string) => {
+    try {
+      await completeTask(taskId)
+      toast.success('Task Completed', {
+        description: `"${taskName}" has been marked as done`
+      })
+      refetchTasks()
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Complete Task', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
+  }
+
+  // Add backlog task to sprint - real Supabase operation
+  const handleAddToSprint = async (taskData: typeof backlogTasks[0], sprintId: string) => {
+    try {
+      await createTask({
+        sprint_id: sprintId,
+        title: taskData.title,
+        description: taskData.description || null,
+        priority: taskData.priority,
+        story_points: taskData.story_points,
+        estimated_hours: taskData.estimate_hours,
+        status: 'todo',
+        progress: 0,
+        actual_hours: 0,
+        labels: taskData.labels,
+      })
+
+      toast.success('Task Added to Sprint', {
+        description: `"${taskData.title}" has been added to the sprint`
+      })
+      refetchTasks()
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Add Task to Sprint', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
+  }
+
+  // Sync data from Supabase
+  const handleSync = async () => {
     toast.info('Syncing', {
-      description: 'Syncing sprint data...'
+      description: 'Syncing sprint data from database...'
     })
+    try {
+      await Promise.all([refetchSprints(), refetchTasks()])
+      toast.success('Sync Complete', {
+        description: 'Sprint data has been refreshed'
+      })
+    } catch (error) {
+      toast.error('Sync Failed', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
   }
 
-  const handleArchiveSprints = () => {
-    toast.success('Sprints Archived', {
-      description: 'All completed sprints have been archived'
-    })
+  // Archive completed sprints - real Supabase operation
+  const handleArchiveSprints = async () => {
+    try {
+      const completedSprints = dbSprints.filter(s => s.status === 'completed')
+      for (const sprint of completedSprints) {
+        await deleteSprint(sprint.id)
+      }
+      toast.success('Sprints Archived', {
+        description: `${completedSprints.length} completed sprints have been archived`
+      })
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Archive Sprints', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
   }
 
-  const handleResetVelocity = () => {
-    toast.success('Velocity Reset', {
-      description: 'Velocity data has been cleared'
-    })
+  // Reset velocity data
+  const handleResetVelocity = async () => {
+    try {
+      for (const sprint of dbSprints) {
+        await updateSprint({
+          id: sprint.id,
+          updates: { velocity: 0 }
+        })
+      }
+      toast.success('Velocity Reset', {
+        description: 'Velocity data has been cleared for all sprints'
+      })
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Reset Velocity', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
   }
 
-  const handleDeleteProject = () => {
-    toast.error('Project Deleted', {
-      description: 'Project has been permanently deleted'
-    })
+  // Delete all sprints (project delete simulation)
+  const handleDeleteProject = async () => {
+    try {
+      for (const sprint of dbSprints) {
+        await deleteSprint(sprint.id)
+      }
+      toast.error('Project Deleted', {
+        description: 'All sprints have been permanently deleted'
+      })
+      refetchSprints()
+    } catch (error) {
+      toast.error('Failed to Delete Project', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    }
   }
 
   const handleCopyApiKey = () => {
+    navigator.clipboard.writeText('sprint_xxxxxxxxxxxxxxxxxxxxx')
     toast.success('Copied', {
       description: 'API key copied to clipboard'
     })
@@ -765,10 +1098,227 @@ export default function SprintsClient() {
                         SM: {sprint.scrum_master.name}
                       </div>
                     </div>
+
+                    {/* Sprint Actions - Real Supabase Operations */}
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                      {sprint.status === 'planning' && (
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleStartSprint(sprint.id, sprint.name)
+                          }}
+                          disabled={isStartingSprint}
+                          className="bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                        >
+                          <PlayCircle className="w-4 h-4 mr-1" />
+                          Start Sprint
+                        </Button>
+                      )}
+                      {sprint.status === 'active' && (
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleCompleteSprint(sprint.id, sprint.name)
+                          }}
+                          disabled={isCompletingSprint}
+                          className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-1" />
+                          Complete Sprint
+                        </Button>
+                      )}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleAddTask(sprint.id)
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        Add Task
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteSprintClick(sprint.id)
+                        }}
+                        disabled={isDeletingSprint}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
+
+            {/* Display Real Sprints from Supabase */}
+            {dbSprints.length > 0 && (
+              <div className="space-y-4 mt-6">
+                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300">
+                  Your Sprints (from Database)
+                </h3>
+                {dbSprints.map((sprint) => (
+                  <Card
+                    key={sprint.id}
+                    className="border-0 shadow-lg bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm cursor-pointer hover:shadow-xl transition-all duration-300 border-l-4 border-l-teal-500"
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-start gap-4">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            sprint.status === 'active' ? 'bg-gradient-to-br from-teal-500 to-cyan-500' :
+                            sprint.status === 'planning' ? 'bg-gradient-to-br from-purple-500 to-violet-500' :
+                            'bg-gradient-to-br from-green-500 to-emerald-500'
+                          }`}>
+                            <Zap className="w-6 h-6 text-white" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-3 mb-1">
+                              <span className="text-sm text-slate-500">{sprint.sprint_code}</span>
+                              <h3 className="font-semibold text-lg text-slate-900 dark:text-white">
+                                {sprint.name}
+                              </h3>
+                            </div>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{sprint.goal || 'No goal set'}</p>
+                            <div className="flex items-center gap-4 text-sm">
+                              <Badge variant="outline" className={getStatusColor(sprint.status as SprintStatus)}>
+                                {sprint.status}
+                              </Badge>
+                              {sprint.start_date && sprint.end_date && (
+                                <span className="text-slate-500">
+                                  {formatDate(sprint.start_date)} - {formatDate(sprint.end_date)}
+                                </span>
+                              )}
+                              {sprint.team_name && (
+                                <span className="text-slate-500">{sprint.team_name}</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-3xl font-bold text-teal-600">
+                            {sprint.total_tasks > 0
+                              ? Math.round((sprint.completed_tasks / sprint.total_tasks) * 100)
+                              : 0}%
+                          </div>
+                          <div className="text-sm text-slate-500">Complete</div>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="mb-4">
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-slate-600 dark:text-slate-400">
+                            {sprint.completed_tasks} / {sprint.total_tasks} tasks
+                          </span>
+                          {sprint.days_remaining > 0 && (
+                            <span className={`font-medium ${sprint.days_remaining <= 3 ? 'text-red-600' : 'text-slate-600'}`}>
+                              {sprint.days_remaining} days remaining
+                            </span>
+                          )}
+                        </div>
+                        <Progress
+                          value={sprint.total_tasks > 0 ? (sprint.completed_tasks / sprint.total_tasks) * 100 : 0}
+                          className="h-2"
+                        />
+                      </div>
+
+                      {/* Task Stats */}
+                      <div className="grid grid-cols-5 gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-slate-900 dark:text-white">{sprint.total_tasks}</div>
+                          <div className="text-xs text-slate-500">Total</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-green-600">{sprint.completed_tasks}</div>
+                          <div className="text-xs text-slate-500">Done</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-blue-600">{sprint.in_progress_tasks}</div>
+                          <div className="text-xs text-slate-500">In Progress</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-red-600">{sprint.blocked_tasks}</div>
+                          <div className="text-xs text-slate-500">Blocked</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-xl font-bold text-teal-600">{sprint.velocity}</div>
+                          <div className="text-xs text-slate-500">Velocity</div>
+                        </div>
+                      </div>
+
+                      {/* Sprint Actions */}
+                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        {sprint.status === 'planning' && (
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleStartSprint(sprint.id, sprint.name)
+                            }}
+                            disabled={isStartingSprint}
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                          >
+                            <PlayCircle className="w-4 h-4 mr-1" />
+                            Start Sprint
+                          </Button>
+                        )}
+                        {sprint.status === 'active' && (
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleCompleteSprint(sprint.id, sprint.name)
+                            }}
+                            disabled={isCompletingSprint}
+                            className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
+                          >
+                            <CheckCircle2 className="w-4 h-4 mr-1" />
+                            Complete Sprint
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleAddTask(sprint.id)
+                          }}
+                        >
+                          <Plus className="w-4 h-4 mr-1" />
+                          Add Task
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteSprintClick(sprint.id)
+                          }}
+                          disabled={isDeletingSprint}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* Loading State */}
+            {isLoadingSprints && (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="w-6 h-6 animate-spin text-teal-500 mr-2" />
+                <span className="text-slate-500">Loading sprints...</span>
+              </div>
+            )}
           </TabsContent>
 
           {/* Board Tab */}
@@ -895,9 +1445,29 @@ export default function SprintsClient() {
                           <div className="text-lg font-bold text-teal-600">{task.story_points}</div>
                           <div className="text-xs text-slate-500">points</div>
                         </div>
-                        <Button onClick={handleAddTask} variant="outline" size="sm">
-                          Add to Sprint
-                        </Button>
+                        <Select
+                          onValueChange={(sprintId) => {
+                            if (sprintId) {
+                              handleAddToSprint(task, sprintId)
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Add to Sprint" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {dbSprints.filter(s => s.status !== 'completed').map((sprint) => (
+                              <SelectItem key={sprint.id} value={sprint.id}>
+                                {sprint.name}
+                              </SelectItem>
+                            ))}
+                            {mockSprints.filter(s => s.status !== 'completed').map((sprint) => (
+                              <SelectItem key={sprint.id} value={sprint.id}>
+                                {sprint.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     )
                   })}
@@ -1945,6 +2515,274 @@ export default function SprintsClient() {
                 </div>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* CREATE SPRINT DIALOG - Real Supabase Operation */}
+        {/* ============================================================================ */}
+        <Dialog open={showCreateSprintDialog} onOpenChange={setShowCreateSprintDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-white" />
+                </div>
+                Create New Sprint
+              </DialogTitle>
+              <DialogDescription>
+                Create a new sprint to organize your team's work
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="sprint-name">Sprint Name *</Label>
+                <Input
+                  id="sprint-name"
+                  placeholder="e.g., Sprint 26 - Mobile Features"
+                  value={newSprintName}
+                  onChange={(e) => setNewSprintName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sprint-goal">Sprint Goal</Label>
+                <Textarea
+                  id="sprint-goal"
+                  placeholder="What is the main objective of this sprint?"
+                  value={newSprintGoal}
+                  onChange={(e) => setNewSprintGoal(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sprint-team">Team Name</Label>
+                <Input
+                  id="sprint-team"
+                  placeholder="e.g., Platform Team"
+                  value={newSprintTeamName}
+                  onChange={(e) => setNewSprintTeamName(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sprint-start">Start Date</Label>
+                  <Input
+                    id="sprint-start"
+                    type="date"
+                    value={newSprintStartDate}
+                    onChange={(e) => setNewSprintStartDate(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="sprint-end">End Date</Label>
+                  <Input
+                    id="sprint-end"
+                    type="date"
+                    value={newSprintEndDate}
+                    onChange={(e) => setNewSprintEndDate(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sprint-capacity">Team Capacity (hours)</Label>
+                <Input
+                  id="sprint-capacity"
+                  type="number"
+                  placeholder="80"
+                  value={newSprintCapacity}
+                  onChange={(e) => setNewSprintCapacity(e.target.value)}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateSprintDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitCreateSprint}
+                disabled={isCreatingSprint}
+                className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white"
+              >
+                {isCreatingSprint ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Sprint
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* CREATE TASK DIALOG - Real Supabase Operation */}
+        {/* ============================================================================ */}
+        <Dialog open={showCreateTaskDialog} onOpenChange={setShowCreateTaskDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+                  <CheckCircle2 className="w-5 h-5 text-white" />
+                </div>
+                Create New Task
+              </DialogTitle>
+              <DialogDescription>
+                Add a new task to your sprint
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="task-sprint">Sprint *</Label>
+                <Select
+                  value={selectedSprintForTask || ''}
+                  onValueChange={setSelectedSprintForTask}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a sprint" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dbSprints.filter(s => s.status !== 'completed').map((sprint) => (
+                      <SelectItem key={sprint.id} value={sprint.id}>
+                        {sprint.name}
+                      </SelectItem>
+                    ))}
+                    {mockSprints.filter(s => s.status !== 'completed').map((sprint) => (
+                      <SelectItem key={sprint.id} value={sprint.id}>
+                        {sprint.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-title">Task Title *</Label>
+                <Input
+                  id="task-title"
+                  placeholder="e.g., Implement user authentication"
+                  value={newTaskTitle}
+                  onChange={(e) => setNewTaskTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="task-description">Description</Label>
+                <Textarea
+                  id="task-description"
+                  placeholder="Describe what needs to be done..."
+                  value={newTaskDescription}
+                  onChange={(e) => setNewTaskDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="task-priority">Priority</Label>
+                  <Select
+                    value={newTaskPriority}
+                    onValueChange={setNewTaskPriority}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="task-points">Story Points</Label>
+                  <Input
+                    id="task-points"
+                    type="number"
+                    placeholder="3"
+                    value={newTaskStoryPoints}
+                    onChange={(e) => setNewTaskStoryPoints(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="task-hours">Est. Hours</Label>
+                  <Input
+                    id="task-hours"
+                    type="number"
+                    placeholder="8"
+                    value={newTaskEstimatedHours}
+                    onChange={(e) => setNewTaskEstimatedHours(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateTaskDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitCreateTask}
+                disabled={isCreatingTask}
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+              >
+                {isCreatingTask ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Task
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* DELETE CONFIRMATION DIALOG */}
+        {/* ============================================================================ */}
+        <Dialog open={showDeleteConfirmDialog} onOpenChange={setShowDeleteConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                Confirm Delete
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this sprint? This action cannot be undone.
+                All tasks associated with this sprint will also be removed.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowDeleteConfirmDialog(false)
+                setSprintToDelete(null)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmDeleteSprint}
+                disabled={isDeletingSprint}
+              >
+                {isDeletingSprint ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Sprint
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

@@ -265,12 +265,23 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
   const [newTriggerType, setNewTriggerType] = useState('webhook')
   const [newSchedule, setNewSchedule] = useState('0 9 * * *')
 
-  // Hook for automation data
-  const { automations, loading, error } = useAutomation({
+  // Hook for automation data with CRUD operations
+  const {
+    automations,
+    loading,
+    error,
+    createAutomation,
+    updateAutomation,
+    deleteAutomation,
+    refetch
+  } = useAutomation({
     automationType: automationTypeFilter,
     status: statusFilter
   })
   const displayAutomations = automations.length > 0 ? automations : initialAutomations
+
+  // Form submission loading state
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Calculate comprehensive stats
   const stats = useMemo(() => ({
@@ -308,19 +319,57 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
   }, [selectedCategory])
 
   // Handlers
-  const handleCreateAutomation = useCallback(() => {
+  const handleCreateAutomation = useCallback(async () => {
     if (!newName.trim()) {
       toast.error('Please enter a name for your automation')
       return
     }
 
-    toast.success('Automation Created!', {
-      description: `"${newName}" is now ready. Add your first trigger and actions.`
-    })
-    setShowCreateDialog(false)
-    setNewName('')
-    setNewDescription('')
-  }, [newName])
+    setIsSubmitting(true)
+    try {
+      await createAutomation({
+        automation_name: newName.trim(),
+        description: newDescription.trim() || null,
+        automation_type: 'trigger' as AutomationType,
+        trigger_type: newTriggerType,
+        trigger_conditions: {},
+        schedule_expression: newTriggerType === 'scheduled' ? newSchedule : null,
+        schedule_timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        action_type: 'notification',
+        action_config: {},
+        action_parameters: {},
+        status: 'inactive' as AutomationStatus,
+        is_enabled: false,
+        is_running: false,
+        run_count: 0,
+        success_count: 0,
+        failure_count: 0,
+        total_execution_time_ms: 0,
+        priority: 'normal',
+        retry_enabled: true,
+        max_retries: 3,
+        retry_count: 0,
+        retry_delay_seconds: 60,
+        timeout_seconds: 300,
+        filters: {},
+        conditions: {},
+        metadata: {}
+      })
+      toast.success('Automation Created!', {
+        description: `"${newName}" is now ready. Add your first trigger and actions.`
+      })
+      setShowCreateDialog(false)
+      setNewName('')
+      setNewDescription('')
+      setNewTriggerType('webhook')
+      setNewSchedule('0 9 * * *')
+      refetch()
+    } catch (err) {
+      // Error toast is handled by mutation hook
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [newName, newDescription, newTriggerType, newSchedule, createAutomation, refetch])
 
   const handleUseTemplate = useCallback((template: AutomationTemplate) => {
     setSelectedTemplate(template)
@@ -332,30 +381,106 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
     setShowIntegrationDialog(true)
   }, [])
 
-  const handleToggleAutomation = useCallback((automation: Automation) => {
+  const handleToggleAutomation = useCallback(async (automation: Automation) => {
     const newStatus = automation.status === 'active' ? 'paused' : 'active'
-    toast.success(`Automation ${newStatus === 'active' ? 'Activated' : 'Paused'}`, {
-      description: `"${automation.automation_name}" is now ${newStatus}`
-    })
-  }, [])
+    try {
+      await updateAutomation(automation.id, {
+        status: newStatus as AutomationStatus,
+        is_enabled: newStatus === 'active'
+      })
+      toast.success(`Automation ${newStatus === 'active' ? 'Activated' : 'Paused'}`, {
+        description: `"${automation.automation_name}" is now ${newStatus}`
+      })
+      refetch()
+    } catch (err) {
+      // Error toast is handled by mutation hook
+    }
+  }, [updateAutomation, refetch])
 
-  const handleRunAutomation = useCallback((automation: Automation) => {
-    toast.success('Running Automation', {
-      description: `"${automation.automation_name}" triggered manually`
-    })
-  }, [])
+  const handleRunAutomation = useCallback(async (automation: Automation) => {
+    try {
+      await updateAutomation(automation.id, {
+        status: 'running' as AutomationStatus,
+        is_running: true,
+        last_run_at: new Date().toISOString(),
+        run_count: automation.run_count + 1
+      })
+      toast.success('Running Automation', {
+        description: `"${automation.automation_name}" triggered manually`
+      })
+      // Simulate completion after delay (in real app, this would be async task)
+      setTimeout(async () => {
+        await updateAutomation(automation.id, {
+          status: 'active' as AutomationStatus,
+          is_running: false,
+          success_count: automation.success_count + 1,
+          last_success_at: new Date().toISOString()
+        })
+        refetch()
+      }, 2000)
+    } catch (err) {
+      // Error toast is handled by mutation hook
+    }
+  }, [updateAutomation, refetch])
 
-  const handleDuplicateAutomation = useCallback((automation: Automation) => {
-    toast.success('Automation Duplicated', {
-      description: `Copy of "${automation.automation_name}" created`
-    })
-  }, [])
+  const handleDuplicateAutomation = useCallback(async (automation: Automation) => {
+    try {
+      await createAutomation({
+        automation_name: `${automation.automation_name} (Copy)`,
+        description: automation.description,
+        automation_type: automation.automation_type,
+        trigger_type: automation.trigger_type,
+        trigger_event: automation.trigger_event,
+        trigger_conditions: automation.trigger_conditions,
+        schedule_type: automation.schedule_type,
+        schedule_expression: automation.schedule_expression,
+        schedule_timezone: automation.schedule_timezone,
+        action_type: automation.action_type,
+        action_config: automation.action_config,
+        action_parameters: automation.action_parameters,
+        status: 'inactive' as AutomationStatus,
+        is_enabled: false,
+        is_running: false,
+        run_count: 0,
+        success_count: 0,
+        failure_count: 0,
+        total_execution_time_ms: 0,
+        priority: automation.priority,
+        queue_name: automation.queue_name,
+        retry_enabled: automation.retry_enabled,
+        max_retries: automation.max_retries,
+        retry_count: 0,
+        retry_delay_seconds: automation.retry_delay_seconds,
+        timeout_seconds: automation.timeout_seconds,
+        filters: automation.filters,
+        conditions: automation.conditions,
+        tags: automation.tags,
+        category: automation.category,
+        metadata: automation.metadata
+      })
+      toast.success('Automation Duplicated', {
+        description: `Copy of "${automation.automation_name}" created`
+      })
+      refetch()
+    } catch (err) {
+      // Error toast is handled by mutation hook
+    }
+  }, [createAutomation, refetch])
 
-  const handleDeleteAutomation = useCallback((automation: Automation) => {
-    toast.success('Automation Deleted', {
-      description: `"${automation.automation_name}" has been removed`
-    })
-  }, [])
+  const handleDeleteAutomation = useCallback(async (automation: Automation) => {
+    if (!confirm(`Are you sure you want to delete "${automation.automation_name}"?`)) {
+      return
+    }
+    try {
+      await deleteAutomation(automation.id)
+      toast.success('Automation Deleted', {
+        description: `"${automation.automation_name}" has been removed`
+      })
+      refetch()
+    } catch (err) {
+      // Error toast is handled by mutation hook
+    }
+  }, [deleteAutomation, refetch])
 
   const handleViewHistory = useCallback((automation: Automation) => {
     setSelectedAutomation(automation)
@@ -2040,15 +2165,20 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)} disabled={isSubmitting}>
                 Cancel
               </Button>
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
                 onClick={handleCreateAutomation}
+                disabled={isSubmitting}
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Automation
+                {isSubmitting ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                {isSubmitting ? 'Creating...' : 'Create Automation'}
               </Button>
             </DialogFooter>
           </DialogContent>

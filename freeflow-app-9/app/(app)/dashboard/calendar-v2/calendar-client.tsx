@@ -234,7 +234,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [showNewEvent, setShowNewEvent] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
-  const { events, loading, error, createEvent, refetch } = useCalendarEvents({ eventType: eventTypeFilter, status: statusFilter })
+  const { events, loading, error, createEvent, updateEvent, deleteEvent, refetch } = useCalendarEvents({ eventType: eventTypeFilter, status: statusFilter })
 
   // Form state for new event
   const [newEventForm, setNewEventForm] = useState({
@@ -405,17 +405,59 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   }, [displayEvents])
 
   // Handlers
-  const handleCancelEvent = (event: CalendarEvent) => {
-    toast.success('Event cancelled', {
-      description: `"${event.title}" has been cancelled`
-    })
+  // Edit form state
+  const [editForm, setEditForm] = useState({
+    title: '',
+    startTime: '',
+    endTime: '',
+    location: '',
+    description: ''
+  })
+  const [isEditing, setIsEditing] = useState(false)
+
+  // Handle updating an event
+  const handleUpdateEvent = async () => {
+    if (!selectedEvent || !editForm.title) return
+    try {
+      await updateEvent({
+        id: selectedEvent.id,
+        title: editForm.title,
+        start_time: editForm.startTime,
+        end_time: editForm.endTime,
+        location: editForm.location || null,
+        description: editForm.description || null
+      } as any)
+      toast.success('Event updated')
+      setIsEditing(false)
+      setSelectedEvent(null)
+      refetch()
+    } catch (err) {
+      toast.error('Failed to update event')
+    }
   }
 
-  const handleRescheduleEvent = (event: CalendarEvent) => {
-    toast.info('Reschedule Event', {
-      description: 'Opening reschedule options...'
+  // Handle deleting an event
+  const handleDeleteEvent = async (event: CalendarEvent) => {
+    try {
+      await deleteEvent({ id: event.id } as any)
+      toast.success('Event deleted', { description: `"${event.title}" removed` })
+      setSelectedEvent(null)
+      refetch()
+    } catch (err) {
+      toast.error('Failed to delete event')
+    }
+  }
+
+  // Start editing - populate form
+  const startEditing = (event: CalendarEvent) => {
+    setEditForm({
+      title: event.title,
+      startTime: event.start_time.slice(0, 16),
+      endTime: event.end_time.slice(0, 16),
+      location: event.location || '',
+      description: event.description || ''
     })
-    setSelectedEvent(event)
+    setIsEditing(true)
   }
 
   const handleExportCalendar = () => {
@@ -1844,56 +1886,93 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
 
         {/* Event Detail Modal */}
         {selectedEvent && (
-          <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
+          <Dialog open={!!selectedEvent} onOpenChange={() => { setSelectedEvent(null); setIsEditing(false) }}>
             <DialogContent className="max-w-lg">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-3">
                   <div className={`w-3 h-3 rounded-full ${eventColors[selectedEvent.event_type]}`}></div>
-                  {selectedEvent.title}
+                  {isEditing ? 'Edit Event' : selectedEvent.title}
                 </DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-                  <Clock className="h-5 w-5" />
+              {isEditing ? (
+                <div className="space-y-4 py-4">
                   <div>
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {new Date(selectedEvent.start_time).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                    <label className="block text-sm font-medium mb-1">Title</label>
+                    <Input value={editForm.title} onChange={(e) => setEditForm(f => ({ ...f, title: e.target.value }))} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Start</label>
+                      <Input type="datetime-local" value={editForm.startTime} onChange={(e) => setEditForm(f => ({ ...f, startTime: e.target.value }))} />
                     </div>
-                    <div className="text-sm">{formatTime(selectedEvent.start_time)} - {formatTime(selectedEvent.end_time)}</div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">End</label>
+                      <Input type="datetime-local" value={editForm.endTime} onChange={(e) => setEditForm(f => ({ ...f, endTime: e.target.value }))} />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Location</label>
+                    <Input value={editForm.location} onChange={(e) => setEditForm(f => ({ ...f, location: e.target.value }))} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Description</label>
+                    <textarea rows={3} className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" value={editForm.description} onChange={(e) => setEditForm(f => ({ ...f, description: e.target.value }))} />
+                  </div>
+                  <div className="flex gap-2 pt-4">
+                    <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                    <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={handleUpdateEvent} disabled={loading}>
+                      {loading ? 'Saving...' : 'Save Changes'}
+                    </Button>
                   </div>
                 </div>
-                {selectedEvent.location && (
+              ) : (
+                <div className="space-y-4 py-4">
                   <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-                    <MapPin className="h-5 w-5" />
-                    <span>{selectedEvent.location}</span>
+                    <Clock className="h-5 w-5" />
+                    <div>
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {new Date(selectedEvent.start_time).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                      </div>
+                      <div className="text-sm">{formatTime(selectedEvent.start_time)} - {formatTime(selectedEvent.end_time)}</div>
+                    </div>
                   </div>
-                )}
-                {selectedEvent.location_type === 'virtual' && (
-                  <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-                    <Video className="h-5 w-5" />
-                    <Button variant="link" className="text-teal-600 p-0">Join Video Call</Button>
-                  </div>
-                )}
-                <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
-                  <Users className="h-5 w-5" />
-                  <span>{selectedEvent.total_attendees} attendees</span>
-                  {selectedEvent.rsvp_required && (
-                    <span className="text-sm text-gray-500">({selectedEvent.accepted_count} accepted)</span>
+                  {selectedEvent.location && (
+                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+                      <MapPin className="h-5 w-5" />
+                      <span>{selectedEvent.location}</span>
+                    </div>
                   )}
-                </div>
-                {selectedEvent.description && (
-                  <div className="pt-4 border-t dark:border-gray-700">
-                    <p className="text-gray-600 dark:text-gray-400">{selectedEvent.description}</p>
+                  {selectedEvent.location_type === 'virtual' && (
+                    <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+                      <Video className="h-5 w-5" />
+                      <Button variant="link" className="text-teal-600 p-0">Join Video Call</Button>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
+                    <Users className="h-5 w-5" />
+                    <span>{selectedEvent.total_attendees} attendees</span>
+                    {selectedEvent.rsvp_required && (
+                      <span className="text-sm text-gray-500">({selectedEvent.accepted_count} accepted)</span>
+                    )}
                   </div>
-                )}
-                <div className="flex items-center gap-2 pt-4 border-t dark:border-gray-700">
-                  <Button className="flex-1 bg-teal-600 hover:bg-teal-700">
-                    <Edit2 className="h-4 w-4 mr-2" />Edit
-                  </Button>
-                  <Button variant="outline"><Copy className="h-4 w-4" /></Button>
-                  <Button variant="outline" className="text-red-600"><Trash2 className="h-4 w-4" /></Button>
+                  {selectedEvent.description && (
+                    <div className="pt-4 border-t dark:border-gray-700">
+                      <p className="text-gray-600 dark:text-gray-400">{selectedEvent.description}</p>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 pt-4 border-t dark:border-gray-700">
+                    <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => startEditing(selectedEvent)}>
+                      <Edit2 className="h-4 w-4 mr-2" />Edit
+                    </Button>
+                    <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedEvent.title); toast.success('Copied to clipboard') }}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                    <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteEvent(selectedEvent)} disabled={loading}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </DialogContent>
           </Dialog>
         )}

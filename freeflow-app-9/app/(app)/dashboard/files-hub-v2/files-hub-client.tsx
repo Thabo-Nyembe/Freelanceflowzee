@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -432,7 +433,42 @@ const mockFilesHubQuickActions = [
   { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => console.log('Search') },
 ]
 
+// Database types matching schema
+interface DbFile {
+  id: string
+  user_id: string
+  folder_id: string | null
+  name: string
+  type: string
+  extension: string
+  size: number
+  url: string
+  is_starred: boolean
+  is_shared: boolean
+  status: string
+  version: number
+  created_at: string
+  updated_at: string
+}
+
+interface DbFolder {
+  id: string
+  user_id: string
+  parent_id: string | null
+  name: string
+  path: string
+  file_count: number
+  total_size: number
+  color: string | null
+  is_shared: boolean
+  created_at: string
+  updated_at: string
+}
+
 export default function FilesHubClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('files')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -443,21 +479,88 @@ export default function FilesHubClient() {
   const [filterType, setFilterType] = useState<FileType | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('storage')
 
+  // Data State
+  const [files, setFiles] = useState<FileItem[]>(mockFiles)
+  const [folders, setFolders] = useState<FolderItem[]>(mockFolders)
+  const [loading, setLoading] = useState(true)
+
+  // Form State
+  const [showCreateFolderDialog, setShowCreateFolderDialog] = useState(false)
+  const [newFolderName, setNewFolderName] = useState('')
+  const [newFolderColor, setNewFolderColor] = useState('blue')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Fetch files and folders
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const [filesRes, foldersRes] = await Promise.all([
+        supabase.from('files').select('*').eq('user_id', user.id).eq('status', 'active').order('updated_at', { ascending: false }),
+        supabase.from('folders').select('*').eq('user_id', user.id).order('name')
+      ])
+
+      if (filesRes.data) {
+        setFiles(filesRes.data.map((f: DbFile) => ({
+          id: f.id,
+          name: f.name,
+          type: f.type as FileType,
+          size: f.size,
+          path: '/',
+          parentId: f.folder_id,
+          createdAt: f.created_at,
+          modifiedAt: f.updated_at,
+          owner: 'You',
+          status: (f.status || 'synced') as FileStatus,
+          isStarred: f.is_starred,
+          isShared: f.is_shared,
+          extension: f.extension,
+          version: f.version
+        })))
+      }
+
+      if (foldersRes.data) {
+        setFolders(foldersRes.data.map((f: DbFolder) => ({
+          id: f.id,
+          name: f.name,
+          parentId: f.parent_id,
+          path: f.path,
+          itemCount: f.file_count,
+          size: f.total_size,
+          createdAt: f.created_at,
+          modifiedAt: f.updated_at,
+          color: f.color || 'blue',
+          isShared: f.is_shared
+        })))
+      }
+    } catch (error) {
+      console.error('Error fetching files:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
   // Stats
   const stats: StorageStats = useMemo(() => ({
     totalSpace: 15 * 1024 * 1024 * 1024, // 15 GB
-    usedSpace: mockFiles.reduce((sum, f) => sum + f.size, 0) + mockFolders.reduce((sum, f) => sum + f.size, 0),
-    fileCount: mockFiles.length,
-    folderCount: mockFolders.length,
-    sharedFiles: mockFiles.filter(f => f.isShared).length,
-    starredFiles: mockFiles.filter(f => f.isStarred).length,
-    recentFiles: mockFiles.filter(f => new Date(f.modifiedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
+    usedSpace: files.reduce((sum, f) => sum + f.size, 0) + folders.reduce((sum, f) => sum + f.size, 0),
+    fileCount: files.length,
+    folderCount: folders.length,
+    sharedFiles: files.filter(f => f.isShared).length,
+    starredFiles: files.filter(f => f.isStarred).length,
+    recentFiles: files.filter(f => new Date(f.modifiedAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
     trashedFiles: 0
-  }), [])
+  }), [files, folders])
 
   // Filtered and sorted files
   const filteredFiles = useMemo(() => {
-    let files = mockFiles.filter(file => {
+    const filtered = [...files].filter(file => {
       const matchesSearch = file.name.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesType = filterType === 'all' || file.type === filterType
       const matchesFolder = currentFolderId === null || file.parentId === currentFolderId
@@ -465,7 +568,7 @@ export default function FilesHubClient() {
     })
 
     // Sort
-    files.sort((a, b) => {
+    filtered.sort((a, b) => {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name)
@@ -480,53 +583,112 @@ export default function FilesHubClient() {
       }
     })
 
-    return files
-  }, [searchQuery, filterType, currentFolderId, sortBy])
+    return filtered
+  }, [files, searchQuery, filterType, currentFolderId, sortBy])
 
   const currentFolders = useMemo(() => {
-    return mockFolders.filter(f => f.parentId === currentFolderId)
-  }, [currentFolderId])
+    return folders.filter(f => f.parentId === currentFolderId)
+  }, [folders, currentFolderId])
 
   const breadcrumbs = useMemo(() => {
-    const crumbs = [{ id: null, name: 'Home' }]
+    const crumbs: { id: string | null; name: string }[] = [{ id: null, name: 'Home' }]
     if (currentFolderId) {
-      const folder = mockFolders.find(f => f.id === currentFolderId)
+      const folder = folders.find(f => f.id === currentFolderId)
       if (folder) {
         crumbs.push({ id: folder.id, name: folder.name })
       }
     }
     return crumbs
-  }, [currentFolderId])
+  }, [folders, currentFolderId])
 
-  // Handlers
-  const handleUploadFile = () => {
-    toast.info('Upload File', {
-      description: 'Opening file picker...'
-    })
+  // CRUD Handlers
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) {
+      toast.error('Please enter a folder name')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const parentPath = currentFolderId
+        ? folders.find(f => f.id === currentFolderId)?.path || '/'
+        : '/'
+
+      const { error } = await supabase.from('folders').insert({
+        user_id: user.id,
+        parent_id: currentFolderId,
+        name: newFolderName.trim(),
+        path: `${parentPath}/${newFolderName.trim()}`,
+        color: newFolderColor
+      })
+
+      if (error) throw error
+      toast.success('Folder created', { description: `"${newFolderName}" has been created` })
+      setNewFolderName('')
+      setShowCreateFolderDialog(false)
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to create folder', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleCreateFolder = () => {
-    toast.success('Folder created', {
-      description: 'New folder has been created'
-    })
+  const handleDeleteFile = async (fileId: string, fileName: string) => {
+    try {
+      const { error } = await supabase.from('files').update({ status: 'deleted', deleted_at: new Date().toISOString() }).eq('id', fileId)
+      if (error) throw error
+      toast.success('File deleted', { description: `${fileName} moved to trash` })
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to delete file', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
   }
 
-  const handleDownloadFile = (fileName: string) => {
-    toast.success('Downloading file', {
-      description: `${fileName} is being downloaded`
-    })
+  const handleToggleStar = async (fileId: string, currentlyStarred: boolean) => {
+    try {
+      const { error } = await supabase.from('files').update({ is_starred: !currentlyStarred }).eq('id', fileId)
+      if (error) throw error
+      toast.success(currentlyStarred ? 'Removed from starred' : 'Added to starred')
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to update star status')
+    }
   }
 
-  const handleShareFile = (fileName: string) => {
-    toast.info('Share file', {
-      description: `Opening share options for ${fileName}`
-    })
+  const handleShareFile = async (fileId: string, fileName: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('file_shares').insert({
+        file_id: fileId,
+        shared_by: user.id,
+        permission: 'view',
+        can_download: true
+      })
+      if (error) throw error
+
+      await supabase.from('files').update({ is_shared: true }).eq('id', fileId)
+      toast.success('File shared', { description: `Share link created for ${fileName}` })
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to share file', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
   }
 
-  const handleDeleteFile = (fileName: string) => {
-    toast.info('File deleted', {
-      description: `${fileName} moved to trash`
-    })
+  const handleDeleteFolder = async (folderId: string, folderName: string) => {
+    try {
+      const { error } = await supabase.from('folders').delete().eq('id', folderId)
+      if (error) throw error
+      toast.success('Folder deleted', { description: `"${folderName}" has been deleted` })
+      if (currentFolderId === folderId) setCurrentFolderId(null)
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to delete folder', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
   }
 
   return (
@@ -548,11 +710,11 @@ export default function FilesHubClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setShowCreateFolderDialog(true)}>
               <FolderPlus className="w-4 h-4 mr-2" />
               New Folder
             </Button>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.info('Upload', { description: 'File upload coming soon' })}>
               <Upload className="w-4 h-4 mr-2" />
               Upload Files
             </Button>
@@ -857,7 +1019,7 @@ export default function FilesHubClient() {
           {/* Recent Tab */}
           <TabsContent value="recent" className="space-y-4">
             <div className="space-y-2">
-              {mockFiles
+              {[...files]
                 .sort((a, b) => new Date(b.modifiedAt).getTime() - new Date(a.modifiedAt).getTime())
                 .slice(0, 10)
                 .map((file) => {
@@ -871,10 +1033,10 @@ export default function FilesHubClient() {
                           <p className="text-sm text-gray-500">Modified {formatDate(file.modifiedAt)} at {formatTime(file.modifiedAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => toast.info('Download', { description: 'Download starting...' })}>
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleShareFile(file.id, file.name)}>
                             <Share2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -888,10 +1050,10 @@ export default function FilesHubClient() {
           {/* Starred Tab */}
           <TabsContent value="starred" className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {mockFiles.filter(f => f.isStarred).map((file) => {
+              {files.filter(f => f.isStarred).map((file) => {
                 const FileIcon = getFileIcon(file.type)
                 return (
-                  <Card key={file.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
+                  <Card key={file.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm cursor-pointer" onClick={() => { setSelectedFile(file); setShowFileDialog(true) }}>
                     <CardContent className="p-4 text-center">
                       <FileIcon className={`w-12 h-12 mx-auto mb-2 ${getFileColor(file.type)}`} />
                       <h3 className="font-medium text-gray-900 dark:text-white truncate">{file.name}</h3>
@@ -1989,20 +2151,65 @@ export default function FilesHubClient() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.info('Download', { description: 'Download starting...' })}>
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => handleShareFile(selectedFile.id, selectedFile.name)}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleToggleStar(selectedFile.id, selectedFile.isStarred)}>
                     <Star className={`w-4 h-4 ${selectedFile.isStarred ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+                  </Button>
+                  <Button variant="outline" className="text-red-600" onClick={() => { handleDeleteFile(selectedFile.id, selectedFile.name); setShowFileDialog(false) }}>
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Folder Dialog */}
+        <Dialog open={showCreateFolderDialog} onOpenChange={setShowCreateFolderDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Folder</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Folder Name</Label>
+                <Input
+                  placeholder="Enter folder name"
+                  value={newFolderName}
+                  onChange={(e) => setNewFolderName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Color</Label>
+                <Select value={newFolderColor} onValueChange={setNewFolderColor}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                    <SelectItem value="red">Red</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="cyan">Cyan</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateFolderDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateFolder} disabled={isSubmitting} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+                {isSubmitting ? 'Creating...' : 'Create Folder'}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

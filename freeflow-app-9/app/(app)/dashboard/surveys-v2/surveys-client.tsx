@@ -9,10 +9,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Textarea } from '@/components/ui/textarea'
 import {
   ClipboardList,
   Search,
@@ -74,8 +75,12 @@ import {
   HardDrive,
   Terminal,
   History,
-  RefreshCw
+  RefreshCw,
+  XCircle
 } from 'lucide-react'
+
+// Supabase hooks for real database operations
+import { useSurveys, useSurveyMutations } from '@/lib/hooks/use-surveys'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -476,20 +481,198 @@ export default function SurveysClient() {
   const [sharingSurvey, setSharingSurvey] = useState<Survey | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Create Survey Dialog State
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [newSurveyTitle, setNewSurveyTitle] = useState('')
+  const [newSurveyDescription, setNewSurveyDescription] = useState('')
+  const [newSurveyType, setNewSurveyType] = useState('customer-feedback')
+
+  // Confirm Delete Dialog State
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [surveyToDelete, setSurveyToDelete] = useState<string | null>(null)
+
+  // Real Supabase data and mutations
+  const { surveys: dbSurveys, stats: dbStats, isLoading, error: dbError, refetch } = useSurveys()
+  const {
+    createSurvey,
+    updateSurvey,
+    publishSurvey,
+    closeSurvey,
+    pauseSurvey,
+    deleteSurvey,
+    isCreating,
+    isUpdating,
+    isDeleting
+  } = useSurveyMutations()
+
+  // Handler: Create Survey
+  const handleCreateSurvey = async () => {
+    if (!newSurveyTitle.trim()) {
+      toast.error('Please enter a survey title')
+      return
+    }
+
+    try {
+      const result = await createSurvey({
+        title: newSurveyTitle.trim(),
+        description: newSurveyDescription.trim() || undefined,
+        survey_type: newSurveyType,
+        status: 'draft'
+      })
+
+      if (result.success) {
+        toast.success('Survey created successfully!')
+        setShowCreateDialog(false)
+        setNewSurveyTitle('')
+        setNewSurveyDescription('')
+        setNewSurveyType('customer-feedback')
+        refetch()
+      } else {
+        toast.error(result.error || 'Failed to create survey')
+      }
+    } catch (err) {
+      toast.error('An error occurred while creating the survey')
+    }
+  }
+
+  // Handler: Publish Survey
+  const handlePublishSurvey = async (surveyId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    try {
+      const result = await publishSurvey(surveyId)
+      if (result.success) {
+        toast.success('Survey published successfully!')
+        refetch()
+      } else {
+        toast.error(result.error || 'Failed to publish survey')
+      }
+    } catch (err) {
+      toast.error('An error occurred while publishing the survey')
+    }
+  }
+
+  // Handler: Close Survey
+  const handleCloseSurvey = async (surveyId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    try {
+      const result = await closeSurvey(surveyId)
+      if (result.success) {
+        toast.success('Survey closed successfully!')
+        refetch()
+      } else {
+        toast.error(result.error || 'Failed to close survey')
+      }
+    } catch (err) {
+      toast.error('An error occurred while closing the survey')
+    }
+  }
+
+  // Handler: Pause Survey
+  const handlePauseSurvey = async (surveyId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    try {
+      const result = await pauseSurvey(surveyId)
+      if (result.success) {
+        toast.success('Survey paused successfully!')
+        refetch()
+      } else {
+        toast.error(result.error || 'Failed to pause survey')
+      }
+    } catch (err) {
+      toast.error('An error occurred while pausing the survey')
+    }
+  }
+
+  // Handler: Delete Survey (with confirmation)
+  const handleDeleteSurvey = async () => {
+    if (!surveyToDelete) return
+
+    try {
+      const result = await deleteSurvey(surveyToDelete)
+      if (result.success) {
+        toast.success('Survey deleted successfully!')
+        setShowDeleteDialog(false)
+        setSurveyToDelete(null)
+        refetch()
+      } else {
+        toast.error(result.error || 'Failed to delete survey')
+      }
+    } catch (err) {
+      toast.error('An error occurred while deleting the survey')
+    }
+  }
+
+  // Open delete confirmation
+  const confirmDeleteSurvey = (surveyId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    setSurveyToDelete(surveyId)
+    setShowDeleteDialog(true)
+  }
+
+  // Combine database surveys with mock surveys for display
+  // Database surveys take priority, mock surveys are for demo purposes when no real data
+  const combinedSurveys = useMemo(() => {
+    // Map database surveys to the local Survey interface
+    const dbSurveysMapped: Survey[] = dbSurveys.map(dbSurvey => ({
+      id: dbSurvey.id,
+      title: dbSurvey.title,
+      description: dbSurvey.description || '',
+      status: (dbSurvey.status as SurveyStatus) || 'draft',
+      theme: { primaryColor: '#10b981', backgroundColor: '#ffffff', fontFamily: 'Inter' },
+      questions: [], // Questions would need separate query
+      responses: dbSurvey.total_responses || 0,
+      completionRate: dbSurvey.completion_rate || 0,
+      avgTime: dbSurvey.average_time || 0,
+      createdAt: dbSurvey.created_at,
+      updatedAt: dbSurvey.updated_at,
+      publishedAt: dbSurvey.published_date || undefined,
+      closedAt: dbSurvey.closed_date || undefined,
+      tags: dbSurvey.tags || [],
+      isTemplate: false,
+      createdBy: dbSurvey.created_by || 'Unknown',
+      settings: {
+        showProgressBar: true,
+        showQuestionNumbers: true,
+        allowMultipleResponses: false,
+        requireLogin: false,
+        customThankYou: 'Thank you for your feedback!'
+      }
+    }))
+
+    // Return database surveys if available, otherwise show mock surveys as demo
+    return dbSurveysMapped.length > 0 ? dbSurveysMapped : mockSurveys
+  }, [dbSurveys])
+
   // Computed values
   const filteredSurveys = useMemo(() => {
-    return mockSurveys.filter(survey => {
+    return combinedSurveys.filter(survey => {
       const matchesSearch = survey.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         survey.description.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesStatus = statusFilter === 'all' || survey.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchTerm, statusFilter])
+  }, [searchTerm, statusFilter, combinedSurveys])
 
   const surveyResponses = useMemo(() => {
     if (!selectedSurvey) return []
     return mockResponses.filter(r => r.surveyId === selectedSurvey.id)
   }, [selectedSurvey])
+
+  // Computed stats - prefer database stats over mock stats
+  const displayStats = useMemo(() => {
+    if (dbStats && dbSurveys.length > 0) {
+      return {
+        totalSurveys: dbStats.total,
+        activeSurveys: dbStats.active,
+        totalResponses: dbStats.totalResponses,
+        avgCompletionRate: Math.round(dbStats.avgCompletionRate * 10) / 10,
+        avgNPS: Math.round(dbStats.avgNPS * 10) / 10 || 0,
+        responsesThisWeek: mockStats.responsesThisWeek, // Would need additional query for real data
+        responsesLastWeek: mockStats.responsesLastWeek
+      }
+    }
+    return mockStats
+  }, [dbStats, dbSurveys])
 
   const npsDistribution = useMemo(() => {
     const promoters = mockResponses.filter(r => r.npsScore && r.npsScore >= 9).length
@@ -529,8 +712,16 @@ export default function SurveysClient() {
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
-            <Button className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">
-              <Plus className="w-4 h-4 mr-2" />
+            <Button
+              className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+              onClick={() => setShowCreateDialog(true)}
+              disabled={isCreating}
+            >
+              {isCreating ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4 mr-2" />
+              )}
               Create Survey
             </Button>
           </div>
@@ -544,8 +735,8 @@ export default function SurveysClient() {
                 <ClipboardList className="w-4 h-4" />
                 <span className="text-xs font-medium">Total Surveys</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.totalSurveys}</p>
-              <p className="text-xs text-muted-foreground">{mockStats.activeSurveys} active</p>
+              <p className="text-2xl font-bold">{displayStats.totalSurveys}</p>
+              <p className="text-xs text-muted-foreground">{displayStats.activeSurveys} active</p>
             </CardContent>
           </Card>
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -554,7 +745,7 @@ export default function SurveysClient() {
                 <Users className="w-4 h-4" />
                 <span className="text-xs font-medium">Responses</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.totalResponses.toLocaleString()}</p>
+              <p className="text-2xl font-bold">{displayStats.totalResponses.toLocaleString()}</p>
               <p className="text-xs text-muted-foreground">all time</p>
             </CardContent>
           </Card>
@@ -564,7 +755,7 @@ export default function SurveysClient() {
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-xs font-medium">Completion</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.avgCompletionRate}%</p>
+              <p className="text-2xl font-bold">{displayStats.avgCompletionRate}%</p>
               <p className="text-xs text-muted-foreground">avg rate</p>
             </CardContent>
           </Card>
@@ -574,7 +765,7 @@ export default function SurveysClient() {
                 <Target className="w-4 h-4" />
                 <span className="text-xs font-medium">Avg NPS</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.avgNPS}</p>
+              <p className="text-2xl font-bold">{displayStats.avgNPS}</p>
               <p className="text-xs text-muted-foreground">score</p>
             </CardContent>
           </Card>
@@ -584,8 +775,8 @@ export default function SurveysClient() {
                 <TrendingUp className="w-4 h-4" />
                 <span className="text-xs font-medium">This Week</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.responsesThisWeek}</p>
-              <p className="text-xs text-green-600">+{Math.round(((mockStats.responsesThisWeek - mockStats.responsesLastWeek) / mockStats.responsesLastWeek) * 100)}%</p>
+              <p className="text-2xl font-bold">{displayStats.responsesThisWeek}</p>
+              <p className="text-xs text-green-600">+{Math.round(((displayStats.responsesThisWeek - displayStats.responsesLastWeek) / displayStats.responsesLastWeek) * 100)}%</p>
             </CardContent>
           </Card>
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -680,19 +871,19 @@ export default function SurveysClient() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Active Surveys</p>
-                    <p className="text-2xl font-bold">{mockStats.activeSurveys}</p>
+                    <p className="text-2xl font-bold">{displayStats.activeSurveys}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Total Responses</p>
-                    <p className="text-2xl font-bold">{mockStats.totalResponses.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{displayStats.totalResponses.toLocaleString()}</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">Avg Completion</p>
-                    <p className="text-2xl font-bold">{mockStats.avgCompletionRate}%</p>
+                    <p className="text-2xl font-bold">{displayStats.avgCompletionRate}%</p>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
                     <p className="text-white/70 text-sm">NPS Score</p>
-                    <p className="text-2xl font-bold">{mockStats.avgNPS}</p>
+                    <p className="text-2xl font-bold">{displayStats.avgNPS}</p>
                   </div>
                 </div>
               </div>
@@ -767,7 +958,30 @@ export default function SurveysClient() {
             </div>
 
             <div className="grid gap-4">
-              {filteredSurveys.map(survey => (
+              {isLoading ? (
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                  <CardContent className="p-6 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 animate-spin text-emerald-600 mr-2" />
+                    <span>Loading surveys...</span>
+                  </CardContent>
+                </Card>
+              ) : filteredSurveys.length === 0 ? (
+                <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
+                  <CardContent className="p-6 text-center">
+                    <ClipboardList className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No surveys yet</h3>
+                    <p className="text-muted-foreground mb-4">Create your first survey to get started</p>
+                    <Button
+                      onClick={() => setShowCreateDialog(true)}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Survey
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredSurveys.map(survey => (
                 <Card key={survey.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur hover:shadow-lg transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between">
@@ -813,6 +1027,72 @@ export default function SurveysClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
+                        {/* Status-based action buttons */}
+                        {survey.status === 'draft' && (
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={(e) => handlePublishSurvey(survey.id, e)}
+                            disabled={isUpdating}
+                          >
+                            {isUpdating ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <>
+                                <Play className="w-4 h-4 mr-1" />
+                                Publish
+                              </>
+                            )}
+                          </Button>
+                        )}
+                        {survey.status === 'active' && (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => handlePauseSurvey(survey.id, e)}
+                              disabled={isUpdating}
+                            >
+                              <Pause className="w-4 h-4 mr-1" />
+                              Pause
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={(e) => handleCloseSurvey(survey.id, e)}
+                              disabled={isUpdating}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Close
+                            </Button>
+                          </>
+                        )}
+                        {survey.status === 'paused' && (
+                          <>
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="bg-green-600 hover:bg-green-700"
+                              onClick={(e) => handlePublishSurvey(survey.id, e)}
+                              disabled={isUpdating}
+                            >
+                              <Play className="w-4 h-4 mr-1" />
+                              Resume
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={(e) => handleCloseSurvey(survey.id, e)}
+                              disabled={isUpdating}
+                            >
+                              <XCircle className="w-4 h-4 mr-1" />
+                              Close
+                            </Button>
+                          </>
+                        )}
                         <Button variant="outline" size="sm" onClick={() => handleShare(survey)}>
                           <Share2 className="w-4 h-4" />
                         </Button>
@@ -822,8 +1102,14 @@ export default function SurveysClient() {
                         <Button variant="outline" size="sm">
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={(e) => confirmDeleteSurvey(survey.id, e)}
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
@@ -840,7 +1126,8 @@ export default function SurveysClient() {
                     )}
                   </CardContent>
                 </Card>
-              ))}
+              ))
+              )}
             </div>
           </TabsContent>
 
@@ -1594,9 +1881,9 @@ export default function SurveysClient() {
                             <div className="space-y-2">
                               <div className="flex items-center justify-between text-sm">
                                 <span>Responses</span>
-                                <span>{mockStats.totalResponses.toLocaleString()} / 10,000</span>
+                                <span>{displayStats.totalResponses.toLocaleString()} / 10,000</span>
                               </div>
-                              <Progress value={(mockStats.totalResponses / 10000) * 100} className="h-2" />
+                              <Progress value={(displayStats.totalResponses / 10000) * 100} className="h-2" />
                             </div>
                           </div>
                           <div className="md:col-span-2 space-y-4">
@@ -1882,6 +2169,126 @@ export default function SurveysClient() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Survey Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5" />
+                Create New Survey
+              </DialogTitle>
+              <DialogDescription>
+                Create a new survey to start collecting responses
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="survey-title">Survey Title *</Label>
+                <Input
+                  id="survey-title"
+                  placeholder="Enter survey title..."
+                  value={newSurveyTitle}
+                  onChange={(e) => setNewSurveyTitle(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="survey-description">Description</Label>
+                <Textarea
+                  id="survey-description"
+                  placeholder="Enter survey description..."
+                  value={newSurveyDescription}
+                  onChange={(e) => setNewSurveyDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="survey-type">Survey Type</Label>
+                <select
+                  id="survey-type"
+                  className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  value={newSurveyType}
+                  onChange={(e) => setNewSurveyType(e.target.value)}
+                >
+                  <option value="customer-feedback">Customer Feedback</option>
+                  <option value="nps">NPS Survey</option>
+                  <option value="csat">Customer Satisfaction (CSAT)</option>
+                  <option value="employee-engagement">Employee Engagement</option>
+                  <option value="market-research">Market Research</option>
+                  <option value="product-feedback">Product Feedback</option>
+                  <option value="event-feedback">Event Feedback</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateSurvey}
+                disabled={isCreating || !newSurveyTitle.trim()}
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white"
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Survey
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Delete Survey
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this survey? This action cannot be undone.
+                All responses associated with this survey will also be deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="mt-4">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteDialog(false)
+                  setSurveyToDelete(null)
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteSurvey}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Survey
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

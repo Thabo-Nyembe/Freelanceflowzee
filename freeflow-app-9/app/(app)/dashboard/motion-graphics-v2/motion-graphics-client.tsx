@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -477,6 +478,65 @@ const mockMotionGraphicsQuickActions = [
   { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => console.log('Templates') },
 ]
 
+// Database types
+interface DbProject {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  width: number
+  height: number
+  frame_rate: number
+  duration_seconds: number
+  background_color: string
+  thumbnail_url: string | null
+  tags: string[]
+  is_public: boolean
+  created_at: string
+  updated_at: string
+}
+
+interface DbExport {
+  id: string
+  project_id: string
+  user_id: string
+  format: string
+  quality: string
+  status: 'pending' | 'processing' | 'completed' | 'failed'
+  file_url: string | null
+  file_size_bytes: number | null
+  duration_seconds: number | null
+  error_message: string | null
+  started_at: string | null
+  completed_at: string | null
+  created_at: string
+  updated_at: string
+}
+
+interface ProjectFormState {
+  name: string
+  description: string
+  width: number
+  height: number
+  frame_rate: number
+  duration_seconds: number
+  background_color: string
+  is_public: boolean
+  tags: string
+}
+
+const initialFormState: ProjectFormState = {
+  name: '',
+  description: '',
+  width: 1920,
+  height: 1080,
+  frame_rate: 30,
+  duration_seconds: 10,
+  background_color: '#000000',
+  is_public: false,
+  tags: '',
+}
+
 interface MotionGraphicsClientProps {
   initialAnimations?: Animation[]
 }
@@ -484,6 +544,8 @@ interface MotionGraphicsClientProps {
 export default function MotionGraphicsClient({
   initialAnimations = mockAnimations
 }: MotionGraphicsClientProps) {
+  const supabase = createClientComponentClient()
+
   const [activeTab, setActiveTab] = useState('projects')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<'all' | AnimationStatus>('all')
@@ -492,6 +554,14 @@ export default function MotionGraphicsClient({
   const [currentTime, setCurrentTime] = useState(0)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Supabase data state
+  const [dbProjects, setDbProjects] = useState<DbProject[]>([])
+  const [dbExports, setDbExports] = useState<DbExport[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [formState, setFormState] = useState<ProjectFormState>(initialFormState)
 
   const stats = useMemo(() => {
     const total = initialAnimations.length
@@ -524,34 +594,252 @@ export default function MotionGraphicsClient({
     { label: 'Presets', value: mockPresets.length.toString(), change: 8.3, icon: Wand2, color: 'from-teal-500 to-cyan-600' }
   ]
 
-  // Handlers
-  const handleRenderAnimation = (animationTitle: string) => {
-    toast.info('Rendering started', {
-      description: `"${animationTitle}" is being rendered...`
-    })
+  // Fetch projects from Supabase
+  const fetchProjects = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('motion_projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbProjects(data || [])
+    } catch (error) {
+      console.error('Error fetching projects:', error)
+      toast.error('Failed to load projects')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  // Fetch exports from Supabase
+  const fetchExports = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('motion_exports')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbExports(data || [])
+    } catch (error) {
+      console.error('Error fetching exports:', error)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchProjects()
+    fetchExports()
+  }, [fetchProjects, fetchExports])
+
+  // Create project handler
+  const handleCreateProject = async () => {
+    if (!formState.name.trim()) {
+      toast.error('Project name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create projects')
+        return
+      }
+
+      const { error } = await supabase.from('motion_projects').insert({
+        user_id: user.id,
+        name: formState.name,
+        description: formState.description || null,
+        width: formState.width,
+        height: formState.height,
+        frame_rate: formState.frame_rate,
+        duration_seconds: formState.duration_seconds,
+        background_color: formState.background_color,
+        is_public: formState.is_public,
+        tags: formState.tags ? formState.tags.split(',').map(t => t.trim()) : [],
+      })
+
+      if (error) throw error
+
+      toast.success('Project created successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      fetchProjects()
+    } catch (error) {
+      console.error('Error creating project:', error)
+      toast.error('Failed to create project')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleExportAnimation = (animationTitle: string) => {
-    toast.success('Exporting animation', {
-      description: `"${animationTitle}" will be downloaded shortly`
-    })
+  // Render/Export animation handler
+  const handleRenderAnimation = async (projectId: string, projectName: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to render')
+        return
+      }
+
+      const { error } = await supabase.from('motion_exports').insert({
+        project_id: projectId,
+        user_id: user.id,
+        format: 'mp4',
+        quality: 'high',
+        status: 'pending',
+      })
+
+      if (error) throw error
+
+      toast.info('Rendering started', {
+        description: `"${projectName}" added to render queue`
+      })
+      fetchExports()
+    } catch (error) {
+      console.error('Error starting render:', error)
+      toast.error('Failed to start render')
+    }
   }
 
-  const handleDuplicateAnimation = (animationTitle: string) => {
-    toast.success('Animation duplicated', {
-      description: `Copy of "${animationTitle}" created`
-    })
+  // Export/Download animation handler
+  const handleExportAnimation = async (projectId: string, projectName: string, format: string = 'mp4') => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to export')
+        return
+      }
+
+      const { error } = await supabase.from('motion_exports').insert({
+        project_id: projectId,
+        user_id: user.id,
+        format,
+        quality: 'high',
+        status: 'pending',
+      })
+
+      if (error) throw error
+
+      toast.success('Export started', {
+        description: `"${projectName}" will be ready shortly`
+      })
+      fetchExports()
+    } catch (error) {
+      console.error('Error exporting:', error)
+      toast.error('Failed to start export')
+    }
   }
 
+  // Duplicate project handler
+  const handleDuplicateAnimation = async (projectId: string, projectName: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to duplicate')
+        return
+      }
+
+      const original = dbProjects.find(p => p.id === projectId)
+      if (!original) {
+        toast.error('Project not found')
+        return
+      }
+
+      const { error } = await supabase.from('motion_projects').insert({
+        user_id: user.id,
+        name: `${original.name} (Copy)`,
+        description: original.description,
+        width: original.width,
+        height: original.height,
+        frame_rate: original.frame_rate,
+        duration_seconds: original.duration_seconds,
+        background_color: original.background_color,
+        is_public: false,
+        tags: original.tags,
+      })
+
+      if (error) throw error
+
+      toast.success('Project duplicated', {
+        description: `Copy of "${projectName}" created`
+      })
+      fetchProjects()
+    } catch (error) {
+      console.error('Error duplicating:', error)
+      toast.error('Failed to duplicate project')
+    }
+  }
+
+  // Update project handler
+  const handleUpdateProject = async (projectId: string, updates: Partial<DbProject>) => {
+    try {
+      const { error } = await supabase
+        .from('motion_projects')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', projectId)
+
+      if (error) throw error
+
+      toast.success('Project updated')
+      fetchProjects()
+    } catch (error) {
+      console.error('Error updating project:', error)
+      toast.error('Failed to update project')
+    }
+  }
+
+  // Delete project handler
+  const handleDeleteProject = async (projectId: string, projectName: string) => {
+    try {
+      const { error } = await supabase
+        .from('motion_projects')
+        .delete()
+        .eq('id', projectId)
+
+      if (error) throw error
+
+      toast.success('Project deleted', {
+        description: `"${projectName}" has been removed`
+      })
+      fetchProjects()
+    } catch (error) {
+      console.error('Error deleting project:', error)
+      toast.error('Failed to delete project')
+    }
+  }
+
+  // Update export status handler
+  const handleUpdateExportStatus = async (exportId: string, status: DbExport['status']) => {
+    try {
+      const { error } = await supabase
+        .from('motion_exports')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', exportId)
+
+      if (error) throw error
+
+      toast.success(`Export ${status}`)
+      fetchExports()
+    } catch (error) {
+      console.error('Error updating export:', error)
+      toast.error('Failed to update export')
+    }
+  }
+
+  // Apply preset handler
   const handleApplyPreset = (presetName: string) => {
     toast.success('Preset applied', {
       description: `"${presetName}" effect applied to timeline`
-    })
-  }
-
-  const handleCreateProject = () => {
-    toast.info('Create Project', {
-      description: 'Opening motion graphics editor...'
     })
   }
 
@@ -574,7 +862,10 @@ export default function MotionGraphicsClient({
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+              onClick={() => setShowCreateDialog(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Project
             </Button>
@@ -650,7 +941,11 @@ export default function MotionGraphicsClient({
                     <p className="text-2xl font-bold">{stats.ready}</p>
                     <p className="text-cyan-100 text-sm">Rendered</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={() => setShowCreateDialog(true)}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     New Project
                   </Button>
@@ -1940,6 +2235,104 @@ export default function MotionGraphicsClient({
                 </div>
               )}
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Project Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Project</DialogTitle>
+              <DialogDescription>Set up a new motion graphics project</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Project Name *</label>
+                <Input
+                  placeholder="Enter project name"
+                  value={formState.name}
+                  onChange={(e) => setFormState({ ...formState, name: e.target.value })}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <Input
+                  placeholder="Brief description"
+                  value={formState.description}
+                  onChange={(e) => setFormState({ ...formState, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Width</label>
+                  <Input
+                    type="number"
+                    value={formState.width}
+                    onChange={(e) => setFormState({ ...formState, width: parseInt(e.target.value) || 1920 })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Height</label>
+                  <Input
+                    type="number"
+                    value={formState.height}
+                    onChange={(e) => setFormState({ ...formState, height: parseInt(e.target.value) || 1080 })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Frame Rate</label>
+                  <select
+                    className="w-full px-3 py-2 border rounded-lg"
+                    value={formState.frame_rate}
+                    onChange={(e) => setFormState({ ...formState, frame_rate: parseInt(e.target.value) })}
+                  >
+                    <option value={24}>24 fps</option>
+                    <option value={30}>30 fps</option>
+                    <option value={60}>60 fps</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Duration (sec)</label>
+                  <Input
+                    type="number"
+                    value={formState.duration_seconds}
+                    onChange={(e) => setFormState({ ...formState, duration_seconds: parseInt(e.target.value) || 10 })}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Tags (comma-separated)</label>
+                <Input
+                  placeholder="animation, motion, intro"
+                  value={formState.tags}
+                  onChange={(e) => setFormState({ ...formState, tags: e.target.value })}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Public Project</p>
+                  <p className="text-xs text-gray-500">Allow others to view</p>
+                </div>
+                <Switch
+                  checked={formState.is_public}
+                  onCheckedChange={(checked) => setFormState({ ...formState, is_public: checked })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                onClick={handleCreateProject}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Creating...' : 'Create Project'}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

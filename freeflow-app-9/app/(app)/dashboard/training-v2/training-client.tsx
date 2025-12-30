@@ -2,15 +2,18 @@
 // Comprehensive LMS with courses, learning paths, certifications, and gamification
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useTrainingPrograms, useTrainingMutations, TrainingProgram } from '@/lib/hooks/use-training'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import {
@@ -68,6 +71,8 @@ import {
   Webhook,
   Database,
   Trash2,
+  Loader2,
+  Pencil,
   RefreshCw,
   Palette,
   AlertOctagon,
@@ -515,7 +520,58 @@ interface TrainingClientProps {
   initialPrograms?: any[]
 }
 
+// Form state types
+interface CourseFormData {
+  title: string
+  description: string
+  category: CourseCategory
+  difficulty: DifficultyLevel
+  duration: string
+  format: string
+  max_capacity: number
+  prerequisites: string
+  objectives: string
+  materials_url: string
+}
+
+interface EnrollmentFormData {
+  trainee_name: string
+  trainee_email: string
+  notes: string
+}
+
+const defaultCourseForm: CourseFormData = {
+  title: '',
+  description: '',
+  category: 'technical',
+  difficulty: 'beginner',
+  duration: '',
+  format: 'online',
+  max_capacity: 30,
+  prerequisites: '',
+  objectives: '',
+  materials_url: '',
+}
+
+const defaultEnrollmentForm: EnrollmentFormData = {
+  trainee_name: '',
+  trainee_email: '',
+  notes: '',
+}
+
 export default function TrainingClient({ initialPrograms }: TrainingClientProps) {
+  // Hooks for real data
+  const { programs: dbPrograms, stats: dbStats, isLoading, refetch } = useTrainingPrograms(initialPrograms || [])
+  const {
+    createProgram, isCreating,
+    updateProgram, isUpdating,
+    deleteProgram, isDeleting,
+    enrollTrainee, isEnrolling,
+    updateEnrollment, isUpdatingEnrollment
+  } = useTrainingMutations()
+  const supabase = createClient()
+
+  // UI state
   const [activeTab, setActiveTab] = useState('catalog')
   const [searchQuery, setSearchQuery] = useState('')
   const [categoryFilter, setCategoryFilter] = useState<CourseCategory | 'all'>('all')
@@ -523,6 +579,19 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states
+  const [showCreateCourseDialog, setShowCreateCourseDialog] = useState(false)
+  const [showEditCourseDialog, setShowEditCourseDialog] = useState(false)
+  const [showDeleteCourseDialog, setShowDeleteCourseDialog] = useState(false)
+  const [showEnrollDialog, setShowEnrollDialog] = useState(false)
+  const [courseToEdit, setCourseToEdit] = useState<TrainingProgram | null>(null)
+  const [courseToDelete, setCourseToDelete] = useState<TrainingProgram | null>(null)
+  const [courseToEnroll, setCourseToEnroll] = useState<Course | null>(null)
+
+  // Form states
+  const [courseForm, setCourseForm] = useState<CourseFormData>(defaultCourseForm)
+  const [enrollmentForm, setEnrollmentForm] = useState<EnrollmentFormData>(defaultEnrollmentForm)
 
   // Filter courses
   const filteredCourses = useMemo(() => {
@@ -549,36 +618,198 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
     return result
   }, [searchQuery, categoryFilter, difficultyFilter])
 
-  // Handlers
-  const handleEnrollCourse = (courseName: string) => {
-    toast.success('Enrolled successfully', {
-      description: `You are now enrolled in "${courseName}"`
-    })
-  }
+  // CRUD Handlers
+  const handleCreateCourse = useCallback(async () => {
+    if (!courseForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Course title is required' })
+      return
+    }
 
-  const handleStartLesson = (lessonName: string) => {
-    toast.info('Starting lesson', {
-      description: `Loading "${lessonName}"...`
-    })
-  }
+    try {
+      const result = await createProgram({
+        program_name: courseForm.title,
+        description: courseForm.description || undefined,
+        program_type: courseForm.category,
+        format: courseForm.format,
+        max_capacity: courseForm.max_capacity,
+        prerequisites: courseForm.prerequisites || undefined,
+        objectives: courseForm.objectives || undefined,
+        materials_url: courseForm.materials_url || undefined,
+      })
 
-  const handleDownloadCertificate = (courseName: string) => {
-    toast.success('Downloading certificate', {
-      description: `Certificate for "${courseName}" will be downloaded`
-    })
-  }
+      if (result.success) {
+        toast.success('Course Created', { description: `"${courseForm.title}" has been created successfully` })
+        setShowCreateCourseDialog(false)
+        setCourseForm(defaultCourseForm)
+        refetch()
+      } else {
+        toast.error('Failed to Create Course', { description: result.error || 'An error occurred' })
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to create course. Please try again.' })
+    }
+  }, [courseForm, createProgram, refetch])
 
-  const handleBookmarkCourse = (courseName: string) => {
-    toast.success('Course bookmarked', {
-      description: `"${courseName}" saved to your learning path`
-    })
-  }
+  const handleEditCourse = useCallback(async () => {
+    if (!courseToEdit || !courseForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Course title is required' })
+      return
+    }
 
-  const handleCreateTrainingPath = () => {
-    toast.info('Create Training Path', {
-      description: 'Opening training path builder...'
+    try {
+      const result = await updateProgram({
+        id: courseToEdit.id,
+        program_name: courseForm.title,
+        description: courseForm.description || undefined,
+        program_type: courseForm.category,
+        format: courseForm.format,
+        max_capacity: courseForm.max_capacity,
+        prerequisites: courseForm.prerequisites || undefined,
+        objectives: courseForm.objectives || undefined,
+        materials_url: courseForm.materials_url || undefined,
+      })
+
+      if (result.success) {
+        toast.success('Course Updated', { description: `"${courseForm.title}" has been updated successfully` })
+        setShowEditCourseDialog(false)
+        setCourseToEdit(null)
+        setCourseForm(defaultCourseForm)
+        refetch()
+      } else {
+        toast.error('Failed to Update Course', { description: result.error || 'An error occurred' })
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to update course. Please try again.' })
+    }
+  }, [courseToEdit, courseForm, updateProgram, refetch])
+
+  const handleDeleteCourse = useCallback(async () => {
+    if (!courseToDelete) return
+
+    try {
+      const result = await deleteProgram(courseToDelete.id)
+
+      if (result.success) {
+        toast.success('Course Deleted', { description: `"${courseToDelete.program_name}" has been deleted` })
+        setShowDeleteCourseDialog(false)
+        setCourseToDelete(null)
+        refetch()
+      } else {
+        toast.error('Failed to Delete Course', { description: result.error || 'An error occurred' })
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to delete course. Please try again.' })
+    }
+  }, [courseToDelete, deleteProgram, refetch])
+
+  const handleEnrollCourse = useCallback(async (course: Course) => {
+    setCourseToEnroll(course)
+    setEnrollmentForm(defaultEnrollmentForm)
+    setShowEnrollDialog(true)
+  }, [])
+
+  const handleConfirmEnrollment = useCallback(async () => {
+    if (!courseToEnroll || !enrollmentForm.trainee_name.trim()) {
+      toast.error('Validation Error', { description: 'Trainee name is required' })
+      return
+    }
+
+    try {
+      // For the mock courses, we'll create a direct enrollment
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated', { description: 'Please sign in to enroll' })
+        return
+      }
+
+      // Insert enrollment directly
+      const { error } = await supabase
+        .from('training_enrollments')
+        .insert({
+          user_id: user.id,
+          program_id: courseToEnroll.id,
+          trainee_name: enrollmentForm.trainee_name,
+          trainee_email: enrollmentForm.trainee_email || null,
+          notes: enrollmentForm.notes || null,
+        })
+
+      if (error) {
+        toast.error('Enrollment Failed', { description: error.message })
+        return
+      }
+
+      toast.success('Enrolled Successfully', { description: `You are now enrolled in "${courseToEnroll.title}"` })
+      setShowEnrollDialog(false)
+      setCourseToEnroll(null)
+      setEnrollmentForm(defaultEnrollmentForm)
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to enroll. Please try again.' })
+    }
+  }, [courseToEnroll, enrollmentForm, supabase, refetch])
+
+  const handleStartLesson = useCallback((lessonName: string) => {
+    toast.info('Starting Lesson', { description: `Loading "${lessonName}"...` })
+    // In a real app, this would navigate to the lesson player
+  }, [])
+
+  const handleDownloadCertificate = useCallback(async (courseName: string, certificateUrl?: string) => {
+    if (certificateUrl) {
+      window.open(certificateUrl, '_blank')
+      toast.success('Downloading Certificate', { description: `Certificate for "${courseName}" is downloading` })
+    } else {
+      toast.error('Certificate Not Available', { description: 'No certificate available for this course' })
+    }
+  }, [])
+
+  const handleBookmarkCourse = useCallback(async (course: Course) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated', { description: 'Please sign in to bookmark courses' })
+        return
+      }
+
+      // Store bookmark in local storage or a bookmarks table
+      const bookmarks = JSON.parse(localStorage.getItem('course_bookmarks') || '[]')
+      if (!bookmarks.includes(course.id)) {
+        bookmarks.push(course.id)
+        localStorage.setItem('course_bookmarks', JSON.stringify(bookmarks))
+        toast.success('Course Bookmarked', { description: `"${course.title}" saved to your learning path` })
+      } else {
+        toast.info('Already Bookmarked', { description: `"${course.title}" is already in your bookmarks` })
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to bookmark course' })
+    }
+  }, [supabase])
+
+  const handleCreateTrainingPath = useCallback(() => {
+    setShowCreateCourseDialog(true)
+    setCourseForm(defaultCourseForm)
+  }, [])
+
+  const openEditDialog = useCallback((program: TrainingProgram) => {
+    setCourseToEdit(program)
+    setCourseForm({
+      title: program.program_name,
+      description: program.description || '',
+      category: (program.program_type as CourseCategory) || 'technical',
+      difficulty: 'beginner',
+      duration: `${program.duration_days || 0}d`,
+      format: program.format || 'online',
+      max_capacity: program.max_capacity || 30,
+      prerequisites: program.prerequisites || '',
+      objectives: program.objectives || '',
+      materials_url: program.materials_url || '',
     })
-  }
+    setShowEditCourseDialog(true)
+  }, [])
+
+  const openDeleteDialog = useCallback((program: TrainingProgram) => {
+    setCourseToDelete(program)
+    setShowDeleteCourseDialog(true)
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-green-50/30 to-teal-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -603,6 +834,13 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
               <Trophy className="w-4 h-4" />
               <span className="font-medium">{mockStats.points.toLocaleString()} pts</span>
             </div>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              onClick={handleCreateTrainingPath}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Create Course
+            </Button>
             <Button variant="outline" size="sm">
               <Settings className="w-4 h-4 mr-2" />
               Settings
@@ -699,6 +937,13 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
             <TabsTrigger value="catalog" className="gap-2">
               <BookOpen className="w-4 h-4" />
               Course Catalog
+            </TabsTrigger>
+            <TabsTrigger value="my-courses" className="gap-2">
+              <Layers className="w-4 h-4" />
+              My Courses
+              {dbPrograms.length > 0 && (
+                <Badge variant="secondary" className="ml-1 text-xs">{dbPrograms.length}</Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="my-learning" className="gap-2">
               <Play className="w-4 h-4" />
@@ -837,7 +1082,14 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                           </Avatar>
                           <span className="text-xs text-gray-500">{course.instructor.name}</span>
                         </div>
-                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                        <Button
+                          size="sm"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEnrollCourse(course)
+                          }}
+                        >
                           Enroll
                         </Button>
                       </div>
@@ -846,6 +1098,108 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                 )
               })}
             </div>
+          </TabsContent>
+
+          {/* My Courses Tab - Database Courses */}
+          <TabsContent value="my-courses" className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">My Training Programs</h3>
+                <p className="text-sm text-gray-500">Manage your created training courses</p>
+              </div>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={handleCreateTrainingPath}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create New Course
+              </Button>
+            </div>
+
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+              </div>
+            ) : dbPrograms.length === 0 ? (
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm">
+                <CardContent className="p-12 text-center">
+                  <GraduationCap className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Courses Yet</h4>
+                  <p className="text-gray-500 mb-4">Create your first training course to get started</p>
+                  <Button
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                    onClick={handleCreateTrainingPath}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Your First Course
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {dbPrograms.map((program) => (
+                  <Card key={program.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm hover:shadow-md transition-all">
+                    <div className="h-24 bg-gradient-to-br from-emerald-400 to-green-600 relative">
+                      <Badge className="absolute top-2 left-2 bg-white/90 text-emerald-700">
+                        {program.program_code}
+                      </Badge>
+                      <Badge className={`absolute top-2 right-2 ${
+                        program.status === 'scheduled' ? 'bg-blue-500' :
+                        program.status === 'in-progress' ? 'bg-yellow-500' :
+                        program.status === 'completed' ? 'bg-green-500' :
+                        'bg-gray-500'
+                      } text-white`}>
+                        {program.status}
+                      </Badge>
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold text-gray-900 dark:text-white mb-1 line-clamp-1">
+                        {program.program_name}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
+                        {program.description || 'No description provided'}
+                      </p>
+
+                      <div className="flex items-center gap-3 text-sm text-gray-500 mb-3">
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3 h-3" />
+                          {program.enrolled_count}/{program.max_capacity}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {program.duration_days}d
+                        </span>
+                        {program.format && (
+                          <Badge variant="outline" className="text-xs">
+                            {program.format}
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openEditDialog(program)}
+                        >
+                          <Pencil className="w-3 h-3 mr-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => openDeleteDialog(program)}
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* My Learning Tab */}
@@ -2045,13 +2399,384 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
                     </div>
                   )}
 
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white" size="lg">
+                  <Button
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                    size="lg"
+                    onClick={() => {
+                      setSelectedCourse(null)
+                      handleEnrollCourse(selectedCourse)
+                    }}
+                  >
                     <Play className="w-4 h-4 mr-2" />
                     Enroll Now
                   </Button>
                 </div>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Course Dialog */}
+        <Dialog open={showCreateCourseDialog} onOpenChange={setShowCreateCourseDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Course</DialogTitle>
+              <DialogDescription>Add a new training course to the learning platform</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="course-title">Course Title *</Label>
+                  <Input
+                    id="course-title"
+                    placeholder="Enter course title"
+                    value={courseForm.title}
+                    onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-category">Category</Label>
+                  <Select
+                    value={courseForm.category}
+                    onValueChange={(value) => setCourseForm({ ...courseForm, category: value as CourseCategory })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="leadership">Leadership</SelectItem>
+                      <SelectItem value="compliance">Compliance</SelectItem>
+                      <SelectItem value="soft_skills">Soft Skills</SelectItem>
+                      <SelectItem value="product">Product</SelectItem>
+                      <SelectItem value="onboarding">Onboarding</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="course-description">Description</Label>
+                <Textarea
+                  id="course-description"
+                  placeholder="Enter course description"
+                  rows={3}
+                  value={courseForm.description}
+                  onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="course-difficulty">Difficulty</Label>
+                  <Select
+                    value={courseForm.difficulty}
+                    onValueChange={(value) => setCourseForm({ ...courseForm, difficulty: value as DifficultyLevel })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                      <SelectItem value="expert">Expert</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-format">Format</Label>
+                  <Select
+                    value={courseForm.format}
+                    onValueChange={(value) => setCourseForm({ ...courseForm, format: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="online">Online</SelectItem>
+                      <SelectItem value="in-person">In-Person</SelectItem>
+                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="course-capacity">Max Capacity</Label>
+                  <Input
+                    id="course-capacity"
+                    type="number"
+                    value={courseForm.max_capacity}
+                    onChange={(e) => setCourseForm({ ...courseForm, max_capacity: parseInt(e.target.value) || 30 })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="course-objectives">Learning Objectives</Label>
+                <Textarea
+                  id="course-objectives"
+                  placeholder="Enter learning objectives"
+                  rows={2}
+                  value={courseForm.objectives}
+                  onChange={(e) => setCourseForm({ ...courseForm, objectives: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="course-prerequisites">Prerequisites</Label>
+                <Input
+                  id="course-prerequisites"
+                  placeholder="Enter prerequisites (comma separated)"
+                  value={courseForm.prerequisites}
+                  onChange={(e) => setCourseForm({ ...courseForm, prerequisites: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateCourseDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={handleCreateCourse}
+                disabled={isCreating}
+              >
+                {isCreating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Course
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Course Dialog */}
+        <Dialog open={showEditCourseDialog} onOpenChange={setShowEditCourseDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Edit Course</DialogTitle>
+              <DialogDescription>Update the course details</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-title">Course Title *</Label>
+                  <Input
+                    id="edit-course-title"
+                    placeholder="Enter course title"
+                    value={courseForm.title}
+                    onChange={(e) => setCourseForm({ ...courseForm, title: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-category">Category</Label>
+                  <Select
+                    value={courseForm.category}
+                    onValueChange={(value) => setCourseForm({ ...courseForm, category: value as CourseCategory })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="leadership">Leadership</SelectItem>
+                      <SelectItem value="compliance">Compliance</SelectItem>
+                      <SelectItem value="soft_skills">Soft Skills</SelectItem>
+                      <SelectItem value="product">Product</SelectItem>
+                      <SelectItem value="onboarding">Onboarding</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-course-description">Description</Label>
+                <Textarea
+                  id="edit-course-description"
+                  placeholder="Enter course description"
+                  rows={3}
+                  value={courseForm.description}
+                  onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-difficulty">Difficulty</Label>
+                  <Select
+                    value={courseForm.difficulty}
+                    onValueChange={(value) => setCourseForm({ ...courseForm, difficulty: value as DifficultyLevel })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                      <SelectItem value="expert">Expert</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-format">Format</Label>
+                  <Select
+                    value={courseForm.format}
+                    onValueChange={(value) => setCourseForm({ ...courseForm, format: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="online">Online</SelectItem>
+                      <SelectItem value="in-person">In-Person</SelectItem>
+                      <SelectItem value="hybrid">Hybrid</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-course-capacity">Max Capacity</Label>
+                  <Input
+                    id="edit-course-capacity"
+                    type="number"
+                    value={courseForm.max_capacity}
+                    onChange={(e) => setCourseForm({ ...courseForm, max_capacity: parseInt(e.target.value) || 30 })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-course-objectives">Learning Objectives</Label>
+                <Textarea
+                  id="edit-course-objectives"
+                  placeholder="Enter learning objectives"
+                  rows={2}
+                  value={courseForm.objectives}
+                  onChange={(e) => setCourseForm({ ...courseForm, objectives: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditCourseDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={handleEditCourse}
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Pencil className="w-4 h-4 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Course Dialog */}
+        <Dialog open={showDeleteCourseDialog} onOpenChange={setShowDeleteCourseDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Course</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{courseToDelete?.program_name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDeleteCourseDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteCourse}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Enrollment Dialog */}
+        <Dialog open={showEnrollDialog} onOpenChange={setShowEnrollDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Enroll in Course</DialogTitle>
+              <DialogDescription>
+                {courseToEnroll ? `Enrolling in "${courseToEnroll.title}"` : 'Enter your details to enroll'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="trainee-name">Your Name *</Label>
+                <Input
+                  id="trainee-name"
+                  placeholder="Enter your name"
+                  value={enrollmentForm.trainee_name}
+                  onChange={(e) => setEnrollmentForm({ ...enrollmentForm, trainee_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="trainee-email">Email (optional)</Label>
+                <Input
+                  id="trainee-email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={enrollmentForm.trainee_email}
+                  onChange={(e) => setEnrollmentForm({ ...enrollmentForm, trainee_email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="enrollment-notes">Notes (optional)</Label>
+                <Textarea
+                  id="enrollment-notes"
+                  placeholder="Any additional notes"
+                  rows={2}
+                  value={enrollmentForm.notes}
+                  onChange={(e) => setEnrollmentForm({ ...enrollmentForm, notes: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEnrollDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={handleConfirmEnrollment}
+                disabled={isEnrolling}
+              >
+                {isEnrolling ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Enrolling...
+                  </>
+                ) : (
+                  <>
+                    <GraduationCap className="w-4 h-4 mr-2" />
+                    Confirm Enrollment
+                  </>
+                )}
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

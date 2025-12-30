@@ -221,21 +221,23 @@ export function useStarredConversations() {
 
 // Messaging Mutations
 export function useMessagingMutations() {
-  const createConversation = useSupabaseMutation<Partial<Conversation>>('conversations', 'INSERT')
-  const updateConversation = useSupabaseMutation<Partial<Conversation>>('conversations', 'UPDATE')
-  const deleteConversation = useSupabaseMutation<{ id: string }>('conversations', 'DELETE')
+  const conversationMutation = useSupabaseMutation({
+    table: 'conversations',
+    onSuccess: () => {},
+  })
 
-  const sendMessage = useSupabaseMutation<Partial<DirectMessage>>('direct_messages', 'INSERT')
-  const updateMessage = useSupabaseMutation<Partial<DirectMessage>>('direct_messages', 'UPDATE')
-  const deleteMessage = useSupabaseMutation<{ id: string }>('direct_messages', 'DELETE')
+  const messageMutation = useSupabaseMutation({
+    table: 'direct_messages',
+    onSuccess: () => {},
+  })
 
   return {
-    createConversation,
-    updateConversation,
-    deleteConversation,
-    sendMessage,
-    updateMessage,
-    deleteMessage
+    createConversation: conversationMutation,
+    updateConversation: conversationMutation,
+    deleteConversation: conversationMutation,
+    sendMessage: messageMutation,
+    updateMessage: messageMutation,
+    deleteMessage: messageMutation
   }
 }
 

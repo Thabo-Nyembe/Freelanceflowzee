@@ -9,8 +9,16 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  useJobPostings,
+  useJobApplications,
+  useRecruitmentMutations,
+  type JobPosting
+} from '@/lib/hooks/use-recruitment'
 import {
   Briefcase,
   Users,
@@ -22,14 +30,11 @@ import {
   FileText,
   Mail,
   Database,
-  Settings,
-  BarChart3,
   MapPin,
   DollarSign,
   Building2,
   Star,
   ThumbsUp,
-  ThumbsDown,
   Video,
   Phone,
   CheckCircle,
@@ -38,16 +43,12 @@ import {
   Send,
   Eye,
   Edit,
-  Trash2,
   Filter,
   Download,
   Upload,
   UserPlus,
-  GraduationCap,
-  Award,
   MessageSquare,
   ChevronRight,
-  MoreVertical,
   Linkedin,
   Globe,
   FileCheck,
@@ -694,6 +695,58 @@ export default function RecruitmentClient() {
   const [jobFilter, setJobFilter] = useState<JobStatus | 'all'>('all')
   const [stageFilter, setStageFilter] = useState<CandidateStage | 'all'>('all')
 
+  // Dialog states
+  const [showPostJobDialog, setShowPostJobDialog] = useState(false)
+  const [showAddCandidateDialog, setShowAddCandidateDialog] = useState(false)
+  const [showEditJobDialog, setShowEditJobDialog] = useState(false)
+  const [editingJob, setEditingJob] = useState<JobPosting | null>(null)
+
+  // Form states for new job
+  const [newJobForm, setNewJobForm] = useState({
+    title: '',
+    description: '',
+    department: '',
+    location: '',
+    job_type: 'full-time',
+    status: 'draft',
+    salary_min: '',
+    salary_max: '',
+    salary_currency: 'USD',
+    hiring_manager: '',
+    recruiter: ''
+  })
+
+  // Form states for new candidate/application
+  const [newCandidateForm, setNewCandidateForm] = useState({
+    job_id: '',
+    candidate_name: '',
+    candidate_email: '',
+    candidate_phone: '',
+    experience_years: '',
+    resume_url: '',
+    linkedin_url: '',
+    portfolio_url: '',
+    notes: ''
+  })
+
+  // Real Supabase hooks
+  const { jobs: dbJobs, stats: dbStats, isLoading: isLoadingJobs, refetch: refetchJobs } = useJobPostings()
+  const { applications: dbApplications, isLoading: isLoadingApplications, refetch: refetchApplications } = useJobApplications()
+  const {
+    createJob,
+    updateJob,
+    deleteJob,
+    createApplication,
+    updateApplication,
+    advanceStage,
+    isCreatingJob,
+    isUpdatingJob,
+    isDeletingJob,
+    isCreatingApplication,
+    isUpdatingApplication,
+    isAdvancingStage
+  } = useRecruitmentMutations()
+
   // Stats calculations
   const stats = useMemo(() => {
     const activeJobs = mockJobs.filter(j => j.status === 'open').length
@@ -828,41 +881,242 @@ export default function RecruitmentClient() {
     { stage: 'offer', label: 'Offer', color: 'border-yellow-300' }
   ]
 
-  // Handlers
+  // Real Supabase Handlers
   const handlePostJob = () => {
-    toast.info('Post Job', { description: 'Opening job posting form...' })
+    setNewJobForm({
+      title: '',
+      description: '',
+      department: '',
+      location: '',
+      job_type: 'full-time',
+      status: 'draft',
+      salary_min: '',
+      salary_max: '',
+      salary_currency: 'USD',
+      hiring_manager: '',
+      recruiter: ''
+    })
+    setShowPostJobDialog(true)
+  }
+
+  const handleCreateJob = async () => {
+    if (!newJobForm.title.trim()) {
+      toast.error('Validation Error', { description: 'Job title is required' })
+      return
+    }
+
+    try {
+      await createJob({
+        title: newJobForm.title,
+        description: newJobForm.description || null,
+        department: newJobForm.department || null,
+        location: newJobForm.location || null,
+        job_type: newJobForm.job_type,
+        status: newJobForm.status,
+        salary_min: newJobForm.salary_min ? parseInt(newJobForm.salary_min) : null,
+        salary_max: newJobForm.salary_max ? parseInt(newJobForm.salary_max) : null,
+        salary_currency: newJobForm.salary_currency,
+        hiring_manager: newJobForm.hiring_manager || null,
+        recruiter: newJobForm.recruiter || null,
+        requirements: [],
+        benefits: [],
+        configuration: {}
+      })
+      toast.success('Job Posted', { description: `${newJobForm.title} has been created successfully` })
+      setShowPostJobDialog(false)
+      refetchJobs()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to create job posting' })
+    }
+  }
+
+  const handleEditJob = (job: JobPosting) => {
+    setEditingJob(job)
+    setNewJobForm({
+      title: job.title,
+      description: job.description || '',
+      department: job.department || '',
+      location: job.location || '',
+      job_type: job.job_type,
+      status: job.status,
+      salary_min: job.salary_min?.toString() || '',
+      salary_max: job.salary_max?.toString() || '',
+      salary_currency: job.salary_currency,
+      hiring_manager: job.hiring_manager || '',
+      recruiter: job.recruiter || ''
+    })
+    setShowEditJobDialog(true)
+  }
+
+  const handleUpdateJob = async () => {
+    if (!editingJob) return
+
+    try {
+      await updateJob({
+        id: editingJob.id,
+        updates: {
+          title: newJobForm.title,
+          description: newJobForm.description || null,
+          department: newJobForm.department || null,
+          location: newJobForm.location || null,
+          job_type: newJobForm.job_type,
+          status: newJobForm.status,
+          salary_min: newJobForm.salary_min ? parseInt(newJobForm.salary_min) : null,
+          salary_max: newJobForm.salary_max ? parseInt(newJobForm.salary_max) : null,
+          salary_currency: newJobForm.salary_currency,
+          hiring_manager: newJobForm.hiring_manager || null,
+          recruiter: newJobForm.recruiter || null
+        }
+      })
+      toast.success('Job Updated', { description: `${newJobForm.title} has been updated` })
+      setShowEditJobDialog(false)
+      setEditingJob(null)
+      refetchJobs()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to update job posting' })
+    }
+  }
+
+  const handleDeleteJob = async (jobId: string, jobTitle: string) => {
+    try {
+      await deleteJob(jobId)
+      toast.success('Job Deleted', { description: `${jobTitle} has been removed` })
+      refetchJobs()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to delete job posting' })
+    }
   }
 
   const handleExportReport = () => {
-    toast.success('Exporting', { description: 'Recruitment report will be downloaded' })
+    const reportData = {
+      generatedAt: new Date().toISOString(),
+      stats: dbStats,
+      jobs: dbJobs,
+      applications: dbApplications
+    }
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `recruitment-report-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Report Exported', { description: 'Recruitment report has been downloaded' })
+  }
+
+  const handleAddCandidate = () => {
+    setNewCandidateForm({
+      job_id: '',
+      candidate_name: '',
+      candidate_email: '',
+      candidate_phone: '',
+      experience_years: '',
+      resume_url: '',
+      linkedin_url: '',
+      portfolio_url: '',
+      notes: ''
+    })
+    setShowAddCandidateDialog(true)
+  }
+
+  const handleCreateApplication = async () => {
+    if (!newCandidateForm.candidate_name.trim() || !newCandidateForm.job_id) {
+      toast.error('Validation Error', { description: 'Candidate name and job are required' })
+      return
+    }
+
+    try {
+      await createApplication({
+        job_id: newCandidateForm.job_id,
+        candidate_name: newCandidateForm.candidate_name,
+        candidate_email: newCandidateForm.candidate_email || null,
+        candidate_phone: newCandidateForm.candidate_phone || null,
+        experience_years: newCandidateForm.experience_years ? parseInt(newCandidateForm.experience_years) : 0,
+        resume_url: newCandidateForm.resume_url || null,
+        linkedin_url: newCandidateForm.linkedin_url || null,
+        portfolio_url: newCandidateForm.portfolio_url || null,
+        notes: newCandidateForm.notes || null,
+        status: 'new',
+        stage: 'Applied',
+        match_score: 0,
+        applied_date: new Date().toISOString(),
+        interviewer_notes: [],
+        configuration: {}
+      })
+      toast.success('Candidate Added', { description: `${newCandidateForm.candidate_name} has been added to the pipeline` })
+      setShowAddCandidateDialog(false)
+      refetchApplications()
+      refetchJobs()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to add candidate' })
+    }
+  }
+
+  const handleAdvanceStage = async (applicationId: string, candidateName: string, currentStage: string) => {
+    const stageOrder = ['Applied', 'Screening', 'Phone Interview', 'Technical', 'Onsite', 'Offer', 'Hired']
+    const currentIndex = stageOrder.indexOf(currentStage)
+    if (currentIndex === -1 || currentIndex >= stageOrder.length - 1) {
+      toast.info('Stage Complete', { description: `${candidateName} is already at the final stage` })
+      return
+    }
+
+    const nextStage = stageOrder[currentIndex + 1]
+
+    try {
+      await advanceStage({ id: applicationId, newStage: nextStage })
+      toast.success('Stage Advanced', { description: `${candidateName} has been moved to ${nextStage}` })
+      refetchApplications()
+      refetchJobs()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to advance candidate stage' })
+    }
+  }
+
+  const handleRejectCandidate = async (applicationId: string, candidateName: string) => {
+    try {
+      await updateApplication({
+        id: applicationId,
+        updates: {
+          status: 'rejected',
+          stage: 'Rejected'
+        }
+      })
+      toast.success('Candidate Rejected', { description: `${candidateName} has been rejected` })
+      refetchApplications()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to reject candidate' })
+    }
   }
 
   const handleScheduleInterview = (candidateName: string) => {
     toast.info('Schedule Interview', { description: `Opening scheduler for ${candidateName}...` })
   }
 
-  const handleRejectCandidate = (candidateName: string) => {
-    toast.info('Candidate Rejected', { description: `${candidateName} has been rejected` })
-  }
-
   const handleExportCandidates = () => {
-    toast.success('Exporting', { description: 'Candidate data will be downloaded' })
+    const blob = new Blob([JSON.stringify(dbApplications, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `candidates-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Exported', { description: 'Candidate data has been downloaded' })
   }
 
-  const handleViewJob = (jobTitle: string) => {
-    toast.info('View Job', { description: `Opening details for ${jobTitle}...` })
+  const handleViewResume = (resumeUrl: string | null, candidateName: string) => {
+    if (resumeUrl) {
+      window.open(resumeUrl, '_blank')
+    } else {
+      toast.info('No Resume', { description: `No resume file available for ${candidateName}` })
+    }
   }
 
-  const handleEditJob = (jobTitle: string) => {
-    toast.info('Edit Job', { description: `Opening editor for ${jobTitle}...` })
-  }
-
-  const handleViewResume = (candidateName: string) => {
-    toast.info('View Resume', { description: `Opening resume for ${candidateName}...` })
-  }
-
-  const handleEmailCandidate = (candidateName: string) => {
-    toast.info('Email Candidate', { description: `Opening email composer for ${candidateName}...` })
+  const handleEmailCandidate = (email: string | null, candidateName: string) => {
+    if (email) {
+      window.location.href = `mailto:${email}`
+    } else {
+      toast.info('No Email', { description: `No email address available for ${candidateName}` })
+    }
   }
 
   const handleViewOffer = (candidateName: string) => {
@@ -885,20 +1139,16 @@ export default function RecruitmentClient() {
     toast.info('Import', { description: 'Opening import dialog...' })
   }
 
-  const handleAddCandidate = () => {
-    toast.info('Add Candidate', { description: 'Opening candidate form...' })
-  }
-
-  const handleReachOut = (candidateName: string) => {
-    toast.info('Reach Out', { description: `Opening message composer for ${candidateName}...` })
+  const handleReachOut = (email: string | null, candidateName: string) => {
+    if (email) {
+      window.location.href = `mailto:${email}?subject=Opportunity at Our Company`
+    } else {
+      toast.info('No Email', { description: `No email address available for ${candidateName}` })
+    }
   }
 
   const handleMatchJobs = (candidateName: string) => {
     toast.info('Match Jobs', { description: `Finding matching jobs for ${candidateName}...` })
-  }
-
-  const handleAdvanceStage = (candidateName: string) => {
-    toast.success('Advance Stage', { description: `${candidateName} has been advanced to the next stage` })
   }
 
   return (
@@ -1146,11 +1396,11 @@ export default function RecruitmentClient() {
                           <span>Recruiter: {job.recruiter}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewJob(job.title) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedJob(job) }}>
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEditJob(job.title) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Edit Job', { description: `Opening editor for ${job.title}...` }) }}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>
@@ -1275,11 +1525,11 @@ export default function RecruitmentClient() {
                           <span>Applied {new Date(candidate.appliedDate).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewResume(candidate.name) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleViewResume(candidate.resumeUrl, candidate.name) }}>
                             <FileText className="w-4 h-4 mr-1" />
                             Resume
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEmailCandidate(candidate.name) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleEmailCandidate(candidate.email, candidate.name) }}>
                             <Mail className="w-4 h-4 mr-1" />
                             Email
                           </Button>
@@ -1688,7 +1938,7 @@ export default function RecruitmentClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleReachOut(candidate.name)}>
+                          <Button variant="ghost" size="sm" onClick={() => handleReachOut(candidate.email, candidate.name)}>
                             <Mail className="w-4 h-4 mr-1" />
                             Reach Out
                           </Button>
@@ -1914,7 +2164,7 @@ export default function RecruitmentClient() {
               )}
 
               <div className="flex gap-2">
-                <Button variant="outline" className="flex-1" onClick={() => handleViewResume(selectedCandidate.name)}>
+                <Button variant="outline" className="flex-1" onClick={() => handleViewResume(selectedCandidate.resumeUrl, selectedCandidate.name)}>
                   <FileText className="w-4 h-4 mr-2" />
                   View Resume
                 </Button>
@@ -1922,13 +2172,410 @@ export default function RecruitmentClient() {
                   <Calendar className="w-4 h-4 mr-2" />
                   Schedule Interview
                 </Button>
-                <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600" onClick={() => handleAdvanceStage(selectedCandidate.name)}>
+                <Button className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600" onClick={() => handleAdvanceStage(selectedCandidate.id, selectedCandidate.name, selectedCandidate.stage)}>
                   <ChevronRight className="w-4 h-4 mr-2" />
                   Advance Stage
                 </Button>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Post New Job Dialog */}
+      <Dialog open={showPostJobDialog} onOpenChange={setShowPostJobDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
+                <Plus className="w-5 h-5" />
+              </div>
+              Post New Job
+            </DialogTitle>
+            <DialogDescription>
+              Create a new job posting to start receiving applications
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="job-title">Job Title *</Label>
+                <Input
+                  id="job-title"
+                  value={newJobForm.title}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g. Senior Software Engineer"
+                />
+              </div>
+              <div>
+                <Label htmlFor="department">Department</Label>
+                <Input
+                  id="department"
+                  value={newJobForm.department}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, department: e.target.value }))}
+                  placeholder="e.g. Engineering"
+                />
+              </div>
+              <div>
+                <Label htmlFor="location">Location</Label>
+                <Input
+                  id="location"
+                  value={newJobForm.location}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="e.g. San Francisco, CA"
+                />
+              </div>
+              <div>
+                <Label htmlFor="job-type">Job Type</Label>
+                <Select value={newJobForm.job_type} onValueChange={(val) => setNewJobForm(prev => ({ ...prev, job_type: val }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full-time">Full-time</SelectItem>
+                    <SelectItem value="part-time">Part-time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="freelance">Freelance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select value={newJobForm.status} onValueChange={(val) => setNewJobForm(prev => ({ ...prev, status: val }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="paused">Paused</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="salary-min">Salary Min</Label>
+                <Input
+                  id="salary-min"
+                  type="number"
+                  value={newJobForm.salary_min}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, salary_min: e.target.value }))}
+                  placeholder="e.g. 100000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="salary-max">Salary Max</Label>
+                <Input
+                  id="salary-max"
+                  type="number"
+                  value={newJobForm.salary_max}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, salary_max: e.target.value }))}
+                  placeholder="e.g. 150000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="hiring-manager">Hiring Manager</Label>
+                <Input
+                  id="hiring-manager"
+                  value={newJobForm.hiring_manager}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, hiring_manager: e.target.value }))}
+                  placeholder="e.g. John Smith"
+                />
+              </div>
+              <div>
+                <Label htmlFor="recruiter">Recruiter</Label>
+                <Input
+                  id="recruiter"
+                  value={newJobForm.recruiter}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, recruiter: e.target.value }))}
+                  placeholder="e.g. Jane Doe"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={newJobForm.description}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Job description..."
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPostJobDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-purple-600 to-pink-600"
+              onClick={handleCreateJob}
+              disabled={isCreatingJob}
+            >
+              {isCreatingJob ? 'Creating...' : 'Create Job'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Job Dialog */}
+      <Dialog open={showEditJobDialog} onOpenChange={setShowEditJobDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white">
+                <Edit className="w-5 h-5" />
+              </div>
+              Edit Job
+            </DialogTitle>
+            <DialogDescription>
+              Update the job posting details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="edit-job-title">Job Title *</Label>
+                <Input
+                  id="edit-job-title"
+                  value={newJobForm.title}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g. Senior Software Engineer"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-department">Department</Label>
+                <Input
+                  id="edit-department"
+                  value={newJobForm.department}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, department: e.target.value }))}
+                  placeholder="e.g. Engineering"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-location">Location</Label>
+                <Input
+                  id="edit-location"
+                  value={newJobForm.location}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, location: e.target.value }))}
+                  placeholder="e.g. San Francisco, CA"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-job-type">Job Type</Label>
+                <Select value={newJobForm.job_type} onValueChange={(val) => setNewJobForm(prev => ({ ...prev, job_type: val }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full-time">Full-time</SelectItem>
+                    <SelectItem value="part-time">Part-time</SelectItem>
+                    <SelectItem value="contract">Contract</SelectItem>
+                    <SelectItem value="internship">Internship</SelectItem>
+                    <SelectItem value="freelance">Freelance</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-status">Status</Label>
+                <Select value={newJobForm.status} onValueChange={(val) => setNewJobForm(prev => ({ ...prev, status: val }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="paused">Paused</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="filled">Filled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-salary-min">Salary Min</Label>
+                <Input
+                  id="edit-salary-min"
+                  type="number"
+                  value={newJobForm.salary_min}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, salary_min: e.target.value }))}
+                  placeholder="e.g. 100000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-salary-max">Salary Max</Label>
+                <Input
+                  id="edit-salary-max"
+                  type="number"
+                  value={newJobForm.salary_max}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, salary_max: e.target.value }))}
+                  placeholder="e.g. 150000"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-hiring-manager">Hiring Manager</Label>
+                <Input
+                  id="edit-hiring-manager"
+                  value={newJobForm.hiring_manager}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, hiring_manager: e.target.value }))}
+                  placeholder="e.g. John Smith"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-recruiter">Recruiter</Label>
+                <Input
+                  id="edit-recruiter"
+                  value={newJobForm.recruiter}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, recruiter: e.target.value }))}
+                  placeholder="e.g. Jane Doe"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={newJobForm.description}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Job description..."
+                  rows={4}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowEditJobDialog(false); setEditingJob(null); }}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-600 to-cyan-600"
+              onClick={handleUpdateJob}
+              disabled={isUpdatingJob}
+            >
+              {isUpdatingJob ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Candidate Dialog */}
+      <Dialog open={showAddCandidateDialog} onOpenChange={setShowAddCandidateDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white">
+                <UserPlus className="w-5 h-5" />
+              </div>
+              Add Candidate
+            </DialogTitle>
+            <DialogDescription>
+              Add a new candidate to the recruitment pipeline
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="candidate-job">Job Position *</Label>
+                <Select value={newCandidateForm.job_id} onValueChange={(val) => setNewCandidateForm(prev => ({ ...prev, job_id: val }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job position" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dbJobs.map(job => (
+                      <SelectItem key={job.id} value={job.id}>
+                        {job.title} - {job.department || 'General'}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="candidate-name">Candidate Name *</Label>
+                <Input
+                  id="candidate-name"
+                  value={newCandidateForm.candidate_name}
+                  onChange={(e) => setNewCandidateForm(prev => ({ ...prev, candidate_name: e.target.value }))}
+                  placeholder="e.g. John Doe"
+                />
+              </div>
+              <div>
+                <Label htmlFor="candidate-email">Email</Label>
+                <Input
+                  id="candidate-email"
+                  type="email"
+                  value={newCandidateForm.candidate_email}
+                  onChange={(e) => setNewCandidateForm(prev => ({ ...prev, candidate_email: e.target.value }))}
+                  placeholder="john@example.com"
+                />
+              </div>
+              <div>
+                <Label htmlFor="candidate-phone">Phone</Label>
+                <Input
+                  id="candidate-phone"
+                  value={newCandidateForm.candidate_phone}
+                  onChange={(e) => setNewCandidateForm(prev => ({ ...prev, candidate_phone: e.target.value }))}
+                  placeholder="+1 (555) 123-4567"
+                />
+              </div>
+              <div>
+                <Label htmlFor="experience-years">Years of Experience</Label>
+                <Input
+                  id="experience-years"
+                  type="number"
+                  value={newCandidateForm.experience_years}
+                  onChange={(e) => setNewCandidateForm(prev => ({ ...prev, experience_years: e.target.value }))}
+                  placeholder="e.g. 5"
+                />
+              </div>
+              <div>
+                <Label htmlFor="resume-url">Resume URL</Label>
+                <Input
+                  id="resume-url"
+                  value={newCandidateForm.resume_url}
+                  onChange={(e) => setNewCandidateForm(prev => ({ ...prev, resume_url: e.target.value }))}
+                  placeholder="https://..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="linkedin-url">LinkedIn URL</Label>
+                <Input
+                  id="linkedin-url"
+                  value={newCandidateForm.linkedin_url}
+                  onChange={(e) => setNewCandidateForm(prev => ({ ...prev, linkedin_url: e.target.value }))}
+                  placeholder="linkedin.com/in/..."
+                />
+              </div>
+              <div>
+                <Label htmlFor="portfolio-url">Portfolio URL</Label>
+                <Input
+                  id="portfolio-url"
+                  value={newCandidateForm.portfolio_url}
+                  onChange={(e) => setNewCandidateForm(prev => ({ ...prev, portfolio_url: e.target.value }))}
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="candidate-notes">Notes</Label>
+                <Textarea
+                  id="candidate-notes"
+                  value={newCandidateForm.notes}
+                  onChange={(e) => setNewCandidateForm(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Additional notes about the candidate..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddCandidateDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-indigo-600 to-purple-600"
+              onClick={handleCreateApplication}
+              disabled={isCreatingApplication}
+            >
+              {isCreatingApplication ? 'Adding...' : 'Add Candidate'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

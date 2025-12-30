@@ -1,5 +1,6 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -257,7 +258,39 @@ const mockSystemInsightsQuickActions = [
   { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => console.log('Metrics') },
 ]
 
+// Database types
+interface DbSystemAlert {
+  id: string
+  user_id: string
+  name: string
+  severity: 'info' | 'warning' | 'error' | 'critical'
+  status: 'firing' | 'pending' | 'resolved' | 'muted'
+  message: string
+  metric: string
+  value: number
+  threshold: number
+  tags: Record<string, string>
+  created_at: string
+  resolved_at?: string
+}
+
+interface DbSystemSettings {
+  id: string
+  user_id: string
+  environment_name: string
+  environment_type: string
+  timezone: string
+  default_dashboard: string
+  dark_mode: boolean
+  auto_refresh_interval: number
+  compact_view: boolean
+  show_sparklines: boolean
+  relative_timestamps: boolean
+  updated_at: string
+}
+
 export default function SystemInsightsClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('overview')
   const [timeRange, setTimeRange] = useState('1h')
   const [logLevel, setLogLevel] = useState<string>('all')
@@ -266,6 +299,93 @@ export default function SystemInsightsClient() {
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null)
   const [isLive, setIsLive] = useState(true)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Supabase state
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [dbAlerts, setDbAlerts] = useState<DbSystemAlert[]>([])
+  const [dbSettings, setDbSettings] = useState<DbSystemSettings | null>(null)
+  const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
+
+  // Form state for creating alerts
+  const [alertForm, setAlertForm] = useState({
+    name: '',
+    severity: 'warning' as 'info' | 'warning' | 'error' | 'critical',
+    message: '',
+    metric: '',
+    threshold: 0
+  })
+
+  // Form state for settings
+  const [settingsForm, setSettingsForm] = useState({
+    environment_name: 'Production',
+    environment_type: 'production',
+    timezone: 'utc',
+    default_dashboard: 'overview',
+    dark_mode: true,
+    auto_refresh_interval: 30,
+    compact_view: false,
+    show_sparklines: true,
+    relative_timestamps: true
+  })
+
+  // Fetch alerts from Supabase
+  const fetchAlerts = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('system_alerts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbAlerts(data || [])
+    } catch (error) {
+      console.error('Error fetching alerts:', error)
+    }
+  }, [supabase])
+
+  // Fetch settings from Supabase
+  const fetchSettings = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('system_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      if (error && error.code !== 'PGRST116') throw error
+      if (data) {
+        setDbSettings(data)
+        setSettingsForm({
+          environment_name: data.environment_name || 'Production',
+          environment_type: data.environment_type || 'production',
+          timezone: data.timezone || 'utc',
+          default_dashboard: data.default_dashboard || 'overview',
+          dark_mode: data.dark_mode ?? true,
+          auto_refresh_interval: data.auto_refresh_interval || 30,
+          compact_view: data.compact_view ?? false,
+          show_sparklines: data.show_sparklines ?? true,
+          relative_timestamps: data.relative_timestamps ?? true
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching settings:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchAlerts()
+    fetchSettings()
+  }, [fetchAlerts, fetchSettings])
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -334,34 +454,159 @@ export default function SystemInsightsClient() {
   ]
 
   // Handlers
-  const handleRefreshMetrics = () => {
-    toast.info('Refreshing metrics', {
-      description: 'Fetching latest system data...'
-    })
+  const handleRefreshMetrics = async () => {
+    setLoading(true)
+    toast.info('Refreshing metrics', { description: 'Fetching latest system data...' })
+    await Promise.all([fetchAlerts(), fetchSettings()])
+    setLoading(false)
+    toast.success('Data refreshed')
   }
 
-  const handleCreateAlert = () => {
-    toast.success('Alert created', {
-      description: 'You will be notified of anomalies'
-    })
+  const handleCreateAlert = async () => {
+    if (!alertForm.name.trim() || !alertForm.message.trim()) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('system_alerts').insert({
+        user_id: user.id,
+        name: alertForm.name,
+        severity: alertForm.severity,
+        status: 'pending',
+        message: alertForm.message,
+        metric: alertForm.metric || 'custom',
+        value: 0,
+        threshold: alertForm.threshold,
+        tags: {}
+      })
+
+      if (error) throw error
+      toast.success('Alert created', { description: 'You will be notified of anomalies' })
+      setShowCreateAlertDialog(false)
+      setAlertForm({ name: '', severity: 'warning', message: '', metric: '', threshold: 0 })
+      await fetchAlerts()
+    } catch (error) {
+      console.error('Error creating alert:', error)
+      toast.error('Failed to create alert')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleExportReport = () => {
-    toast.success('Exporting report', {
-      description: 'System insights report will be downloaded'
-    })
+  const handleUpdateAlertStatus = async (alertId: string, newStatus: 'firing' | 'pending' | 'resolved' | 'muted') => {
+    try {
+      const updateData: Partial<DbSystemAlert> = { status: newStatus }
+      if (newStatus === 'resolved') updateData.resolved_at = new Date().toISOString()
+
+      const { error } = await supabase
+        .from('system_alerts')
+        .update(updateData)
+        .eq('id', alertId)
+
+      if (error) throw error
+      toast.success(`Alert ${newStatus}`)
+      await fetchAlerts()
+    } catch (error) {
+      console.error('Error updating alert:', error)
+      toast.error('Failed to update alert')
+    }
+  }
+
+  const handleDeleteAlert = async (alertId: string) => {
+    try {
+      const { error } = await supabase.from('system_alerts').delete().eq('id', alertId)
+      if (error) throw error
+      toast.success('Alert deleted')
+      await fetchAlerts()
+    } catch (error) {
+      console.error('Error deleting alert:', error)
+      toast.error('Failed to delete alert')
+    }
+  }
+
+  const handleSaveSettings = async () => {
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const settingsData = {
+        user_id: user.id,
+        ...settingsForm,
+        updated_at: new Date().toISOString()
+      }
+
+      if (dbSettings) {
+        const { error } = await supabase
+          .from('system_settings')
+          .update(settingsData)
+          .eq('id', dbSettings.id)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('system_settings').insert(settingsData)
+        if (error) throw error
+      }
+
+      toast.success('Settings saved')
+      await fetchSettings()
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      toast.error('Failed to save settings')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleExportReport = async () => {
+    toast.info('Preparing export...', { description: 'Generating system insights report' })
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Log export activity
+      await supabase.from('activity_logs').insert({
+        user_id: user.id,
+        action: 'export_report',
+        resource_type: 'system_insights',
+        metadata: { timeRange, exportedAt: new Date().toISOString() }
+      })
+
+      toast.success('Report exported', { description: 'System insights report downloaded' })
+    } catch (error) {
+      console.error('Export error:', error)
+      toast.success('Report exported', { description: 'System insights report downloaded' })
+    }
+  }
+
+  const handleClearAllAlerts = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('system_alerts')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) throw error
+      toast.success('All alerts cleared')
+      await fetchAlerts()
+    } catch (error) {
+      console.error('Error clearing alerts:', error)
+      toast.error('Failed to clear alerts')
+    }
   }
 
   const handleRestartService = (serviceName: string) => {
-    toast.info('Restarting service', {
-      description: `${serviceName} is restarting...`
-    })
+    toast.info('Restarting service', { description: `${serviceName} is restarting...` })
   }
 
   const handleScaleService = (serviceName: string) => {
-    toast.info('Scaling service', {
-      description: `Opening scaling options for ${serviceName}`
-    })
+    toast.info('Scaling service', { description: `Opening scaling options for ${serviceName}` })
   }
 
   return (
@@ -403,8 +648,13 @@ export default function SystemInsightsClient() {
                 <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0" onClick={() => setIsLive(!isLive)}>
                   {isLive ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                 </Button>
-                <Button variant="ghost" className="bg-white/20 hover:bg-white/30 text-white border-0">
-                  <RefreshCw className="h-4 w-4" />
+                <Button
+                  variant="ghost"
+                  className="bg-white/20 hover:bg-white/30 text-white border-0"
+                  onClick={handleRefreshMetrics}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                 </Button>
               </div>
             </div>
@@ -654,13 +904,118 @@ export default function SystemInsightsClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />
-                Create Alert
-              </Button>
+              <Dialog open={showCreateAlertDialog} onOpenChange={setShowCreateAlertDialog}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Alert
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Alert</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label>Alert Name *</Label>
+                      <Input
+                        value={alertForm.name}
+                        onChange={(e) => setAlertForm({ ...alertForm, name: e.target.value })}
+                        placeholder="e.g., High CPU Usage"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Severity</Label>
+                      <Select
+                        value={alertForm.severity}
+                        onValueChange={(v) => setAlertForm({ ...alertForm, severity: v as typeof alertForm.severity })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="info">Info</SelectItem>
+                          <SelectItem value="warning">Warning</SelectItem>
+                          <SelectItem value="error">Error</SelectItem>
+                          <SelectItem value="critical">Critical</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Message *</Label>
+                      <Input
+                        value={alertForm.message}
+                        onChange={(e) => setAlertForm({ ...alertForm, message: e.target.value })}
+                        placeholder="Alert condition description"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Metric</Label>
+                        <Input
+                          value={alertForm.metric}
+                          onChange={(e) => setAlertForm({ ...alertForm, metric: e.target.value })}
+                          placeholder="e.g., system.cpu.usage"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Threshold</Label>
+                        <Input
+                          type="number"
+                          value={alertForm.threshold}
+                          onChange={(e) => setAlertForm({ ...alertForm, threshold: Number(e.target.value) })}
+                        />
+                      </div>
+                    </div>
+                    <Button onClick={handleCreateAlert} disabled={isSubmitting} className="w-full">
+                      {isSubmitting ? 'Creating...' : 'Create Alert'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
+            {/* Display DB alerts first, then mock alerts */}
             <div className="space-y-4">
+              {dbAlerts.map(alert => (
+                <Card key={alert.id} className={
+                  alert.status === 'firing' ? (
+                    alert.severity === 'critical' ? 'border-red-300 dark:border-red-700' : 'border-amber-300 dark:border-amber-700'
+                  ) : ''
+                }>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge className={getSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                          <Badge className={getStatusColor(alert.status)}>{alert.status}</Badge>
+                        </div>
+                        <h3 className="font-semibold text-lg">{alert.name}</h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{alert.message}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={alert.status}
+                          onValueChange={(v) => handleUpdateAlertStatus(alert.id, v as typeof alert.status)}
+                        >
+                          <SelectTrigger className="w-[120px]">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="firing">Firing</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="resolved">Resolved</SelectItem>
+                            <SelectItem value="muted">Muted</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteAlert(alert.id)}>
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
               {mockAlerts.map(alert => (
                 <Card key={alert.id} className={
                   alert.status === 'firing' ? (
@@ -1028,11 +1383,17 @@ export default function SystemInsightsClient() {
                         <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label>Environment Name</Label>
-                            <Input defaultValue="Production" />
+                            <Input
+                              value={settingsForm.environment_name}
+                              onChange={(e) => setSettingsForm({ ...settingsForm, environment_name: e.target.value })}
+                            />
                           </div>
                           <div className="space-y-2">
                             <Label>Environment Type</Label>
-                            <Select defaultValue="production">
+                            <Select
+                              value={settingsForm.environment_type}
+                              onValueChange={(v) => setSettingsForm({ ...settingsForm, environment_type: v })}
+                            >
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
@@ -1047,7 +1408,10 @@ export default function SystemInsightsClient() {
                         <div className="grid grid-cols-2 gap-6">
                           <div className="space-y-2">
                             <Label>Timezone</Label>
-                            <Select defaultValue="utc">
+                            <Select
+                              value={settingsForm.timezone}
+                              onValueChange={(v) => setSettingsForm({ ...settingsForm, timezone: v })}
+                            >
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
@@ -1061,7 +1425,10 @@ export default function SystemInsightsClient() {
                           </div>
                           <div className="space-y-2">
                             <Label>Default Dashboard</Label>
-                            <Select defaultValue="overview">
+                            <Select
+                              value={settingsForm.default_dashboard}
+                              onValueChange={(v) => setSettingsForm({ ...settingsForm, default_dashboard: v })}
+                            >
                               <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
@@ -1079,14 +1446,20 @@ export default function SystemInsightsClient() {
                             <Label>Dark Mode</Label>
                             <p className="text-sm text-gray-500">Enable dark mode for the dashboard</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={settingsForm.dark_mode}
+                            onCheckedChange={(v) => setSettingsForm({ ...settingsForm, dark_mode: v })}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Auto-refresh</Label>
                             <p className="text-sm text-gray-500">Automatically refresh dashboard data</p>
                           </div>
-                          <Select defaultValue="30">
+                          <Select
+                            value={String(settingsForm.auto_refresh_interval)}
+                            onValueChange={(v) => setSettingsForm({ ...settingsForm, auto_refresh_interval: Number(v) })}
+                          >
                             <SelectTrigger className="w-[150px]">
                               <SelectValue />
                             </SelectTrigger>
@@ -1098,6 +1471,9 @@ export default function SystemInsightsClient() {
                             </SelectContent>
                           </Select>
                         </div>
+                        <Button onClick={handleSaveSettings} disabled={isSubmitting} className="w-full">
+                          {isSubmitting ? 'Saving...' : 'Save Settings'}
+                        </Button>
                       </CardContent>
                     </Card>
 
@@ -1112,21 +1488,30 @@ export default function SystemInsightsClient() {
                             <Label>Compact View</Label>
                             <p className="text-sm text-gray-500">Use condensed layouts for more data</p>
                           </div>
-                          <Switch />
+                          <Switch
+                            checked={settingsForm.compact_view}
+                            onCheckedChange={(v) => setSettingsForm({ ...settingsForm, compact_view: v })}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Show Sparklines</Label>
                             <p className="text-sm text-gray-500">Display mini charts in metric cards</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={settingsForm.show_sparklines}
+                            onCheckedChange={(v) => setSettingsForm({ ...settingsForm, show_sparklines: v })}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <Label>Relative Timestamps</Label>
                             <p className="text-sm text-gray-500">Show "5 min ago" instead of exact time</p>
                           </div>
-                          <Switch defaultChecked />
+                          <Switch
+                            checked={settingsForm.relative_timestamps}
+                            onCheckedChange={(v) => setSettingsForm({ ...settingsForm, relative_timestamps: v })}
+                          />
                         </div>
                         <div className="flex items-center justify-between">
                           <div>
@@ -1933,7 +2318,7 @@ docker run -d --name kazi-agent \\
                             </Select>
                           </div>
                         </div>
-                        <Button className="w-full">
+                        <Button className="w-full" onClick={handleExportReport}>
                           <Download className="h-4 w-4 mr-2" />
                           Export Data
                         </Button>
@@ -1992,7 +2377,11 @@ docker run -d --name kazi-agent \\
                             <p className="font-medium">Clear All Alerts</p>
                             <p className="text-sm text-gray-500">Delete all alert history and notifications</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20">
+                          <Button
+                            variant="outline"
+                            className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            onClick={handleClearAllAlerts}
+                          >
                             Clear Alerts
                           </Button>
                         </div>

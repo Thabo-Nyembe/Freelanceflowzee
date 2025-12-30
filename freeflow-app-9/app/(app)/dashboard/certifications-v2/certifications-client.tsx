@@ -1,10 +1,18 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Loader2 } from 'lucide-react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useCertifications, type Certification, type CertificationType, type CertificationStatus } from '@/lib/hooks/use-certifications'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -662,6 +670,87 @@ export default function CertificationsClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [certToDelete, setCertToDelete] = useState<Certification | null>(null)
+  const [certToEdit, setCertToEdit] = useState<Certification | null>(null)
+
+  // Supabase client and hooks
+  const supabase = createClientComponentClient()
+  const {
+    certifications: dbCertifications,
+    loading: certificationsLoading,
+    createCertification,
+    updateCertification,
+    deleteCertification,
+    refetch
+  } = useCertifications({
+    certificationType: typeFilter !== 'all' ? typeFilter as CertificationType : undefined,
+    status: statusFilter !== 'all' ? statusFilter as CertificationStatus : undefined
+  })
+
+  // Form state
+  const [certForm, setCertForm] = useState({
+    certification_name: '',
+    certification_code: '',
+    certification_type: 'professional' as CertificationType,
+    issuing_organization: '',
+    issuing_authority: '',
+    issue_date: '',
+    expiry_date: '',
+    status: 'active' as CertificationStatus,
+    level: '',
+    scope: '',
+    holder_name: '',
+    holder_email: '',
+    certificate_url: '',
+    certificate_number: '',
+    notes: ''
+  })
+
+  const resetForm = () => {
+    setCertForm({
+      certification_name: '',
+      certification_code: '',
+      certification_type: 'professional',
+      issuing_organization: '',
+      issuing_authority: '',
+      issue_date: '',
+      expiry_date: '',
+      status: 'active',
+      level: '',
+      scope: '',
+      holder_name: '',
+      holder_email: '',
+      certificate_url: '',
+      certificate_number: '',
+      notes: ''
+    })
+  }
+
+  const populateFormForEdit = (cert: Certification) => {
+    setCertForm({
+      certification_name: cert.certification_name || '',
+      certification_code: cert.certification_code || '',
+      certification_type: cert.certification_type || 'professional',
+      issuing_organization: cert.issuing_organization || '',
+      issuing_authority: cert.issuing_authority || '',
+      issue_date: cert.issue_date || '',
+      expiry_date: cert.expiry_date || '',
+      status: cert.status || 'active',
+      level: cert.level || '',
+      scope: cert.scope || '',
+      holder_name: cert.holder_name || '',
+      holder_email: cert.holder_email || '',
+      certificate_url: cert.certificate_url || '',
+      certificate_number: cert.certificate_number || '',
+      notes: cert.notes || ''
+    })
+  }
+
   // Calculate stats
   const stats = useMemo(() => {
     const totalCredentials = mockCredentials.length
@@ -748,35 +837,128 @@ export default function CertificationsClient() {
     return num.toString()
   }
 
-  // Handlers
+  // CRUD Handlers
+  const handleCreateCertification = async () => {
+    if (!certForm.certification_name.trim()) {
+      toast.error('Certification name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in')
+        return
+      }
+      await createCertification({
+        user_id: user.id,
+        certification_name: certForm.certification_name,
+        certification_code: certForm.certification_code || undefined,
+        certification_type: certForm.certification_type,
+        issuing_organization: certForm.issuing_organization || undefined,
+        issuing_authority: certForm.issuing_authority || undefined,
+        issue_date: certForm.issue_date || undefined,
+        expiry_date: certForm.expiry_date || undefined,
+        status: certForm.status,
+        level: certForm.level || undefined,
+        scope: certForm.scope || undefined,
+        holder_name: certForm.holder_name || undefined,
+        holder_email: certForm.holder_email || undefined,
+        certificate_url: certForm.certificate_url || undefined,
+        certificate_number: certForm.certificate_number || undefined,
+        notes: certForm.notes || undefined
+      })
+      toast.success('Certification created', { description: `"${certForm.certification_name}" has been added` })
+      setShowCreateDialog(false)
+      resetForm()
+    } catch (error: any) {
+      toast.error('Failed to create certification', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleUpdateCertification = async () => {
+    if (!certToEdit || !certForm.certification_name.trim()) {
+      toast.error('Certification name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await updateCertification({
+        id: certToEdit.id,
+        certification_name: certForm.certification_name,
+        certification_code: certForm.certification_code || undefined,
+        certification_type: certForm.certification_type,
+        issuing_organization: certForm.issuing_organization || undefined,
+        issuing_authority: certForm.issuing_authority || undefined,
+        issue_date: certForm.issue_date || undefined,
+        expiry_date: certForm.expiry_date || undefined,
+        status: certForm.status,
+        level: certForm.level || undefined,
+        scope: certForm.scope || undefined,
+        holder_name: certForm.holder_name || undefined,
+        holder_email: certForm.holder_email || undefined,
+        certificate_url: certForm.certificate_url || undefined,
+        certificate_number: certForm.certificate_number || undefined,
+        notes: certForm.notes || undefined
+      })
+      toast.success('Certification updated', { description: `"${certForm.certification_name}" has been updated` })
+      setShowEditDialog(false)
+      setCertToEdit(null)
+      resetForm()
+    } catch (error: any) {
+      toast.error('Failed to update certification', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeleteCertification = async () => {
+    if (!certToDelete) return
+    setIsSubmitting(true)
+    try {
+      await deleteCertification(certToDelete.id)
+      toast.success('Certification deleted', { description: `"${certToDelete.certification_name}" has been removed` })
+      setShowDeleteDialog(false)
+      setCertToDelete(null)
+    } catch (error: any) {
+      toast.error('Failed to delete certification', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const openEditDialog = (cert: Certification) => {
+    setCertToEdit(cert)
+    populateFormForEdit(cert)
+    setShowEditDialog(true)
+  }
+
+  const openDeleteDialog = (cert: Certification) => {
+    setCertToDelete(cert)
+    setShowDeleteDialog(true)
+  }
+
+  // Legacy handlers (for mock data UI elements)
   const handleStartCertification = (certName: string) => {
-    toast.info('Starting certification', {
-      description: `Beginning "${certName}" exam...`
-    })
+    toast.info('Starting certification', { description: `Beginning "${certName}" exam...` })
   }
 
   const handleDownloadCertificate = (certName: string) => {
-    toast.success('Downloading certificate', {
-      description: `"${certName}" certificate will be downloaded`
-    })
+    toast.success('Downloading certificate', { description: `"${certName}" certificate will be downloaded` })
   }
 
   const handleShareCertification = (certName: string) => {
-    toast.success('Sharing certification', {
-      description: `"${certName}" share link copied`
-    })
+    toast.success('Sharing certification', { description: `"${certName}" share link copied` })
   }
 
   const handleRenewCertification = (certName: string) => {
-    toast.info('Renewing certification', {
-      description: `Starting renewal for "${certName}"...`
-    })
+    toast.info('Renewing certification', { description: `Starting renewal for "${certName}"...` })
   }
 
   const handleViewCredential = (certName: string) => {
-    toast.info('Loading credential', {
-      description: `Opening "${certName}" details...`
-    })
+    toast.info('Loading credential', { description: `Opening "${certName}" details...` })
   }
 
   return (
@@ -803,9 +985,12 @@ export default function CertificationsClient() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white w-64"
             />
-            <button className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity">
+            <Button
+              onClick={() => { resetForm(); setShowCreateDialog(true) }}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:opacity-90"
+            >
               + Add Credential
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -1917,7 +2102,263 @@ export default function CertificationsClient() {
             variant="grid"
           />
         </div>
+
+        {/* Database Certifications Section */}
+        {dbCertifications && dbCertifications.length > 0 && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
+            <h3 className="text-lg font-semibold mb-4 dark:text-white">Your Certifications (Database)</h3>
+            {certificationsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {dbCertifications.map((cert) => (
+                  <div key={cert.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div>
+                      <p className="font-medium dark:text-white">{cert.certification_name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {cert.issuing_organization || 'Unknown issuer'} - {cert.status}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" onClick={() => openEditDialog(cert)}>Edit</Button>
+                      <Button variant="destructive" size="sm" onClick={() => openDeleteDialog(cert)}>Delete</Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Create Certification Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Certification</DialogTitle>
+            <DialogDescription>Enter the details for your new certification</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Certification Name *</Label>
+                <Input
+                  value={certForm.certification_name}
+                  onChange={(e) => setCertForm({ ...certForm, certification_name: e.target.value })}
+                  placeholder="AWS Solutions Architect"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Certification Code</Label>
+                <Input
+                  value={certForm.certification_code}
+                  onChange={(e) => setCertForm({ ...certForm, certification_code: e.target.value })}
+                  placeholder="SAA-C03"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select value={certForm.certification_type} onValueChange={(v) => setCertForm({ ...certForm, certification_type: v as CertificationType })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="technical">Technical</SelectItem>
+                    <SelectItem value="compliance">Compliance</SelectItem>
+                    <SelectItem value="safety">Safety</SelectItem>
+                    <SelectItem value="quality">Quality</SelectItem>
+                    <SelectItem value="industry">Industry</SelectItem>
+                    <SelectItem value="vendor">Vendor</SelectItem>
+                    <SelectItem value="educational">Educational</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={certForm.status} onValueChange={(v) => setCertForm({ ...certForm, status: v as CertificationStatus })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="revoked">Revoked</SelectItem>
+                    <SelectItem value="in_renewal">In Renewal</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Issuing Organization</Label>
+                <Input
+                  value={certForm.issuing_organization}
+                  onChange={(e) => setCertForm({ ...certForm, issuing_organization: e.target.value })}
+                  placeholder="Amazon Web Services"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Issuing Authority</Label>
+                <Input
+                  value={certForm.issuing_authority}
+                  onChange={(e) => setCertForm({ ...certForm, issuing_authority: e.target.value })}
+                  placeholder="AWS Training"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Issue Date</Label>
+                <Input type="date" value={certForm.issue_date} onChange={(e) => setCertForm({ ...certForm, issue_date: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Expiry Date</Label>
+                <Input type="date" value={certForm.expiry_date} onChange={(e) => setCertForm({ ...certForm, expiry_date: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Level</Label>
+                <Input value={certForm.level} onChange={(e) => setCertForm({ ...certForm, level: e.target.value })} placeholder="Associate, Professional, etc." />
+              </div>
+              <div className="space-y-2">
+                <Label>Certificate Number</Label>
+                <Input value={certForm.certificate_number} onChange={(e) => setCertForm({ ...certForm, certificate_number: e.target.value })} placeholder="CERT-12345" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea value={certForm.notes} onChange={(e) => setCertForm({ ...certForm, notes: e.target.value })} placeholder="Additional notes..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreateCertification} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Create Certification
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Certification Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Certification</DialogTitle>
+            <DialogDescription>Update certification details</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Certification Name *</Label>
+                <Input value={certForm.certification_name} onChange={(e) => setCertForm({ ...certForm, certification_name: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Certification Code</Label>
+                <Input value={certForm.certification_code} onChange={(e) => setCertForm({ ...certForm, certification_code: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select value={certForm.certification_type} onValueChange={(v) => setCertForm({ ...certForm, certification_type: v as CertificationType })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="technical">Technical</SelectItem>
+                    <SelectItem value="compliance">Compliance</SelectItem>
+                    <SelectItem value="safety">Safety</SelectItem>
+                    <SelectItem value="quality">Quality</SelectItem>
+                    <SelectItem value="industry">Industry</SelectItem>
+                    <SelectItem value="vendor">Vendor</SelectItem>
+                    <SelectItem value="educational">Educational</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={certForm.status} onValueChange={(v) => setCertForm({ ...certForm, status: v as CertificationStatus })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                    <SelectItem value="suspended">Suspended</SelectItem>
+                    <SelectItem value="revoked">Revoked</SelectItem>
+                    <SelectItem value="in_renewal">In Renewal</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Issuing Organization</Label>
+                <Input value={certForm.issuing_organization} onChange={(e) => setCertForm({ ...certForm, issuing_organization: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Issuing Authority</Label>
+                <Input value={certForm.issuing_authority} onChange={(e) => setCertForm({ ...certForm, issuing_authority: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Issue Date</Label>
+                <Input type="date" value={certForm.issue_date} onChange={(e) => setCertForm({ ...certForm, issue_date: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Expiry Date</Label>
+                <Input type="date" value={certForm.expiry_date} onChange={(e) => setCertForm({ ...certForm, expiry_date: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Level</Label>
+                <Input value={certForm.level} onChange={(e) => setCertForm({ ...certForm, level: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Certificate Number</Label>
+                <Input value={certForm.certificate_number} onChange={(e) => setCertForm({ ...certForm, certificate_number: e.target.value })} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea value={certForm.notes} onChange={(e) => setCertForm({ ...certForm, notes: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowEditDialog(false); setCertToEdit(null); resetForm() }}>Cancel</Button>
+            <Button onClick={handleUpdateCertification} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Certification</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete "{certToDelete?.certification_name}"? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowDeleteDialog(false); setCertToDelete(null) }}>Cancel</Button>
+            <Button variant="destructive" onClick={handleDeleteCertification} disabled={isSubmitting}>
+              {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

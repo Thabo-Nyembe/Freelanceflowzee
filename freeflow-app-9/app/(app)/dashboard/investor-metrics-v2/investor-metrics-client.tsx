@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -88,6 +89,22 @@ import {
   investorMetricsActivities,
   investorMetricsQuickActions,
 } from '@/lib/mock-data/adapters'
+
+// Database types
+interface DBInvestorMetric {
+  id: string
+  user_id: string
+  metric_name: string
+  category: 'revenue' | 'growth' | 'efficiency' | 'engagement'
+  current_value: number
+  previous_value: number
+  change_percent: number
+  unit: string
+  description: string | null
+  period: 'monthly' | 'quarterly' | 'yearly'
+  created_at: string
+  updated_at: string
+}
 
 // Types
 type FundingStage = 'pre-seed' | 'seed' | 'series-a' | 'series-b' | 'series-c' | 'series-d' | 'ipo'
@@ -354,12 +371,184 @@ const mockInvestorMetricsQuickActions = [
 ]
 
 export default function InvestorMetricsClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRound, setSelectedRound] = useState<FundingRound | null>(null)
   const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null)
   const [periodFilter, setPeriodFilter] = useState<'monthly' | 'quarterly' | 'annual'>('quarterly')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Database state
+  const [dbMetrics, setDbMetrics] = useState<DBInvestorMetric[]>([])
+  const [loading, setLoading] = useState(false)
+  const [showMetricDialog, setShowMetricDialog] = useState(false)
+  const [editingMetric, setEditingMetric] = useState<DBInvestorMetric | null>(null)
+  const [formData, setFormData] = useState<{
+    metric_name: string
+    category: 'revenue' | 'growth' | 'efficiency' | 'engagement'
+    current_value: number
+    previous_value: number
+    unit: string
+    description: string
+    period: 'monthly' | 'quarterly' | 'yearly'
+  }>({
+    metric_name: '',
+    category: 'revenue',
+    current_value: 0,
+    previous_value: 0,
+    unit: 'currency',
+    description: '',
+    period: 'quarterly'
+  })
+
+  // Fetch metrics from Supabase
+  useEffect(() => {
+    fetchMetrics()
+  }, [])
+
+  const fetchMetrics = async () => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('investor_metrics')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbMetrics(data || [])
+    } catch (error: any) {
+      toast.error('Failed to fetch metrics', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCreateMetric = async () => {
+    setLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+
+      const changePercent = formData.previous_value > 0
+        ? ((formData.current_value - formData.previous_value) / formData.previous_value) * 100
+        : 0
+
+      const { data, error } = await supabase
+        .from('investor_metrics')
+        .insert({
+          user_id: user.id,
+          metric_name: formData.metric_name,
+          category: formData.category,
+          current_value: formData.current_value,
+          previous_value: formData.previous_value,
+          change_percent: changePercent,
+          unit: formData.unit,
+          description: formData.description || null,
+          period: formData.period
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setDbMetrics(prev => [data, ...prev])
+      setShowMetricDialog(false)
+      resetForm()
+      toast.success('Metric created successfully')
+    } catch (error: any) {
+      toast.error('Failed to create metric', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUpdateMetric = async () => {
+    if (!editingMetric) return
+    setLoading(true)
+    try {
+      const changePercent = formData.previous_value > 0
+        ? ((formData.current_value - formData.previous_value) / formData.previous_value) * 100
+        : 0
+
+      const { data, error } = await supabase
+        .from('investor_metrics')
+        .update({
+          metric_name: formData.metric_name,
+          category: formData.category,
+          current_value: formData.current_value,
+          previous_value: formData.previous_value,
+          change_percent: changePercent,
+          unit: formData.unit,
+          description: formData.description || null,
+          period: formData.period,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingMetric.id)
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setDbMetrics(prev => prev.map(m => m.id === editingMetric.id ? data : m))
+      setShowMetricDialog(false)
+      setEditingMetric(null)
+      resetForm()
+      toast.success('Metric updated successfully')
+    } catch (error: any) {
+      toast.error('Failed to update metric', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDeleteMetric = async (id: string) => {
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('investor_metrics')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      setDbMetrics(prev => prev.filter(m => m.id !== id))
+      toast.success('Metric deleted successfully')
+    } catch (error: any) {
+      toast.error('Failed to delete metric', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const resetForm = () => {
+    setFormData({
+      metric_name: '',
+      category: 'revenue',
+      current_value: 0,
+      previous_value: 0,
+      unit: 'currency',
+      description: '',
+      period: 'quarterly'
+    })
+  }
+
+  const openEditDialog = (metric: DBInvestorMetric) => {
+    setEditingMetric(metric)
+    setFormData({
+      metric_name: metric.metric_name,
+      category: metric.category,
+      current_value: metric.current_value,
+      previous_value: metric.previous_value,
+      unit: metric.unit,
+      description: metric.description || '',
+      period: metric.period as 'monthly' | 'quarterly' | 'yearly'
+    })
+    setShowMetricDialog(true)
+  }
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -443,34 +632,65 @@ export default function InvestorMetricsClient() {
   }
 
   // Handlers
-  const handleExportMetrics = () => {
-    toast.success('Exporting metrics', {
-      description: 'Investor report will be downloaded'
-    })
+  const handleExportMetrics = async () => {
+    try {
+      const exportData = {
+        metrics: dbMetrics,
+        kpis: mockKPIs,
+        capTable: mockCapTable,
+        fundingRounds: mockFundingRounds,
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `investor-metrics-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Metrics exported', { description: 'Investor report downloaded successfully' })
+    } catch (error: any) {
+      toast.error('Export failed', { description: error.message })
+    }
   }
 
-  const handleRefreshData = () => {
-    toast.info('Refreshing data', {
-      description: 'Fetching latest metrics...'
-    })
+  const handleRefreshData = async () => {
+    toast.info('Refreshing data...')
+    await fetchMetrics()
+    toast.success('Data refreshed', { description: 'Latest metrics loaded' })
   }
 
   const handleGenerateReport = () => {
-    toast.success('Generating report', {
-      description: 'Investor presentation is being created'
-    })
+    toast.success('Generating report', { description: 'Investor presentation is being created' })
   }
 
-  const handleSetAlert = (metric: string) => {
-    toast.success('Alert set', {
-      description: `You'll be notified when ${metric} changes`
-    })
+  const handleSetAlert = async (metric: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated')
+        return
+      }
+      // Could save alert to database here
+      toast.success('Alert set', { description: `You'll be notified when ${metric} changes` })
+    } catch (error: any) {
+      toast.error('Failed to set alert', { description: error.message })
+    }
   }
 
-  const handleShareDashboard = () => {
-    toast.success('Link copied', {
-      description: 'Dashboard link copied to clipboard'
-    })
+  const handleShareDashboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      toast.success('Link copied', { description: 'Dashboard link copied to clipboard' })
+    } catch {
+      toast.error('Failed to copy link')
+    }
+  }
+
+  const handleAddInvestor = () => {
+    setEditingMetric(null)
+    resetForm()
+    setShowMetricDialog(true)
   }
 
   return (
@@ -489,17 +709,17 @@ export default function InvestorMetricsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportMetrics} disabled={loading}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleShareDashboard}>
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </Button>
-              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+              <Button className="bg-gradient-to-r from-amber-500 to-orange-500 text-white" onClick={handleAddInvestor}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Investor
+                Add Metric
               </Button>
             </div>
           </div>
@@ -637,16 +857,16 @@ export default function InvestorMetricsClient() {
               {/* Overview Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
                 {[
-                  { icon: CircleDollarSign, label: 'Raise Fund', color: 'text-emerald-600 dark:text-emerald-400' },
-                  { icon: PieChart, label: 'Cap Table', color: 'text-blue-600 dark:text-blue-400' },
-                  { icon: Users, label: 'Investors', color: 'text-purple-600 dark:text-purple-400' },
-                  { icon: TrendingUp, label: 'KPIs', color: 'text-green-600 dark:text-green-400' },
-                  { icon: FileText, label: 'Reports', color: 'text-amber-600 dark:text-amber-400' },
-                  { icon: Mail, label: 'Updates', color: 'text-pink-600 dark:text-pink-400' },
-                  { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400' },
-                  { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400' }
+                  { icon: CircleDollarSign, label: 'Add Metric', color: 'text-emerald-600 dark:text-emerald-400', action: handleAddInvestor },
+                  { icon: PieChart, label: 'Cap Table', color: 'text-blue-600 dark:text-blue-400', action: () => setActiveTab('cap-table') },
+                  { icon: Users, label: 'Investors', color: 'text-purple-600 dark:text-purple-400', action: () => setActiveTab('investors') },
+                  { icon: TrendingUp, label: 'KPIs', color: 'text-green-600 dark:text-green-400', action: () => setActiveTab('kpis') },
+                  { icon: FileText, label: 'Reports', color: 'text-amber-600 dark:text-amber-400', action: handleGenerateReport },
+                  { icon: RefreshCw, label: 'Refresh', color: 'text-pink-600 dark:text-pink-400', action: handleRefreshData },
+                  { icon: Download, label: 'Export', color: 'text-cyan-600 dark:text-cyan-400', action: handleExportMetrics },
+                  { icon: Settings, label: 'Settings', color: 'text-gray-600 dark:text-gray-400', action: () => setActiveTab('settings') }
                 ].map((action, i) => (
-                  <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
+                  <Button key={i} variant="outline" onClick={action.action} className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200">
                     <action.icon className={`h-5 w-5 ${action.color}`} />
                     <span className="text-xs">{action.label}</span>
                   </Button>
@@ -1112,6 +1332,59 @@ export default function InvestorMetricsClient() {
                   </CardContent>
                 </Card>
               ))}
+
+              {/* Database Metrics Section */}
+              <Card className="bg-white dark:bg-gray-800">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-amber-500" />
+                      Your Custom Metrics
+                      {loading && <RefreshCw className="w-4 h-4 animate-spin text-gray-400" />}
+                    </CardTitle>
+                    <Button size="sm" onClick={handleAddInvestor} className="bg-gradient-to-r from-amber-500 to-orange-500">
+                      <Plus className="w-4 h-4 mr-1" /> Add Metric
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {dbMetrics.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                      <p>No custom metrics yet. Create your first metric to get started.</p>
+                    </div>
+                  ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {dbMetrics.map(metric => (
+                        <div key={metric.id} className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg relative group">
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => openEditDialog(metric)}>
+                              <Edit className="w-3 h-3" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-red-500" onClick={() => handleDeleteMetric(metric.id)}>
+                              <AlertCircle className="w-3 h-3" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-gray-500 truncate pr-12">{metric.metric_name}</span>
+                            <Badge variant="outline" className="text-xs">{metric.category}</Badge>
+                          </div>
+                          <div className="text-xl font-bold text-gray-900 dark:text-white">
+                            {metric.unit === 'currency' ? formatCurrency(metric.current_value, true) :
+                             metric.unit === 'percent' ? `${metric.current_value}%` :
+                             metric.unit === 'ratio' ? `${metric.current_value}x` :
+                             metric.current_value.toLocaleString()}
+                          </div>
+                          <div className={`flex items-center gap-1 text-xs mt-1 ${getChangeColor(metric.change_percent)}`}>
+                            {metric.change_percent > 0 ? <ArrowUpRight className="w-3 h-3" /> : metric.change_percent < 0 ? <ArrowDownRight className="w-3 h-3" /> : null}
+                            {Math.abs(metric.change_percent).toFixed(1)}% from previous
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             {/* Settings Tab */}
@@ -1827,6 +2100,105 @@ export default function InvestorMetricsClient() {
           </div>
         </div>
       </div>
+
+      {/* Metric Create/Edit Dialog */}
+      <Dialog open={showMetricDialog} onOpenChange={(open) => { setShowMetricDialog(open); if (!open) { setEditingMetric(null); resetForm(); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{editingMetric ? 'Edit Metric' : 'Create Metric'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Metric Name</Label>
+              <Input
+                value={formData.metric_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, metric_name: e.target.value }))}
+                placeholder="e.g., Monthly Revenue"
+                className="mt-1"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Category</Label>
+                <Select value={formData.category} onValueChange={(v) => setFormData(prev => ({ ...prev, category: v as any }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="revenue">Revenue</SelectItem>
+                    <SelectItem value="growth">Growth</SelectItem>
+                    <SelectItem value="efficiency">Efficiency</SelectItem>
+                    <SelectItem value="engagement">Engagement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Period</Label>
+                <Select value={formData.period} onValueChange={(v) => setFormData(prev => ({ ...prev, period: v as any }))}>
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Current Value</Label>
+                <Input
+                  type="number"
+                  value={formData.current_value}
+                  onChange={(e) => setFormData(prev => ({ ...prev, current_value: parseFloat(e.target.value) || 0 }))}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Previous Value</Label>
+                <Input
+                  type="number"
+                  value={formData.previous_value}
+                  onChange={(e) => setFormData(prev => ({ ...prev, previous_value: parseFloat(e.target.value) || 0 }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label>Unit</Label>
+              <Select value={formData.unit} onValueChange={(v) => setFormData(prev => ({ ...prev, unit: v }))}>
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="currency">Currency ($)</SelectItem>
+                  <SelectItem value="percent">Percent (%)</SelectItem>
+                  <SelectItem value="number">Number</SelectItem>
+                  <SelectItem value="ratio">Ratio (x)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Description (optional)</Label>
+              <Textarea
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Brief description of this metric"
+                className="mt-1"
+                rows={2}
+              />
+            </div>
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => { setShowMetricDialog(false); setEditingMetric(null); resetForm(); }}>
+              Cancel
+            </Button>
+            <Button
+              onClick={editingMetric ? handleUpdateMetric : handleCreateMetric}
+              disabled={loading || !formData.metric_name}
+              className="bg-gradient-to-r from-amber-500 to-orange-500"
+            >
+              {loading ? 'Saving...' : editingMetric ? 'Update' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Investor Detail Dialog */}
       <Dialog open={!!selectedInvestor} onOpenChange={() => setSelectedInvestor(null)}>

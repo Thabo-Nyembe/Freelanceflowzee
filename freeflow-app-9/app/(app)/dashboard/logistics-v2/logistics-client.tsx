@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import {
   Truck, Package, MapPin, Route, Clock, CheckCircle, XCircle,
@@ -562,12 +563,311 @@ const formatDateTime = (date: string) => {
 }
 
 
+// Database types matching Supabase schema
+interface DbShipment {
+  id: string
+  user_id: string
+  shipment_code: string
+  tracking_number: string | null
+  order_id: string | null
+  status: string
+  method: string
+  carrier: string | null
+  origin_address: string | null
+  origin_city: string | null
+  origin_state: string | null
+  origin_country: string
+  origin_postal: string | null
+  recipient_name: string | null
+  recipient_email: string | null
+  recipient_phone: string | null
+  destination_address: string | null
+  destination_city: string | null
+  destination_state: string | null
+  destination_country: string
+  destination_postal: string | null
+  item_count: number
+  weight_lbs: number
+  dimensions_length: number | null
+  dimensions_width: number | null
+  dimensions_height: number | null
+  shipping_cost: number
+  insurance_value: number
+  declared_value: number
+  estimated_delivery: string | null
+  actual_delivery: string | null
+  shipped_at: string | null
+  priority: boolean
+  signature_required: boolean
+  insurance_enabled: boolean
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+interface DbCarrier {
+  id: string
+  user_id: string
+  name: string
+  code: string
+  logo_url: string | null
+  status: string
+  total_shipments: number
+  on_time_rate: number
+  avg_delivery_days: number
+  api_key_encrypted: string | null
+  api_config: Record<string, unknown>
+  supports_tracking: boolean
+  supports_labels: boolean
+  supports_rates: boolean
+  created_at: string
+  updated_at: string
+}
+
+interface DbRoute {
+  id: string
+  user_id: string
+  route_code: string
+  route_name: string
+  description: string | null
+  route_type: string
+  status: string
+  driver_name: string | null
+  driver_phone: string | null
+  vehicle_type: string | null
+  origin_city: string | null
+  destination_city: string | null
+  total_stops: number
+  completed_stops: number
+  total_distance_miles: number
+  total_packages: number
+  delivered_packages: number
+  estimated_duration_minutes: number
+  departure_time: string | null
+  estimated_arrival: string | null
+  created_at: string
+  updated_at: string
+}
+
+// Form state for new shipment
+interface ShipmentFormState {
+  recipientName: string
+  recipientEmail: string
+  destinationAddress: string
+  destinationCity: string
+  destinationState: string
+  destinationPostal: string
+  carrier: string
+  method: string
+  weight: string
+  notes: string
+  priority: boolean
+  signatureRequired: boolean
+}
+
+const initialShipmentForm: ShipmentFormState = {
+  recipientName: '',
+  recipientEmail: '',
+  destinationAddress: '',
+  destinationCity: '',
+  destinationState: '',
+  destinationPostal: '',
+  carrier: 'FedEx',
+  method: 'standard',
+  weight: '1.0',
+  notes: '',
+  priority: false,
+  signatureRequired: false,
+}
+
 export default function LogisticsClient() {
+  const supabase = createClientComponentClient()
+
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null)
   const [statusFilter, setStatusFilter] = useState<ShipmentStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Database state
+  const [dbShipments, setDbShipments] = useState<DbShipment[]>([])
+  const [dbCarriers, setDbCarriers] = useState<DbCarrier[]>([])
+  const [dbRoutes, setDbRoutes] = useState<DbRoute[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Form state
+  const [shipmentForm, setShipmentForm] = useState<ShipmentFormState>(initialShipmentForm)
+  const [showNewShipmentDialog, setShowNewShipmentDialog] = useState(false)
+
+  // Fetch data from Supabase
+  const fetchShipments = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('shipments')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching shipments:', error)
+      return
+    }
+    setDbShipments(data || [])
+  }, [supabase])
+
+  const fetchCarriers = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('shipping_carriers')
+      .select('*')
+      .order('name')
+
+    if (error) {
+      console.error('Error fetching carriers:', error)
+      return
+    }
+    setDbCarriers(data || [])
+  }, [supabase])
+
+  const fetchRoutes = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('logistics_routes')
+      .select('*')
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching routes:', error)
+      return
+    }
+    setDbRoutes(data || [])
+  }, [supabase])
+
+  useEffect(() => {
+    const loadData = async () => {
+      setIsLoading(true)
+      await Promise.all([fetchShipments(), fetchCarriers(), fetchRoutes()])
+      setIsLoading(false)
+    }
+    loadData()
+  }, [fetchShipments, fetchCarriers, fetchRoutes])
+
+  // CRUD Operations
+  const handleCreateShipment = async () => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required', { description: 'Please sign in to create shipments' })
+        return
+      }
+
+      const { error } = await supabase.from('shipments').insert({
+        user_id: user.id,
+        recipient_name: shipmentForm.recipientName,
+        recipient_email: shipmentForm.recipientEmail,
+        destination_address: shipmentForm.destinationAddress,
+        destination_city: shipmentForm.destinationCity,
+        destination_state: shipmentForm.destinationState,
+        destination_postal: shipmentForm.destinationPostal,
+        carrier: shipmentForm.carrier,
+        method: shipmentForm.method,
+        weight_lbs: parseFloat(shipmentForm.weight) || 1.0,
+        notes: shipmentForm.notes,
+        priority: shipmentForm.priority,
+        signature_required: shipmentForm.signatureRequired,
+        status: 'pending',
+      })
+
+      if (error) throw error
+
+      toast.success('Shipment created', { description: 'New shipment has been created successfully' })
+      setShipmentForm(initialShipmentForm)
+      setShowNewShipmentDialog(false)
+      await fetchShipments()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to create shipment'
+      toast.error('Error', { description: message })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleUpdateShipmentStatus = async (shipmentId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('shipments')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', shipmentId)
+
+      if (error) throw error
+
+      toast.success('Status updated', { description: `Shipment status changed to ${newStatus}` })
+      await fetchShipments()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update status'
+      toast.error('Error', { description: message })
+    }
+  }
+
+  const handleDeleteShipment = async (shipmentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('shipments')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', shipmentId)
+
+      if (error) throw error
+
+      toast.success('Shipment deleted', { description: 'Shipment has been removed' })
+      await fetchShipments()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to delete shipment'
+      toast.error('Error', { description: message })
+    }
+  }
+
+  const handleToggleCarrier = async (carrierId: string, active: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('shipping_carriers')
+        .update({ status: active ? 'active' : 'inactive', updated_at: new Date().toISOString() })
+        .eq('id', carrierId)
+
+      if (error) throw error
+
+      toast.success('Carrier updated', { description: `Carrier ${active ? 'activated' : 'deactivated'}` })
+      await fetchCarriers()
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Failed to update carrier'
+      toast.error('Error', { description: message })
+    }
+  }
+
+  const handleExportReport = async () => {
+    try {
+      const csvContent = dbShipments.map(s =>
+        `${s.shipment_code},${s.recipient_name},${s.status},${s.carrier},${s.created_at}`
+      ).join('\n')
+      const header = 'Code,Recipient,Status,Carrier,Created\n'
+      const blob = new Blob([header + csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `logistics-report-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Export complete', { description: 'Logistics report downloaded' })
+    } catch {
+      toast.error('Export failed', { description: 'Could not generate report' })
+    }
+  }
+
+  const handleRefreshData = async () => {
+    setIsLoading(true)
+    await Promise.all([fetchShipments(), fetchCarriers(), fetchRoutes()])
+    setIsLoading(false)
+    toast.success('Data refreshed', { description: 'All logistics data updated' })
+  }
 
   // Computed stats
   const stats = useMemo(() => {
@@ -608,30 +908,23 @@ export default function LogisticsClient() {
     })
   }, [searchQuery, statusFilter])
 
-  // Handlers
-  const handleNewShipment = () => {
-    toast.info('New Shipment', {
-      description: 'Opening shipment creation form...'
-    })
-  }
+  // Combined stats from mock + db data
+  const combinedStats = useMemo(() => {
+    const dbDelivered = dbShipments.filter(s => s.status === 'delivered').length
+    const dbInTransit = dbShipments.filter(s => ['in_transit', 'shipped', 'processing'].includes(s.status)).length
+    const dbPending = dbShipments.filter(s => s.status === 'pending').length
+    const dbExceptions = dbShipments.filter(s => s.status === 'failed').length
 
-  const handleOptimizeRoute = () => {
-    toast.success('Routes optimized', {
-      description: 'Delivery routes have been optimized'
-    })
-  }
-
-  const handleDispatch = (shipment: Shipment) => {
-    toast.success('Shipment dispatched', {
-      description: `Shipment ${shipment.trackingNumber} is now in transit`
-    })
-  }
-
-  const handleExportReport = () => {
-    toast.success('Export started', {
-      description: 'Logistics report is being generated'
-    })
-  }
+    return {
+      totalDbShipments: dbShipments.length,
+      dbDelivered,
+      dbInTransit,
+      dbPending,
+      dbExceptions,
+      totalDbCarriers: dbCarriers.filter(c => c.status === 'active').length,
+      totalDbRoutes: dbRoutes.length,
+    }
+  }, [dbShipments, dbCarriers, dbRoutes])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900">
@@ -653,11 +946,18 @@ export default function LogisticsClient() {
               </div>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button variant="outline" className="flex items-center gap-2" onClick={handleRefreshData} disabled={isLoading}>
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <Button variant="outline" className="flex items-center gap-2" onClick={handleExportReport}>
                 <Download className="w-4 h-4" />
                 Export
               </Button>
-              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center gap-2">
+              <Button
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex items-center gap-2"
+                onClick={() => setShowNewShipmentDialog(true)}
+              >
                 <Plus className="w-4 h-4" />
                 Create Shipment
               </Button>
@@ -667,14 +967,14 @@ export default function LogisticsClient() {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
             {[
-              { label: 'Total Shipments', value: stats.totalShipments.toString(), icon: Package, gradient: 'from-blue-500 to-cyan-600' },
-              { label: 'In Transit', value: stats.inTransit.toString(), icon: Truck, gradient: 'from-yellow-500 to-orange-600' },
-              { label: 'Delivered', value: stats.delivered.toString(), icon: CheckCircle, gradient: 'from-green-500 to-emerald-600' },
-              { label: 'Exceptions', value: stats.exceptions.toString(), icon: AlertTriangle, gradient: 'from-red-500 to-pink-600' },
+              { label: 'Total Shipments', value: (stats.totalShipments + combinedStats.totalDbShipments).toString(), icon: Package, gradient: 'from-blue-500 to-cyan-600' },
+              { label: 'In Transit', value: (stats.inTransit + combinedStats.dbInTransit).toString(), icon: Truck, gradient: 'from-yellow-500 to-orange-600' },
+              { label: 'Delivered', value: (stats.delivered + combinedStats.dbDelivered).toString(), icon: CheckCircle, gradient: 'from-green-500 to-emerald-600' },
+              { label: 'Exceptions', value: (stats.exceptions + combinedStats.dbExceptions).toString(), icon: AlertTriangle, gradient: 'from-red-500 to-pink-600' },
               { label: 'On-Time Rate', value: `${stats.avgOnTime.toFixed(1)}%`, icon: Timer, gradient: 'from-purple-500 to-indigo-600' },
               { label: 'Warehouse Usage', value: `${stats.warehouseUtilization}%`, icon: Warehouse, gradient: 'from-cyan-500 to-blue-600' },
-              { label: 'Active Carriers', value: stats.activeCarriers.toString(), icon: Globe, gradient: 'from-pink-500 to-rose-600' },
-              { label: 'Pending Orders', value: stats.pendingOrders.toString(), icon: FileText, gradient: 'from-orange-500 to-amber-600' }
+              { label: 'Active Carriers', value: (stats.activeCarriers + combinedStats.totalDbCarriers).toString(), icon: Globe, gradient: 'from-pink-500 to-rose-600' },
+              { label: 'Pending Orders', value: (stats.pendingOrders + combinedStats.dbPending).toString(), icon: FileText, gradient: 'from-orange-500 to-amber-600' }
             ].map((stat, index) => (
               <Card key={index} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg">
                 <CardContent className="p-4">
@@ -1853,18 +2153,18 @@ export default function LogisticsClient() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
             <div className="lg:col-span-2">
               <AIInsightsPanel
-                insights={mockLogisticsAIInsights}
+                insights={logisticsAIInsights}
                 title="Logistics Intelligence"
                 onInsightAction={(insight) => console.log('Insight action:', insight)}
               />
             </div>
             <div className="space-y-6">
               <CollaborationIndicator
-                collaborators={mockLogisticsCollaborators}
+                collaborators={logisticsCollaborators}
                 maxVisible={4}
               />
               <PredictiveAnalytics
-                predictions={mockLogisticsPredictions}
+                predictions={logisticsPredictions}
                 title="Logistics Forecasts"
               />
             </div>
@@ -1872,17 +2172,205 @@ export default function LogisticsClient() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
             <ActivityFeed
-              activities={mockLogisticsActivities}
+              activities={logisticsActivities}
               title="Logistics Activity"
               maxItems={5}
             />
             <QuickActionsToolbar
-              actions={mockLogisticsQuickActions}
+              actions={logisticsQuickActions}
               variant="grid"
             />
           </div>
+
+          {/* Database Shipments Section */}
+          {dbShipments.length > 0 && (
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg mt-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5 text-indigo-600" />
+                  Your Shipments ({dbShipments.length})
+                </CardTitle>
+                <CardDescription>Shipments from your database</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScrollArea className="h-[300px]">
+                  <div className="space-y-3">
+                    {dbShipments.slice(0, 10).map((shipment) => (
+                      <div key={shipment.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-900 dark:text-white">{shipment.shipment_code}</p>
+                          <p className="text-sm text-gray-500">{shipment.recipient_name} - {shipment.destination_city}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Badge className={
+                            shipment.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                            shipment.status === 'shipped' ? 'bg-blue-100 text-blue-700' :
+                            shipment.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                            'bg-gray-100 text-gray-700'
+                          }>{shipment.status}</Badge>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleUpdateShipmentStatus(shipment.id, 'shipped')}
+                            disabled={shipment.status !== 'pending'}
+                          >
+                            <Truck className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteShipment(shipment.id)}
+                          >
+                            <XCircle className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
+
+      {/* New Shipment Dialog */}
+      <Dialog open={showNewShipmentDialog} onOpenChange={setShowNewShipmentDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Shipment</DialogTitle>
+            <DialogDescription>Enter shipment details to create a new delivery</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Recipient Name</label>
+                <Input
+                  value={shipmentForm.recipientName}
+                  onChange={(e) => setShipmentForm(prev => ({ ...prev, recipientName: e.target.value }))}
+                  placeholder="John Doe"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email</label>
+                <Input
+                  value={shipmentForm.recipientEmail}
+                  onChange={(e) => setShipmentForm(prev => ({ ...prev, recipientEmail: e.target.value }))}
+                  placeholder="john@example.com"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Destination Address</label>
+              <Input
+                value={shipmentForm.destinationAddress}
+                onChange={(e) => setShipmentForm(prev => ({ ...prev, destinationAddress: e.target.value }))}
+                placeholder="123 Main St"
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-sm font-medium">City</label>
+                <Input
+                  value={shipmentForm.destinationCity}
+                  onChange={(e) => setShipmentForm(prev => ({ ...prev, destinationCity: e.target.value }))}
+                  placeholder="New York"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">State</label>
+                <Input
+                  value={shipmentForm.destinationState}
+                  onChange={(e) => setShipmentForm(prev => ({ ...prev, destinationState: e.target.value }))}
+                  placeholder="NY"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Postal Code</label>
+                <Input
+                  value={shipmentForm.destinationPostal}
+                  onChange={(e) => setShipmentForm(prev => ({ ...prev, destinationPostal: e.target.value }))}
+                  placeholder="10001"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Carrier</label>
+                <select
+                  className="w-full mt-1 px-3 py-2 border rounded-lg"
+                  value={shipmentForm.carrier}
+                  onChange={(e) => setShipmentForm(prev => ({ ...prev, carrier: e.target.value }))}
+                >
+                  <option value="FedEx">FedEx</option>
+                  <option value="UPS">UPS</option>
+                  <option value="USPS">USPS</option>
+                  <option value="DHL">DHL</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Method</label>
+                <select
+                  className="w-full mt-1 px-3 py-2 border rounded-lg"
+                  value={shipmentForm.method}
+                  onChange={(e) => setShipmentForm(prev => ({ ...prev, method: e.target.value }))}
+                >
+                  <option value="standard">Standard</option>
+                  <option value="express">Express</option>
+                  <option value="overnight">Overnight</option>
+                </select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">Weight (lbs)</label>
+                <Input
+                  type="number"
+                  value={shipmentForm.weight}
+                  onChange={(e) => setShipmentForm(prev => ({ ...prev, weight: e.target.value }))}
+                  placeholder="1.0"
+                />
+              </div>
+              <div className="flex items-center gap-4 pt-6">
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={shipmentForm.priority}
+                    onChange={(e) => setShipmentForm(prev => ({ ...prev, priority: e.target.checked }))}
+                  />
+                  Priority
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={shipmentForm.signatureRequired}
+                    onChange={(e) => setShipmentForm(prev => ({ ...prev, signatureRequired: e.target.checked }))}
+                  />
+                  Signature
+                </label>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Notes</label>
+              <Input
+                value={shipmentForm.notes}
+                onChange={(e) => setShipmentForm(prev => ({ ...prev, notes: e.target.value }))}
+                placeholder="Special instructions..."
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowNewShipmentDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleCreateShipment}
+              disabled={isSaving || !shipmentForm.recipientName}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
+            >
+              {isSaving ? 'Creating...' : 'Create Shipment'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

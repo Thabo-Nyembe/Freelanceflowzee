@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,7 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { useTickets, useTicketMutations, useTicketMessageMutations, SupportTicket as DBSupportTicket } from '@/lib/hooks/use-tickets'
 import {
   Ticket,
   MessageSquare,
@@ -470,16 +475,80 @@ export default function TicketsClient() {
   const [replyText, setReplyText] = useState('')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Stats calculations
+  // Dialog states
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [ticketToAssign, setTicketToAssign] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [ticketToDelete, setTicketToDelete] = useState<string | null>(null)
+
+  // Form states for new ticket
+  const [newTicket, setNewTicket] = useState({
+    subject: '',
+    description: '',
+    priority: 'normal' as TicketPriority,
+    category: 'General',
+    customer_name: '',
+    customer_email: ''
+  })
+
+  // Supabase hooks
+  const { tickets: dbTickets, stats: dbStats, isLoading, refetch } = useTickets()
+  const { createTicket, updateTicket, deleteTicket, assignTicket, isCreating, isUpdating, isDeleting } = useTicketMutations()
+  const { createMessage, isCreating: isCreatingMessage } = useTicketMessageMutations()
+
+  // Merge mock data with real DB data for display
+  const allTickets = useMemo(() => {
+    // Convert DB tickets to display format if available
+    if (dbTickets && dbTickets.length > 0) {
+      return dbTickets.map(t => ({
+        id: t.id,
+        ticketNumber: t.ticket_number || `TKT-${t.id.slice(0, 8)}`,
+        subject: t.subject,
+        description: t.description || '',
+        status: (t.status || 'new') as TicketStatus,
+        priority: (t.priority || 'normal') as TicketPriority,
+        channel: 'email' as TicketChannel,
+        category: t.category || 'General',
+        tags: t.tags || [],
+        customer: {
+          id: t.user_id,
+          name: t.customer_name || 'Unknown',
+          email: t.customer_email || '',
+          tier: 'pro' as const,
+          totalTickets: 1
+        },
+        assignee: t.assigned_to ? {
+          id: t.assigned_to,
+          name: t.assigned_name || 'Agent',
+          team: 'Support'
+        } : undefined,
+        sla: {
+          status: (t.sla_status || 'on-track') as SLAStatus,
+          firstResponseDue: new Date(Date.now() + 3600000).toISOString(),
+          resolutionDue: new Date(Date.now() + 86400000).toISOString(),
+          firstResponseAt: t.first_response_at || undefined,
+          resolvedAt: t.resolved_at || undefined
+        },
+        messages: [],
+        createdAt: t.created_at,
+        updatedAt: t.updated_at
+      }))
+    }
+    return mockTickets
+  }, [dbTickets])
+
+  // Stats calculations - uses real data when available
   const stats = useMemo(() => {
-    const total = mockTickets.length
-    const newTickets = mockTickets.filter(t => t.status === 'new').length
-    const open = mockTickets.filter(t => t.status === 'open').length
-    const pending = mockTickets.filter(t => t.status === 'pending').length
-    const solved = mockTickets.filter(t => t.status === 'solved').length
-    const urgent = mockTickets.filter(t => t.priority === 'urgent').length
-    const slaAtRisk = mockTickets.filter(t => t.sla.status === 'at-risk').length
-    const slaBreached = mockTickets.filter(t => t.sla.status === 'breached').length
+    const ticketsToCount = allTickets
+    const total = ticketsToCount.length
+    const newTickets = ticketsToCount.filter(t => t.status === 'new').length
+    const open = ticketsToCount.filter(t => t.status === 'open').length
+    const pending = ticketsToCount.filter(t => t.status === 'pending').length
+    const solved = ticketsToCount.filter(t => t.status === 'solved').length
+    const urgent = ticketsToCount.filter(t => t.priority === 'urgent').length
+    const slaAtRisk = ticketsToCount.filter(t => t.sla.status === 'at-risk').length
+    const slaBreached = ticketsToCount.filter(t => t.sla.status === 'breached').length
     const avgResponseTime = '18 min'
     const avgResolutionTime = '4.2 hrs'
     const csatScore = 94
@@ -500,11 +569,11 @@ export default function TicketsClient() {
       onlineAgents,
       totalAgents: mockAgents.length
     }
-  }, [])
+  }, [allTickets])
 
-  // Filtered tickets
+  // Filtered tickets - uses real data when available
   const filteredTickets = useMemo(() => {
-    return mockTickets.filter(ticket => {
+    return allTickets.filter(ticket => {
       const matchesSearch = ticket.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ticket.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ticket.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -513,7 +582,7 @@ export default function TicketsClient() {
       const matchesPriority = priorityFilter === 'all' || ticket.priority === priorityFilter
       return matchesSearch && matchesStatus && matchesPriority
     })
-  }, [searchQuery, statusFilter, priorityFilter])
+  }, [allTickets, searchQuery, statusFilter, priorityFilter])
 
   // Helper functions
   const getStatusColor = (status: TicketStatus) => {
@@ -603,83 +672,210 @@ export default function TicketsClient() {
     return date.toLocaleDateString()
   }
 
-  // Handlers
+  // Handlers - wired to real Supabase operations
   const handleCreateTicket = () => {
-    toast.info('Create Ticket', {
-      description: 'Opening ticket submission form...'
-    })
+    setShowCreateDialog(true)
+  }
+
+  const handleSubmitNewTicket = async () => {
+    if (!newTicket.subject.trim()) {
+      toast.error('Validation Error', { description: 'Subject is required' })
+      return
+    }
+
+    try {
+      const ticketNumber = `TKT-${Date.now().toString().slice(-8)}`
+      await createTicket({
+        ticket_number: ticketNumber,
+        subject: newTicket.subject,
+        description: newTicket.description,
+        priority: newTicket.priority,
+        category: newTicket.category,
+        customer_name: newTicket.customer_name,
+        customer_email: newTicket.customer_email,
+        status: 'new',
+        sla_status: 'on-track',
+        tags: [],
+        message_count: 0,
+        attachment_count: 0,
+        metadata: {}
+      })
+      toast.success('Ticket Created', { description: `Ticket ${ticketNumber} created successfully` })
+      setShowCreateDialog(false)
+      setNewTicket({ subject: '', description: '', priority: 'normal', category: 'General', customer_name: '', customer_email: '' })
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to create ticket' })
+    }
   }
 
   const handleAssignTicket = (ticketId: string) => {
-    toast.info('Assign Ticket', {
-      description: `Assigning ticket #${ticketId} to agent...`
-    })
+    setTicketToAssign(ticketId)
+    setShowAssignDialog(true)
   }
 
-  const handleResolveTicket = (ticketId: string) => {
-    toast.success('Ticket Resolved', {
-      description: `Ticket #${ticketId} has been resolved`
-    })
+  const handleConfirmAssign = async (agentId: string, agentName: string) => {
+    if (!ticketToAssign) return
+
+    try {
+      await assignTicket(ticketToAssign, agentId, agentName)
+      toast.success('Ticket Assigned', { description: `Ticket assigned to ${agentName}` })
+      setShowAssignDialog(false)
+      setTicketToAssign(null)
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to assign ticket' })
+    }
   }
 
-  const handleEscalateTicket = (ticketId: string) => {
-    toast.info('Ticket Escalated', {
-      description: `Ticket #${ticketId} escalated to senior support`
-    })
+  const handleResolveTicket = async (ticketId: string) => {
+    try {
+      await updateTicket({ id: ticketId, status: 'solved', resolved_at: new Date().toISOString() })
+      toast.success('Ticket Resolved', { description: 'Ticket has been marked as solved' })
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to resolve ticket' })
+    }
+  }
+
+  const handleCloseTicket = async (ticketId: string) => {
+    try {
+      await updateTicket({ id: ticketId, status: 'closed', closed_at: new Date().toISOString() })
+      toast.success('Ticket Closed', { description: 'Ticket has been closed' })
+      setSelectedTicket(null)
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to close ticket' })
+    }
+  }
+
+  const handleEscalateTicket = async (ticketId: string) => {
+    try {
+      await updateTicket({ id: ticketId, priority: 'urgent', sla_status: 'at-risk' })
+      toast.success('Ticket Escalated', { description: 'Ticket has been escalated to urgent priority' })
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to escalate ticket' })
+    }
+  }
+
+  const handleDeleteTicket = (ticketId: string) => {
+    setTicketToDelete(ticketId)
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!ticketToDelete) return
+
+    try {
+      await deleteTicket(ticketToDelete)
+      toast.success('Ticket Deleted', { description: 'Ticket has been deleted' })
+      setShowDeleteDialog(false)
+      setTicketToDelete(null)
+      setSelectedTicket(null)
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to delete ticket' })
+    }
   }
 
   const handleExportTickets = () => {
-    toast.success('Exporting Tickets', {
-      description: 'Ticket report will be downloaded'
-    })
+    // Export tickets to CSV
+    const csvContent = allTickets.map(t =>
+      `${t.ticketNumber},${t.subject},${t.status},${t.priority},${t.customer.name},${t.customer.email}`
+    ).join('\n')
+
+    const blob = new Blob([`Ticket#,Subject,Status,Priority,Customer,Email\n${csvContent}`], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `tickets-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('Export Complete', { description: 'Tickets exported to CSV file' })
   }
 
-  const handleRefresh = () => {
-    toast.info('Refreshing', {
-      description: 'Refreshing ticket data...'
-    })
+  const handleRefresh = async () => {
+    toast.info('Refreshing', { description: 'Refreshing ticket data...' })
+    await refetch()
+    toast.success('Refreshed', { description: 'Ticket data updated' })
   }
 
   const handleNewTicket = () => {
-    toast.info('New Ticket', {
-      description: 'Creating new ticket...'
-    })
+    setShowCreateDialog(true)
   }
 
   const handleBulkAssign = () => {
-    toast.info('Bulk Assign', {
-      description: 'Opening bulk assignment dialog...'
-    })
+    toast.info('Bulk Assign', { description: 'Opening bulk assignment dialog...' })
   }
 
-  const handleAssignToMe = (ticketNumber: string) => {
-    toast.success('Ticket Assigned', {
-      description: `Ticket ${ticketNumber} assigned to you`
-    })
+  const handleAssignToMe = async (ticketId: string, ticketNumber: string) => {
+    try {
+      // In a real app, get current user info
+      await assignTicket(ticketId, 'current-user-id', 'Me')
+      toast.success('Ticket Assigned', { description: `Ticket ${ticketNumber} assigned to you` })
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to assign ticket' })
+    }
   }
 
   const handleAddAgent = () => {
-    toast.info('Add Agent', {
-      description: 'Opening agent creation form...'
-    })
+    toast.info('Add Agent', { description: 'Opening agent creation form...' })
   }
 
   const handleFullReport = () => {
-    toast.info('Full Report', {
-      description: 'Generating full analytics report...'
-    })
+    toast.info('Full Report', { description: 'Generating full analytics report...' })
   }
 
-  const handleSendReply = () => {
-    if (replyText.trim()) {
-      toast.success('Reply Sent', {
-        description: 'Your reply has been sent to the customer'
+  const handleSendReply = async () => {
+    if (!replyText.trim()) {
+      toast.error('Empty Reply', { description: 'Please enter a message before sending' })
+      return
+    }
+
+    if (!selectedTicket) {
+      toast.error('Error', { description: 'No ticket selected' })
+      return
+    }
+
+    try {
+      await createMessage({
+        ticket_id: selectedTicket.id,
+        message_type: 'reply',
+        content: replyText,
+        is_internal: false,
+        sender_name: 'Support Agent',
+        attachments: []
       })
+
+      // Update ticket to in-progress if it was new
+      if (selectedTicket.status === 'new') {
+        await updateTicket({ id: selectedTicket.id, status: 'open', first_response_at: new Date().toISOString() })
+      }
+
+      toast.success('Reply Sent', { description: 'Your reply has been sent to the customer' })
       setReplyText('')
-    } else {
-      toast.error('Empty Reply', {
-        description: 'Please enter a message before sending'
-      })
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to send reply' })
+    }
+  }
+
+  const handleUpdateTicketStatus = async (ticketId: string, newStatus: TicketStatus) => {
+    try {
+      const updateData: any = { id: ticketId, status: newStatus }
+      if (newStatus === 'solved') {
+        updateData.resolved_at = new Date().toISOString()
+      } else if (newStatus === 'closed') {
+        updateData.closed_at = new Date().toISOString()
+      }
+      await updateTicket(updateData)
+      toast.success('Status Updated', { description: `Ticket status changed to ${newStatus}` })
+      refetch()
+    } catch (error) {
+      toast.error('Error', { description: 'Failed to update ticket status' })
     }
   }
 
@@ -1105,8 +1301,43 @@ export default function TicketsClient() {
                               onChange={(e) => setReplyText(e.target.value)}
                               className="flex-1"
                             />
-                            <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500" onClick={handleSendReply}>
+                            <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500" onClick={handleSendReply} disabled={isCreatingMessage}>
                               <Send className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Ticket Actions */}
+                        <div className="pt-4 border-t dark:border-gray-700 space-y-2">
+                          <h5 className="text-sm font-medium mb-3">Actions</h5>
+                          <div className="grid grid-cols-2 gap-2">
+                            {!selectedTicket.assignee && (
+                              <Button size="sm" variant="outline" onClick={() => handleAssignTicket(selectedTicket.id)}>
+                                <UserPlus className="w-4 h-4 mr-1" />
+                                Assign
+                              </Button>
+                            )}
+                            {selectedTicket.status !== 'solved' && selectedTicket.status !== 'closed' && (
+                              <Button size="sm" variant="outline" className="text-green-600" onClick={() => handleResolveTicket(selectedTicket.id)} disabled={isUpdating}>
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Resolve
+                              </Button>
+                            )}
+                            {selectedTicket.status === 'solved' && (
+                              <Button size="sm" variant="outline" onClick={() => handleCloseTicket(selectedTicket.id)} disabled={isUpdating}>
+                                <XCircle className="w-4 h-4 mr-1" />
+                                Close
+                              </Button>
+                            )}
+                            {selectedTicket.priority !== 'urgent' && (
+                              <Button size="sm" variant="outline" className="text-orange-600" onClick={() => handleEscalateTicket(selectedTicket.id)} disabled={isUpdating}>
+                                <ArrowUp className="w-4 h-4 mr-1" />
+                                Escalate
+                              </Button>
+                            )}
+                            <Button size="sm" variant="outline" className="text-red-600" onClick={() => handleDeleteTicket(selectedTicket.id)}>
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Delete
                             </Button>
                           </div>
                         </div>
@@ -1133,7 +1364,7 @@ export default function TicketsClient() {
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">On Track</span>
                         <Badge className="bg-green-100 text-green-700">
-                          {mockTickets.filter(t => t.sla.status === 'on-track').length}
+                          {allTickets.filter(t => t.sla.status === 'on-track').length}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between">
@@ -1174,9 +1405,9 @@ export default function TicketsClient() {
                     <div className="space-y-2">
                       {[
                         { priority: 'Urgent', count: stats.urgent, color: 'red' },
-                        { priority: 'High', count: mockTickets.filter(t => t.priority === 'high').length, color: 'orange' },
-                        { priority: 'Normal', count: mockTickets.filter(t => t.priority === 'normal').length, color: 'blue' },
-                        { priority: 'Low', count: mockTickets.filter(t => t.priority === 'low').length, color: 'green' },
+                        { priority: 'High', count: allTickets.filter(t => t.priority === 'high').length, color: 'orange' },
+                        { priority: 'Normal', count: allTickets.filter(t => t.priority === 'normal').length, color: 'blue' },
+                        { priority: 'Low', count: allTickets.filter(t => t.priority === 'low').length, color: 'green' },
                       ].map((item, i) => (
                         <div key={i} className="flex items-center gap-3">
                           <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
@@ -1246,15 +1477,15 @@ export default function TicketsClient() {
                 </div>
                 <div className="grid grid-cols-4 gap-4">
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockTickets.filter(t => !t.assignee).length}</p>
+                    <p className="text-2xl font-bold">{allTickets.filter(t => !t.assignee).length}</p>
                     <p className="text-xs text-red-100">Unassigned</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockTickets.filter(t => !t.assignee && t.priority === 'urgent').length}</p>
+                    <p className="text-2xl font-bold">{allTickets.filter(t => !t.assignee && t.priority === 'urgent').length}</p>
                     <p className="text-xs text-red-100">Urgent</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
-                    <p className="text-2xl font-bold">{mockTickets.filter(t => !t.assignee && t.sla.status === 'at-risk').length}</p>
+                    <p className="text-2xl font-bold">{allTickets.filter(t => !t.assignee && t.sla.status === 'at-risk').length}</p>
                     <p className="text-xs text-red-100">SLA At Risk</p>
                   </div>
                   <div className="bg-white/20 rounded-lg p-3 text-center">
@@ -1265,7 +1496,7 @@ export default function TicketsClient() {
               </div>
 
               <div className="grid gap-4">
-                {mockTickets.filter(t => !t.assignee).map(ticket => (
+                {allTickets.filter(t => !t.assignee).map(ticket => (
                   <Card key={ticket.id} className="bg-white dark:bg-gray-800 hover:shadow-md transition-shadow">
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -1287,7 +1518,7 @@ export default function TicketsClient() {
                         <div className="flex items-center gap-2">
                           <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
                           <Badge className={getSLAColor(ticket.sla.status)}>SLA: {ticket.sla.status}</Badge>
-                          <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500" onClick={() => handleAssignToMe(ticket.ticketNumber)}>
+                          <Button size="sm" className="bg-gradient-to-r from-orange-500 to-amber-500" onClick={() => handleAssignToMe(ticket.id, ticket.ticketNumber)}>
                             Assign to me
                           </Button>
                         </div>
@@ -1295,7 +1526,7 @@ export default function TicketsClient() {
                     </CardContent>
                   </Card>
                 ))}
-                {mockTickets.filter(t => !t.assignee).length === 0 && (
+                {allTickets.filter(t => !t.assignee).length === 0 && (
                   <Card className="bg-white dark:bg-gray-800">
                     <CardContent className="p-8 text-center">
                       <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
@@ -1485,8 +1716,8 @@ export default function TicketsClient() {
                     </div>
                     <div className="mt-4 space-y-2">
                       {['new', 'open', 'pending', 'solved'].map(status => {
-                        const count = mockTickets.filter(t => t.status === status).length
-                        const percentage = Math.round((count / stats.total) * 100)
+                        const count = allTickets.filter(t => t.status === status).length
+                        const percentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0
                         return (
                           <div key={status} className="flex items-center gap-2">
                             <div className="w-20 text-sm text-gray-500 capitalize">{status}</div>
@@ -2015,6 +2246,153 @@ export default function TicketsClient() {
           </div>
         </div>
       </div>
+
+      {/* Create Ticket Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Create New Ticket</DialogTitle>
+            <DialogDescription>
+              Enter the ticket details below. All tickets are saved to your database.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="subject">Subject *</Label>
+              <Input
+                id="subject"
+                value={newTicket.subject}
+                onChange={(e) => setNewTicket({ ...newTicket, subject: e.target.value })}
+                placeholder="Brief description of the issue"
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={newTicket.description}
+                onChange={(e) => setNewTicket({ ...newTicket, description: e.target.value })}
+                placeholder="Detailed description of the issue"
+                rows={4}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select value={newTicket.priority} onValueChange={(v: TicketPriority) => setNewTicket({ ...newTicket, priority: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="category">Category</Label>
+                <Select value={newTicket.category} onValueChange={(v) => setNewTicket({ ...newTicket, category: v })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="General">General</SelectItem>
+                    <SelectItem value="Technical">Technical</SelectItem>
+                    <SelectItem value="Billing">Billing</SelectItem>
+                    <SelectItem value="Account Access">Account Access</SelectItem>
+                    <SelectItem value="Feature Request">Feature Request</SelectItem>
+                    <SelectItem value="Bug Report">Bug Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="customer_name">Customer Name</Label>
+                <Input
+                  id="customer_name"
+                  value={newTicket.customer_name}
+                  onChange={(e) => setNewTicket({ ...newTicket, customer_name: e.target.value })}
+                  placeholder="Customer name"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="customer_email">Customer Email</Label>
+                <Input
+                  id="customer_email"
+                  type="email"
+                  value={newTicket.customer_email}
+                  onChange={(e) => setNewTicket({ ...newTicket, customer_email: e.target.value })}
+                  placeholder="customer@example.com"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+            <Button onClick={handleSubmitNewTicket} disabled={isCreating} className="bg-gradient-to-r from-orange-500 to-amber-500">
+              {isCreating ? 'Creating...' : 'Create Ticket'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Assign Ticket Dialog */}
+      <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Assign Ticket</DialogTitle>
+            <DialogDescription>
+              Select an agent to assign this ticket to.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {mockAgents.filter(a => a.status === 'online').map(agent => (
+              <div
+                key={agent.id}
+                className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
+                onClick={() => handleConfirmAssign(agent.id, agent.name)}
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-10 h-10">
+                    <AvatarFallback className="bg-gradient-to-br from-orange-500 to-amber-500 text-white">
+                      {agent.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{agent.name}</p>
+                    <p className="text-sm text-gray-500">{agent.team} - {agent.openTickets} open tickets</p>
+                  </div>
+                </div>
+                <div className={`w-3 h-3 rounded-full ${getAgentStatusColor(agent.status)}`} />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAssignDialog(false)}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Delete Ticket</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this ticket? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
+              {isDeleting ? 'Deleting...' : 'Delete Ticket'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

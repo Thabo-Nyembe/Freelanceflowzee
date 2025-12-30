@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useAnnouncements, type AnnouncementType as DBAnnouncementTypeEnum, type AnnouncementStatus as DBAnnouncementStatusEnum, type AnnouncementPriority as DBAnnouncementPriorityEnum } from '@/lib/hooks/use-announcements'
 import {
   Megaphone,
   Bell,
@@ -430,7 +432,56 @@ const typeColors: Record<AnnouncementType, string> = {
 }
 
 export default function AnnouncementsClient() {
-  const [announcements] = useState<Announcement[]>(mockAnnouncements)
+  // Supabase hook for real database operations
+  const {
+    announcements: dbAnnouncements,
+    loading: dbLoading,
+    error: dbError,
+    mutating,
+    createAnnouncement,
+    updateAnnouncement,
+    deleteAnnouncement,
+    refetch
+  } = useAnnouncements()
+
+  // Convert DB announcements to local format for display
+  const announcements: Announcement[] = useMemo(() => {
+    if (!dbAnnouncements || dbAnnouncements.length === 0) {
+      return mockAnnouncements // Fallback to mock data if no DB data
+    }
+    return dbAnnouncements.map((dbAnn): Announcement => ({
+      id: dbAnn.id,
+      title: dbAnn.title,
+      content: dbAnn.content,
+      excerpt: dbAnn.content.substring(0, 100) + '...',
+      type: mapDbTypeToLocal(dbAnn.announcement_type),
+      status: dbAnn.status as AnnouncementStatus,
+      priority: dbAnn.priority as AnnouncementPriority,
+      author: mockAuthors[0], // Default author
+      createdAt: dbAnn.created_at,
+      updatedAt: dbAnn.updated_at,
+      publishedAt: dbAnn.published_at || undefined,
+      scheduledAt: dbAnn.scheduled_for || undefined,
+      expiresAt: dbAnn.expires_at || undefined,
+      isPinned: dbAnn.is_pinned,
+      isFeatured: dbAnn.is_featured,
+      reactions: [],
+      comments: [],
+      metrics: {
+        views: dbAnn.views_count,
+        uniqueViews: dbAnn.views_count,
+        clicks: 0,
+        ctr: 0,
+        avgTimeOnPost: 0,
+        shares: 0
+      },
+      targetSegments: [],
+      channels: ['web'],
+      labels: dbAnn.tags || [],
+      relatedAnnouncements: []
+    }))
+  }, [dbAnnouncements])
+
   const [changelog] = useState<ChangelogEntry[]>(mockChangelog)
   const [segments] = useState<Segment[]>(mockSegments)
   const [searchQuery, setSearchQuery] = useState('')
@@ -439,6 +490,49 @@ export default function AnnouncementsClient() {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null)
   const [activeTab, setActiveTab] = useState('announcements')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Create announcement dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [newAnnouncement, setNewAnnouncement] = useState({
+    title: '',
+    content: '',
+    announcement_type: 'general' as DBAnnouncementTypeEnum,
+    priority: 'normal' as DBAnnouncementPriorityEnum,
+    status: 'draft' as DBAnnouncementStatusEnum,
+    target_audience: 'all' as const,
+    is_pinned: false,
+    is_featured: false,
+    send_email: false,
+    send_push: false
+  })
+
+  // Helper function to map DB types to local types
+  function mapDbTypeToLocal(dbType: string): AnnouncementType {
+    const typeMap: Record<string, AnnouncementType> = {
+      'general': 'announcement',
+      'urgent': 'announcement',
+      'update': 'improvement',
+      'policy': 'announcement',
+      'event': 'promotion',
+      'maintenance': 'maintenance',
+      'achievement': 'feature',
+      'alert': 'announcement'
+    }
+    return typeMap[dbType] || 'announcement'
+  }
+
+  // Helper function to map local types to DB types
+  function mapLocalTypeToDb(localType: AnnouncementType): DBAnnouncementTypeEnum {
+    const typeMap: Record<AnnouncementType, DBAnnouncementTypeEnum> = {
+      'feature': 'achievement',
+      'improvement': 'update',
+      'fix': 'update',
+      'announcement': 'general',
+      'promotion': 'event',
+      'maintenance': 'maintenance'
+    }
+    return typeMap[localType] || 'general'
+  }
 
   // Filtered announcements
   const filteredAnnouncements = useMemo(() => {
@@ -518,35 +612,130 @@ export default function AnnouncementsClient() {
     return num.toString()
   }
 
-  // Handlers
-  const handleCreateAnnouncement = () => {
-    toast.info('Create Announcement', {
-      description: 'Opening announcement composer...'
-    })
+  // Handlers - Real Supabase Operations
+  const handleCreateAnnouncement = async () => {
+    if (!newAnnouncement.title.trim() || !newAnnouncement.content.trim()) {
+      toast.error('Validation Error', {
+        description: 'Title and content are required'
+      })
+      return
+    }
+
+    try {
+      await createAnnouncement({
+        title: newAnnouncement.title,
+        content: newAnnouncement.content,
+        announcement_type: newAnnouncement.announcement_type,
+        priority: newAnnouncement.priority,
+        status: newAnnouncement.status,
+        target_audience: newAnnouncement.target_audience,
+        is_pinned: newAnnouncement.is_pinned,
+        is_featured: newAnnouncement.is_featured,
+        send_email: newAnnouncement.send_email,
+        send_push: newAnnouncement.send_push
+      })
+
+      toast.success('Announcement Created', {
+        description: `"${newAnnouncement.title}" has been saved as ${newAnnouncement.status}`
+      })
+
+      // Reset form and close dialog
+      setNewAnnouncement({
+        title: '',
+        content: '',
+        announcement_type: 'general',
+        priority: 'normal',
+        status: 'draft',
+        target_audience: 'all',
+        is_pinned: false,
+        is_featured: false,
+        send_email: false,
+        send_push: false
+      })
+      setShowCreateDialog(false)
+    } catch (error) {
+      toast.error('Failed to create announcement', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
   }
 
-  const handlePublishAnnouncement = (title: string) => {
-    toast.success('Announcement published', {
-      description: `"${title}" is now live`
-    })
+  const handlePublishAnnouncement = async (id: string, title: string) => {
+    try {
+      await updateAnnouncement(id, {
+        status: 'published',
+        published_at: new Date().toISOString()
+      })
+      toast.success('Announcement Published', {
+        description: `"${title}" is now live`
+      })
+      setSelectedAnnouncement(null)
+    } catch (error) {
+      toast.error('Failed to publish announcement', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
   }
 
-  const handleScheduleAnnouncement = (title: string) => {
-    toast.success('Announcement scheduled', {
-      description: `"${title}" has been scheduled`
-    })
+  const handleScheduleAnnouncement = async (id: string, title: string, scheduledFor: string) => {
+    try {
+      await updateAnnouncement(id, {
+        status: 'scheduled',
+        scheduled_for: scheduledFor
+      })
+      toast.success('Announcement Scheduled', {
+        description: `"${title}" has been scheduled`
+      })
+    } catch (error) {
+      toast.error('Failed to schedule announcement', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
   }
 
-  const handleArchiveAnnouncement = (title: string) => {
-    toast.info('Announcement archived', {
-      description: `"${title}" moved to archive`
-    })
+  const handleArchiveAnnouncement = async (id: string, title: string) => {
+    try {
+      await updateAnnouncement(id, {
+        status: 'archived'
+      })
+      toast.info('Announcement Archived', {
+        description: `"${title}" moved to archive`
+      })
+      setSelectedAnnouncement(null)
+    } catch (error) {
+      toast.error('Failed to archive announcement', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
   }
 
-  const handlePinAnnouncement = (title: string) => {
-    toast.success('Announcement pinned', {
-      description: `"${title}" is now pinned`
-    })
+  const handleDeleteAnnouncement = async (id: string, title: string) => {
+    try {
+      await deleteAnnouncement(id)
+      toast.success('Announcement Deleted', {
+        description: `"${title}" has been permanently deleted`
+      })
+      setSelectedAnnouncement(null)
+    } catch (error) {
+      toast.error('Failed to delete announcement', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
+  }
+
+  const handlePinAnnouncement = async (id: string, title: string, isPinned: boolean) => {
+    try {
+      await updateAnnouncement(id, {
+        is_pinned: !isPinned
+      })
+      toast.success(isPinned ? 'Announcement Unpinned' : 'Announcement Pinned', {
+        description: `"${title}" is ${isPinned ? 'no longer pinned' : 'now pinned'}`
+      })
+    } catch (error) {
+      toast.error('Failed to update pin status', {
+        description: error instanceof Error ? error.message : 'Unknown error occurred'
+      })
+    }
   }
 
   return (
@@ -564,7 +753,11 @@ export default function AnnouncementsClient() {
                 Share updates, features, and news with your users
               </p>
             </div>
-            <Button className="bg-white text-violet-600 hover:bg-white/90">
+            <Button
+              className="bg-white text-violet-600 hover:bg-white/90"
+              onClick={() => setShowCreateDialog(true)}
+              disabled={mutating}
+            >
               <Plus className="h-4 w-4 mr-2" />
               New Announcement
             </Button>
@@ -2019,7 +2212,31 @@ export default function AnnouncementsClient() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    {/* Publish button - only show for drafts/scheduled */}
+                    {(selectedAnnouncement.status === 'draft' || selectedAnnouncement.status === 'scheduled') && (
+                      <Button
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => handlePublishAnnouncement(selectedAnnouncement.id, selectedAnnouncement.title)}
+                        disabled={mutating}
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Publish
+                      </Button>
+                    )}
+
+                    {/* Archive button - show for published announcements */}
+                    {selectedAnnouncement.status === 'published' && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleArchiveAnnouncement(selectedAnnouncement.id, selectedAnnouncement.title)}
+                        disabled={mutating}
+                      >
+                        <Archive className="h-4 w-4 mr-2" />
+                        Archive
+                      </Button>
+                    )}
+
+                    <Button variant="outline">
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
@@ -2027,26 +2244,219 @@ export default function AnnouncementsClient() {
                       <Share2 className="h-4 w-4 mr-2" />
                       Share
                     </Button>
-                    <Button variant="outline">
-                      <Copy className="h-4 w-4 mr-2" />
-                      Duplicate
+
+                    {/* Pin/Unpin button */}
+                    <Button
+                      variant="outline"
+                      onClick={() => handlePinAnnouncement(selectedAnnouncement.id, selectedAnnouncement.title, selectedAnnouncement.isPinned)}
+                      disabled={mutating}
+                    >
+                      {selectedAnnouncement.isPinned ? (
+                        <>
+                          <PinOff className="h-4 w-4 mr-2" />
+                          Unpin
+                        </>
+                      ) : (
+                        <>
+                          <Pin className="h-4 w-4 mr-2" />
+                          Pin
+                        </>
+                      )}
                     </Button>
-                    {selectedAnnouncement.isPinned ? (
-                      <Button variant="outline">
-                        <PinOff className="h-4 w-4 mr-2" />
-                        Unpin
-                      </Button>
-                    ) : (
-                      <Button variant="outline">
-                        <Pin className="h-4 w-4 mr-2" />
-                        Pin
-                      </Button>
-                    )}
+
+                    {/* Delete button */}
+                    <Button
+                      variant="outline"
+                      className="text-red-600 border-red-300 hover:bg-red-50"
+                      onClick={() => handleDeleteAnnouncement(selectedAnnouncement.id, selectedAnnouncement.title)}
+                      disabled={mutating}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </Button>
                   </div>
                 </div>
               </ScrollArea>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Announcement Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Megaphone className="h-5 w-5 text-violet-600" />
+              Create New Announcement
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Title */}
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                placeholder="Enter announcement title..."
+                value={newAnnouncement.title}
+                onChange={(e) => setNewAnnouncement(prev => ({ ...prev, title: e.target.value }))}
+              />
+            </div>
+
+            {/* Content */}
+            <div className="space-y-2">
+              <Label htmlFor="content">Content *</Label>
+              <Textarea
+                id="content"
+                placeholder="Write your announcement content..."
+                className="min-h-[120px]"
+                value={newAnnouncement.content}
+                onChange={(e) => setNewAnnouncement(prev => ({ ...prev, content: e.target.value }))}
+              />
+            </div>
+
+            {/* Type and Priority */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select
+                  value={newAnnouncement.announcement_type}
+                  onValueChange={(value: DBAnnouncementTypeEnum) => setNewAnnouncement(prev => ({ ...prev, announcement_type: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="update">Update</SelectItem>
+                    <SelectItem value="policy">Policy</SelectItem>
+                    <SelectItem value="event">Event</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                    <SelectItem value="achievement">Achievement</SelectItem>
+                    <SelectItem value="alert">Alert</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Priority</Label>
+                <Select
+                  value={newAnnouncement.priority}
+                  onValueChange={(value: DBAnnouncementPriorityEnum) => setNewAnnouncement(prev => ({ ...prev, priority: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
+                    <SelectItem value="critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Target Audience */}
+            <div className="space-y-2">
+              <Label>Target Audience</Label>
+              <Select
+                value={newAnnouncement.target_audience}
+                onValueChange={(value: 'all' | 'employees' | 'customers' | 'partners' | 'admins' | 'specific') => setNewAnnouncement(prev => ({ ...prev, target_audience: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="employees">Employees Only</SelectItem>
+                  <SelectItem value="customers">Customers Only</SelectItem>
+                  <SelectItem value="partners">Partners Only</SelectItem>
+                  <SelectItem value="admins">Admins Only</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Options */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <div className="font-medium text-sm">Pin Announcement</div>
+                  <div className="text-xs text-gray-500">Keep this at the top of the list</div>
+                </div>
+                <Switch
+                  checked={newAnnouncement.is_pinned}
+                  onCheckedChange={(checked) => setNewAnnouncement(prev => ({ ...prev, is_pinned: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <div className="font-medium text-sm">Featured</div>
+                  <div className="text-xs text-gray-500">Highlight this announcement</div>
+                </div>
+                <Switch
+                  checked={newAnnouncement.is_featured}
+                  onCheckedChange={(checked) => setNewAnnouncement(prev => ({ ...prev, is_featured: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <div className="font-medium text-sm">Send Email</div>
+                  <div className="text-xs text-gray-500">Email this announcement to target audience</div>
+                </div>
+                <Switch
+                  checked={newAnnouncement.send_email}
+                  onCheckedChange={(checked) => setNewAnnouncement(prev => ({ ...prev, send_email: checked }))}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <div className="font-medium text-sm">Push Notification</div>
+                  <div className="text-xs text-gray-500">Send push notification to users</div>
+                </div>
+                <Switch
+                  checked={newAnnouncement.send_push}
+                  onCheckedChange={(checked) => setNewAnnouncement(prev => ({ ...prev, send_push: checked }))}
+                />
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowCreateDialog(false)}
+              disabled={mutating}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setNewAnnouncement(prev => ({ ...prev, status: 'draft' }))
+                handleCreateAnnouncement()
+              }}
+              disabled={mutating}
+            >
+              Save as Draft
+            </Button>
+            <Button
+              className="bg-violet-600 hover:bg-violet-700"
+              onClick={() => {
+                setNewAnnouncement(prev => ({ ...prev, status: 'published' }))
+                handleCreateAnnouncement()
+              }}
+              disabled={mutating}
+            >
+              {mutating ? 'Publishing...' : 'Publish Now'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

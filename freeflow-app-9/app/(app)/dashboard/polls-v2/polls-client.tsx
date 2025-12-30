@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import {
   ClipboardList,
   Plus,
@@ -539,21 +540,240 @@ const mockPollsQuickActions = [
 ]
 
 // ============================================================================
+// SUPABASE POLL TYPE
+// ============================================================================
+
+type PollType = 'single-choice' | 'multiple-choice' | 'rating' | 'ranking' | 'open-ended'
+type PollStatus = 'draft' | 'active' | 'paused' | 'closed' | 'archived'
+
+interface DbPoll {
+  id: string
+  user_id: string
+  question: string
+  description: string | null
+  poll_type: PollType
+  status: PollStatus
+  options: { id: string; text: string }[]
+  total_votes: number
+  total_voters: number
+  views_count: number
+  starts_at: string | null
+  ends_at: string | null
+  is_public: boolean
+  created_at: string
+  updated_at: string
+}
+
+// ============================================================================
 // COMPONENT
 // ============================================================================
 
 export default function PollsClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('forms')
   const [forms, setForms] = useState<Form[]>(mockForms)
   const [templates] = useState<FormTemplate[]>(mockTemplates)
-  const [selectedForm, setSelectedForm] = useState<Form | null>(null)
+  const [_selectedForm, _setSelectedForm] = useState<Form | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [_viewMode, _setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedQuestionType, setSelectedQuestionType] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Database state
+  const [dbPolls, setDbPolls] = useState<DbPoll[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Form state for create/edit
+  const [formData, setFormData] = useState({
+    question: '',
+    description: '',
+    poll_type: 'single-choice' as PollType,
+    status: 'draft' as PollStatus,
+    options: [{ id: '1', text: '' }, { id: '2', text: '' }],
+    is_public: true,
+    starts_at: '',
+    ends_at: ''
+  })
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      question: '',
+      description: '',
+      poll_type: 'single-choice',
+      status: 'draft',
+      options: [{ id: '1', text: '' }, { id: '2', text: '' }],
+      is_public: true,
+      starts_at: '',
+      ends_at: ''
+    })
+    setSelectedQuestionType(null)
+  }
+
+  // Fetch polls from Supabase
+  const fetchPolls = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('polls')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbPolls(data || [])
+    } catch (error) {
+      console.error('Error fetching polls:', error)
+      toast.error('Failed to load polls')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Create poll
+  const handleCreatePoll = async () => {
+    if (!formData.question.trim()) {
+      toast.error('Please enter a question')
+      return
+    }
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create polls')
+        return
+      }
+
+      const { error } = await supabase.from('polls').insert({
+        user_id: user.id,
+        question: formData.question,
+        description: formData.description || null,
+        poll_type: formData.poll_type,
+        status: formData.status,
+        options: formData.options.filter(o => o.text.trim()),
+        is_public: formData.is_public,
+        starts_at: formData.starts_at || null,
+        ends_at: formData.ends_at || null
+      })
+
+      if (error) throw error
+
+      toast.success('Poll created successfully')
+      setShowCreateDialog(false)
+      resetForm()
+      fetchPolls()
+    } catch (error) {
+      console.error('Error creating poll:', error)
+      toast.error('Failed to create poll')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update poll status
+  const handleUpdatePollStatus = async (pollId: string, newStatus: PollStatus) => {
+    try {
+      const { error } = await supabase
+        .from('polls')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', pollId)
+
+      if (error) throw error
+
+      toast.success(`Poll ${newStatus === 'active' ? 'activated' : newStatus}`)
+      fetchPolls()
+    } catch (error) {
+      console.error('Error updating poll:', error)
+      toast.error('Failed to update poll')
+    }
+  }
+
+  // Delete poll
+  const handleDeletePoll = async (pollId: string) => {
+    try {
+      const { error } = await supabase
+        .from('polls')
+        .delete()
+        .eq('id', pollId)
+
+      if (error) throw error
+
+      toast.success('Poll deleted successfully')
+      fetchPolls()
+    } catch (error) {
+      console.error('Error deleting poll:', error)
+      toast.error('Failed to delete poll')
+    }
+  }
+
+  // Duplicate poll
+  const handleDuplicatePollDb = async (poll: DbPoll) => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase.from('polls').insert({
+        user_id: user.id,
+        question: `${poll.question} (Copy)`,
+        description: poll.description,
+        poll_type: poll.poll_type,
+        status: 'draft',
+        options: poll.options,
+        is_public: poll.is_public
+      })
+
+      if (error) throw error
+
+      toast.success('Poll duplicated successfully')
+      fetchPolls()
+    } catch (error) {
+      console.error('Error duplicating poll:', error)
+      toast.error('Failed to duplicate poll')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Add option to form
+  const addOption = () => {
+    setFormData(prev => ({
+      ...prev,
+      options: [...prev.options, { id: String(prev.options.length + 1), text: '' }]
+    }))
+  }
+
+  // Update option text
+  const updateOption = (id: string, text: string) => {
+    setFormData(prev => ({
+      ...prev,
+      options: prev.options.map(o => o.id === id ? { ...o, text } : o)
+    }))
+  }
+
+  // Remove option
+  const removeOption = (id: string) => {
+    if (formData.options.length <= 2) {
+      toast.error('Minimum 2 options required')
+      return
+    }
+    setFormData(prev => ({
+      ...prev,
+      options: prev.options.filter(o => o.id !== id)
+    }))
+  }
+
+  // Load polls on mount
+  useEffect(() => {
+    fetchPolls()
+  }, [fetchPolls])
 
   const filteredForms = useMemo(() => {
     return forms.filter(form => {
@@ -602,42 +822,34 @@ export default function PollsClient() {
   }
 
   const handleCreateForm = () => {
-    toast.info('Create Form', {
-      description: 'Opening form builder...'
-    })
     setShowCreateDialog(true)
   }
 
-  // Handlers
   const handleUseTemplate = () => {
-    toast.info('Template Gallery', {
-      description: 'Opening template gallery...'
-    })
     setShowTemplateDialog(true)
   }
 
-  const handleExportResponses = () => {
-    toast.success('Export started', {
-      description: 'Your responses are being exported'
-    })
+  const handleExportResponses = async () => {
+    try {
+      const csvContent = dbPolls.map(p =>
+        `"${p.question}","${p.poll_type}","${p.status}","${p.total_votes}","${p.created_at}"`
+      ).join('\n')
+      const blob = new Blob([`Question,Type,Status,Votes,Created\n${csvContent}`], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'polls-export.csv'
+      a.click()
+      toast.success('Export completed', { description: 'Polls exported to CSV' })
+    } catch {
+      toast.error('Export failed')
+    }
   }
 
-  const handleShareForm = () => {
-    toast.success('Link copied', {
-      description: 'Form share link copied to clipboard'
-    })
-  }
-
-  const handleClosePoll = (pollName: string) => {
-    toast.info('Poll closed', {
-      description: `"${pollName}" is no longer accepting responses`
-    })
-  }
-
-  const handleDuplicatePoll = (pollName: string) => {
-    toast.success('Poll duplicated', {
-      description: `Copy of "${pollName}" created`
-    })
+  const handleShareForm = async (pollId: string) => {
+    const url = `${window.location.origin}/polls/${pollId}`
+    await navigator.clipboard.writeText(url)
+    toast.success('Link copied', { description: 'Poll share link copied to clipboard' })
   }
 
   return (
@@ -852,17 +1064,83 @@ export default function PollsClient() {
                   <Plus className="w-8 h-8 text-emerald-600" />
                 </div>
                 <div className="text-center">
-                  <p className="font-semibold text-gray-900 dark:text-white">Create New Form</p>
+                  <p className="font-semibold text-gray-900 dark:text-white">Create New Poll</p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Start from scratch or use a template</p>
                 </div>
               </button>
             </div>
 
-            {filteredForms.length === 0 && (
+            {/* Database Polls Section */}
+            {dbPolls.length > 0 && (
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <ClipboardList className="w-5 h-5 text-emerald-600" />
+                  Your Polls ({dbPolls.length})
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {dbPolls.map(poll => (
+                    <div key={poll.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <Badge className={getStatusColor(poll.status)}>{poll.status}</Badge>
+                          <span className="text-xs text-gray-500">{poll.poll_type}</span>
+                        </div>
+                        <h4 className="font-semibold mb-1 line-clamp-2">{poll.question}</h4>
+                        {poll.description && (
+                          <p className="text-sm text-gray-500 line-clamp-1 mb-3">{poll.description}</p>
+                        )}
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Users className="w-4 h-4" />
+                            {poll.total_voters} voters
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <BarChart3 className="w-4 h-4" />
+                            {poll.total_votes} votes
+                          </span>
+                        </div>
+                      </div>
+                      <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          {poll.status === 'draft' && (
+                            <Button size="sm" variant="ghost" onClick={() => handleUpdatePollStatus(poll.id, 'active')}>
+                              <Play className="w-4 h-4 mr-1" /> Publish
+                            </Button>
+                          )}
+                          {poll.status === 'active' && (
+                            <Button size="sm" variant="ghost" onClick={() => handleUpdatePollStatus(poll.id, 'paused')}>
+                              <Pause className="w-4 h-4 mr-1" /> Pause
+                            </Button>
+                          )}
+                          {poll.status === 'paused' && (
+                            <Button size="sm" variant="ghost" onClick={() => handleUpdatePollStatus(poll.id, 'active')}>
+                              <Play className="w-4 h-4 mr-1" /> Resume
+                            </Button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Button size="icon" variant="ghost" onClick={() => handleShareForm(poll.id)}>
+                            <Share2 className="w-4 h-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleDuplicatePollDb(poll)}>
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => handleDeletePoll(poll.id)}>
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {filteredForms.length === 0 && dbPolls.length === 0 && (
               <div className="text-center py-12">
                 <ClipboardList className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No forms found</h3>
-                <p className="text-gray-500">Try adjusting your search or create a new form</p>
+                <h3 className="text-lg font-semibold mb-2">No polls found</h3>
+                <p className="text-gray-500">Create your first poll to get started</p>
               </div>
             )}
           </TabsContent>
@@ -874,14 +1152,14 @@ export default function PollsClient() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-semibold">Recent Responses</h2>
                   <div className="flex items-center gap-2">
-                    <button className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2">
+                    <Button variant="outline" onClick={handleExportResponses} className="flex items-center gap-2">
                       <Download className="w-4 h-4" />
                       Export All
-                    </button>
-                    <button className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2">
-                      <RefreshCw className="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" onClick={fetchPolls} disabled={isLoading} className="flex items-center gap-2">
+                      <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
                       Refresh
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -1970,85 +2248,109 @@ export default function PollsClient() {
       </div>
 
       {/* Create Form Dialog */}
-      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+      <Dialog open={showCreateDialog} onOpenChange={(open) => { setShowCreateDialog(open); if (!open) resetForm(); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle>Create New Form</DialogTitle>
+            <DialogTitle>Create New Poll</DialogTitle>
           </DialogHeader>
           <ScrollArea className="max-h-[calc(90vh-120px)]">
             <div className="space-y-6 p-1">
-              {/* Form Details */}
+              {/* Poll Details */}
               <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Form Title</label>
-                  <input
-                    type="text"
-                    placeholder="Enter form title..."
-                    className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                  <Label>Poll Question *</Label>
+                  <Input
+                    value={formData.question}
+                    onChange={(e) => setFormData(prev => ({ ...prev, question: e.target.value }))}
+                    placeholder="What would you like to ask?"
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                  <Label>Description</Label>
                   <textarea
                     rows={2}
-                    placeholder="Describe your form..."
-                    className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+                    value={formData.description}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    placeholder="Add context for your poll..."
+                    className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-sm"
                   />
                 </div>
               </div>
 
-              {/* Question Types */}
+              {/* Poll Type */}
               <div>
-                <h4 className="font-medium mb-3">Add Questions</h4>
-                <div className="grid grid-cols-3 gap-3">
-                  {questionTypes.map(qt => (
-                    <button
-                      key={qt.type}
-                      onClick={() => setSelectedQuestionType(qt.type)}
-                      className={`p-4 text-left border rounded-lg hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all ${
-                        selectedQuestionType === qt.type
-                          ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
-                          : 'border-gray-200 dark:border-gray-700'
-                      }`}
-                    >
-                      <qt.icon className="w-5 h-5 text-emerald-600 mb-2" />
-                      <p className="font-medium text-sm">{qt.label}</p>
-                      <p className="text-xs text-gray-500">{qt.description}</p>
-                    </button>
-                  ))}
-                </div>
+                <Label>Poll Type</Label>
+                <Select value={formData.poll_type} onValueChange={(v: PollType) => setFormData(prev => ({ ...prev, poll_type: v }))}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="single-choice">Single Choice</SelectItem>
+                    <SelectItem value="multiple-choice">Multiple Choice</SelectItem>
+                    <SelectItem value="rating">Rating Scale</SelectItem>
+                    <SelectItem value="ranking">Ranking</SelectItem>
+                    <SelectItem value="open-ended">Open Ended</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
-              {/* Theme Selection */}
-              <div>
-                <h4 className="font-medium mb-3">Choose Theme</h4>
-                <div className="grid grid-cols-4 gap-3">
-                  {mockThemes.map(theme => (
-                    <button
-                      key={theme.id}
-                      className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500 transition-all"
-                    >
-                      <div
-                        className="h-16 rounded-lg mb-2"
-                        style={{ backgroundColor: theme.backgroundColor }}
-                      />
-                      <p className="text-sm font-medium">{theme.name}</p>
-                    </button>
-                  ))}
+              {/* Options */}
+              {(formData.poll_type === 'single-choice' || formData.poll_type === 'multiple-choice') && (
+                <div>
+                  <Label>Options</Label>
+                  <div className="space-y-2 mt-2">
+                    {formData.options.map((opt, idx) => (
+                      <div key={opt.id} className="flex gap-2">
+                        <Input
+                          value={opt.text}
+                          onChange={(e) => updateOption(opt.id, e.target.value)}
+                          placeholder={`Option ${idx + 1}`}
+                        />
+                        <Button variant="ghost" size="icon" onClick={() => removeOption(opt.id)} disabled={formData.options.length <= 2}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" onClick={addOption} className="mt-2">
+                      <Plus className="w-4 h-4 mr-1" /> Add Option
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* Settings */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Status</Label>
+                  <Select value={formData.status} onValueChange={(v: PollStatus) => setFormData(prev => ({ ...prev, status: v }))}>
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="paused">Paused</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <Switch
+                    checked={formData.is_public}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, is_public: checked }))}
+                  />
+                  <Label>Public Poll</Label>
                 </div>
               </div>
 
               {/* Actions */}
               <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button
-                  onClick={() => setShowCreateDialog(false)}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
-                >
+                <Button variant="outline" onClick={() => { setShowCreateDialog(false); resetForm(); }}>
                   Cancel
-                </button>
-                <button className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium">
-                  Create Form
-                </button>
+                </Button>
+                <Button onClick={handleCreatePoll} disabled={isSaving} className="bg-emerald-600 hover:bg-emerald-700">
+                  {isSaving ? 'Creating...' : 'Create Poll'}
+                </Button>
               </div>
             </div>
           </ScrollArea>

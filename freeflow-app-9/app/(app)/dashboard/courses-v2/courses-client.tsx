@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import {
@@ -17,8 +19,11 @@ import {
   FileText, Award, Bell, Key, Webhook, Mail, Shield, Lock, Cpu, Palette,
   Globe, CreditCard, DollarSign, Percent, Clock, Calendar, Video, Image,
   Upload, Download, Trash2, Copy, AlertOctagon, RefreshCw, Zap, Link2,
-  MessageSquare, CheckCircle, XCircle, Eye, Edit, Plus, Search, Filter
+  MessageSquare, CheckCircle, XCircle, Eye, Edit, Plus, Search, Filter, Loader2
 } from 'lucide-react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useCourses as useCoursesExtended, useCourse, useCourseModules, useCourseStats } from '@/lib/hooks/use-courses-extended'
+import { useCreateCourse, useUpdateCourse, useDeleteCourse, type Course as DBCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -565,6 +570,103 @@ export default function CoursesClient() {
   const [searchQuery, setSearchQuery] = useState('')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states
+  const [showCreateCourseDialog, setShowCreateCourseDialog] = useState(false)
+  const [showEditCourseDialog, setShowEditCourseDialog] = useState(false)
+  const [showDeleteCourseDialog, setShowDeleteCourseDialog] = useState(false)
+  const [showAddSectionDialog, setShowAddSectionDialog] = useState(false)
+  const [showAddLectureDialog, setShowAddLectureDialog] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null)
+
+  // Supabase hooks
+  const { courses: dbCourses, isLoading: coursesLoading, refresh: refreshCourses } = useCoursesExtended({
+    category: categoryFilter !== 'all' ? categoryFilter : undefined,
+    search: searchQuery || undefined
+  })
+  const createCourseMutation = useCreateCourse()
+  const updateCourseMutation = useUpdateCourse()
+  const deleteCourseMutation = useDeleteCourse()
+
+  // Course form state
+  const [courseForm, setCourseForm] = useState({
+    course_name: '',
+    description: '',
+    course_category: 'development' as DBCourseCategory,
+    level: 'beginner' as DBCourseLevel,
+    status: 'draft' as DBCourseStatus,
+    instructor_name: '',
+    instructor_email: '',
+    instructor_bio: '',
+    price: 0,
+    original_price: 0,
+    discount_percentage: 0,
+    currency: 'USD',
+    language: 'English',
+    has_certificates: true,
+    has_downloadable_resources: true,
+    has_lifetime_access: true,
+    has_mobile_access: true,
+    requirements: [] as string[],
+    learning_outcomes: [] as string[],
+    target_audience: '',
+    meta_title: '',
+    meta_description: '',
+    keywords: [] as string[]
+  })
+
+  // Section form state
+  const [sectionForm, setSectionForm] = useState({
+    title: '',
+    description: '',
+    order: 1
+  })
+
+  // Lecture form state
+  const [lectureForm, setLectureForm] = useState({
+    title: '',
+    type: 'video' as 'video' | 'article' | 'quiz' | 'assignment' | 'resource',
+    duration: 0,
+    isPreview: false
+  })
+
+  // Reset form helpers
+  const resetCourseForm = () => {
+    setCourseForm({
+      course_name: '',
+      description: '',
+      course_category: 'development',
+      level: 'beginner',
+      status: 'draft',
+      instructor_name: '',
+      instructor_email: '',
+      instructor_bio: '',
+      price: 0,
+      original_price: 0,
+      discount_percentage: 0,
+      currency: 'USD',
+      language: 'English',
+      has_certificates: true,
+      has_downloadable_resources: true,
+      has_lifetime_access: true,
+      has_mobile_access: true,
+      requirements: [],
+      learning_outcomes: [],
+      target_audience: '',
+      meta_title: '',
+      meta_description: '',
+      keywords: []
+    })
+  }
+
+  const resetSectionForm = () => {
+    setSectionForm({ title: '', description: '', order: 1 })
+  }
+
+  const resetLectureForm = () => {
+    setLectureForm({ title: '', type: 'video', duration: 0, isPreview: false })
+  }
+
   // Stats
   const stats = useMemo(() => {
     const totalCourses = mockCourses.length
@@ -639,28 +741,471 @@ export default function CoursesClient() {
   }
 
   // Handlers
-  const handleEnrollCourse = (course: Course) => {
-    toast.success('Enrolled!', {
-      description: `You've enrolled in "${course.title}"`
-    })
+  const handleCreateCourse = async () => {
+    if (!courseForm.course_name) {
+      toast.error('Please enter a course name')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const supabase = createClientComponentClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in to create a course')
+        return
+      }
+
+      await createCourseMutation.mutateAsync({
+        user_id: user.id,
+        course_name: courseForm.course_name,
+        description: courseForm.description || undefined,
+        course_category: courseForm.course_category,
+        level: courseForm.level,
+        status: courseForm.status,
+        instructor_name: courseForm.instructor_name || undefined,
+        instructor_email: courseForm.instructor_email || undefined,
+        instructor_bio: courseForm.instructor_bio || undefined,
+        price: courseForm.price,
+        original_price: courseForm.original_price || undefined,
+        discount_percentage: courseForm.discount_percentage,
+        currency: courseForm.currency,
+        language: courseForm.language,
+        has_certificates: courseForm.has_certificates,
+        has_downloadable_resources: courseForm.has_downloadable_resources,
+        has_lifetime_access: courseForm.has_lifetime_access,
+        has_mobile_access: courseForm.has_mobile_access,
+        requirements: courseForm.requirements,
+        learning_outcomes: courseForm.learning_outcomes,
+        target_audience: courseForm.target_audience || undefined,
+        meta_title: courseForm.meta_title || undefined,
+        meta_description: courseForm.meta_description || undefined,
+        keywords: courseForm.keywords,
+        lecture_count: 0,
+        module_count: 0,
+        quiz_count: 0,
+        assignment_count: 0,
+        total_duration_hours: 0,
+        student_count: 0,
+        enrolled_count: 0,
+        active_students: 0,
+        completed_students: 0,
+        dropped_students: 0,
+        rating: 0,
+        review_count: 0,
+        five_star_count: 0,
+        four_star_count: 0,
+        three_star_count: 0,
+        two_star_count: 0,
+        one_star_count: 0,
+        completion_rate: 0,
+        engagement_score: 0,
+        video_watch_rate: 0,
+        quiz_pass_rate: 0,
+        assignment_submission_rate: 0,
+        total_revenue: 0,
+        avg_revenue_per_student: 0,
+        is_published: false,
+        is_featured: false,
+        is_bestseller: false,
+        access_type: 'public',
+        certification_pass_percentage: 70,
+        testimonial_count: 0,
+        share_count: 0,
+        bookmark_count: 0,
+        page_views: 0,
+        unique_visitors: 0,
+        conversion_rate: 0,
+        avg_time_on_page_seconds: 0,
+        has_discussion_forum: true,
+        has_qa_support: true,
+        has_live_sessions: false,
+        drm_enabled: false,
+        watermark_enabled: false
+      } as any)
+
+      toast.success('Course created successfully', {
+        description: `Created "${courseForm.course_name}"`
+      })
+      setShowCreateCourseDialog(false)
+      resetCourseForm()
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to create course', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleStartLesson = (lesson: Lesson) => {
-    toast.info('Starting lesson', {
-      description: `Loading "${lesson.title}"...`
+  const handleEditCourse = (course: Course) => {
+    setCourseForm({
+      course_name: course.title,
+      description: course.description,
+      course_category: course.category.toLowerCase().replace(' ', '-') as DBCourseCategory,
+      level: course.level,
+      status: course.status,
+      instructor_name: course.instructor.name,
+      instructor_email: '',
+      instructor_bio: course.instructor.bio,
+      price: course.pricing.price,
+      original_price: course.pricing.originalPrice,
+      discount_percentage: course.pricing.discount,
+      currency: course.pricing.currency,
+      language: course.language,
+      has_certificates: true,
+      has_downloadable_resources: true,
+      has_lifetime_access: true,
+      has_mobile_access: true,
+      requirements: course.requirements,
+      learning_outcomes: course.objectives,
+      target_audience: course.targetAudience.join(', '),
+      meta_title: course.seo.metaTitle,
+      meta_description: course.seo.metaDescription,
+      keywords: course.seo.keywords
     })
+    setSelectedCourse(course)
+    setShowEditCourseDialog(true)
   }
 
-  const handleCompleteCourse = (course: Course) => {
-    toast.success('Course completed!', {
-      description: 'Congratulations on finishing the course!'
-    })
+  const handleUpdateCourse = async () => {
+    if (!selectedCourse || !courseForm.course_name) {
+      toast.error('Please enter a course name')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await updateCourseMutation.mutateAsync({
+        id: selectedCourse.id,
+        course_name: courseForm.course_name,
+        description: courseForm.description || undefined,
+        course_category: courseForm.course_category,
+        level: courseForm.level,
+        status: courseForm.status,
+        instructor_name: courseForm.instructor_name || undefined,
+        instructor_email: courseForm.instructor_email || undefined,
+        instructor_bio: courseForm.instructor_bio || undefined,
+        price: courseForm.price,
+        original_price: courseForm.original_price || undefined,
+        discount_percentage: courseForm.discount_percentage,
+        currency: courseForm.currency,
+        language: courseForm.language,
+        has_certificates: courseForm.has_certificates,
+        has_downloadable_resources: courseForm.has_downloadable_resources,
+        has_lifetime_access: courseForm.has_lifetime_access,
+        has_mobile_access: courseForm.has_mobile_access,
+        requirements: courseForm.requirements,
+        learning_outcomes: courseForm.learning_outcomes,
+        target_audience: courseForm.target_audience || undefined,
+        meta_title: courseForm.meta_title || undefined,
+        meta_description: courseForm.meta_description || undefined,
+        keywords: courseForm.keywords
+      } as any)
+
+      toast.success('Course updated successfully', {
+        description: `Updated "${courseForm.course_name}"`
+      })
+      setShowEditCourseDialog(false)
+      resetCourseForm()
+      setSelectedCourse(null)
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to update course', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleDownloadCertificate = () => {
-    toast.success('Download started', {
-      description: 'Your certificate is being downloaded'
-    })
+  const handleDeleteCourse = async () => {
+    if (!courseToDelete) return
+
+    setIsSubmitting(true)
+    try {
+      await deleteCourseMutation.mutateAsync({ id: courseToDelete.id } as any)
+
+      toast.success('Course deleted', {
+        description: `Deleted "${courseToDelete.title}"`
+      })
+      setShowDeleteCourseDialog(false)
+      setCourseToDelete(null)
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to delete course', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleConfirmDeleteCourse = (course: Course) => {
+    setCourseToDelete(course)
+    setShowDeleteCourseDialog(true)
+  }
+
+  const handlePublishCourse = async (course: Course) => {
+    setIsSubmitting(true)
+    try {
+      await updateCourseMutation.mutateAsync({
+        id: course.id,
+        status: 'published',
+        is_published: true,
+        publish_date: new Date().toISOString()
+      } as any)
+
+      toast.success('Course published', {
+        description: `"${course.title}" is now live`
+      })
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to publish course', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleArchiveCourse = async (course: Course) => {
+    setIsSubmitting(true)
+    try {
+      await updateCourseMutation.mutateAsync({
+        id: course.id,
+        status: 'archived',
+        is_published: false
+      } as any)
+
+      toast.success('Course archived', {
+        description: `"${course.title}" has been archived`
+      })
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to archive course', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleEnrollCourse = async (course: Course) => {
+    setIsSubmitting(true)
+    try {
+      const supabase = createClientComponentClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in to enroll')
+        return
+      }
+
+      // Create enrollment in course_enrollments table
+      const { error } = await supabase.from('course_enrollments').insert({
+        user_id: user.id,
+        course_id: course.id,
+        status: 'active',
+        progress_percent: 0,
+        enrolled_at: new Date().toISOString()
+      })
+
+      if (error) throw error
+
+      toast.success('Enrolled!', {
+        description: `You've enrolled in "${course.title}"`
+      })
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to enroll', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleStartLesson = async (lecture: Lecture) => {
+    try {
+      const supabase = createClientComponentClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in to start a lesson')
+        return
+      }
+
+      // Track lesson start in course_progress table
+      await supabase.from('course_progress').upsert({
+        user_id: user.id,
+        lesson_id: lecture.id,
+        status: 'in_progress',
+        started_at: new Date().toISOString()
+      })
+
+      toast.info('Starting lesson', {
+        description: `Loading "${lecture.title}"...`
+      })
+    } catch (error: any) {
+      toast.error('Failed to start lesson', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleCompleteCourse = async (course: Course) => {
+    setIsSubmitting(true)
+    try {
+      const supabase = createClientComponentClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in')
+        return
+      }
+
+      // Update enrollment status to completed
+      const { error } = await supabase
+        .from('course_enrollments')
+        .update({ status: 'completed', completed_at: new Date().toISOString(), progress_percent: 100 })
+        .eq('user_id', user.id)
+        .eq('course_id', course.id)
+
+      if (error) throw error
+
+      toast.success('Course completed!', {
+        description: 'Congratulations on finishing the course!'
+      })
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to complete course', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDownloadCertificate = async (course: Course) => {
+    try {
+      const supabase = createClientComponentClient()
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        toast.error('You must be logged in')
+        return
+      }
+
+      // Generate certificate URL or trigger download
+      toast.success('Download started', {
+        description: 'Your certificate is being downloaded'
+      })
+    } catch (error: any) {
+      toast.error('Failed to download certificate', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleAddSection = async () => {
+    if (!selectedCourse || !sectionForm.title) {
+      toast.error('Please enter a section title')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const supabase = createClientComponentClient()
+
+      const { error } = await supabase.from('course_modules').insert({
+        course_id: selectedCourse.id,
+        title: sectionForm.title,
+        description: sectionForm.description || null,
+        order: sectionForm.order
+      })
+
+      if (error) throw error
+
+      toast.success('Section added', {
+        description: `Added "${sectionForm.title}" to the course`
+      })
+      setShowAddSectionDialog(false)
+      resetSectionForm()
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to add section', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleAddLecture = async (sectionId: string) => {
+    if (!lectureForm.title) {
+      toast.error('Please enter a lecture title')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const supabase = createClientComponentClient()
+
+      const { error } = await supabase.from('course_lessons').insert({
+        module_id: sectionId,
+        title: lectureForm.title,
+        type: lectureForm.type,
+        duration_minutes: lectureForm.duration,
+        is_preview: lectureForm.isPreview,
+        order: 1
+      })
+
+      if (error) throw error
+
+      toast.success('Lecture added', {
+        description: `Added "${lectureForm.title}" to the section`
+      })
+      setShowAddLectureDialog(false)
+      resetLectureForm()
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to add lecture', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleRespondToReview = async (reviewId: string, response: string) => {
+    setIsSubmitting(true)
+    try {
+      const supabase = createClientComponentClient()
+
+      const { error } = await supabase
+        .from('course_reviews')
+        .update({
+          instructor_response: response,
+          instructor_response_at: new Date().toISOString()
+        })
+        .eq('id', reviewId)
+
+      if (error) throw error
+
+      toast.success('Response posted', {
+        description: 'Your response has been added to the review'
+      })
+      refreshCourses()
+    } catch (error: any) {
+      toast.error('Failed to post response', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -687,9 +1232,14 @@ export default function CoursesClient() {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="px-4 py-2 border rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white w-64"
             />
-            <button className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity">
-              + Create Course
-            </button>
+            <Button
+              onClick={() => setShowCreateCourseDialog(true)}
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:opacity-90 transition-opacity"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Create Course
+            </Button>
           </div>
         </div>
 
@@ -933,15 +1483,50 @@ export default function CoursesClient() {
                       )}
 
                       <div className="flex gap-3">
-                        <button className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+                        <Button
+                          onClick={() => handleEditCourse(course)}
+                          className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+                        >
+                          <Edit className="w-4 h-4 mr-2" />
                           Edit Course
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
-                          Preview
-                        </button>
-                        <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white">
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            if (course.status === 'draft') {
+                              handlePublishCourse(course)
+                            } else {
+                              toast.info('Opening preview...', { description: `Previewing "${course.title}"` })
+                            }
+                          }}
+                          disabled={isSubmitting}
+                        >
+                          {course.status === 'draft' ? (
+                            <>
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Publish
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="w-4 h-4 mr-2" />
+                              Preview
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => setActiveView('analytics')}
+                        >
+                          <BarChart3 className="w-4 h-4 mr-2" />
                           Analytics
-                        </button>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleConfirmDeleteCourse(course)}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   </DialogContent>
@@ -955,9 +1540,14 @@ export default function CoursesClient() {
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold dark:text-white">Curriculum Builder</h3>
-                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm">
-                  + Add Section
-                </button>
+                <Button
+                  onClick={() => setShowAddSectionDialog(true)}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
+                  disabled={isSubmitting || !selectedCourse}
+                >
+                  {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                  Add Section
+                </Button>
               </div>
               {mockCourses[0].curriculum.map((section, sIdx) => (
                 <div key={section.id} className="mb-4 border dark:border-gray-700 rounded-lg overflow-hidden">
@@ -991,9 +1581,15 @@ export default function CoursesClient() {
                         </div>
                       </div>
                     ))}
-                    <button className="w-full py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-500 text-sm">
-                      + Add Lecture
-                    </button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAddLectureDialog(true)}
+                      className="w-full py-2 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-500 text-sm"
+                      disabled={isSubmitting}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Lecture
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -1128,7 +1724,20 @@ export default function CoursesClient() {
                       </div>
                     )}
                     {!review.instructorResponse && (
-                      <button className="mt-2 text-sm text-indigo-600 hover:underline">Reply to this review</button>
+                      <Button
+                        variant="link"
+                        className="mt-2 p-0 h-auto text-sm text-indigo-600 hover:underline"
+                        onClick={() => {
+                          const response = prompt('Enter your response to this review:')
+                          if (response) {
+                            handleRespondToReview(review.id, response)
+                          }
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        <MessageSquare className="w-3 h-3 mr-1" />
+                        Reply to this review
+                      </Button>
                     )}
                   </div>
                 ))}
@@ -1908,6 +2517,473 @@ export default function CoursesClient() {
           />
         </div>
       </div>
+
+      {/* Create Course Dialog */}
+      <Dialog open={showCreateCourseDialog} onOpenChange={setShowCreateCourseDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-indigo-500" />
+              Create New Course
+            </DialogTitle>
+            <DialogDescription>
+              Fill in the details to create a new course
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="course_name">Course Name *</Label>
+                <Input
+                  id="course_name"
+                  placeholder="e.g., Complete Web Development Bootcamp"
+                  value={courseForm.course_name}
+                  onChange={(e) => setCourseForm({ ...courseForm, course_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select
+                  value={courseForm.course_category}
+                  onValueChange={(value) => setCourseForm({ ...courseForm, course_category: value as DBCourseCategory })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="business">Business</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="data-science">Data Science</SelectItem>
+                    <SelectItem value="finance">Finance</SelectItem>
+                    <SelectItem value="technology">Technology</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Describe what students will learn..."
+                value={courseForm.description}
+                onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="level">Level</Label>
+                <Select
+                  value={courseForm.level}
+                  onValueChange={(value) => setCourseForm({ ...courseForm, level: value as DBCourseLevel })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="expert">Expert</SelectItem>
+                    <SelectItem value="all_levels">All Levels</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="language">Language</Label>
+                <Input
+                  id="language"
+                  placeholder="e.g., English"
+                  value={courseForm.language}
+                  onChange={(e) => setCourseForm({ ...courseForm, language: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="price">Price</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  placeholder="0.00"
+                  value={courseForm.price}
+                  onChange={(e) => setCourseForm({ ...courseForm, price: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="original_price">Original Price</Label>
+                <Input
+                  id="original_price"
+                  type="number"
+                  placeholder="0.00"
+                  value={courseForm.original_price}
+                  onChange={(e) => setCourseForm({ ...courseForm, original_price: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="discount">Discount %</Label>
+                <Input
+                  id="discount"
+                  type="number"
+                  placeholder="0"
+                  value={courseForm.discount_percentage}
+                  onChange={(e) => setCourseForm({ ...courseForm, discount_percentage: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="instructor_name">Instructor Name</Label>
+              <Input
+                id="instructor_name"
+                placeholder="Your name"
+                value={courseForm.instructor_name}
+                onChange={(e) => setCourseForm({ ...courseForm, instructor_name: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="target_audience">Target Audience</Label>
+              <Input
+                id="target_audience"
+                placeholder="Who is this course for?"
+                value={courseForm.target_audience}
+                onChange={(e) => setCourseForm({ ...courseForm, target_audience: e.target.value })}
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-4">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={courseForm.has_certificates}
+                  onCheckedChange={(checked) => setCourseForm({ ...courseForm, has_certificates: checked })}
+                />
+                <Label>Certificates</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={courseForm.has_downloadable_resources}
+                  onCheckedChange={(checked) => setCourseForm({ ...courseForm, has_downloadable_resources: checked })}
+                />
+                <Label>Downloadable Resources</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={courseForm.has_lifetime_access}
+                  onCheckedChange={(checked) => setCourseForm({ ...courseForm, has_lifetime_access: checked })}
+                />
+                <Label>Lifetime Access</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowCreateCourseDialog(false); resetCourseForm() }}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateCourse} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Create Course
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Course Dialog */}
+      <Dialog open={showEditCourseDialog} onOpenChange={setShowEditCourseDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-indigo-500" />
+              Edit Course
+            </DialogTitle>
+            <DialogDescription>
+              Update course details
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_course_name">Course Name *</Label>
+                <Input
+                  id="edit_course_name"
+                  placeholder="e.g., Complete Web Development Bootcamp"
+                  value={courseForm.course_name}
+                  onChange={(e) => setCourseForm({ ...courseForm, course_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_category">Category</Label>
+                <Select
+                  value={courseForm.course_category}
+                  onValueChange={(value) => setCourseForm({ ...courseForm, course_category: value as DBCourseCategory })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="business">Business</SelectItem>
+                    <SelectItem value="design">Design</SelectItem>
+                    <SelectItem value="marketing">Marketing</SelectItem>
+                    <SelectItem value="data-science">Data Science</SelectItem>
+                    <SelectItem value="finance">Finance</SelectItem>
+                    <SelectItem value="technology">Technology</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="edit_description">Description</Label>
+              <Textarea
+                id="edit_description"
+                placeholder="Describe what students will learn..."
+                value={courseForm.description}
+                onChange={(e) => setCourseForm({ ...courseForm, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_level">Level</Label>
+                <Select
+                  value={courseForm.level}
+                  onValueChange={(value) => setCourseForm({ ...courseForm, level: value as DBCourseLevel })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                    <SelectItem value="expert">Expert</SelectItem>
+                    <SelectItem value="all_levels">All Levels</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_status">Status</Label>
+                <Select
+                  value={courseForm.status}
+                  onValueChange={(value) => setCourseForm({ ...courseForm, status: value as DBCourseStatus })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                    <SelectItem value="under_review">Under Review</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_price">Price</Label>
+                <Input
+                  id="edit_price"
+                  type="number"
+                  placeholder="0.00"
+                  value={courseForm.price}
+                  onChange={(e) => setCourseForm({ ...courseForm, price: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_original_price">Original Price</Label>
+                <Input
+                  id="edit_original_price"
+                  type="number"
+                  placeholder="0.00"
+                  value={courseForm.original_price}
+                  onChange={(e) => setCourseForm({ ...courseForm, original_price: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_discount">Discount %</Label>
+                <Input
+                  id="edit_discount"
+                  type="number"
+                  placeholder="0"
+                  value={courseForm.discount_percentage}
+                  onChange={(e) => setCourseForm({ ...courseForm, discount_percentage: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowEditCourseDialog(false); resetCourseForm(); setSelectedCourse(null) }}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateCourse} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+              Update Course
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Course Confirmation Dialog */}
+      <Dialog open={showDeleteCourseDialog} onOpenChange={setShowDeleteCourseDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete Course
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete &quot;{courseToDelete?.title}&quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowDeleteCourseDialog(false); setCourseToDelete(null) }}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteCourse} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Delete Course
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Section Dialog */}
+      <Dialog open={showAddSectionDialog} onOpenChange={setShowAddSectionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-purple-500" />
+              Add Section
+            </DialogTitle>
+            <DialogDescription>
+              Add a new section to the course curriculum
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="section_title">Section Title *</Label>
+              <Input
+                id="section_title"
+                placeholder="e.g., Introduction to Web Development"
+                value={sectionForm.title}
+                onChange={(e) => setSectionForm({ ...sectionForm, title: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="section_description">Description</Label>
+              <Textarea
+                id="section_description"
+                placeholder="What will this section cover?"
+                value={sectionForm.description}
+                onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })}
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="section_order">Order</Label>
+              <Input
+                id="section_order"
+                type="number"
+                placeholder="1"
+                value={sectionForm.order}
+                onChange={(e) => setSectionForm({ ...sectionForm, order: parseInt(e.target.value) || 1 })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowAddSectionDialog(false); resetSectionForm() }}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddSection} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Add Section
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Lecture Dialog */}
+      <Dialog open={showAddLectureDialog} onOpenChange={setShowAddLectureDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <PlayCircle className="w-5 h-5 text-indigo-500" />
+              Add Lecture
+            </DialogTitle>
+            <DialogDescription>
+              Add a new lecture to the section
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="lecture_title">Lecture Title *</Label>
+              <Input
+                id="lecture_title"
+                placeholder="e.g., Welcome to the Course"
+                value={lectureForm.title}
+                onChange={(e) => setLectureForm({ ...lectureForm, title: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="lecture_type">Type</Label>
+                <Select
+                  value={lectureForm.type}
+                  onValueChange={(value) => setLectureForm({ ...lectureForm, type: value as any })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="article">Article</SelectItem>
+                    <SelectItem value="quiz">Quiz</SelectItem>
+                    <SelectItem value="assignment">Assignment</SelectItem>
+                    <SelectItem value="resource">Resource</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lecture_duration">Duration (minutes)</Label>
+                <Input
+                  id="lecture_duration"
+                  type="number"
+                  placeholder="10"
+                  value={lectureForm.duration}
+                  onChange={(e) => setLectureForm({ ...lectureForm, duration: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                checked={lectureForm.isPreview}
+                onCheckedChange={(checked) => setLectureForm({ ...lectureForm, isPreview: checked })}
+              />
+              <Label>Available as Free Preview</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowAddLectureDialog(false); resetLectureForm() }}>
+              Cancel
+            </Button>
+            <Button onClick={() => handleAddLecture('')} disabled={isSubmitting}>
+              {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Add Lecture
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

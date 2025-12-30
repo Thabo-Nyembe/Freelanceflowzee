@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { usePlugins, Plugin as DBPlugin } from '@/lib/hooks/use-plugins'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -512,6 +513,37 @@ export default function PluginsClient() {
   const [showInstallDialog, setShowInstallDialog] = useState(false)
   const [installing, setInstalling] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [newPluginForm, setNewPluginForm] = useState({
+    name: '',
+    description: '',
+    version: '1.0.0',
+    author: '',
+    category: 'productivity' as DBPlugin['category'],
+    plugin_type: 'community' as DBPlugin['plugin_type'],
+    repository_url: '',
+    documentation_url: ''
+  })
+
+  // Use the Supabase hook
+  const {
+    plugins: dbPlugins,
+    stats: dbStats,
+    loading: dbLoading,
+    error: dbError,
+    fetchPlugins,
+    createPlugin,
+    updatePlugin,
+    deletePlugin,
+    activatePlugin,
+    deactivatePlugin,
+    updatePluginVersion
+  } = usePlugins()
+
+  // Fetch plugins on mount
+  useEffect(() => {
+    fetchPlugins()
+  }, [fetchPlugins])
 
   // Filter plugins
   const filteredPlugins = useMemo(() => {
@@ -598,27 +630,130 @@ export default function PluginsClient() {
 
   const handleInstall = async (plugin: Plugin) => {
     setInstalling(plugin.id)
-    // Simulate installation
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    setInstalling(null)
-    setShowInstallDialog(false)
+    try {
+      await createPlugin({
+        name: plugin.name,
+        description: plugin.description,
+        version: plugin.version,
+        author: plugin.author.name,
+        category: plugin.category as DBPlugin['category'],
+        plugin_type: plugin.tier === 'free' ? 'community' : plugin.tier === 'premium' ? 'premium' : 'core',
+        status: 'active',
+        rating: plugin.rating,
+        reviews_count: plugin.reviewsCount,
+        installs_count: plugin.activeInstalls,
+        size: plugin.size,
+        tags: plugin.tags,
+        performance_score: plugin.performanceScore
+      })
+      toast.success('Plugin Installed', { description: `"${plugin.name}" has been installed successfully!` })
+    } catch (err: any) {
+      toast.error('Installation Failed', { description: err.message || 'Failed to install plugin' })
+    } finally {
+      setInstalling(null)
+      setShowInstallDialog(false)
+    }
   }
 
-  // Handlers
-  const handleInstallPlugin = (pluginName: string) => {
-    toast.info('Installing Plugin', { description: `Installing "${pluginName}"...` })
+  // Create new plugin handler
+  const handleCreatePlugin = async () => {
+    if (!newPluginForm.name.trim()) {
+      toast.error('Validation Error', { description: 'Plugin name is required' })
+      return
+    }
+    try {
+      await createPlugin({
+        name: newPluginForm.name,
+        description: newPluginForm.description || null,
+        version: newPluginForm.version,
+        author: newPluginForm.author || null,
+        category: newPluginForm.category,
+        plugin_type: newPluginForm.plugin_type,
+        status: 'active',
+        repository_url: newPluginForm.repository_url || null,
+        documentation_url: newPluginForm.documentation_url || null,
+        tags: [],
+        permissions: [],
+        metadata: {}
+      })
+      toast.success('Plugin Created', { description: `"${newPluginForm.name}" has been created successfully!` })
+      setShowUploadDialog(false)
+      setNewPluginForm({
+        name: '',
+        description: '',
+        version: '1.0.0',
+        author: '',
+        category: 'productivity',
+        plugin_type: 'community',
+        repository_url: '',
+        documentation_url: ''
+      })
+    } catch (err: any) {
+      toast.error('Creation Failed', { description: err.message || 'Failed to create plugin' })
+    }
   }
-  const handleUninstallPlugin = (pluginName: string) => {
-    toast.info('Plugin Uninstalled', { description: `"${pluginName}" has been removed` })
+
+  // Handlers for DB plugins
+  const handleUninstallPlugin = async (pluginId: string, pluginName: string) => {
+    try {
+      await deletePlugin(pluginId)
+      toast.success('Plugin Uninstalled', { description: `"${pluginName}" has been removed` })
+    } catch (err: any) {
+      toast.error('Uninstall Failed', { description: err.message || 'Failed to uninstall plugin' })
+    }
   }
+
   const handleConfigurePlugin = (pluginName: string) => {
     toast.info('Configure Plugin', { description: `Opening settings for "${pluginName}"...` })
   }
-  const handleEnablePlugin = (pluginName: string) => {
-    toast.success('Plugin Enabled', { description: `"${pluginName}" is now active` })
+
+  const handleEnablePlugin = async (pluginId: string, pluginName: string) => {
+    try {
+      await activatePlugin(pluginId)
+      toast.success('Plugin Enabled', { description: `"${pluginName}" is now active` })
+    } catch (err: any) {
+      toast.error('Activation Failed', { description: err.message || 'Failed to activate plugin' })
+    }
   }
+
+  const handleDisablePlugin = async (pluginId: string, pluginName: string) => {
+    try {
+      await deactivatePlugin(pluginId)
+      toast.info('Plugin Disabled', { description: `"${pluginName}" has been deactivated` })
+    } catch (err: any) {
+      toast.error('Deactivation Failed', { description: err.message || 'Failed to deactivate plugin' })
+    }
+  }
+
+  const handleUpdatePlugin = async (pluginId: string, pluginName: string, newVersion: string) => {
+    try {
+      await updatePluginVersion(pluginId, newVersion)
+      toast.success('Plugin Updated', { description: `"${pluginName}" has been updated to v${newVersion}` })
+    } catch (err: any) {
+      toast.error('Update Failed', { description: err.message || 'Failed to update plugin' })
+    }
+  }
+
+  const handleUpdateAllPlugins = async () => {
+    const needsUpdate = dbPlugins.filter(p => p.status === 'updating' || p.version !== '1.0.0')
+    if (needsUpdate.length === 0) {
+      toast.info('All Up to Date', { description: 'All plugins are already running the latest versions' })
+      return
+    }
+    toast.info('Updating Plugins', { description: `Updating ${needsUpdate.length} plugin(s)...` })
+    for (const plugin of needsUpdate) {
+      try {
+        await updatePlugin(plugin.id, { status: 'active' })
+      } catch (err) {
+        console.error('Failed to update plugin:', plugin.name)
+      }
+    }
+    toast.success('Update Complete', { description: 'All plugins have been updated' })
+  }
+
   const handleBrowsePlugins = () => {
-    toast.info('Plugin Marketplace', { description: 'Opening plugin marketplace...' })
+    setActiveTab('discover')
+    toast.info('Plugin Marketplace', { description: 'Browse available plugins below' })
   }
 
   const renderPluginCard = (plugin: Plugin) => (
@@ -725,16 +860,96 @@ export default function PluginsClient() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Switch checked={plugin.isActivated} onCheckedChange={() => handleEnablePlugin(plugin.name)} />
+        <Switch checked={plugin.isActivated} onCheckedChange={() => {
+          if (plugin.isActivated) {
+            toast.info('Deactivating...', { description: `Deactivating "${plugin.name}"` })
+          } else {
+            toast.info('Activating...', { description: `Activating "${plugin.name}"` })
+          }
+        }} />
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleConfigurePlugin(plugin.name) }}>
           <Settings className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); handleUninstallPlugin(plugin.name) }}>
+        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); toast.info('Removing...', { description: `"${plugin.name}" would be removed from mock data` }) }}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
     </div>
   )
+
+  // Render function for DB plugins with real Supabase handlers
+  const renderDBPluginRow = (plugin: DBPlugin) => {
+    const getCategoryIcon = () => {
+      const iconMap: Record<string, any> = {
+        'productivity': Zap,
+        'security': Shield,
+        'analytics': BarChart3,
+        'integration': Webhook,
+        'communication': Mail,
+        'automation': Bot,
+        'ui-enhancement': Palette,
+        'developer-tools': Terminal
+      }
+      const Icon = iconMap[plugin.category] || Package
+      return <Icon className="h-5 w-5" />
+    }
+
+    return (
+      <div
+        key={plugin.id}
+        className="flex items-center gap-4 p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+      >
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
+          {getCategoryIcon()}
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="font-medium text-gray-900 dark:text-white">{plugin.name}</h3>
+            <Badge className={plugin.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'} variant="secondary">
+              {plugin.status}
+            </Badge>
+            <Badge variant="outline" className="text-xs">{plugin.plugin_type}</Badge>
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{plugin.description || 'No description available'}</p>
+        </div>
+
+        <div className="text-right">
+          <p className="text-sm font-medium">v{plugin.version}</p>
+          {plugin.rating > 0 && (
+            <div className="flex items-center gap-1 text-xs text-yellow-500">
+              <Star className="h-3 w-3 fill-current" />
+              {plugin.rating.toFixed(1)}
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Switch
+            checked={plugin.status === 'active'}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                handleEnablePlugin(plugin.id, plugin.name)
+              } else {
+                handleDisablePlugin(plugin.id, plugin.name)
+              }
+            }}
+          />
+          <Button variant="ghost" size="icon" onClick={() => handleConfigurePlugin(plugin.name)}>
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-red-500 hover:text-red-600"
+            onClick={() => handleUninstallPlugin(plugin.id, plugin.name)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50/30 to-emerald-50/20 dark:bg-none dark:bg-gray-900 p-6">
@@ -764,7 +979,7 @@ export default function PluginsClient() {
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700" onClick={() => toast.info('Upload Plugin', { description: 'Opening plugin upload dialog...' })}>
+            <Button className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700" onClick={() => setShowUploadDialog(true)}>
               <Plus className="h-4 w-4 mr-2" />
               Upload Plugin
             </Button>
@@ -998,11 +1213,11 @@ export default function PluginsClient() {
                   </div>
                   <div className="hidden md:flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{installedPlugins.length}</div>
+                      <div className="text-3xl font-bold">{dbPlugins.length + installedPlugins.length}</div>
                       <div className="text-sm text-white/80">Installed</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-bold">{installedPlugins.filter(p => p.status === 'active').length}</div>
+                      <div className="text-3xl font-bold">{dbStats.active + installedPlugins.filter(p => p.status === 'active').length}</div>
                       <div className="text-sm text-white/80">Active</div>
                     </div>
                   </div>
@@ -1010,10 +1225,52 @@ export default function PluginsClient() {
               </div>
             </div>
 
+            {/* Your Plugins from Database */}
+            {dbPlugins.length > 0 && (
+              <Card className="border-gray-200 dark:border-gray-700">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Your Plugins</CardTitle>
+                      <p className="text-sm text-gray-500 mt-1">Plugins you have created or installed from the marketplace</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => fetchPlugins()}>
+                        <RefreshCw className={`h-4 w-4 mr-2 ${dbLoading ? 'animate-spin' : ''}`} />
+                        Refresh
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={handleUpdateAllPlugins}>
+                        Update All
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  {dbLoading ? (
+                    <div className="p-8 text-center text-gray-500">
+                      <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-2" />
+                      Loading plugins...
+                    </div>
+                  ) : dbError ? (
+                    <div className="p-8 text-center text-red-500">
+                      <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
+                      {dbError}
+                    </div>
+                  ) : (
+                    dbPlugins.map(plugin => renderDBPluginRow(plugin))
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Demo Plugins (Mock Data) */}
             <Card className="border-gray-200 dark:border-gray-700">
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Installed Plugins</CardTitle>
+                  <div>
+                    <CardTitle>Demo Plugins</CardTitle>
+                    <p className="text-sm text-gray-500 mt-1">Sample plugins for demonstration</p>
+                  </div>
                   <div className="flex items-center gap-2">
                     <Button variant="outline" size="sm" onClick={() => toast.info('Check Updates', { description: 'Checking for plugin updates...' })}>
                       <RefreshCw className="h-4 w-4 mr-2" />
@@ -1808,7 +2065,7 @@ export default function PluginsClient() {
                           <Settings className="h-4 w-4 mr-2" />
                           Settings
                         </Button>
-                        <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleUninstallPlugin(selectedPlugin.name)}>
+                        <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => toast.info('Uninstalling...', { description: `"${selectedPlugin.name}" would be removed from demo plugins` })}>
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </Button>
@@ -1898,6 +2155,129 @@ export default function PluginsClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload/Create Plugin Dialog */}
+        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-green-500" />
+                Create New Plugin
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="pluginName">Plugin Name *</Label>
+                <Input
+                  id="pluginName"
+                  placeholder="My Awesome Plugin"
+                  value={newPluginForm.name}
+                  onChange={(e) => setNewPluginForm(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pluginDescription">Description</Label>
+                <Input
+                  id="pluginDescription"
+                  placeholder="A brief description of what this plugin does..."
+                  value={newPluginForm.description}
+                  onChange={(e) => setNewPluginForm(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pluginVersion">Version</Label>
+                  <Input
+                    id="pluginVersion"
+                    placeholder="1.0.0"
+                    value={newPluginForm.version}
+                    onChange={(e) => setNewPluginForm(prev => ({ ...prev, version: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pluginAuthor">Author</Label>
+                  <Input
+                    id="pluginAuthor"
+                    placeholder="Your name"
+                    value={newPluginForm.author}
+                    onChange={(e) => setNewPluginForm(prev => ({ ...prev, author: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="pluginCategory">Category</Label>
+                  <select
+                    id="pluginCategory"
+                    className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                    value={newPluginForm.category}
+                    onChange={(e) => setNewPluginForm(prev => ({ ...prev, category: e.target.value as DBPlugin['category'] }))}
+                  >
+                    <option value="productivity">Productivity</option>
+                    <option value="security">Security</option>
+                    <option value="analytics">Analytics</option>
+                    <option value="integration">Integration</option>
+                    <option value="communication">Communication</option>
+                    <option value="automation">Automation</option>
+                    <option value="ui-enhancement">UI Enhancement</option>
+                    <option value="developer-tools">Developer Tools</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="pluginType">Plugin Type</Label>
+                  <select
+                    id="pluginType"
+                    className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800"
+                    value={newPluginForm.plugin_type}
+                    onChange={(e) => setNewPluginForm(prev => ({ ...prev, plugin_type: e.target.value as DBPlugin['plugin_type'] }))}
+                  >
+                    <option value="community">Community</option>
+                    <option value="core">Core</option>
+                    <option value="premium">Premium</option>
+                    <option value="enterprise">Enterprise</option>
+                    <option value="beta">Beta</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pluginRepo">Repository URL (optional)</Label>
+                <Input
+                  id="pluginRepo"
+                  placeholder="https://github.com/username/plugin"
+                  value={newPluginForm.repository_url}
+                  onChange={(e) => setNewPluginForm(prev => ({ ...prev, repository_url: e.target.value }))}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pluginDocs">Documentation URL (optional)</Label>
+                <Input
+                  id="pluginDocs"
+                  placeholder="https://docs.example.com/plugin"
+                  value={newPluginForm.documentation_url}
+                  onChange={(e) => setNewPluginForm(prev => ({ ...prev, documentation_url: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowUploadDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                  onClick={handleCreatePlugin}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Plugin
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

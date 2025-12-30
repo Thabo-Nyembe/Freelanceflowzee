@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -10,8 +11,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Users, Plus, Mail, Phone, DollarSign, TrendingUp, MessageSquare, UserPlus,
   Building2, Target, Search, Filter, MoreVertical, Star, Calendar, Clock,
@@ -21,8 +24,10 @@ import {
   ArrowUpRight, ArrowDownRight, Eye, Trash2, Edit, Copy, Bell, Play,
   GitBranch, Layers, Bot, Workflow, Sparkles, Cog, ShieldCheck, UserCog,
   TrendingDown, Percent, Timer, AlertCircle, CheckCircle, LayoutGrid,
-  List, Kanban, FolderOpen, Archive, Heart, ThumbsUp, Share2, ExternalLink
+  List, Kanban, FolderOpen, Archive, Heart, ThumbsUp, Share2, ExternalLink,
+  Loader2
 } from 'lucide-react'
+import { useSupabaseQuery, useSupabaseMutation, useRealtimeSubscription } from '@/lib/hooks/use-supabase-helpers'
 
 // Competitive Upgrade Components
 import {
@@ -165,10 +170,95 @@ const mockCrmActivitiesFeed = crmActivities
 const mockCrmQuickActions = crmQuickActions
 
 export default function CrmClient() {
-  const [contacts] = useState<Contact[]>(mockContacts)
+  const supabase = createClientComponentClient()
+
+  // Supabase queries
+  const { data: dbContacts, isLoading: contactsLoading, refetch: refetchContacts } = useSupabaseQuery<any>({
+    table: 'crm_contacts',
+    orderBy: { column: 'created_at', ascending: false }
+  })
+
+  const { data: dbDeals, isLoading: dealsLoading, refetch: refetchDeals } = useSupabaseQuery<any>({
+    table: 'crm_deals',
+    orderBy: { column: 'created_at', ascending: false }
+  })
+
+  const { data: dbActivities, isLoading: activitiesLoading, refetch: refetchActivities } = useSupabaseQuery<any>({
+    table: 'crm_activities',
+    orderBy: { column: 'created_at', ascending: false }
+  })
+
+  // Mutations
+  const contactMutation = useSupabaseMutation<any>({
+    table: 'crm_contacts',
+    onSuccess: () => refetchContacts()
+  })
+
+  const dealMutation = useSupabaseMutation<any>({
+    table: 'crm_deals',
+    onSuccess: () => refetchDeals()
+  })
+
+  const activityMutation = useSupabaseMutation<any>({
+    table: 'crm_activities',
+    onSuccess: () => refetchActivities()
+  })
+
+  // Use DB data or fallback to mock data
+  const contacts: Contact[] = dbContacts.length > 0 ? dbContacts.map((c: any) => ({
+    id: c.id,
+    name: c.contact_name || c.name || 'Unknown',
+    email: c.email || '',
+    phone: c.phone || '',
+    company: c.company_name || c.company || '',
+    title: c.job_title || c.title || '',
+    type: c.contact_type || 'lead',
+    status: c.status || 'new',
+    dealValue: c.deal_value || 0,
+    dealStage: c.deal_stage || null,
+    leadScore: c.lead_score || 50,
+    probability: c.probability_percentage || 0,
+    owner: c.account_owner_name || 'Unassigned',
+    source: c.lead_source || 'website',
+    lastContact: c.last_contact_date || c.updated_at || c.created_at,
+    nextFollowUp: c.next_followup_date || null,
+    tags: c.tags || [],
+    emailCount: c.email_count || 0,
+    callCount: c.call_count || 0,
+    meetingCount: c.meeting_count || 0,
+    createdAt: c.created_at,
+    avatar: (c.contact_name || c.name || 'U').charAt(0).toUpperCase()
+  })) : mockContacts
+
+  const deals: Deal[] = dbDeals.length > 0 ? dbDeals.map((d: any) => ({
+    id: d.id,
+    name: d.deal_name || d.name || 'Untitled Deal',
+    company: d.company_name || d.company || '',
+    contact: d.contact_name || d.contact || '',
+    value: d.deal_value || d.value || 0,
+    stage: d.deal_stage || d.stage || 'prospecting',
+    probability: d.probability_percentage || d.probability || 0,
+    expectedClose: d.expected_close_date || d.expectedClose || new Date().toISOString(),
+    owner: d.owner_name || d.owner || 'Unassigned',
+    createdAt: d.created_at,
+    lastActivity: d.updated_at || d.created_at,
+    products: d.products || []
+  })) : mockDeals
+
+  const activities: CrmActivity[] = dbActivities.length > 0 ? dbActivities.map((a: any) => ({
+    id: a.id,
+    type: a.activity_type || a.type || 'note',
+    title: a.title || 'Activity',
+    description: a.description || '',
+    contactId: a.contact_id || '',
+    contactName: a.contact_name || 'Unknown',
+    timestamp: a.activity_date || a.created_at,
+    completed: a.completed || false,
+    outcome: a.outcome || null,
+    duration: a.duration_minutes || a.duration || null
+  })) : mockActivities
+
   const [companies] = useState<Company[]>(mockCompanies)
-  const [deals] = useState<Deal[]>(mockDeals)
-  const [activities] = useState<CrmActivity[]>(mockActivities)
   const [reports] = useState<Report[]>(mockReports)
   const [automations] = useState<Automation[]>(mockAutomations)
   const [searchQuery, setSearchQuery] = useState('')
@@ -177,6 +267,63 @@ export default function CrmClient() {
   const [statusFilter, setStatusFilter] = useState<ContactStatus | 'all'>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states
+  const [showAddContactDialog, setShowAddContactDialog] = useState(false)
+  const [showAddDealDialog, setShowAddDealDialog] = useState(false)
+  const [showEditContactDialog, setShowEditContactDialog] = useState(false)
+  const [showEditDealDialog, setShowEditDealDialog] = useState(false)
+  const [showAddActivityDialog, setShowAddActivityDialog] = useState(false)
+
+  // Form states
+  const [contactForm, setContactForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    title: '',
+    type: 'lead' as ContactType,
+    status: 'new' as ContactStatus,
+    dealValue: 0,
+    leadScore: 50,
+    source: 'website',
+    notes: ''
+  })
+
+  const [dealForm, setDealForm] = useState({
+    name: '',
+    company: '',
+    contact: '',
+    value: 0,
+    stage: 'prospecting' as DealStage,
+    probability: 25,
+    expectedClose: new Date().toISOString().split('T')[0],
+    notes: ''
+  })
+
+  const [activityForm, setActivityForm] = useState({
+    type: 'note' as ActivityType,
+    title: '',
+    description: '',
+    contactId: '',
+    contactName: ''
+  })
+
+  // Real-time subscriptions
+  useRealtimeSubscription({
+    table: 'crm_contacts',
+    onUpdate: () => refetchContacts()
+  })
+
+  useRealtimeSubscription({
+    table: 'crm_deals',
+    onUpdate: () => refetchDeals()
+  })
+
+  useRealtimeSubscription({
+    table: 'crm_activities',
+    onUpdate: () => refetchActivities()
+  })
 
   // Settings
   const [settings, setSettings] = useState({
@@ -189,6 +336,9 @@ export default function CrmClient() {
     duplicateDetection: true,
     dataEnrichment: true
   })
+
+  // Loading state
+  const isLoading = contactsLoading || dealsLoading || activitiesLoading
 
   // Stats
   const stats = useMemo(() => {
@@ -225,27 +375,375 @@ export default function CrmClient() {
     return grouped
   }, [deals])
 
+  // CRUD Handlers
   const handleAddContact = () => {
-    toast.info('Add Contact', {
-      description: 'Opening contact form...'
+    setContactForm({
+      name: '',
+      email: '',
+      phone: '',
+      company: '',
+      title: '',
+      type: 'lead',
+      status: 'new',
+      dealValue: 0,
+      leadScore: 50,
+      source: 'website',
+      notes: ''
     })
+    setShowAddContactDialog(true)
+  }
+
+  const handleCreateContact = async () => {
+    if (!contactForm.name.trim()) {
+      toast.error('Contact name is required')
+      return
+    }
+
+    const result = await contactMutation.mutate({
+      contact_name: contactForm.name,
+      email: contactForm.email || null,
+      phone: contactForm.phone || null,
+      company_name: contactForm.company || null,
+      job_title: contactForm.title || null,
+      contact_type: contactForm.type,
+      status: contactForm.status,
+      deal_value: contactForm.dealValue,
+      lead_score: contactForm.leadScore,
+      lead_source: contactForm.source,
+      notes: contactForm.notes || null,
+      email_count: 0,
+      call_count: 0,
+      meeting_count: 0,
+      probability_percentage: 0,
+      lifetime_value: 0,
+      total_purchases: 0,
+      avg_purchase_value: 0,
+      purchase_count: 0,
+      outstanding_balance: 0,
+      engagement_score: 0,
+      email_opt_in: true,
+      sms_opt_in: false,
+      do_not_contact: false
+    })
+
+    if (result) {
+      toast.success('Contact created', {
+        description: `${contactForm.name} has been added to your CRM`
+      })
+      setShowAddContactDialog(false)
+    } else {
+      toast.error('Failed to create contact', {
+        description: contactMutation.error?.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleEditContact = (contact: Contact) => {
+    setContactForm({
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      company: contact.company,
+      title: contact.title,
+      type: contact.type,
+      status: contact.status,
+      dealValue: contact.dealValue,
+      leadScore: contact.leadScore,
+      source: contact.source,
+      notes: ''
+    })
+    setSelectedContact(contact)
+    setShowEditContactDialog(true)
+  }
+
+  const handleUpdateContact = async () => {
+    if (!selectedContact) return
+
+    const result = await contactMutation.mutate({
+      contact_name: contactForm.name,
+      email: contactForm.email || null,
+      phone: contactForm.phone || null,
+      company_name: contactForm.company || null,
+      job_title: contactForm.title || null,
+      contact_type: contactForm.type,
+      status: contactForm.status,
+      deal_value: contactForm.dealValue,
+      lead_score: contactForm.leadScore,
+      lead_source: contactForm.source,
+      notes: contactForm.notes || null
+    }, selectedContact.id)
+
+    if (result) {
+      toast.success('Contact updated', {
+        description: `${contactForm.name} has been updated`
+      })
+      setShowEditContactDialog(false)
+      setSelectedContact(null)
+    } else {
+      toast.error('Failed to update contact', {
+        description: contactMutation.error?.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleDeleteContact = async (contactId: string, contactName: string) => {
+    const success = await contactMutation.remove(contactId)
+    if (success) {
+      toast.success('Contact deleted', {
+        description: `${contactName} has been removed`
+      })
+      setSelectedContact(null)
+    } else {
+      toast.error('Failed to delete contact', {
+        description: contactMutation.error?.message || 'Please try again'
+      })
+    }
   }
 
   const handleAddDeal = () => {
-    toast.info('Add Deal', {
-      description: 'Opening deal form...'
+    setDealForm({
+      name: '',
+      company: '',
+      contact: '',
+      value: 0,
+      stage: 'prospecting',
+      probability: 25,
+      expectedClose: new Date().toISOString().split('T')[0],
+      notes: ''
+    })
+    setShowAddDealDialog(true)
+  }
+
+  const handleCreateDeal = async () => {
+    if (!dealForm.name.trim()) {
+      toast.error('Deal name is required')
+      return
+    }
+
+    const result = await dealMutation.mutate({
+      deal_name: dealForm.name,
+      company_name: dealForm.company || null,
+      contact_name: dealForm.contact || null,
+      deal_value: dealForm.value,
+      deal_stage: dealForm.stage,
+      probability_percentage: dealForm.probability,
+      expected_close_date: dealForm.expectedClose,
+      notes: dealForm.notes || null,
+      products: []
+    })
+
+    if (result) {
+      toast.success('Deal created', {
+        description: `${dealForm.name} has been added to your pipeline`
+      })
+      setShowAddDealDialog(false)
+    } else {
+      toast.error('Failed to create deal', {
+        description: dealMutation.error?.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleEditDeal = (deal: Deal) => {
+    setDealForm({
+      name: deal.name,
+      company: deal.company,
+      contact: deal.contact,
+      value: deal.value,
+      stage: deal.stage,
+      probability: deal.probability,
+      expectedClose: deal.expectedClose.split('T')[0],
+      notes: ''
+    })
+    setSelectedDeal(deal)
+    setShowEditDealDialog(true)
+  }
+
+  const handleUpdateDeal = async () => {
+    if (!selectedDeal) return
+
+    const result = await dealMutation.mutate({
+      deal_name: dealForm.name,
+      company_name: dealForm.company || null,
+      contact_name: dealForm.contact || null,
+      deal_value: dealForm.value,
+      deal_stage: dealForm.stage,
+      probability_percentage: dealForm.probability,
+      expected_close_date: dealForm.expectedClose,
+      notes: dealForm.notes || null
+    }, selectedDeal.id)
+
+    if (result) {
+      toast.success('Deal updated', {
+        description: `${dealForm.name} has been updated`
+      })
+      setShowEditDealDialog(false)
+      setSelectedDeal(null)
+    } else {
+      toast.error('Failed to update deal', {
+        description: dealMutation.error?.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleDeleteDeal = async (dealId: string, dealName: string) => {
+    const success = await dealMutation.remove(dealId)
+    if (success) {
+      toast.success('Deal deleted', {
+        description: `${dealName} has been removed`
+      })
+      setSelectedDeal(null)
+    } else {
+      toast.error('Failed to delete deal', {
+        description: dealMutation.error?.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleMoveDealStage = async (dealId: string, newStage: DealStage) => {
+    const probability = {
+      prospecting: 10,
+      qualification: 25,
+      proposal: 50,
+      negotiation: 75,
+      closed_won: 100,
+      closed_lost: 0
+    }[newStage]
+
+    const result = await dealMutation.mutate({
+      deal_stage: newStage,
+      probability_percentage: probability
+    }, dealId)
+
+    if (result) {
+      toast.success('Deal stage updated', {
+        description: `Moved to ${newStage.replace('_', ' ')}`
+      })
+    } else {
+      toast.error('Failed to update deal stage')
+    }
+  }
+
+  const handleAddActivity = (contactId?: string, contactName?: string) => {
+    setActivityForm({
+      type: 'note',
+      title: '',
+      description: '',
+      contactId: contactId || '',
+      contactName: contactName || ''
+    })
+    setShowAddActivityDialog(true)
+  }
+
+  const handleCreateActivity = async () => {
+    if (!activityForm.title.trim()) {
+      toast.error('Activity title is required')
+      return
+    }
+
+    const result = await activityMutation.mutate({
+      activity_type: activityForm.type,
+      title: activityForm.title,
+      description: activityForm.description || null,
+      contact_id: activityForm.contactId || null,
+      contact_name: activityForm.contactName || null,
+      activity_date: new Date().toISOString(),
+      completed: false,
+      outcome: null,
+      duration_minutes: null
+    })
+
+    if (result) {
+      toast.success('Activity logged', {
+        description: `${activityForm.title} has been recorded`
+      })
+      setShowAddActivityDialog(false)
+    } else {
+      toast.error('Failed to log activity', {
+        description: activityMutation.error?.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleCompleteActivity = async (activityId: string) => {
+    const result = await activityMutation.mutate({
+      completed: true
+    }, activityId)
+
+    if (result) {
+      toast.success('Activity completed')
+    } else {
+      toast.error('Failed to complete activity')
+    }
+  }
+
+  const handleExportCRM = async () => {
+    toast.info('Preparing export...', {
+      description: 'Your CRM data is being prepared for download'
+    })
+
+    try {
+      const exportData = {
+        contacts: contacts,
+        deals: deals,
+        activities: activities,
+        exportedAt: new Date().toISOString()
+      }
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `crm-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Export complete', {
+        description: 'Your CRM data has been downloaded'
+      })
+    } catch (error) {
+      toast.error('Export failed', {
+        description: 'Unable to export CRM data'
+      })
+    }
+  }
+
+  const handleSyncData = async () => {
+    toast.info('Syncing data...', {
+      description: 'Refreshing from database'
+    })
+
+    await Promise.all([
+      refetchContacts(),
+      refetchDeals(),
+      refetchActivities()
+    ])
+
+    toast.success('Sync complete', {
+      description: 'CRM data has been refreshed'
     })
   }
 
-  const handleExportCRM = () => {
-    toast.success('Export started', {
-      description: 'Your CRM data is being exported'
-    })
+  const handleQualifyLead = async (contactId: string, contactName: string) => {
+    const result = await contactMutation.mutate({
+      status: 'qualified',
+      qualification_status: 'qualified'
+    }, contactId)
+
+    if (result) {
+      toast.success('Lead qualified', {
+        description: `${contactName} has been moved to qualified status`
+      })
+    } else {
+      toast.error('Failed to qualify lead')
+    }
   }
 
-  const handleSyncData = () => {
-    toast.success('Sync started', {
-      description: 'Syncing CRM data with connected services'
+  const handleImportContacts = () => {
+    toast.info('Import feature', {
+      description: 'CSV import coming soon'
     })
   }
 
@@ -332,37 +830,6 @@ export default function CrmClient() {
     { label: 'Avg Lead Score', value: stats.avgLeadScore.toFixed(0), change: 4.1, icon: Zap, gradient: 'from-blue-500 to-indigo-500' }
   ]
 
-  // Handlers
-  const handleAddContact = () => {
-    toast.info('Add Contact', {
-      description: 'Opening contact form...'
-    })
-  }
-
-  const handleCreateDeal = () => {
-    toast.info('Create Deal', {
-      description: 'Opening deal pipeline...'
-    })
-  }
-
-  const handleImportContacts = () => {
-    toast.success('Import started', {
-      description: 'Contacts are being imported'
-    })
-  }
-
-  const handleExportData = () => {
-    toast.success('Exporting data', {
-      description: 'CRM data will be downloaded'
-    })
-  }
-
-  const handleQualifyLead = (leadId: string) => {
-    toast.success('Lead qualified', {
-      description: 'Lead moved to opportunities'
-    })
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">
@@ -392,15 +859,26 @@ export default function CrmClient() {
                 className="pl-10 w-72"
               />
             </div>
+            <Button variant="outline" size="icon" onClick={handleSyncData}>
+              <RefreshCw className="w-4 h-4" />
+            </Button>
             <Button variant="outline" size="icon">
               <Filter className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+            <Button onClick={handleAddContact} className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Add Contact
             </Button>
           </div>
         </div>
+
+        {/* Loading indicator */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-4">
+            <Loader2 className="w-6 h-6 animate-spin text-indigo-500 mr-2" />
+            <span className="text-sm text-gray-500">Loading CRM data...</span>
+          </div>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -601,7 +1079,7 @@ export default function CrmClient() {
                           </div>
                         )}
 
-                        <Button variant="outline" className="w-full border-dashed">
+                        <Button variant="outline" className="w-full border-dashed" onClick={handleAddDeal}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Deal
                         </Button>
@@ -972,8 +1450,13 @@ export default function CrmClient() {
                               {new Date(activity.timestamp).toLocaleString()}
                             </div>
                           </div>
-                          <Button variant="ghost" size="icon">
-                            <CheckCircle2 className="w-5 h-5 text-gray-400" />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleCompleteActivity(activity.id)}
+                            title="Mark as complete"
+                          >
+                            <CheckCircle2 className="w-5 h-5 text-gray-400 hover:text-green-500" />
                           </Button>
                         </div>
                       ))}
@@ -1020,19 +1503,47 @@ export default function CrmClient() {
                     <CardTitle>Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start bg-blue-50 text-blue-600 border-blue-200">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-blue-50 text-blue-600 border-blue-200"
+                      onClick={() => {
+                        setActivityForm({ ...activityForm, type: 'email', title: '', description: '' })
+                        setShowAddActivityDialog(true)
+                      }}
+                    >
                       <Mail className="w-4 h-4 mr-2" />
                       Log Email
                     </Button>
-                    <Button variant="outline" className="w-full justify-start bg-green-50 text-green-600 border-green-200">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-green-50 text-green-600 border-green-200"
+                      onClick={() => {
+                        setActivityForm({ ...activityForm, type: 'call', title: '', description: '' })
+                        setShowAddActivityDialog(true)
+                      }}
+                    >
                       <Phone className="w-4 h-4 mr-2" />
                       Log Call
                     </Button>
-                    <Button variant="outline" className="w-full justify-start bg-purple-50 text-purple-600 border-purple-200">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-purple-50 text-purple-600 border-purple-200"
+                      onClick={() => {
+                        setActivityForm({ ...activityForm, type: 'meeting', title: '', description: '' })
+                        setShowAddActivityDialog(true)
+                      }}
+                    >
                       <Calendar className="w-4 h-4 mr-2" />
                       Schedule Meeting
                     </Button>
-                    <Button variant="outline" className="w-full justify-start bg-amber-50 text-amber-600 border-amber-200">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start bg-amber-50 text-amber-600 border-amber-200"
+                      onClick={() => {
+                        setActivityForm({ ...activityForm, type: 'note', title: '', description: '' })
+                        setShowAddActivityDialog(true)
+                      }}
+                    >
                       <FileText className="w-4 h-4 mr-2" />
                       Add Note
                     </Button>
@@ -1101,7 +1612,7 @@ export default function CrmClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Reports & Analytics</h3>
-              <Button>
+              <Button onClick={() => toast.info('Reports', { description: 'Report builder coming soon' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Report
               </Button>
@@ -1185,7 +1696,7 @@ export default function CrmClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Workflows & Automation</h3>
-              <Button>
+              <Button onClick={() => toast.info('Automation', { description: 'Workflow builder coming soon' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Automation
               </Button>
@@ -1654,19 +2165,19 @@ export default function CrmClient() {
                         <Switch />
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t dark:border-gray-700">
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={handleExportCRM}>
                           <Download className="w-6 h-6" />
                           <span>Export All Data</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={handleImportContacts}>
                           <Plus className="w-6 h-6" />
                           <span>Import Data</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={handleExportCRM}>
                           <Archive className="w-6 h-6" />
                           <span>Backup CRM</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2">
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={handleSyncData}>
                           <RefreshCw className="w-6 h-6" />
                           <span>Sync All Data</span>
                         </Button>
@@ -1773,17 +2284,67 @@ export default function CrmClient() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+                    onClick={() => {
+                      setActivityForm({
+                        type: 'email',
+                        title: `Email to ${selectedContact.name}`,
+                        description: '',
+                        contactId: selectedContact.id,
+                        contactName: selectedContact.name
+                      })
+                      setShowAddActivityDialog(true)
+                    }}
+                  >
                     <Mail className="w-4 h-4 mr-2" />
                     Send Email
                   </Button>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setActivityForm({
+                        type: 'call',
+                        title: `Call with ${selectedContact.name}`,
+                        description: '',
+                        contactId: selectedContact.id,
+                        contactName: selectedContact.name
+                      })
+                      setShowAddActivityDialog(true)
+                    }}
+                  >
                     <Phone className="w-4 h-4 mr-2" />
                     Call
                   </Button>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setActivityForm({
+                        type: 'meeting',
+                        title: `Meeting with ${selectedContact.name}`,
+                        description: '',
+                        contactId: selectedContact.id,
+                        contactName: selectedContact.name
+                      })
+                      setShowAddActivityDialog(true)
+                    }}
+                  >
                     <Calendar className="w-4 h-4 mr-2" />
                     Schedule
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleEditContact(selectedContact)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="text-red-600 hover:bg-red-50"
+                    onClick={() => handleDeleteContact(selectedContact.id, selectedContact.name)}
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
@@ -1829,17 +2390,570 @@ export default function CrmClient() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+                    onClick={() => handleEditDeal(selectedDeal)}
+                  >
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Deal
                   </Button>
-                  <Button variant="outline">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const stages: DealStage[] = ['prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won', 'closed_lost']
+                      const currentIndex = stages.indexOf(selectedDeal.stage)
+                      if (currentIndex < stages.length - 2) {
+                        handleMoveDealStage(selectedDeal.id, stages[currentIndex + 1])
+                      }
+                    }}
+                  >
                     <ArrowRight className="w-4 h-4 mr-2" />
                     Move Stage
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="text-red-600 hover:bg-red-50"
+                    onClick={() => handleDeleteDeal(selectedDeal.id, selectedDeal.name)}
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Contact Dialog */}
+        <Dialog open={showAddContactDialog} onOpenChange={setShowAddContactDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Add New Contact</DialogTitle>
+              <DialogDescription>Create a new contact in your CRM</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contact-name">Name *</Label>
+                  <Input
+                    id="contact-name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                    placeholder="John Doe"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact-email">Email</Label>
+                  <Input
+                    id="contact-email"
+                    type="email"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    placeholder="john@example.com"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contact-phone">Phone</Label>
+                  <Input
+                    id="contact-phone"
+                    value={contactForm.phone}
+                    onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                    placeholder="+1 234 567 8900"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact-company">Company</Label>
+                  <Input
+                    id="contact-company"
+                    value={contactForm.company}
+                    onChange={(e) => setContactForm({ ...contactForm, company: e.target.value })}
+                    placeholder="Acme Inc"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contact-title">Job Title</Label>
+                  <Input
+                    id="contact-title"
+                    value={contactForm.title}
+                    onChange={(e) => setContactForm({ ...contactForm, title: e.target.value })}
+                    placeholder="CEO"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact-type">Type</Label>
+                  <Select
+                    value={contactForm.type}
+                    onValueChange={(value: ContactType) => setContactForm({ ...contactForm, type: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="lead">Lead</SelectItem>
+                      <SelectItem value="prospect">Prospect</SelectItem>
+                      <SelectItem value="customer">Customer</SelectItem>
+                      <SelectItem value="partner">Partner</SelectItem>
+                      <SelectItem value="vendor">Vendor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contact-status">Status</Label>
+                  <Select
+                    value={contactForm.status}
+                    onValueChange={(value: ContactStatus) => setContactForm({ ...contactForm, status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="vip">VIP</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact-source">Source</Label>
+                  <Select
+                    value={contactForm.source}
+                    onValueChange={(value) => setContactForm({ ...contactForm, source: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="website">Website</SelectItem>
+                      <SelectItem value="referral">Referral</SelectItem>
+                      <SelectItem value="social_media">Social Media</SelectItem>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="event">Event</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contact-deal-value">Deal Value ($)</Label>
+                  <Input
+                    id="contact-deal-value"
+                    type="number"
+                    value={contactForm.dealValue}
+                    onChange={(e) => setContactForm({ ...contactForm, dealValue: Number(e.target.value) })}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contact-lead-score">Lead Score (0-100)</Label>
+                  <Input
+                    id="contact-lead-score"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={contactForm.leadScore}
+                    onChange={(e) => setContactForm({ ...contactForm, leadScore: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="contact-notes">Notes</Label>
+                <Textarea
+                  id="contact-notes"
+                  value={contactForm.notes}
+                  onChange={(e) => setContactForm({ ...contactForm, notes: e.target.value })}
+                  placeholder="Additional notes..."
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddContactDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateContact}
+                disabled={contactMutation.isLoading}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+              >
+                {contactMutation.isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Create Contact
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Contact Dialog */}
+        <Dialog open={showEditContactDialog} onOpenChange={setShowEditContactDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Contact</DialogTitle>
+              <DialogDescription>Update contact information</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-contact-name">Name *</Label>
+                  <Input
+                    id="edit-contact-name"
+                    value={contactForm.name}
+                    onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-contact-email">Email</Label>
+                  <Input
+                    id="edit-contact-email"
+                    type="email"
+                    value={contactForm.email}
+                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-contact-phone">Phone</Label>
+                  <Input
+                    id="edit-contact-phone"
+                    value={contactForm.phone}
+                    onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-contact-company">Company</Label>
+                  <Input
+                    id="edit-contact-company"
+                    value={contactForm.company}
+                    onChange={(e) => setContactForm({ ...contactForm, company: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-contact-status">Status</Label>
+                  <Select
+                    value={contactForm.status}
+                    onValueChange={(value: ContactStatus) => setContactForm({ ...contactForm, status: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="qualified">Qualified</SelectItem>
+                      <SelectItem value="vip">VIP</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="churned">Churned</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-contact-lead-score">Lead Score</Label>
+                  <Input
+                    id="edit-contact-lead-score"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={contactForm.leadScore}
+                    onChange={(e) => setContactForm({ ...contactForm, leadScore: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditContactDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateContact}
+                disabled={contactMutation.isLoading}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+              >
+                {contactMutation.isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Deal Dialog */}
+        <Dialog open={showAddDealDialog} onOpenChange={setShowAddDealDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Deal</DialogTitle>
+              <DialogDescription>Add a new deal to your sales pipeline</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="deal-name">Deal Name *</Label>
+                <Input
+                  id="deal-name"
+                  value={dealForm.name}
+                  onChange={(e) => setDealForm({ ...dealForm, name: e.target.value })}
+                  placeholder="Enterprise SaaS Implementation"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deal-company">Company</Label>
+                  <Input
+                    id="deal-company"
+                    value={dealForm.company}
+                    onChange={(e) => setDealForm({ ...dealForm, company: e.target.value })}
+                    placeholder="Acme Corp"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="deal-contact">Contact</Label>
+                  <Input
+                    id="deal-contact"
+                    value={dealForm.contact}
+                    onChange={(e) => setDealForm({ ...dealForm, contact: e.target.value })}
+                    placeholder="John Doe"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deal-value">Deal Value ($)</Label>
+                  <Input
+                    id="deal-value"
+                    type="number"
+                    value={dealForm.value}
+                    onChange={(e) => setDealForm({ ...dealForm, value: Number(e.target.value) })}
+                    placeholder="50000"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="deal-stage">Stage</Label>
+                  <Select
+                    value={dealForm.stage}
+                    onValueChange={(value: DealStage) => setDealForm({ ...dealForm, stage: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="prospecting">Prospecting</SelectItem>
+                      <SelectItem value="qualification">Qualification</SelectItem>
+                      <SelectItem value="proposal">Proposal</SelectItem>
+                      <SelectItem value="negotiation">Negotiation</SelectItem>
+                      <SelectItem value="closed_won">Closed Won</SelectItem>
+                      <SelectItem value="closed_lost">Closed Lost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="deal-probability">Probability (%)</Label>
+                  <Input
+                    id="deal-probability"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={dealForm.probability}
+                    onChange={(e) => setDealForm({ ...dealForm, probability: Number(e.target.value) })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="deal-close">Expected Close</Label>
+                  <Input
+                    id="deal-close"
+                    type="date"
+                    value={dealForm.expectedClose}
+                    onChange={(e) => setDealForm({ ...dealForm, expectedClose: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deal-notes">Notes</Label>
+                <Textarea
+                  id="deal-notes"
+                  value={dealForm.notes}
+                  onChange={(e) => setDealForm({ ...dealForm, notes: e.target.value })}
+                  placeholder="Additional notes about this deal..."
+                  rows={3}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddDealDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateDeal}
+                disabled={dealMutation.isLoading}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+              >
+                {dealMutation.isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Create Deal
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Deal Dialog */}
+        <Dialog open={showEditDealDialog} onOpenChange={setShowEditDealDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Deal</DialogTitle>
+              <DialogDescription>Update deal information</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-deal-name">Deal Name *</Label>
+                <Input
+                  id="edit-deal-name"
+                  value={dealForm.name}
+                  onChange={(e) => setDealForm({ ...dealForm, name: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-deal-value">Deal Value ($)</Label>
+                  <Input
+                    id="edit-deal-value"
+                    type="number"
+                    value={dealForm.value}
+                    onChange={(e) => setDealForm({ ...dealForm, value: Number(e.target.value) })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-deal-stage">Stage</Label>
+                  <Select
+                    value={dealForm.stage}
+                    onValueChange={(value: DealStage) => setDealForm({ ...dealForm, stage: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="prospecting">Prospecting</SelectItem>
+                      <SelectItem value="qualification">Qualification</SelectItem>
+                      <SelectItem value="proposal">Proposal</SelectItem>
+                      <SelectItem value="negotiation">Negotiation</SelectItem>
+                      <SelectItem value="closed_won">Closed Won</SelectItem>
+                      <SelectItem value="closed_lost">Closed Lost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-deal-probability">Probability (%)</Label>
+                  <Input
+                    id="edit-deal-probability"
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={dealForm.probability}
+                    onChange={(e) => setDealForm({ ...dealForm, probability: Number(e.target.value) })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-deal-close">Expected Close</Label>
+                  <Input
+                    id="edit-deal-close"
+                    type="date"
+                    value={dealForm.expectedClose}
+                    onChange={(e) => setDealForm({ ...dealForm, expectedClose: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditDealDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateDeal}
+                disabled={dealMutation.isLoading}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+              >
+                {dealMutation.isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Activity Dialog */}
+        <Dialog open={showAddActivityDialog} onOpenChange={setShowAddActivityDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Log Activity</DialogTitle>
+              <DialogDescription>Record a new activity in your CRM</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="activity-type">Activity Type</Label>
+                <Select
+                  value={activityForm.type}
+                  onValueChange={(value: ActivityType) => setActivityForm({ ...activityForm, type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="call">Call</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="note">Note</SelectItem>
+                    <SelectItem value="task">Task</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="activity-title">Title *</Label>
+                <Input
+                  id="activity-title"
+                  value={activityForm.title}
+                  onChange={(e) => setActivityForm({ ...activityForm, title: e.target.value })}
+                  placeholder="Follow-up call with prospect"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="activity-description">Description</Label>
+                <Textarea
+                  id="activity-description"
+                  value={activityForm.description}
+                  onChange={(e) => setActivityForm({ ...activityForm, description: e.target.value })}
+                  placeholder="Details about this activity..."
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="activity-contact">Contact Name</Label>
+                <Input
+                  id="activity-contact"
+                  value={activityForm.contactName}
+                  onChange={(e) => setActivityForm({ ...activityForm, contactName: e.target.value })}
+                  placeholder="John Doe"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddActivityDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateActivity}
+                disabled={activityMutation.isLoading}
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
+              >
+                {activityMutation.isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Log Activity
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 

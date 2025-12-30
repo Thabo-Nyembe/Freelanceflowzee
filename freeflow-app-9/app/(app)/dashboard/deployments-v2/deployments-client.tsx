@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -37,6 +38,34 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+import { Textarea } from '@/components/ui/textarea'
+import { Loader2 } from 'lucide-react'
+
+// Database types
+interface DbDeployment {
+  id: string
+  user_id: string
+  deployment_name: string
+  version: string
+  environment: 'production' | 'staging' | 'development' | 'testing' | 'qa' | 'sandbox' | 'preview'
+  status: 'pending' | 'in_progress' | 'success' | 'failed' | 'rolled_back' | 'cancelled' | 'skipped'
+  branch?: string
+  commit_hash?: string
+  commit_message?: string
+  commit_author?: string
+  deploy_type?: string
+  started_at?: string
+  completed_at?: string
+  duration_seconds: number
+  can_rollback: boolean
+  error_message?: string
+  notes?: string
+  tags?: string[]
+  metadata?: any
+  created_at: string
+  updated_at: string
+}
 
 // Types
 type DeploymentStatus = 'success' | 'in_progress' | 'failed' | 'rolled_back' | 'cancelled' | 'queued'
@@ -303,7 +332,184 @@ const mockDeploymentsQuickActions = [
   { id: '3', label: 'View Logs', icon: 'file-text', action: () => console.log('Logs'), variant: 'outline' as const },
 ]
 
+// Default form state for creating deployments
+const defaultDeploymentForm = {
+  deployment_name: '',
+  version: '',
+  environment: 'development' as DbDeployment['environment'],
+  branch: '',
+  commit_hash: '',
+  commit_message: '',
+  commit_author: '',
+  deploy_type: 'full',
+  notes: '',
+}
+
 export default function DeploymentsClient() {
+  const supabase = createClientComponentClient()
+
+  // Database state
+  const [dbDeployments, setDbDeployments] = useState<DbDeployment[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deploymentForm, setDeploymentForm] = useState(defaultDeploymentForm)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [selectedDbDeployment, setSelectedDbDeployment] = useState<DbDeployment | null>(null)
+
+  // Fetch deployments from Supabase
+  const fetchDeployments = useCallback(async () => {
+    try {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('deployments')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbDeployments(data || [])
+    } catch (error: any) {
+      toast.error('Failed to load deployments', { description: error.message })
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchDeployments()
+  }, [fetchDeployments])
+
+  // Create deployment
+  const handleCreateDeployment = async () => {
+    if (!deploymentForm.deployment_name || !deploymentForm.version) {
+      toast.error('Validation Error', { description: 'Deployment name and version are required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: userData } = await supabase.auth.getUser()
+      if (!userData.user) throw new Error('Not authenticated')
+
+      const { error } = await supabase.from('deployments').insert({
+        user_id: userData.user.id,
+        deployment_name: deploymentForm.deployment_name,
+        version: deploymentForm.version,
+        environment: deploymentForm.environment,
+        status: 'pending',
+        branch: deploymentForm.branch || null,
+        commit_hash: deploymentForm.commit_hash || null,
+        commit_message: deploymentForm.commit_message || null,
+        commit_author: deploymentForm.commit_author || null,
+        deploy_type: deploymentForm.deploy_type || 'full',
+        notes: deploymentForm.notes || null,
+        duration_seconds: 0,
+        can_rollback: true,
+      })
+
+      if (error) throw error
+      toast.success('Deployment Created', { description: `${deploymentForm.deployment_name} v${deploymentForm.version} queued` })
+      setShowCreateDialog(false)
+      setDeploymentForm(defaultDeploymentForm)
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Failed to create deployment', { description: error.message })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Start deployment (update status to in_progress)
+  const handleStartDeployment = async (deployment: DbDeployment) => {
+    try {
+      const { error } = await supabase
+        .from('deployments')
+        .update({ status: 'in_progress', started_at: new Date().toISOString() })
+        .eq('id', deployment.id)
+
+      if (error) throw error
+      toast.info('Deployment Started', { description: `${deployment.deployment_name} is now deploying...` })
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Failed to start deployment', { description: error.message })
+    }
+  }
+
+  // Complete deployment
+  const handleCompleteDeployment = async (deployment: DbDeployment, success: boolean) => {
+    try {
+      const startTime = deployment.started_at ? new Date(deployment.started_at).getTime() : Date.now()
+      const duration = Math.floor((Date.now() - startTime) / 1000)
+
+      const { error } = await supabase
+        .from('deployments')
+        .update({
+          status: success ? 'success' : 'failed',
+          completed_at: new Date().toISOString(),
+          duration_seconds: duration,
+        })
+        .eq('id', deployment.id)
+
+      if (error) throw error
+      toast[success ? 'success' : 'error'](
+        success ? 'Deployment Successful' : 'Deployment Failed',
+        { description: `${deployment.deployment_name} v${deployment.version}` }
+      )
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Failed to update deployment', { description: error.message })
+    }
+  }
+
+  // Rollback deployment
+  const handleRollbackDeployment = async (deployment: DbDeployment) => {
+    if (!deployment.can_rollback) {
+      toast.error('Cannot Rollback', { description: 'This deployment cannot be rolled back' })
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('deployments')
+        .update({ status: 'rolled_back' })
+        .eq('id', deployment.id)
+
+      if (error) throw error
+      toast.success('Rollback Initiated', { description: `Rolling back ${deployment.deployment_name}` })
+      setShowRollbackDialog(false)
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Failed to rollback', { description: error.message })
+    }
+  }
+
+  // Cancel deployment
+  const handleCancelDeployment = async (deployment: DbDeployment) => {
+    try {
+      const { error } = await supabase
+        .from('deployments')
+        .update({ status: 'cancelled' })
+        .eq('id', deployment.id)
+
+      if (error) throw error
+      toast.info('Deployment Cancelled', { description: `${deployment.deployment_name} has been cancelled` })
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Failed to cancel deployment', { description: error.message })
+    }
+  }
+
+  // Delete deployment
+  const handleDeleteDeployment = async (id: string) => {
+    try {
+      const { error } = await supabase.from('deployments').delete().eq('id', id)
+      if (error) throw error
+      toast.success('Deployment Deleted', { description: 'Deployment record removed' })
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Failed to delete deployment', { description: error.message })
+    }
+  }
+
   const [activeTab, setActiveTab] = useState('deployments')
   const [searchQuery, setSearchQuery] = useState('')
   const [environmentFilter, setEnvironmentFilter] = useState<DeploymentEnvironment | 'all'>('all')
@@ -344,31 +550,26 @@ export default function DeploymentsClient() {
     }
   }, [])
 
-  const handleDeploy = () => {
-    toast.info('Deploying', {
-      description: 'Starting deployment...'
-    })
+  // Promote deployment to production
+  const handlePromoteDeployment = async (deployment: DbDeployment) => {
+    try {
+      const { error } = await supabase
+        .from('deployments')
+        .update({ environment: 'production' })
+        .eq('id', deployment.id)
+
+      if (error) throw error
+      toast.success('Promoted', { description: `${deployment.deployment_name} promoted to production` })
+      fetchDeployments()
+    } catch (error: any) {
+      toast.error('Failed to promote', { description: error.message })
+    }
   }
 
-  const handleRollback = (deployment: Deployment) => {
-    toast.success('Rollback initiated', {
-      description: `Rolling back to ${deployment.name}`
-    })
-    setShowRollbackDialog(true)
-  }
-
+  // View logs handler
   const handleViewLogs = (deployment: Deployment) => {
     setSelectedDeployment(deployment)
     setShowLogsDialog(true)
-    toast.info('Loading logs', {
-      description: 'Fetching deployment logs...'
-    })
-  }
-
-  const handlePromote = (deployment: Deployment) => {
-    toast.success('Promoted', {
-      description: `${deployment.name} promoted to production`
-    })
   }
 
   const statsCards = [
@@ -451,37 +652,6 @@ export default function DeploymentsClient() {
     return groups
   }, [])
 
-  // Handlers
-  const handleTriggerDeployment = () => {
-    toast.info('Triggering deployment', {
-      description: 'Starting deployment pipeline...'
-    })
-  }
-
-  const handleRollback = (deploymentName: string) => {
-    toast.info('Rolling back', {
-      description: `Rolling back "${deploymentName}"...`
-    })
-  }
-
-  const handlePromoteDeployment = (deploymentName: string) => {
-    toast.success('Promoting deployment', {
-      description: `"${deploymentName}" promoted to production`
-    })
-  }
-
-  const handleViewLogs = (deploymentName: string) => {
-    toast.info('Loading logs', {
-      description: `Opening logs for "${deploymentName}"...`
-    })
-  }
-
-  const handleCancelDeployment = (deploymentName: string) => {
-    toast.info('Cancelling deployment', {
-      description: `"${deploymentName}" deployment cancelled`
-    })
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1600px] mx-auto space-y-6">
@@ -503,7 +673,7 @@ export default function DeploymentsClient() {
             </div>
             <Button variant="outline" onClick={() => setShowEnvDialog(true)}><Lock className="h-4 w-4 mr-2" />Environment</Button>
             <Button variant="outline" onClick={() => setShowDomainDialog(true)}><Globe className="h-4 w-4 mr-2" />Domains</Button>
-            <Button className="bg-gradient-to-r from-purple-600 to-indigo-600"><Rocket className="h-4 w-4 mr-2" />Deploy</Button>
+            <Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={() => setShowCreateDialog(true)}><Rocket className="h-4 w-4 mr-2" />Deploy</Button>
           </div>
         </div>
 
@@ -549,8 +719,8 @@ export default function DeploymentsClient() {
                   <p className="text-purple-200 text-sm">CI/CD Pipeline Performance</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
-                  <Button className="bg-white text-purple-700 hover:bg-purple-50"><Rocket className="h-4 w-4 mr-2" />Deploy Now</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => fetchDeployments()}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                  <Button className="bg-white text-purple-700 hover:bg-purple-50" onClick={() => setShowCreateDialog(true)}><Rocket className="h-4 w-4 mr-2" />Deploy Now</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1881,14 +2051,16 @@ export default function DeploymentsClient() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2 text-amber-600"><AlertTriangle className="h-5 w-5" />Confirm Rollback</DialogTitle>
-              <DialogDescription>Are you sure you want to rollback to {selectedDeployment?.name}?</DialogDescription>
+              <DialogDescription>Are you sure you want to rollback {selectedDbDeployment?.deployment_name || selectedDeployment?.name}?</DialogDescription>
             </DialogHeader>
             <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-              <p className="text-sm text-amber-800 dark:text-amber-200">This will instantly redirect all production traffic to the previous deployment.</p>
+              <p className="text-sm text-amber-800 dark:text-amber-200">This will mark the deployment as rolled back and stop serving this version.</p>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowRollbackDialog(false)}>Cancel</Button>
-              <Button className="bg-amber-600 hover:bg-amber-700"><RotateCcw className="h-4 w-4 mr-2" />Confirm Rollback</Button>
+              <Button variant="outline" onClick={() => { setShowRollbackDialog(false); setSelectedDbDeployment(null); }}>Cancel</Button>
+              <Button className="bg-amber-600 hover:bg-amber-700" onClick={() => selectedDbDeployment && handleRollbackDeployment(selectedDbDeployment)}>
+                <RotateCcw className="h-4 w-4 mr-2" />Confirm Rollback
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -1943,6 +2115,161 @@ export default function DeploymentsClient() {
             <DialogFooter><Button variant="outline" onClick={() => setShowIntegrationDialog(false)}>Cancel</Button></DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Create Deployment Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Rocket className="h-5 w-5 text-purple-600" />Create New Deployment</DialogTitle>
+              <DialogDescription>Configure and queue a new deployment</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Deployment Name *</Label>
+                  <Input placeholder="my-app-release" className="mt-1" value={deploymentForm.deployment_name} onChange={(e) => setDeploymentForm(prev => ({ ...prev, deployment_name: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>Version *</Label>
+                  <Input placeholder="1.0.0" className="mt-1" value={deploymentForm.version} onChange={(e) => setDeploymentForm(prev => ({ ...prev, version: e.target.value }))} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Environment</Label>
+                  <Select value={deploymentForm.environment} onValueChange={(v) => setDeploymentForm(prev => ({ ...prev, environment: v as DbDeployment['environment'] }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="development">Development</SelectItem>
+                      <SelectItem value="staging">Staging</SelectItem>
+                      <SelectItem value="production">Production</SelectItem>
+                      <SelectItem value="preview">Preview</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Deploy Type</Label>
+                  <Select value={deploymentForm.deploy_type} onValueChange={(v) => setDeploymentForm(prev => ({ ...prev, deploy_type: v }))}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="full">Full Deploy</SelectItem>
+                      <SelectItem value="incremental">Incremental</SelectItem>
+                      <SelectItem value="hotfix">Hotfix</SelectItem>
+                      <SelectItem value="canary">Canary</SelectItem>
+                      <SelectItem value="rolling">Rolling</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Branch</Label>
+                  <Input placeholder="main" className="mt-1 font-mono" value={deploymentForm.branch} onChange={(e) => setDeploymentForm(prev => ({ ...prev, branch: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>Commit Hash</Label>
+                  <Input placeholder="abc123" className="mt-1 font-mono" value={deploymentForm.commit_hash} onChange={(e) => setDeploymentForm(prev => ({ ...prev, commit_hash: e.target.value }))} />
+                </div>
+              </div>
+              <div>
+                <Label>Commit Message</Label>
+                <Input placeholder="feat: Add new feature" className="mt-1" value={deploymentForm.commit_message} onChange={(e) => setDeploymentForm(prev => ({ ...prev, commit_message: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Author</Label>
+                <Input placeholder="John Doe" className="mt-1" value={deploymentForm.commit_author} onChange={(e) => setDeploymentForm(prev => ({ ...prev, commit_author: e.target.value }))} />
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Textarea placeholder="Deployment notes..." className="mt-1" value={deploymentForm.notes} onChange={(e) => setDeploymentForm(prev => ({ ...prev, notes: e.target.value }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={handleCreateDeployment} disabled={isSubmitting}>
+                {isSubmitting ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Creating...</> : <><Rocket className="h-4 w-4 mr-2" />Create Deployment</>}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Database Deployments List */}
+        {dbDeployments.length > 0 && (
+          <Card className="border-gray-200 dark:border-gray-700">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-purple-600" />
+                Your Deployments ({dbDeployments.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+                {dbDeployments.map(dep => (
+                  <div key={dep.id} className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        dep.status === 'success' ? 'bg-green-100' :
+                        dep.status === 'in_progress' ? 'bg-blue-100' :
+                        dep.status === 'failed' ? 'bg-red-100' :
+                        dep.status === 'rolled_back' ? 'bg-amber-100' :
+                        dep.status === 'cancelled' ? 'bg-gray-100' : 'bg-purple-100'
+                      }`}>
+                        {dep.status === 'success' && <Check className="h-5 w-5 text-green-600" />}
+                        {dep.status === 'in_progress' && <RefreshCw className="h-5 w-5 text-blue-600 animate-spin" />}
+                        {dep.status === 'failed' && <X className="h-5 w-5 text-red-600" />}
+                        {dep.status === 'rolled_back' && <RotateCcw className="h-5 w-5 text-amber-600" />}
+                        {dep.status === 'cancelled' && <X className="h-5 w-5 text-gray-600" />}
+                        {dep.status === 'pending' && <Clock className="h-5 w-5 text-purple-600" />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{dep.deployment_name}</p>
+                          <Badge variant="outline">v{dep.version}</Badge>
+                        </div>
+                        <div className="flex items-center gap-3 text-sm text-gray-500">
+                          {dep.branch && <span className="flex items-center gap-1"><GitBranch className="h-3 w-3" />{dep.branch}</span>}
+                          {dep.commit_hash && <span className="flex items-center gap-1"><GitCommit className="h-3 w-3" />{dep.commit_hash.substring(0, 7)}</span>}
+                          <span>{formatTimeAgo(dep.created_at)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge className={
+                        dep.environment === 'production' ? 'bg-purple-100 text-purple-700' :
+                        dep.environment === 'staging' ? 'bg-blue-100 text-blue-700' :
+                        dep.environment === 'preview' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
+                      }>{dep.environment}</Badge>
+                      <Badge className={
+                        dep.status === 'success' ? 'bg-green-100 text-green-700' :
+                        dep.status === 'in_progress' ? 'bg-blue-100 text-blue-700' :
+                        dep.status === 'failed' ? 'bg-red-100 text-red-700' :
+                        dep.status === 'rolled_back' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'
+                      }>{dep.status.replace('_', ' ')}</Badge>
+                      <div className="flex gap-1">
+                        {dep.status === 'pending' && (
+                          <Button variant="ghost" size="sm" onClick={() => handleStartDeployment(dep)}><Play className="h-4 w-4 text-green-600" /></Button>
+                        )}
+                        {dep.status === 'in_progress' && (
+                          <>
+                            <Button variant="ghost" size="sm" onClick={() => handleCompleteDeployment(dep, true)}><Check className="h-4 w-4 text-green-600" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleCompleteDeployment(dep, false)}><X className="h-4 w-4 text-red-600" /></Button>
+                          </>
+                        )}
+                        {dep.status === 'success' && dep.environment !== 'production' && (
+                          <Button variant="ghost" size="sm" onClick={() => handlePromoteDeployment(dep)}><ArrowUpRight className="h-4 w-4 text-purple-600" /></Button>
+                        )}
+                        {dep.status === 'success' && dep.can_rollback && (
+                          <Button variant="ghost" size="sm" onClick={() => { setSelectedDbDeployment(dep); setShowRollbackDialog(true); }}><RotateCcw className="h-4 w-4 text-amber-600" /></Button>
+                        )}
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteDeployment(dep.id)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   )

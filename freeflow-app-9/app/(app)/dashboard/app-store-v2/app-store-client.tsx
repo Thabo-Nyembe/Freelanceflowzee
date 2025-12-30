@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -614,12 +615,13 @@ const mockAppStoreQuickActions = [
 // ============================================================================
 
 export default function AppStoreClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('discover')
-  const [apps] = useState<App[]>(mockApps)
-  const [reviews] = useState<Review[]>(mockReviews)
-  const [collections] = useState<AppCollection[]>(mockCollections)
-  const [updates] = useState<AppUpdate[]>(mockUpdates)
-  const [analytics] = useState<Analytics>(mockAnalytics)
+  const [apps, setApps] = useState<App[]>(mockApps)
+  const [reviews, setReviews] = useState<Review[]>(mockReviews)
+  const [collections, setCollections] = useState<AppCollection[]>(mockCollections)
+  const [updates, setUpdates] = useState<AppUpdate[]>(mockUpdates)
+  const [analytics, setAnalytics] = useState<Analytics>(mockAnalytics)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<AppStatus | 'all'>('all')
   const [categoryFilter, setCategoryFilter] = useState<AppCategory | 'all'>('all')
@@ -628,6 +630,100 @@ export default function AppStoreClient() {
   const [showAppDialog, setShowAppDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [loading, setLoading] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
+
+  // Fetch user on mount
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) setUserId(user.id)
+    }
+    getUser()
+  }, [supabase.auth])
+
+  // Fetch apps from database
+  const fetchApps = useCallback(async () => {
+    if (!userId) return
+    setLoading(true)
+    try {
+      // Fetch plugins from database
+      const { data: plugins, error } = await supabase
+        .from('plugins')
+        .select(`
+          *,
+          plugin_authors (*)
+        `)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      // Fetch installed plugins for current user
+      const { data: installedPlugins } = await supabase
+        .from('installed_plugins')
+        .select('plugin_id, installed_version, installed_at, is_active')
+        .eq('user_id', userId)
+
+      const installedMap = new Map(installedPlugins?.map(p => [p.plugin_id, p]) || [])
+
+      if (plugins && plugins.length > 0) {
+        const mappedApps: App[] = plugins.map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          slug: p.slug,
+          tagline: p.description?.substring(0, 100) || '',
+          description: p.long_description || p.description || '',
+          developer: {
+            id: p.plugin_authors?.id || 'unknown',
+            name: p.plugin_authors?.name || 'Unknown Developer',
+            website: p.plugin_authors?.website || '',
+            email: p.plugin_authors?.email || '',
+            verified: p.plugin_authors?.verified || false,
+            appCount: p.plugin_authors?.total_plugins || 0,
+            totalDownloads: p.plugin_authors?.total_installs || 0,
+            avgRating: 4.5
+          },
+          category: p.category || 'productivity',
+          pricing: p.pricing_type || 'free',
+          price: Number(p.price) || 0,
+          status: installedMap.has(p.id) ? 'installed' : 'available',
+          version: p.version || '1.0.0',
+          releaseDate: p.created_at,
+          lastUpdated: p.updated_at,
+          size: p.file_size || 0,
+          platforms: ['web'],
+          screenshots: p.screenshots || [],
+          icon: p.icon || '',
+          rating: Number(p.rating) || 0,
+          reviewCount: p.review_count || 0,
+          downloadCount: p.install_count || 0,
+          activeUsers: p.active_installs || 0,
+          features: p.tags || [],
+          requirements: p.requirements || [],
+          permissions: [],
+          languages: ['English'],
+          trialDays: 14,
+          trialActive: false,
+          installedAt: installedMap.get(p.id)?.installed_at,
+          featured: p.is_featured || false,
+          editorChoice: p.is_verified || false,
+          trending: p.is_trending || false,
+          inAppPurchases: false,
+          tags: p.tags || []
+        }))
+        setApps(mappedApps.length > 0 ? mappedApps : mockApps)
+      }
+    } catch (error: any) {
+      console.error('Error fetching apps:', error)
+      // Keep mock data if database fetch fails
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase, userId])
+
+  useEffect(() => {
+    fetchApps()
+  }, [fetchApps])
 
   // Filtered apps
   const filteredApps = useMemo(() => {
@@ -664,35 +760,227 @@ export default function AppStoreClient() {
   const trendingApps = apps.filter(a => a.trending)
   const editorChoiceApps = apps.filter(a => a.editorChoice)
 
-  // Handlers
-  const handleInstallApp = (appName: string) => {
-    toast.success('Installing app', {
-      description: `"${appName}" is being installed...`
-    })
+  // Handlers - Real Supabase CRUD operations
+  const handleInstallApp = async (app: App) => {
+    if (!userId) {
+      toast.error('Please sign in to install apps')
+      return
+    }
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('installed_plugins')
+        .insert({
+          plugin_id: app.id,
+          user_id: userId,
+          installed_version: app.version,
+          is_active: true,
+          settings: {}
+        })
+
+      if (error) throw error
+
+      // Update install count
+      await supabase
+        .from('plugins')
+        .update({ install_count: app.downloadCount + 1 })
+        .eq('id', app.id)
+
+      // Record download
+      await supabase
+        .from('plugin_downloads')
+        .insert({
+          plugin_id: app.id,
+          user_id: userId,
+          version: app.version
+        })
+
+      toast.success('App installed successfully', {
+        description: `"${app.name}" has been installed`
+      })
+      await fetchApps()
+    } catch (error: any) {
+      toast.error('Failed to install app', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleUninstallApp = (appName: string) => {
-    toast.info('Uninstalling app', {
-      description: `Removing "${appName}"...`
-    })
+  const handleUninstallApp = async (app: App) => {
+    if (!userId) {
+      toast.error('Please sign in')
+      return
+    }
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('installed_plugins')
+        .delete()
+        .eq('plugin_id', app.id)
+        .eq('user_id', userId)
+
+      if (error) throw error
+
+      toast.success('App uninstalled', {
+        description: `"${app.name}" has been removed`
+      })
+      await fetchApps()
+    } catch (error: any) {
+      toast.error('Failed to uninstall', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleUpdateApp = (appName: string) => {
-    toast.info('Updating app', {
-      description: `Updating "${appName}" to latest version...`
-    })
+  const handleUpdateApp = async (update: AppUpdate) => {
+    if (!userId) {
+      toast.error('Please sign in')
+      return
+    }
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('installed_plugins')
+        .update({ installed_version: update.newVersion, updated_at: new Date().toISOString() })
+        .eq('plugin_id', update.appId)
+        .eq('user_id', userId)
+
+      if (error) throw error
+
+      toast.success('App updated', {
+        description: `"${update.appName}" updated to v${update.newVersion}`
+      })
+      setUpdates(prev => prev.filter(u => u.id !== update.id))
+      await fetchApps()
+    } catch (error: any) {
+      toast.error('Update failed', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleRateApp = (appName: string) => {
-    toast.success('Rating submitted', {
-      description: `Thank you for rating "${appName}"`
-    })
+  const handleRateApp = async (app: App, rating: number, title: string, comment: string) => {
+    if (!userId) {
+      toast.error('Please sign in to rate apps')
+      return
+    }
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('plugin_reviews')
+        .upsert({
+          plugin_id: app.id,
+          user_id: userId,
+          rating,
+          title,
+          comment,
+          verified: true
+        }, { onConflict: 'plugin_id,user_id' })
+
+      if (error) throw error
+
+      toast.success('Rating submitted', {
+        description: `Thank you for rating "${app.name}"`
+      })
+      await fetchApps()
+    } catch (error: any) {
+      toast.error('Failed to submit rating', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const handleStartTrial = (appName: string) => {
-    toast.success('Trial started', {
-      description: `14-day trial for "${appName}" has begun`
-    })
+  const handleStartTrial = async (app: App) => {
+    if (!userId) {
+      toast.error('Please sign in to start a trial')
+      return
+    }
+    setLoading(true)
+    try {
+      const trialEnds = new Date()
+      trialEnds.setDate(trialEnds.getDate() + app.trialDays)
+
+      const { error } = await supabase
+        .from('installed_plugins')
+        .insert({
+          plugin_id: app.id,
+          user_id: userId,
+          installed_version: app.version,
+          is_active: true,
+          settings: { trial: true, trial_ends_at: trialEnds.toISOString() }
+        })
+
+      if (error) throw error
+
+      toast.success('Trial started', {
+        description: `${app.trialDays}-day trial for "${app.name}" has begun`
+      })
+      await fetchApps()
+    } catch (error: any) {
+      toast.error('Failed to start trial', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAddToWishlist = async (app: App) => {
+    if (!userId) {
+      toast.error('Please sign in')
+      return
+    }
+    try {
+      const { error } = await supabase
+        .from('plugin_wishlists')
+        .insert({
+          plugin_id: app.id,
+          user_id: userId
+        })
+
+      if (error) throw error
+
+      toast.success('Added to wishlist', {
+        description: `"${app.name}" added to your wishlist`
+      })
+    } catch (error: any) {
+      toast.error('Failed to add to wishlist', {
+        description: error.message || 'Please try again'
+      })
+    }
+  }
+
+  const handleUpdateAll = async () => {
+    if (!userId || updates.length === 0) return
+    setLoading(true)
+    try {
+      for (const update of updates) {
+        await supabase
+          .from('installed_plugins')
+          .update({ installed_version: update.newVersion, updated_at: new Date().toISOString() })
+          .eq('plugin_id', update.appId)
+          .eq('user_id', userId)
+      }
+      toast.success('All apps updated', {
+        description: `${updates.length} apps have been updated`
+      })
+      setUpdates([])
+      await fetchApps()
+    } catch (error: any) {
+      toast.error('Update failed', {
+        description: error.message || 'Some updates may have failed'
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -863,11 +1151,19 @@ export default function AppStoreClient() {
                 <h2 className="text-3xl font-bold mb-2">{featuredApps[0]?.name}</h2>
                 <p className="text-indigo-100 mb-4">{featuredApps[0]?.tagline}</p>
                 <div className="flex items-center gap-4">
-                  <Button className="bg-white text-indigo-600 hover:bg-indigo-50">
+                  <Button
+                    className="bg-white text-indigo-600 hover:bg-indigo-50"
+                    onClick={() => featuredApps[0] && handleInstallApp(featuredApps[0])}
+                    disabled={loading}
+                  >
                     <Download className="w-4 h-4 mr-2" />
                     Get App
                   </Button>
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/30 text-white hover:bg-white/10"
+                    onClick={() => featuredApps[0] && handleViewApp(featuredApps[0])}
+                  >
                     Learn More
                   </Button>
                 </div>
@@ -1103,31 +1399,31 @@ export default function AppStoreClient() {
                     <div className="flex gap-2 mt-4 pt-3 border-t">
                       {app.status === 'installed' ? (
                         <>
-                          <Button size="sm" className="flex-1">
+                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); toast.info('Opening app...') }}>
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleUninstallApp(app) }} disabled={loading}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </>
                       ) : app.status === 'trial' ? (
                         <>
-                          <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700">
+                          <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={(e) => { e.stopPropagation(); handleInstallApp(app) }} disabled={loading}>
                             Purchase
                           </Button>
-                          <Button size="sm" variant="outline">
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.info('Opening app...') }}>
                             <Play className="w-4 h-4" />
                           </Button>
                         </>
                       ) : (
                         <>
-                          <Button size="sm" className="flex-1">
+                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); handleInstallApp(app) }} disabled={loading}>
                             <Download className="w-4 h-4 mr-1" />
                             Get
                           </Button>
                           {app.trialDays > 0 && (
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleStartTrial(app) }} disabled={loading}>
                               Try Free
                             </Button>
                           )}
@@ -1167,13 +1463,13 @@ export default function AppStoreClient() {
                             <p className="text-sm text-muted-foreground">v{app.version} • {formatBytes(app.size)}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm">
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Opening app...') }}>
                               <Play className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="outline">
+                            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleViewApp(app) }}>
                               <Settings className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="outline" className="text-red-600">
+                            <Button size="sm" variant="outline" className="text-red-600" onClick={(e) => { e.stopPropagation(); handleUninstallApp(app) }} disabled={loading}>
                               <Trash2 className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1218,8 +1514,8 @@ export default function AppStoreClient() {
             <Card className="dark:bg-gray-800/50">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Available Updates ({updates.length})</CardTitle>
-                <Button>
-                  <RefreshCw className="w-4 h-4 mr-2" />
+                <Button onClick={handleUpdateAll} disabled={loading || updates.length === 0}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Update All
                 </Button>
               </CardHeader>
@@ -1239,11 +1535,11 @@ export default function AppStoreClient() {
                         <div className="flex-1">
                           <h4 className="font-semibold">{update.appName}</h4>
                           <p className="text-sm text-muted-foreground">
-                            v{update.currentVersion} → v{update.newVersion} • {formatBytes(update.size)}
+                            v{update.currentVersion} {'->'} v{update.newVersion} - {formatBytes(update.size)}
                           </p>
                           <p className="text-sm text-muted-foreground mt-1">{update.releaseNotes}</p>
                         </div>
-                        <Button>
+                        <Button onClick={() => handleUpdateApp(update)} disabled={loading}>
                           <Download className="w-4 h-4 mr-2" />
                           Update
                         </Button>
@@ -1869,43 +2165,43 @@ export default function AppStoreClient() {
                 <div className="flex items-center gap-3 pt-4 border-t">
                   {selectedApp.status === 'installed' ? (
                     <>
-                      <Button className="flex-1">
+                      <Button className="flex-1" onClick={() => toast.info('Opening app...')}>
                         <Play className="w-4 h-4 mr-2" />
                         Open App
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => toast.info('Opening settings...')}>
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </Button>
-                      <Button variant="outline" className="text-red-600">
+                      <Button variant="outline" className="text-red-600" onClick={() => { handleUninstallApp(selectedApp); setShowAppDialog(false) }} disabled={loading}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Uninstall
                       </Button>
                     </>
                   ) : selectedApp.status === 'trial' ? (
                     <>
-                      <Button className="flex-1 bg-purple-600 hover:bg-purple-700">
+                      <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => { handleInstallApp(selectedApp); setShowAppDialog(false) }} disabled={loading}>
                         <DollarSign className="w-4 h-4 mr-2" />
                         Purchase Now
                       </Button>
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => toast.info('Opening app...')}>
                         <Play className="w-4 h-4 mr-2" />
                         Continue Trial
                       </Button>
                     </>
                   ) : (
                     <>
-                      <Button className="flex-1">
+                      <Button className="flex-1" onClick={() => { handleInstallApp(selectedApp); setShowAppDialog(false) }} disabled={loading}>
                         <Download className="w-4 h-4 mr-2" />
                         Install
                       </Button>
                       {selectedApp.trialDays > 0 && (
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => { handleStartTrial(selectedApp); setShowAppDialog(false) }} disabled={loading}>
                           <Clock className="w-4 h-4 mr-2" />
                           Try {selectedApp.trialDays} Days Free
                         </Button>
                       )}
-                      <Button variant="outline">
+                      <Button variant="outline" onClick={() => handleAddToWishlist(selectedApp)}>
                         <Heart className="w-4 h-4 mr-2" />
                         Wishlist
                       </Button>

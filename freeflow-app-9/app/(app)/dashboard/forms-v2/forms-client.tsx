@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useForms, type Form, type FormStatus, type FormType } from '@/lib/hooks/use-forms'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +24,7 @@ import {
   Layout, Grid3X3, Layers, Smartphone, Monitor, Globe, Lock, Unlock, RefreshCw,
   MousePointer, FileQuestion, CircleDot, Square, ChevronUp, Minus, MoreVertical,
   ArrowDownRight, ArrowUpRight, Send, Webhook, Database, GitBranch, Shuffle,
-  Timer, Gauge, ThumbsUp, ThumbsDown, Sliders, ListChecks, FileUp, Save
+  Timer, Gauge, ThumbsUp, ThumbsDown, Sliders, ListChecks, FileUp, Save, AlertOctagon
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -284,6 +285,7 @@ const mockFormsQuickActions = [
 // ============================================================================
 
 export default function FormsClient({ initialForms }: { initialForms: Form[] }) {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
   const [statusFilter, setStatusFilter] = useState<FormStatus | 'all'>('all')
@@ -298,7 +300,12 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   const [showQuestionTypesDialog, setShowQuestionTypesDialog] = useState(false)
   const [showThemesDialog, setShowThemesDialog] = useState(false)
 
-  const { forms, loading, error } = useForms({ status: statusFilter, formType: typeFilter, limit: 50 })
+  // Form state for create dialog
+  const [newFormTitle, setNewFormTitle] = useState('')
+  const [newFormDescription, setNewFormDescription] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const { forms, loading, error, createForm, updateForm, deleteForm, mutating } = useForms({ status: statusFilter, formType: typeFilter, limit: 50 })
   const displayForms = forms.length > 0 ? forms : initialForms
 
   // Calculate comprehensive stats
@@ -338,34 +345,98 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   }, [displayForms, searchQuery, statusFilter])
 
   // Handlers
-  const handleCreateForm = () => {
-    toast.info('Create Form', {
-      description: 'Opening form builder...'
-    })
+  const handleCreateForm = async () => {
+    if (!newFormTitle.trim()) {
+      toast.error('Validation Error', { description: 'Form title is required' })
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      await createForm({
+        user_id: user.id,
+        title: newFormTitle.trim(),
+        description: newFormDescription.trim() || null,
+        form_type: 'custom' as FormType,
+        status: 'draft' as FormStatus,
+        fields: [],
+        field_count: 0,
+        sections: [],
+        allow_multiple_submissions: false,
+        require_authentication: false,
+        allow_save_draft: true,
+        show_progress_bar: true,
+        validation_rules: {},
+        required_fields: [],
+        total_submissions: 0,
+        total_views: 0,
+        total_started: 0,
+        total_completed: 0,
+        completion_rate: 0,
+        average_completion_time: 0,
+        is_public: false,
+        password_protected: false,
+        theme: 'default',
+        analytics_enabled: true,
+        track_source: true,
+        track_location: false,
+        tags: [],
+        metadata: {},
+        send_confirmation_email: false
+      })
+      toast.success('Form Created', { description: `"${newFormTitle}" has been created` })
+      setNewFormTitle('')
+      setNewFormDescription('')
+      setShowCreateDialog(false)
+    } catch (err: any) {
+      toast.error('Error', { description: err.message || 'Failed to create form' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handlePublishForm = (formTitle: string) => {
-    toast.success('Publishing form', {
-      description: `"${formTitle}" is now live`
-    })
+  const handlePublishForm = async (form: Form) => {
+    try {
+      await updateForm(form.id, { status: 'active' as FormStatus })
+      toast.success('Form Published', { description: `"${form.title}" is now live` })
+    } catch (err: any) {
+      toast.error('Error', { description: err.message || 'Failed to publish form' })
+    }
   }
 
-  const handleDuplicateForm = (formTitle: string) => {
-    toast.success('Form duplicated', {
-      description: `Copy of "${formTitle}" created`
-    })
+  const handleDuplicateForm = async (form: Form) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { id, created_at, updated_at, deleted_at, ...rest } = form
+      await createForm({ ...rest, user_id: user.id, title: `${form.title} (Copy)`, status: 'draft' as FormStatus })
+      toast.success('Form Duplicated', { description: `Copy of "${form.title}" created` })
+    } catch (err: any) {
+      toast.error('Error', { description: err.message || 'Failed to duplicate form' })
+    }
+  }
+
+  const handleDeleteForm = async (form: Form) => {
+    try {
+      await deleteForm(form.id)
+      toast.success('Form Deleted', { description: `"${form.title}" has been deleted` })
+      setSelectedForm(null)
+    } catch (err: any) {
+      toast.error('Error', { description: err.message || 'Failed to delete form' })
+    }
   }
 
   const handleExportResponses = (formTitle: string) => {
-    toast.success('Exporting responses', {
-      description: `Responses for "${formTitle}" will be downloaded`
-    })
+    toast.success('Exporting Responses', { description: `Responses for "${formTitle}" will be downloaded` })
   }
 
-  const handleShareForm = (formTitle: string) => {
-    toast.success('Link copied', {
-      description: `Share link for "${formTitle}" copied to clipboard`
-    })
+  const handleShareForm = async (form: Form) => {
+    const shareUrl = `${window.location.origin}/forms/${form.id}`
+    await navigator.clipboard.writeText(shareUrl)
+    toast.success('Link Copied', { description: `Share link for "${form.title}" copied to clipboard` })
   }
 
   if (error) return (
@@ -459,11 +530,21 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     <div className="space-y-4 py-4">
                       <div>
                         <Label>Form Name</Label>
-                        <Input placeholder="My new form" className="mt-1" />
+                        <Input
+                          placeholder="My new form"
+                          className="mt-1"
+                          value={newFormTitle}
+                          onChange={(e) => setNewFormTitle(e.target.value)}
+                        />
                       </div>
                       <div>
                         <Label>Description (optional)</Label>
-                        <Input placeholder="What's this form about?" className="mt-1" />
+                        <Input
+                          placeholder="What's this form about?"
+                          className="mt-1"
+                          value={newFormDescription}
+                          onChange={(e) => setNewFormDescription(e.target.value)}
+                        />
                       </div>
                       <div className="grid grid-cols-2 gap-3">
                         <button
@@ -492,7 +573,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                     </div>
                     <DialogFooter>
                       <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
-                      <Button className="bg-indigo-600 hover:bg-indigo-700">Create Form</Button>
+                      <Button
+                        className="bg-indigo-600 hover:bg-indigo-700"
+                        onClick={handleCreateForm}
+                        disabled={isSubmitting || mutating}
+                      >
+                        {isSubmitting ? 'Creating...' : 'Create Form'}
+                      </Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -793,13 +880,13 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
                           <span>{new Date(form.updated_at).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <button onClick={(e) => { e.stopPropagation(); setSelectedForm(form); setShowShareDialog(true); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button onClick={(e) => { e.stopPropagation(); handleShareForm(form); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                             <Share2 className="h-4 w-4" />
                           </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button onClick={(e) => { e.stopPropagation(); handleDuplicateForm(form); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                             <Copy className="h-4 w-4" />
                           </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-red-500">
+                          <button onClick={(e) => { e.stopPropagation(); handleDeleteForm(form); }} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg text-red-500">
                             <Trash2 className="h-4 w-4" />
                           </button>
                         </div>

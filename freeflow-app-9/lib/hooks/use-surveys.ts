@@ -1,7 +1,9 @@
 'use client'
 
-import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
-import { createSurvey, updateSurvey, publishSurvey, closeSurvey, pauseSurvey, deleteSurvey } from '@/app/actions/surveys'
+import { useState, useCallback } from 'react'
+import { useSupabaseQuery } from './use-supabase-query'
+import { createSurvey as createSurveyAction, updateSurvey as updateSurveyAction, publishSurvey as publishSurveyAction, closeSurvey as closeSurveyAction, pauseSurvey as pauseSurveyAction, deleteSurvey as deleteSurveyAction } from '@/app/actions/surveys'
+import type { CreateSurveyData } from '@/app/actions/surveys'
 
 export interface Survey {
   id: string
@@ -68,24 +70,72 @@ export function useSurveys(initialSurveys: Survey[] = [], filters: SurveyFilters
   return { surveys, stats, isLoading, error, refetch }
 }
 
+// Helper hook to wrap server actions with loading state
+function useServerAction<TArgs extends any[], TResult>(
+  action: (...args: TArgs) => Promise<TResult>
+) {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const mutate = useCallback(async (...args: TArgs): Promise<TResult> => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await action(...args)
+      return result
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred'
+      setError(errorMessage)
+      throw err
+    } finally {
+      setIsLoading(false)
+    }
+  }, [action])
+
+  return { mutate, isLoading, error }
+}
+
 export function useSurveyMutations() {
-  const createMutation = useSupabaseMutation(createSurvey)
-  const updateMutation = useSupabaseMutation(updateSurvey)
-  const publishMutation = useSupabaseMutation(publishSurvey)
-  const closeMutation = useSupabaseMutation(closeSurvey)
-  const pauseMutation = useSupabaseMutation(pauseSurvey)
-  const deleteMutation = useSupabaseMutation(deleteSurvey)
+  const createMutation = useServerAction(createSurveyAction)
+  const updateMutation = useServerAction(updateSurveyAction)
+  const publishMutation = useServerAction(publishSurveyAction)
+  const closeMutation = useServerAction(closeSurveyAction)
+  const pauseMutation = useServerAction(pauseSurveyAction)
+  const deleteMutation = useServerAction(deleteSurveyAction)
+
+  const createSurvey = useCallback(async (data: CreateSurveyData) => {
+    return createMutation.mutate(data)
+  }, [createMutation])
+
+  const updateSurvey = useCallback(async (id: string, data: Partial<CreateSurveyData>) => {
+    return updateMutation.mutate(id, data)
+  }, [updateMutation])
+
+  const publishSurvey = useCallback(async (id: string) => {
+    return publishMutation.mutate(id)
+  }, [publishMutation])
+
+  const closeSurvey = useCallback(async (id: string) => {
+    return closeMutation.mutate(id)
+  }, [closeMutation])
+
+  const pauseSurvey = useCallback(async (id: string) => {
+    return pauseMutation.mutate(id)
+  }, [pauseMutation])
+
+  const deleteSurvey = useCallback(async (id: string) => {
+    return deleteMutation.mutate(id)
+  }, [deleteMutation])
 
   return {
-    createSurvey: createMutation.mutate,
-    updateSurvey: (id: string, data: Parameters<typeof updateSurvey>[1]) =>
-      updateMutation.mutate({ id, ...data } as any),
-    publishSurvey: publishMutation.mutate,
-    closeSurvey: closeMutation.mutate,
-    pauseSurvey: pauseMutation.mutate,
-    deleteSurvey: deleteMutation.mutate,
+    createSurvey,
+    updateSurvey,
+    publishSurvey,
+    closeSurvey,
+    pauseSurvey,
+    deleteSurvey,
     isCreating: createMutation.isLoading,
-    isUpdating: updateMutation.isLoading,
+    isUpdating: updateMutation.isLoading || publishMutation.isLoading || closeMutation.isLoading || pauseMutation.isLoading,
     isDeleting: deleteMutation.isLoading
   }
 }

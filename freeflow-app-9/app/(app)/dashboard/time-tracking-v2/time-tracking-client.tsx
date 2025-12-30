@@ -324,8 +324,25 @@ export default function TimeTrackingClient() {
   const [reportsTab, setReportsTab] = useState('overview')
   const [teamTab, setTeamTab] = useState('activity')
 
-  // Database integration - use real time tracking hook
-  const { timeEntries: dbTimeEntries, createEntry, updateEntry, deleteEntry, loading: entriesLoading, refetch } = useTimeTracking()
+  // Database integration - use real time tracking hook with all CRUD operations
+  const {
+    timeEntries: dbTimeEntries,
+    createEntry,
+    updateEntry,
+    deleteEntry,
+    startTimer: dbStartTimer,
+    stopTimer: dbStopTimer,
+    approveEntry,
+    rejectEntry,
+    submitEntry,
+    lockEntry,
+    loading: entriesLoading,
+    refetch
+  } = useTimeTracking()
+
+  // Track the active running entry ID
+  const [activeTimerEntryId, setActiveTimerEntryId] = useState<string | null>(null)
+  const [activeTimerStartTime, setActiveTimerStartTime] = useState<string | null>(null)
 
   // Form state for new time entry
   const [newEntryForm, setNewEntryForm] = useState({
@@ -343,8 +360,28 @@ export default function TimeTrackingClient() {
     refetch()
   }, [refetch])
 
-  // Handle creating a new time entry
-  const handleCreateEntry = async () => {
+  // Check for running timer entries on load
+  useEffect(() => {
+    if (dbTimeEntries && dbTimeEntries.length > 0) {
+      const runningEntry = dbTimeEntries.find((entry: any) => entry.status === 'running')
+      if (runningEntry) {
+        setActiveTimerEntryId(runningEntry.id)
+        setActiveTimerStartTime(runningEntry.start_time)
+        setTimerDescription(runningEntry.title || '')
+        setTimerProject(runningEntry.project_id || '')
+        setTimerBillable(runningEntry.is_billable ?? true)
+
+        // Calculate elapsed time
+        const startTime = new Date(runningEntry.start_time).getTime()
+        const elapsed = Math.floor((Date.now() - startTime) / 1000)
+        setTimerSeconds(elapsed)
+        setIsTimerRunning(true)
+      }
+    }
+  }, [dbTimeEntries])
+
+  // Handle creating a new manual time entry - WIRED TO SUPABASE
+  const handleCreateManualEntry = async () => {
     if (!newEntryForm.description || !newEntryForm.projectId) {
       toast.error('Please fill in description and project')
       return
@@ -361,6 +398,8 @@ export default function TimeTrackingClient() {
         durationSeconds = parseFloat(durationStr || '0') * 3600
       }
 
+      const project = mockProjects.find(p => p.id === newEntryForm.projectId)
+
       await createEntry({
         title: newEntryForm.description,
         description: newEntryForm.description,
@@ -370,9 +409,11 @@ export default function TimeTrackingClient() {
         duration_seconds: durationSeconds,
         duration_hours: durationSeconds / 3600,
         is_billable: newEntryForm.isBillable,
+        hourly_rate: project?.hourlyRate,
+        billable_amount: newEntryForm.isBillable ? (durationSeconds / 3600) * (project?.hourlyRate || 0) : 0,
         entry_type: 'manual',
         status: 'stopped'
-      } as any)
+      })
       setShowEntryDialog(false)
       setNewEntryForm({
         description: '',
@@ -383,35 +424,126 @@ export default function TimeTrackingClient() {
         endTime: '',
         isBillable: true
       })
-      toast.success('Time entry created')
+      toast.success('Time entry created successfully')
     } catch (error) {
       console.error('Failed to create time entry:', error)
+      toast.error('Failed to create time entry')
     }
   }
 
-  // Handle starting timer and saving entry
-  const handleSaveTimerEntry = async () => {
-    if (!timerDescription || !timerProject) {
-      toast.error('Please enter description and select project')
+  // Handle starting timer - WIRED TO SUPABASE
+  const handleStartTimerDB = async () => {
+    if (!timerDescription) {
+      toast.error('Please enter a description')
       return
     }
     try {
-      await createEntry({
+      const project = mockProjects.find(p => p.id === timerProject)
+      const result = await dbStartTimer({
         title: timerDescription,
         description: timerDescription,
-        project_id: timerProject,
-        start_time: new Date(Date.now() - timerSeconds * 1000).toISOString(),
-        end_time: new Date().toISOString(),
-        duration_seconds: timerSeconds,
-        duration_hours: timerSeconds / 3600,
+        project_id: timerProject || undefined,
         is_billable: timerBillable,
-        entry_type: 'timer',
-        status: 'stopped'
-      } as any)
-      stopTimer()
-      toast.success('Timer entry saved')
+        hourly_rate: project?.hourlyRate
+      })
+
+      if (result) {
+        setActiveTimerEntryId(result.id)
+        setActiveTimerStartTime(result.start_time)
+        setIsTimerRunning(true)
+        toast.success('Timer started', { description: 'Time tracking is now active in the database' })
+      }
     } catch (error) {
-      console.error('Failed to save timer entry:', error)
+      console.error('Failed to start timer:', error)
+      toast.error('Failed to start timer')
+    }
+  }
+
+  // Handle stopping timer and saving entry - WIRED TO SUPABASE
+  const handleStopTimerDB = async () => {
+    if (!activeTimerEntryId || !activeTimerStartTime) {
+      toast.error('No active timer to stop')
+      return
+    }
+    try {
+      const project = mockProjects.find(p => p.id === timerProject)
+      const durationSeconds = timerSeconds
+      const billableAmount = timerBillable ? (durationSeconds / 3600) * (project?.hourlyRate || 0) : 0
+
+      await dbStopTimer(activeTimerEntryId, activeTimerStartTime)
+
+      // Also update billable amount if applicable
+      if (billableAmount > 0) {
+        await updateEntry(activeTimerEntryId, { billable_amount: billableAmount })
+      }
+
+      // Reset local timer state
+      setIsTimerRunning(false)
+      setTimerSeconds(0)
+      setTimerDescription('')
+      setTimerProject('')
+      setActiveTimerEntryId(null)
+      setActiveTimerStartTime(null)
+
+      toast.success('Timer stopped and saved', { description: `Logged ${(durationSeconds / 3600).toFixed(2)} hours` })
+    } catch (error) {
+      console.error('Failed to stop timer:', error)
+      toast.error('Failed to stop timer')
+    }
+  }
+
+  // Handle deleting a time entry - WIRED TO SUPABASE
+  const handleDeleteEntry = async (entryId: string) => {
+    try {
+      await deleteEntry(entryId)
+      toast.success('Entry deleted', { description: 'Time entry has been removed' })
+    } catch (error) {
+      console.error('Failed to delete entry:', error)
+      toast.error('Failed to delete entry')
+    }
+  }
+
+  // Handle approving a time entry - WIRED TO SUPABASE
+  const handleApproveEntry = async (entryId: string) => {
+    try {
+      await approveEntry(entryId)
+      toast.success('Entry approved', { description: 'Time entry has been approved' })
+    } catch (error) {
+      console.error('Failed to approve entry:', error)
+      toast.error('Failed to approve entry')
+    }
+  }
+
+  // Handle rejecting a time entry - WIRED TO SUPABASE
+  const handleRejectEntry = async (entryId: string, reason?: string) => {
+    try {
+      await rejectEntry(entryId, reason)
+      toast.success('Entry rejected', { description: 'Time entry has been rejected' })
+    } catch (error) {
+      console.error('Failed to reject entry:', error)
+      toast.error('Failed to reject entry')
+    }
+  }
+
+  // Handle submitting a time entry for approval - WIRED TO SUPABASE
+  const handleSubmitEntry = async (entryId: string) => {
+    try {
+      await submitEntry(entryId)
+      toast.success('Entry submitted', { description: 'Time entry submitted for approval' })
+    } catch (error) {
+      console.error('Failed to submit entry:', error)
+      toast.error('Failed to submit entry')
+    }
+  }
+
+  // Handle locking a time entry - WIRED TO SUPABASE
+  const handleLockEntry = async (entryId: string) => {
+    try {
+      await lockEntry(entryId)
+      toast.info('Entry locked', { description: 'Time entry can no longer be edited' })
+    } catch (error) {
+      console.error('Failed to lock entry:', error)
+      toast.error('Failed to lock entry')
     }
   }
 
@@ -499,16 +631,7 @@ export default function TimeTrackingClient() {
     return colors[status] || 'bg-gray-100 text-gray-700'
   }
 
-  // Handlers
-  const handleStartTimer = () => {
-    toast.success('Timer Started', { description: 'Time tracking is now active' })
-  }
-  const handleStopTimer = () => {
-    toast.info('Timer Stopped', { description: 'Time entry has been saved' })
-  }
-  const handleCreateEntry = () => {
-    toast.info('Create Entry', { description: 'Opening time entry form...' })
-  }
+  // UI-only Handlers
   const handleExportTimesheet = () => {
     toast.success('Exporting', { description: 'Timesheet will be downloaded' })
   }
@@ -540,9 +663,9 @@ export default function TimeTrackingClient() {
               <Button variant={timerBillable ? 'default' : 'outline'} size="icon" onClick={() => setTimerBillable(!timerBillable)} className={timerBillable ? 'bg-emerald-500 hover:bg-emerald-600' : ''}><DollarSign className="h-5 w-5" /></Button>
               <div className="text-4xl font-mono font-bold min-w-[160px] text-center">{formatTimer(timerSeconds)}</div>
               {isTimerRunning ? (
-                <><Button variant="outline" size="icon" onClick={toggleTimer}><Pause className="h-5 w-5" /></Button><Button variant="destructive" size="icon" onClick={handleSaveTimerEntry} title="Stop and save"><Square className="h-5 w-5" /></Button></>
+                <><Button variant="outline" size="icon" onClick={toggleTimer}><Pause className="h-5 w-5" /></Button><Button variant="destructive" size="icon" onClick={handleStopTimerDB} title="Stop and save to database" disabled={entriesLoading}><Square className="h-5 w-5" /></Button></>
               ) : (
-                <Button size="icon" className="bg-amber-500 hover:bg-amber-600" onClick={toggleTimer}><Play className="h-5 w-5" /></Button>
+                <Button size="icon" className="bg-amber-500 hover:bg-amber-600" onClick={handleStartTimerDB} disabled={entriesLoading || !timerDescription}><Play className="h-5 w-5" /></Button>
               )}
             </div>
           </CardContent>
@@ -603,8 +726,8 @@ export default function TimeTrackingClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Play, label: 'Start Timer', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleStartTimer },
-                { icon: Plus, label: 'Manual Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleCreateEntry },
+                { icon: Play, label: 'Start Timer', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => { if (timerDescription) handleStartTimerDB(); else toast.info('Enter a description first', { description: 'Type what you are working on in the timer bar above' }) }, disabled: isTimerRunning },
+                { icon: Plus, label: 'Manual Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowEntryDialog(true) },
                 { icon: Calendar, label: 'Calendar', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('calendar') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setActiveTab('reports') },
                 { icon: Briefcase, label: 'Projects', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setActiveTab('projects') },
@@ -616,6 +739,7 @@ export default function TimeTrackingClient() {
                   key={idx}
                   variant="ghost"
                   onClick={action.onClick}
+                  disabled={(action as any).disabled}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -625,33 +749,71 @@ export default function TimeTrackingClient() {
             </div>
 
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Today's Entries</CardTitle><span className="text-sm text-gray-500">Total: {mockEntries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h</span></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Today's Entries {entriesLoading && <span className="text-sm font-normal text-gray-500">(Loading...)</span>}</CardTitle>
+                <span className="text-sm text-gray-500">
+                  Total: {dbTimeEntries && dbTimeEntries.length > 0
+                    ? dbTimeEntries.filter((e: any) => new Date(e.start_time).toDateString() === new Date().toDateString())
+                        .reduce((sum: number, e: any) => sum + (e.duration_hours || 0), 0).toFixed(1)
+                    : mockEntries.filter(e => e.startTime.startsWith('2024-01-16')).reduce((sum, e) => sum + e.durationHours, 0).toFixed(1)}h
+                </span>
+              </CardHeader>
               <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-800">
-                {mockEntries.map(entry => (
-                  <div key={entry.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-1">
-                          {entry.status === 'running' && <span className="flex h-2 w-2"><span className="animate-ping absolute h-2 w-2 rounded-full bg-green-400 opacity-75"></span><span className="relative rounded-full h-2 w-2 bg-green-500"></span></span>}
-                          <h4 className="font-medium">{entry.title}</h4>
+                {/* Show database entries if available, otherwise show mock data */}
+                {(dbTimeEntries && dbTimeEntries.length > 0 ? dbTimeEntries : mockEntries.map(e => ({
+                  id: e.id,
+                  title: e.title,
+                  status: e.status,
+                  is_billable: e.isBillable,
+                  project_id: e.projectId,
+                  start_time: e.startTime,
+                  end_time: e.endTime,
+                  duration_hours: e.durationHours,
+                  billable_amount: e.billableAmount
+                }))).map((entry: any) => {
+                  const project = mockProjects.find(p => p.id === entry.project_id)
+                  return (
+                    <div key={entry.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-1">
+                            {entry.status === 'running' && <span className="flex h-2 w-2"><span className="animate-ping absolute h-2 w-2 rounded-full bg-green-400 opacity-75"></span><span className="relative rounded-full h-2 w-2 bg-green-500"></span></span>}
+                            <h4 className="font-medium">{entry.title}</h4>
+                            <Badge className={getStatusColor(entry.status)}>{entry.status}</Badge>
+                          </div>
+                          <div className="flex items-center gap-3 text-sm">
+                            <Badge className={getStatusColor(entry.is_billable ? 'paid' : 'draft')}>{entry.is_billable ? 'Billable' : 'Non-Billable'}</Badge>
+                            <span className="text-gray-500">{project?.name || 'No Project'}</span>
+                            <span className="text-gray-400">
+                              {new Date(entry.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {entry.end_time && ` - ${new Date(entry.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-3 text-sm">
-                          <Badge className={getStatusColor(entry.isBillable ? 'paid' : 'draft')}>{entry.isBillable ? 'Billable' : 'Non-Billable'}</Badge>
-                          <span className="text-gray-500">{entry.projectName}</span>
-                          <span className="text-gray-400">{new Date(entry.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}{entry.endTime && ` - ${new Date(entry.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        {entry.billableAmount > 0 && <span className="text-sm font-medium text-emerald-600">${entry.billableAmount}</span>}
-                        <div className="text-lg font-bold">{entry.durationHours.toFixed(1)}h</div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
-                          <Button variant="ghost" size="icon" onClick={() => toast.info('Edit Entry', { description: 'Opening entry editor...' })}><Edit2 className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" className="text-red-500" onClick={() => toast.success('Entry Deleted', { description: 'Time entry has been removed' })}><Trash2 className="h-4 w-4" /></Button>
+                        <div className="flex items-center gap-4">
+                          {entry.billable_amount > 0 && <span className="text-sm font-medium text-emerald-600">${entry.billable_amount?.toFixed(2)}</span>}
+                          <div className="text-lg font-bold">{(entry.duration_hours || 0).toFixed(1)}h</div>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+                            {entry.status === 'stopped' && (
+                              <Button variant="ghost" size="icon" onClick={() => handleApproveEntry(entry.id)} title="Approve entry" className="text-green-600"><Check className="h-4 w-4" /></Button>
+                            )}
+                            {entry.status === 'stopped' && (
+                              <Button variant="ghost" size="icon" onClick={() => handleSubmitEntry(entry.id)} title="Submit for approval" className="text-blue-600"><Send className="h-4 w-4" /></Button>
+                            )}
+                            <Button variant="ghost" size="icon" onClick={() => toast.info('Edit Entry', { description: 'Entry editor coming soon...' })} title="Edit entry"><Edit2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteEntry(entry.id)} disabled={entriesLoading} title="Delete entry"><Trash2 className="h-4 w-4" /></Button>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  )
+                })}
+                {(!dbTimeEntries || dbTimeEntries.length === 0) && !entriesLoading && (
+                  <div className="p-8 text-center text-gray-500">
+                    <Clock className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p>No time entries yet. Start a timer or add a manual entry!</p>
                   </div>
-                ))}
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -681,10 +843,21 @@ export default function TimeTrackingClient() {
             {/* Timesheet Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleCreateEntry },
+                { icon: Plus, label: 'Add Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowEntryDialog(true) },
                 { icon: Copy, label: 'Copy Week', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Week Copied', { description: 'Previous week entries duplicated' }) },
                 { icon: CheckCircle, label: 'Submit', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleApproveTimesheet },
-                { icon: Lock, label: 'Lock', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Timesheet Locked', { description: 'Entries can no longer be edited' }) },
+                { icon: Lock, label: 'Lock', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: async () => {
+                  // Lock all entries for the current week
+                  if (dbTimeEntries && dbTimeEntries.length > 0) {
+                    const weekEntries = dbTimeEntries.filter((e: any) => e.status === 'stopped' || e.status === 'approved')
+                    for (const entry of weekEntries) {
+                      await handleLockEntry(entry.id)
+                    }
+                    toast.info('Timesheet Locked', { description: 'All entries are now locked' })
+                  } else {
+                    toast.info('No entries to lock')
+                  }
+                }},
                 { icon: Calendar, label: 'View Month', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('calendar') },
                 { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: handleExportTimesheet },
                 { icon: Printer, label: 'Print', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Printing', { description: 'Opening print dialog...' }) },
@@ -1927,7 +2100,7 @@ export default function TimeTrackingClient() {
               <div className="grid grid-cols-2 gap-4"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
               <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowEntryDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={handleCreateEntry} disabled={entriesLoading || !newEntryForm.description || !newEntryForm.projectId}>{entriesLoading ? 'Saving...' : 'Save Entry'}</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowEntryDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={handleCreateManualEntry} disabled={entriesLoading || !newEntryForm.description || !newEntryForm.projectId}>{entriesLoading ? 'Saving...' : 'Save Entry'}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

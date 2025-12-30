@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { useExpenses, useCreateExpense } from '@/lib/hooks/use-expenses'
+import { useExpenses, useCreateExpense, useUpdateExpense, useDeleteExpense } from '@/lib/hooks/use-expenses'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -236,6 +236,8 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   // Database integration - use real expenses hooks
   const { data: dbExpenses, loading: expensesLoading, refetch } = useExpenses({ status: statusFilter as any })
   const { mutate: createExpense, loading: creating } = useCreateExpense()
+  const { mutate: updateExpense, loading: updating } = useUpdateExpense()
+  const { mutate: deleteExpense, loading: deleting } = useDeleteExpense()
 
   // Form state for new expense
   const [newExpenseForm, setNewExpenseForm] = useState({
@@ -350,17 +352,73 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     return Object.entries(breakdown).sort((a, b) => b[1] - a[1])
   }, [reports])
 
-  // Handlers
-  const handleApproveExpense = (report: ExpenseReport) => {
-    toast.success('Expense approved', {
-      description: `Report "${report.title}" has been approved`
-    })
+  // Handlers - Real Supabase operations
+  const handleApproveExpense = async (expenseId: string, title: string) => {
+    try {
+      await updateExpense({
+        id: expenseId,
+        status: 'approved',
+        approved_at: new Date().toISOString()
+      } as any)
+      toast.success('Expense approved', {
+        description: `Report "${title}" has been approved`
+      })
+      setShowReportDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to approve expense:', error)
+      toast.error('Failed to approve expense')
+    }
   }
 
-  const handleRejectExpense = (report: ExpenseReport) => {
-    toast.success('Expense rejected', {
-      description: `Report "${report.title}" has been rejected`
-    })
+  const handleRejectExpense = async (expenseId: string, title: string) => {
+    try {
+      await updateExpense({
+        id: expenseId,
+        status: 'rejected'
+      } as any)
+      toast.success('Expense rejected', {
+        description: `Report "${title}" has been rejected`
+      })
+      setShowReportDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to reject expense:', error)
+      toast.error('Failed to reject expense')
+    }
+  }
+
+  const handleReimburseExpense = async (expenseId: string, title: string) => {
+    try {
+      await updateExpense({
+        id: expenseId,
+        status: 'reimbursed',
+        reimbursed_at: new Date().toISOString(),
+        reimbursed: true
+      } as any)
+      toast.success('Expense reimbursed', {
+        description: `Report "${title}" has been marked as reimbursed`
+      })
+      setShowReportDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to reimburse expense:', error)
+      toast.error('Failed to reimburse expense')
+    }
+  }
+
+  const handleDeleteExpense = async (expenseId: string, title: string) => {
+    try {
+      await deleteExpense({ id: expenseId } as any)
+      toast.success('Expense deleted', {
+        description: `Report "${title}" has been deleted`
+      })
+      setShowReportDialog(false)
+      refetch()
+    } catch (error) {
+      console.error('Failed to delete expense:', error)
+      toast.error('Failed to delete expense')
+    }
   }
 
   const handleExportExpenses = () => {
@@ -369,10 +427,21 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     })
   }
 
-  const handleSubmitReport = (report: ExpenseReport) => {
-    toast.success('Report submitted', {
-      description: `"${report.title}" submitted for approval`
-    })
+  const handleSubmitReport = async (expenseId: string, title: string) => {
+    try {
+      await updateExpense({
+        id: expenseId,
+        status: 'pending',
+        submitted_at: new Date().toISOString()
+      } as any)
+      toast.success('Report submitted', {
+        description: `"${title}" submitted for approval`
+      })
+      refetch()
+    } catch (error) {
+      console.error('Failed to submit report:', error)
+      toast.error('Failed to submit report')
+    }
   }
 
   const handleAddReceipt = () => {
@@ -457,11 +526,11 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{expenseReports.length}</p>
+                    <p className="text-3xl font-bold">{dbExpenses?.length || reports.length}</p>
                     <p className="text-emerald-200 text-sm">Reports</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${expenseReports.reduce((sum, r) => sum + r.total, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">${(dbExpenses?.reduce((sum, r) => sum + (r.total_amount || 0), 0) || stats.totalExpenses).toLocaleString()}</p>
                     <p className="text-emerald-200 text-sm">Total</p>
                   </div>
                 </div>
@@ -1907,13 +1976,64 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
               {/* Actions */}
               {selectedReport.status === 'pending' && (
                 <div className="flex gap-3 pt-4 border-t">
-                  <Button variant="outline" className="flex-1 text-red-600 hover:bg-red-50">
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-red-600 hover:bg-red-50"
+                    onClick={() => handleRejectExpense(selectedReport.id, selectedReport.title)}
+                    disabled={updating}
+                  >
                     <XCircle className="h-4 w-4 mr-2" />
-                    Reject
+                    {updating ? 'Rejecting...' : 'Reject'}
                   </Button>
-                  <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                  <Button
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => handleApproveExpense(selectedReport.id, selectedReport.title)}
+                    disabled={updating}
+                  >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    Approve
+                    {updating ? 'Approving...' : 'Approve'}
+                  </Button>
+                </div>
+              )}
+              {selectedReport.status === 'approved' && (
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-red-600 hover:bg-red-50"
+                    onClick={() => handleDeleteExpense(selectedReport.id, selectedReport.title)}
+                    disabled={deleting}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {deleting ? 'Deleting...' : 'Delete'}
+                  </Button>
+                  <Button
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    onClick={() => handleReimburseExpense(selectedReport.id, selectedReport.title)}
+                    disabled={updating}
+                  >
+                    <Banknote className="h-4 w-4 mr-2" />
+                    {updating ? 'Processing...' : 'Reimburse'}
+                  </Button>
+                </div>
+              )}
+              {selectedReport.status === 'draft' && (
+                <div className="flex gap-3 pt-4 border-t">
+                  <Button
+                    variant="outline"
+                    className="flex-1 text-red-600 hover:bg-red-50"
+                    onClick={() => handleDeleteExpense(selectedReport.id, selectedReport.title)}
+                    disabled={deleting}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    {deleting ? 'Deleting...' : 'Delete'}
+                  </Button>
+                  <Button
+                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    onClick={() => handleSubmitReport(selectedReport.id, selectedReport.title)}
+                    disabled={updating}
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    {updating ? 'Submitting...' : 'Submit for Approval'}
                   </Button>
                 </div>
               )}

@@ -90,6 +90,7 @@ export interface CloudStorage {
   scan_status?: string
   scan_result?: string
   scanned_at?: string
+  is_starred?: boolean
   created_at: string
   updated_at: string
   deleted_at?: string
@@ -118,33 +119,39 @@ export function useCloudStorage(options: UseCloudStorageOptions = {}) {
     realtime: true
   }
 
-  const { data, loading, error, refetch } = useSupabaseQuery<CloudStorage>(queryOptions)
+  const { data, isLoading, error, refetch } = useSupabaseQuery<CloudStorage>(queryOptions)
 
-  const { mutate: createFile } = useSupabaseMutation({
+  const { mutate: createFile, remove: removeFile } = useSupabaseMutation<CloudStorage>({
     table: 'cloud_storage',
-    action: 'insert',
     onSuccess: refetch
   })
 
-  const { mutate: updateFile } = useSupabaseMutation({
-    table: 'cloud_storage',
-    action: 'update',
-    onSuccess: refetch
-  })
+  // Wrapper functions for CRUD operations
+  const addFile = async (fileData: Partial<CloudStorage>) => {
+    return createFile(fileData)
+  }
 
-  const { mutate: deleteFile } = useSupabaseMutation({
-    table: 'cloud_storage',
-    action: 'delete',
-    onSuccess: refetch
-  })
+  const updateFile = async (id: string, fileData: Partial<CloudStorage>) => {
+    return createFile(fileData, id)
+  }
+
+  const deleteFile = async (id: string) => {
+    return removeFile(id)
+  }
+
+  // Toggle starred status
+  const toggleStarred = async (id: string, currentStarred: boolean) => {
+    return createFile({ is_starred: !currentStarred }, id)
+  }
 
   return {
     files: data,
-    loading,
+    loading: isLoading,
     error,
-    createFile,
+    addFile,
     updateFile,
     deleteFile,
+    toggleStarred,
     refetch
   }
 }

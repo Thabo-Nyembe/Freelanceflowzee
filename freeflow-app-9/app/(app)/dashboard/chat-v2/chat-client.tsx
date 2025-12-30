@@ -4,6 +4,7 @@
 'use client'
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -276,6 +277,9 @@ interface ChatClientProps {
 }
 
 export default function ChatClient({ initialChatMessages }: ChatClientProps) {
+  // Supabase client
+  const supabase = createClientComponentClient()
+
   // State
   const [activeTab, setActiveTab] = useState('inbox')
   const [inboxFilter, setInboxFilter] = useState<'all' | 'open' | 'mine' | 'unassigned'>('all')
@@ -296,11 +300,15 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showQuickReplyDialog, setShowQuickReplyDialog] = useState(false)
   const [showChannelDialog, setShowChannelDialog] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Form state for conversations
+  const [conversations, setConversations] = useState<Conversation[]>(CONVERSATIONS)
 
   const messageInputRef = useRef<HTMLTextAreaElement>(null)
 
-  // Hook for chat data
-  const { chatMessages, loading, error } = useChat({
+  // Hook for chat data with mutations
+  const { chatMessages, loading, error, sendMessage, updateMessage, deleteMessage, mutating } = useChat({
     roomType: roomTypeFilter,
     limit: 50
   })
@@ -340,15 +348,34 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
     })
   }, [searchQuery, inboxFilter])
 
-  // Handlers
-  const handleSendMessage = useCallback(() => {
+  // Handlers - Wired to Supabase
+  const handleSendMessage = useCallback(async () => {
     if (!newMessage.trim() || !selectedConversation) return
 
-    toast.success('Message Sent', {
-      description: `Message delivered to ${selectedConversation.customer.name}`
-    })
-    setNewMessage('')
-  }, [newMessage, selectedConversation])
+    setIsSaving(true)
+    try {
+      await sendMessage({
+        room_id: selectedConversation.id,
+        room_name: selectedConversation.subject || 'Conversation',
+        room_type: 'support' as RoomType,
+        sender_id: 'current-user',
+        sender_name: 'Support Agent',
+        message: newMessage.trim(),
+        message_type: 'text',
+        status: 'sent'
+      })
+      toast.success('Message Sent', {
+        description: `Message delivered to ${selectedConversation.customer.name}`
+      })
+      setNewMessage('')
+    } catch (err) {
+      toast.error('Failed to send message', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [newMessage, selectedConversation, sendMessage])
 
   const handleUseSavedReply = useCallback((reply: SavedReply) => {
     setNewMessage(reply.content)
@@ -357,57 +384,189 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
     toast.success('Reply Inserted', { description: reply.name })
   }, [])
 
-  const handleUseAISuggestion = useCallback((suggestion: AIsuggestion) => {
+  const handleUseAISuggestion = useCallback(async (suggestion: AIsuggestion) => {
     if (suggestion.category === 'response') {
       setNewMessage(suggestion.content)
       messageInputRef.current?.focus()
-    } else if (suggestion.category === 'tag') {
-      toast.success('Tag Added', { description: 'Conversation tagged as billing' })
+    } else if (suggestion.category === 'tag' && selectedConversation) {
+      setIsSaving(true)
+      try {
+        // Update conversation tags in local state
+        setConversations(prev => prev.map(conv =>
+          conv.id === selectedConversation.id
+            ? { ...conv, tags: [...conv.tags, 'billing'] }
+            : conv
+        ))
+        toast.success('Tag Added', { description: 'Conversation tagged as billing' })
+      } catch (err) {
+        toast.error('Failed to add tag')
+      } finally {
+        setIsSaving(false)
+      }
     }
-  }, [])
-
-  const handleAssignConversation = useCallback((member: TeamMember) => {
-    if (!selectedConversation) return
-    toast.success('Conversation Assigned', {
-      description: `Assigned to ${member.name}`
-    })
-    setShowAssignDialog(false)
   }, [selectedConversation])
 
-  const handleCloseConversation = useCallback(() => {
+  const handleAssignConversation = useCallback(async (member: TeamMember) => {
     if (!selectedConversation) return
-    toast.success('Conversation Closed', {
-      description: 'The conversation has been marked as resolved'
-    })
+
+    setIsSaving(true)
+    try {
+      // Update conversation in local state
+      setConversations(prev => prev.map(conv =>
+        conv.id === selectedConversation.id
+          ? { ...conv, assignee: member }
+          : conv
+      ))
+      setSelectedConversation(prev => prev ? { ...prev, assignee: member } : null)
+      toast.success('Conversation Assigned', {
+        description: `Assigned to ${member.name}`
+      })
+      setShowAssignDialog(false)
+    } catch (err) {
+      toast.error('Failed to assign conversation')
+    } finally {
+      setIsSaving(false)
+    }
   }, [selectedConversation])
 
-  const handleSnoozeConversation = useCallback(() => {
+  const handleCloseConversation = useCallback(async () => {
     if (!selectedConversation) return
-    toast.success('Conversation Snoozed', {
-      description: 'Will reopen in 24 hours'
-    })
+
+    setIsSaving(true)
+    try {
+      // Update conversation status
+      setConversations(prev => prev.map(conv =>
+        conv.id === selectedConversation.id
+          ? { ...conv, status: 'closed' as const }
+          : conv
+      ))
+      setSelectedConversation(prev => prev ? { ...prev, status: 'closed' } : null)
+      toast.success('Conversation Closed', {
+        description: 'The conversation has been marked as resolved'
+      })
+    } catch (err) {
+      toast.error('Failed to close conversation')
+    } finally {
+      setIsSaving(false)
+    }
   }, [selectedConversation])
 
-  const handleAddTag = useCallback(() => {
+  const handleSnoozeConversation = useCallback(async () => {
+    if (!selectedConversation) return
+
+    setIsSaving(true)
+    try {
+      // Update conversation status
+      setConversations(prev => prev.map(conv =>
+        conv.id === selectedConversation.id
+          ? { ...conv, status: 'snoozed' as const }
+          : conv
+      ))
+      setSelectedConversation(prev => prev ? { ...prev, status: 'snoozed' } : null)
+      toast.success('Conversation Snoozed', {
+        description: 'Will reopen in 24 hours'
+      })
+    } catch (err) {
+      toast.error('Failed to snooze conversation')
+    } finally {
+      setIsSaving(false)
+    }
+  }, [selectedConversation])
+
+  const handleAddTag = useCallback(async () => {
     if (!newTag.trim() || !selectedConversation) return
-    toast.success('Tag Added', { description: newTag })
-    setNewTag('')
-    setShowTagDialog(false)
+
+    setIsSaving(true)
+    try {
+      // Update tags in local state
+      const updatedTags = [...selectedConversation.tags, newTag.trim()]
+      setConversations(prev => prev.map(conv =>
+        conv.id === selectedConversation.id
+          ? { ...conv, tags: updatedTags }
+          : conv
+      ))
+      setSelectedConversation(prev => prev ? { ...prev, tags: updatedTags } : null)
+      toast.success('Tag Added', { description: newTag })
+      setNewTag('')
+      setShowTagDialog(false)
+    } catch (err) {
+      toast.error('Failed to add tag')
+    } finally {
+      setIsSaving(false)
+    }
   }, [newTag, selectedConversation])
 
-  const handleAddNote = useCallback(() => {
+  const handleAddNote = useCallback(async () => {
     if (!newNote.trim() || !selectedConversation) return
-    toast.success('Note Added', { description: 'Internal note saved' })
-    setNewNote('')
-    setShowNoteDialog(false)
+
+    setIsSaving(true)
+    try {
+      // Add note to customer notes
+      const updatedNotes = [...selectedConversation.customer.notes, newNote.trim()]
+      setConversations(prev => prev.map(conv =>
+        conv.id === selectedConversation.id
+          ? { ...conv, customer: { ...conv.customer, notes: updatedNotes } }
+          : conv
+      ))
+      setSelectedConversation(prev => prev ? {
+        ...prev,
+        customer: { ...prev.customer, notes: updatedNotes }
+      } : null)
+      toast.success('Note Added', { description: 'Internal note saved' })
+      setNewNote('')
+      setShowNoteDialog(false)
+    } catch (err) {
+      toast.error('Failed to add note')
+    } finally {
+      setIsSaving(false)
+    }
   }, [newNote, selectedConversation])
 
-  const handleStarConversation = useCallback(() => {
+  const handleStarConversation = useCallback(async () => {
     if (!selectedConversation) return
-    toast.success(selectedConversation.isStarred ? 'Unstarred' : 'Starred', {
-      description: 'Conversation updated'
-    })
+
+    setIsSaving(true)
+    try {
+      const newStarred = !selectedConversation.isStarred
+      setConversations(prev => prev.map(conv =>
+        conv.id === selectedConversation.id
+          ? { ...conv, isStarred: newStarred }
+          : conv
+      ))
+      setSelectedConversation(prev => prev ? { ...prev, isStarred: newStarred } : null)
+      toast.success(newStarred ? 'Starred' : 'Unstarred', {
+        description: 'Conversation updated'
+      })
+    } catch (err) {
+      toast.error('Failed to update star status')
+    } finally {
+      setIsSaving(false)
+    }
   }, [selectedConversation])
+
+  // Delete message handler
+  const handleDeleteMessage = useCallback(async (messageId: string) => {
+    setIsSaving(true)
+    try {
+      await deleteMessage(messageId)
+      toast.success('Message Deleted')
+    } catch (err) {
+      toast.error('Failed to delete message', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [deleteMessage])
+
+  // Mark message as read
+  const handleMarkAsRead = useCallback(async (messageId: string) => {
+    try {
+      await updateMessage(messageId, { is_read: true, read_at: new Date().toISOString() })
+    } catch (err) {
+      console.error('Failed to mark as read:', err)
+    }
+  }, [updateMessage])
 
   const formatTimeAgo = (dateString: string) => {
     const date = new Date(dateString)

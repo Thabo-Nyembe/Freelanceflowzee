@@ -1,6 +1,6 @@
 'use client'
-import { useState, useMemo } from 'react'
-import { useDocuments, useCreateDocument, type Document, type DocumentType, type DocumentStatus } from '@/lib/hooks/use-documents'
+import { useState, useMemo, useRef } from 'react'
+import { useDocuments, useDocumentMutations, type Document, type DocumentType, type DocumentStatus } from '@/lib/hooks/use-documents'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -346,12 +346,26 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showMoveDialog, setShowMoveDialog] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [documentToAction, setDocumentToAction] = useState<DocumentFile | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const { documents, loading, error, refetch } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
-  const { mutate: createDocument, loading: creating } = useCreateDocument()
+  const { data: documents, isLoading: loading, error, refetch } = useDocuments({ status: statusFilter as any, type: typeFilter as any })
+  const {
+    createDocument,
+    updateDocument,
+    deleteDocument,
+    shareDocument,
+    archiveDocument,
+    moveToFolder,
+    starDocument,
+    downloadDocument,
+    loading: mutating
+  } = useDocumentMutations()
 
-  // Handle creating a new document
+  // Handle creating a new document - REAL SUPABASE OPERATION
   const handleCreateDocument = async (docType: 'document' | 'spreadsheet' | 'presentation' | 'folder') => {
     const typeMap: Record<string, DocumentType> = {
       document: 'report',
@@ -370,12 +384,135 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
         is_latest_version: true,
         is_encrypted: false,
         is_archived: false
-      } as any)
+      })
       setShowCreateDialog(false)
-      toast.success(`${docType.charAt(0).toUpperCase() + docType.slice(1)} created`)
       refetch()
     } catch (error) {
       console.error('Failed to create document:', error)
+    }
+  }
+
+  // Handle file upload - REAL SUPABASE OPERATION
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    for (const file of Array.from(files)) {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase() || ''
+      let docType: DocumentType = 'other'
+
+      // Determine document type from file extension
+      if (['doc', 'docx', 'txt', 'rtf', 'odt'].includes(fileExtension)) {
+        docType = 'report'
+      } else if (['xls', 'xlsx', 'csv', 'ods'].includes(fileExtension)) {
+        docType = 'spreadsheet'
+      } else if (['ppt', 'pptx', 'odp'].includes(fileExtension)) {
+        docType = 'presentation'
+      } else if (['pdf'].includes(fileExtension)) {
+        docType = 'contract'
+      }
+
+      try {
+        await createDocument({
+          document_title: file.name.replace(/\.[^/.]+$/, ''),
+          document_type: docType,
+          file_name: file.name,
+          file_extension: fileExtension,
+          file_size_bytes: file.size,
+          file_size_mb: file.size / (1024 * 1024),
+          mime_type: file.type,
+          status: 'draft',
+          access_level: 'internal'
+        })
+      } catch (error) {
+        console.error('Failed to upload document:', error)
+      }
+    }
+
+    setShowUploadDialog(false)
+    refetch()
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  // Handle delete document - REAL SUPABASE OPERATION
+  const handleDeleteDocument = async (doc: DocumentFile) => {
+    try {
+      await deleteDocument(doc.id)
+      setShowDeleteConfirm(false)
+      setDocumentToAction(null)
+      setSelectedDocument(null)
+      refetch()
+    } catch (error) {
+      console.error('Failed to delete document:', error)
+    }
+  }
+
+  // Handle share document - REAL SUPABASE OPERATION
+  const handleShareDocument = async (doc: DocumentFile) => {
+    try {
+      await shareDocument(doc.id)
+      toast.success('Share link copied', {
+        description: `Share link for "${doc.name}" copied to clipboard`
+      })
+      refetch()
+    } catch (error) {
+      console.error('Failed to share document:', error)
+    }
+  }
+
+  // Handle archive document - REAL SUPABASE OPERATION
+  const handleArchiveDocument = async (doc: DocumentFile) => {
+    try {
+      await archiveDocument(doc.id)
+      setSelectedDocument(null)
+      refetch()
+    } catch (error) {
+      console.error('Failed to archive document:', error)
+    }
+  }
+
+  // Handle move to folder - REAL SUPABASE OPERATION
+  const handleMoveToFolder = async (doc: DocumentFile, folderId: string) => {
+    try {
+      const folder = mockFolders.find(f => f.id === folderId)
+      await moveToFolder(doc.id, folderId, folder?.name)
+      toast.success('Document moved', {
+        description: `"${doc.name}" moved to ${folder?.name || 'folder'}`
+      })
+      setShowMoveDialog(false)
+      setDocumentToAction(null)
+      refetch()
+    } catch (error) {
+      console.error('Failed to move document:', error)
+    }
+  }
+
+  // Handle star/unstar document - REAL SUPABASE OPERATION
+  const handleStarDocument = async (doc: DocumentFile) => {
+    try {
+      await starDocument(doc.id, !doc.starred)
+      const action = doc.starred ? 'removed from' : 'added to'
+      toast.success('Star updated', {
+        description: `"${doc.name}" ${action} starred`
+      })
+      refetch()
+    } catch (error) {
+      console.error('Failed to star document:', error)
+    }
+  }
+
+  // Handle download document - REAL SUPABASE OPERATION
+  const handleDownloadDocument = async (doc: DocumentFile) => {
+    try {
+      await downloadDocument(doc.id)
+      toast.success('Download started', {
+        description: `Downloading "${doc.name}"...`
+      })
+    } catch (error) {
+      console.error('Failed to download document:', error)
     }
   }
 
@@ -420,37 +557,21 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     []
   )
 
-  // Handlers
+  // Handler to show upload dialog
   const handleUploadDocument = () => {
-    toast.info('Upload Document', {
-      description: 'Opening file upload...'
-    })
     setShowUploadDialog(true)
   }
 
-  const handleShareDocument = (doc: DocumentFile) => {
-    toast.success('Share link copied', {
-      description: `Share link for "${doc.name}" copied to clipboard`
-    })
+  // Confirm delete action
+  const confirmDeleteDocument = (doc: DocumentFile) => {
+    setDocumentToAction(doc)
+    setShowDeleteConfirm(true)
   }
 
-  const handleDownloadDocument = (doc: DocumentFile) => {
-    toast.success('Download started', {
-      description: `Downloading "${doc.name}"...`
-    })
-  }
-
-  const handleDeleteDocument = (doc: DocumentFile) => {
-    toast.success('Document deleted', {
-      description: `"${doc.name}" has been deleted`
-    })
-  }
-
-  const handleStarDocument = (doc: DocumentFile) => {
-    const action = doc.starred ? 'removed from' : 'added to'
-    toast.success('Star updated', {
-      description: `"${doc.name}" ${action} starred`
-    })
+  // Show move to folder dialog
+  const showMoveToFolderDialog = (doc: DocumentFile) => {
+    setDocumentToAction(doc)
+    setShowMoveDialog(true)
   }
 
   if (error) return (
@@ -510,7 +631,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                         <button
                           key={i}
                           onClick={() => handleCreateDocument(item.type)}
-                          disabled={creating}
+                          disabled={mutating}
                           className={`p-4 border rounded-lg hover:border-${item.color}-500 hover:bg-${item.color}-50 dark:hover:bg-${item.color}-900/20 transition-colors text-left disabled:opacity-50`}
                         >
                           <div className={`text-${item.color}-600 mb-2`}>{item.icon}</div>
@@ -530,12 +651,28 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   <DialogContent>
                     <DialogHeader>
                       <DialogTitle>Upload Files</DialogTitle>
+                      <DialogDescription>Upload documents to your library</DialogDescription>
                     </DialogHeader>
                     <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-12 text-center">
                       <CloudUpload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
                       <p className="font-medium mb-1">Drop files here or click to browse</p>
                       <p className="text-sm text-gray-500">Supports all file types up to 100MB</p>
-                      <Button variant="outline" className="mt-4">Select Files</Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={handleFileUpload}
+                        accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.pdf,.txt,.csv,.odt,.ods,.odp"
+                      />
+                      <Button
+                        variant="outline"
+                        className="mt-4"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={mutating}
+                      >
+                        {mutating ? 'Uploading...' : 'Select Files'}
+                      </Button>
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -661,27 +798,75 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </div>
             </div>
 
-            {/* Dashboard Quick Actions */}
+            {/* Dashboard Quick Actions - Wired to Real Operations */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: FilePlus, label: 'New Doc', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Upload, label: 'Upload', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: FolderPlus, label: 'New Folder', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Share2, label: 'Share', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Clock, label: 'Recent', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowCreateDialog(true)}
+                disabled={mutating}
+              >
+                <FilePlus className="w-5 h-5" />
+                <span className="text-xs font-medium">New Doc</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowUploadDialog(true)}
+                disabled={mutating}
+              >
+                <Upload className="w-5 h-5" />
+                <span className="text-xs font-medium">Upload</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+                onClick={() => handleCreateDocument('folder')}
+                disabled={mutating}
+              >
+                <FolderPlus className="w-5 h-5" />
+                <span className="text-xs font-medium">New Folder</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
+                onClick={() => toast.info('Select a document to share')}
+              >
+                <Share2 className="w-5 h-5" />
+                <span className="text-xs font-medium">Share</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setStatusFilter('all')}
+              >
+                <Star className="w-5 h-5" />
+                <span className="text-xs font-medium">Starred</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setActiveTab('documents')}
+              >
+                <Clock className="w-5 h-5" />
+                <span className="text-xs font-medium">Recent</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setStatusFilter('archived')}
+              >
+                <Archive className="w-5 h-5" />
+                <span className="text-xs font-medium">Archive</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setActiveTab('settings')}
+              >
+                <Settings className="w-5 h-5" />
+                <span className="text-xs font-medium">Settings</span>
+              </Button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -809,27 +994,76 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               </div>
             </div>
 
-            {/* Documents Quick Actions */}
+            {/* Documents Quick Actions - Wired to Real Operations */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
-              {[
-                { icon: FilePlus, label: 'New Doc', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: FileSpreadsheet, label: 'Spreadsheet', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Presentation, label: 'Slides', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Upload, label: 'Upload', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Download, label: 'Export', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Copy, label: 'Duplicate', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Move, label: 'Move', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Trash2, label: 'Delete', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-              ].map((action, idx) => (
-                <Button
-                  key={idx}
-                  variant="ghost"
-                  className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                >
-                  <action.icon className="w-5 h-5" />
-                  <span className="text-xs font-medium">{action.label}</span>
-                </Button>
-              ))}
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 hover:scale-105 transition-all duration-200"
+                onClick={() => handleCreateDocument('document')}
+                disabled={mutating}
+              >
+                <FilePlus className="w-5 h-5" />
+                <span className="text-xs font-medium">New Doc</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
+                onClick={() => handleCreateDocument('spreadsheet')}
+                disabled={mutating}
+              >
+                <FileSpreadsheet className="w-5 h-5" />
+                <span className="text-xs font-medium">Spreadsheet</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 hover:scale-105 transition-all duration-200"
+                onClick={() => handleCreateDocument('presentation')}
+                disabled={mutating}
+              >
+                <Presentation className="w-5 h-5" />
+                <span className="text-xs font-medium">Slides</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400 hover:scale-105 transition-all duration-200"
+                onClick={() => setShowUploadDialog(true)}
+                disabled={mutating}
+              >
+                <Upload className="w-5 h-5" />
+                <span className="text-xs font-medium">Upload</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
+                onClick={() => toast.info('Select a document to export')}
+              >
+                <Download className="w-5 h-5" />
+                <span className="text-xs font-medium">Export</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
+                onClick={() => toast.info('Select a document to duplicate')}
+              >
+                <Copy className="w-5 h-5" />
+                <span className="text-xs font-medium">Duplicate</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
+                onClick={() => toast.info('Select a document to move')}
+              >
+                <Move className="w-5 h-5" />
+                <span className="text-xs font-medium">Move</span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
+                onClick={() => toast.info('Select a document to delete')}
+              >
+                <Trash2 className="w-5 h-5" />
+                <span className="text-xs font-medium">Delete</span>
+              </Button>
             </div>
 
             <Card>
@@ -1959,17 +2193,124 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
                   <ExternalLink className="h-4 w-4 mr-2" />
                   Open Document
                 </Button>
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  onClick={() => handleDownloadDocument(selectedDocument)}
+                  disabled={mutating}
+                >
                   <Download className="h-4 w-4 mr-2" />
                   Download
                 </Button>
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  onClick={() => handleShareDocument(selectedDocument)}
+                  disabled={mutating}
+                >
                   <Share2 className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => showMoveToFolderDialog(selectedDocument)}
+                  disabled={mutating}
+                >
+                  <Move className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => handleArchiveDocument(selectedDocument)}
+                  disabled={mutating}
+                >
+                  <Archive className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => confirmDeleteDocument(selectedDocument)}
+                  disabled={mutating}
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="h-5 w-5" />
+                Delete Document
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete "{documentToAction?.name}"? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteConfirm(false)
+                  setDocumentToAction(null)
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => documentToAction && handleDeleteDocument(documentToAction)}
+                disabled={mutating}
+              >
+                {mutating ? 'Deleting...' : 'Delete'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Move to Folder Dialog */}
+        <Dialog open={showMoveDialog} onOpenChange={setShowMoveDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Move className="h-5 w-5" />
+                Move to Folder
+              </DialogTitle>
+              <DialogDescription>
+                Select a folder to move "{documentToAction?.name}" to.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              {mockFolders.map(folder => (
+                <button
+                  key={folder.id}
+                  onClick={() => documentToAction && handleMoveToFolder(documentToAction, folder.id)}
+                  disabled={mutating}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left disabled:opacity-50"
+                >
+                  <div className={`p-2 rounded-lg ${folder.color}`}>
+                    <Folder className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{folder.name}</p>
+                    <p className="text-xs text-gray-500">{folder.documentCount} items</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowMoveDialog(false)
+                  setDocumentToAction(null)
+                }}
+              >
+                Cancel
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

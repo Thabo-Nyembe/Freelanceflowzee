@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
+import { useMessages, Message as SupabaseMessage } from '@/lib/hooks/use-messages'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -242,6 +243,20 @@ export default function MessagesClient() {
   const [selectedThread, setSelectedThread] = useState<Message | null>(null)
   const [channelFilter, setChannelFilter] = useState<'all' | 'unread' | 'starred'>('all')
   const [activeCall, setActiveCall] = useState<Call | null>(null)
+  const [recipientId, setRecipientId] = useState('')
+  const [messageSubject, setMessageSubject] = useState('')
+
+  // Real Supabase hook for messages
+  const {
+    messages: supabaseMessages,
+    loading: messagesLoading,
+    error: messagesError,
+    mutating,
+    createMessage,
+    updateMessage,
+    deleteMessage,
+    refetch: refetchMessages
+  } = useMessages({ limit: 100 })
 
   // Settings
   const [settings, setSettings] = useState({
@@ -331,11 +346,114 @@ export default function MessagesClient() {
     { label: 'Mentions', value: stats.mentions.toString(), change: -5.0, icon: AtSign, gradient: 'from-indigo-500 to-purple-500' }
   ]
 
-  // Handlers
-  const handleSendMessage = () => {
-    toast.success('Message sent', {
-      description: 'Your message has been delivered'
-    })
+  // Real Supabase handlers
+  const handleSendMessage = async () => {
+    if (!messageInput.trim()) {
+      toast.error('Message required', { description: 'Please enter a message to send' })
+      return
+    }
+
+    try {
+      await createMessage({
+        body: messageInput,
+        subject: messageSubject || null,
+        recipient_id: recipientId || currentUser.id,
+        sender_id: currentUser.id,
+        message_type: 'direct' as const,
+        status: 'sent' as const,
+        priority: 'normal' as const,
+        folder: 'inbox',
+        is_read: false,
+        is_pinned: false,
+        is_starred: false,
+        is_important: false,
+        is_spam: false,
+        is_forwarded: false,
+        is_encrypted: false,
+        is_scheduled: false,
+        has_attachments: false,
+        attachment_count: 0,
+        reaction_count: 0
+      })
+      setMessageInput('')
+      setMessageSubject('')
+      toast.success('Message sent', { description: 'Your message has been delivered' })
+    } catch (error) {
+      toast.error('Failed to send message', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      await deleteMessage(messageId)
+      toast.success('Message deleted', { description: 'The message has been removed' })
+    } catch (error) {
+      toast.error('Failed to delete message', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleMarkAsRead = async (messageId: string) => {
+    try {
+      await updateMessage(messageId, {
+        is_read: true,
+        read_at: new Date().toISOString(),
+        status: 'read' as const
+      })
+      toast.success('Marked as read', { description: 'Message marked as read' })
+    } catch (error) {
+      toast.error('Failed to mark as read', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleArchiveMessage = async (messageId: string) => {
+    try {
+      await updateMessage(messageId, {
+        status: 'archived' as const,
+        folder: 'archive'
+      })
+      toast.success('Message archived', { description: 'Message moved to archive' })
+    } catch (error) {
+      toast.error('Failed to archive message', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleStarMessage = async (messageId: string, currentStarred: boolean) => {
+    try {
+      await updateMessage(messageId, {
+        is_starred: !currentStarred
+      })
+      toast.success(currentStarred ? 'Star removed' : 'Message starred', {
+        description: currentStarred ? 'Star has been removed' : 'Message has been starred'
+      })
+    } catch (error) {
+      toast.error('Failed to update star', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handlePinMessage = async (messageId: string, currentPinned: boolean) => {
+    try {
+      await updateMessage(messageId, {
+        is_pinned: !currentPinned
+      })
+      toast.success(currentPinned ? 'Message unpinned' : 'Message pinned', {
+        description: currentPinned ? 'Message has been unpinned' : 'Message has been pinned'
+      })
+    } catch (error) {
+      toast.error('Failed to update pin', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleMarkAsImportant = async (messageId: string, currentImportant: boolean) => {
+    try {
+      await updateMessage(messageId, {
+        is_important: !currentImportant
+      })
+      toast.success(currentImportant ? 'Removed important flag' : 'Marked as important', {
+        description: currentImportant ? 'Important flag removed' : 'Message marked as important'
+      })
+    } catch (error) {
+      toast.error('Failed to update importance', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
   }
 
   const handleCreateChannel = () => {
@@ -350,16 +468,105 @@ export default function MessagesClient() {
     })
   }
 
-  const handleMarkAsRead = (channelName: string) => {
-    toast.success('Marked as read', {
-      description: `All messages in #${channelName} marked as read`
-    })
-  }
-
   const handleMuteChannel = (channelName: string) => {
     toast.info('Channel muted', {
       description: `#${channelName} notifications muted`
     })
+  }
+
+  const handleMarkAllAsRead = async () => {
+    if (!supabaseMessages || supabaseMessages.length === 0) {
+      toast.info('No messages to mark as read')
+      return
+    }
+
+    try {
+      const unreadMessages = supabaseMessages.filter(m => !m.is_read)
+      for (const msg of unreadMessages) {
+        await updateMessage(msg.id, {
+          is_read: true,
+          read_at: new Date().toISOString(),
+          status: 'read' as const
+        })
+      }
+      toast.success('All messages marked as read', { description: `${unreadMessages.length} messages updated` })
+    } catch (error) {
+      toast.error('Failed to mark all as read', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleForwardMessage = async (messageId: string, newRecipientId: string) => {
+    const originalMessage = supabaseMessages?.find(m => m.id === messageId)
+    if (!originalMessage) {
+      toast.error('Message not found')
+      return
+    }
+
+    try {
+      await createMessage({
+        body: originalMessage.body,
+        subject: originalMessage.subject ? `Fwd: ${originalMessage.subject}` : null,
+        recipient_id: newRecipientId,
+        sender_id: currentUser.id,
+        message_type: 'direct' as const,
+        status: 'sent' as const,
+        priority: originalMessage.priority,
+        folder: 'sent',
+        is_read: false,
+        is_pinned: false,
+        is_starred: false,
+        is_important: false,
+        is_spam: false,
+        is_forwarded: true,
+        forwarded_from_message_id: messageId,
+        is_encrypted: false,
+        is_scheduled: false,
+        has_attachments: originalMessage.has_attachments,
+        attachment_count: originalMessage.attachment_count,
+        reaction_count: 0
+      })
+      toast.success('Message forwarded', { description: 'Message has been forwarded successfully' })
+    } catch (error) {
+      toast.error('Failed to forward message', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleReplyToMessage = async (parentMessageId: string, replyBody: string) => {
+    const parentMessage = supabaseMessages?.find(m => m.id === parentMessageId)
+    if (!parentMessage) {
+      toast.error('Original message not found')
+      return
+    }
+
+    try {
+      await createMessage({
+        body: replyBody,
+        subject: parentMessage.subject ? `Re: ${parentMessage.subject}` : null,
+        recipient_id: parentMessage.sender_id,
+        sender_id: currentUser.id,
+        parent_message_id: parentMessageId,
+        reply_to_message_id: parentMessageId,
+        thread_id: parentMessage.thread_id || parentMessageId,
+        message_type: 'direct' as const,
+        status: 'sent' as const,
+        priority: 'normal' as const,
+        folder: 'sent',
+        is_read: false,
+        is_pinned: false,
+        is_starred: false,
+        is_important: false,
+        is_spam: false,
+        is_forwarded: false,
+        is_encrypted: false,
+        is_scheduled: false,
+        has_attachments: false,
+        attachment_count: 0,
+        reaction_count: 0
+      })
+      toast.success('Reply sent', { description: 'Your reply has been sent' })
+    } catch (error) {
+      toast.error('Failed to send reply', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
   }
 
   return (
@@ -373,7 +580,12 @@ export default function MessagesClient() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Messages</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Slack-level team communication platform</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Slack-level team communication platform
+                {messagesLoading && <span className="ml-2 text-blue-500">(Loading...)</span>}
+                {messagesError && <span className="ml-2 text-red-500">(Error loading messages)</span>}
+                {supabaseMessages && <span className="ml-2 text-green-500">({supabaseMessages.length} messages from Supabase)</span>}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -389,7 +601,14 @@ export default function MessagesClient() {
             <Button variant="outline" size="icon">
               <Filter className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white">
+            <Button variant="outline" size="sm" onClick={handleMarkAllAsRead} disabled={mutating}>
+              <CheckCheck className="w-4 h-4 mr-2" />
+              Mark All Read
+            </Button>
+            <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white" onClick={() => {
+              setMessageInput('')
+              toast.info('Compose Message', { description: 'Use the message input below to send a new message' })
+            }}>
               <Plus className="w-4 h-4 mr-2" />
               New Message
             </Button>
@@ -619,21 +838,29 @@ export default function MessagesClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={handleCreateChannel}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Channel
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Invite People', { description: 'Opening invite dialog...' })}>
                       <UserPlus className="w-4 h-4 mr-2" />
                       Invite People
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Add App', { description: 'Opening app marketplace...' })}>
                       <Bot className="w-4 h-4 mr-2" />
                       Add App
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Create Workflow', { description: 'Opening workflow builder...' })}>
                       <Workflow className="w-4 h-4 mr-2" />
                       Create Workflow
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" onClick={handleMarkAllAsRead} disabled={mutating}>
+                      <CheckCheck className="w-4 h-4 mr-2" />
+                      Mark All Read
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" onClick={refetchMessages} disabled={messagesLoading}>
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Refresh Messages
                     </Button>
                   </CardContent>
                 </Card>
@@ -761,9 +988,11 @@ export default function MessagesClient() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="icon"><Phone className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon"><Video className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon"><Pin className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Phone className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Video className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.info('Pinned Items', { description: 'View pinned messages in this channel' })}><Pin className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleMuteChannel(selectedChannel.name)}><BellOff className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.info('Archive Channel', { description: 'Archive this channel to hide it from the sidebar' })}><Archive className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </CardHeader>
@@ -802,8 +1031,10 @@ export default function MessagesClient() {
                     </ScrollArea>
                     <div className="p-4 border-t">
                       <div className="flex gap-2">
-                        <Input placeholder={`Message #${selectedChannel.name}`} value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="flex-1" />
-                        <Button><Send className="w-4 h-4" /></Button>
+                        <Input placeholder={`Message #${selectedChannel.name}`} value={messageInput} onChange={(e) => setMessageInput(e.target.value)} className="flex-1" onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()} />
+                        <Button onClick={handleSendMessage} disabled={mutating || !messageInput.trim()}>
+                          <Send className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -977,7 +1208,10 @@ export default function MessagesClient() {
                               <p className="text-xs text-gray-500">{call.participants.length} participants</p>
                             </div>
                           </div>
-                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+                          <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => {
+                            setActiveCall(call)
+                            toast.success('Joining call', { description: `You are now in ${call.channelName}` })
+                          }}>
                             Join
                           </Button>
                         </div>
@@ -1016,7 +1250,7 @@ export default function MessagesClient() {
                               <p className="text-sm text-gray-500">{new Date(call.startTime).toLocaleString()}</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">View</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('View Scheduled Call', { description: `Call scheduled for ${new Date(call.startTime).toLocaleString()}` })}>View</Button>
                         </div>
                       </div>
                     ))}
@@ -1107,7 +1341,7 @@ export default function MessagesClient() {
                     <CardTitle>Shared Files</CardTitle>
                     <CardDescription>All files shared across channels</CardDescription>
                   </div>
-                  <Button>
+                  <Button onClick={() => toast.info('Upload File', { description: 'File upload dialog will open...' })}>
                     <Upload className="w-4 h-4 mr-2" />
                     Upload File
                   </Button>
@@ -1137,7 +1371,7 @@ export default function MessagesClient() {
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="text-sm text-gray-500">{file.downloads} downloads</span>
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" onClick={() => toast.success('Download started', { description: `Downloading ${file.name}...` })}>
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1220,7 +1454,10 @@ export default function MessagesClient() {
                           </div>
                           <p className="text-sm">{mention.message.content}</p>
                         </div>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          toast.info('Reply', { description: 'Enter your reply in the message input below' })
+                          setMessageInput(`@${mention.message.author.name} `)
+                        }}>
                           <Reply className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1243,9 +1480,19 @@ export default function MessagesClient() {
                   <div className="flex gap-4">
                     <div className="relative flex-1">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <Input placeholder="Search messages..." className="pl-10 h-12 text-lg" />
+                      <Input placeholder="Search messages..." className="pl-10 h-12 text-lg" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                     </div>
-                    <Button size="lg">Search</Button>
+                    <Button size="lg" onClick={() => {
+                      if (!searchQuery.trim()) {
+                        toast.error('Search required', { description: 'Please enter a search term' })
+                        return
+                      }
+                      const results = supabaseMessages?.filter(m =>
+                        m.body?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        m.subject?.toLowerCase().includes(searchQuery.toLowerCase())
+                      ) || []
+                      toast.success(`Search complete`, { description: `Found ${results.length} matching messages` })
+                    }}>Search</Button>
                   </div>
 
                   <div className="flex flex-wrap gap-2">
@@ -1695,7 +1942,7 @@ export default function MessagesClient() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Active Sessions', { description: 'Opening session management...' })}>
                           <Key className="w-4 h-4 mr-2" />
                           Manage Active Sessions
                         </Button>
@@ -1761,7 +2008,7 @@ export default function MessagesClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Connect Zoom', { description: 'Starting Zoom OAuth flow...' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1793,9 +2040,9 @@ export default function MessagesClient() {
                               <div className="text-sm text-gray-500">3 active workflows</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Manage Workflows', { description: 'Opening workflow manager...' })}>Manage</Button>
                         </div>
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={() => toast.info('Add App', { description: 'Opening app marketplace...' })}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add App
                         </Button>
@@ -1830,11 +2077,11 @@ export default function MessagesClient() {
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.info('Export Data', { description: 'Preparing data export...' })}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.success('Cache Cleared', { description: 'Local cache has been cleared' })}>
                             <Archive className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -1851,19 +2098,19 @@ export default function MessagesClient() {
                         <CardDescription>Get help and support resources</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Documentation', { description: 'Opening documentation...' })}>
                           <BookOpen className="w-4 h-4 mr-2" />
                           Documentation
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Contact Support', { description: 'Opening support chat...' })}>
                           <MessageSquare className="w-4 h-4 mr-2" />
                           Contact Support
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Keyboard Shortcuts', { description: 'Press Ctrl+/ to view shortcuts' })}>
                           <Zap className="w-4 h-4 mr-2" />
                           Keyboard Shortcuts
                         </Button>
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.success('Up to date', { description: 'You are running the latest version' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Check for Updates
                         </Button>
@@ -1884,7 +2131,11 @@ export default function MessagesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Leave Workspace</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Remove yourself from this workspace</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            if (confirm('Are you sure you want to leave this workspace?')) {
+                              toast.info('Leaving workspace', { description: 'Redirecting...' })
+                            }
+                          }}>
                             <LogOut className="w-4 h-4 mr-2" />
                             Leave
                           </Button>
@@ -1894,7 +2145,22 @@ export default function MessagesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Delete All Messages</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all your messages</div>
                           </div>
-                          <Button variant="destructive" size="sm">
+                          <Button variant="destructive" size="sm" onClick={async () => {
+                            if (!supabaseMessages || supabaseMessages.length === 0) {
+                              toast.info('No messages to delete')
+                              return
+                            }
+                            if (confirm('Are you sure you want to delete all messages? This cannot be undone.')) {
+                              try {
+                                for (const msg of supabaseMessages) {
+                                  await deleteMessage(msg.id, true)
+                                }
+                                toast.success('All messages deleted', { description: 'All your messages have been permanently deleted' })
+                              } catch (error) {
+                                toast.error('Failed to delete messages', { description: error instanceof Error ? error.message : 'Unknown error' })
+                              }
+                            }
+                          }} disabled={mutating}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>

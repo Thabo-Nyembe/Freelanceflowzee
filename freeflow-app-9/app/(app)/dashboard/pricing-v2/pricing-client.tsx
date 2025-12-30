@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -109,6 +110,84 @@ type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'trialing' | 'pau
 type DiscountType = 'percentage' | 'fixed' | 'free_trial'
 type PricingModel = 'flat' | 'tiered' | 'usage' | 'per_seat' | 'freemium'
 type InvoiceStatus = 'paid' | 'pending' | 'overdue' | 'failed' | 'refunded'
+
+// Database Types
+interface DbPricingPlan {
+  id: string
+  user_id: string
+  name: string
+  description: string | null
+  monthly_price: number
+  annual_price: number
+  currency: string
+  is_active: boolean
+  is_featured: boolean
+  sort_order: number
+  subscribers_count: number
+  revenue_monthly: number
+  revenue_annual: number
+  churn_rate: number
+  upgrade_rate: number
+  features: any[]
+  limits: Record<string, any>
+  metadata: Record<string, any>
+  created_at: string
+  updated_at: string
+}
+
+interface DbCoupon {
+  id: string
+  user_id: string
+  code: string
+  name: string
+  discount_type: 'percentage' | 'fixed' | 'free_trial'
+  discount_value: number
+  duration: 'once' | 'repeating' | 'forever'
+  duration_months: number | null
+  max_redemptions: number | null
+  redemptions_count: number
+  is_active: boolean
+  expires_at: string | null
+  created_at: string
+}
+
+interface PlanFormState {
+  name: string
+  description: string
+  monthly_price: number
+  annual_price: number
+  is_featured: boolean
+  features: { name: string; included: boolean }[]
+}
+
+interface CouponFormState {
+  code: string
+  name: string
+  discount_type: 'percentage' | 'fixed' | 'free_trial'
+  discount_value: number
+  duration: 'once' | 'repeating' | 'forever'
+  duration_months: number
+  max_redemptions: number | null
+}
+
+const initialPlanForm: PlanFormState = {
+  name: '',
+  description: '',
+  monthly_price: 0,
+  annual_price: 0,
+  is_featured: false,
+  features: []
+}
+
+const initialCouponForm: CouponFormState = {
+  code: '',
+  name: '',
+  discount_type: 'percentage',
+  discount_value: 0,
+  duration: 'once',
+  duration_months: 1,
+  max_redemptions: null
+}
 
 interface PlanFeature {
   id: string
@@ -425,12 +504,74 @@ const mockPricingQuickActions = [
 export default function PricingClient({
   initialPlans = mockPlans
 }: PricingClientProps) {
+  const supabase = createClientComponentClient()
+
+  // Core UI state
   const [activeTab, setActiveTab] = useState('plans')
   const [settingsTab, setSettingsTab] = useState('general')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPeriod, setSelectedPeriod] = useState<BillingPeriod>('monthly')
   const [selectedPlan, setSelectedPlan] = useState<PricingPlan | null>(null)
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null)
+
+  // Supabase state
+  const [dbPlans, setDbPlans] = useState<DbPricingPlan[]>([])
+  const [dbCoupons, setDbCoupons] = useState<DbCoupon[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreatePlanDialog, setShowCreatePlanDialog] = useState(false)
+  const [showCreateCouponDialog, setShowCreateCouponDialog] = useState(false)
+  const [planForm, setPlanForm] = useState<PlanFormState>(initialPlanForm)
+  const [couponForm, setCouponForm] = useState<CouponFormState>(initialCouponForm)
+  const [editingPlanId, setEditingPlanId] = useState<string | null>(null)
+  const [editingCouponId, setEditingCouponId] = useState<string | null>(null)
+
+  // Fetch plans from Supabase
+  const fetchPlans = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('pricing_plans')
+        .select('*')
+        .order('sort_order', { ascending: true })
+
+      if (error) throw error
+      setDbPlans(data || [])
+    } catch (error) {
+      console.error('Error fetching plans:', error)
+    }
+  }, [supabase])
+
+  // Fetch coupons from Supabase
+  const fetchCoupons = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('booking_coupons')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        // Table may not exist, use mock data
+        console.log('Using mock coupons')
+      } else {
+        setDbCoupons(data || [])
+      }
+    } catch (error) {
+      console.error('Error fetching coupons:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchPlans()
+    fetchCoupons()
+  }, [fetchPlans, fetchCoupons])
 
   const stats = useMemo(() => {
     const totalRevenue = initialPlans.reduce((sum, p) => sum + p.revenue, 0)
@@ -472,35 +613,189 @@ export default function PricingClient({
     { label: 'Coupons Active', value: mockCoupons.filter(c => c.isActive).length.toString(), change: 25, icon: Tag, color: 'from-pink-500 to-rose-600' }
   ]
 
-  // Handlers
-  const handleCreatePlan = () => {
-    toast.info('Create Plan', {
-      description: 'Opening plan builder...'
-    })
+  // CRUD: Create Plan
+  const handleCreatePlan = async () => {
+    if (!planForm.name.trim()) {
+      toast.error('Plan name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create plans')
+        return
+      }
+
+      const { error } = await supabase.from('pricing_plans').insert({
+        user_id: user.id,
+        name: planForm.name,
+        description: planForm.description,
+        monthly_price: planForm.monthly_price,
+        annual_price: planForm.annual_price,
+        is_featured: planForm.is_featured,
+        features: planForm.features,
+        is_active: true,
+        sort_order: dbPlans.length,
+      })
+
+      if (error) throw error
+      toast.success('Plan created successfully')
+      setShowCreatePlanDialog(false)
+      setPlanForm(initialPlanForm)
+      fetchPlans()
+    } catch (error) {
+      console.error('Error creating plan:', error)
+      toast.error('Failed to create plan')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleEditPlan = (planName: string) => {
-    toast.info('Edit Plan', {
-      description: `Opening "${planName}" for editing...`
-    })
+  // CRUD: Update Plan
+  const handleUpdatePlan = async (planId: string) => {
+    setIsSubmitting(true)
+    try {
+      const { error } = await supabase
+        .from('pricing_plans')
+        .update({
+          name: planForm.name,
+          description: planForm.description,
+          monthly_price: planForm.monthly_price,
+          annual_price: planForm.annual_price,
+          is_featured: planForm.is_featured,
+          features: planForm.features,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', planId)
+
+      if (error) throw error
+      toast.success('Plan updated successfully')
+      setEditingPlanId(null)
+      setPlanForm(initialPlanForm)
+      fetchPlans()
+    } catch (error) {
+      console.error('Error updating plan:', error)
+      toast.error('Failed to update plan')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleCreateCoupon = () => {
-    toast.info('Create Coupon', {
-      description: 'Opening coupon builder...'
-    })
+  // CRUD: Delete/Archive Plan
+  const handleArchivePlan = async (planId: string, planName: string) => {
+    try {
+      const { error } = await supabase
+        .from('pricing_plans')
+        .update({ is_active: false, updated_at: new Date().toISOString() })
+        .eq('id', planId)
+
+      if (error) throw error
+      toast.success(`"${planName}" archived successfully`)
+      fetchPlans()
+    } catch (error) {
+      console.error('Error archiving plan:', error)
+      toast.error('Failed to archive plan')
+    }
   }
 
-  const handleExportPricing = () => {
-    toast.success('Exporting pricing', {
-      description: 'Pricing data will be downloaded'
-    })
+  // CRUD: Create Coupon
+  const handleCreateCoupon = async () => {
+    if (!couponForm.code.trim() || !couponForm.name.trim()) {
+      toast.error('Coupon code and name are required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create coupons')
+        return
+      }
+
+      const { error } = await supabase.from('booking_coupons').insert({
+        user_id: user.id,
+        code: couponForm.code.toUpperCase(),
+        name: couponForm.name,
+        discount_type: couponForm.discount_type,
+        discount_value: couponForm.discount_value,
+        duration: couponForm.duration,
+        duration_months: couponForm.duration === 'repeating' ? couponForm.duration_months : null,
+        max_redemptions: couponForm.max_redemptions,
+        is_active: true,
+        redemptions_count: 0,
+      })
+
+      if (error) throw error
+      toast.success('Coupon created successfully')
+      setShowCreateCouponDialog(false)
+      setCouponForm(initialCouponForm)
+      fetchCoupons()
+    } catch (error) {
+      console.error('Error creating coupon:', error)
+      toast.error('Failed to create coupon')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleArchivePlan = (planName: string) => {
-    toast.info('Plan archived', {
-      description: `"${planName}" has been archived`
-    })
+  // CRUD: Toggle Coupon Active Status
+  const handleToggleCoupon = async (couponId: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('booking_coupons')
+        .update({ is_active: !isActive })
+        .eq('id', couponId)
+
+      if (error) throw error
+      toast.success(`Coupon ${!isActive ? 'activated' : 'deactivated'}`)
+      fetchCoupons()
+    } catch (error) {
+      console.error('Error toggling coupon:', error)
+      toast.error('Failed to update coupon')
+    }
+  }
+
+  // CRUD: Delete Coupon
+  const handleDeleteCoupon = async (couponId: string) => {
+    try {
+      const { error } = await supabase
+        .from('booking_coupons')
+        .delete()
+        .eq('id', couponId)
+
+      if (error) throw error
+      toast.success('Coupon deleted')
+      fetchCoupons()
+    } catch (error) {
+      console.error('Error deleting coupon:', error)
+      toast.error('Failed to delete coupon')
+    }
+  }
+
+  // Export pricing data
+  const handleExportPricing = async () => {
+    try {
+      const { data: plans } = await supabase.from('pricing_plans').select('*')
+      const exportData = { plans: plans || dbPlans, exportedAt: new Date().toISOString() }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `pricing-export-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Pricing data exported')
+    } catch (error) {
+      console.error('Error exporting:', error)
+      toast.error('Failed to export data')
+    }
+  }
+
+  // Copy coupon code
+  const handleCopyCoupon = (code: string) => {
+    navigator.clipboard.writeText(code)
+    toast.success('Coupon code copied')
   }
 
   return (
@@ -518,11 +813,14 @@ export default function PricingClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
-            <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+              onClick={() => setShowCreatePlanDialog(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create Plan
             </Button>
@@ -719,14 +1017,81 @@ export default function PricingClient({
           <TabsContent value="coupons" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Discount Codes</h2>
-              <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white">
+              <Button
+                className="bg-gradient-to-r from-pink-500 to-rose-600 text-white"
+                onClick={() => setShowCreateCouponDialog(true)}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Coupon
               </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockCoupons.map((coupon) => (
+              {/* Database coupons */}
+              {dbCoupons.map((coupon) => (
+                <Card key={coupon.id} className={`border-0 shadow-sm ${!coupon.is_active ? 'opacity-60' : ''}`}>
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="p-2 rounded-lg bg-gradient-to-br from-pink-500 to-rose-600">
+                          <Tag className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <code className="font-mono font-bold text-lg">{coupon.code}</code>
+                          <p className="text-sm text-gray-500">{coupon.name}</p>
+                        </div>
+                      </div>
+                      <Badge className={coupon.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
+                        {coupon.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Discount</span>
+                        <span className="font-semibold">
+                          {coupon.discount_type === 'percentage' ? `${coupon.discount_value}%` :
+                           coupon.discount_type === 'fixed' ? formatCurrency(coupon.discount_value) :
+                           `${coupon.discount_value} days free`}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Duration</span>
+                        <span className="capitalize">{coupon.duration}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-500">Redemptions</span>
+                        <span>
+                          {coupon.redemptions_count}
+                          {coupon.max_redemptions && ` / ${coupon.max_redemptions}`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {coupon.max_redemptions && (
+                      <Progress
+                        value={(coupon.redemptions_count / coupon.max_redemptions) * 100}
+                        className="mt-3 h-1"
+                      />
+                    )}
+
+                    <div className="flex gap-2 mt-4">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleCopyCoupon(coupon.code)}>
+                        <Copy className="w-3 h-3 mr-1" />
+                        Copy
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleToggleCoupon(coupon.id, coupon.is_active)}>
+                        {coupon.is_active ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleDeleteCoupon(coupon.id)}>
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {/* Mock coupons fallback */}
+              {dbCoupons.length === 0 && mockCoupons.map((coupon) => (
                 <Card key={coupon.id} className={`border-0 shadow-sm ${!coupon.isActive ? 'opacity-60' : ''}`}>
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-3">
@@ -774,7 +1139,7 @@ export default function PricingClient({
                     )}
 
                     <div className="flex gap-2 mt-4">
-                      <Button variant="outline" size="sm" className="flex-1">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => handleCopyCoupon(coupon.code)}>
                         <Copy className="w-3 h-3 mr-1" />
                         Copy
                       </Button>
@@ -1916,6 +2281,169 @@ export default function PricingClient({
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Plan Dialog */}
+        <Dialog open={showCreatePlanDialog} onOpenChange={setShowCreatePlanDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Pricing Plan</DialogTitle>
+              <DialogDescription>Add a new subscription plan to your pricing table</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Plan Name</Label>
+                <Input
+                  placeholder="e.g., Professional"
+                  value={planForm.name}
+                  onChange={(e) => setPlanForm({ ...planForm, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Input
+                  placeholder="Short description of the plan"
+                  value={planForm.description}
+                  onChange={(e) => setPlanForm({ ...planForm, description: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Monthly Price ($)</Label>
+                  <Input
+                    type="number"
+                    placeholder="29"
+                    value={planForm.monthly_price}
+                    onChange={(e) => setPlanForm({ ...planForm, monthly_price: parseFloat(e.target.value) || 0 })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>Annual Price ($)</Label>
+                  <Input
+                    type="number"
+                    placeholder="290"
+                    value={planForm.annual_price}
+                    onChange={(e) => setPlanForm({ ...planForm, annual_price: parseFloat(e.target.value) || 0 })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={planForm.is_featured}
+                  onCheckedChange={(checked) => setPlanForm({ ...planForm, is_featured: checked })}
+                />
+                <Label>Featured Plan (highlighted)</Label>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCreatePlanDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                  onClick={handleCreatePlan}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Plan'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Coupon Dialog */}
+        <Dialog open={showCreateCouponDialog} onOpenChange={setShowCreateCouponDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create Discount Coupon</DialogTitle>
+              <DialogDescription>Create a new discount code for your customers</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Coupon Code</Label>
+                  <Input
+                    placeholder="e.g., SAVE20"
+                    value={couponForm.code}
+                    onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
+                    className="mt-1 font-mono"
+                  />
+                </div>
+                <div>
+                  <Label>Display Name</Label>
+                  <Input
+                    placeholder="e.g., 20% Off First Month"
+                    value={couponForm.name}
+                    onChange={(e) => setCouponForm({ ...couponForm, name: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Discount Type</Label>
+                  <select
+                    className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                    value={couponForm.discount_type}
+                    onChange={(e) => setCouponForm({ ...couponForm, discount_type: e.target.value as any })}
+                  >
+                    <option value="percentage">Percentage</option>
+                    <option value="fixed">Fixed Amount</option>
+                    <option value="free_trial">Free Trial Days</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>{couponForm.discount_type === 'percentage' ? 'Percentage' : couponForm.discount_type === 'fixed' ? 'Amount ($)' : 'Days'}</Label>
+                  <Input
+                    type="number"
+                    placeholder={couponForm.discount_type === 'percentage' ? '20' : couponForm.discount_type === 'fixed' ? '50' : '14'}
+                    value={couponForm.discount_value}
+                    onChange={(e) => setCouponForm({ ...couponForm, discount_value: parseFloat(e.target.value) || 0 })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Duration</Label>
+                  <select
+                    className="w-full mt-1 px-3 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                    value={couponForm.duration}
+                    onChange={(e) => setCouponForm({ ...couponForm, duration: e.target.value as any })}
+                  >
+                    <option value="once">Once</option>
+                    <option value="repeating">Repeating</option>
+                    <option value="forever">Forever</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Max Redemptions (optional)</Label>
+                  <Input
+                    type="number"
+                    placeholder="Unlimited"
+                    value={couponForm.max_redemptions || ''}
+                    onChange={(e) => setCouponForm({ ...couponForm, max_redemptions: e.target.value ? parseInt(e.target.value) : null })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCreateCouponDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-pink-500 to-rose-600 text-white"
+                  onClick={handleCreateCoupon}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Coupon'}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

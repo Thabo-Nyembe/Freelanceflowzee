@@ -1,5 +1,6 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { useAutomations, type AutomationWorkflow, type WorkflowType, type WorkflowStatus } from '@/lib/hooks/use-automations'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -335,10 +336,31 @@ const mockAutomationsQuickActions = [
 ]
 
 // ============================================================================
+// FORM STATE INTERFACE
+// ============================================================================
+
+interface WorkflowFormState {
+  workflow_name: string
+  description: string
+  workflow_type: WorkflowType
+  trigger_type: string
+  is_enabled: boolean
+}
+
+const initialFormState: WorkflowFormState = {
+  workflow_name: '',
+  description: '',
+  workflow_type: 'sequential',
+  trigger_type: 'webhook',
+  is_enabled: true,
+}
+
+// ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 export default function AutomationsClient({ initialWorkflows }: { initialWorkflows: AutomationWorkflow[] }) {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [workflowTypeFilter, setWorkflowTypeFilter] = useState<WorkflowType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<WorkflowStatus | 'all'>('all')
@@ -348,9 +370,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [selectedExecution, setSelectedExecution] = useState<Execution | null>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [formState, setFormState] = useState<WorkflowFormState>(initialFormState)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [dbWorkflows, setDbWorkflows] = useState<AutomationWorkflow[]>([])
 
-  const { workflows, loading, error } = useAutomations({ workflowType: workflowTypeFilter, status: statusFilter })
-  const displayWorkflows = workflows.length > 0 ? workflows : initialWorkflows
+  const { workflows, loading, error, refetch } = useAutomations({ workflowType: workflowTypeFilter, status: statusFilter })
+  const displayWorkflows = dbWorkflows.length > 0 ? dbWorkflows : (workflows.length > 0 ? workflows : initialWorkflows)
 
   // Calculate comprehensive stats
   const stats = useMemo(() => {
@@ -391,31 +416,213 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     })
   }, [displayWorkflows, searchQuery, workflowTypeFilter, statusFilter])
 
-  // Handlers
-  const handleCreateAutomation = () => {
-    toast.info('Create Automation', {
-      description: 'Opening automation builder...'
-    })
-    setShowNewWorkflow(true)
+  // Fetch workflows from Supabase
+  const fetchWorkflows = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('automations')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbWorkflows(data || [])
+    } catch (err) {
+      console.error('Error fetching workflows:', err)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchWorkflows()
+  }, [fetchWorkflows])
+
+  // Create workflow handler
+  const handleCreateWorkflow = async () => {
+    if (!formState.workflow_name.trim()) {
+      toast.error('Workflow name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create workflows')
+        return
+      }
+
+      const { error } = await supabase.from('automations').insert({
+        user_id: user.id,
+        workflow_name: formState.workflow_name,
+        description: formState.description || null,
+        workflow_type: formState.workflow_type,
+        trigger_type: formState.trigger_type,
+        status: 'draft',
+        is_enabled: formState.is_enabled,
+        steps: [],
+        step_count: 0,
+        current_step: 0,
+        trigger_config: {},
+        total_executions: 0,
+        successful_executions: 0,
+        failed_executions: 0,
+        total_duration_seconds: 0,
+        version: 1,
+        is_published: false,
+        variables: {},
+        context_data: {},
+        error_handling_strategy: 'stop',
+        max_retries: 3,
+        retry_delay_seconds: 30,
+        notify_on_success: false,
+        notify_on_failure: true,
+        notification_config: {},
+        is_scheduled: false,
+        schedule_config: {},
+        requires_approval: false,
+        approved: false,
+        metadata: {},
+      })
+
+      if (error) throw error
+
+      toast.success('Workflow created successfully')
+      setShowNewWorkflow(false)
+      setFormState(initialFormState)
+      fetchWorkflows()
+      refetch()
+    } catch (err) {
+      console.error('Error creating workflow:', err)
+      toast.error('Failed to create workflow')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleRunAutomation = (workflow: AutomationWorkflow) => {
-    toast.success('Automation running', {
-      description: `${workflow.workflow_name} is now executing`
-    })
+  // Run workflow handler
+  const handleRunAutomation = async (workflow: AutomationWorkflow) => {
+    try {
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          status: 'running',
+          is_running: true,
+          last_execution_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', workflow.id)
+
+      if (error) throw error
+
+      toast.success('Automation started', {
+        description: `${workflow.workflow_name} is now executing`
+      })
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error running workflow:', err)
+      toast.error('Failed to start automation')
+    }
   }
 
-  const handleToggleAutomation = (workflow: AutomationWorkflow) => {
+  // Toggle workflow status handler
+  const handleToggleAutomation = async (workflow: AutomationWorkflow) => {
     const newStatus = workflow.status === 'active' ? 'paused' : 'active'
-    toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused', {
-      description: `${workflow.workflow_name} is now ${newStatus}`
-    })
+    try {
+      const { error } = await supabase
+        .from('automations')
+        .update({
+          status: newStatus,
+          is_enabled: newStatus === 'active',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', workflow.id)
+
+      if (error) throw error
+
+      toast.success(newStatus === 'active' ? 'Automation activated' : 'Automation paused', {
+        description: `${workflow.workflow_name} is now ${newStatus}`
+      })
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error toggling workflow:', err)
+      toast.error('Failed to update automation status')
+    }
   }
 
-  const handleDuplicateAutomation = (workflow: AutomationWorkflow) => {
-    toast.success('Automation duplicated', {
-      description: `Copy of ${workflow.workflow_name} created`
-    })
+  // Duplicate workflow handler
+  const handleDuplicateAutomation = async (workflow: AutomationWorkflow) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to duplicate workflows')
+        return
+      }
+
+      const { error } = await supabase.from('automations').insert({
+        user_id: user.id,
+        workflow_name: `${workflow.workflow_name} (Copy)`,
+        description: workflow.description,
+        workflow_type: workflow.workflow_type,
+        trigger_type: workflow.trigger_type,
+        status: 'draft',
+        is_enabled: false,
+        steps: workflow.steps,
+        step_count: workflow.step_count,
+        current_step: 0,
+        trigger_config: workflow.trigger_config,
+        total_executions: 0,
+        successful_executions: 0,
+        failed_executions: 0,
+        total_duration_seconds: 0,
+        version: 1,
+        is_published: false,
+        variables: workflow.variables,
+        context_data: {},
+        error_handling_strategy: workflow.error_handling_strategy,
+        max_retries: workflow.max_retries,
+        retry_delay_seconds: workflow.retry_delay_seconds,
+        notify_on_success: workflow.notify_on_success,
+        notify_on_failure: workflow.notify_on_failure,
+        notification_config: workflow.notification_config,
+        is_scheduled: false,
+        schedule_config: {},
+        requires_approval: false,
+        approved: false,
+        metadata: workflow.metadata,
+      })
+
+      if (error) throw error
+
+      toast.success('Automation duplicated', {
+        description: `Copy of ${workflow.workflow_name} created`
+      })
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error duplicating workflow:', err)
+      toast.error('Failed to duplicate automation')
+    }
+  }
+
+  // Delete workflow handler
+  const handleDeleteAutomation = async (workflow: AutomationWorkflow) => {
+    try {
+      const { error } = await supabase
+        .from('automations')
+        .delete()
+        .eq('id', workflow.id)
+
+      if (error) throw error
+
+      toast.success('Automation deleted', {
+        description: `${workflow.workflow_name} has been removed`
+      })
+      fetchWorkflows()
+    } catch (err) {
+      console.error('Error deleting workflow:', err)
+      toast.error('Failed to delete automation')
+    }
   }
 
   if (error) return (
@@ -472,17 +679,47 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <TabsContent value="blank" className="space-y-4 pr-4">
                           <div>
                             <label className="block text-sm font-medium mb-1">Scenario Name</label>
-                            <Input placeholder="My Automation Scenario" />
+                            <Input
+                              placeholder="My Automation Scenario"
+                              value={formState.workflow_name}
+                              onChange={(e) => setFormState(prev => ({ ...prev, workflow_name: e.target.value }))}
+                            />
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-1">Description</label>
-                            <textarea className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" rows={3} placeholder="What does this scenario automate?" />
+                            <textarea
+                              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                              rows={3}
+                              placeholder="What does this scenario automate?"
+                              value={formState.description}
+                              onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Workflow Type</label>
+                            <select
+                              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                              value={formState.workflow_type}
+                              onChange={(e) => setFormState(prev => ({ ...prev, workflow_type: e.target.value as WorkflowType }))}
+                            >
+                              <option value="sequential">Sequential</option>
+                              <option value="parallel">Parallel</option>
+                              <option value="conditional">Conditional</option>
+                              <option value="branching">Branching</option>
+                              <option value="loop">Loop</option>
+                              <option value="hybrid">Hybrid</option>
+                            </select>
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-2">Start with a Trigger</label>
                             <div className="grid grid-cols-2 gap-3">
                               {nodeTypes.filter(n => n.category === 'triggers').map(node => (
-                                <button key={node.id} className="flex items-center gap-3 p-3 border rounded-lg hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-left">
+                                <button
+                                  key={node.id}
+                                  type="button"
+                                  onClick={() => setFormState(prev => ({ ...prev, trigger_type: node.id }))}
+                                  className={`flex items-center gap-3 p-3 border rounded-lg hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all text-left ${formState.trigger_type === node.id ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : ''}`}
+                                >
                                   <div className="p-2 rounded-lg bg-amber-100 text-amber-600">
                                     {node.icon}
                                   </div>
@@ -493,6 +730,27 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                                 </button>
                               ))}
                             </div>
+                          </div>
+                          <div className="pt-4 border-t flex justify-end gap-3">
+                            <Button variant="outline" onClick={() => setShowNewWorkflow(false)}>
+                              Cancel
+                            </Button>
+                            <Button
+                              onClick={handleCreateWorkflow}
+                              disabled={isSubmitting || !formState.workflow_name.trim()}
+                            >
+                              {isSubmitting ? (
+                                <>
+                                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                                  Creating...
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="h-4 w-4 mr-2" />
+                                  Create Scenario
+                                </>
+                              )}
+                            </Button>
                           </div>
                         </TabsContent>
                         <TabsContent value="template" className="pr-4">
@@ -944,16 +1202,34 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       </div>
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="sm" className="text-green-600">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-green-600"
+                        onClick={(e) => { e.stopPropagation(); handleRunAutomation(workflow) }}
+                      >
                         <Play className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); handleToggleAutomation(workflow) }}
+                      >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => { e.stopPropagation(); handleDuplicateAutomation(workflow) }}
+                      >
                         <Copy className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-red-600">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600"
+                        onClick={(e) => { e.stopPropagation(); handleDeleteAutomation(workflow) }}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>

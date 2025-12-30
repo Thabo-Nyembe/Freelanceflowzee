@@ -32,6 +32,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTeamManagement, type Team, type TeamType, type TeamStatus } from '@/lib/hooks/use-team-management'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import {
   teamManagementAIInsights,
@@ -111,8 +112,49 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null)
   const [settingsTab, setSettingsTab] = useState('organization')
 
-  const { teams, loading, error, createTeam, refetch } = useTeamManagement({ teamType: typeFilter, status: statusFilter })
+  const { teams, loading, error, createTeam, updateTeam, deleteTeam, refetch } = useTeamManagement({ teamType: typeFilter, status: statusFilter })
   const displayTeams = teams.length > 0 ? teams : initialTeams
+  const supabase = createClientComponentClient()
+
+  // Form state for new team member
+  const [showAddMemberModal, setShowAddMemberModal] = useState(false)
+  const [newMemberForm, setNewMemberForm] = useState({
+    name: '',
+    email: '',
+    role: '',
+    department: 'Engineering'
+  })
+  const [addingMember, setAddingMember] = useState(false)
+
+  // Form state for recognition
+  const [recognitionForm, setRecognitionForm] = useState({
+    recipientId: '',
+    value: 'Excellence',
+    message: ''
+  })
+  const [sendingRecognition, setSendingRecognition] = useState(false)
+
+  // Form state for 1:1 scheduling
+  const [showSchedule1on1Modal, setShowSchedule1on1Modal] = useState(false)
+  const [schedule1on1Form, setSchedule1on1Form] = useState({
+    participantId: '',
+    scheduledDate: '',
+    topics: ''
+  })
+  const [scheduling1on1, setScheduling1on1] = useState(false)
+
+  // Form state for review cycle
+  const [showReviewCycleModal, setShowReviewCycleModal] = useState(false)
+  const [reviewCycleForm, setReviewCycleForm] = useState({
+    cycleName: '',
+    reviewType: '360',
+    dueDate: ''
+  })
+  const [startingReviewCycle, setStartingReviewCycle] = useState(false)
+
+  // Operation states
+  const [archivingTeam, setArchivingTeam] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
 
   // Form state for new OKR/Goal
   const [newGoalForm, setNewGoalForm] = useState({
@@ -256,29 +298,343 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
     )
   }
 
-  // Handlers
-  const handleExportTeams = () => {
-    toast.success('Export started', {
-      description: 'Team data is being exported'
-    })
+  // Handlers - Real Supabase Operations
+  const handleExportTeams = async () => {
+    setExporting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Fetch all team data for export
+      const { data: teamsData, error: teamsError } = await supabase
+        .from('team_management')
+        .select('*')
+        .eq('user_id', user.id)
+
+      if (teamsError) throw teamsError
+
+      // Create CSV content
+      const headers = ['Team Name', 'Type', 'Status', 'Member Count', 'Description', 'Created At']
+      const rows = (teamsData || []).map(t => [
+        t.team_name,
+        t.team_type,
+        t.status,
+        t.member_count,
+        t.description || '',
+        new Date(t.created_at).toLocaleDateString()
+      ])
+      const csvContent = [headers, ...rows].map(row => row.join(',')).join('\n')
+
+      // Download file
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `team-export-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Export completed', {
+        description: `Exported ${teamsData?.length || 0} teams`
+      })
+    } catch (error: any) {
+      toast.error('Export failed', {
+        description: error.message || 'Could not export team data'
+      })
+    } finally {
+      setExporting(false)
+    }
   }
 
-  const handleAddTeamMember = (team: Team) => {
-    toast.info('Add Member', {
-      description: `Opening member selection for ${team.name}`
-    })
+  const handleAddTeamMember = async () => {
+    if (!newMemberForm.name || !newMemberForm.email) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    setAddingMember(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('team_members')
+        .insert({
+          user_id: user.id,
+          name: newMemberForm.name,
+          email: newMemberForm.email,
+          role: newMemberForm.role,
+          department: newMemberForm.department,
+          status: 'active',
+          is_lead: false,
+          projects_count: 0,
+          tasks_completed: 0,
+          performance_score: 0,
+          skills: [],
+          metadata: {}
+        })
+
+      if (error) throw error
+
+      toast.success('Team member added', {
+        description: `${newMemberForm.name} has been added to the team`
+      })
+      setShowAddMemberModal(false)
+      setNewMemberForm({ name: '', email: '', role: '', department: 'Engineering' })
+    } catch (error: any) {
+      toast.error('Failed to add member', {
+        description: error.message || 'Could not add team member'
+      })
+    } finally {
+      setAddingMember(false)
+    }
   }
 
-  const handleArchiveTeam = (team: Team) => {
-    toast.success('Team archived', {
-      description: `"${team.name}" has been archived`
-    })
+  const handleArchiveTeam = async (team: Team) => {
+    setArchivingTeam(team.id)
+    try {
+      await updateTeam({ id: team.id, status: 'archived' as TeamStatus })
+      toast.success('Team archived', {
+        description: `"${team.team_name}" has been archived`
+      })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to archive team', {
+        description: error.message || 'Could not archive the team'
+      })
+    } finally {
+      setArchivingTeam(null)
+    }
   }
 
-  const handleSendTeamMessage = (team: Team) => {
-    toast.info('Send Message', {
-      description: `Composing message to ${team.name}`
-    })
+  const handleSendRecognition = async () => {
+    if (!recognitionForm.recipientId || !recognitionForm.message) {
+      toast.error('Please select a recipient and enter a message')
+      return
+    }
+    setSendingRecognition(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const recipient = teamMembers.find(m => m.id === recognitionForm.recipientId)
+
+      const { error } = await supabase
+        .from('team_recognitions')
+        .insert({
+          user_id: user.id,
+          from_user: user.email || 'Anonymous',
+          to_user: recipient?.name || 'Team Member',
+          message: recognitionForm.message,
+          value: recognitionForm.value,
+          reactions: 0,
+          metadata: {}
+        })
+
+      if (error) throw error
+
+      toast.success('Recognition sent!', {
+        description: `Your recognition for ${recipient?.name} has been posted`
+      })
+      setShowRecognitionModal(false)
+      setRecognitionForm({ recipientId: '', value: 'Excellence', message: '' })
+    } catch (error: any) {
+      toast.error('Failed to send recognition', {
+        description: error.message || 'Could not send recognition'
+      })
+    } finally {
+      setSendingRecognition(false)
+    }
+  }
+
+  const handleSchedule1on1 = async () => {
+    if (!schedule1on1Form.participantId || !schedule1on1Form.scheduledDate) {
+      toast.error('Please select a participant and date')
+      return
+    }
+    setScheduling1on1(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const participant = teamMembers.find(m => m.id === schedule1on1Form.participantId)
+
+      const { error } = await supabase
+        .from('team_meetings')
+        .insert({
+          user_id: user.id,
+          participant_name: participant?.name || 'Team Member',
+          manager_name: user.email || 'Manager',
+          scheduled_date: schedule1on1Form.scheduledDate,
+          status: 'scheduled',
+          topics: schedule1on1Form.topics.split(',').map(t => t.trim()).filter(Boolean),
+          notes: '',
+          metadata: {}
+        })
+
+      if (error) throw error
+
+      toast.success('1:1 scheduled', {
+        description: `Meeting scheduled with ${participant?.name}`
+      })
+      setShowSchedule1on1Modal(false)
+      setSchedule1on1Form({ participantId: '', scheduledDate: '', topics: '' })
+    } catch (error: any) {
+      toast.error('Failed to schedule 1:1', {
+        description: error.message || 'Could not schedule meeting'
+      })
+    } finally {
+      setScheduling1on1(false)
+    }
+  }
+
+  const handleStartReviewCycle = async () => {
+    if (!reviewCycleForm.cycleName || !reviewCycleForm.dueDate) {
+      toast.error('Please fill in cycle name and due date')
+      return
+    }
+    setStartingReviewCycle(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Create review entries for all team members
+      const reviewInserts = teamMembers.map(member => ({
+        user_id: user.id,
+        employee_name: member.name,
+        review_type: reviewCycleForm.reviewType,
+        status: 'pending',
+        cycle_name: reviewCycleForm.cycleName,
+        due_date: reviewCycleForm.dueDate,
+        score: null,
+        metadata: {}
+      }))
+
+      const { error } = await supabase
+        .from('team_reviews')
+        .insert(reviewInserts)
+
+      if (error) throw error
+
+      toast.success('Review cycle started', {
+        description: `Created ${teamMembers.length} review entries`
+      })
+      setShowReviewCycleModal(false)
+      setReviewCycleForm({ cycleName: '', reviewType: '360', dueDate: '' })
+    } catch (error: any) {
+      toast.error('Failed to start review cycle', {
+        description: error.message || 'Could not start review cycle'
+      })
+    } finally {
+      setStartingReviewCycle(false)
+    }
+  }
+
+  const handleResetOKRs = async () => {
+    if (!confirm('Are you sure you want to reset all OKRs? This action cannot be undone.')) {
+      return
+    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('team_management')
+        .update({
+          objectives: {},
+          key_results: [],
+          milestones: []
+        })
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('OKRs reset', {
+        description: 'All goals and OKRs have been cleared'
+      })
+      refetch()
+    } catch (error: any) {
+      toast.error('Failed to reset OKRs', {
+        description: error.message || 'Could not reset OKRs'
+      })
+    }
+  }
+
+  const handleArchiveAllReviews = async () => {
+    if (!confirm('Are you sure you want to archive all reviews? This action cannot be undone.')) {
+      return
+    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const { error } = await supabase
+        .from('team_reviews')
+        .update({ status: 'archived' })
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Reviews archived', {
+        description: 'All reviews have been moved to archive'
+      })
+    } catch (error: any) {
+      toast.error('Failed to archive reviews', {
+        description: error.message || 'Could not archive reviews'
+      })
+    }
+  }
+
+  const handleExportAllData = async () => {
+    setExporting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Fetch all HR data
+      const [teamsRes, membersRes, meetingsRes, reviewsRes] = await Promise.all([
+        supabase.from('team_management').select('*').eq('user_id', user.id),
+        supabase.from('team_members').select('*').eq('user_id', user.id),
+        supabase.from('team_meetings').select('*').eq('user_id', user.id),
+        supabase.from('team_reviews').select('*').eq('user_id', user.id)
+      ])
+
+      const exportData = {
+        teams: teamsRes.data || [],
+        members: membersRes.data || [],
+        meetings: meetingsRes.data || [],
+        reviews: reviewsRes.data || [],
+        exportedAt: new Date().toISOString()
+      }
+
+      // Download as JSON
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `hr-data-export-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Export completed', {
+        description: 'All HR data has been exported'
+      })
+    } catch (error: any) {
+      toast.error('Export failed', {
+        description: error.message || 'Could not export data'
+      })
+    } finally {
+      setExporting(false)
+    }
+  }
+
+  const handleSyncNow = async () => {
+    toast.info('Syncing...', { description: 'Refreshing data from all sources' })
+    try {
+      await refetch()
+      toast.success('Sync complete', { description: 'All data is up to date' })
+    } catch (error: any) {
+      toast.error('Sync failed', { description: error.message })
+    }
   }
 
   if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
@@ -319,7 +675,12 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Who are you recognizing?</label>
-                    <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <select
+                      className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                      value={recognitionForm.recipientId}
+                      onChange={(e) => setRecognitionForm(prev => ({ ...prev, recipientId: e.target.value }))}
+                    >
+                      <option value="">Select a person...</option>
                       {teamMembers.map(m => (
                         <option key={m.id} value={m.id}>{m.name}</option>
                       ))}
@@ -329,7 +690,16 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                     <label className="text-sm font-medium">Company Value</label>
                     <div className="flex flex-wrap gap-2">
                       {['Excellence', 'Innovation', 'Teamwork', 'Leadership'].map(value => (
-                        <button key={value} className="px-3 py-1.5 rounded-full border hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors">
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setRecognitionForm(prev => ({ ...prev, value }))}
+                          className={`px-3 py-1.5 rounded-full border transition-colors ${
+                            recognitionForm.value === value
+                              ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
+                              : 'hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30'
+                          }`}
+                        >
                           {value}
                         </button>
                       ))}
@@ -337,22 +707,92 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Message</label>
-                    <textarea className="w-full px-3 py-2 border rounded-lg min-h-[100px] dark:bg-gray-800 dark:border-gray-700" placeholder="Share what they did and why it matters..." />
+                    <textarea
+                      className="w-full px-3 py-2 border rounded-lg min-h-[100px] dark:bg-gray-800 dark:border-gray-700"
+                      placeholder="Share what they did and why it matters..."
+                      value={recognitionForm.message}
+                      onChange={(e) => setRecognitionForm(prev => ({ ...prev, message: e.target.value }))}
+                    />
                   </div>
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => setShowRecognitionModal(false)}>Cancel</Button>
-                  <Button className="bg-purple-600 hover:bg-purple-700 gap-2">
+                  <Button
+                    className="bg-purple-600 hover:bg-purple-700 gap-2"
+                    onClick={handleSendRecognition}
+                    disabled={sendingRecognition || !recognitionForm.recipientId || !recognitionForm.message}
+                  >
                     <Send className="w-4 h-4" />
-                    Send Recognition
+                    {sendingRecognition ? 'Sending...' : 'Send Recognition'}
                   </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-            <Button className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-              <UserPlus className="w-4 h-4" />
-              Add Team Member
-            </Button>
+            <Dialog open={showAddMemberModal} onOpenChange={setShowAddMemberModal}>
+              <DialogTrigger asChild>
+                <Button className="gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                  <UserPlus className="w-4 h-4" />
+                  Add Team Member
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add New Team Member</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Name *</Label>
+                    <Input
+                      placeholder="Full name"
+                      value={newMemberForm.name}
+                      onChange={(e) => setNewMemberForm(prev => ({ ...prev, name: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email *</Label>
+                    <Input
+                      type="email"
+                      placeholder="email@company.com"
+                      value={newMemberForm.email}
+                      onChange={(e) => setNewMemberForm(prev => ({ ...prev, email: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Role</Label>
+                    <Input
+                      placeholder="Job title"
+                      value={newMemberForm.role}
+                      onChange={(e) => setNewMemberForm(prev => ({ ...prev, role: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Department</Label>
+                    <Select
+                      value={newMemberForm.department}
+                      onValueChange={(value) => setNewMemberForm(prev => ({ ...prev, department: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Engineering">Engineering</SelectItem>
+                        <SelectItem value="Design">Design</SelectItem>
+                        <SelectItem value="Marketing">Marketing</SelectItem>
+                        <SelectItem value="People Ops">People Ops</SelectItem>
+                        <SelectItem value="Sales">Sales</SelectItem>
+                        <SelectItem value="Finance">Finance</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowAddMemberModal(false)}>Cancel</Button>
+                  <Button onClick={handleAddTeamMember} disabled={addingMember || !newMemberForm.name || !newMemberForm.email}>
+                    {addingMember ? 'Adding...' : 'Add Member'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
@@ -831,10 +1271,66 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Performance Reviews</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Q4 2024 Review Cycle</p>
                 </div>
-                <Button className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Start Review Cycle
-                </Button>
+                <Dialog open={showReviewCycleModal} onOpenChange={setShowReviewCycleModal}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <Plus className="w-4 h-4" />
+                      Start Review Cycle
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Start Review Cycle</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Cycle Name *</Label>
+                        <Input
+                          placeholder="e.g., Q1 2025 Reviews"
+                          value={reviewCycleForm.cycleName}
+                          onChange={(e) => setReviewCycleForm(prev => ({ ...prev, cycleName: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Review Type</Label>
+                        <Select
+                          value={reviewCycleForm.reviewType}
+                          onValueChange={(value) => setReviewCycleForm(prev => ({ ...prev, reviewType: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="360">360 Feedback</SelectItem>
+                            <SelectItem value="manager">Manager Only</SelectItem>
+                            <SelectItem value="self">Self Assessment</SelectItem>
+                            <SelectItem value="peer">Peer Reviews</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Due Date *</Label>
+                        <Input
+                          type="date"
+                          value={reviewCycleForm.dueDate}
+                          onChange={(e) => setReviewCycleForm(prev => ({ ...prev, dueDate: e.target.value }))}
+                        />
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        This will create review entries for {teamMembers.length} team members.
+                      </p>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setShowReviewCycleModal(false)}>Cancel</Button>
+                      <Button
+                        onClick={handleStartReviewCycle}
+                        disabled={startingReviewCycle || !reviewCycleForm.cycleName || !reviewCycleForm.dueDate}
+                      >
+                        {startingReviewCycle ? 'Starting...' : 'Start Cycle'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <div className="grid md:grid-cols-3 gap-4 mb-6">
@@ -916,10 +1412,62 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">1:1 Meetings</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Schedule and track one-on-one meetings</p>
                 </div>
-                <Button className="gap-2">
-                  <Plus className="w-4 h-4" />
-                  Schedule 1:1
-                </Button>
+                <Dialog open={showSchedule1on1Modal} onOpenChange={setShowSchedule1on1Modal}>
+                  <DialogTrigger asChild>
+                    <Button className="gap-2">
+                      <Plus className="w-4 h-4" />
+                      Schedule 1:1
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Schedule 1:1 Meeting</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Participant *</Label>
+                        <Select
+                          value={schedule1on1Form.participantId}
+                          onValueChange={(value) => setSchedule1on1Form(prev => ({ ...prev, participantId: value }))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select team member..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {teamMembers.map(m => (
+                              <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Date & Time *</Label>
+                        <Input
+                          type="datetime-local"
+                          value={schedule1on1Form.scheduledDate}
+                          onChange={(e) => setSchedule1on1Form(prev => ({ ...prev, scheduledDate: e.target.value }))}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Topics (comma-separated)</Label>
+                        <Input
+                          placeholder="Career goals, Project updates, Feedback..."
+                          value={schedule1on1Form.topics}
+                          onChange={(e) => setSchedule1on1Form(prev => ({ ...prev, topics: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setShowSchedule1on1Modal(false)}>Cancel</Button>
+                      <Button
+                        onClick={handleSchedule1on1}
+                        disabled={scheduling1on1 || !schedule1on1Form.participantId || !schedule1on1Form.scheduledDate}
+                      >
+                        {scheduling1on1 ? 'Scheduling...' : 'Schedule Meeting'}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               <div className="space-y-4">
@@ -1721,7 +2269,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full gap-2">
+                      <Button variant="outline" className="w-full gap-2" onClick={handleSyncNow}>
                         <RefreshCw className="w-4 h-4" />
                         Sync Now
                       </Button>
@@ -1846,7 +2394,11 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                           <div className="font-medium text-gray-900 dark:text-white">Reset All OKRs</div>
                           <p className="text-sm text-gray-500">Clear all goals and progress</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button
+                          variant="outline"
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                          onClick={handleResetOKRs}
+                        >
                           Reset OKRs
                         </Button>
                       </div>
@@ -1855,7 +2407,11 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                           <div className="font-medium text-gray-900 dark:text-white">Archive Review History</div>
                           <p className="text-sm text-gray-500">Move all reviews to archive</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button
+                          variant="outline"
+                          className="text-red-600 border-red-300 hover:bg-red-50"
+                          onClick={handleArchiveAllReviews}
+                        >
                           Archive All
                         </Button>
                       </div>
@@ -1864,9 +2420,14 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                           <div className="font-medium text-gray-900 dark:text-white">Export All Data</div>
                           <p className="text-sm text-gray-500">Download complete HR data</p>
                         </div>
-                        <Button variant="outline" className="gap-2">
+                        <Button
+                          variant="outline"
+                          className="gap-2"
+                          onClick={handleExportAllData}
+                          disabled={exporting}
+                        >
                           <Download className="w-4 h-4" />
-                          Export
+                          {exporting ? 'Exporting...' : 'Export'}
                         </Button>
                       </div>
                     </div>
@@ -1957,11 +2518,30 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
                   )}
 
                   <div className="flex gap-2">
-                    <Button className="flex-1 gap-2">
+                    <Button
+                      className="flex-1 gap-2"
+                      onClick={() => {
+                        if (selectedMember) {
+                          setSchedule1on1Form(prev => ({ ...prev, participantId: selectedMember.id }))
+                          setShowSchedule1on1Modal(true)
+                          setSelectedMember(null)
+                        }
+                      }}
+                    >
                       <MessageSquare className="w-4 h-4" />
                       Schedule 1:1
                     </Button>
-                    <Button variant="outline" className="flex-1 gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-2"
+                      onClick={() => {
+                        if (selectedMember) {
+                          setRecognitionForm(prev => ({ ...prev, recipientId: selectedMember.id }))
+                          setShowRecognitionModal(true)
+                          setSelectedMember(null)
+                        }
+                      }}
+                    >
                       <Star className="w-4 h-4" />
                       Give Recognition
                     </Button>

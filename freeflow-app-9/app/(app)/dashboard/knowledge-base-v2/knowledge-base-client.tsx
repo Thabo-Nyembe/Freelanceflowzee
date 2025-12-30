@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,7 +10,8 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   BookOpen,
@@ -684,7 +686,37 @@ const mockKnowledgeBaseQuickActions = [
   { id: '3', label: 'Search All', icon: 'search', action: () => console.log('Search'), variant: 'outline' as const },
 ]
 
+// Database types
+interface DbArticle {
+  id: string
+  user_id: string
+  article_title: string
+  article_slug: string | null
+  description: string | null
+  content: string | null
+  category: string
+  article_type: string
+  status: string
+  is_published: boolean
+  is_featured: boolean
+  author: string | null
+  contributors: string[] | null
+  read_time_minutes: number
+  view_count: number
+  helpful_count: number
+  comment_count: number
+  tags: string[] | null
+  visibility: string
+  version: number
+  published_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 export default function KnowledgeBaseClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('pages')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSpace, setSelectedSpace] = useState<string>('all')
@@ -694,8 +726,76 @@ export default function KnowledgeBaseClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Data State
+  const [pages, setPages] = useState<Page[]>(mockPages)
+  const [loading, setLoading] = useState(true)
+
+  // Form State
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [newPageTitle, setNewPageTitle] = useState('')
+  const [newPageContent, setNewPageContent] = useState('')
+  const [newPageCategory, setNewPageCategory] = useState('general')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Fetch articles from Supabase
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('knowledge_base')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('updated_at', { ascending: false })
+
+      if (error) throw error
+
+      if (data && data.length > 0) {
+        setPages(data.map((a: DbArticle) => ({
+          id: a.id,
+          title: a.article_title,
+          excerpt: a.description || '',
+          content: a.content || '',
+          spaceId: '1',
+          spaceName: a.category || 'General',
+          spaceKey: (a.category || 'GEN').substring(0, 3).toUpperCase(),
+          parentId: null,
+          type: (a.article_type === 'guide' ? 'how-to' : a.article_type === 'tutorial' ? 'how-to' : 'page') as PageType,
+          status: (a.status || 'draft') as PageStatus,
+          author: { id: a.user_id, name: a.author || 'You', avatar: '' },
+          contributors: [],
+          labels: a.tags || [],
+          version: a.version || 1,
+          views: a.view_count || 0,
+          likes: a.helpful_count || 0,
+          comments: a.comment_count || 0,
+          isLiked: false,
+          isWatching: false,
+          isBookmarked: a.is_featured,
+          createdAt: a.created_at,
+          updatedAt: a.updated_at,
+          publishedAt: a.published_at,
+          readTime: a.read_time_minutes || 5,
+          children: [],
+          restrictions: a.visibility === 'private' ? { view: ['owner'], edit: ['owner'] } : null
+        })))
+      }
+    } catch (error) {
+      console.error('Error fetching articles:', error)
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
+
   const filteredPages = useMemo(() => {
-    return mockPages.filter(page => {
+    return pages.filter(page => {
       const matchesSearch = page.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         page.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
         page.labels.some(l => l.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -703,7 +803,7 @@ export default function KnowledgeBaseClient() {
       const matchesStatus = selectedStatus === 'all' || page.status === selectedStatus
       return matchesSearch && matchesSpace && matchesStatus
     })
-  }, [searchQuery, selectedSpace, selectedStatus])
+  }, [pages, searchQuery, selectedSpace, selectedStatus])
 
   const filteredSpaces = useMemo(() => {
     return mockSpaces.filter(space =>
@@ -756,34 +856,99 @@ export default function KnowledgeBaseClient() {
     setShowPageDialog(true)
   }
 
-  // Handlers
-  const handleCreatePage = () => {
-    toast.info('Create Page', {
-      description: 'Opening page editor...'
-    })
+  // CRUD Handlers
+  const handleCreatePage = async () => {
+    if (!newPageTitle.trim()) {
+      toast.error('Please enter a title')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      const slug = newPageTitle.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      const { error } = await supabase.from('knowledge_base').insert({
+        user_id: user.id,
+        article_title: newPageTitle.trim(),
+        article_slug: slug,
+        description: newPageContent.trim() || null,
+        content: newPageContent.trim() || null,
+        category: newPageCategory,
+        status: 'draft',
+        author: user.email?.split('@')[0] || 'User'
+      })
+
+      if (error) throw error
+      toast.success('Page created', { description: `"${newPageTitle}" has been created` })
+      setNewPageTitle('')
+      setNewPageContent('')
+      setShowCreateDialog(false)
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to create page', { description: error instanceof Error ? error.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleDeletePage = async (pageId: string, pageTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('knowledge_base')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', pageId)
+
+      if (error) throw error
+      toast.success('Page deleted', { description: `"${pageTitle}" moved to trash` })
+      setShowPageDialog(false)
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to delete page', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handlePublishPage = async (pageId: string, pageTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('knowledge_base')
+        .update({ status: 'published', is_published: true, published_at: new Date().toISOString() })
+        .eq('id', pageId)
+
+      if (error) throw error
+      toast.success('Page published', { description: `"${pageTitle}" is now live` })
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to publish page', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+  }
+
+  const handleBookmark = async (page: Page) => {
+    try {
+      const { error } = await supabase
+        .from('knowledge_base')
+        .update({ is_featured: !page.isBookmarked })
+        .eq('id', page.id)
+
+      if (error) throw error
+      toast.success(page.isBookmarked ? 'Removed from bookmarks' : 'Added to bookmarks')
+      fetchData()
+    } catch (error) {
+      toast.error('Failed to update bookmark')
+    }
   }
 
   const handleExport = () => {
-    toast.success('Export started', {
-      description: 'Your knowledge base is being exported'
-    })
+    toast.success('Export started', { description: 'Your knowledge base is being exported' })
   }
 
   const handleShare = () => {
-    toast.success('Link copied', {
-      description: 'Share link copied to clipboard'
-    })
-  }
-
-  const handleBookmark = (page: Page) => {
-    toast.success('Bookmarked', {
-      description: `${page.title} added to bookmarks`
-    })
+    toast.success('Link copied', { description: 'Share link copied to clipboard' })
   }
 
   const stats = [
     { label: 'Total Spaces', value: mockSpaces.length.toString(), icon: FolderOpen, change: '+2', trend: 'up', color: 'text-blue-600' },
-    { label: 'Total Pages', value: formatNumber(mockAnalytics.totalPages), icon: FileText, change: '+12.3%', trend: 'up', color: 'text-indigo-600' },
+    { label: 'Total Pages', value: formatNumber(pages.length || mockAnalytics.totalPages), icon: FileText, change: '+12.3%', trend: 'up', color: 'text-indigo-600' },
     { label: 'Total Views', value: formatNumber(mockAnalytics.totalViews), icon: Eye, change: '+18.5%', trend: 'up', color: 'text-green-600' },
     { label: 'Contributors', value: mockAnalytics.activeContributors.toString(), icon: Users, change: '+8', trend: 'up', color: 'text-purple-600' },
     { label: 'Avg Views/Page', value: mockAnalytics.avgPageViews.toString(), icon: TrendingUp, change: '+5.2%', trend: 'up', color: 'text-cyan-600' },
@@ -819,7 +984,7 @@ export default function KnowledgeBaseClient() {
             <Button variant="outline" size="icon">
               <Filter className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
+            <Button onClick={() => setShowCreateDialog(true)} className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Create Page
             </Button>
@@ -900,18 +1065,19 @@ export default function KnowledgeBaseClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Page', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: FolderOpen, label: 'New Space', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Layout, label: 'Templates', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Clock, label: 'Recent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: Download, label: 'Export', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Plus, label: 'New Page', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowCreateDialog(true) },
+                { icon: FolderOpen, label: 'New Space', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Creating space...') },
+                { icon: Layout, label: 'Templates', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('templates') },
+                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {} },
+                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Showing starred pages') },
+                { icon: Clock, label: 'Recent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.info('Showing recent pages') },
+                { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: () => setSelectedStatus('archived') },
+                { icon: Download, label: 'Export', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: handleExport },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1886,20 +2052,22 @@ export default function KnowledgeBaseClient() {
               </ScrollArea>
               <div className="flex items-center justify-between pt-4 border-t">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline">
-                    <History className="w-4 h-4 mr-2" />
-                    View History
+                  <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => handleDeletePage(selectedPage.id, selectedPage.title)}>
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={handleExport}>
                     <Download className="w-4 h-4 mr-2" />
                     Export
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline">
-                    <Copy className="w-4 h-4 mr-2" />
-                    Duplicate
-                  </Button>
+                  {selectedPage.status !== 'published' && (
+                    <Button variant="outline" className="text-green-600" onClick={() => handlePublishPage(selectedPage.id, selectedPage.title)}>
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Publish
+                    </Button>
+                  )}
                   <Button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Page
@@ -1908,6 +2076,60 @@ export default function KnowledgeBaseClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Page Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create New Page</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={newPageTitle}
+                onChange={(e) => setNewPageTitle(e.target.value)}
+                placeholder="Enter page title..."
+                onKeyDown={(e) => e.key === 'Enter' && handleCreatePage()}
+              />
+            </div>
+            <div>
+              <Label htmlFor="category">Category</Label>
+              <select
+                id="category"
+                value={newPageCategory}
+                onChange={(e) => setNewPageCategory(e.target.value)}
+                className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600"
+              >
+                <option value="general">General</option>
+                <option value="getting-started">Getting Started</option>
+                <option value="tutorials">Tutorials</option>
+                <option value="api">API</option>
+                <option value="troubleshooting">Troubleshooting</option>
+                <option value="best-practices">Best Practices</option>
+                <option value="faq">FAQ</option>
+              </select>
+            </div>
+            <div>
+              <Label htmlFor="content">Content (optional)</Label>
+              <Textarea
+                id="content"
+                value={newPageContent}
+                onChange={(e) => setNewPageContent(e.target.value)}
+                placeholder="Enter page content..."
+                rows={4}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+            <Button onClick={handleCreatePage} disabled={isSubmitting} className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white">
+              {isSubmitting ? 'Creating...' : 'Create Page'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

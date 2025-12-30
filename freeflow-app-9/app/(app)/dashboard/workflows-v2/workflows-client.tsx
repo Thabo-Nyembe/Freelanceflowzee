@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { useWorkflows, Workflow as DBWorkflow } from '@/lib/hooks/use-workflows'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -436,9 +437,56 @@ export default function WorkflowsClient() {
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [folderFilter, setFolderFilter] = useState<string>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isCreating, setIsCreating] = useState(false)
+  const [newWorkflowName, setNewWorkflowName] = useState('')
+  const [newWorkflowDescription, setNewWorkflowDescription] = useState('')
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
 
-  // Stats calculations
+  // Real Supabase hook
+  const {
+    workflows: dbWorkflows,
+    loading: dbLoading,
+    error: dbError,
+    stats: dbStats,
+    fetchWorkflows,
+    createWorkflow,
+    updateWorkflow,
+    deleteWorkflow,
+    startWorkflow,
+    pauseWorkflow,
+    resumeWorkflow
+  } = useWorkflows()
+
+  // Fetch workflows on mount
+  useEffect(() => {
+    fetchWorkflows()
+  }, [fetchWorkflows])
+
+  // Stats calculations - use real data from Supabase when available, fallback to mock
   const stats = useMemo(() => {
+    // Use real data if available
+    if (dbWorkflows.length > 0) {
+      const totalWorkflows = dbWorkflows.length
+      const activeWorkflows = dbWorkflows.filter(w => w.status === 'active').length
+      const totalRuns = mockRuns.length // Keep mock for runs until run tracking is implemented
+      const successfulRuns = mockRuns.filter(r => r.status === 'success').length
+      const successRate = totalRuns > 0 ? (successfulRuns / totalRuns) * 100 : 0
+      const errorWorkflows = dbWorkflows.filter(w => w.status === 'failed').length
+      const connectedApps = mockApps.filter(a => a.status === 'connected').length
+      const tasksSaved = dbWorkflows.reduce((acc, w) => acc + (w.total_steps || 0), 0)
+
+      return {
+        totalWorkflows,
+        activeWorkflows,
+        totalRuns,
+        successRate,
+        errorWorkflows,
+        connectedApps,
+        tasksSaved
+      }
+    }
+
+    // Fallback to mock data
     const totalWorkflows = mockWorkflows.length
     const activeWorkflows = mockWorkflows.filter(w => w.status === 'active').length
     const totalRuns = mockRuns.length
@@ -457,48 +505,208 @@ export default function WorkflowsClient() {
       connectedApps,
       tasksSaved
     }
-  }, [])
+  }, [dbWorkflows])
 
-  // Filtered workflows
+  // Filtered workflows - combine database workflows with mock for display
   const filteredWorkflows = useMemo(() => {
-    return mockWorkflows.filter(workflow => {
+    // Convert DB workflows to display format
+    const displayWorkflows: Workflow[] = dbWorkflows.map(dbw => ({
+      id: dbw.id,
+      name: dbw.name,
+      description: dbw.description || '',
+      status: dbw.status === 'failed' ? 'error' : (dbw.status as 'active' | 'paused' | 'draft' | 'error'),
+      folder: dbw.tags?.[0] || 'General',
+      steps: (dbw.steps_config || []).map((step: any, idx: number) => ({
+        id: `s${idx + 1}`,
+        type: step.type || 'action',
+        app: step.app || 'Custom',
+        appIcon: step.icon || '⚡',
+        name: step.name || 'Step',
+        description: step.description || '',
+        config: step.config || {},
+        position: idx + 1
+      })),
+      trigger: dbw.steps_config?.[0]?.name || 'Manual Trigger',
+      lastRun: dbw.started_at || undefined,
+      totalRuns: dbw.current_step || 0,
+      successRate: dbw.completion_rate || 0,
+      avgRunTime: '0s',
+      createdAt: dbw.created_at,
+      updatedAt: dbw.updated_at,
+      owner: 'You',
+      isStarred: false,
+      tags: dbw.tags || []
+    }))
+
+    // Combine with mock data if no DB workflows
+    const workflowsToFilter = displayWorkflows.length > 0 ? displayWorkflows : mockWorkflows
+
+    return workflowsToFilter.filter(workflow => {
       const matchesSearch = workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         workflow.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || workflow.status === statusFilter
       const matchesFolder = folderFilter === 'all' || workflow.folder === folderFilter
       return matchesSearch && matchesStatus && matchesFolder
     })
-  }, [searchQuery, statusFilter, folderFilter])
+  }, [searchQuery, statusFilter, folderFilter, dbWorkflows])
 
-  // Handlers
-  const handleCreateWorkflow = () => {
-    toast.info('Create Workflow', {
-      description: 'Opening workflow builder...'
-    })
+  // Handlers - wired to REAL Supabase operations
+  const handleCreateWorkflow = async () => {
+    setShowCreateDialog(true)
   }
 
-  const handleRunWorkflow = (workflow: Workflow) => {
-    toast.success('Workflow running', {
-      description: `${workflow.name} is now executing`
-    })
+  const handleSubmitCreateWorkflow = async () => {
+    if (!newWorkflowName.trim()) {
+      toast.error('Workflow name is required')
+      return
+    }
+
+    setIsCreating(true)
+    try {
+      // Generate a unique workflow code
+      const workflowCode = `WF-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+
+      const result = await createWorkflow({
+        workflow_code: workflowCode,
+        name: newWorkflowName,
+        description: newWorkflowDescription || null,
+        type: 'processing',
+        status: 'draft',
+        priority: 'medium',
+        total_steps: 0,
+        current_step: 0,
+        steps_config: [],
+        approvals_required: 0,
+        approvals_received: 0,
+        completion_rate: 0,
+        assigned_to: [],
+        dependencies: [],
+        tags: [],
+        metadata: {}
+      })
+
+      if (result.success) {
+        toast.success('Workflow created', {
+          description: `${newWorkflowName} has been created successfully`
+        })
+        setShowCreateDialog(false)
+        setNewWorkflowName('')
+        setNewWorkflowDescription('')
+      } else {
+        toast.error('Failed to create workflow', {
+          description: result.error || 'An error occurred'
+        })
+      }
+    } catch (error) {
+      toast.error('Failed to create workflow', {
+        description: error instanceof Error ? error.message : 'An error occurred'
+      })
+    } finally {
+      setIsCreating(false)
+    }
   }
 
-  const handlePauseWorkflow = (workflow: Workflow) => {
-    toast.success('Workflow paused', {
-      description: `${workflow.name} has been paused`
-    })
+  const handleRunWorkflow = async (workflow: Workflow) => {
+    // Activate workflow - sets status to 'active' and started_at timestamp
+    const result = await startWorkflow(workflow.id)
+    if (result.success) {
+      toast.success('Workflow activated', {
+        description: `${workflow.name} is now active and running`
+      })
+    } else {
+      toast.error('Failed to activate workflow', {
+        description: result.error || 'An error occurred'
+      })
+    }
   }
 
-  const handleDuplicateWorkflow = (workflow: Workflow) => {
-    toast.success('Workflow duplicated', {
-      description: `Copy of ${workflow.name} created`
-    })
+  const handlePauseWorkflow = async (workflow: Workflow) => {
+    // Pause workflow - sets status to 'paused'
+    const result = await pauseWorkflow(workflow.id)
+    if (result.success) {
+      toast.success('Workflow paused', {
+        description: `${workflow.name} has been paused`
+      })
+    } else {
+      toast.error('Failed to pause workflow', {
+        description: result.error || 'An error occurred'
+      })
+    }
   }
 
-  const handleDeleteWorkflow = (workflow: Workflow) => {
-    toast.info('Workflow deleted', {
-      description: `${workflow.name} has been removed`
+  const handleActivateWorkflow = async (workflow: Workflow) => {
+    // Activate/Resume workflow
+    const result = await updateWorkflow(workflow.id, { status: 'active' })
+    if (result.success) {
+      toast.success('Workflow activated', {
+        description: `${workflow.name} is now active`
+      })
+    } else {
+      toast.error('Failed to activate workflow', {
+        description: result.error || 'An error occurred'
+      })
+    }
+  }
+
+  const handleDuplicateWorkflow = async (workflow: Workflow) => {
+    // Find the original DB workflow to get full data
+    const originalDbWorkflow = dbWorkflows.find(w => w.id === workflow.id)
+
+    // Generate a unique workflow code for the duplicate
+    const workflowCode = `WF-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+
+    const result = await createWorkflow({
+      workflow_code: workflowCode,
+      name: `${workflow.name} (Copy)`,
+      description: workflow.description || null,
+      type: originalDbWorkflow?.type || 'processing',
+      status: 'draft',
+      priority: originalDbWorkflow?.priority || 'medium',
+      total_steps: originalDbWorkflow?.total_steps || 0,
+      current_step: 0,
+      steps_config: originalDbWorkflow?.steps_config || [],
+      approvals_required: originalDbWorkflow?.approvals_required || 0,
+      approvals_received: 0,
+      completion_rate: 0,
+      assigned_to: originalDbWorkflow?.assigned_to || [],
+      dependencies: originalDbWorkflow?.dependencies || [],
+      tags: originalDbWorkflow?.tags || [],
+      metadata: originalDbWorkflow?.metadata || {}
     })
+
+    if (result.success) {
+      toast.success('Workflow duplicated', {
+        description: `Copy of ${workflow.name} created`
+      })
+    } else {
+      toast.error('Failed to duplicate workflow', {
+        description: result.error || 'An error occurred'
+      })
+    }
+  }
+
+  const handleDeleteWorkflow = async (workflow: Workflow) => {
+    // Delete workflow (soft delete in Supabase)
+    const result = await deleteWorkflow(workflow.id)
+    if (result.success) {
+      toast.success('Workflow deleted', {
+        description: `${workflow.name} has been removed`
+      })
+      setSelectedWorkflow(null) // Close the dialog if open
+    } else {
+      toast.error('Failed to delete workflow', {
+        description: result.error || 'An error occurred'
+      })
+    }
+  }
+
+  const handleToggleWorkflowStatus = async (workflow: Workflow) => {
+    // Toggle between active and paused
+    if (workflow.status === 'active') {
+      await handlePauseWorkflow(workflow)
+    } else {
+      await handleActivateWorkflow(workflow)
+    }
   }
 
   const handleExportWorkflows = () => {
@@ -532,10 +740,13 @@ export default function WorkflowsClient() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="icon">
-                <RefreshCw className="w-4 h-4" />
+              <Button variant="outline" size="icon" onClick={() => fetchWorkflows()} disabled={dbLoading}>
+                <RefreshCw className={`w-4 h-4 ${dbLoading ? 'animate-spin' : ''}`} />
               </Button>
-              <Button className="bg-gradient-to-r from-orange-500 to-amber-600 text-white">
+              <Button
+                className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+                onClick={handleCreateWorkflow}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Workflow
               </Button>
@@ -690,8 +901,12 @@ export default function WorkflowsClient() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Switch checked={workflow.status === 'active'} />
+                      <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                        <Switch
+                          checked={workflow.status === 'active'}
+                          onCheckedChange={() => handleToggleWorkflowStatus(workflow)}
+                          disabled={dbLoading}
+                        />
                         <Button variant="ghost" size="icon">
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
@@ -1846,14 +2061,40 @@ export default function WorkflowsClient() {
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Workflow
                   </Button>
-                  <Button variant="outline" className="flex-1">
-                    <Play className="w-4 h-4 mr-2" />
-                    Run Now
-                  </Button>
-                  <Button variant="outline">
+                  {selectedWorkflow.status === 'active' ? (
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handlePauseWorkflow(selectedWorkflow)}
+                      disabled={dbLoading}
+                    >
+                      <Pause className="w-4 h-4 mr-2" />
+                      Pause
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => handleActivateWorkflow(selectedWorkflow)}
+                      disabled={dbLoading}
+                    >
+                      <Play className="w-4 h-4 mr-2" />
+                      Activate
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    onClick={() => handleDuplicateWorkflow(selectedWorkflow)}
+                    disabled={dbLoading}
+                  >
                     <Copy className="w-4 h-4" />
                   </Button>
-                  <Button variant="outline" className="text-red-600">
+                  <Button
+                    variant="outline"
+                    className="text-red-600"
+                    onClick={() => handleDeleteWorkflow(selectedWorkflow)}
+                    disabled={dbLoading}
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -1931,6 +2172,81 @@ export default function WorkflowsClient() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Create Workflow Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5 text-orange-500" />
+              Create New Workflow
+            </DialogTitle>
+            <DialogDescription>
+              Create a new workflow automation. You can add steps after creation.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="workflow-name">Workflow Name</Label>
+              <Input
+                id="workflow-name"
+                placeholder="e.g., Lead to CRM Pipeline"
+                value={newWorkflowName}
+                onChange={(e) => setNewWorkflowName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="workflow-description">Description (optional)</Label>
+              <Input
+                id="workflow-description"
+                placeholder="e.g., Automatically sync new leads to CRM"
+                value={newWorkflowDescription}
+                onChange={(e) => setNewWorkflowDescription(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCreateDialog(false)
+                setNewWorkflowName('')
+                setNewWorkflowDescription('')
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+              onClick={handleSubmitCreateWorkflow}
+              disabled={isCreating || !newWorkflowName.trim()}
+            >
+              {isCreating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Workflow
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error display */}
+      {dbError && (
+        <div className="fixed bottom-4 right-4 p-4 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 rounded-lg shadow-lg max-w-md">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="w-5 h-5" />
+            <span className="font-medium">Error</span>
+          </div>
+          <p className="text-sm mt-1">{dbError}</p>
+        </div>
+      )}
     </div>
   )
 }

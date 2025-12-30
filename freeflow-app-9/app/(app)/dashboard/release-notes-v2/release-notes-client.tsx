@@ -14,9 +14,10 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Textarea } from '@/components/ui/textarea'
 import { useReleaseNotes, ReleaseNote, ReleaseNotesStats } from '@/lib/hooks/use-release-notes'
-import { createReleaseNote, deleteReleaseNote, publishReleaseNote, archiveReleaseNote, likeReleaseNote } from '@/app/actions/release-notes'
-import { Rocket, Calendar, Flag, GitBranch, Tag, ChevronRight, Clock, Users, Download, Eye, Heart, MessageSquare, Bell, BellOff, Share2, Code, Smartphone, Monitor, Globe, CheckCircle, XCircle, AlertCircle, Zap, TrendingUp, BarChart3, Settings, Filter, Search, Plus, ArrowUpRight, Sparkles, Star, BookOpen, FileText, History, Target, Layers, Key, Webhook, Database, Trash2, Lock, Mail, Link2, RefreshCw, Palette, Copy, AlertOctagon } from 'lucide-react'
+import { createReleaseNote, deleteReleaseNote, publishReleaseNote, archiveReleaseNote, likeReleaseNote, updateReleaseNote, ReleaseNoteInput } from '@/app/actions/release-notes'
+import { Rocket, Calendar, Flag, GitBranch, Download, Eye, Heart, MessageSquare, Bell, BellOff, Share2, Code, Smartphone, Monitor, Globe, CheckCircle, AlertCircle, Zap, TrendingUp, Settings, Search, Plus, Sparkles, Star, FileText, History, Target, Layers, Key, Webhook, Database, Trash2, Lock, Mail, Link2, RefreshCw, Palette, Copy, AlertOctagon, Edit2 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -114,7 +115,8 @@ interface RoadmapItem {
   votes: number
 }
 
-interface Subscription {
+// Subscription interface for future use
+interface _Subscription {
   id: string
   releaseTypes: string[]
   platforms: string[]
@@ -347,8 +349,26 @@ const mockReleaseNotesQuickActions = [
   { id: '4', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => console.log('Analytics') },
 ]
 
+// Default form state for creating/editing release notes
+const defaultFormState: ReleaseNoteInput = {
+  version: '',
+  title: '',
+  description: '',
+  status: 'draft',
+  release_type: 'minor',
+  platform: 'all',
+  author: '',
+  highlights: [],
+  features: [],
+  improvements: [],
+  bug_fixes: [],
+  breaking_changes: [],
+  tags: [],
+  scheduled_at: undefined,
+}
+
 export default function ReleaseNotesClient({ initialReleases, initialStats }: ReleaseNotesClientProps) {
-  const { releases, stats } = useReleaseNotes(initialReleases, initialStats)
+  const { releases, stats: _stats } = useReleaseNotes(initialReleases, initialStats)
   const [activeTab, setActiveTab] = useState('releases')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -358,6 +378,16 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [subscribed, setSubscribed] = useState(true)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Form state for create/edit dialog
+  const [formData, setFormData] = useState<ReleaseNoteInput>(defaultFormState)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
+  const [editingReleaseNote, setEditingReleaseNote] = useState<ReleaseNote | null>(null)
+  const [highlightsInput, setHighlightsInput] = useState('')
+  const [featuresInput, setFeaturesInput] = useState('')
+  const [tagsInput, setTagsInput] = useState('')
 
   const filteredReleases = useMemo(() => {
     let filtered = [...mockReleases]
@@ -515,35 +545,203 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     </Card>
   )
 
-  // Handlers
-  const handleCreateReleaseNote = () => {
-    toast.info('Create Release Note', {
-      description: 'Opening release note editor...'
-    })
+  // Reset form to default state
+  const resetForm = () => {
+    setFormData(defaultFormState)
+    setEditingReleaseNote(null)
+    setHighlightsInput('')
+    setFeaturesInput('')
+    setTagsInput('')
   }
 
-  const handlePublishNote = (noteVersion: string) => {
-    toast.success('Publishing note', {
-      description: `Release note ${noteVersion} published`
-    })
+  // Open create modal
+  const handleOpenCreateModal = () => {
+    resetForm()
+    setShowCreateModal(true)
   }
 
+  // Open edit modal with existing release note data
+  const handleOpenEditModal = (releaseNote: ReleaseNote) => {
+    setEditingReleaseNote(releaseNote)
+    setFormData({
+      version: releaseNote.version,
+      title: releaseNote.title,
+      description: releaseNote.description || '',
+      status: releaseNote.status,
+      release_type: releaseNote.release_type,
+      platform: releaseNote.platform,
+      author: releaseNote.author || '',
+      highlights: releaseNote.highlights || [],
+      features: releaseNote.features || [],
+      improvements: releaseNote.improvements || [],
+      bug_fixes: releaseNote.bug_fixes || [],
+      breaking_changes: releaseNote.breaking_changes || [],
+      tags: releaseNote.tags || [],
+      scheduled_at: releaseNote.scheduled_at || undefined,
+    })
+    setHighlightsInput((releaseNote.highlights || []).join(', '))
+    setFeaturesInput((releaseNote.features || []).join(', '))
+    setTagsInput((releaseNote.tags || []).join(', '))
+    setShowCreateModal(true)
+  }
+
+  // Create or update release note
+  const handleSubmitReleaseNote = async () => {
+    if (!formData.version.trim() || !formData.title.trim()) {
+      toast.error('Validation Error', { description: 'Version and title are required' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      // Parse comma-separated inputs into arrays
+      const releaseData: ReleaseNoteInput = {
+        ...formData,
+        highlights: highlightsInput.split(',').map(s => s.trim()).filter(Boolean),
+        features: featuresInput.split(',').map(s => s.trim()).filter(Boolean),
+        tags: tagsInput.split(',').map(s => s.trim()).filter(Boolean),
+      }
+
+      if (editingReleaseNote) {
+        const result = await updateReleaseNote(editingReleaseNote.id, releaseData)
+        if (result.success) {
+          toast.success('Release Note Updated', { description: `${formData.version} has been updated successfully` })
+          setShowCreateModal(false)
+          resetForm()
+        } else {
+          toast.error('Update Failed', { description: result.error || 'Failed to update release note' })
+        }
+      } else {
+        const result = await createReleaseNote(releaseData)
+        if (result.success) {
+          toast.success('Release Note Created', { description: `${formData.version} has been created successfully` })
+          setShowCreateModal(false)
+          resetForm()
+        } else {
+          toast.error('Creation Failed', { description: result.error || 'Failed to create release note' })
+        }
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Publish a release note
+  const handlePublishNote = async (noteId: string, noteVersion: string) => {
+    setIsSubmitting(true)
+    try {
+      const result = await publishReleaseNote(noteId)
+      if (result.success) {
+        toast.success('Published', { description: `Release note ${noteVersion} is now live` })
+      } else {
+        toast.error('Publish Failed', { description: result.error || 'Failed to publish release note' })
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Archive a release note
+  const handleArchiveNote = async (noteId: string, noteVersion: string) => {
+    setIsSubmitting(true)
+    try {
+      const result = await archiveReleaseNote(noteId)
+      if (result.success) {
+        toast.success('Archived', { description: `Release note ${noteVersion} has been archived` })
+      } else {
+        toast.error('Archive Failed', { description: result.error || 'Failed to archive release note' })
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Like a release note
+  const handleLikeNote = async (noteId: string) => {
+    try {
+      const result = await likeReleaseNote(noteId)
+      if (result.success) {
+        toast.success('Liked', { description: 'You liked this release note' })
+      } else {
+        toast.error('Like Failed', { description: result.error || 'Failed to like release note' })
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'An unexpected error occurred' })
+    }
+  }
+
+  // Delete confirmation
+  const handleConfirmDelete = (id: string) => {
+    setDeleteTargetId(id)
+    setShowDeleteConfirm(true)
+  }
+
+  // Delete a release note
+  const handleDeleteNote = async () => {
+    if (!deleteTargetId) return
+
+    setIsSubmitting(true)
+    try {
+      const result = await deleteReleaseNote(deleteTargetId)
+      if (result.success) {
+        toast.success('Deleted', { description: 'Release note has been deleted' })
+        setShowDeleteConfirm(false)
+        setDeleteTargetId(null)
+        setSelectedRelease(null)
+      } else {
+        toast.error('Delete Failed', { description: result.error || 'Failed to delete release note' })
+      }
+    } catch (error) {
+      toast.error('Error', { description: 'An unexpected error occurred' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Share release note link
   const handleShareReleaseNote = (noteVersion: string) => {
-    toast.success('Link copied', {
-      description: `Share link for ${noteVersion} copied to clipboard`
-    })
+    const shareUrl = `${window.location.origin}/releases/${noteVersion}`
+    navigator.clipboard.writeText(shareUrl)
+    toast.success('Link Copied', { description: `Share link for ${noteVersion} copied to clipboard` })
   }
 
+  // Subscribe to notifications
   const handleSubscribeNotes = () => {
-    toast.success('Subscribed', {
-      description: 'You will receive updates for new release notes'
-    })
+    setSubscribed(!subscribed)
+    if (!subscribed) {
+      toast.success('Subscribed', { description: 'You will receive updates for new release notes' })
+    } else {
+      toast.info('Unsubscribed', { description: 'You will no longer receive release note updates' })
+    }
   }
 
+  // Export release notes
   const handleExportNotes = () => {
-    toast.success('Exporting notes', {
-      description: 'Release notes will be downloaded'
-    })
+    const data = releases.map(r => ({
+      version: r.version,
+      title: r.title,
+      description: r.description,
+      status: r.status,
+      release_type: r.release_type,
+      platform: r.platform,
+      published_at: r.published_at,
+      highlights: r.highlights,
+      features: r.features,
+    }))
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'release-notes-export.json'
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Exported', { description: 'Release notes have been downloaded' })
   }
 
   return (
@@ -563,12 +761,15 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               <Button
                 variant="secondary"
                 className={`${subscribed ? 'bg-white/20' : 'bg-white/10'} hover:bg-white/30 border-0`}
-                onClick={() => setSubscribed(!subscribed)}
+                onClick={handleSubscribeNotes}
               >
                 {subscribed ? <Bell className="w-4 h-4 mr-2" /> : <BellOff className="w-4 h-4 mr-2" />}
                 {subscribed ? 'Subscribed' : 'Subscribe'}
               </Button>
-              <Button className="bg-white text-orange-600 hover:bg-orange-50">
+              <Button
+                className="bg-white text-orange-600 hover:bg-orange-50"
+                onClick={handleOpenCreateModal}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 New Release
               </Button>
@@ -673,20 +874,121 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
 
           {/* Releases Tab */}
           <TabsContent value="releases" className="space-y-6">
-            {filteredReleases.length === 0 ? (
+            {/* Real Releases from Database */}
+            {releases.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                    <Database className="w-5 h-5 text-orange-600" />
+                    Your Release Notes ({releases.length})
+                  </h3>
+                  <Button variant="outline" size="sm" onClick={handleExportNotes}>
+                    <Download className="w-4 h-4 mr-1" />
+                    Export
+                  </Button>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {releases.map((release) => (
+                    <Card key={release.id} className="hover:shadow-lg transition-all border-gray-200 hover:border-orange-300">
+                      <CardContent className="p-5">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg text-white">
+                              <Rocket className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-lg">{release.version}</span>
+                                <Badge className={getTypeColor(release.release_type)}>{release.release_type}</Badge>
+                              </div>
+                              <h3 className="font-semibold text-gray-900 dark:text-white">{release.title}</h3>
+                            </div>
+                          </div>
+                          <Badge className={getStatusColor(release.status)}>{release.status}</Badge>
+                        </div>
+
+                        {release.description && (
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">{release.description}</p>
+                        )}
+
+                        {release.highlights && release.highlights.length > 0 && (
+                          <div className="mb-4 p-3 bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-lg">
+                            <ul className="space-y-1">
+                              {release.highlights.slice(0, 2).map((h, i) => (
+                                <li key={i} className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                                  <Star className="w-3 h-3 text-orange-500 fill-orange-500" />
+                                  {h}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between pt-3 border-t">
+                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Eye className="w-3 h-3" />
+                              {release.views_count || 0}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Heart className="w-3 h-3" />
+                              {release.likes_count || 0}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {release.published_at ? new Date(release.published_at).toLocaleDateString() : 'Draft'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="sm" onClick={() => handleOpenEditModal(release)}>
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            {release.status === 'draft' && (
+                              <Button variant="ghost" size="sm" onClick={() => handlePublishNote(release.id, release.version)}>
+                                <Rocket className="w-4 h-4 text-green-600" />
+                              </Button>
+                            )}
+                            {release.status === 'published' && (
+                              <Button variant="ghost" size="sm" onClick={() => handleArchiveNote(release.id, release.version)}>
+                                <FileText className="w-4 h-4 text-gray-600" />
+                              </Button>
+                            )}
+                            <Button variant="ghost" size="sm" onClick={() => handleLikeNote(release.id)}>
+                              <Heart className="w-4 h-4 text-pink-600" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => handleConfirmDelete(release.id)}>
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Mock/Example Releases */}
+            {filteredReleases.length === 0 && releases.length === 0 ? (
               <Card>
                 <CardContent className="p-12 text-center">
                   <Rocket className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No releases found</h3>
                   <p className="text-gray-500 mb-4">Try adjusting your filters or create a new release</p>
-                  <Button className="bg-orange-600">Create Release</Button>
+                  <Button className="bg-orange-600" onClick={handleOpenCreateModal}>Create Release</Button>
                 </CardContent>
               </Card>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredReleases.map(release => (
-                  <ReleaseCard key={release.id} release={release} />
-                ))}
+            ) : filteredReleases.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-600" />
+                  Example Releases
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {filteredReleases.map(release => (
+                    <ReleaseCard key={release.id} release={release} />
+                  ))}
+                </div>
               </div>
             )}
           </TabsContent>
@@ -704,7 +1006,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                 <div className="relative">
                   <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
                   <div className="space-y-8">
-                    {mockReleases.sort((a, b) => new Date(b.releaseDate || b.scheduledDate || '').getTime() - new Date(a.releaseDate || a.scheduledDate || '').getTime()).map((release, idx) => (
+                    {mockReleases.sort((a, b) => new Date(b.releaseDate || b.scheduledDate || '').getTime() - new Date(a.releaseDate || a.scheduledDate || '').getTime()).map((release) => (
                       <div key={release.id} className="relative pl-10">
                         <div className={`absolute left-2 w-5 h-5 rounded-full border-4 border-white ${
                           release.status === 'published' ? 'bg-green-500' :
@@ -786,7 +1088,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     <Flag className="w-5 h-5" />
                     Feature Flags
                   </CardTitle>
-                  <Button size="sm" className="bg-orange-600">
+                  <Button size="sm" className="bg-orange-600" onClick={() => toast.info('Feature Flags', { description: 'Feature flag management coming soon' })}>
                     <Plus className="w-4 h-4 mr-1" />
                     New Flag
                   </Button>
@@ -1129,7 +1431,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                       <div className="flex items-center justify-between">
                         <div>
                           <Label className="font-medium">Avoid Weekends</Label>
-                          <p className="text-sm text-gray-500">Don't publish on weekends</p>
+                          <p className="text-sm text-gray-500">Do not publish on weekends</p>
                         </div>
                         <Switch defaultChecked />
                       </div>
@@ -1332,7 +1634,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                       </div>
                       <div className="flex items-center justify-between">
                         <div>
-                          <Label className="font-medium">What's New Modal</Label>
+                          <Label className="font-medium">Whats New Modal</Label>
                           <p className="text-sm text-gray-500">Show modal on first visit after update</p>
                         </div>
                         <Switch defaultChecked />
@@ -1599,7 +1901,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                       <div className="space-y-2">
                         <Label className="font-medium">Custom CSS</Label>
                         <div className="p-3 bg-gray-900 rounded-lg h-24">
-                          <code className="text-xs text-gray-400">/* Add custom CSS here */</code>
+                          <code className="text-xs text-gray-400">{`/* Add custom CSS here */`}</code>
                         </div>
                       </div>
                     </CardContent>
@@ -1774,6 +2076,196 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
         </div>
       </div>
 
+      {/* Create/Edit Release Note Dialog */}
+      <Dialog open={showCreateModal} onOpenChange={(open) => { if (!open) { setShowCreateModal(false); resetForm(); } }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Rocket className="w-5 h-5 text-orange-600" />
+              {editingReleaseNote ? 'Edit Release Note' : 'Create New Release Note'}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="version">Version *</Label>
+                <Input
+                  id="version"
+                  placeholder="e.g., v1.2.0"
+                  value={formData.version}
+                  onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="release_type">Release Type</Label>
+                <Select
+                  value={formData.release_type}
+                  onValueChange={(value: 'major' | 'minor' | 'patch' | 'hotfix') => setFormData({ ...formData, release_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="major">Major</SelectItem>
+                    <SelectItem value="minor">Minor</SelectItem>
+                    <SelectItem value="patch">Patch</SelectItem>
+                    <SelectItem value="hotfix">Hotfix</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                placeholder="Release title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Describe what's in this release..."
+                value={formData.description || ''}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={3}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value: 'published' | 'draft' | 'scheduled' | 'archived') => setFormData({ ...formData, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="platform">Platform</Label>
+                <Select
+                  value={formData.platform}
+                  onValueChange={(value: 'web' | 'mobile' | 'api' | 'desktop' | 'all') => setFormData({ ...formData, platform: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Platforms</SelectItem>
+                    <SelectItem value="web">Web</SelectItem>
+                    <SelectItem value="mobile">Mobile</SelectItem>
+                    <SelectItem value="desktop">Desktop</SelectItem>
+                    <SelectItem value="api">API</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="author">Author</Label>
+              <Input
+                id="author"
+                placeholder="Author name"
+                value={formData.author || ''}
+                onChange={(e) => setFormData({ ...formData, author: e.target.value })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="highlights">Highlights (comma-separated)</Label>
+              <Textarea
+                id="highlights"
+                placeholder="Key highlights of this release..."
+                value={highlightsInput}
+                onChange={(e) => setHighlightsInput(e.target.value)}
+                rows={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="features">Features (comma-separated)</Label>
+              <Textarea
+                id="features"
+                placeholder="New features in this release..."
+                value={featuresInput}
+                onChange={(e) => setFeaturesInput(e.target.value)}
+                rows={2}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Input
+                id="tags"
+                placeholder="e.g., feature, security, performance"
+                value={tagsInput}
+                onChange={(e) => setTagsInput(e.target.value)}
+              />
+            </div>
+
+            {formData.status === 'scheduled' && (
+              <div className="space-y-2">
+                <Label htmlFor="scheduled_at">Scheduled Date</Label>
+                <Input
+                  id="scheduled_at"
+                  type="datetime-local"
+                  value={formData.scheduled_at || ''}
+                  onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
+                />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowCreateModal(false); resetForm(); }} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitReleaseNote} disabled={isSubmitting} className="bg-orange-600 hover:bg-orange-700">
+              {isSubmitting ? 'Saving...' : editingReleaseNote ? 'Update Release Note' : 'Create Release Note'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Delete Release Note
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              Are you sure you want to delete this release note? This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteNote} disabled={isSubmitting}>
+              {isSubmitting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Release Detail Dialog */}
       <Dialog open={!!selectedRelease} onOpenChange={() => setSelectedRelease(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
@@ -1805,9 +2297,13 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleShareReleaseNote(selectedRelease.version)}>
                       <Share2 className="w-4 h-4 mr-1" />
                       Share
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => handleLikeNote(selectedRelease.id)}>
+                      <Heart className="w-4 h-4 mr-1" />
+                      Like
                     </Button>
                     {selectedRelease.downloadUrl && (
                       <Button size="sm" className="bg-orange-600">

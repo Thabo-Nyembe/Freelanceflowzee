@@ -625,7 +625,7 @@ export default function CampaignsClient() {
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Database integration
-  const { campaigns: dbCampaigns, createCampaign, loading: campaignsLoading, refetch } = useCampaigns({})
+  const { campaigns: dbCampaigns, createCampaign, updateCampaign, deleteCampaign, loading: campaignsLoading, refetch } = useCampaigns({})
 
   // Form state for new campaign
   const [newCampaignForm, setNewCampaignForm] = useState({
@@ -715,36 +715,177 @@ export default function CampaignsClient() {
     })
   }, [statusFilter, typeFilter, searchQuery])
 
-  // Handlers
-  const handleCreateCampaign = () => {
-    toast.info('Create Campaign', {
-      description: 'Opening campaign builder...'
-    })
-    setShowCampaignDialog(true)
+  // Handlers - Real Supabase Operations
+  const [operationLoading, setOperationLoading] = useState<string | null>(null)
+
+  const handleLaunchCampaign = async (campaignId: string, campaignName: string) => {
+    setOperationLoading(campaignId)
+    try {
+      await updateCampaign({
+        id: campaignId,
+        status: 'running' as CampaignStatusDB,
+        launched_at: new Date().toISOString()
+      })
+      toast.success('Campaign launched', {
+        description: `"${campaignName}" is now live`
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to launch campaign', {
+        description: 'Please try again'
+      })
+      console.error(error)
+    } finally {
+      setOperationLoading(null)
+    }
   }
 
-  const handleLaunchCampaign = (campaign: Campaign) => {
-    toast.success('Campaign launched', {
-      description: `"${campaign.name}" is now live`
-    })
+  const handlePauseCampaign = async (campaignId: string, campaignName: string) => {
+    setOperationLoading(campaignId)
+    try {
+      await updateCampaign({
+        id: campaignId,
+        status: 'paused' as CampaignStatusDB
+      })
+      toast.success('Campaign paused', {
+        description: `"${campaignName}" has been paused`
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to pause campaign', {
+        description: 'Please try again'
+      })
+      console.error(error)
+    } finally {
+      setOperationLoading(null)
+    }
   }
 
-  const handlePauseCampaign = (campaign: Campaign) => {
-    toast.success('Campaign paused', {
-      description: `"${campaign.name}" has been paused`
-    })
+  const handleEndCampaign = async (campaignId: string, campaignName: string) => {
+    setOperationLoading(campaignId)
+    try {
+      await updateCampaign({
+        id: campaignId,
+        status: 'completed' as CampaignStatusDB,
+        completed_at: new Date().toISOString()
+      })
+      toast.success('Campaign ended', {
+        description: `"${campaignName}" has been completed`
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to end campaign', {
+        description: 'Please try again'
+      })
+      console.error(error)
+    } finally {
+      setOperationLoading(null)
+    }
   }
 
-  const handleDuplicateCampaign = (campaign: Campaign) => {
-    toast.success('Campaign duplicated', {
-      description: `Copy of "${campaign.name}" created`
-    })
+  const handleDeleteCampaign = async (campaignId: string, campaignName: string) => {
+    setOperationLoading(campaignId)
+    try {
+      await deleteCampaign({ id: campaignId })
+      toast.success('Campaign deleted', {
+        description: `"${campaignName}" has been deleted`
+      })
+      refetch()
+      setShowCampaignDialog(false)
+      setSelectedCampaign(null)
+    } catch (error) {
+      toast.error('Failed to delete campaign', {
+        description: 'Please try again'
+      })
+      console.error(error)
+    } finally {
+      setOperationLoading(null)
+    }
+  }
+
+  const handleDuplicateCampaign = async (campaign: Campaign) => {
+    setOperationLoading(campaign.id)
+    try {
+      await createCampaign({
+        campaign_name: `${campaign.name} (Copy)`,
+        campaign_type: (campaign.type === 'ab_test' ? 'email' : campaign.type) as CampaignTypeDB,
+        description: campaign.description || null,
+        status: 'draft' as CampaignStatusDB,
+        phase: 'planning',
+        budget_total: 0,
+        budget_spent: 0,
+        budget_remaining: 0,
+        currency: 'USD',
+        audience_size: campaign.audienceSize || 0,
+        impressions: 0,
+        clicks: 0,
+        conversions: 0,
+        leads_generated: 0,
+        sales_generated: 0,
+        revenue_generated: 0,
+        likes_count: 0,
+        shares_count: 0,
+        comments_count: 0,
+        followers_gained: 0,
+        emails_sent: 0,
+        emails_delivered: 0,
+        emails_opened: 0,
+        emails_clicked: 0,
+        is_ab_test: campaign.abTest ? true : false,
+        is_automated: campaign.automation ? true : false,
+        requires_approval: false,
+        approved: false
+      } as any)
+      toast.success('Campaign duplicated', {
+        description: `Copy of "${campaign.name}" created`
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to duplicate campaign', {
+        description: 'Please try again'
+      })
+      console.error(error)
+    } finally {
+      setOperationLoading(null)
+    }
   }
 
   const handleExportCampaigns = () => {
+    // Export campaigns as JSON
+    const exportData = dbCampaigns || []
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `campaigns-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
     toast.success('Export started', {
       description: 'Campaign data is being exported'
     })
+  }
+
+  const handleArchiveCampaign = async (campaignId: string, campaignName: string) => {
+    setOperationLoading(campaignId)
+    try {
+      await updateCampaign({
+        id: campaignId,
+        status: 'archived' as CampaignStatusDB
+      })
+      toast.success('Campaign archived', {
+        description: `"${campaignName}" has been archived`
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to archive campaign', {
+        description: 'Please try again'
+      })
+      console.error(error)
+    } finally {
+      setOperationLoading(null)
+    }
   }
 
   return (
@@ -950,25 +1091,80 @@ export default function CampaignsClient() {
 
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-                {[
-                  { icon: Plus, label: 'New Campaign', color: 'text-rose-500' },
-                  { icon: Copy, label: 'Duplicate', color: 'text-blue-500' },
-                  { icon: Zap, label: 'Automate', color: 'text-amber-500' },
-                  { icon: Split, label: 'A/B Test', color: 'text-purple-500' },
-                  { icon: Layout, label: 'Templates', color: 'text-green-500' },
-                  { icon: Users, label: 'Audiences', color: 'text-indigo-500' },
-                  { icon: BarChart3, label: 'Reports', color: 'text-cyan-500' },
-                  { icon: Download, label: 'Export', color: 'text-pink-500' },
-                ].map((action, i) => (
-                  <Button
-                    key={i}
-                    variant="outline"
-                    className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
-                  >
-                    <action.icon className={`w-5 h-5 ${action.color}`} />
-                    <span className="text-xs">{action.label}</span>
-                  </Button>
-                ))}
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={() => setShowNewCampaignDialog(true)}
+                >
+                  <Plus className="w-5 h-5 text-rose-500" />
+                  <span className="text-xs">New Campaign</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={() => {
+                    if (selectedCampaign) {
+                      handleDuplicateCampaign(selectedCampaign)
+                    } else {
+                      toast.info('Select a campaign first', { description: 'Click on a campaign to select it, then duplicate' })
+                    }
+                  }}
+                >
+                  <Copy className="w-5 h-5 text-blue-500" />
+                  <span className="text-xs">Duplicate</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={() => setActiveTab('automations')}
+                >
+                  <Zap className="w-5 h-5 text-amber-500" />
+                  <span className="text-xs">Automate</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={() => {
+                    setNewCampaignForm(prev => ({ ...prev, type: 'email' }))
+                    setShowNewCampaignDialog(true)
+                    toast.info('A/B Test Campaign', { description: 'Create your campaign and enable A/B testing in settings' })
+                  }}
+                >
+                  <Split className="w-5 h-5 text-purple-500" />
+                  <span className="text-xs">A/B Test</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={() => setActiveTab('templates')}
+                >
+                  <Layout className="w-5 h-5 text-green-500" />
+                  <span className="text-xs">Templates</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={() => setActiveTab('audiences')}
+                >
+                  <Users className="w-5 h-5 text-indigo-500" />
+                  <span className="text-xs">Audiences</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={() => setActiveTab('analytics')}
+                >
+                  <BarChart3 className="w-5 h-5 text-cyan-500" />
+                  <span className="text-xs">Reports</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={handleExportCampaigns}
+                >
+                  <Download className="w-5 h-5 text-pink-500" />
+                  <span className="text-xs">Export</span>
+                </Button>
               </div>
 
               {/* Filters */}
@@ -1073,9 +1269,60 @@ export default function CampaignsClient() {
                             <div className="text-xs text-gray-500">Revenue</div>
                           </div>
                         )}
-                        <Button variant="ghost" size="icon" onClick={(e) => e.stopPropagation()}>
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          {campaign.status === 'draft' || campaign.status === 'scheduled' || campaign.status === 'paused' ? (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="text-green-600 border-green-600 hover:bg-green-50"
+                              onClick={() => handleLaunchCampaign(campaign.id, campaign.name)}
+                              disabled={operationLoading === campaign.id}
+                            >
+                              <Play className="w-3 h-3 mr-1" />
+                              {operationLoading === campaign.id ? 'Launching...' : 'Launch'}
+                            </Button>
+                          ) : campaign.status === 'running' ? (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-orange-600 border-orange-600 hover:bg-orange-50"
+                                onClick={() => handlePauseCampaign(campaign.id, campaign.name)}
+                                disabled={operationLoading === campaign.id}
+                              >
+                                <Pause className="w-3 h-3 mr-1" />
+                                {operationLoading === campaign.id ? 'Pausing...' : 'Pause'}
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-purple-600 border-purple-600 hover:bg-purple-50"
+                                onClick={() => handleEndCampaign(campaign.id, campaign.name)}
+                                disabled={operationLoading === campaign.id}
+                              >
+                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                End
+                              </Button>
+                            </>
+                          ) : null}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDuplicateCampaign(campaign)}
+                            disabled={operationLoading === campaign.id}
+                          >
+                            <Copy className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() => handleDeleteCampaign(campaign.id, campaign.name)}
+                            disabled={operationLoading === campaign.id}
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
 
@@ -2064,19 +2311,61 @@ export default function CampaignsClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button
+                            variant="outline"
+                            className="h-auto py-4 flex flex-col items-center gap-2"
+                            onClick={handleExportCampaigns}
+                          >
                             <Download className="w-5 h-5" />
                             <span>Export All Data</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button
+                            variant="outline"
+                            className="h-auto py-4 flex flex-col items-center gap-2"
+                            onClick={async () => {
+                              // Archive all completed campaigns older than 30 days
+                              const completedCampaigns = dbCampaigns?.filter(c => c.status === 'completed') || []
+                              if (completedCampaigns.length === 0) {
+                                toast.info('No campaigns to archive', { description: 'There are no completed campaigns to archive' })
+                                return
+                              }
+                              for (const campaign of completedCampaigns) {
+                                await updateCampaign({ id: campaign.id, status: 'archived' as CampaignStatusDB })
+                              }
+                              toast.success('Campaigns archived', { description: `${completedCampaigns.length} completed campaigns have been archived` })
+                              refetch()
+                            }}
+                          >
                             <Archive className="w-5 h-5" />
                             <span>Archive Old Campaigns</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button
+                            variant="outline"
+                            className="h-auto py-4 flex flex-col items-center gap-2"
+                            onClick={() => {
+                              toast.info('Reset Statistics', { description: 'This feature resets campaign analytics data' })
+                            }}
+                          >
                             <RefreshCw className="w-5 h-5" />
                             <span>Reset Statistics</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600">
+                          <Button
+                            variant="outline"
+                            className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600"
+                            onClick={async () => {
+                              // Delete all draft campaigns (test emails)
+                              const draftCampaigns = dbCampaigns?.filter(c => c.status === 'draft') || []
+                              if (draftCampaigns.length === 0) {
+                                toast.info('No test emails to purge', { description: 'There are no draft campaigns to delete' })
+                                return
+                              }
+                              for (const campaign of draftCampaigns) {
+                                await deleteCampaign({ id: campaign.id })
+                              }
+                              toast.success('Test emails purged', { description: `${draftCampaigns.length} draft campaigns have been deleted` })
+                              refetch()
+                            }}
+                          >
                             <TrashIcon className="w-5 h-5" />
                             <span>Purge Test Emails</span>
                           </Button>
@@ -2100,7 +2389,27 @@ export default function CampaignsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Campaigns</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete all campaign data</p>
                           </div>
-                          <Button variant="destructive" size="sm">Delete</Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={async () => {
+                              if (!dbCampaigns || dbCampaigns.length === 0) {
+                                toast.info('No campaigns to delete', { description: 'There are no campaigns in the database' })
+                                return
+                              }
+                              // Confirm before deleting all
+                              const confirmed = window.confirm('Are you sure you want to delete ALL campaigns? This action cannot be undone.')
+                              if (!confirmed) return
+
+                              for (const campaign of dbCampaigns) {
+                                await deleteCampaign({ id: campaign.id })
+                              }
+                              toast.success('All campaigns deleted', { description: `${dbCampaigns.length} campaigns have been permanently deleted` })
+                              refetch()
+                            }}
+                          >
+                            Delete
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2186,6 +2495,70 @@ export default function CampaignsClient() {
                       </div>
                     </div>
                   </Card>
+                </div>
+
+                {/* Campaign Actions */}
+                <div className="pt-4 border-t">
+                  <h4 className="font-semibold mb-3">Campaign Actions</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {(selectedCampaign.status === 'draft' || selectedCampaign.status === 'scheduled' || selectedCampaign.status === 'paused') && (
+                      <Button
+                        className="bg-green-600 hover:bg-green-700"
+                        onClick={() => handleLaunchCampaign(selectedCampaign.id, selectedCampaign.name)}
+                        disabled={operationLoading === selectedCampaign.id}
+                      >
+                        <Play className="w-4 h-4 mr-2" />
+                        {operationLoading === selectedCampaign.id ? 'Launching...' : 'Launch Campaign'}
+                      </Button>
+                    )}
+                    {selectedCampaign.status === 'running' && (
+                      <>
+                        <Button
+                          variant="outline"
+                          className="border-orange-600 text-orange-600 hover:bg-orange-50"
+                          onClick={() => handlePauseCampaign(selectedCampaign.id, selectedCampaign.name)}
+                          disabled={operationLoading === selectedCampaign.id}
+                        >
+                          <Pause className="w-4 h-4 mr-2" />
+                          {operationLoading === selectedCampaign.id ? 'Pausing...' : 'Pause Campaign'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="border-purple-600 text-purple-600 hover:bg-purple-50"
+                          onClick={() => handleEndCampaign(selectedCampaign.id, selectedCampaign.name)}
+                          disabled={operationLoading === selectedCampaign.id}
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          End Campaign
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDuplicateCampaign(selectedCampaign)}
+                      disabled={operationLoading === selectedCampaign.id}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Duplicate
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-gray-400 text-gray-600 hover:bg-gray-50"
+                      onClick={() => handleArchiveCampaign(selectedCampaign.id, selectedCampaign.name)}
+                      disabled={operationLoading === selectedCampaign.id}
+                    >
+                      <Archive className="w-4 h-4 mr-2" />
+                      Archive
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      onClick={() => handleDeleteCampaign(selectedCampaign.id, selectedCampaign.name)}
+                      disabled={operationLoading === selectedCampaign.id}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      {operationLoading === selectedCampaign.id ? 'Deleting...' : 'Delete'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             )}

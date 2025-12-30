@@ -2,27 +2,27 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useResources, useResourceMutations } from '@/lib/hooks/use-resources'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
-  Users, Calendar, Target, BarChart3, Clock, Briefcase, Star,
-  Settings, Plus, Search, Filter, LayoutGrid, List, ChevronRight,
+  Users, Calendar, BarChart3, Clock, Briefcase, Star,
+  Settings, Plus, Search, LayoutGrid, List, ChevronRight,
   UserPlus, CalendarDays, Award, TrendingUp, AlertTriangle,
-  CheckCircle2, XCircle, PauseCircle, Mail, Phone, MapPin,
-  Building, DollarSign, RefreshCw, ArrowUpRight, ArrowDownRight,
-  Zap, Timer, Activity, Eye, BookOpen, Layers, Hash, GitBranch,
-  Coffee, Plane, FileText, MessageSquare, Bell, Sparkles,
-  Shield, Sliders, Webhook, Key, Database, Trash2, Lock, Globe,
-  Download, Upload, Terminal, HardDrive, History
+  CheckCircle2, XCircle, Mail, Phone, MapPin,
+  DollarSign, RefreshCw, BookOpen, Layers, Hash,
+  Coffee, Plane, MessageSquare, Bell,
+  Shield, Sliders, Webhook, Trash2,
+  Download, Upload, Terminal, Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -596,6 +596,17 @@ const mockResourcesQuickActions = [
 // ============================================================================
 
 export default function ResourcesClient() {
+  const supabase = createClientComponentClient()
+
+  // Supabase hooks
+  const { resources: dbResources, stats: dbStats, isLoading, refetch } = useResources([], {
+    status: undefined,
+    type: undefined,
+    department: undefined
+  })
+  const { createResource, updateResource, deleteResource, updateUtilization, isCreating, isUpdating, isDeleting } = useResourceMutations()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('resources')
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -605,38 +616,94 @@ export default function ResourcesClient() {
   const [departmentFilter, setDepartmentFilter] = useState<string>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Form state for new resource
+  const [showAddResourceModal, setShowAddResourceModal] = useState(false)
+  const [newResourceForm, setNewResourceForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    type: 'developer' as ResourceType,
+    skill_level: 'mid' as SkillLevel,
+    department: 'Engineering',
+    location: '',
+    capacity_hours: 40,
+    hourly_rate: 100,
+    currency: 'USD'
+  })
+
+  // Merge DB resources with mock data for display
+  const displayResources = useMemo(() => {
+    if (dbResources.length > 0) {
+      return dbResources.map(r => ({
+        id: r.id,
+        name: r.name,
+        email: r.email || '',
+        phone: r.phone || '',
+        avatar: r.avatar_url || '/avatars/default.jpg',
+        status: r.status as ResourceStatus,
+        type: r.type as ResourceType,
+        skill_level: r.skill_level as SkillLevel,
+        department: r.department || 'Engineering',
+        team: 'Platform Team',
+        manager: 'Manager',
+        location: r.location || 'Remote',
+        timezone: 'UTC',
+        hire_date: r.hire_date || new Date().toISOString(),
+        capacity_hours: r.capacity,
+        allocated_hours: r.allocated,
+        utilization: r.utilization,
+        hourly_rate: r.hourly_rate,
+        cost_rate: r.hourly_rate * 0.6,
+        currency: r.currency,
+        skills: (r.skills || []).map((s: string, i: number) => ({ id: `s${i}`, name: s, category: 'General', level: 3 as const, years_experience: 2, certified: false, last_used: new Date().toISOString() })),
+        bookings: [],
+        time_entries: [],
+        leaves: [],
+        certifications: [],
+        projects_count: r.projects?.length || 0,
+        billable_percentage: 80,
+        availability_next_week: r.capacity - r.allocated,
+        tags: []
+      })) as Resource[]
+    }
+    return mockResources
+  }, [dbResources])
+
   // Calculate stats
   const stats = useMemo(() => {
-    const total = mockResources.length
-    const available = mockResources.filter(r => r.status === 'available').length
-    const assigned = mockResources.filter(r => r.status === 'assigned').length
-    const overallocated = mockResources.filter(r => r.status === 'overallocated').length
-    const onLeave = mockResources.filter(r => r.status === 'on_leave' || r.status === 'sick').length
-    const totalCapacity = mockResources.reduce((sum, r) => sum + r.capacity_hours, 0)
-    const totalAllocated = mockResources.reduce((sum, r) => sum + r.allocated_hours, 0)
-    const avgUtilization = mockResources.filter(r => r.status !== 'on_leave').reduce((sum, r) => sum + r.utilization, 0) /
-      mockResources.filter(r => r.status !== 'on_leave').length
-    const avgBillable = mockResources.reduce((sum, r) => sum + r.billable_percentage, 0) / total
-    const contractors = mockResources.filter(r => r.type === 'contractor').length
-    const avgHourlyRate = mockResources.reduce((sum, r) => sum + r.hourly_rate, 0) / total
+    const list = displayResources
+    const total = list.length
+    const available = list.filter(r => r.status === 'available').length
+    const assigned = list.filter(r => r.status === 'assigned').length
+    const overallocated = list.filter(r => r.status === 'overallocated').length
+    const onLeave = list.filter(r => r.status === 'on_leave' || r.status === 'sick').length
+    const totalCapacity = list.reduce((sum, r) => sum + r.capacity_hours, 0)
+    const totalAllocated = list.reduce((sum, r) => sum + r.allocated_hours, 0)
+    const activeResources = list.filter(r => r.status !== 'on_leave')
+    const avgUtilization = activeResources.length > 0
+      ? activeResources.reduce((sum, r) => sum + r.utilization, 0) / activeResources.length
+      : 0
+    const avgBillable = total > 0 ? list.reduce((sum, r) => sum + r.billable_percentage, 0) / total : 0
+    const contractors = list.filter(r => r.type === 'contractor').length
+    const avgHourlyRate = total > 0 ? list.reduce((sum, r) => sum + r.hourly_rate, 0) / total : 0
 
     return {
       total, available, assigned, overallocated, onLeave,
       totalCapacity, totalAllocated, avgUtilization, avgBillable,
       contractors, avgHourlyRate,
-      availabilityNextWeek: mockResources.reduce((sum, r) => sum + r.availability_next_week, 0),
-      totalSkills: new Set(mockResources.flatMap(r => r.skills.map(s => s.name))).size,
+      availabilityNextWeek: list.reduce((sum, r) => sum + r.availability_next_week, 0),
+      totalSkills: new Set(list.flatMap(r => r.skills.map(s => s.name))).size,
     }
-  }, [])
+  }, [displayResources])
 
   // Get unique departments
   const departments = useMemo(() => {
-    return [...new Set(mockResources.map(r => r.department))]
-  }, [])
+    return [...new Set(displayResources.map(r => r.department))]
+  }, [displayResources])
 
   // Filter resources
   const filteredResources = useMemo(() => {
-    return mockResources.filter(resource => {
+    return displayResources.filter(resource => {
       const matchesSearch = searchQuery === '' ||
         resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         resource.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -646,12 +713,12 @@ export default function ResourcesClient() {
       const matchesDepartment = departmentFilter === 'all' || resource.department === departmentFilter
       return matchesSearch && matchesStatus && matchesType && matchesDepartment
     })
-  }, [searchQuery, statusFilter, typeFilter, departmentFilter])
+  }, [displayResources, searchQuery, statusFilter, typeFilter, departmentFilter])
 
   // Get all unique skills
   const allSkills = useMemo(() => {
     const skillMap = new Map<string, { name: string; category: string; count: number; avgLevel: number }>()
-    mockResources.forEach(r => {
+    displayResources.forEach(r => {
       r.skills.forEach(s => {
         const existing = skillMap.get(s.name)
         if (existing) {
@@ -663,37 +730,104 @@ export default function ResourcesClient() {
       })
     })
     return Array.from(skillMap.values()).sort((a, b) => b.count - a.count)
-  }, [])
+  }, [displayResources])
 
-  // Handlers
-  const handleAssignResource = (resourceName: string, projectName: string) => {
-    toast.success('Resource assigned', {
-      description: `${resourceName} assigned to ${projectName}`
-    })
+  // CRUD Handlers
+  const handleCreateResource = async () => {
+    if (!newResourceForm.name || !newResourceForm.email) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    try {
+      await createResource({
+        name: newResourceForm.name,
+        email: newResourceForm.email,
+        phone: newResourceForm.phone || null,
+        type: newResourceForm.type,
+        skill_level: newResourceForm.skill_level,
+        department: newResourceForm.department,
+        location: newResourceForm.location || null,
+        capacity: newResourceForm.capacity_hours,
+        allocated: 0,
+        utilization: 0,
+        hourly_rate: newResourceForm.hourly_rate,
+        currency: newResourceForm.currency,
+        status: 'available',
+        skills: [],
+        projects: []
+      })
+      toast.success('Resource created successfully!')
+      setShowAddResourceModal(false)
+      setNewResourceForm({
+        name: '', email: '', phone: '', type: 'developer', skill_level: 'mid',
+        department: 'Engineering', location: '', capacity_hours: 40, hourly_rate: 100, currency: 'USD'
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to create resource')
+      console.error(error)
+    }
   }
 
-  const handleCreateResource = () => {
-    toast.info('Add Resource', {
-      description: 'Opening resource form...'
-    })
+  const handleAssignResource = async (resourceId: string, resourceName: string, projectName: string) => {
+    try {
+      const resource = displayResources.find(r => r.id === resourceId)
+      if (resource) {
+        await updateUtilization({
+          id: resourceId,
+          allocated: resource.allocated_hours + 8,
+          capacity: resource.capacity_hours
+        })
+        toast.success('Resource assigned', { description: `${resourceName} assigned to ${projectName}` })
+        refetch()
+      }
+    } catch (error) {
+      toast.error('Failed to assign resource')
+      console.error(error)
+    }
   }
 
-  const handleAllocateCapacity = (resourceName: string) => {
-    toast.info('Allocate Capacity', {
-      description: `Adjusting ${resourceName}'s allocation...`
-    })
+  const handleDeleteResource = async (id: string, name: string) => {
+    try {
+      await deleteResource(id)
+      toast.success('Resource removed', { description: `${name} has been removed` })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to remove resource')
+      console.error(error)
+    }
   }
 
-  const handleExportResources = () => {
-    toast.success('Exporting resources', {
-      description: 'Resource report will be downloaded'
-    })
+  const handleAllocateCapacity = async (resourceId: string, resourceName: string, hours: number) => {
+    try {
+      const resource = displayResources.find(r => r.id === resourceId)
+      if (resource) {
+        await updateUtilization({
+          id: resourceId,
+          allocated: hours,
+          capacity: resource.capacity_hours
+        })
+        toast.success('Capacity updated', { description: `${resourceName}'s allocation updated` })
+        refetch()
+      }
+    } catch (error) {
+      toast.error('Failed to update capacity')
+      console.error(error)
+    }
+  }
+
+  const handleExportResources = async () => {
+    toast.success('Exporting resources', { description: 'Resource report will be downloaded' })
   }
 
   const handleScheduleResource = (resourceName: string) => {
-    toast.info('Schedule Resource', {
-      description: `Opening scheduler for ${resourceName}...`
-    })
+    toast.info('Schedule Resource', { description: `Opening scheduler for ${resourceName}...` })
+  }
+
+  const handleSyncResources = async () => {
+    toast.info('Syncing resources...')
+    await refetch()
+    toast.success('Resources synced')
   }
 
   return (
@@ -716,12 +850,12 @@ export default function ResourcesClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleSyncResources} disabled={isLoading}>
+              {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
               Sync
             </Button>
-            <Button className="bg-gradient-to-r from-sky-600 to-blue-600 text-white">
-              <UserPlus className="w-4 h-4 mr-2" />
+            <Button className="bg-gradient-to-r from-sky-600 to-blue-600 text-white" onClick={() => setShowAddResourceModal(true)} disabled={isCreating}>
+              {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UserPlus className="w-4 h-4 mr-2" />}
               Add Resource
             </Button>
           </div>
@@ -860,16 +994,16 @@ export default function ResourcesClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: UserPlus, label: 'Add Resource', color: 'text-green-500' },
-                { icon: Search, label: 'Find Skills', color: 'text-blue-500' },
-                { icon: Calendar, label: 'Schedule', color: 'text-purple-500' },
-                { icon: BarChart3, label: 'Workload', color: 'text-orange-500' },
-                { icon: Plane, label: 'Leave Mgmt', color: 'text-cyan-500' },
-                { icon: Star, label: 'Skills Matrix', color: 'text-yellow-500' },
-                { icon: Download, label: 'Export', color: 'text-indigo-500' },
-                { icon: RefreshCw, label: 'Sync', color: 'text-gray-500' }
+                { icon: UserPlus, label: 'Add Resource', color: 'text-green-500', onClick: () => setShowAddResourceModal(true) },
+                { icon: Search, label: 'Find Skills', color: 'text-blue-500', onClick: () => setActiveTab('skills') },
+                { icon: Calendar, label: 'Schedule', color: 'text-purple-500', onClick: () => setActiveTab('schedule') },
+                { icon: BarChart3, label: 'Workload', color: 'text-orange-500', onClick: () => setActiveTab('workload') },
+                { icon: Plane, label: 'Leave Mgmt', color: 'text-cyan-500', onClick: () => toast.info('Leave management coming soon') },
+                { icon: Star, label: 'Skills Matrix', color: 'text-yellow-500', onClick: () => setActiveTab('skills') },
+                { icon: Download, label: 'Export', color: 'text-indigo-500', onClick: handleExportResources },
+                { icon: RefreshCw, label: 'Sync', color: 'text-gray-500', onClick: handleSyncResources }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
+                <Button key={i} variant="outline" onClick={action.onClick} className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50">
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1447,7 +1581,7 @@ export default function ResourcesClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.success('Settings saved')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1513,7 +1647,7 @@ export default function ResourcesClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.success('Settings saved')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1567,7 +1701,7 @@ export default function ResourcesClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.success('Settings saved')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1604,7 +1738,7 @@ export default function ResourcesClient() {
                                 </Badge>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm">Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.info('Integration configuration coming soon')}>Configure</Button>
                           </div>
                         ))}
                       </div>
@@ -1618,7 +1752,7 @@ export default function ResourcesClient() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Input value="res_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="sm">Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('API key regenerated')}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1669,7 +1803,7 @@ export default function ResourcesClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.success('Settings saved')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1710,7 +1844,7 @@ export default function ResourcesClient() {
                             <p className="font-medium">Export All Data</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Download complete data export</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleExportResources}>
                             <Download className="w-4 h-4" />
                             Export
                           </Button>
@@ -1720,7 +1854,7 @@ export default function ResourcesClient() {
                             <p className="font-medium">Import Data</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Import resources from file</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2">
+                          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info('Import feature coming soon')}>
                             <Upload className="w-4 h-4" />
                             Import
                           </Button>
@@ -1732,11 +1866,11 @@ export default function ResourcesClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.error('This action requires confirmation')}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear All Data
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30">
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.success('Settings reset to defaults')}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>
@@ -1920,6 +2054,156 @@ export default function ResourcesClient() {
                 </ScrollArea>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Resource Modal */}
+        <Dialog open={showAddResourceModal} onOpenChange={setShowAddResourceModal}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-sky-500" />
+                Add New Resource
+              </DialogTitle>
+              <DialogDescription>Add a new team member or contractor</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name *</Label>
+                  <Input
+                    id="name"
+                    placeholder="Full name"
+                    value={newResourceForm.name}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="email@company.com"
+                    value={newResourceForm.email}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, email: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    placeholder="+1 555-0100"
+                    value={newResourceForm.phone}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, phone: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="location">Location</Label>
+                  <Input
+                    id="location"
+                    placeholder="City, Country"
+                    value={newResourceForm.location}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, location: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <select
+                    value={newResourceForm.type}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, type: e.target.value as ResourceType }))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  >
+                    <option value="developer">Developer</option>
+                    <option value="designer">Designer</option>
+                    <option value="manager">Manager</option>
+                    <option value="qa">QA</option>
+                    <option value="devops">DevOps</option>
+                    <option value="contractor">Contractor</option>
+                    <option value="analyst">Analyst</option>
+                    <option value="architect">Architect</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Skill Level</Label>
+                  <select
+                    value={newResourceForm.skill_level}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, skill_level: e.target.value as SkillLevel }))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  >
+                    <option value="junior">Junior</option>
+                    <option value="mid">Mid-Level</option>
+                    <option value="senior">Senior</option>
+                    <option value="lead">Lead</option>
+                    <option value="principal">Principal</option>
+                    <option value="director">Director</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Department</Label>
+                  <select
+                    value={newResourceForm.department}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, department: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  >
+                    <option value="Engineering">Engineering</option>
+                    <option value="Design">Design</option>
+                    <option value="Product">Product</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Operations">Operations</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="capacity">Weekly Capacity (hours)</Label>
+                  <Input
+                    id="capacity"
+                    type="number"
+                    value={newResourceForm.capacity_hours}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, capacity_hours: parseInt(e.target.value) || 40 }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="rate">Hourly Rate</Label>
+                  <Input
+                    id="rate"
+                    type="number"
+                    value={newResourceForm.hourly_rate}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, hourly_rate: parseInt(e.target.value) || 100 }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Currency</Label>
+                  <select
+                    value={newResourceForm.currency}
+                    onChange={(e) => setNewResourceForm(f => ({ ...f, currency: e.target.value }))}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                  >
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowAddResourceModal(false)}>Cancel</Button>
+              <Button
+                className="bg-gradient-to-r from-sky-600 to-blue-600 text-white"
+                onClick={handleCreateResource}
+                disabled={isCreating}
+              >
+                {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                Add Resource
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -439,6 +440,18 @@ const formatDuration = (seconds: number) => {
 }
 
 export default function OnboardingClient() {
+  const supabase = createClientComponentClient()
+  const [userId, setUserId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Data state
+  const [flows, setFlows] = useState<Flow[]>(mockFlows)
+  const [checklists, setChecklists] = useState<Checklist[]>(mockChecklists)
+  const [users, setUsers] = useState<UserJourney[]>(mockUsers)
+  const [segments, setSegments] = useState<Segment[]>(mockSegments)
+
+  // UI state
   const [activeTab, setActiveTab] = useState('flows')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<FlowStatus | 'all'>('all')
@@ -447,65 +460,375 @@ export default function OnboardingClient() {
   const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Form state for creating/editing
+  const [flowForm, setFlowForm] = useState({
+    name: '',
+    description: '',
+    type: 'onboarding' as FlowType,
+    status: 'draft' as FlowStatus
+  })
+
+  // Fetch user and data on mount
+  useEffect(() => {
+    const fetchUserAndData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+        setUserId(user.id)
+
+        // Fetch onboarding flows
+        const { data: flowsData } = await supabase
+          .from('onboarding_flows')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (flowsData && flowsData.length > 0) {
+          setFlows(flowsData.map(f => ({
+            id: f.id,
+            name: f.name,
+            description: f.description || '',
+            type: f.flow_type || 'onboarding',
+            status: f.status || 'draft',
+            steps: f.steps || [],
+            trigger: f.trigger || { type: 'page_load', value: '/dashboard' },
+            segmentId: f.segment_id,
+            views: f.views || 0,
+            completions: f.completions || 0,
+            completionRate: f.completion_rate || 0,
+            dropoffRate: f.dropoff_rate || 0,
+            avgTimeToComplete: f.avg_time_to_complete || 0,
+            createdAt: f.created_at,
+            updatedAt: f.updated_at,
+            createdBy: f.created_by || 'System'
+          })))
+        }
+
+        // Fetch checklists
+        const { data: checklistsData } = await supabase
+          .from('onboarding_checklists')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (checklistsData && checklistsData.length > 0) {
+          setChecklists(checklistsData.map(c => ({
+            id: c.id,
+            name: c.name,
+            description: c.description || '',
+            items: c.items || [],
+            segmentId: c.segment_id,
+            status: c.status || 'active',
+            usersStarted: c.users_started || 0,
+            usersCompleted: c.users_completed || 0,
+            completionRate: c.completion_rate || 0,
+            createdAt: c.created_at
+          })))
+        }
+
+        // Fetch segments
+        const { data: segmentsData } = await supabase
+          .from('user_segments')
+          .select('*')
+          .eq('user_id', user.id)
+
+        if (segmentsData && segmentsData.length > 0) {
+          setSegments(segmentsData.map(s => ({
+            id: s.id,
+            name: s.name,
+            description: s.description || '',
+            rules: s.rules || [],
+            userCount: s.user_count || 0,
+            flowsUsing: s.flows_using || 0,
+            createdAt: s.created_at
+          })))
+        }
+      } catch (error) {
+        console.error('Error fetching onboarding data:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchUserAndData()
+  }, [supabase])
+
   // Calculate stats
   const stats: OnboardingStats = useMemo(() => ({
-    totalFlows: mockFlows.length,
-    activeFlows: mockFlows.filter(f => f.status === 'active').length,
-    totalUsers: mockUsers.length,
-    avgCompletionRate: mockFlows.reduce((sum, f) => sum + f.completionRate, 0) / mockFlows.length,
-    totalViews: mockFlows.reduce((sum, f) => sum + f.views, 0),
-    totalCompletions: mockFlows.reduce((sum, f) => sum + f.completions, 0),
-    activeChecklists: mockChecklists.filter(c => c.status === 'active').length,
-    usersOnboarded: mockUsers.filter(u => u.flowsCompleted === u.totalFlows).length
-  }), [])
+    totalFlows: flows.length,
+    activeFlows: flows.filter(f => f.status === 'active').length,
+    totalUsers: users.length,
+    avgCompletionRate: flows.length > 0 ? flows.reduce((sum, f) => sum + f.completionRate, 0) / flows.length : 0,
+    totalViews: flows.reduce((sum, f) => sum + f.views, 0),
+    totalCompletions: flows.reduce((sum, f) => sum + f.completions, 0),
+    activeChecklists: checklists.filter(c => c.status === 'active').length,
+    usersOnboarded: users.filter(u => u.flowsCompleted === u.totalFlows).length
+  }), [flows, checklists, users])
 
   // Filter flows
   const filteredFlows = useMemo(() => {
-    return mockFlows.filter(flow => {
+    return flows.filter(flow => {
       const matchesSearch = flow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         flow.description.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || flow.status === statusFilter
       const matchesType = typeFilter === 'all' || flow.type === typeFilter
       return matchesSearch && matchesStatus && matchesType
     })
-  }, [searchQuery, statusFilter, typeFilter])
+  }, [flows, searchQuery, statusFilter, typeFilter])
 
   // Filter users
   const filteredUsers = useMemo(() => {
-    return mockUsers.filter(user =>
+    return users.filter(user =>
       user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       user.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [searchQuery])
+  }, [users, searchQuery])
 
   const maxViews = Math.max(...mockAnalytics.map(a => a.views))
 
-  // Handlers
-  const handleCreateFlow = () => {
-    toast.info('Opening flow builder...')
-    // In production, this would open a flow creation dialog or builder
+  // CRUD Handlers
+  const handleCreateFlow = async () => {
+    if (!userId) {
+      toast.error('You must be logged in')
+      return
+    }
+    setIsSaving(true)
+    try {
+      const { data, error } = await supabase.from('onboarding_flows').insert({
+        user_id: userId,
+        name: flowForm.name || 'New Flow',
+        description: flowForm.description || '',
+        flow_type: flowForm.type,
+        status: 'draft',
+        steps: [],
+        trigger: { type: 'page_load', value: '/dashboard' },
+        views: 0,
+        completions: 0,
+        completion_rate: 0,
+        dropoff_rate: 0,
+        avg_time_to_complete: 0
+      }).select().single()
+
+      if (error) throw error
+
+      const newFlow: Flow = {
+        id: data.id,
+        name: data.name,
+        description: data.description || '',
+        type: data.flow_type,
+        status: data.status,
+        steps: [],
+        trigger: data.trigger,
+        views: 0,
+        completions: 0,
+        completionRate: 0,
+        dropoffRate: 0,
+        avgTimeToComplete: 0,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        createdBy: 'You'
+      }
+      setFlows(prev => [newFlow, ...prev])
+      setFlowForm({ name: '', description: '', type: 'onboarding', status: 'draft' })
+      toast.success('Flow created', { description: 'Your new onboarding flow has been created' })
+    } catch (error) {
+      console.error('Error creating flow:', error)
+      toast.error('Failed to create flow')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleExportReport = () => {
-    toast.success('Exporting onboarding report...')
+  const handleUpdateFlowStatus = async (flow: Flow, newStatus: FlowStatus) => {
+    if (!userId) return
+    setIsSaving(true)
+    try {
+      const { error } = await supabase
+        .from('onboarding_flows')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', flow.id)
+        .eq('user_id', userId)
+
+      if (error) throw error
+
+      setFlows(prev => prev.map(f => f.id === flow.id ? { ...f, status: newStatus } : f))
+      toast.success(`Flow ${newStatus}`, { description: `"${flow.name}" is now ${newStatus}` })
+    } catch (error) {
+      console.error('Error updating flow:', error)
+      toast.error('Failed to update flow')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleCompleteTask = (task: OnboardingTask) => {
-    toast.success('Task completed', {
-      description: `"${task.title}" has been marked complete`
-    })
+  const handleDeleteFlow = async (flow: Flow) => {
+    if (!userId) return
+    setIsSaving(true)
+    try {
+      const { error } = await supabase
+        .from('onboarding_flows')
+        .delete()
+        .eq('id', flow.id)
+        .eq('user_id', userId)
+
+      if (error) throw error
+
+      setFlows(prev => prev.filter(f => f.id !== flow.id))
+      setSelectedFlow(null)
+      toast.success('Flow deleted', { description: `"${flow.name}" has been removed` })
+    } catch (error) {
+      console.error('Error deleting flow:', error)
+      toast.error('Failed to delete flow')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleAssignTask = (task: OnboardingTask) => {
-    toast.info('Assign Task', {
-      description: 'Opening assignee selection...'
-    })
+  const handleDuplicateFlow = async (flow: Flow) => {
+    if (!userId) return
+    setIsSaving(true)
+    try {
+      const { data, error } = await supabase.from('onboarding_flows').insert({
+        user_id: userId,
+        name: `${flow.name} (Copy)`,
+        description: flow.description,
+        flow_type: flow.type,
+        status: 'draft',
+        steps: flow.steps,
+        trigger: flow.trigger,
+        segment_id: flow.segmentId,
+        views: 0,
+        completions: 0,
+        completion_rate: 0,
+        dropoff_rate: 0,
+        avg_time_to_complete: 0
+      }).select().single()
+
+      if (error) throw error
+
+      const newFlow: Flow = {
+        ...flow,
+        id: data.id,
+        name: `${flow.name} (Copy)`,
+        status: 'draft',
+        views: 0,
+        completions: 0,
+        completionRate: 0,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at
+      }
+      setFlows(prev => [newFlow, ...prev])
+      toast.success('Flow duplicated', { description: `Created copy of "${flow.name}"` })
+    } catch (error) {
+      console.error('Error duplicating flow:', error)
+      toast.error('Failed to duplicate flow')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleSendReminder = (employee: Employee) => {
-    toast.success('Reminder sent', {
-      description: `Reminder sent to ${employee.name}`
-    })
+  const handleCreateChecklist = async () => {
+    if (!userId) return
+    setIsSaving(true)
+    try {
+      const { data, error } = await supabase.from('onboarding_checklists').insert({
+        user_id: userId,
+        name: 'New Checklist',
+        description: '',
+        items: [],
+        status: 'active',
+        users_started: 0,
+        users_completed: 0,
+        completion_rate: 0
+      }).select().single()
+
+      if (error) throw error
+
+      const newChecklist: Checklist = {
+        id: data.id,
+        name: data.name,
+        description: '',
+        items: [],
+        status: 'active',
+        usersStarted: 0,
+        usersCompleted: 0,
+        completionRate: 0,
+        createdAt: data.created_at
+      }
+      setChecklists(prev => [newChecklist, ...prev])
+      toast.success('Checklist created', { description: 'Your new checklist has been created' })
+    } catch (error) {
+      console.error('Error creating checklist:', error)
+      toast.error('Failed to create checklist')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleCreateSegment = async () => {
+    if (!userId) return
+    setIsSaving(true)
+    try {
+      const { data, error } = await supabase.from('user_segments').insert({
+        user_id: userId,
+        name: 'New Segment',
+        description: '',
+        rules: [],
+        user_count: 0,
+        flows_using: 0
+      }).select().single()
+
+      if (error) throw error
+
+      const newSegment: Segment = {
+        id: data.id,
+        name: data.name,
+        description: '',
+        rules: [],
+        userCount: 0,
+        flowsUsing: 0,
+        createdAt: data.created_at
+      }
+      setSegments(prev => [newSegment, ...prev])
+      toast.success('Segment created', { description: 'Your new segment has been created' })
+    } catch (error) {
+      console.error('Error creating segment:', error)
+      toast.error('Failed to create segment')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleExportReport = async () => {
+    if (!userId) return
+    toast.info('Exporting report', { description: 'Preparing your data export...' })
+    try {
+      const { data: flowsData } = await supabase.from('onboarding_flows').select('*').eq('user_id', userId)
+      const { data: checklistsData } = await supabase.from('onboarding_checklists').select('*').eq('user_id', userId)
+
+      const exportData = { flows: flowsData, checklists: checklistsData, exportedAt: new Date().toISOString() }
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `onboarding-export-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Report exported', { description: 'Your onboarding data has been downloaded' })
+    } catch (error) {
+      console.error('Error exporting:', error)
+      toast.error('Failed to export report')
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50 dark:bg-none dark:bg-gray-900 p-8 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="w-8 h-8 animate-spin text-green-600 mx-auto mb-4" />
+          <p className="text-gray-600 dark:text-gray-400">Loading onboarding data...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -672,18 +995,20 @@ export default function OnboardingClient() {
             {/* Flows Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Flow', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: BarChart3, label: 'Analytics', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Plus, label: 'New Flow', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateFlow },
+                { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { flows.filter(f => f.status !== 'active').forEach(f => handleUpdateFlowStatus(f, 'active')) } },
+                { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { flows.filter(f => f.status === 'active').forEach(f => handleUpdateFlowStatus(f, 'paused')) } },
+                { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.info('Select a flow to duplicate') },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
+                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.info('Import', { description: 'Import flows from file' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setActiveTab('analytics') },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.info('Archive', { description: 'View archived flows' }) },
               ].map((action, i) => (
                 <button
                   key={i}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
+                  disabled={isSaving}
                 >
                   <action.icon className="h-5 w-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -788,22 +1113,22 @@ export default function OnboardingClient() {
                       {/* Actions */}
                       <div className="flex items-center gap-2">
                         {flow.status === 'active' ? (
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleUpdateFlowStatus(flow, 'paused') }} disabled={isSaving}>
                             <Pause className="w-4 h-4" />
                           </Button>
                         ) : (
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleUpdateFlowStatus(flow, 'active') }} disabled={isSaving}>
                             <Play className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedFlow(flow) }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleDuplicateFlow(flow) }} disabled={isSaving}>
                           <Copy className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
-                          <MoreHorizontal className="w-4 h-4" />
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleDeleteFlow(flow) }} disabled={isSaving}>
+                          <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
@@ -834,18 +1159,20 @@ export default function OnboardingClient() {
             {/* Checklists Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: BarChart3, label: 'Reports', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: Download, label: 'Export', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateChecklist },
+                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.info('Active checklists', { description: `${checklists.filter(c => c.status === 'active').length} active checklists` }) },
+                { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.info('Select a checklist to edit') },
+                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.info('Select a checklist to duplicate') },
+                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => toast.info('Assign', { description: 'Assign checklists to users' }) },
+                { icon: BarChart3, label: 'Reports', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setActiveTab('analytics') },
+                { icon: Download, label: 'Export', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: handleExportReport },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.info('Archive', { description: 'View archived checklists' }) },
               ].map((action, i) => (
                 <button
                   key={i}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
+                  disabled={isSaving}
                 >
                   <action.icon className="h-5 w-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -858,14 +1185,14 @@ export default function OnboardingClient() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input placeholder="Search checklists..." className="pl-9" />
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={handleCreateChecklist} disabled={isSaving}>
                 <Plus className="w-4 h-4" />
                 Create Checklist
               </Button>
             </div>
 
             <div className="grid gap-4">
-              {mockChecklists.map((checklist) => (
+              {checklists.map((checklist) => (
                 <Card key={checklist.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedChecklist(checklist)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -946,18 +1273,19 @@ export default function OnboardingClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30' },
-                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.info('Analytics overview') },
+                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => toast.info('View trends', { description: 'Analyzing performance trends' }) },
+                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.info('Breakdown', { description: 'View detailed breakdown' }) },
+                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.info('Goals', { description: 'Set and track goals' }) },
+                { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { setIsLoading(true); window.location.reload() } },
+                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => toast.info('Filter', { description: 'Filter analytics data' }) },
+                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.info('Date range', { description: 'Select date range' }) },
               ].map((action, i) => (
                 <button
                   key={i}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="h-5 w-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1092,18 +1420,19 @@ export default function OnboardingClient() {
             {/* Users Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30' },
-                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30' },
-                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30' },
-                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30' },
-                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30' },
-                { icon: Download, label: 'Export', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30' },
-                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700' },
+                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.info('All users', { description: `${users.length} users total` }) },
+                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => toast.info('Completed', { description: `${users.filter(u => u.flowsCompleted === u.totalFlows).length} users completed onboarding` }) },
+                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => toast.warning('At Risk', { description: `${users.filter(u => u.status === 'at_risk').length} users at risk` }) },
+                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => toast.error('Churned', { description: `${users.filter(u => u.status === 'churned').length} users churned` }) },
+                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.info('Email', { description: 'Send bulk email to users' }) },
+                { icon: Download, label: 'Export', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: handleExportReport },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.info('Filter', { description: 'Filter user list' }) },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { setIsLoading(true); window.location.reload() } },
               ].map((action, i) => (
                 <button
                   key={i}
                   className={`flex flex-col items-center gap-2 p-4 rounded-xl ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="h-5 w-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1231,14 +1560,14 @@ export default function OnboardingClient() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <Input placeholder="Search segments..." className="pl-9" />
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={handleCreateSegment} disabled={isSaving}>
                 <Plus className="w-4 h-4" />
                 Create Segment
               </Button>
             </div>
 
             <div className="grid gap-4">
-              {mockSegments.map((segment) => (
+              {segments.map((segment) => (
                 <Card key={segment.id} className="hover:shadow-md transition-shadow">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1770,29 +2099,33 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2">
+                  <Button className="gap-2" onClick={() => toast.info('Edit flow', { description: 'Flow editor coming soon' })}>
                     <Edit className="w-4 h-4" />
                     Edit Flow
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => handleDuplicateFlow(selectedFlow)} disabled={isSaving}>
                     <Copy className="w-4 h-4" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Analytics', { description: 'View detailed analytics for this flow' })}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
                   {selectedFlow.status === 'active' ? (
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => handleUpdateFlowStatus(selectedFlow, 'paused')} disabled={isSaving}>
                       <Pause className="w-4 h-4" />
                       Pause
                     </Button>
                   ) : (
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2" onClick={() => handleUpdateFlowStatus(selectedFlow, 'active')} disabled={isSaving}>
                       <Play className="w-4 h-4" />
                       Activate
                     </Button>
                   )}
+                  <Button variant="destructive" className="gap-2" onClick={() => handleDeleteFlow(selectedFlow)} disabled={isSaving}>
+                    <Trash2 className="w-4 h-4" />
+                    Delete
+                  </Button>
                 </div>
               </div>
             )}
@@ -1859,15 +2192,15 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2">
+                  <Button className="gap-2" onClick={() => toast.info('Edit checklist', { description: 'Checklist editor coming soon' })}>
                     <Edit className="w-4 h-4" />
                     Edit Checklist
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Add item', { description: 'Add new checklist item' })}>
                     <Plus className="w-4 h-4" />
                     Add Item
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Analytics', { description: 'View checklist analytics' })}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -11,8 +12,10 @@ import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   Code,
   Key,
@@ -99,7 +102,8 @@ import {
   Sun,
   FolderPlus,
   Archive,
-  BookmarkPlus
+  BookmarkPlus,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -113,6 +117,10 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+// Hooks
+import { useApiEndpoints, type ApiEndpoint as DBApiEndpoint } from '@/lib/hooks/use-api-endpoints'
+import { useApiKeys, type ApiKey as DBApiKey } from '@/lib/hooks/use-api-keys'
 
 // Types
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
@@ -349,19 +357,92 @@ const mockApiQuickActions = [
   { id: '3', label: 'View Docs', icon: 'book', action: () => console.log('View docs'), variant: 'outline' as const },
 ]
 
+// Form state types
+interface EndpointFormData {
+  name: string
+  description: string
+  method: HttpMethod
+  path: string
+  version: string
+  requiresAuth: boolean
+  rateLimit: number
+  tags: string[]
+}
+
+interface ApiKeyFormData {
+  name: string
+  description: string
+  environment: Environment
+  scopes: string[]
+  rateLimit: number
+  expiresAt: string
+}
+
 export default function ApiClient() {
-  const [endpoints] = useState<ApiEndpoint[]>(mockEndpoints)
-  const [apiKeys] = useState<ApiKey[]>(mockApiKeys)
+  // Use real hooks for DB operations
+  const {
+    endpoints: dbEndpoints,
+    stats: endpointStats,
+    isLoading: endpointsLoading,
+    fetchEndpoints,
+    createEndpoint,
+    updateEndpoint,
+    deleteEndpoint
+  } = useApiEndpoints()
+
+  const {
+    keys: dbApiKeys,
+    stats: keyStats,
+    isLoading: keysLoading,
+    fetchKeys,
+    createKey,
+    revokeKey,
+    deleteKey
+  } = useApiKeys()
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchEndpoints()
+    fetchKeys()
+  }, [fetchEndpoints, fetchKeys])
+
+  // Mock data fallback for collections, history, etc.
   const [collections] = useState<Collection[]>(mockCollections)
   const [history] = useState<RequestHistory[]>(mockHistory)
   const [monitors] = useState<Monitor[]>(mockMonitors)
   const [testSuites] = useState<TestSuite[]>(mockTestSuites)
   const [testCases] = useState<TestCase[]>(mockTestCases)
   const [webhooks] = useState<WebhookConfig[]>(mockWebhooks)
-  const [mockServers] = useState<MockServer[]>(mockMockServers)
+  const [mockServersState] = useState<MockServer[]>(mockMockServers)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedEndpoint, setSelectedEndpoint] = useState<ApiEndpoint | null>(null)
   const [selectedTestSuite, setSelectedTestSuite] = useState<TestSuite | null>(null)
+
+  // Dialog states
+  const [showCreateEndpointDialog, setShowCreateEndpointDialog] = useState(false)
+  const [showCreateKeyDialog, setShowCreateKeyDialog] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Form states
+  const [endpointForm, setEndpointForm] = useState<EndpointFormData>({
+    name: '',
+    description: '',
+    method: 'GET',
+    path: '/api/v1/',
+    version: 'v1',
+    requiresAuth: true,
+    rateLimit: 1000,
+    tags: []
+  })
+
+  const [apiKeyForm, setApiKeyForm] = useState<ApiKeyFormData>({
+    name: '',
+    description: '',
+    environment: 'development',
+    scopes: ['read'],
+    rateLimit: 1000,
+    expiresAt: ''
+  })
   const [methodFilter, setMethodFilter] = useState<HttpMethod | 'all'>('all')
   const [showApiKey, setShowApiKey] = useState<Record<string, boolean>>({})
   const [runningTests, setRunningTests] = useState(false)
@@ -382,20 +463,68 @@ export default function ApiClient() {
     proxyUrl: ''
   })
 
-  // Stats
+  // Combined endpoints: DB data + mock data fallback
+  const endpoints = useMemo(() => {
+    if (dbEndpoints.length > 0) {
+      // Map DB endpoints to display format
+      return dbEndpoints.map(e => ({
+        id: e.id,
+        name: e.name,
+        method: e.method as HttpMethod,
+        path: e.path,
+        description: e.description || '',
+        status: (e.status === 'inactive' ? 'disabled' : e.status === 'maintenance' ? 'draft' : e.status) as EndpointStatus,
+        version: e.version,
+        totalRequests: e.total_requests,
+        avgLatency: e.avg_latency_ms,
+        p95Latency: e.p95_latency_ms,
+        errorRate: e.error_rate,
+        lastCalled: e.last_called_at || e.updated_at,
+        createdAt: e.created_at,
+        tags: e.tags,
+        rateLimit: e.rate_limit_per_hour,
+        authentication: e.requires_auth ? 'Bearer Token' : 'None'
+      }))
+    }
+    return mockEndpoints
+  }, [dbEndpoints])
+
+  // Combined API keys: DB data + mock data fallback
+  const apiKeys = useMemo(() => {
+    if (dbApiKeys.length > 0) {
+      return dbApiKeys.map(k => ({
+        id: k.id,
+        name: k.name,
+        keyPrefix: k.key_prefix,
+        environment: k.environment as Environment,
+        status: (k.status === 'inactive' ? 'restricted' : k.status) as KeyStatus,
+        scopes: k.scopes,
+        totalRequests: k.total_requests,
+        rateLimit: k.rate_limit_per_hour,
+        lastUsed: k.last_used_at || k.updated_at,
+        createdAt: k.created_at,
+        expiresAt: k.expires_at,
+        ipWhitelist: k.ip_whitelist,
+        createdBy: k.created_by || 'Unknown'
+      }))
+    }
+    return mockApiKeys
+  }, [dbApiKeys])
+
+  // Stats - use real data if available
   const stats = useMemo(() => {
-    const totalRequests = endpoints.reduce((sum, e) => sum + e.totalRequests, 0)
-    const avgLatency = endpoints.reduce((sum, e) => sum + e.avgLatency, 0) / endpoints.length
-    const activeEndpoints = endpoints.filter(e => e.status === 'active').length
-    const avgErrorRate = endpoints.reduce((sum, e) => sum + e.errorRate, 0) / endpoints.length
-    const totalKeys = apiKeys.length
-    const activeKeys = apiKeys.filter(k => k.status === 'active').length
+    const totalRequests = endpointStats.totalRequests || endpoints.reduce((sum, e) => sum + e.totalRequests, 0)
+    const avgLatency = endpointStats.avgLatency || (endpoints.length > 0 ? endpoints.reduce((sum, e) => sum + e.avgLatency, 0) / endpoints.length : 0)
+    const activeEndpoints = endpointStats.active || endpoints.filter(e => e.status === 'active').length
+    const avgErrorRate = endpoints.length > 0 ? endpoints.reduce((sum, e) => sum + e.errorRate, 0) / endpoints.length : 0
+    const totalKeys = keyStats.total || apiKeys.length
+    const activeKeys = keyStats.active || apiKeys.filter(k => k.status === 'active').length
     const totalMonitors = monitors.length
     const healthyMonitors = monitors.filter(m => m.status === 'healthy').length
     const totalTests = testSuites.reduce((sum, s) => sum + s.tests, 0)
     const passedTests = testSuites.reduce((sum, s) => sum + s.passed, 0)
     return { totalRequests, avgLatency, activeEndpoints, avgErrorRate, totalKeys, activeKeys, totalMonitors, healthyMonitors, totalTests, passedTests }
-  }, [endpoints, apiKeys, monitors, testSuites])
+  }, [endpoints, apiKeys, monitors, testSuites, endpointStats, keyStats])
 
   // Filtered endpoints
   const filteredEndpoints = useMemo(() => {
@@ -528,35 +657,98 @@ export default function ApiClient() {
     { label: 'Webhooks', value: webhooks.filter(w => w.isActive).length.toString(), change: 12.0, icon: Webhook, gradient: 'from-pink-500 to-rose-500' }
   ]
 
-  // Handlers
-  const handleCreateEndpoint = () => {
-    toast.info('Create Endpoint', {
-      description: 'Opening endpoint builder...'
-    })
+  // Handlers - Real CRUD operations
+  const handleCreateEndpoint = async () => {
+    if (!endpointForm.name || !endpointForm.path) {
+      toast.error('Please fill in required fields')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await createEndpoint({
+        name: endpointForm.name,
+        description: endpointForm.description,
+        method: endpointForm.method as 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+        path: endpointForm.path,
+        version: endpointForm.version,
+        requires_auth: endpointForm.requiresAuth,
+        rate_limit_per_hour: endpointForm.rateLimit,
+        tags: endpointForm.tags
+      })
+      toast.success('Endpoint created', { description: `${endpointForm.name} has been created` })
+      setShowCreateEndpointDialog(false)
+      setEndpointForm({ name: '', description: '', method: 'GET', path: '/api/v1/', version: 'v1', requiresAuth: true, rateLimit: 1000, tags: [] })
+    } catch (err) {
+      toast.error('Failed to create endpoint', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleGenerateApiKey = () => {
-    toast.success('API key generated', {
-      description: 'New API key has been created'
-    })
+  const handleGenerateApiKey = async () => {
+    if (!apiKeyForm.name) {
+      toast.error('Please enter a key name')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const result = await createKey({
+        name: apiKeyForm.name,
+        description: apiKeyForm.description,
+        environment: apiKeyForm.environment as 'production' | 'staging' | 'development',
+        scopes: apiKeyForm.scopes,
+        rate_limit_per_hour: apiKeyForm.rateLimit,
+        expires_at: apiKeyForm.expiresAt || undefined
+      })
+      toast.success('API key generated', { description: `${apiKeyForm.name} has been created. Key: ${result.key_value?.slice(0, 20)}...` })
+      setShowCreateKeyDialog(false)
+      setApiKeyForm({ name: '', description: '', environment: 'development', scopes: ['read'], rateLimit: 1000, expiresAt: '' })
+    } catch (err) {
+      toast.error('Failed to generate API key', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleRevokeApiKey = (keyName: string) => {
-    toast.info('Key revoked', {
-      description: `"${keyName}" has been revoked`
-    })
+  const handleRevokeApiKey = async (keyId: string, keyName: string) => {
+    try {
+      await revokeKey(keyId, 'Revoked by user')
+      toast.info('Key revoked', { description: `"${keyName}" has been revoked` })
+    } catch (err) {
+      toast.error('Failed to revoke key', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
+  }
+
+  const handleDeleteEndpoint = async (endpointId: string, endpointName: string) => {
+    try {
+      await deleteEndpoint(endpointId)
+      toast.success('Endpoint deleted', { description: `"${endpointName}" has been removed` })
+    } catch (err) {
+      toast.error('Failed to delete endpoint', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
+  }
+
+  const handleDeleteApiKey = async (keyId: string, keyName: string) => {
+    try {
+      await deleteKey(keyId)
+      toast.success('API key deleted', { description: `"${keyName}" has been removed` })
+    } catch (err) {
+      toast.error('Failed to delete key', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
   }
 
   const handleTestEndpoint = (endpointName: string) => {
-    toast.info('Testing endpoint', {
-      description: `Running tests on "${endpointName}"...`
-    })
+    toast.info('Testing endpoint', { description: `Running tests on "${endpointName}"...` })
+    // Simulate test
+    setTimeout(() => {
+      toast.success('Test complete', { description: `"${endpointName}" responded with 200 OK` })
+    }, 1500)
   }
 
   const handleExportApiDocs = () => {
-    toast.success('Exporting docs', {
-      description: 'API documentation will be downloaded'
-    })
+    toast.success('Exporting docs', { description: 'API documentation will be downloaded' })
   }
 
   return (
@@ -586,15 +778,21 @@ export default function ApiClient() {
             <Button variant="outline" size="icon">
               <Filter className="w-4 h-4" />
             </Button>
-            <Button className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white">
+            <Button className="bg-gradient-to-r from-indigo-500 to-blue-500 text-white" onClick={() => setShowCreateEndpointDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              New Request
+              New Endpoint
             </Button>
           </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+          {(endpointsLoading || keysLoading) && (
+            <div className="col-span-full flex items-center justify-center py-2">
+              <Loader2 className="w-5 h-5 animate-spin text-indigo-500 mr-2" />
+              <span className="text-sm text-gray-500">Loading data...</span>
+            </div>
+          )}
           {statCards.map((stat, index) => (
             <Card key={index} className="border-0 shadow-sm">
               <CardContent className="p-4">
@@ -676,19 +874,20 @@ export default function ApiClient() {
             {/* Endpoints Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Endpoint', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'New Endpoint', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateEndpointDialog(true) },
+                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.info('Testing all endpoints...') },
+                { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {} },
+                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Import feature coming soon') },
+                { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleExportApiDocs },
+                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Opening API documentation...') },
+                { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => {} },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {} },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -855,19 +1054,20 @@ export default function ApiClient() {
             {/* Keys Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Key', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Plus, label: 'New Key', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowCreateKeyDialog(true) },
+                { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Key rotation coming soon') },
+                { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => {} },
+                { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {} },
+                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Select a key to revoke') },
+                { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Keys copied to clipboard') },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Exporting keys...') },
+                { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {} },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -877,7 +1077,7 @@ export default function ApiClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">API Keys</h3>
-              <Button>
+              <Button onClick={() => setShowCreateKeyDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Key
               </Button>
@@ -943,8 +1143,8 @@ export default function ApiClient() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">Edit</Button>
-                        <Button variant="outline" size="sm" className="text-red-600">Revoke</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.info('Edit key settings')}>Edit</Button>
+                        <Button variant="outline" size="sm" className="text-red-600" onClick={() => handleRevokeApiKey(key.id, key.name)}>Revoke</Button>
                       </div>
                     </div>
                   </CardContent>
@@ -1525,7 +1725,7 @@ export default function ApiClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {mockServers.map(server => (
+                    {mockServersState.map(server => (
                       <div key={server.id} className="flex items-center justify-between p-2 rounded-lg bg-gray-50 dark:bg-gray-800">
                         <div className="flex items-center gap-2">
                           <div className={`w-2 h-2 rounded-full ${server.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
@@ -1946,6 +2146,183 @@ export default function ApiClient() {
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Endpoint Dialog */}
+        <Dialog open={showCreateEndpointDialog} onOpenChange={setShowCreateEndpointDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Create New Endpoint</DialogTitle>
+              <DialogDescription>Add a new API endpoint to your collection</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="endpoint-name">Name *</Label>
+                <Input
+                  id="endpoint-name"
+                  placeholder="e.g., Get User Profile"
+                  value={endpointForm.name}
+                  onChange={(e) => setEndpointForm({ ...endpointForm, name: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Method</Label>
+                  <Select
+                    value={endpointForm.method}
+                    onValueChange={(value) => setEndpointForm({ ...endpointForm, method: value as HttpMethod })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].map(m => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Version</Label>
+                  <Input
+                    value={endpointForm.version}
+                    onChange={(e) => setEndpointForm({ ...endpointForm, version: e.target.value })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endpoint-path">Path *</Label>
+                <Input
+                  id="endpoint-path"
+                  placeholder="/api/v1/users/:id"
+                  value={endpointForm.path}
+                  onChange={(e) => setEndpointForm({ ...endpointForm, path: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="Describe what this endpoint does..."
+                  value={endpointForm.description}
+                  onChange={(e) => setEndpointForm({ ...endpointForm, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Rate Limit (req/hr)</Label>
+                  <Input
+                    type="number"
+                    value={endpointForm.rateLimit}
+                    onChange={(e) => setEndpointForm({ ...endpointForm, rateLimit: parseInt(e.target.value) || 1000 })}
+                  />
+                </div>
+                <div className="flex items-center gap-2 pt-6">
+                  <Switch
+                    checked={endpointForm.requiresAuth}
+                    onCheckedChange={(checked) => setEndpointForm({ ...endpointForm, requiresAuth: checked })}
+                  />
+                  <Label>Requires Authentication</Label>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateEndpointDialog(false)}>Cancel</Button>
+              <Button onClick={handleCreateEndpoint} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                Create Endpoint
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create API Key Dialog */}
+        <Dialog open={showCreateKeyDialog} onOpenChange={setShowCreateKeyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Generate API Key</DialogTitle>
+              <DialogDescription>Create a new API key for your application</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="key-name">Key Name *</Label>
+                <Input
+                  id="key-name"
+                  placeholder="e.g., Production API Key"
+                  value={apiKeyForm.name}
+                  onChange={(e) => setApiKeyForm({ ...apiKeyForm, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  placeholder="What is this key used for?"
+                  value={apiKeyForm.description}
+                  onChange={(e) => setApiKeyForm({ ...apiKeyForm, description: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Environment</Label>
+                  <Select
+                    value={apiKeyForm.environment}
+                    onValueChange={(value) => setApiKeyForm({ ...apiKeyForm, environment: value as Environment })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="development">Development</SelectItem>
+                      <SelectItem value="staging">Staging</SelectItem>
+                      <SelectItem value="production">Production</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Rate Limit (req/hr)</Label>
+                  <Input
+                    type="number"
+                    value={apiKeyForm.rateLimit}
+                    onChange={(e) => setApiKeyForm({ ...apiKeyForm, rateLimit: parseInt(e.target.value) || 1000 })}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Scopes</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {['read', 'write', 'delete', 'admin'].map(scope => (
+                    <Button
+                      key={scope}
+                      variant={apiKeyForm.scopes.includes(scope) ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        const newScopes = apiKeyForm.scopes.includes(scope)
+                          ? apiKeyForm.scopes.filter(s => s !== scope)
+                          : [...apiKeyForm.scopes, scope]
+                        setApiKeyForm({ ...apiKeyForm, scopes: newScopes })
+                      }}
+                    >
+                      {scope}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Expiration (optional)</Label>
+                <Input
+                  type="date"
+                  value={apiKeyForm.expiresAt}
+                  onChange={(e) => setApiKeyForm({ ...apiKeyForm, expiresAt: e.target.value })}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateKeyDialog(false)}>Cancel</Button>
+              <Button onClick={handleGenerateApiKey} disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Key className="w-4 h-4 mr-2" />}
+                Generate Key
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

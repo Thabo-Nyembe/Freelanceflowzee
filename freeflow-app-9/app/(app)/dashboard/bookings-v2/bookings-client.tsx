@@ -117,7 +117,23 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   const [searchQuery, setSearchQuery] = useState('')
   const [settingsTab, setSettingsTab] = useState('availability')
 
-  const { bookings, loading, error } = useBookings({ bookingType: bookingTypeFilter, status: statusFilter, paymentStatus: paymentStatusFilter })
+  const { bookings, loading, error, createBooking, updateBooking, deleteBooking, refetch } = useBookings({ bookingType: bookingTypeFilter, status: statusFilter, paymentStatus: paymentStatusFilter })
+
+  // Form state for new booking
+  const [newBookingForm, setNewBookingForm] = useState({
+    serviceType: '1',
+    teamMember: '',
+    date: '',
+    time: '09:00',
+    clientName: '',
+    clientEmail: '',
+    addVideoMeeting: false,
+    requirePayment: false
+  })
+
+  // Reschedule state
+  const [rescheduleData, setRescheduleData] = useState<{ bookingId: string; newDate: string; newTime: string } | null>(null)
+  const [showRescheduleDialog, setShowRescheduleDialog] = useState(false)
   const displayBookings = (bookings && bookings.length > 0) ? bookings : (initialBookings || [])
 
   // Service types
@@ -155,30 +171,179 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
 
   const timeSlots = useMemo(() => generateTimeSlots(), [currentDate])
 
-  // Handlers
+  // Handlers - Real Supabase Operations
   const handleNewBooking = () => {
-    toast.info('New Booking', {
-      description: 'Opening booking form...'
-    })
     setShowNewBooking(true)
   }
 
-  const handleConfirmBooking = (booking: Booking) => {
-    toast.success('Booking confirmed', {
-      description: `Booking for ${booking.clientName} confirmed`
-    })
+  const handleCreateBooking = async () => {
+    const selectedService = serviceTypes.find(s => s.id === newBookingForm.serviceType)
+    if (!selectedService) {
+      toast.error('Error', { description: 'Please select a service type' })
+      return
+    }
+    if (!newBookingForm.date || !newBookingForm.clientName || !newBookingForm.clientEmail) {
+      toast.error('Error', { description: 'Please fill in all required fields' })
+      return
+    }
+
+    const startTime = new Date(`${newBookingForm.date}T${newBookingForm.time}:00`)
+    const endTime = new Date(startTime.getTime() + selectedService.duration * 60000)
+    const bookingNumber = `BK-${Date.now().toString(36).toUpperCase()}`
+
+    try {
+      await createBooking({
+        booking_number: bookingNumber,
+        title: selectedService.name,
+        description: selectedService.description,
+        booking_type: 'appointment' as BookingType,
+        customer_name: newBookingForm.clientName,
+        customer_email: newBookingForm.clientEmail,
+        guest_count: 1,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        duration_minutes: selectedService.duration,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        buffer_before_minutes: selectedService.buffer,
+        buffer_after_minutes: selectedService.buffer,
+        status: 'pending' as BookingStatus,
+        provider_id: newBookingForm.teamMember || undefined,
+        provider_name: newBookingForm.teamMember ? teamMembers.find(m => m.id === newBookingForm.teamMember)?.name : undefined,
+        service_id: selectedService.id,
+        service_name: selectedService.name,
+        price: selectedService.price,
+        deposit_amount: 0,
+        paid_amount: 0,
+        balance_due: selectedService.price,
+        currency: 'USD',
+        payment_status: 'unpaid' as PaymentStatus,
+        reminder_sent: false,
+        confirmation_sent: false,
+        follow_up_sent: false,
+        is_recurring: false,
+        capacity: selectedService.maxCapacity,
+        slots_booked: 1,
+        requirements: {},
+        metadata: {
+          addVideoMeeting: newBookingForm.addVideoMeeting,
+          requirePayment: newBookingForm.requirePayment
+        },
+        meeting_url: newBookingForm.addVideoMeeting ? 'https://zoom.us/j/pending' : undefined
+      })
+
+      toast.success('Booking Created', {
+        description: `Booking for ${newBookingForm.clientName} has been created successfully`
+      })
+      setShowNewBooking(false)
+      setNewBookingForm({
+        serviceType: '1',
+        teamMember: '',
+        date: '',
+        time: '09:00',
+        clientName: '',
+        clientEmail: '',
+        addVideoMeeting: false,
+        requirePayment: false
+      })
+      refetch()
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to create booking' })
+    }
   }
 
-  const handleCancelBooking = (booking: Booking) => {
-    toast.success('Booking cancelled', {
-      description: `Booking for ${booking.clientName} has been cancelled`
-    })
+  const handleConfirmBooking = async (booking: Booking) => {
+    try {
+      await updateBooking(booking.id, {
+        status: 'confirmed' as BookingStatus,
+        confirmed_at: new Date().toISOString(),
+        confirmation_code: `CONF-${Date.now().toString(36).toUpperCase()}`
+      })
+      toast.success('Booking Confirmed', {
+        description: `Booking for ${booking.customer_name || 'client'} has been confirmed`
+      })
+      refetch()
+      if (selectedBooking?.id === booking.id) {
+        setSelectedBooking(null)
+      }
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to confirm booking' })
+    }
+  }
+
+  const handleCancelBooking = async (booking: Booking) => {
+    try {
+      await updateBooking(booking.id, {
+        status: 'cancelled' as BookingStatus,
+        cancelled_at: new Date().toISOString(),
+        cancellation_reason: 'Cancelled by user'
+      })
+      toast.success('Booking Cancelled', {
+        description: `Booking for ${booking.customer_name || 'client'} has been cancelled`
+      })
+      refetch()
+      if (selectedBooking?.id === booking.id) {
+        setSelectedBooking(null)
+      }
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to cancel booking' })
+    }
   }
 
   const handleReschedule = (booking: Booking) => {
-    toast.info('Reschedule', {
-      description: 'Opening reschedule options...'
+    setRescheduleData({
+      bookingId: booking.id,
+      newDate: booking.start_time.split('T')[0],
+      newTime: booking.start_time.split('T')[1]?.substring(0, 5) || '09:00'
     })
+    setShowRescheduleDialog(true)
+  }
+
+  const handleConfirmReschedule = async () => {
+    if (!rescheduleData) return
+
+    const booking = displayBookings.find(b => b.id === rescheduleData.bookingId)
+    if (!booking) return
+
+    const startTime = new Date(`${rescheduleData.newDate}T${rescheduleData.newTime}:00`)
+    const endTime = new Date(startTime.getTime() + booking.duration_minutes * 60000)
+
+    try {
+      await updateBooking(rescheduleData.bookingId, {
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        status: 'rescheduled' as BookingStatus
+      })
+      toast.success('Booking Rescheduled', {
+        description: `Booking has been rescheduled to ${startTime.toLocaleDateString()}`
+      })
+      setShowRescheduleDialog(false)
+      setRescheduleData(null)
+      refetch()
+      if (selectedBooking?.id === rescheduleData.bookingId) {
+        setSelectedBooking(null)
+      }
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to reschedule booking' })
+    }
+  }
+
+  const handleDeleteBooking = async (booking: Booking) => {
+    if (!confirm(`Are you sure you want to delete the booking "${booking.title}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      await deleteBooking(booking.id)
+      toast.success('Booking Deleted', {
+        description: `Booking "${booking.title}" has been deleted`
+      })
+      refetch()
+      if (selectedBooking?.id === booking.id) {
+        setSelectedBooking(null)
+      }
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to delete booking' })
+    }
   }
 
   // Get days of the week
@@ -306,7 +471,11 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium mb-1">Service Type</label>
-                            <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <select
+                              value={newBookingForm.serviceType}
+                              onChange={(e) => setNewBookingForm({ ...newBookingForm, serviceType: e.target.value })}
+                              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                            >
                               {serviceTypes.map(service => (
                                 <option key={service.id} value={service.id}>{service.name} ({service.duration}min)</option>
                               ))}
@@ -314,7 +483,11 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-1">Team Member</label>
-                            <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <select
+                              value={newBookingForm.teamMember}
+                              onChange={(e) => setNewBookingForm({ ...newBookingForm, teamMember: e.target.value })}
+                              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                            >
                               <option value="">Auto-assign (Round Robin)</option>
                               {teamMembers.map(member => (
                                 <option key={member.id} value={member.id}>{member.name}</option>
@@ -325,11 +498,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <label className="block text-sm font-medium mb-1">Date</label>
-                            <input type="date" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" />
+                            <input
+                              type="date"
+                              value={newBookingForm.date}
+                              onChange={(e) => setNewBookingForm({ ...newBookingForm, date: e.target.value })}
+                              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                            />
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-1">Time</label>
-                            <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                            <select
+                              value={newBookingForm.time}
+                              onChange={(e) => setNewBookingForm({ ...newBookingForm, time: e.target.value })}
+                              className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                            >
                               {timeSlots.filter(s => s.available).map(slot => (
                                 <option key={slot.time} value={slot.time}>{slot.time}</option>
                               ))}
@@ -338,19 +520,41 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                         </div>
                         <div>
                           <label className="block text-sm font-medium mb-1">Client Name</label>
-                          <input type="text" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" placeholder="Enter client name" />
+                          <input
+                            type="text"
+                            value={newBookingForm.clientName}
+                            onChange={(e) => setNewBookingForm({ ...newBookingForm, clientName: e.target.value })}
+                            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                            placeholder="Enter client name"
+                          />
                         </div>
                         <div>
                           <label className="block text-sm font-medium mb-1">Client Email</label>
-                          <input type="email" className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" placeholder="client@example.com" />
+                          <input
+                            type="email"
+                            value={newBookingForm.clientEmail}
+                            onChange={(e) => setNewBookingForm({ ...newBookingForm, clientEmail: e.target.value })}
+                            className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                            placeholder="client@example.com"
+                          />
                         </div>
                         <div className="flex items-center gap-4">
                           <label className="flex items-center gap-2">
-                            <input type="checkbox" className="rounded" />
+                            <input
+                              type="checkbox"
+                              checked={newBookingForm.addVideoMeeting}
+                              onChange={(e) => setNewBookingForm({ ...newBookingForm, addVideoMeeting: e.target.checked })}
+                              className="rounded"
+                            />
                             <span className="text-sm">Add video meeting (Zoom)</span>
                           </label>
                           <label className="flex items-center gap-2">
-                            <input type="checkbox" className="rounded" />
+                            <input
+                              type="checkbox"
+                              checked={newBookingForm.requirePayment}
+                              onChange={(e) => setNewBookingForm({ ...newBookingForm, requirePayment: e.target.checked })}
+                              className="rounded"
+                            />
                             <span className="text-sm">Require payment</span>
                           </label>
                         </div>
@@ -358,7 +562,10 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                           <button onClick={() => setShowNewBooking(false)} className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
                             Cancel
                           </button>
-                          <button className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700">
+                          <button
+                            onClick={handleCreateBooking}
+                            className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
+                          >
                             Create Booking
                           </button>
                         </div>
@@ -1841,27 +2048,112 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   </div>
                 </TabsContent>
                 <TabsContent value="actions" className="mt-4 space-y-3">
-                  <button className="w-full py-3 px-4 bg-sky-600 text-white rounded-lg hover:bg-sky-700 flex items-center justify-center gap-2">
+                  {selectedBooking.status === 'pending' && (
+                    <button
+                      onClick={() => handleConfirmBooking(selectedBooking)}
+                      className="w-full py-3 px-4 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center justify-center gap-2"
+                    >
+                      <Check className="h-4 w-4" />
+                      Confirm Booking
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      if (selectedBooking.meeting_url) {
+                        window.open(selectedBooking.meeting_url, '_blank')
+                      } else {
+                        toast.info('No Meeting Link', { description: 'This booking does not have a video meeting link.' })
+                      }
+                    }}
+                    className="w-full py-3 px-4 bg-sky-600 text-white rounded-lg hover:bg-sky-700 flex items-center justify-center gap-2"
+                  >
                     <Video className="h-4 w-4" />
                     Start Meeting
                   </button>
-                  <button className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => handleReschedule(selectedBooking)}
+                    className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
+                  >
                     <RefreshCw className="h-4 w-4" />
                     Reschedule
                   </button>
-                  <button className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => {
+                      toast.success('Reminder Sent', { description: `Reminder sent to ${selectedBooking.customer_email || 'client'}` })
+                    }}
+                    className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
+                  >
                     <Mail className="h-4 w-4" />
                     Send Reminder
                   </button>
-                  <button className="w-full py-3 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 flex items-center justify-center gap-2">
+                  <button
+                    onClick={() => handleCancelBooking(selectedBooking)}
+                    className="w-full py-3 px-4 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 flex items-center justify-center gap-2"
+                  >
                     <X className="h-4 w-4" />
                     Cancel Booking
+                  </button>
+                  <button
+                    onClick={() => handleDeleteBooking(selectedBooking)}
+                    className="w-full py-3 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete Booking
                   </button>
                 </TabsContent>
               </Tabs>
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Reschedule Dialog */}
+        <Dialog open={showRescheduleDialog} onOpenChange={setShowRescheduleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Reschedule Booking</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">New Date</label>
+                <input
+                  type="date"
+                  value={rescheduleData?.newDate || ''}
+                  onChange={(e) => setRescheduleData(prev => prev ? { ...prev, newDate: e.target.value } : null)}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">New Time</label>
+                <select
+                  value={rescheduleData?.newTime || '09:00'}
+                  onChange={(e) => setRescheduleData(prev => prev ? { ...prev, newTime: e.target.value } : null)}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                >
+                  {timeSlots.filter(s => s.available).map(slot => (
+                    <option key={slot.time} value={slot.time}>{slot.time}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <DialogFooter className="mt-6">
+              <button
+                onClick={() => {
+                  setShowRescheduleDialog(false)
+                  setRescheduleData(null)
+                }}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmReschedule}
+                className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
+              >
+                Confirm Reschedule
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">

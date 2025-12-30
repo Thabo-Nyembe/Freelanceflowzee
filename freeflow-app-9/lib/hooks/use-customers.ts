@@ -1,4 +1,7 @@
-import { useSupabaseQuery, useSupabaseMutation } from './base-hooks'
+'use client'
+
+import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
+import { useMemo } from 'react'
 
 export type CustomerSegment = 'vip' | 'active' | 'new' | 'inactive' | 'churned' | 'at_risk' | 'prospect'
 export type CustomerStatus = 'active' | 'inactive' | 'suspended' | 'deleted' | 'pending' | 'verified'
@@ -58,31 +61,112 @@ export interface Customer {
   metadata?: any
 }
 
-export function useCustomers(filters?: {
+export interface CustomerFilters {
   segment?: CustomerSegment | 'all'
   status?: CustomerStatus | 'all'
-}) {
-  let query = useSupabaseQuery<Customer>('customers')
-
-  if (filters?.segment && filters.segment !== 'all') {
-    query = query.eq('segment', filters.segment)
-  }
-
-  if (filters?.status && filters.status !== 'all') {
-    query = query.eq('status', filters.status)
-  }
-
-  return query.order('lifetime_value', { ascending: false })
 }
 
+export function useCustomers(filters?: CustomerFilters) {
+  const query = useSupabaseQuery<Customer>({
+    table: 'customers',
+    select: '*',
+    filters: {
+      ...(filters?.segment && filters.segment !== 'all' ? { segment: filters.segment } : {}),
+      ...(filters?.status && filters.status !== 'all' ? { status: filters.status } : {})
+    },
+    orderBy: { column: 'lifetime_value', ascending: false }
+  })
+
+  const stats = useMemo(() => {
+    if (!query.data) return {
+      total: 0,
+      active: 0,
+      inactive: 0,
+      vip: 0,
+      new: 0,
+      churned: 0,
+      atRisk: 0,
+      prospect: 0,
+      totalLifetimeValue: 0,
+      avgLifetimeValue: 0,
+      totalOrders: 0
+    }
+
+    const active = query.data.filter(c => c.status === 'active').length
+    const inactive = query.data.filter(c => c.status === 'inactive').length
+    const vip = query.data.filter(c => c.segment === 'vip').length
+    const newCustomers = query.data.filter(c => c.segment === 'new').length
+    const churned = query.data.filter(c => c.segment === 'churned').length
+    const atRisk = query.data.filter(c => c.segment === 'at_risk').length
+    const prospect = query.data.filter(c => c.segment === 'prospect').length
+    const totalLifetimeValue = query.data.reduce((sum, c) => sum + (c.lifetime_value || 0), 0)
+    const totalOrders = query.data.reduce((sum, c) => sum + (c.total_orders || 0), 0)
+
+    return {
+      total: query.data.length,
+      active,
+      inactive,
+      vip,
+      new: newCustomers,
+      churned,
+      atRisk,
+      prospect,
+      totalLifetimeValue,
+      avgLifetimeValue: query.data.length > 0 ? totalLifetimeValue / query.data.length : 0,
+      totalOrders
+    }
+  }, [query.data])
+
+  return {
+    ...query,
+    customers: query.data,
+    stats,
+    isLoading: query.loading
+  }
+}
+
+export function useCustomerMutations() {
+  const customerMutation = useSupabaseMutation<Customer>({
+    table: 'customers'
+  })
+
+  return {
+    createCustomer: (data: Partial<Customer>) => customerMutation.mutate(data),
+    updateCustomer: (data: Partial<Customer> & { id: string }) => customerMutation.mutate(data, data.id),
+    deleteCustomer: (id: string) => customerMutation.remove(id),
+    updateCustomerSegment: (id: string, segment: CustomerSegment) =>
+      customerMutation.mutate({ segment }, id),
+    updateCustomerStatus: (id: string, status: CustomerStatus) =>
+      customerMutation.mutate({ status }, id),
+    isCreating: customerMutation.loading,
+    isUpdating: customerMutation.loading,
+    isDeleting: customerMutation.loading,
+    loading: customerMutation.loading,
+    error: customerMutation.error
+  }
+}
+
+// Backwards compatibility exports
 export function useCreateCustomer() {
-  return useSupabaseMutation<Customer>('customers', 'insert')
+  const mutations = useCustomerMutations()
+  return {
+    mutate: mutations.createCustomer,
+    loading: mutations.isCreating
+  }
 }
 
 export function useUpdateCustomer() {
-  return useSupabaseMutation<Customer>('customers', 'update')
+  const mutations = useCustomerMutations()
+  return {
+    mutate: mutations.updateCustomer,
+    loading: mutations.isUpdating
+  }
 }
 
 export function useDeleteCustomer() {
-  return useSupabaseMutation<Customer>('customers', 'delete')
+  const mutations = useCustomerMutations()
+  return {
+    remove: mutations.deleteCustomer,
+    loading: mutations.isDeleting
+  }
 }

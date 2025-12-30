@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -400,6 +401,8 @@ const mockAIDesignQuickActions = [
 ]
 
 export default function AIDesignClient() {
+  const supabase = createClientComponentClient()
+
   const [activeTab, setActiveTab] = useState('generate')
   const [searchQuery, setSearchQuery] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -416,57 +419,229 @@ export default function AIDesignClient() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Database state
+  const [generations, setGenerations] = useState<Generation[]>(mockGenerations)
+  const [collections, setCollections] = useState<Collection[]>(mockCollections)
+  const [promptHistory, setPromptHistory] = useState<PromptHistory[]>(mockPromptHistory)
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Fetch AI design projects from Supabase
+  const fetchGenerations = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('ai_design_projects')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      if (data && data.length > 0) {
+        const mapped: Generation[] = data.map((p: any) => ({
+          id: p.id,
+          prompt: p.prompt || '',
+          negativePrompt: p.parameters?.negative_prompt,
+          style: p.parameters?.style || 'photorealistic',
+          model: p.model?.replace('-', '_') || 'midjourney_v6',
+          aspectRatio: p.parameters?.aspect_ratio || '1:1',
+          quality: p.parameters?.quality || 'high',
+          status: p.status === 'generating' ? 'processing' : p.status || 'pending',
+          imageUrl: p.parameters?.image_url,
+          thumbnailUrl: p.parameters?.thumbnail_url,
+          seed: p.parameters?.seed,
+          likes: p.parameters?.likes || 0,
+          views: p.parameters?.views || 0,
+          downloads: p.parameters?.downloads || 0,
+          isFavorite: p.parameters?.is_favorite || false,
+          isPublic: p.parameters?.is_public || false,
+          createdAt: p.created_at,
+          generationTime: p.parameters?.generation_time,
+          creditsUsed: p.parameters?.credits_used || 5
+        }))
+        setGenerations(mapped)
+      }
+    } catch (err) {
+      console.error('Error fetching generations:', err)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchGenerations()
+  }, [fetchGenerations])
+
   // Stats
   const stats: AIDesignStats = useMemo(() => ({
-    totalGenerations: mockGenerations.length,
-    completedGenerations: mockGenerations.filter(g => g.status === 'completed').length,
+    totalGenerations: generations.length,
+    completedGenerations: generations.filter(g => g.status === 'completed').length,
     totalCredits: 500,
-    creditsUsed: mockGenerations.reduce((sum, g) => sum + g.creditsUsed, 0),
-    totalLikes: mockGenerations.reduce((sum, g) => sum + g.likes, 0),
-    totalDownloads: mockGenerations.reduce((sum, g) => sum + g.downloads, 0),
-    avgGenerationTime: mockGenerations.filter(g => g.generationTime).reduce((sum, g) => sum + (g.generationTime || 0), 0) / mockGenerations.filter(g => g.generationTime).length,
-    favoriteCount: mockGenerations.filter(g => g.isFavorite).length
-  }), [])
+    creditsUsed: generations.reduce((sum, g) => sum + g.creditsUsed, 0),
+    totalLikes: generations.reduce((sum, g) => sum + g.likes, 0),
+    totalDownloads: generations.reduce((sum, g) => sum + g.downloads, 0),
+    avgGenerationTime: generations.filter(g => g.generationTime).reduce((sum, g) => sum + (g.generationTime || 0), 0) / (generations.filter(g => g.generationTime).length || 1),
+    favoriteCount: generations.filter(g => g.isFavorite).length
+  }), [generations])
 
   // Filtered data
   const filteredGenerations = useMemo(() => {
-    return mockGenerations.filter(gen =>
+    return generations.filter(gen =>
       gen.prompt.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [searchQuery])
+  }, [searchQuery, generations])
 
-  const handleGenerate = () => {
+  // Generate new image
+  const handleGenerate = async () => {
     if (!prompt.trim()) return
     setIsGenerating(true)
-    setTimeout(() => {
-      setIsGenerating(false)
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required', { description: 'Please sign in to generate images' })
+        return
+      }
+
+      const { data, error } = await supabase
+        .from('ai_design_projects')
+        .insert({
+          user_id: user.id,
+          name: prompt.slice(0, 50),
+          type: 'batch-generate',
+          status: 'generating',
+          progress: 0,
+          tool_id: 'ai-image-gen',
+          model: selectedModel.replace('_', '-'),
+          prompt: prompt,
+          parameters: {
+            negative_prompt: negativePrompt,
+            style: selectedStyle,
+            aspect_ratio: selectedRatio,
+            quality: selectedQuality,
+            credits_used: selectedQuality === 'ultra' ? 8 : selectedQuality === 'high' ? 5 : selectedQuality === 'standard' ? 3 : 2
+          }
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      toast.success('Generation started', { description: 'Your image is being created' })
       setPrompt('')
-    }, 2000)
+      setNegativePrompt('')
+      fetchGenerations()
+    } catch (err: any) {
+      toast.error('Generation failed', { description: err.message })
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
-  // Handlers
-  const handleSaveDesign = (design: GeneratedDesign) => {
-    toast.success('Design saved', {
-      description: 'Design saved to your library'
-    })
+  // Toggle favorite
+  const handleToggleFavorite = async (gen: Generation) => {
+    try {
+      const newFavorite = !gen.isFavorite
+      const { error } = await supabase
+        .from('ai_design_projects')
+        .update({ parameters: { ...gen, is_favorite: newFavorite } })
+        .eq('id', gen.id)
+
+      if (error) throw error
+
+      setGenerations(prev => prev.map(g =>
+        g.id === gen.id ? { ...g, isFavorite: newFavorite } : g
+      ))
+      toast.success(newFavorite ? 'Added to favorites' : 'Removed from favorites')
+    } catch (err: any) {
+      toast.error('Update failed', { description: err.message })
+    }
   }
 
-  const handleDownloadDesign = (design: GeneratedDesign) => {
-    toast.success('Download started', {
-      description: 'Your design is being downloaded'
-    })
+  // Delete generation
+  const handleDeleteGeneration = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('ai_design_projects')
+        .delete()
+        .eq('id', id)
+
+      if (error) throw error
+
+      setGenerations(prev => prev.filter(g => g.id !== id))
+      setShowGenerationDialog(false)
+      toast.success('Generation deleted')
+    } catch (err: any) {
+      toast.error('Delete failed', { description: err.message })
+    }
   }
 
-  const handleRegenerateDesign = () => {
-    toast.info('Regenerating', {
-      description: 'Creating new variations...'
-    })
+  // Download handler
+  const handleDownloadDesign = async (gen: Generation) => {
+    try {
+      const { error } = await supabase
+        .from('ai_design_projects')
+        .update({
+          parameters: {
+            ...gen,
+            downloads: (gen.downloads || 0) + 1
+          }
+        })
+        .eq('id', gen.id)
+
+      if (error) throw error
+
+      setGenerations(prev => prev.map(g =>
+        g.id === gen.id ? { ...g, downloads: g.downloads + 1 } : g
+      ))
+      toast.success('Download started', { description: 'Your design is being downloaded' })
+    } catch (err: any) {
+      toast.error('Download failed', { description: err.message })
+    }
   }
 
-  const handleExportDesigns = () => {
-    toast.success('Export started', {
-      description: 'Your designs are being exported'
-    })
+  // Regenerate with same settings
+  const handleRegenerateDesign = async (gen: Generation) => {
+    setPrompt(gen.prompt)
+    setNegativePrompt(gen.negativePrompt || '')
+    setSelectedStyle(gen.style)
+    setSelectedModel(gen.model)
+    setSelectedRatio(gen.aspectRatio)
+    setSelectedQuality(gen.quality)
+    setActiveTab('generate')
+    toast.info('Settings loaded', { description: 'Click Generate to create a new variation' })
+  }
+
+  // Create collection
+  const handleCreateCollection = async (name: string, description: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Using a generic approach since collection table may vary
+      const newCollection: Collection = {
+        id: crypto.randomUUID(),
+        name,
+        description,
+        itemCount: 0,
+        isPrivate: false,
+        createdAt: new Date().toISOString()
+      }
+
+      setCollections(prev => [newCollection, ...prev])
+      toast.success('Collection created', { description: `"${name}" is ready to use` })
+    } catch (err: any) {
+      toast.error('Failed to create collection', { description: err.message })
+    }
+  }
+
+  // Export all designs
+  const handleExportDesigns = async () => {
+    setIsLoading(true)
+    try {
+      toast.success('Export started', { description: `Exporting ${generations.length} designs` })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -1271,13 +1446,16 @@ export default function AIDesignClient() {
           <TabsContent value="collections" className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">My Collections</h2>
-              <Button className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">
+              <Button
+                className="bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white"
+                onClick={() => handleCreateCollection('New Collection', 'My new design collection')}
+              >
                 <FolderPlus className="w-4 h-4 mr-2" />
                 New Collection
               </Button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {mockCollections.map((collection) => (
+              {collections.map((collection) => (
                 <Card key={collection.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden">
                   <div className="aspect-video bg-gradient-to-br from-fuchsia-200 to-purple-200 dark:from-fuchsia-900 dark:to-purple-900 relative">
                     {collection.isPrivate && (
@@ -1314,15 +1492,15 @@ export default function AIDesignClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockPromptHistory.length}</div>
+                      <div className="text-2xl font-bold">{promptHistory.length}</div>
                       <div className="text-sm text-amber-100">Prompts</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockPromptHistory.filter(p => p.isFavorite).length}</div>
+                      <div className="text-2xl font-bold">{promptHistory.filter(p => p.isFavorite).length}</div>
                       <div className="text-sm text-amber-100">Favorites</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockPromptHistory.reduce((sum, p) => sum + p.resultCount, 0)}</div>
+                      <div className="text-2xl font-bold">{promptHistory.reduce((sum, p) => sum + p.resultCount, 0)}</div>
                       <div className="text-sm text-amber-100">Results</div>
                     </div>
                   </div>
@@ -1339,7 +1517,7 @@ export default function AIDesignClient() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {mockPromptHistory.map((item) => (
+                  {promptHistory.map((item) => (
                     <div key={item.id} className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer">
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">{item.prompt}</p>
@@ -1350,13 +1528,39 @@ export default function AIDesignClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" className={item.isFavorite ? 'text-amber-500' : ''}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={item.isFavorite ? 'text-amber-500' : ''}
+                          onClick={() => {
+                            setPromptHistory(prev => prev.map(p =>
+                              p.id === item.id ? { ...p, isFavorite: !p.isFavorite } : p
+                            ))
+                            toast.success(item.isFavorite ? 'Removed from favorites' : 'Added to favorites')
+                          }}
+                        >
                           <Star className={`w-4 h-4 ${item.isFavorite ? 'fill-amber-500' : ''}`} />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            navigator.clipboard.writeText(item.prompt)
+                            toast.success('Copied to clipboard')
+                          }}
+                        >
                           <Copy className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setPrompt(item.prompt)
+                            setSelectedStyle(item.style)
+                            setActiveTab('generate')
+                            toast.info('Prompt loaded', { description: 'Ready to regenerate' })
+                          }}
+                        >
                           <RefreshCw className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1892,19 +2096,25 @@ export default function AIDesignClient() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button className="flex-1 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white">
+                    <Button
+                      className="flex-1 bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white"
+                      onClick={() => handleDownloadDesign(selectedGeneration)}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => toast.info('Upscaling', { description: 'Processing your image...' })}>
                       <Maximize2 className="w-4 h-4 mr-2" />
                       Upscale
                     </Button>
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => handleRegenerateDesign(selectedGeneration)}>
                       <Shuffle className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline">
-                      <Share2 className="w-4 h-4" />
+                    <Button variant="outline" onClick={() => handleToggleFavorite(selectedGeneration)}>
+                      <Star className={`w-4 h-4 ${selectedGeneration.isFavorite ? 'fill-amber-400 text-amber-400' : ''}`} />
+                    </Button>
+                    <Button variant="outline" onClick={() => handleDeleteGeneration(selectedGeneration.id)}>
+                      <Trash2 className="w-4 h-4 text-red-500" />
                     </Button>
                   </div>
                 </div>

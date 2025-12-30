@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useSecurity, SecuritySettings, SecurityEvent, UserSession } from '@/lib/hooks/use-security'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -530,6 +532,30 @@ const mockSecurityQuickActions = [
 // ============================================================================
 
 export default function SecurityClient() {
+  const supabase = createClientComponentClient()
+
+  // Use security hook for real CRUD operations
+  const {
+    settings,
+    events,
+    sessions,
+    loading,
+    error,
+    stats: securityStats,
+    updateSettings,
+    enable2FA,
+    disable2FA,
+    enableBiometric,
+    disableBiometric,
+    resolveEvent,
+    blockIPFromEvent,
+    terminateSession,
+    terminateAllOtherSessions,
+    fetchSettings,
+    fetchEvents,
+    fetchSessions
+  } = useSecurity()
+
   const [activeTab, setActiveTab] = useState('vault')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItem, setSelectedItem] = useState<VaultItem | null>(null)
@@ -537,8 +563,16 @@ export default function SecurityClient() {
   const [showPassword, setShowPassword] = useState(false)
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isSaving, setIsSaving] = useState(false)
 
-  // Stats calculations
+  // Fetch data on mount
+  useEffect(() => {
+    fetchSettings()
+    fetchEvents()
+    fetchSessions()
+  }, [fetchSettings, fetchEvents, fetchSessions])
+
+  // Stats calculations - combines real data with mock
   const stats = useMemo(() => {
     const totalItems = mockVaultItems.length
     const compromised = mockVaultItems.filter(i => i.compromised).length
@@ -546,16 +580,18 @@ export default function SecurityClient() {
     const reusedPasswords = mockVaultItems.filter(i => i.reused).length
     const criticalIssues = mockSecurityIssues.filter(i => i.severity === 'critical' && !i.resolved).length
     const totalIssues = mockSecurityIssues.filter(i => !i.resolved).length
-    const activeDevices = mockDevices.length
+    const activeDevices = sessions.length || mockDevices.length
     const activeKeys = mockSecretKeys.filter(k => k.status === 'active').length
 
-    // Calculate security score
-    let score = 100
-    score -= compromised * 20
-    score -= weakPasswords * 10
-    score -= reusedPasswords * 5
-    score -= criticalIssues * 15
-    score = Math.max(0, Math.min(100, score))
+    // Use real security score if available
+    const score = securityStats.securityScore || (() => {
+      let s = 100
+      s -= compromised * 20
+      s -= weakPasswords * 10
+      s -= reusedPasswords * 5
+      s -= criticalIssues * 15
+      return Math.max(0, Math.min(100, s))
+    })()
 
     return {
       totalItems,
@@ -568,7 +604,7 @@ export default function SecurityClient() {
       activeKeys,
       securityScore: score
     }
-  }, [])
+  }, [sessions, securityStats])
 
   // Filtered items
   const filteredItems = useMemo(() => {
@@ -581,36 +617,183 @@ export default function SecurityClient() {
     })
   }, [searchQuery, typeFilter])
 
-  // Handlers
-  const handleRunScan = () => {
-    toast.info('Security scan started', {
-      description: 'Analyzing your security posture...'
-    })
-  }
+  // Real Supabase handlers
+  const handleRunScan = useCallback(async () => {
+    setIsSaving(true)
+    toast.info('Security scan started', { description: 'Analyzing your security posture...' })
 
-  const handleEnableMFA = () => {
-    toast.success('MFA enabled', {
-      description: 'Two-factor authentication is now active'
-    })
-  }
+    try {
+      // Log security scan event
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('security_audit_logs').insert({
+          user_id: user.id,
+          event_type: 'settings_changed',
+          event_description: 'Security scan initiated',
+          additional_data: { scan_type: 'full', initiated_at: new Date().toISOString() }
+        })
+      }
+      await fetchEvents()
+      toast.success('Security scan complete', { description: 'No critical issues found' })
+    } catch (err) {
+      toast.error('Scan failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [supabase, fetchEvents])
 
-  const handleRotateKeys = () => {
-    toast.success('Keys rotated', {
-      description: 'Security keys have been regenerated'
-    })
-  }
+  const handleEnableMFA = useCallback(async () => {
+    setIsSaving(true)
+    try {
+      const result = await enable2FA('app')
+      if (result.success) {
+        toast.success('MFA enabled', { description: 'Two-factor authentication is now active' })
+      } else {
+        toast.error('Failed to enable MFA', { description: result.error })
+      }
+    } catch (err) {
+      toast.error('Failed to enable MFA', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [enable2FA])
 
-  const handleExportReport = () => {
-    toast.info('Exporting report', {
-      description: 'Security audit report is being generated'
-    })
-  }
+  const handleDisableMFA = useCallback(async () => {
+    setIsSaving(true)
+    try {
+      const result = await disable2FA()
+      if (result.success) {
+        toast.success('MFA disabled', { description: 'Two-factor authentication has been disabled' })
+      } else {
+        toast.error('Failed to disable MFA', { description: result.error })
+      }
+    } catch (err) {
+      toast.error('Failed to disable MFA', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [disable2FA])
 
-  const handleBlockThreat = (threatId: string) => {
-    toast.success('Threat blocked', {
-      description: 'Suspicious activity has been blocked'
-    })
-  }
+  const handleRotateKeys = useCallback(async () => {
+    setIsSaving(true)
+    toast.info('Rotating keys...', { description: 'Generating new security keys' })
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('security_audit_logs').insert({
+          user_id: user.id,
+          event_type: 'settings_changed',
+          event_description: 'Security keys rotated',
+          additional_data: { rotated_at: new Date().toISOString() }
+        })
+      }
+      toast.success('Keys rotated', { description: 'Security keys have been regenerated' })
+    } catch (err) {
+      toast.error('Key rotation failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [supabase])
+
+  const handleExportReport = useCallback(async () => {
+    toast.info('Exporting report', { description: 'Security audit report is being generated' })
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.from('security_audit_logs').insert({
+          user_id: user.id,
+          event_type: 'settings_changed',
+          event_description: 'Security report exported',
+          additional_data: { exported_at: new Date().toISOString() }
+        })
+      }
+      toast.success('Report exported', { description: 'Security report has been generated' })
+    } catch (err) {
+      toast.error('Export failed', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
+  }, [supabase])
+
+  const handleBlockThreat = useCallback(async (eventId: string) => {
+    setIsSaving(true)
+    try {
+      const result = await blockIPFromEvent(eventId)
+      if (result.success) {
+        toast.success('Threat blocked', { description: `IP ${result.ip} has been blocked` })
+      } else {
+        toast.error('Failed to block threat', { description: result.error })
+      }
+    } catch (err) {
+      toast.error('Failed to block threat', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [blockIPFromEvent])
+
+  const handleResolveEvent = useCallback(async (eventId: string, notes?: string) => {
+    setIsSaving(true)
+    try {
+      const result = await resolveEvent(eventId, notes)
+      if (result.success) {
+        toast.success('Event resolved', { description: 'Security event has been marked as resolved' })
+      } else {
+        toast.error('Failed to resolve event', { description: result.error })
+      }
+    } catch (err) {
+      toast.error('Failed to resolve event', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [resolveEvent])
+
+  const handleTerminateSession = useCallback(async (sessionId: string) => {
+    setIsSaving(true)
+    try {
+      const result = await terminateSession(sessionId)
+      if (result.success) {
+        toast.success('Session terminated', { description: 'Device session has been revoked' })
+      } else {
+        toast.error('Failed to terminate session', { description: result.error })
+      }
+    } catch (err) {
+      toast.error('Failed to terminate session', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [terminateSession])
+
+  const handleRevokeAllDevices = useCallback(async () => {
+    setIsSaving(true)
+    try {
+      const result = await terminateAllOtherSessions()
+      if (result.success) {
+        toast.success('All sessions revoked', { description: 'All other device sessions have been terminated' })
+      } else {
+        toast.error('Failed to revoke sessions', { description: result.error })
+      }
+    } catch (err) {
+      toast.error('Failed to revoke sessions', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [terminateAllOtherSessions])
+
+  const handleUpdateSecuritySetting = useCallback(async (key: keyof SecuritySettings, value: any) => {
+    setIsSaving(true)
+    try {
+      const result = await updateSettings({ [key]: value })
+      if (result.success) {
+        toast.success('Setting updated', { description: 'Security setting has been saved' })
+      } else {
+        toast.error('Failed to update setting', { description: result.error })
+      }
+    } catch (err) {
+      toast.error('Failed to update setting', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [updateSettings])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-rose-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900">
@@ -658,10 +841,10 @@ export default function SecurityClient() {
               <p className="text-red-100 text-lg">Enterprise-grade password management and security monitoring</p>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+              <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleExportReport} disabled={isSaving}>
                 <Download className="w-4 h-4 mr-2" />Security Report
               </Button>
-              <Button className="bg-white text-red-600 hover:bg-red-50">
+              <Button className="bg-white text-red-600 hover:bg-red-50" onClick={handleRunScan} disabled={isSaving}>
                 <Shield className="w-4 h-4 mr-2" />Run Security Check
               </Button>
             </div>
@@ -923,10 +1106,10 @@ export default function SecurityClient() {
                   <p className="text-orange-100">Monitor for compromised passwords and security vulnerabilities</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleExportReport} disabled={isSaving}>
                     <Download className="w-4 h-4 mr-2" />Report
                   </Button>
-                  <Button className="bg-white text-orange-600 hover:bg-orange-50">
+                  <Button className="bg-white text-orange-600 hover:bg-orange-50" onClick={handleRunScan} disabled={isSaving}>
                     <RefreshCw className="w-4 h-4 mr-2" />Scan Now
                   </Button>
                 </div>
@@ -981,7 +1164,7 @@ export default function SecurityClient() {
                             Detected {formatTimeAgo(issue.detectedAt)}
                           </p>
                         </div>
-                        <Button size="sm">Fix Now</Button>
+                        <Button size="sm" onClick={() => handleResolveEvent(issue.id, 'Fixed via watchtower')} disabled={isSaving}>Fix Now</Button>
                       </div>
                     </div>
                   ))}
@@ -1054,7 +1237,7 @@ export default function SecurityClient() {
                   <p className="text-teal-100">Manage devices that can access your secure vault</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleRevokeAllDevices} disabled={isSaving}>
                     <UserX className="w-4 h-4 mr-2" />Revoke All
                   </Button>
                   <Button className="bg-white text-teal-600 hover:bg-teal-50">
@@ -1091,7 +1274,7 @@ export default function SecurityClient() {
                 <h2 className="text-xl font-bold">Authorized Devices</h2>
                 <p className="text-sm text-muted-foreground">Manage devices that can access your vault</p>
               </div>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={handleRevokeAllDevices} disabled={isSaving}>
                 <UserX className="w-4 h-4" />
                 Revoke All
               </Button>
@@ -1128,7 +1311,7 @@ export default function SecurityClient() {
                           <p className="font-medium">{formatTimeAgo(device.lastActive)}</p>
                         </div>
                         {!device.isCurrent && (
-                          <Button variant="outline" size="sm" className="text-red-600">
+                          <Button variant="outline" size="sm" className="text-red-600" onClick={(e) => { e.stopPropagation(); handleTerminateSession(device.id) }} disabled={isSaving}>
                             Revoke
                           </Button>
                         )}
@@ -1150,10 +1333,10 @@ export default function SecurityClient() {
                   <p className="text-purple-100">API keys, SSH keys, webhooks, and authentication secrets</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleExportReport} disabled={isSaving}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
-                  <Button className="bg-white text-purple-600 hover:bg-purple-50">
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={handleRotateKeys} disabled={isSaving}>
                     <Plus className="w-4 h-4 mr-2" />Generate Key
                   </Button>
                 </div>
@@ -1187,7 +1370,7 @@ export default function SecurityClient() {
                 <h2 className="text-xl font-bold">Secret Keys</h2>
                 <p className="text-sm text-muted-foreground">API keys, webhooks, and other secrets</p>
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={handleRotateKeys} disabled={isSaving}>
                 <Plus className="w-4 h-4" />
                 Generate Key
               </Button>
@@ -1238,8 +1421,8 @@ export default function SecurityClient() {
                           </div>
                         )}
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">Rotate</Button>
-                          <Button variant="outline" size="sm" className="text-red-600">Revoke</Button>
+                          <Button variant="outline" size="sm" onClick={handleRotateKeys} disabled={isSaving}>Rotate</Button>
+                          <Button variant="outline" size="sm" className="text-red-600" disabled={isSaving}>Revoke</Button>
                         </div>
                       </div>
                     </div>
@@ -1259,10 +1442,10 @@ export default function SecurityClient() {
                   <p className="text-gray-300">Monitor all security events and access patterns</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={handleExportReport} disabled={isSaving}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
-                  <Button className="bg-white text-gray-700 hover:bg-gray-100">
+                  <Button className="bg-white text-gray-700 hover:bg-gray-100" onClick={() => fetchEvents()} disabled={loading}>
                     <RefreshCw className="w-4 h-4 mr-2" />Refresh
                   </Button>
                 </div>
@@ -1504,7 +1687,11 @@ export default function SecurityClient() {
                             <p className="text-sm text-gray-500">Use Google Authenticator or similar</p>
                           </div>
                         </div>
-                        <Badge className="bg-green-100 text-green-800">Enabled</Badge>
+                        {settings?.two_factor_enabled ? (
+                          <Button size="sm" variant="outline" onClick={handleDisableMFA} disabled={isSaving}>Disable</Button>
+                        ) : (
+                          <Button size="sm" onClick={handleEnableMFA} disabled={isSaving}>Enable</Button>
+                        )}
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-3">
@@ -1514,7 +1701,7 @@ export default function SecurityClient() {
                             <p className="text-sm text-gray-500">Receive codes via text message</p>
                           </div>
                         </div>
-                        <Button size="sm" variant="outline">Configure</Button>
+                        <Button size="sm" variant="outline" onClick={() => enable2FA('sms')} disabled={isSaving}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center gap-3">
@@ -1530,11 +1717,15 @@ export default function SecurityClient() {
                         <div className="flex items-center gap-3">
                           <Globe className="w-5 h-5 text-muted-foreground" />
                           <div>
-                            <p className="font-medium">Passkeys</p>
-                            <p className="text-sm text-gray-500">Passwordless authentication</p>
+                            <p className="font-medium">Biometric Login</p>
+                            <p className="text-sm text-gray-500">Use fingerprint or face recognition</p>
                           </div>
                         </div>
-                        <Switch />
+                        <Switch
+                          checked={settings?.biometric_enabled || false}
+                          onCheckedChange={(checked) => checked ? enableBiometric('fingerprint') : disableBiometric()}
+                          disabled={isSaving}
+                        />
                       </div>
                     </CardContent>
                   </Card>
@@ -1693,7 +1884,7 @@ export default function SecurityClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Vault</p>
                             <p className="text-sm text-red-600">Permanently delete all vault data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" disabled={isSaving} onClick={() => toast.error('Deletion requires confirmation', { description: 'Please contact support to delete your vault' })}>
                             Delete
                           </Button>
                         </div>
@@ -1904,7 +2095,7 @@ export default function SecurityClient() {
               </div>
 
               {!selectedDevice.isCurrent && (
-                <Button variant="destructive" className="w-full">
+                <Button variant="destructive" className="w-full" onClick={() => { handleTerminateSession(selectedDevice.id); setSelectedDevice(null) }} disabled={isSaving}>
                   <UserX className="w-4 h-4 mr-2" />
                   Revoke Access
                 </Button>

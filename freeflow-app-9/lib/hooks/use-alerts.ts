@@ -238,12 +238,82 @@ export function useAlerts(initialAlerts: Alert[] = [], options: UseAlertsOptions
     setAlerts(prev => prev.filter(a => a.id !== alertId))
   }, [supabase])
 
+  const createAlert = useCallback(async (alertData: Partial<Omit<Alert, 'id' | 'user_id' | 'created_at' | 'updated_at'>>) => {
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) throw new Error('Not authenticated')
+
+    const newAlert = {
+      user_id: userData.user.id,
+      alert_code: alertData.alert_code || `ALT-${Date.now()}`,
+      title: alertData.title || 'New Alert',
+      description: alertData.description || null,
+      severity: alertData.severity || 'info',
+      category: alertData.category || 'other',
+      status: alertData.status || 'active',
+      priority: alertData.priority || 1,
+      source: alertData.source || 'manual',
+      source_id: alertData.source_id || null,
+      source_type: alertData.source_type || null,
+      affected_systems: alertData.affected_systems || [],
+      impact: alertData.impact || null,
+      assigned_to: alertData.assigned_to || null,
+      assigned_team: alertData.assigned_team || null,
+      escalation_level: alertData.escalation_level || 0,
+      triggered_at: alertData.triggered_at || new Date().toISOString(),
+      acknowledged_at: alertData.acknowledged_at || null,
+      resolved_at: alertData.resolved_at || null,
+      snoozed_until: alertData.snoozed_until || null,
+      occurrences: alertData.occurrences || 1,
+      response_time_minutes: alertData.response_time_minutes || 0,
+      resolution_time_minutes: alertData.resolution_time_minutes || 0,
+      notification_channels: alertData.notification_channels || [],
+      notifications_sent: alertData.notifications_sent || 0,
+      resolution: alertData.resolution || null,
+      root_cause: alertData.root_cause || null,
+      ip_address: alertData.ip_address || null,
+      user_agent: alertData.user_agent || null,
+      tags: alertData.tags || [],
+      metadata: alertData.metadata || {},
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    const { data, error } = await supabase
+      .from('alerts')
+      .insert(newAlert)
+      .select()
+      .single()
+
+    if (error) throw error
+    if (data) {
+      setAlerts(prev => [data as Alert, ...prev])
+    }
+    return data as Alert
+  }, [supabase])
+
+  const updateAlert = useCallback(async (alertId: string, updates: Partial<Alert>) => {
+    const { error } = await supabase
+      .from('alerts')
+      .update({
+        ...updates,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', alertId)
+
+    if (error) throw error
+    setAlerts(prev => prev.map(a =>
+      a.id === alertId ? { ...a, ...updates, updated_at: new Date().toISOString() } : a
+    ))
+  }, [supabase])
+
   return {
     alerts,
     stats,
     isLoading,
     error,
     fetchAlerts,
+    createAlert,
+    updateAlert,
     acknowledgeAlert,
     resolveAlert,
     escalateAlert,

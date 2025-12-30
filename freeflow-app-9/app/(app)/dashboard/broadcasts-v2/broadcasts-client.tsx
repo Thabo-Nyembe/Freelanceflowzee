@@ -1,6 +1,7 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useBroadcasts, type Broadcast, type BroadcastType, type BroadcastStatus } from '@/lib/hooks/use-broadcasts'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -115,7 +116,7 @@ interface Template {
   usageCount: number
 }
 
-interface Subscriber {
+interface _Subscriber {
   id: string
   email: string
   name: string
@@ -405,14 +406,296 @@ const mockEvents: EventTracking[] = [
 ]
 
 export default function BroadcastsClient({ initialBroadcasts }: { initialBroadcasts: Broadcast[] }) {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('campaigns')
   const [broadcastTypeFilter, setBroadcastTypeFilter] = useState<BroadcastType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<BroadcastStatus | 'all'>('all')
-  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null)
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [_selectedCampaign, _setSelectedCampaign] = useState<Campaign | null>(null)
+  const [_viewMode, _setViewMode] = useState<'grid' | 'list'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
-  const { broadcasts, loading, error } = useBroadcasts({ broadcastType: broadcastTypeFilter, status: statusFilter })
-  const displayBroadcasts = broadcasts.length > 0 ? broadcasts : initialBroadcasts
+  const { broadcasts, loading, error, refetch } = useBroadcasts({ broadcastType: broadcastTypeFilter, status: statusFilter })
+  const _displayBroadcasts = broadcasts.length > 0 ? broadcasts : initialBroadcasts
+
+  // Database broadcasts state
+  const [_dbBroadcasts, setDbBroadcasts] = useState<Broadcast[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editingBroadcast, setEditingBroadcast] = useState<Broadcast | null>(null)
+
+  // Form state
+  const [formData, setFormData] = useState({
+    title: '',
+    message: '',
+    broadcast_type: 'email' as BroadcastType,
+    status: 'draft' as BroadcastStatus,
+    subject: '',
+    recipient_type: 'all' as 'all' | 'segment' | 'custom',
+    scheduled_for: '',
+    sender_name: '',
+    sender_email: ''
+  })
+
+  // Fetch broadcasts from Supabase
+  const fetchBroadcasts = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('broadcasts')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbBroadcasts(data || [])
+    } catch (error) {
+      console.error('Error fetching broadcasts:', error)
+      toast.error('Failed to load broadcasts')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Create broadcast
+  const handleCreateBroadcast = async () => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create broadcasts')
+        return
+      }
+
+      const { error } = await supabase.from('broadcasts').insert({
+        user_id: user.id,
+        title: formData.title,
+        message: formData.message || null,
+        broadcast_type: formData.broadcast_type,
+        status: formData.status,
+        subject: formData.subject || null,
+        recipient_type: formData.recipient_type,
+        scheduled_for: formData.scheduled_for || null,
+        sender_name: formData.sender_name || null,
+        sender_email: formData.sender_email || null
+      })
+
+      if (error) throw error
+
+      toast.success('Broadcast created successfully')
+      setShowCreateDialog(false)
+      resetForm()
+      fetchBroadcasts()
+      refetch()
+    } catch (error) {
+      console.error('Error creating broadcast:', error)
+      toast.error('Failed to create broadcast')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update broadcast
+  const handleUpdateBroadcast = async () => {
+    if (!editingBroadcast) return
+    try {
+      setIsSaving(true)
+      const { error } = await supabase
+        .from('broadcasts')
+        .update({
+          title: formData.title,
+          message: formData.message || null,
+          broadcast_type: formData.broadcast_type,
+          status: formData.status,
+          subject: formData.subject || null,
+          recipient_type: formData.recipient_type,
+          scheduled_for: formData.scheduled_for || null,
+          sender_name: formData.sender_name || null,
+          sender_email: formData.sender_email || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingBroadcast.id)
+
+      if (error) throw error
+
+      toast.success('Broadcast updated successfully')
+      setShowEditDialog(false)
+      setEditingBroadcast(null)
+      resetForm()
+      fetchBroadcasts()
+      refetch()
+    } catch (error) {
+      console.error('Error updating broadcast:', error)
+      toast.error('Failed to update broadcast')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Delete broadcast
+  const handleDeleteBroadcast = async (broadcastId: string) => {
+    try {
+      const { error } = await supabase
+        .from('broadcasts')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', broadcastId)
+
+      if (error) throw error
+
+      toast.success('Broadcast deleted successfully')
+      fetchBroadcasts()
+      refetch()
+    } catch (error) {
+      console.error('Error deleting broadcast:', error)
+      toast.error('Failed to delete broadcast')
+    }
+  }
+
+  // Send broadcast
+  const handleSendBroadcast = async (broadcastId: string, broadcastTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('broadcasts')
+        .update({
+          status: 'sending',
+          sent_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', broadcastId)
+
+      if (error) throw error
+
+      toast.success('Sending broadcast', { description: `"${broadcastTitle}" is being sent...` })
+      fetchBroadcasts()
+      refetch()
+    } catch (error) {
+      console.error('Error sending broadcast:', error)
+      toast.error('Failed to send broadcast')
+    }
+  }
+
+  // Schedule broadcast
+  const handleScheduleBroadcast = async (broadcastId: string, broadcastTitle: string, scheduledFor: string) => {
+    try {
+      const { error } = await supabase
+        .from('broadcasts')
+        .update({
+          status: 'scheduled',
+          scheduled_for: scheduledFor,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', broadcastId)
+
+      if (error) throw error
+
+      toast.success('Broadcast scheduled', { description: `"${broadcastTitle}" has been scheduled` })
+      fetchBroadcasts()
+      refetch()
+    } catch (error) {
+      console.error('Error scheduling broadcast:', error)
+      toast.error('Failed to schedule broadcast')
+    }
+  }
+
+  // Pause broadcast
+  const handlePauseBroadcast = async (broadcastId: string, broadcastTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('broadcasts')
+        .update({
+          status: 'paused',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', broadcastId)
+
+      if (error) throw error
+
+      toast.info('Broadcast paused', { description: `"${broadcastTitle}" delivery paused` })
+      fetchBroadcasts()
+      refetch()
+    } catch (error) {
+      console.error('Error pausing broadcast:', error)
+      toast.error('Failed to pause broadcast')
+    }
+  }
+
+  // Duplicate broadcast
+  const handleDuplicateBroadcast = async (broadcast: Broadcast) => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to duplicate broadcasts')
+        return
+      }
+
+      const { error } = await supabase.from('broadcasts').insert({
+        user_id: user.id,
+        title: `Copy of ${broadcast.title}`,
+        message: broadcast.message,
+        broadcast_type: broadcast.broadcast_type,
+        status: 'draft',
+        subject: broadcast.subject,
+        recipient_type: broadcast.recipient_type,
+        sender_name: broadcast.sender_name,
+        sender_email: broadcast.sender_email
+      })
+
+      if (error) throw error
+
+      toast.success('Broadcast duplicated', { description: `Copy of "${broadcast.title}" created` })
+      fetchBroadcasts()
+      refetch()
+    } catch (error) {
+      console.error('Error duplicating broadcast:', error)
+      toast.error('Failed to duplicate broadcast')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      message: '',
+      broadcast_type: 'email',
+      status: 'draft',
+      subject: '',
+      recipient_type: 'all',
+      scheduled_for: '',
+      sender_name: '',
+      sender_email: ''
+    })
+  }
+
+  // Open edit dialog
+  const openEditDialog = (broadcast: Broadcast) => {
+    setEditingBroadcast(broadcast)
+    setFormData({
+      title: broadcast.title,
+      message: broadcast.message || '',
+      broadcast_type: broadcast.broadcast_type,
+      status: broadcast.status,
+      subject: broadcast.subject || '',
+      recipient_type: broadcast.recipient_type,
+      scheduled_for: broadcast.scheduled_for || '',
+      sender_name: broadcast.sender_name || '',
+      sender_email: broadcast.sender_email || ''
+    })
+    setShowEditDialog(true)
+  }
+
+  // Initial fetch
+  useEffect(() => {
+    fetchBroadcasts()
+  }, [fetchBroadcasts])
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -470,36 +753,6 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
     }
   }
 
-  // Handlers
-  const handleCreateBroadcast = () => {
-    toast.info('Create Broadcast', {
-      description: 'Opening broadcast composer...'
-    })
-  }
-
-  const handleSendBroadcast = (broadcastTitle: string) => {
-    toast.success('Sending broadcast', {
-      description: `"${broadcastTitle}" is being sent...`
-    })
-  }
-
-  const handleScheduleBroadcast = (broadcastTitle: string) => {
-    toast.success('Broadcast scheduled', {
-      description: `"${broadcastTitle}" has been scheduled`
-    })
-  }
-
-  const handlePauseBroadcast = (broadcastTitle: string) => {
-    toast.info('Broadcast paused', {
-      description: `"${broadcastTitle}" delivery paused`
-    })
-  }
-
-  const handleDuplicateBroadcast = (broadcastTitle: string) => {
-    toast.success('Broadcast duplicated', {
-      description: `Copy of "${broadcastTitle}" created`
-    })
-  }
 
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
 
@@ -520,7 +773,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               Import Contacts
             </button>
-            <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors flex items-center gap-2">
+            <button
+              onClick={() => setShowCreateDialog(true)}
+              className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors flex items-center gap-2"
+            >
               <span>+ New Campaign</span>
             </button>
           </div>
@@ -1920,12 +2176,212 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
           />
         </div>
 
-        {loading && (
+        {(loading || isLoading) && (
           <div className="text-center py-8">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-violet-600 border-r-transparent" />
           </div>
         )}
       </div>
+
+      {/* Create Broadcast Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Broadcast</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                placeholder="Broadcast title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select value={formData.broadcast_type} onValueChange={(v) => setFormData({ ...formData, broadcast_type: v as BroadcastType })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
+                    <SelectItem value="push">Push Notification</SelectItem>
+                    <SelectItem value="in-app">In-App</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Recipient Type</Label>
+                <Select value={formData.recipient_type} onValueChange={(v) => setFormData({ ...formData, recipient_type: v as 'all' | 'segment' | 'custom' })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="segment">Segment</SelectItem>
+                    <SelectItem value="custom">Custom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input
+                placeholder="Email subject line"
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <textarea
+                placeholder="Broadcast message content..."
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                className="w-full min-h-[100px] px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Sender Name</Label>
+                <Input
+                  placeholder="Your Company"
+                  value={formData.sender_name}
+                  onChange={(e) => setFormData({ ...formData, sender_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Sender Email</Label>
+                <Input
+                  type="email"
+                  placeholder="hello@company.com"
+                  value={formData.sender_email}
+                  onChange={(e) => setFormData({ ...formData, sender_email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Schedule For (optional)</Label>
+              <Input
+                type="datetime-local"
+                value={formData.scheduled_for}
+                onChange={(e) => setFormData({ ...formData, scheduled_for: e.target.value })}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => { setShowCreateDialog(false); resetForm(); }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateBroadcast}
+                disabled={isSaving || !formData.title}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                {isSaving ? 'Creating...' : 'Create Broadcast'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Broadcast Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Broadcast</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Title</Label>
+              <Input
+                placeholder="Broadcast title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Type</Label>
+                <Select value={formData.broadcast_type} onValueChange={(v) => setFormData({ ...formData, broadcast_type: v as BroadcastType })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="sms">SMS</SelectItem>
+                    <SelectItem value="push">Push Notification</SelectItem>
+                    <SelectItem value="in-app">In-App</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v as BroadcastStatus })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="scheduled">Scheduled</SelectItem>
+                    <SelectItem value="paused">Paused</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input
+                placeholder="Email subject line"
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <textarea
+                placeholder="Broadcast message content..."
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                className="w-full min-h-[100px] px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Sender Name</Label>
+                <Input
+                  placeholder="Your Company"
+                  value={formData.sender_name}
+                  onChange={(e) => setFormData({ ...formData, sender_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Sender Email</Label>
+                <Input
+                  type="email"
+                  placeholder="hello@company.com"
+                  value={formData.sender_email}
+                  onChange={(e) => setFormData({ ...formData, sender_email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button variant="outline" onClick={() => { setShowEditDialog(false); setEditingBroadcast(null); resetForm(); }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateBroadcast}
+                disabled={isSaving || !formData.title}
+                className="bg-violet-600 hover:bg-violet-700"
+              >
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

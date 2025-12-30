@@ -10,7 +10,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+// Import the Supabase events hook for real database operations
+import { useEvents, Event as SupabaseEvent, EventType as SupabaseEventType, EventStatus as SupabaseEventStatus, LocationType } from '@/lib/hooks/use-events'
 import {
   Calendar,
   MapPin,
@@ -546,6 +551,189 @@ export default function EventsClient() {
   const [typeFilter, setTypeFilter] = useState<EventType | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Supabase hook for real database operations
+  const {
+    events: supabaseEvents,
+    loading: eventsLoading,
+    error: eventsError,
+    mutating,
+    createEvent,
+    updateEvent,
+    deleteEvent,
+    refetch: refetchEvents
+  } = useEvents()
+
+  // Dialog states for CRUD operations
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [eventToEdit, setEventToEdit] = useState<SupabaseEvent | null>(null)
+  const [eventToDelete, setEventToDelete] = useState<SupabaseEvent | null>(null)
+
+  // Form state for create/edit
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    event_type: 'conference' as SupabaseEventType,
+    status: 'upcoming' as SupabaseEventStatus,
+    start_date: '',
+    end_date: '',
+    timezone: 'America/New_York',
+    location_type: 'in-person' as LocationType,
+    venue_name: '',
+    venue_address: '',
+    virtual_link: '',
+    max_attendees: 100,
+    is_public: true,
+    is_featured: false,
+    tags: [] as string[]
+  })
+
+  // Reset form data
+  const resetFormData = () => {
+    setFormData({
+      name: '',
+      description: '',
+      event_type: 'conference',
+      status: 'upcoming',
+      start_date: '',
+      end_date: '',
+      timezone: 'America/New_York',
+      location_type: 'in-person',
+      venue_name: '',
+      venue_address: '',
+      virtual_link: '',
+      max_attendees: 100,
+      is_public: true,
+      is_featured: false,
+      tags: []
+    })
+  }
+
+  // Handle create event - REAL Supabase operation
+  const handleCreateEventSubmit = async () => {
+    if (!formData.name || !formData.start_date || !formData.end_date) {
+      toast.error('Please fill in required fields (name, start date, end date)')
+      return
+    }
+    try {
+      await createEvent({
+        name: formData.name,
+        description: formData.description || null,
+        event_type: formData.event_type,
+        status: formData.status,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        timezone: formData.timezone,
+        location_type: formData.location_type,
+        venue_name: formData.venue_name || null,
+        venue_address: formData.venue_address || null,
+        virtual_link: formData.virtual_link || null,
+        max_attendees: formData.max_attendees || null,
+        is_public: formData.is_public,
+        is_featured: formData.is_featured,
+        tags: formData.tags.length > 0 ? formData.tags : null
+      })
+      toast.success('Event created successfully!')
+      setShowCreateDialog(false)
+      resetFormData()
+    } catch (error) {
+      console.error('Error creating event:', error)
+    }
+  }
+
+  // Handle edit event - REAL Supabase operation
+  const handleEditEventSubmit = async () => {
+    if (!eventToEdit) return
+    if (!formData.name || !formData.start_date || !formData.end_date) {
+      toast.error('Please fill in required fields (name, start date, end date)')
+      return
+    }
+    try {
+      await updateEvent(eventToEdit.id, {
+        name: formData.name,
+        description: formData.description || null,
+        event_type: formData.event_type,
+        status: formData.status,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
+        timezone: formData.timezone,
+        location_type: formData.location_type,
+        venue_name: formData.venue_name || null,
+        venue_address: formData.venue_address || null,
+        virtual_link: formData.virtual_link || null,
+        max_attendees: formData.max_attendees || null,
+        is_public: formData.is_public,
+        is_featured: formData.is_featured,
+        tags: formData.tags.length > 0 ? formData.tags : null
+      })
+      toast.success('Event updated successfully!')
+      setShowEditDialog(false)
+      setEventToEdit(null)
+      resetFormData()
+    } catch (error) {
+      console.error('Error updating event:', error)
+    }
+  }
+
+  // Handle cancel event - REAL Supabase operation
+  const handleCancelEvent = async (event: SupabaseEvent) => {
+    try {
+      await updateEvent(event.id, { status: 'cancelled' })
+      toast.success(`Event "${event.name}" has been cancelled`)
+    } catch (error) {
+      console.error('Error cancelling event:', error)
+    }
+  }
+
+  // Handle delete event - REAL Supabase operation
+  const handleDeleteEventConfirm = async () => {
+    if (!eventToDelete) return
+    try {
+      await deleteEvent(eventToDelete.id)
+      toast.success(`Event "${eventToDelete.name}" has been deleted`)
+      setShowDeleteConfirm(false)
+      setEventToDelete(null)
+    } catch (error) {
+      console.error('Error deleting event:', error)
+    }
+  }
+
+  // Open edit dialog with event data
+  const openEditDialog = (event: SupabaseEvent) => {
+    setEventToEdit(event)
+    setFormData({
+      name: event.name,
+      description: event.description || '',
+      event_type: event.event_type,
+      status: event.status,
+      start_date: event.start_date.split('T')[0],
+      end_date: event.end_date.split('T')[0],
+      timezone: event.timezone,
+      location_type: event.location_type || 'in-person',
+      venue_name: event.venue_name || '',
+      venue_address: event.venue_address || '',
+      virtual_link: event.virtual_link || '',
+      max_attendees: event.max_attendees || 100,
+      is_public: event.is_public,
+      is_featured: event.is_featured,
+      tags: event.tags || []
+    })
+    setShowEditDialog(true)
+  }
+
+  // Open delete confirmation
+  const openDeleteConfirm = (event: SupabaseEvent) => {
+    setEventToDelete(event)
+    setShowDeleteConfirm(true)
+  }
+
+  // Handle RSVP/attendee status update - Placeholder for future implementation
+  const handleRSVP = async (eventId: string, status: 'registered' | 'cancelled' | 'waitlisted') => {
+    toast.info(`RSVP functionality coming soon. Status: ${status}`)
+    // TODO: Implement attendee management when attendees table is available
+  }
+
   // Stats calculations
   const stats = useMemo(() => {
     const totalEvents = mockEvents.length
@@ -694,11 +882,18 @@ export default function EventsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExportAttendees}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-gradient-to-r from-orange-500 to-pink-500 text-white">
+              <Button
+                className="bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                onClick={() => {
+                  resetFormData()
+                  setShowCreateDialog(true)
+                }}
+                disabled={mutating}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Event
               </Button>
@@ -863,19 +1058,21 @@ export default function EventsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Create Event', color: 'from-orange-500 to-pink-600' },
-                  { icon: Ticket, label: 'Manage Tickets', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Users, label: 'Attendees', color: 'from-green-500 to-emerald-600' },
-                  { icon: QrCode, label: 'Check-in', color: 'from-purple-500 to-pink-600' },
-                  { icon: Mail, label: 'Send Invite', color: 'from-cyan-500 to-blue-600' },
-                  { icon: BarChart3, label: 'Analytics', color: 'from-yellow-500 to-orange-600' },
-                  { icon: Download, label: 'Export', color: 'from-indigo-500 to-purple-600' },
-                  { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600' },
+                  { icon: Plus, label: 'Create Event', color: 'from-orange-500 to-pink-600', action: () => { resetFormData(); setShowCreateDialog(true); } },
+                  { icon: Ticket, label: 'Manage Tickets', color: 'from-blue-500 to-indigo-600', action: () => setActiveTab('orders') },
+                  { icon: Users, label: 'Attendees', color: 'from-green-500 to-emerald-600', action: () => setActiveTab('attendees') },
+                  { icon: QrCode, label: 'Check-in', color: 'from-purple-500 to-pink-600', action: () => toast.info('Check-in feature coming soon') },
+                  { icon: Mail, label: 'Send Invite', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Invite feature coming soon') },
+                  { icon: BarChart3, label: 'Analytics', color: 'from-yellow-500 to-orange-600', action: () => setActiveTab('analytics') },
+                  { icon: Download, label: 'Export', color: 'from-indigo-500 to-purple-600', action: handleExportAttendees },
+                  { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', action: () => setActiveTab('settings') },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
+                    disabled={mutating}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1037,6 +1234,135 @@ export default function EventsClient() {
                   ))}
                 </div>
               )}
+
+              {/* Real Supabase Events Section */}
+              {eventsLoading ? (
+                <Card className="bg-white dark:bg-gray-800 p-8 text-center">
+                  <div className="flex items-center justify-center gap-2 text-gray-500">
+                    <RefreshCw className="w-5 h-5 animate-spin" />
+                    Loading events from database...
+                  </div>
+                </Card>
+              ) : eventsError ? (
+                <Card className="bg-red-50 dark:bg-red-900/20 border-red-200 p-4">
+                  <div className="text-red-600 dark:text-red-400">
+                    Error loading events: {eventsError.message}
+                  </div>
+                  <Button variant="outline" size="sm" className="mt-2" onClick={() => refetchEvents()}>
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Retry
+                  </Button>
+                </Card>
+              ) : supabaseEvents && supabaseEvents.length > 0 ? (
+                <div className="mt-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold flex items-center gap-2">
+                      <Database className="w-5 h-5 text-green-600" />
+                      Your Events (Database)
+                    </h3>
+                    <Badge className="bg-green-100 text-green-700">
+                      {supabaseEvents.length} events
+                    </Badge>
+                  </div>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {supabaseEvents.map((event) => (
+                      <Card key={event.id} className="bg-white dark:bg-gray-800 hover:shadow-lg transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
+                                <Calendar className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900 dark:text-white line-clamp-1">{event.name}</h4>
+                                <p className="text-xs text-gray-500">{event.event_type}</p>
+                              </div>
+                            </div>
+                            <Badge className={
+                              event.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
+                              event.status === 'ongoing' ? 'bg-green-100 text-green-700' :
+                              event.status === 'completed' ? 'bg-gray-100 text-gray-700' :
+                              event.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }>
+                              {event.status}
+                            </Badge>
+                          </div>
+
+                          {event.description && (
+                            <p className="text-sm text-gray-500 line-clamp-2 mb-3">{event.description}</p>
+                          )}
+
+                          <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <div className="flex items-center gap-2">
+                              <CalendarDays className="w-4 h-4" />
+                              <span>{formatDate(event.start_date)}</span>
+                            </div>
+                            {event.venue_name && (
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4" />
+                                <span className="truncate">{event.venue_name}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4" />
+                              <span>{event.current_attendees} / {event.max_attendees || 'Unlimited'}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-end gap-2 pt-3 border-t dark:border-gray-700">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(event)}
+                              disabled={mutating}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            {event.status !== 'cancelled' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-yellow-600"
+                                onClick={() => handleCancelEvent(event)}
+                                disabled={mutating}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600"
+                              onClick={() => openDeleteConfirm(event)}
+                              disabled={mutating}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Card className="bg-white dark:bg-gray-800 p-8 mt-8">
+                  <div className="text-center">
+                    <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center mx-auto mb-4">
+                      <Calendar className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No Events in Database</h3>
+                    <p className="text-gray-500 mb-4">Create your first event to get started with real Supabase data.</p>
+                    <Button
+                      className="bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+                      onClick={() => { resetFormData(); setShowCreateDialog(true); }}
+                    >
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Your First Event
+                    </Button>
+                  </div>
+                </Card>
+              )}
             </TabsContent>
 
             {/* Attendees Tab */}
@@ -1080,19 +1406,20 @@ export default function EventsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: UserPlus, label: 'Add Attendee', color: 'from-purple-500 to-violet-600' },
-                  { icon: QrCode, label: 'Check-in', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Mail, label: 'Email All', color: 'from-green-500 to-emerald-600' },
-                  { icon: Send, label: 'Send Reminder', color: 'from-orange-500 to-amber-600' },
-                  { icon: Download, label: 'Export List', color: 'from-cyan-500 to-blue-600' },
-                  { icon: Filter, label: 'Filter', color: 'from-pink-500 to-rose-600' },
-                  { icon: Search, label: 'Search', color: 'from-indigo-500 to-purple-600' },
-                  { icon: CreditCard, label: 'Refunds', color: 'from-gray-500 to-gray-600' },
+                  { icon: UserPlus, label: 'Add Attendee', color: 'from-purple-500 to-violet-600', action: () => toast.info('Add attendee feature coming soon') },
+                  { icon: QrCode, label: 'Check-in', color: 'from-blue-500 to-indigo-600', action: () => toast.info('Check-in scanner coming soon') },
+                  { icon: Mail, label: 'Email All', color: 'from-green-500 to-emerald-600', action: () => toast.info('Email feature coming soon') },
+                  { icon: Send, label: 'Send Reminder', color: 'from-orange-500 to-amber-600', action: () => toast.info('Reminder feature coming soon') },
+                  { icon: Download, label: 'Export List', color: 'from-cyan-500 to-blue-600', action: handleExportAttendees },
+                  { icon: Filter, label: 'Filter', color: 'from-pink-500 to-rose-600', action: () => toast.info('Filter feature coming soon') },
+                  { icon: Search, label: 'Search', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Use the search bar above') },
+                  { icon: CreditCard, label: 'Refunds', color: 'from-gray-500 to-gray-600', action: () => toast.info('Refunds feature coming soon') },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1103,16 +1430,16 @@ export default function EventsClient() {
               </div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter feature coming soon')}>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleExportAttendees}>
                     <Download className="w-4 h-4 mr-2" />
                     Export
                   </Button>
                 </div>
-                <Button className="bg-gradient-to-r from-orange-500 to-pink-500">
+                <Button className="bg-gradient-to-r from-orange-500 to-pink-500" onClick={() => toast.info('Add attendee feature coming soon')}>
                   <UserPlus className="w-4 h-4 mr-2" />
                   Add Attendee
                 </Button>
@@ -1281,19 +1608,20 @@ export default function EventsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: BarChart3, label: 'Full Report', color: 'from-emerald-500 to-teal-600' },
-                  { icon: Download, label: 'Export CSV', color: 'from-blue-500 to-indigo-600' },
-                  { icon: TrendingUp, label: 'Trends', color: 'from-purple-500 to-pink-600' },
-                  { icon: DollarSign, label: 'Revenue', color: 'from-green-500 to-emerald-600' },
-                  { icon: Ticket, label: 'Ticket Sales', color: 'from-orange-500 to-amber-600' },
-                  { icon: Users, label: 'Demographics', color: 'from-cyan-500 to-blue-600' },
-                  { icon: Globe, label: 'Geo Data', color: 'from-pink-500 to-rose-600' },
-                  { icon: Eye, label: 'Page Views', color: 'from-indigo-500 to-purple-600' },
+                  { icon: BarChart3, label: 'Full Report', color: 'from-emerald-500 to-teal-600', action: () => toast.info('Full report feature coming soon') },
+                  { icon: Download, label: 'Export CSV', color: 'from-blue-500 to-indigo-600', action: handleExportAttendees },
+                  { icon: TrendingUp, label: 'Trends', color: 'from-purple-500 to-pink-600', action: () => toast.info('Trends analysis coming soon') },
+                  { icon: DollarSign, label: 'Revenue', color: 'from-green-500 to-emerald-600', action: () => toast.info('Revenue report coming soon') },
+                  { icon: Ticket, label: 'Ticket Sales', color: 'from-orange-500 to-amber-600', action: () => setActiveTab('orders') },
+                  { icon: Users, label: 'Demographics', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Demographics coming soon') },
+                  { icon: Globe, label: 'Geo Data', color: 'from-pink-500 to-rose-600', action: () => toast.info('Geo data coming soon') },
+                  { icon: Eye, label: 'Page Views', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Page views coming soon') },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.action}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -1992,6 +2320,450 @@ export default function EventsClient() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Create Event Dialog - REAL Supabase */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white">
+                <Plus className="w-5 h-5" />
+              </div>
+              Create New Event
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="name">Event Name *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Enter event name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Describe your event"
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="event_type">Event Type</Label>
+                <Select
+                  value={formData.event_type}
+                  onValueChange={(value) => setFormData({ ...formData, event_type: value as SupabaseEventType })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="conference">Conference</SelectItem>
+                    <SelectItem value="workshop">Workshop</SelectItem>
+                    <SelectItem value="meetup">Meetup</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
+                    <SelectItem value="seminar">Seminar</SelectItem>
+                    <SelectItem value="networking">Networking</SelectItem>
+                    <SelectItem value="launch">Launch</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => setFormData({ ...formData, status: value as SupabaseEventStatus })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="ongoing">Ongoing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="postponed">Postponed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="start_date">Start Date *</Label>
+                <Input
+                  id="start_date"
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="end_date">End Date *</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="location_type">Location Type</Label>
+                <Select
+                  value={formData.location_type}
+                  onValueChange={(value) => setFormData({ ...formData, location_type: value as LocationType })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="in-person">In-Person</SelectItem>
+                    <SelectItem value="virtual">Virtual</SelectItem>
+                    <SelectItem value="hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="max_attendees">Max Attendees</Label>
+                <Input
+                  id="max_attendees"
+                  type="number"
+                  value={formData.max_attendees}
+                  onChange={(e) => setFormData({ ...formData, max_attendees: parseInt(e.target.value) || 0 })}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="venue_name">Venue Name</Label>
+              <Input
+                id="venue_name"
+                value={formData.venue_name}
+                onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
+                placeholder="Enter venue name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="venue_address">Venue Address</Label>
+              <Input
+                id="venue_address"
+                value={formData.venue_address}
+                onChange={(e) => setFormData({ ...formData, venue_address: e.target.value })}
+                placeholder="Enter venue address"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="virtual_link">Virtual Link</Label>
+              <Input
+                id="virtual_link"
+                value={formData.virtual_link}
+                onChange={(e) => setFormData({ ...formData, virtual_link: e.target.value })}
+                placeholder="https://zoom.us/..."
+                className="mt-1"
+              />
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.is_public}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
+                />
+                <Label>Public Event</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.is_featured}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
+                />
+                <Label>Featured</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+              onClick={handleCreateEventSubmit}
+              disabled={mutating}
+            >
+              {mutating ? 'Creating...' : 'Create Event'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Event Dialog - REAL Supabase */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white">
+                <Edit className="w-5 h-5" />
+              </div>
+              Edit Event
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="edit-name">Event Name *</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Enter event name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Describe your event"
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-event_type">Event Type</Label>
+                <Select
+                  value={formData.event_type}
+                  onValueChange={(value) => setFormData({ ...formData, event_type: value as SupabaseEventType })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="conference">Conference</SelectItem>
+                    <SelectItem value="workshop">Workshop</SelectItem>
+                    <SelectItem value="meetup">Meetup</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
+                    <SelectItem value="seminar">Seminar</SelectItem>
+                    <SelectItem value="networking">Networking</SelectItem>
+                    <SelectItem value="launch">Launch</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-status">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => setFormData({ ...formData, status: value as SupabaseEventStatus })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="ongoing">Ongoing</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="postponed">Postponed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-start_date">Start Date *</Label>
+                <Input
+                  id="edit-start_date"
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-end_date">End Date *</Label>
+                <Input
+                  id="edit-end_date"
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="edit-location_type">Location Type</Label>
+                <Select
+                  value={formData.location_type}
+                  onValueChange={(value) => setFormData({ ...formData, location_type: value as LocationType })}
+                >
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="in-person">In-Person</SelectItem>
+                    <SelectItem value="virtual">Virtual</SelectItem>
+                    <SelectItem value="hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="edit-max_attendees">Max Attendees</Label>
+                <Input
+                  id="edit-max_attendees"
+                  type="number"
+                  value={formData.max_attendees}
+                  onChange={(e) => setFormData({ ...formData, max_attendees: parseInt(e.target.value) || 0 })}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="edit-venue_name">Venue Name</Label>
+              <Input
+                id="edit-venue_name"
+                value={formData.venue_name}
+                onChange={(e) => setFormData({ ...formData, venue_name: e.target.value })}
+                placeholder="Enter venue name"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-venue_address">Venue Address</Label>
+              <Input
+                id="edit-venue_address"
+                value={formData.venue_address}
+                onChange={(e) => setFormData({ ...formData, venue_address: e.target.value })}
+                placeholder="Enter venue address"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-virtual_link">Virtual Link</Label>
+              <Input
+                id="edit-virtual_link"
+                value={formData.virtual_link}
+                onChange={(e) => setFormData({ ...formData, virtual_link: e.target.value })}
+                placeholder="https://zoom.us/..."
+                className="mt-1"
+              />
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.is_public}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_public: checked })}
+                />
+                <Label>Public Event</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={formData.is_featured}
+                  onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
+                />
+                <Label>Featured</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              className="text-red-600 border-red-300 hover:bg-red-50"
+              onClick={() => eventToEdit && handleCancelEvent(eventToEdit as any)}
+              disabled={mutating}
+            >
+              <XCircle className="w-4 h-4 mr-2" />
+              Cancel Event
+            </Button>
+            <div className="flex-1" />
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              Close
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white"
+              onClick={handleEditEventSubmit}
+              disabled={mutating}
+            >
+              {mutating ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog - REAL Supabase */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-red-600">
+              <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              Delete Event
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600 dark:text-gray-400">
+              Are you sure you want to delete <strong>"{eventToDelete?.name}"</strong>? This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteEventConfirm}
+              disabled={mutating}
+            >
+              {mutating ? 'Deleting...' : 'Delete Event'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Supabase Events Section - Real Data from Database */}
+      {supabaseEvents && supabaseEvents.length > 0 && (
+        <Dialog>
+          <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Supabase Events (Real Database)</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {supabaseEvents.map((event) => (
+                <Card key={event.id} className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">{event.name}</h3>
+                      <p className="text-sm text-gray-500">{event.event_type} - {event.status}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => openEditDialog(event)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" variant="outline" className="text-red-600" onClick={() => openDeleteConfirm(event)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -9,7 +10,9 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Users,
@@ -94,6 +97,64 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { CardDescription } from '@/components/ui/card'
+
+// ============================================================================
+// DATABASE TYPE DEFINITIONS
+// ============================================================================
+
+interface DbRegistration {
+  id: string
+  user_id: string
+  organization_id: string | null
+  event_id: string | null
+  webinar_id: string | null
+  registration_type: 'event' | 'webinar'
+  registrant_name: string
+  registrant_email: string
+  registrant_phone: string | null
+  company: string | null
+  job_title: string | null
+  status: 'pending' | 'confirmed' | 'attended' | 'no-show' | 'cancelled' | 'waitlist'
+  ticket_type: 'free' | 'paid' | 'vip' | 'speaker' | 'sponsor' | 'press' | null
+  ticket_price: number | null
+  payment_status: 'pending' | 'paid' | 'refunded' | 'cancelled' | null
+  checked_in_at: string | null
+  attendance_duration: number | null
+  confirmation_sent: boolean
+  reminder_sent: boolean
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+// Form State Interface
+interface RegistrationFormData {
+  registrant_name: string
+  registrant_email: string
+  registrant_phone: string
+  company: string
+  job_title: string
+  event_id: string
+  registration_type: 'event' | 'webinar'
+  ticket_type: 'free' | 'paid' | 'vip' | 'speaker' | 'sponsor' | 'press'
+  ticket_price: number
+  status: 'pending' | 'confirmed' | 'attended' | 'no-show' | 'cancelled' | 'waitlist'
+  payment_status: 'pending' | 'paid' | 'refunded' | 'cancelled'
+}
+
+const initialFormData: RegistrationFormData = {
+  registrant_name: '',
+  registrant_email: '',
+  registrant_phone: '',
+  company: '',
+  job_title: '',
+  event_id: '',
+  registration_type: 'event',
+  ticket_type: 'paid',
+  ticket_price: 0,
+  status: 'pending',
+  payment_status: 'pending'
+}
 
 // ============================================================================
 // TYPE DEFINITIONS - Salesforce Level Event Registration
@@ -707,10 +768,10 @@ const mockRegistrationsQuickActions = [
 // ============================================================================
 
 export default function RegistrationsClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('registrations')
-  const [registrations] = useState<Registration[]>(mockRegistrations)
-  const [events] = useState<Event[]>(mockEvents)
-  const [analytics] = useState<Analytics>(mockAnalytics)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<RegistrationStatus | 'all'>('all')
   const [eventFilter, setEventFilter] = useState<string>('all')
@@ -718,6 +779,316 @@ export default function RegistrationsClient() {
   const [showRegistrationDialog, setShowRegistrationDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // CRUD Dialog State
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  // Form State
+  const [formData, setFormData] = useState<RegistrationFormData>(initialFormData)
+
+  // Loading States
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Data State - Mix of DB and mock for fallback
+  const [dbRegistrations, setDbRegistrations] = useState<DbRegistration[]>([])
+  const [registrations] = useState<Registration[]>(mockRegistrations)
+  const [events] = useState<Event[]>(mockEvents)
+  const [analytics] = useState<Analytics>(mockAnalytics)
+  const [registrationToEdit, setRegistrationToEdit] = useState<DbRegistration | null>(null)
+  const [registrationToDelete, setRegistrationToDelete] = useState<DbRegistration | null>(null)
+
+  // Fetch registrations from Supabase
+  const fetchRegistrations = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('event_registrations')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbRegistrations(data || [])
+    } catch (error) {
+      console.error('Error fetching registrations:', error)
+      toast.error('Failed to load registrations')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchRegistrations()
+  }, [fetchRegistrations])
+
+  // Real-time subscription
+  useEffect(() => {
+    const channel = supabase
+      .channel('registrations_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_registrations' }, (payload) => {
+        if (payload.eventType === 'INSERT') {
+          setDbRegistrations(prev => [payload.new as DbRegistration, ...prev])
+        } else if (payload.eventType === 'UPDATE') {
+          setDbRegistrations(prev => prev.map(r => r.id === payload.new.id ? payload.new as DbRegistration : r))
+        } else if (payload.eventType === 'DELETE') {
+          setDbRegistrations(prev => prev.filter(r => r.id !== payload.old.id))
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase])
+
+  // Create registration
+  const handleCreateRegistration = async () => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to create a registration')
+        return
+      }
+
+      const regData = {
+        user_id: user.id,
+        registrant_name: formData.registrant_name,
+        registrant_email: formData.registrant_email,
+        registrant_phone: formData.registrant_phone || null,
+        company: formData.company || null,
+        job_title: formData.job_title || null,
+        event_id: formData.event_id || null,
+        registration_type: formData.registration_type,
+        ticket_type: formData.ticket_type,
+        ticket_price: formData.ticket_price,
+        status: formData.status,
+        payment_status: formData.payment_status,
+        confirmation_sent: false,
+        reminder_sent: false
+      }
+
+      const { error } = await supabase
+        .from('event_registrations')
+        .insert(regData)
+
+      if (error) throw error
+
+      toast.success('Registration created successfully', {
+        description: `${formData.registrant_name} has been registered`
+      })
+      setShowCreateDialog(false)
+      setFormData(initialFormData)
+      fetchRegistrations()
+    } catch (error: any) {
+      console.error('Error creating registration:', error)
+      toast.error('Failed to create registration', {
+        description: error.message
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update registration
+  const handleUpdateRegistration = async () => {
+    if (!registrationToEdit) return
+
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to update a registration')
+        return
+      }
+
+      const { error } = await supabase
+        .from('event_registrations')
+        .update({
+          registrant_name: formData.registrant_name,
+          registrant_email: formData.registrant_email,
+          registrant_phone: formData.registrant_phone || null,
+          company: formData.company || null,
+          job_title: formData.job_title || null,
+          ticket_type: formData.ticket_type,
+          ticket_price: formData.ticket_price,
+          status: formData.status,
+          payment_status: formData.payment_status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', registrationToEdit.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Registration updated successfully', {
+        description: `${formData.registrant_name}'s registration has been updated`
+      })
+      setShowEditDialog(false)
+      setRegistrationToEdit(null)
+      setFormData(initialFormData)
+      fetchRegistrations()
+    } catch (error: any) {
+      console.error('Error updating registration:', error)
+      toast.error('Failed to update registration', {
+        description: error.message
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Delete registration (soft delete)
+  const handleDeleteRegistration = async () => {
+    if (!registrationToDelete) return
+
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('You must be logged in to delete a registration')
+        return
+      }
+
+      const { error } = await supabase
+        .from('event_registrations')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', registrationToDelete.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Registration deleted', {
+        description: `${registrationToDelete.registrant_name}'s registration has been removed`
+      })
+      setShowDeleteDialog(false)
+      setRegistrationToDelete(null)
+      fetchRegistrations()
+    } catch (error: any) {
+      console.error('Error deleting registration:', error)
+      toast.error('Failed to delete registration', {
+        description: error.message
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Check in attendee
+  const handleCheckIn = async (registration: DbRegistration) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase
+        .from('event_registrations')
+        .update({
+          status: 'attended',
+          checked_in_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', registration.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Check-in complete', {
+        description: `${registration.registrant_name} has been checked in`
+      })
+      fetchRegistrations()
+    } catch (error: any) {
+      console.error('Error checking in:', error)
+      toast.error('Check-in failed', { description: error.message })
+    }
+  }
+
+  // Confirm registration
+  const handleConfirm = async (registration: DbRegistration) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase
+        .from('event_registrations')
+        .update({
+          status: 'confirmed',
+          confirmation_sent: true,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', registration.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.success('Registration confirmed', {
+        description: `${registration.registrant_name} has been confirmed`
+      })
+      fetchRegistrations()
+    } catch (error: any) {
+      console.error('Error confirming:', error)
+      toast.error('Confirmation failed', { description: error.message })
+    }
+  }
+
+  // Cancel registration
+  const handleCancel = async (registration: DbRegistration) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { error } = await supabase
+        .from('event_registrations')
+        .update({
+          status: 'cancelled',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', registration.id)
+        .eq('user_id', user.id)
+
+      if (error) throw error
+
+      toast.info('Registration cancelled', {
+        description: `${registration.registrant_name}'s registration has been cancelled`
+      })
+      fetchRegistrations()
+    } catch (error: any) {
+      console.error('Error cancelling:', error)
+      toast.error('Cancellation failed', { description: error.message })
+    }
+  }
+
+  // Open edit dialog
+  const openEditDialog = (registration: DbRegistration) => {
+    setRegistrationToEdit(registration)
+    setFormData({
+      registrant_name: registration.registrant_name,
+      registrant_email: registration.registrant_email,
+      registrant_phone: registration.registrant_phone || '',
+      company: registration.company || '',
+      job_title: registration.job_title || '',
+      event_id: registration.event_id || '',
+      registration_type: registration.registration_type,
+      ticket_type: (registration.ticket_type as any) || 'paid',
+      ticket_price: registration.ticket_price || 0,
+      status: registration.status,
+      payment_status: (registration.payment_status as any) || 'pending'
+    })
+    setShowEditDialog(true)
+  }
+
+  // Open delete dialog
+  const openDeleteDialog = (registration: DbRegistration) => {
+    setRegistrationToDelete(registration)
+    setShowDeleteDialog(true)
+  }
 
   // Filtered registrations
   const filteredRegistrations = useMemo(() => {
@@ -753,35 +1124,42 @@ export default function RegistrationsClient() {
     setShowRegistrationDialog(true)
   }
 
-  // Handlers
-  const handleConfirmRegistration = (attendeeName: string) => {
-    toast.success('Registration confirmed', {
-      description: `${attendeeName} has been confirmed`
-    })
-  }
+  // Export handler
+  const handleExportRegistrations = async () => {
+    try {
+      const csvData = dbRegistrations.map(reg => ({
+        Name: reg.registrant_name,
+        Email: reg.registrant_email,
+        Phone: reg.registrant_phone || '',
+        Company: reg.company || '',
+        JobTitle: reg.job_title || '',
+        Status: reg.status,
+        TicketType: reg.ticket_type || '',
+        TicketPrice: reg.ticket_price || 0,
+        PaymentStatus: reg.payment_status || '',
+        CheckedInAt: reg.checked_in_at || '',
+        CreatedAt: reg.created_at
+      }))
 
-  const handleCheckInAttendee = (attendeeName: string) => {
-    toast.success('Check-in complete', {
-      description: `${attendeeName} has been checked in`
-    })
-  }
+      const csvContent = [
+        Object.keys(csvData[0] || {}).join(','),
+        ...csvData.map(row => Object.values(row).join(','))
+      ].join('\n')
 
-  const handleSendReminder = (attendeeName: string) => {
-    toast.success('Reminder sent', {
-      description: `Reminder sent to ${attendeeName}`
-    })
-  }
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `registrations-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      window.URL.revokeObjectURL(url)
 
-  const handleExportRegistrations = () => {
-    toast.success('Exporting registrations', {
-      description: 'Attendee list will be downloaded'
-    })
-  }
-
-  const handleCancelRegistration = (attendeeName: string) => {
-    toast.info('Registration cancelled', {
-      description: `${attendeeName}'s registration has been cancelled`
-    })
+      toast.success('Export complete', {
+        description: 'Registrations exported to CSV'
+      })
+    } catch (error) {
+      toast.error('Export failed')
+    }
   }
 
   return (
@@ -800,11 +1178,21 @@ export default function RegistrationsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10"
+                onClick={handleExportRegistrations}
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </Button>
-              <Button className="bg-white text-purple-600 hover:bg-purple-50">
+              <Button
+                className="bg-white text-purple-600 hover:bg-purple-50"
+                onClick={() => {
+                  setFormData(initialFormData)
+                  setShowCreateDialog(true)
+                }}
+              >
                 <UserPlus className="w-4 h-4 mr-2" />
                 Add Registration
               </Button>
@@ -1022,8 +1410,117 @@ export default function RegistrationsClient() {
               </CardContent>
             </Card>
 
-            {/* Registrations List */}
+            {/* Database Registrations List */}
+            {dbRegistrations.length > 0 && (
+              <Card className="dark:bg-gray-800/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="w-5 h-5" />
+                    Your Registrations ({dbRegistrations.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="divide-y dark:divide-gray-700">
+                    {dbRegistrations.map((reg) => (
+                      <div key={reg.id} className="p-4 hover:bg-muted/50">
+                        <div className="flex items-center gap-4">
+                          <Avatar className="w-12 h-12">
+                            <AvatarFallback className="bg-purple-100 text-purple-700">
+                              {reg.registrant_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-1">
+                              <span className="font-semibold">{reg.registrant_name}</span>
+                              <Badge className={
+                                reg.status === 'confirmed' ? 'bg-green-100 text-green-700' :
+                                reg.status === 'attended' ? 'bg-blue-100 text-blue-700' :
+                                reg.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                reg.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                                'bg-gray-100 text-gray-700'
+                              }>
+                                {reg.status}
+                              </Badge>
+                              {reg.ticket_type && (
+                                <Badge variant="outline">{reg.ticket_type}</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Mail className="w-4 h-4" />
+                                {reg.registrant_email}
+                              </span>
+                              {reg.company && (
+                                <span className="flex items-center gap-1">
+                                  <Building2 className="w-4 h-4" />
+                                  {reg.company}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold">{formatCurrency(reg.ticket_price || 0)}</p>
+                            {reg.payment_status && (
+                              <Badge className={
+                                reg.payment_status === 'paid' ? 'bg-green-100 text-green-700' :
+                                reg.payment_status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-gray-100 text-gray-700'
+                              }>
+                                {reg.payment_status}
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {reg.status === 'pending' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleConfirm(reg)}
+                                title="Confirm"
+                              >
+                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                              </Button>
+                            )}
+                            {reg.status === 'confirmed' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleCheckIn(reg)}
+                                title="Check In"
+                              >
+                                <UserCheck className="w-4 h-4 text-blue-600" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(reg)}
+                              title="Edit"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openDeleteDialog(reg)}
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-600" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Mock Registrations List (Demo Data) */}
             <Card className="dark:bg-gray-800/50">
+              <CardHeader>
+                <CardTitle className="text-muted-foreground text-sm">Demo Registrations</CardTitle>
+              </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y dark:divide-gray-700">
                   {filteredRegistrations.map((registration) => (
@@ -1928,6 +2425,247 @@ export default function RegistrationsClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Registration Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add New Registration</DialogTitle>
+            <DialogDescription>Register a new attendee for an event</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Full Name *</Label>
+                <Input
+                  placeholder="John Doe"
+                  value={formData.registrant_name}
+                  onChange={(e) => setFormData({ ...formData, registrant_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  placeholder="john@example.com"
+                  value={formData.registrant_email}
+                  onChange={(e) => setFormData({ ...formData, registrant_email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input
+                  placeholder="+1 (555) 000-0000"
+                  value={formData.registrant_phone}
+                  onChange={(e) => setFormData({ ...formData, registrant_phone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Company</Label>
+                <Input
+                  placeholder="Company Inc"
+                  value={formData.company}
+                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Job Title</Label>
+              <Input
+                placeholder="Software Engineer"
+                value={formData.job_title}
+                onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Ticket Type</Label>
+                <Select
+                  value={formData.ticket_type}
+                  onValueChange={(value: any) => setFormData({ ...formData, ticket_type: value })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="vip">VIP</SelectItem>
+                    <SelectItem value="speaker">Speaker</SelectItem>
+                    <SelectItem value="sponsor">Sponsor</SelectItem>
+                    <SelectItem value="press">Press</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Ticket Price</Label>
+                <Input
+                  type="number"
+                  placeholder="0.00"
+                  value={formData.ticket_price}
+                  onChange={(e) => setFormData({ ...formData, ticket_price: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value: any) => setFormData({ ...formData, status: value })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="waitlist">Waitlist</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Payment Status</Label>
+                <Select
+                  value={formData.payment_status}
+                  onValueChange={(value: any) => setFormData({ ...formData, payment_status: value })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleCreateRegistration}
+              disabled={isSaving || !formData.registrant_name || !formData.registrant_email}
+            >
+              {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Registration'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Registration Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Registration</DialogTitle>
+            <DialogDescription>Update attendee registration details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Full Name *</Label>
+                <Input
+                  value={formData.registrant_name}
+                  onChange={(e) => setFormData({ ...formData, registrant_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  value={formData.registrant_email}
+                  onChange={(e) => setFormData({ ...formData, registrant_email: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input
+                  value={formData.registrant_phone}
+                  onChange={(e) => setFormData({ ...formData, registrant_phone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Company</Label>
+                <Input
+                  value={formData.company}
+                  onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Job Title</Label>
+              <Input
+                value={formData.job_title}
+                onChange={(e) => setFormData({ ...formData, job_title: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value: any) => setFormData({ ...formData, status: value })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="confirmed">Confirmed</SelectItem>
+                    <SelectItem value="attended">Attended</SelectItem>
+                    <SelectItem value="no-show">No Show</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                    <SelectItem value="waitlist">Waitlist</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Payment Status</Label>
+                <Select
+                  value={formData.payment_status}
+                  onValueChange={(value: any) => setFormData({ ...formData, payment_status: value })}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="refunded">Refunded</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleUpdateRegistration}
+              disabled={isSaving || !formData.registrant_name || !formData.registrant_email}
+            >
+              {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save Changes'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Registration</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {registrationToDelete?.registrant_name}'s registration? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>Cancel</Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteRegistration}
+              disabled={isSaving}
+            >
+              {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deleting...</> : 'Delete'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

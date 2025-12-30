@@ -4,9 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Switch } from '@/components/ui/switch'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -14,15 +12,15 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Wallet, PiggyBank, TrendingUp, TrendingDown, DollarSign, CreditCard, Target,
+  Wallet, PiggyBank, TrendingUp, DollarSign, CreditCard, Target,
   ArrowUpRight, ArrowDownRight, Plus, ChevronLeft, ChevronRight, Calendar,
-  BarChart3, PieChart, List, Grid3X3, Filter, Download, Settings, RefreshCw,
-  CheckCircle, AlertCircle, AlertTriangle, Minus, ArrowRight, Eye, EyeOff,
-  Sparkles, Banknote, Receipt, ShoppingCart, Home, Car, Utensils, Plane,
-  Heart, Zap, GraduationCap, Briefcase, Gift, Music, Film, Gamepad2,
-  Building2, Landmark, CreditCardIcon, Coins, TrendingDown as TrendingDownIcon,
-  Clock, Bell, MoreVertical, Repeat, ArrowLeftRight, Search, ExternalLink,
-  FileText, Lock, Unlock, ChevronDown, Trash2, Edit3, Copy, CheckCircle2,
+  BarChart3, PieChart, Download, Settings, RefreshCw,
+  CheckCircle, AlertCircle, AlertTriangle,
+  Sparkles, Receipt, ShoppingCart, Home, Car, Utensils, Plane,
+  Heart, Zap, GraduationCap, Briefcase, Gift, Music, Film,
+  Building2, Landmark, Coins,
+  Clock, Bell, Repeat, ArrowLeftRight, Search,
+  FileText, Trash2, Edit3, Copy,
   Folder, Cog, Upload, MoreHorizontal, Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -40,13 +38,8 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 // Import mock data from centralized adapters
-import {
-  budgetsAIInsights,
-  budgetsCollaborators,
-  budgetsPredictions,
-  budgetsActivities,
-  budgetsQuickActions
-} from '@/lib/mock-data/adapters'
+
+
 import { useBudgets, type Budget, type BudgetType, type BudgetStatus, type BudgetPeriodType } from '@/lib/hooks/use-budgets'
 import { useTransactions, type Transaction } from '@/lib/hooks/use-transactions'
 
@@ -257,11 +250,7 @@ const mockBudgetsActivities = [
   { id: '3', type: 'update' as const, title: 'Budget refresh for January 2024', user: { id: '3', name: 'System', avatar: '' }, timestamp: new Date(Date.now() - 7200000).toISOString() },
 ]
 
-const mockBudgetsQuickActions = [
-  { id: '1', label: 'New Budget', icon: 'plus', action: () => console.log('New budget'), variant: 'default' as const },
-  { id: '2', label: 'Transfer Funds', icon: 'arrow-right', action: () => console.log('Transfer'), variant: 'default' as const },
-  { id: '3', label: 'Reports', icon: 'chart', action: () => console.log('Reports'), variant: 'outline' as const },
-]
+// Note: Quick actions are generated dynamically inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -340,6 +329,8 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
   const [showScheduledModal, setShowScheduledModal] = useState(false)
   const [showReportsModal, setShowReportsModal] = useState(false)
   const [showNewGoalModal, setShowNewGoalModal] = useState(false)
+  const [showAllocateFundsModal, setShowAllocateFundsModal] = useState(false)
+  const [allocationAmount, setAllocationAmount] = useState(0)
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['needs', 'wants', 'savings', 'debt'])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTransaction, setSelectedTransaction] = useState<LocalTransaction | null>(null)
@@ -414,6 +405,53 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
       budgetsCount: displayBudgets.length
     }
   }, [displayBudgets, dbTransactions, txStats])
+
+  // Dynamic quick actions - wired to real functionality
+  const budgetsQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Budget',
+      icon: <Plus className="h-4 w-4" />,
+      action: () => setShowNewBudgetModal(true),
+      variant: 'default' as const,
+      description: 'Create a new budget'
+    },
+    {
+      id: '2',
+      label: 'Transfer Funds',
+      icon: <ArrowLeftRight className="h-4 w-4" />,
+      action: () => setShowTransferModal(true),
+      variant: 'default' as const,
+      description: 'Transfer between accounts'
+    },
+    {
+      id: '3',
+      label: 'Add Transaction',
+      icon: <Receipt className="h-4 w-4" />,
+      action: () => setShowNewTransactionModal(true),
+      variant: 'outline' as const,
+      description: 'Record a new transaction'
+    },
+    {
+      id: '4',
+      label: 'Reports',
+      icon: <BarChart3 className="h-4 w-4" />,
+      action: () => setShowReportsModal(true),
+      variant: 'outline' as const,
+      description: 'View budget reports'
+    },
+    {
+      id: '5',
+      label: 'Refresh Data',
+      icon: <RefreshCw className="h-4 w-4" />,
+      action: () => {
+        refetchBudgets()
+        toast.success('Data refreshed successfully')
+      },
+      variant: 'outline' as const,
+      description: 'Refresh budget data'
+    }
+  ], [refetchBudgets])
 
   // Handlers
   const handleCreateBudget = useCallback(async () => {
@@ -497,8 +535,78 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
       setSelectedBudget(null)
     } catch (err) {
       console.error('Failed to delete budget:', err)
+      toast.error('Failed to delete budget')
     }
   }, [deleteBudget])
+
+  // Handler for approving a budget
+  const handleApproveBudget = useCallback(async (budgetId: string) => {
+    try {
+      await updateBudget(budgetId, {
+        status: 'approved',
+        approved_at: new Date().toISOString()
+      })
+      toast.success('Budget approved successfully!')
+      // Update local state if viewing the budget
+      if (selectedBudget?.id === budgetId) {
+        setSelectedBudget(prev => prev ? { ...prev, status: 'approved', approved_at: new Date().toISOString() } : null)
+      }
+    } catch (err) {
+      console.error('Failed to approve budget:', err)
+      toast.error('Failed to approve budget')
+    }
+  }, [updateBudget, selectedBudget])
+
+  // Handler for allocating funds to a budget
+  const handleAllocateFunds = useCallback(async (budgetId: string, amount: number) => {
+    if (amount <= 0) {
+      toast.error('Allocation amount must be greater than 0')
+      return
+    }
+
+    try {
+      const budget = displayBudgets.find(b => b.id === budgetId)
+      if (!budget) {
+        toast.error('Budget not found')
+        return
+      }
+
+      const newAllocatedAmount = (budget.allocated_amount || 0) + amount
+      const newAvailableAmount = budget.total_amount - (budget.spent_amount || 0)
+
+      await updateBudget(budgetId, {
+        allocated_amount: newAllocatedAmount,
+        allocation_percent: budget.total_amount > 0 ? Math.round((newAllocatedAmount / budget.total_amount) * 100) : 0
+      })
+      toast.success(`Successfully allocated ${formatCurrency(amount)} to budget`)
+
+      // Update local state if viewing the budget
+      if (selectedBudget?.id === budgetId) {
+        setSelectedBudget(prev => prev ? {
+          ...prev,
+          allocated_amount: newAllocatedAmount,
+          allocation_percent: prev.total_amount > 0 ? Math.round((newAllocatedAmount / prev.total_amount) * 100) : 0
+        } : null)
+      }
+    } catch (err) {
+      console.error('Failed to allocate funds:', err)
+      toast.error('Failed to allocate funds')
+    }
+  }, [updateBudget, displayBudgets, selectedBudget])
+
+  // Handler for activating a budget (changing from draft to active)
+  const handleActivateBudget = useCallback(async (budgetId: string) => {
+    try {
+      await updateBudget(budgetId, { status: 'active' })
+      toast.success('Budget activated successfully!')
+      if (selectedBudget?.id === budgetId) {
+        setSelectedBudget(prev => prev ? { ...prev, status: 'active' } : null)
+      }
+    } catch (err) {
+      console.error('Failed to activate budget:', err)
+      toast.error('Failed to activate budget')
+    }
+  }, [updateBudget, selectedBudget])
 
   // Handler for transferring funds between accounts
   const handleTransferFunds = useCallback(async () => {
@@ -2166,7 +2274,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBudgetsQuickActions}
+            actions={budgetsQuickActions}
             variant="grid"
           />
         </div>
@@ -2543,7 +2651,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 )}
               </div>
             )}
-            <DialogFooter>
+            <DialogFooter className="flex-wrap gap-2">
               <Button
                 variant="destructive"
                 onClick={() => selectedBudget && handleDeleteBudget(selectedBudget.id)}
@@ -2551,8 +2659,106 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                 <Trash2 className="h-4 w-4 mr-2" />
                 Delete
               </Button>
+              {selectedBudget && selectedBudget.status === 'draft' && (
+                <Button
+                  variant="outline"
+                  onClick={() => handleActivateBudget(selectedBudget.id)}
+                  className="border-green-300 text-green-700 hover:bg-green-50"
+                >
+                  <Zap className="h-4 w-4 mr-2" />
+                  Activate
+                </Button>
+              )}
+              {selectedBudget && (selectedBudget.status === 'pending_approval' || selectedBudget.status === 'draft') && (
+                <Button
+                  onClick={() => handleApproveBudget(selectedBudget.id)}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Approve
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowAllocateFundsModal(true)
+                  setAllocationAmount(0)
+                }}
+                className="border-blue-300 text-blue-700 hover:bg-blue-50"
+              >
+                <DollarSign className="h-4 w-4 mr-2" />
+                Allocate Funds
+              </Button>
               <Button variant="outline" onClick={() => setSelectedBudget(null)}>
                 Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Allocate Funds Modal */}
+        <Dialog open={showAllocateFundsModal} onOpenChange={setShowAllocateFundsModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-blue-600" />
+                Allocate Funds
+              </DialogTitle>
+              <DialogDescription>
+                Allocate additional funds to {selectedBudget?.name || 'this budget'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {selectedBudget && (
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-500">Current Budget</span>
+                    <span className="font-semibold">{formatCurrency(selectedBudget.total_amount)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm mb-2">
+                    <span className="text-gray-500">Already Allocated</span>
+                    <span className="font-semibold">{formatCurrency(selectedBudget.allocated_amount)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Available to Allocate</span>
+                    <span className="font-semibold text-green-600">
+                      {formatCurrency(selectedBudget.total_amount - selectedBudget.allocated_amount)}
+                    </span>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="allocation-amount">Allocation Amount *</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    id="allocation-amount"
+                    type="number"
+                    placeholder="0.00"
+                    className="pl-10"
+                    value={allocationAmount || ''}
+                    onChange={(e) => setAllocationAmount(parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAllocateFundsModal(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  if (selectedBudget) {
+                    handleAllocateFunds(selectedBudget.id, allocationAmount)
+                    setShowAllocateFundsModal(false)
+                    setAllocationAmount(0)
+                  }
+                }}
+                disabled={allocationAmount <= 0}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <DollarSign className="h-4 w-4 mr-2" />
+                Allocate Funds
               </Button>
             </DialogFooter>
           </DialogContent>

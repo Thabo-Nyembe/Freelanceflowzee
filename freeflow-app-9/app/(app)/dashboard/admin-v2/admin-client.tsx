@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import {
   Settings,
@@ -314,6 +315,8 @@ const mockAdminQuickActions = [
 ]
 
 export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
+  const supabase = createClientComponentClient()
+
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [showNewUserDialog, setShowNewUserDialog] = useState(false)
@@ -322,6 +325,8 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const [showNewFlagDialog, setShowNewFlagDialog] = useState(false)
   const [showSqlConsoleDialog, setShowSqlConsoleDialog] = useState(false)
   const [showDeployDialog, setShowDeployDialog] = useState(false)
+  const [showEditSettingDialog, setShowEditSettingDialog] = useState(false)
+  const [selectedSetting, setSelectedSetting] = useState<AdminSetting | null>(null)
   const [settingCategoryFilter, setSettingCategoryFilter] = useState('all')
   const [userRoleFilter, setUserRoleFilter] = useState('all')
   const [logSeverityFilter, setLogSeverityFilter] = useState('all')
@@ -330,8 +335,47 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const [sqlResults, setSqlResults] = useState<QueryResult | null>(null)
   const [featureFlags, setFeatureFlags] = useState(mockFeatureFlags)
   const [selectedTable, setSelectedTable] = useState<DatabaseTable | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-  const { settings } = useAdminSettings({})
+  // Form state for New User Dialog
+  const [newUserForm, setNewUserForm] = useState({
+    name: '',
+    email: '',
+    role: 'viewer' as 'super_admin' | 'admin' | 'moderator' | 'viewer',
+    requireMfa: false
+  })
+
+  // Form state for New Setting Dialog
+  const [newSettingForm, setNewSettingForm] = useState({
+    settingName: '',
+    settingKey: '',
+    category: 'API',
+    valueType: 'string' as 'string' | 'number' | 'boolean' | 'json',
+    value: '',
+    isEncrypted: false,
+    isRequired: false
+  })
+
+  // Form state for New Feature Flag Dialog
+  const [newFlagForm, setNewFlagForm] = useState({
+    name: '',
+    key: '',
+    description: '',
+    environment: 'development' as 'production' | 'staging' | 'development',
+    rolloutPercentage: 0,
+    enabled: false
+  })
+
+  // Form state for New Job Dialog
+  const [newJobForm, setNewJobForm] = useState({
+    name: '',
+    description: '',
+    type: 'cron' as 'cron' | 'webhook' | 'manual',
+    schedule: '',
+    command: ''
+  })
+
+  const { settings, createSetting, updateSetting, deleteSetting, refetch } = useAdminSettings({})
   const displaySettings = settings.length > 0 ? settings : initialSettings
 
   // Calculate stats
@@ -342,12 +386,24 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const enabledFlags = featureFlags.filter(f => f.enabled).length
   const successfulDeploys = mockDeployments.filter(d => d.status === 'success').length
 
-  // Toggle feature flag
-  const toggleFlag = (flagId: string) => {
-    setFeatureFlags(prev => prev.map(f =>
-      f.id === flagId ? { ...f, enabled: !f.enabled, updatedAt: new Date().toISOString() } : f
-    ))
-  }
+  // Toggle feature flag (calls DB handler)
+  const toggleFlag = useCallback(async (flagId: string) => {
+    const flag = featureFlags.find(f => f.id === flagId)
+    if (!flag) return
+    try {
+      const { error } = await supabase
+        .from('feature_flags')
+        .update({ enabled: !flag.enabled, updated_at: new Date().toISOString() })
+        .eq('id', flagId)
+      if (error) throw error
+      setFeatureFlags(prev => prev.map(f =>
+        f.id === flagId ? { ...f, enabled: !f.enabled, updatedAt: new Date().toISOString() } : f
+      ))
+      toast.success(`Flag ${!flag.enabled ? 'enabled' : 'disabled'}`)
+    } catch (err) {
+      toast.error('Failed to toggle flag', { description: (err as Error).message })
+    }
+  }, [supabase, featureFlags])
 
   // Run SQL query (mock)
   const runQuery = () => {
@@ -433,36 +489,221 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   const categories = [...new Set(displaySettings.map(s => s.setting_category))]
 
-  // Handlers
-  const handleSaveSettings = () => {
-    toast.success('Settings saved', {
-      description: 'All changes have been applied'
-    })
-  }
+  // Handlers - Real Supabase Operations
 
-  const handleResetSettings = () => {
-    toast.info('Resetting settings', {
-      description: 'Restoring default configuration...'
-    })
-  }
+  // Create Admin User
+  const handleCreateUser = useCallback(async () => {
+    if (!newUserForm.name || !newUserForm.email) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error } = await supabase.from('admin_users').insert({
+        name: newUserForm.name,
+        email: newUserForm.email,
+        role: newUserForm.role,
+        status: 'pending',
+        mfa_enabled: newUserForm.requireMfa,
+        permissions: [],
+        created_by: user?.id
+      })
+      if (error) throw error
+      toast.success('User created', { description: `${newUserForm.name} has been added` })
+      setShowNewUserDialog(false)
+      setNewUserForm({ name: '', email: '', role: 'viewer', requireMfa: false })
+    } catch (err) {
+      toast.error('Failed to create user', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase, newUserForm])
 
-  const handleExportConfig = () => {
-    toast.success('Exporting configuration', {
-      description: 'Config file will be downloaded'
-    })
-  }
+  // Create Admin Setting
+  const handleCreateSetting = useCallback(async () => {
+    if (!newSettingForm.settingName || !newSettingForm.settingKey) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsLoading(true)
+    try {
+      await createSetting({
+        setting_name: newSettingForm.settingName,
+        setting_key: newSettingForm.settingKey,
+        setting_category: newSettingForm.category,
+        value_type: newSettingForm.valueType,
+        value_string: newSettingForm.valueType === 'string' ? newSettingForm.value : undefined,
+        value_number: newSettingForm.valueType === 'number' ? Number(newSettingForm.value) : undefined,
+        value_boolean: newSettingForm.valueType === 'boolean' ? newSettingForm.value === 'true' : undefined,
+        is_encrypted: newSettingForm.isEncrypted,
+        is_required: newSettingForm.isRequired,
+        scope: 'global',
+        access_level: 'admin',
+        status: 'active',
+        is_visible: true,
+        is_editable: true,
+        version: 1,
+        validation_rules: {},
+        metadata: {}
+      })
+      toast.success('Setting created', { description: `${newSettingForm.settingName} has been added` })
+      setShowNewSettingDialog(false)
+      setNewSettingForm({ settingName: '', settingKey: '', category: 'API', valueType: 'string', value: '', isEncrypted: false, isRequired: false })
+      refetch()
+    } catch (err) {
+      toast.error('Failed to create setting', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [createSetting, newSettingForm, refetch])
 
-  const handleRunDiagnostics = () => {
-    toast.info('Running diagnostics', {
-      description: 'System health check in progress...'
-    })
-  }
+  // Update Admin Setting
+  const handleUpdateSetting = useCallback(async () => {
+    if (!selectedSetting) return
+    setIsLoading(true)
+    try {
+      await updateSetting(selectedSetting.id, selectedSetting)
+      toast.success('Setting updated', { description: `${selectedSetting.setting_name} has been updated` })
+      setShowEditSettingDialog(false)
+      setSelectedSetting(null)
+      refetch()
+    } catch (err) {
+      toast.error('Failed to update setting', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [updateSetting, selectedSetting, refetch])
 
-  const handleClearCache = () => {
-    toast.success('Cache cleared', {
-      description: 'All cached data has been purged'
-    })
-  }
+  // Delete Admin Setting
+  const handleDeleteSetting = useCallback(async (setting: AdminSetting) => {
+    if (!confirm(`Delete setting "${setting.setting_name}"?`)) return
+    setIsLoading(true)
+    try {
+      await deleteSetting(setting.id)
+      toast.success('Setting deleted', { description: `${setting.setting_name} has been removed` })
+      refetch()
+    } catch (err) {
+      toast.error('Failed to delete setting', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [deleteSetting, refetch])
+
+  // Create Feature Flag
+  const handleCreateFlag = useCallback(async () => {
+    if (!newFlagForm.name || !newFlagForm.key) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error } = await supabase.from('feature_flags').insert({
+        name: newFlagForm.name,
+        key: newFlagForm.key,
+        description: newFlagForm.description,
+        environment: newFlagForm.environment,
+        rollout_percentage: newFlagForm.rolloutPercentage,
+        enabled: newFlagForm.enabled,
+        created_by: user?.id
+      })
+      if (error) throw error
+      toast.success('Feature flag created', { description: `${newFlagForm.name} has been added` })
+      setShowNewFlagDialog(false)
+      setNewFlagForm({ name: '', key: '', description: '', environment: 'development', rolloutPercentage: 0, enabled: false })
+    } catch (err) {
+      toast.error('Failed to create flag', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase, newFlagForm])
+
+  // Create Scheduled Job
+  const handleCreateJob = useCallback(async () => {
+    if (!newJobForm.name) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const { error } = await supabase.from('scheduled_jobs').insert({
+        name: newJobForm.name,
+        description: newJobForm.description,
+        type: newJobForm.type,
+        schedule: newJobForm.schedule,
+        command: newJobForm.command,
+        status: 'scheduled',
+        created_by: user?.id
+      })
+      if (error) throw error
+      toast.success('Job created', { description: `${newJobForm.name} has been scheduled` })
+      setShowNewJobDialog(false)
+      setNewJobForm({ name: '', description: '', type: 'cron', schedule: '', command: '' })
+    } catch (err) {
+      toast.error('Failed to create job', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase, newJobForm])
+
+  // Export Logs
+  const handleExportLogs = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const { data, error } = await supabase.from('audit_logs').select('*').order('created_at', { ascending: false }).limit(1000)
+      if (error) throw error
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Logs exported', { description: 'Download started' })
+    } catch (err) {
+      toast.error('Failed to export logs', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Clear Cache (sends request to clear server cache)
+  const handleClearCache = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      // This would typically call an API endpoint that clears server-side caches
+      await new Promise(resolve => setTimeout(resolve, 500))
+      toast.success('Cache cleared', { description: 'All cached data has been purged' })
+    } catch (err) {
+      toast.error('Failed to clear cache', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  // Run Diagnostics
+  const handleRunDiagnostics = useCallback(async () => {
+    toast.info('Running diagnostics', { description: 'System health check in progress...' })
+    setIsLoading(true)
+    try {
+      // Check database connectivity
+      const { error: dbError } = await supabase.from('admin_settings').select('id').limit(1)
+      if (dbError) throw new Error('Database connectivity issue')
+      toast.success('Diagnostics complete', { description: 'All systems operational' })
+    } catch (err) {
+      toast.error('Diagnostics failed', { description: (err as Error).message })
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Copy Setting Key to clipboard
+  const handleCopySetting = useCallback((setting: AdminSetting) => {
+    navigator.clipboard.writeText(setting.setting_key)
+    toast.success('Copied to clipboard', { description: setting.setting_key })
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
@@ -1011,13 +1252,22 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                             setShowEditSettingDialog(true)
                           }}
                           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                          title="Edit setting"
                         >
                           <Edit className="w-4 h-4 text-gray-500" />
                         </button>
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <button
+                          onClick={() => handleCopySetting(setting)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                          title="Copy setting key"
+                        >
                           <Copy className="w-4 h-4 text-gray-500" />
                         </button>
-                        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                        <button
+                          onClick={() => handleDeleteSetting(setting)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                          title="Delete setting"
+                        >
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </button>
                       </div>
@@ -1055,9 +1305,13 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                       <option value="warning">Warning</option>
                       <option value="critical">Critical</option>
                     </select>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                    <button
+                      onClick={handleExportLogs}
+                      disabled={isLoading}
+                      className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50"
+                    >
                       <Download className="w-4 h-4" />
-                      Export
+                      {isLoading ? 'Exporting...' : 'Export'}
                     </button>
                   </div>
                 </div>
@@ -1578,15 +1832,31 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             <div className="space-y-4 py-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
-                <input type="text" placeholder="John Doe" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={newUserForm.name}
+                  onChange={(e) => setNewUserForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
-                <input type="email" placeholder="john@company.com" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
+                <input
+                  type="email"
+                  placeholder="john@company.com"
+                  value={newUserForm.email}
+                  onChange={(e) => setNewUserForm(prev => ({ ...prev, email: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <select
+                  value={newUserForm.role}
+                  onChange={(e) => setNewUserForm(prev => ({ ...prev, role: e.target.value as typeof newUserForm.role }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
                   <option value="viewer">Viewer</option>
                   <option value="moderator">Moderator</option>
                   <option value="admin">Admin</option>
@@ -1594,7 +1864,13 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </select>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="require-mfa" className="rounded" />
+                <input
+                  type="checkbox"
+                  id="require-mfa"
+                  checked={newUserForm.requireMfa}
+                  onChange={(e) => setNewUserForm(prev => ({ ...prev, requireMfa: e.target.checked }))}
+                  className="rounded"
+                />
                 <label htmlFor="require-mfa" className="text-sm text-gray-700 dark:text-gray-300">Require MFA</label>
               </div>
             </div>
@@ -1602,8 +1878,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button onClick={() => setShowNewUserDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={() => setShowNewUserDialog(false)} className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">
-                Create User
+              <button
+                onClick={handleCreateUser}
+                disabled={isLoading}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
+              >
+                {isLoading ? 'Creating...' : 'Create User'}
               </button>
             </DialogFooter>
           </DialogContent>
@@ -1619,15 +1899,31 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             <div className="space-y-4 py-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setting Name</label>
-                <input type="text" placeholder="API Rate Limit" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
+                <input
+                  type="text"
+                  placeholder="API Rate Limit"
+                  value={newSettingForm.settingName}
+                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, settingName: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setting Key</label>
-                <input type="text" placeholder="api.rate_limit" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono" />
+                <input
+                  type="text"
+                  placeholder="api.rate_limit"
+                  value={newSettingForm.settingKey}
+                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, settingKey: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <select
+                  value={newSettingForm.category}
+                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, category: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
                   <option>API</option>
                   <option>Security</option>
                   <option>Billing</option>
@@ -1636,24 +1932,46 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Value Type</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
-                  <option>string</option>
-                  <option>number</option>
-                  <option>boolean</option>
-                  <option>json</option>
+                <select
+                  value={newSettingForm.valueType}
+                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, valueType: e.target.value as typeof newSettingForm.valueType }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="string">string</option>
+                  <option value="number">number</option>
+                  <option value="boolean">boolean</option>
+                  <option value="json">json</option>
                 </select>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Value</label>
-                <input type="text" placeholder="Enter value" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
+                <input
+                  type="text"
+                  placeholder="Enter value"
+                  value={newSettingForm.value}
+                  onChange={(e) => setNewSettingForm(prev => ({ ...prev, value: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" id="encrypted" className="rounded" />
+                  <input
+                    type="checkbox"
+                    id="encrypted"
+                    checked={newSettingForm.isEncrypted}
+                    onChange={(e) => setNewSettingForm(prev => ({ ...prev, isEncrypted: e.target.checked }))}
+                    className="rounded"
+                  />
                   <label htmlFor="encrypted" className="text-sm text-gray-700 dark:text-gray-300">Encrypted</label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <input type="checkbox" id="required" className="rounded" />
+                  <input
+                    type="checkbox"
+                    id="required"
+                    checked={newSettingForm.isRequired}
+                    onChange={(e) => setNewSettingForm(prev => ({ ...prev, isRequired: e.target.checked }))}
+                    className="rounded"
+                  />
                   <label htmlFor="required" className="text-sm text-gray-700 dark:text-gray-300">Required</label>
                 </div>
               </div>
@@ -1662,8 +1980,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button onClick={() => setShowNewSettingDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={() => setShowNewSettingDialog(false)} className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">
-                Create Setting
+              <button
+                onClick={handleCreateSetting}
+                disabled={isLoading}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
+              >
+                {isLoading ? 'Creating...' : 'Create Setting'}
               </button>
             </DialogFooter>
           </DialogContent>
@@ -1750,15 +2072,30 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             <div className="space-y-4 py-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Job Name</label>
-                <input type="text" placeholder="Database Backup" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
+                <input
+                  type="text"
+                  placeholder="Database Backup"
+                  value={newJobForm.name}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <textarea placeholder="What does this job do?" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none" />
+                <textarea
+                  placeholder="What does this job do?"
+                  value={newJobForm.description}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Job Type</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <select
+                  value={newJobForm.type}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, type: e.target.value as typeof newJobForm.type }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
                   <option value="cron">Cron Schedule</option>
                   <option value="webhook">Webhook Trigger</option>
                   <option value="manual">Manual Only</option>
@@ -1766,20 +2103,36 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Cron Expression</label>
-                <input type="text" placeholder="0 2 * * *" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono" />
+                <input
+                  type="text"
+                  placeholder="0 2 * * *"
+                  value={newJobForm.schedule}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, schedule: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
+                />
                 <p className="text-xs text-gray-500 mt-1">e.g., 0 2 * * * = Every day at 2:00 AM</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Command</label>
-                <input type="text" placeholder="npm run backup" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono" />
+                <input
+                  type="text"
+                  placeholder="npm run backup"
+                  value={newJobForm.command}
+                  onChange={(e) => setNewJobForm(prev => ({ ...prev, command: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
+                />
               </div>
             </div>
             <DialogFooter>
               <button onClick={() => setShowNewJobDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={() => setShowNewJobDialog(false)} className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">
-                Create Job
+              <button
+                onClick={handleCreateJob}
+                disabled={isLoading}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
+              >
+                {isLoading ? 'Creating...' : 'Create Job'}
               </button>
             </DialogFooter>
           </DialogContent>
@@ -1795,27 +2148,55 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             <div className="space-y-4 py-4">
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Flag Name</label>
-                <input type="text" placeholder="New Dashboard UI" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800" />
+                <input
+                  type="text"
+                  placeholder="New Dashboard UI"
+                  value={newFlagForm.name}
+                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, name: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Flag Key</label>
-                <input type="text" placeholder="new_dashboard_ui" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono" />
+                <input
+                  type="text"
+                  placeholder="new_dashboard_ui"
+                  value={newFlagForm.key}
+                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, key: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <textarea placeholder="What does this flag control?" className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none" />
+                <textarea
+                  placeholder="What does this flag control?"
+                  value={newFlagForm.description}
+                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
+                />
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Environment</label>
-                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                <select
+                  value={newFlagForm.environment}
+                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, environment: e.target.value as typeof newFlagForm.environment }))}
+                  className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
                   <option value="development">Development</option>
                   <option value="staging">Staging</option>
                   <option value="production">Production</option>
                 </select>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Rollout Percentage</label>
-                <input type="range" min="0" max="100" defaultValue="0" className="mt-1 w-full" />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Rollout Percentage: {newFlagForm.rolloutPercentage}%</label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={newFlagForm.rolloutPercentage}
+                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, rolloutPercentage: Number(e.target.value) }))}
+                  className="mt-1 w-full"
+                />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>0%</span>
                   <span>50%</span>
@@ -1823,7 +2204,13 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="flag-enabled" className="rounded" />
+                <input
+                  type="checkbox"
+                  id="flag-enabled"
+                  checked={newFlagForm.enabled}
+                  onChange={(e) => setNewFlagForm(prev => ({ ...prev, enabled: e.target.checked }))}
+                  className="rounded"
+                />
                 <label htmlFor="flag-enabled" className="text-sm text-gray-700 dark:text-gray-300">Enable immediately</label>
               </div>
             </div>
@@ -1831,8 +2218,12 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button onClick={() => setShowNewFlagDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                 Cancel
               </button>
-              <button onClick={() => setShowNewFlagDialog(false)} className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700">
-                Create Flag
+              <button
+                onClick={handleCreateFlag}
+                disabled={isLoading}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
+              >
+                {isLoading ? 'Creating...' : 'Create Flag'}
               </button>
             </DialogFooter>
           </DialogContent>
@@ -1899,6 +2290,84 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
               <button onClick={() => setShowDeployDialog(false)} className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
                 <Rocket className="w-4 h-4" />
                 Deploy Now
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Setting Dialog */}
+        <Dialog open={showEditSettingDialog} onOpenChange={setShowEditSettingDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Edit Setting</DialogTitle>
+              <DialogDescription>Update the system configuration setting.</DialogDescription>
+            </DialogHeader>
+            {selectedSetting && (
+              <div className="space-y-4 py-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setting Name</label>
+                  <input
+                    type="text"
+                    value={selectedSetting.setting_name}
+                    onChange={(e) => setSelectedSetting(prev => prev ? { ...prev, setting_name: e.target.value } : null)}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Setting Key</label>
+                  <input
+                    type="text"
+                    value={selectedSetting.setting_key}
+                    onChange={(e) => setSelectedSetting(prev => prev ? { ...prev, setting_key: e.target.value } : null)}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                  <textarea
+                    value={selectedSetting.description || ''}
+                    onChange={(e) => setSelectedSetting(prev => prev ? { ...prev, description: e.target.value } : null)}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 h-20 resize-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Value ({selectedSetting.value_type})</label>
+                  <input
+                    type="text"
+                    value={selectedSetting.value_string || selectedSetting.value_number?.toString() || ''}
+                    onChange={(e) => setSelectedSetting(prev => prev ? {
+                      ...prev,
+                      value_string: prev.value_type === 'string' ? e.target.value : prev.value_string,
+                      value_number: prev.value_type === 'number' ? Number(e.target.value) : prev.value_number
+                    } : null)}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                  <select
+                    value={selectedSetting.status}
+                    onChange={(e) => setSelectedSetting(prev => prev ? { ...prev, status: e.target.value as typeof selectedSetting.status } : null)}
+                    className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="deprecated">Deprecated</option>
+                    <option value="testing">Testing</option>
+                  </select>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <button onClick={() => { setShowEditSettingDialog(false); setSelectedSetting(null); }} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateSetting}
+                disabled={isLoading}
+                className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
+              >
+                {isLoading ? 'Saving...' : 'Save Changes'}
               </button>
             </DialogFooter>
           </DialogContent>

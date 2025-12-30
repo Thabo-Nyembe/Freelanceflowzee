@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,9 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
 import {
   HelpCircle, Search, BookOpen, FileText, MessageCircle, ThumbsUp, ThumbsDown,
   ChevronRight, ChevronDown, Plus, Eye, Clock, Star, TrendingUp, Users,
@@ -36,6 +38,54 @@ import {
   ActivityFeed,
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
+
+// Database Types
+interface DbHelpArticle {
+  id: string
+  user_id: string
+  article_code: string
+  title: string
+  slug: string | null
+  content: string | null
+  excerpt: string | null
+  category: string
+  status: string
+  published_at: string | null
+  views: number
+  helpful_count: number
+  not_helpful_count: number
+  read_time_minutes: number
+  meta_title: string | null
+  meta_description: string | null
+  keywords: string[]
+  featured_image: string | null
+  attachments: any[]
+  author_id: string | null
+  author_name: string | null
+  sort_order: number
+  parent_id: string | null
+  tags: string[]
+  metadata: Record<string, any>
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+interface DbHelpCategory {
+  id: string
+  user_id: string
+  name: string
+  slug: string | null
+  description: string | null
+  icon: string | null
+  color: string | null
+  sort_order: number
+  article_count: number
+  is_visible: boolean
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
 
 // Zendesk Help Center level types
 type ArticleStatus = 'published' | 'draft' | 'archived' | 'review' | 'scheduled'
@@ -376,6 +426,9 @@ const mockHelpDocsQuickActions = [
 ]
 
 export default function HelpDocsClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('home')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
@@ -388,6 +441,29 @@ export default function HelpDocsClient() {
   const [articleFilter, setArticleFilter] = useState<string>('all')
   const [ticketFilter, setTicketFilter] = useState<string>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Data State
+  const [dbArticles, setDbArticles] = useState<DbHelpArticle[]>([])
+  const [dbCategories, setDbCategories] = useState<DbHelpCategory[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Dialog State
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editingArticle, setEditingArticle] = useState<DbHelpArticle | null>(null)
+
+  // Form State
+  const [formData, setFormData] = useState({
+    title: '',
+    content: '',
+    excerpt: '',
+    category: 'guide',
+    status: 'draft',
+    tags: '',
+    meta_title: '',
+    meta_description: ''
+  })
 
   const toggleCategoryExpand = (categoryId: string) => {
     setExpandedCategories(prev =>
@@ -427,29 +503,230 @@ export default function HelpDocsClient() {
     })
   }, [ticketFilter])
 
-  // Handlers
-  const handleCreateArticle = () => {
-    toast.info('Create Article', {
-      description: 'Opening article editor...'
+  // Generate article code
+  const generateArticleCode = () => `ART-${Date.now().toString(36).toUpperCase()}`
+
+  // Fetch articles
+  const fetchArticles = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('help_articles')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbArticles(data || [])
+    } catch (error) {
+      console.error('Error fetching articles:', error)
+      toast.error('Failed to load articles')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Create article
+  const handleCreateArticle = async () => {
+    if (!formData.title.trim()) {
+      toast.error('Title is required')
+      return
+    }
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create articles')
+        return
+      }
+
+      const { error } = await supabase.from('help_articles').insert({
+        user_id: user.id,
+        article_code: generateArticleCode(),
+        title: formData.title,
+        content: formData.content || null,
+        excerpt: formData.excerpt || null,
+        category: formData.category,
+        status: formData.status,
+        tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+        meta_title: formData.meta_title || null,
+        meta_description: formData.meta_description || null,
+        author_name: user.email?.split('@')[0] || 'Author',
+        author_id: user.id,
+        published_at: formData.status === 'published' ? new Date().toISOString() : null
+      })
+
+      if (error) throw error
+
+      toast.success('Article created successfully')
+      setShowCreateDialog(false)
+      resetForm()
+      fetchArticles()
+    } catch (error) {
+      console.error('Error creating article:', error)
+      toast.error('Failed to create article')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update article
+  const handleUpdateArticle = async () => {
+    if (!editingArticle) return
+    try {
+      setIsSaving(true)
+      const { error } = await supabase
+        .from('help_articles')
+        .update({
+          title: formData.title,
+          content: formData.content || null,
+          excerpt: formData.excerpt || null,
+          category: formData.category,
+          status: formData.status,
+          tags: formData.tags ? formData.tags.split(',').map(t => t.trim()) : [],
+          meta_title: formData.meta_title || null,
+          meta_description: formData.meta_description || null,
+          updated_at: new Date().toISOString(),
+          published_at: formData.status === 'published' && !editingArticle.published_at ? new Date().toISOString() : editingArticle.published_at
+        })
+        .eq('id', editingArticle.id)
+
+      if (error) throw error
+
+      toast.success('Article updated successfully')
+      setShowEditDialog(false)
+      setEditingArticle(null)
+      resetForm()
+      fetchArticles()
+    } catch (error) {
+      console.error('Error updating article:', error)
+      toast.error('Failed to update article')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Delete article
+  const handleDeleteArticle = async (articleId: string) => {
+    try {
+      const { error } = await supabase
+        .from('help_articles')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', articleId)
+
+      if (error) throw error
+
+      toast.success('Article deleted successfully')
+      fetchArticles()
+    } catch (error) {
+      console.error('Error deleting article:', error)
+      toast.error('Failed to delete article')
+    }
+  }
+
+  // Update article status
+  const handleUpdateStatus = async (articleId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('help_articles')
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+          published_at: newStatus === 'published' ? new Date().toISOString() : null
+        })
+        .eq('id', articleId)
+
+      if (error) throw error
+
+      toast.success(`Article status updated to ${newStatus}`)
+      fetchArticles()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('Failed to update status')
+    }
+  }
+
+  // Submit article feedback
+  const handleSubmitFeedback = async (articleId: string, isHelpful: boolean) => {
+    try {
+      const article = dbArticles.find(a => a.id === articleId)
+      if (!article) return
+
+      const { error } = await supabase
+        .from('help_articles')
+        .update({
+          helpful_count: isHelpful ? article.helpful_count + 1 : article.helpful_count,
+          not_helpful_count: !isHelpful ? article.not_helpful_count + 1 : article.not_helpful_count
+        })
+        .eq('id', articleId)
+
+      if (error) throw error
+
+      toast.success('Thank you for your feedback!')
+      fetchArticles()
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+      toast.error('Failed to submit feedback')
+    }
+  }
+
+  // Increment article views
+  const handleIncrementViews = async (articleId: string) => {
+    try {
+      const article = dbArticles.find(a => a.id === articleId)
+      if (!article) return
+
+      await supabase
+        .from('help_articles')
+        .update({ views: article.views + 1 })
+        .eq('id', articleId)
+    } catch (error) {
+      console.error('Error incrementing views:', error)
+    }
+  }
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      content: '',
+      excerpt: '',
+      category: 'guide',
+      status: 'draft',
+      tags: '',
+      meta_title: '',
+      meta_description: ''
     })
   }
 
-  const handleSearchDocs = (query: string) => {
-    toast.info('Searching', {
-      description: `Searching for "${query}"...`
+  // Open edit dialog
+  const openEditDialog = (article: DbHelpArticle) => {
+    setEditingArticle(article)
+    setFormData({
+      title: article.title,
+      content: article.content || '',
+      excerpt: article.excerpt || '',
+      category: article.category,
+      status: article.status,
+      tags: article.tags?.join(', ') || '',
+      meta_title: article.meta_title || '',
+      meta_description: article.meta_description || ''
     })
+    setShowEditDialog(true)
   }
 
+  // Load data on mount
+  useEffect(() => {
+    fetchArticles()
+  }, [fetchArticles])
+
+  // Legacy handlers for UI compatibility
   const handleContactSupport = () => {
-    toast.info('Contact Support', {
-      description: 'Opening support chat...'
-    })
-  }
-
-  const handleSubmitFeedback = (articleId: string) => {
-    toast.success('Feedback submitted', {
-      description: 'Thank you for your feedback!'
-    })
+    setShowContactDialog(true)
   }
 
   const handleBookmarkArticle = (articleTitle: string) => {
@@ -897,14 +1174,14 @@ export default function HelpDocsClient() {
                   <Button variant="outline" className="border-white/30 text-white hover:bg-white/20">
                     <Upload className="w-4 h-4 mr-2" />Import
                   </Button>
-                  <Button className="bg-white text-emerald-600 hover:bg-emerald-50">
+                  <Button className="bg-white text-emerald-600 hover:bg-emerald-50" onClick={() => setShowCreateDialog(true)}>
                     <Plus className="w-4 h-4 mr-2" />New Article
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-4 mt-6">
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                  <div className="text-2xl font-bold">{mockArticles.length}</div>
+                  <div className="text-2xl font-bold">{dbArticles.length || mockArticles.length}</div>
                   <div className="text-sm text-emerald-100">Total</div>
                 </div>
                 <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
@@ -960,7 +1237,7 @@ export default function HelpDocsClient() {
                     <SelectItem value="scheduled">Scheduled</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button>
+                <Button onClick={() => setShowCreateDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />New Article
                 </Button>
               </div>
@@ -968,7 +1245,11 @@ export default function HelpDocsClient() {
 
             <Card>
               <ScrollArea className="h-[600px]">
-                {filteredArticles.map(article => (
+                {isLoading ? (
+                  <div className="flex items-center justify-center p-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                  </div>
+                ) : filteredArticles.map(article => (
                   <div
                     key={article.id}
                     className="p-4 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer"
@@ -2053,6 +2334,170 @@ export default function HelpDocsClient() {
               <Button><Send className="w-4 h-4" /></Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Article Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Article</DialogTitle>
+            <DialogDescription>Add a new article to your knowledge base</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Enter article title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="excerpt">Excerpt</Label>
+              <Textarea
+                id="excerpt"
+                value={formData.excerpt}
+                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                placeholder="Brief description of the article"
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="content">Content</Label>
+              <Textarea
+                id="content"
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                placeholder="Article content..."
+                rows={6}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="guide">Guide</SelectItem>
+                    <SelectItem value="tutorial">Tutorial</SelectItem>
+                    <SelectItem value="faq">FAQ</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Input
+                id="tags"
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                placeholder="e.g., getting-started, api, tutorial"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowCreateDialog(false); resetForm(); }}>Cancel</Button>
+            <Button onClick={handleCreateArticle} disabled={isSaving}>
+              {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Creating...</> : 'Create Article'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Article Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Article</DialogTitle>
+            <DialogDescription>Update article details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-title">Title *</Label>
+              <Input
+                id="edit-title"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="Enter article title"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-excerpt">Excerpt</Label>
+              <Textarea
+                id="edit-excerpt"
+                value={formData.excerpt}
+                onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+                placeholder="Brief description of the article"
+                rows={2}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-content">Content</Label>
+              <Textarea
+                id="edit-content"
+                value={formData.content}
+                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                placeholder="Article content..."
+                rows={6}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="guide">Guide</SelectItem>
+                    <SelectItem value="tutorial">Tutorial</SelectItem>
+                    <SelectItem value="faq">FAQ</SelectItem>
+                    <SelectItem value="video">Video</SelectItem>
+                    <SelectItem value="troubleshooting">Troubleshooting</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="published">Published</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-tags">Tags (comma-separated)</Label>
+              <Input
+                id="edit-tags"
+                value={formData.tags}
+                onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                placeholder="e.g., getting-started, api, tutorial"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => { setShowEditDialog(false); setEditingArticle(null); resetForm(); }}>Cancel</Button>
+            <Button onClick={handleUpdateArticle} disabled={isSaving}>
+              {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Save Changes'}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

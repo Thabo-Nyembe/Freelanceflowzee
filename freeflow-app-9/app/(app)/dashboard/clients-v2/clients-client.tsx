@@ -66,7 +66,13 @@ import {
   CalendarClock,
   Award,
   UserCheck,
-  Building
+  Building,
+  Link2,
+  Bell,
+  Download,
+  Upload,
+  RefreshCw,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -450,10 +456,14 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [clientToDelete, setClientToDelete] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Database integration - use real clients hook
-  const { clients: dbClients, fetchClients, createClient, updateClient, isLoading: clientsLoading } = useClients()
+  const { clients: dbClients, fetchClients, createClient, updateClient, deleteClient, archiveClient, isLoading: clientsLoading } = useClients()
 
   // Form state for new client
   const [newClientForm, setNewClientForm] = useState({
@@ -467,6 +477,18 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     status: 'prospect' as 'active' | 'inactive' | 'prospect' | 'archived'
   })
 
+  // Form state for editing client
+  const [editClientForm, setEditClientForm] = useState({
+    id: '',
+    company: '',
+    industry: 'Technology',
+    website: '',
+    contactName: '',
+    email: '',
+    phone: '',
+    status: 'active' as 'active' | 'inactive' | 'prospect' | 'archived'
+  })
+
   // Fetch clients on mount
   useEffect(() => {
     fetchClients()
@@ -478,6 +500,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       toast.error('Please fill in company name, contact name, and email')
       return
     }
+    setIsSubmitting(true)
     try {
       await createClient({
         name: newClientForm.contactName,
@@ -488,7 +511,6 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         industry: newClientForm.industry,
         status: newClientForm.status
       } as any)
-      toast.success('Client created successfully!')
       setShowAddDialog(false)
       setNewClientForm({
         company: '',
@@ -501,14 +523,165 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
         status: 'prospect'
       })
     } catch (error) {
-      toast.error('Failed to create client')
       console.error('Failed to create client:', error)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  // Filter clients
+  // Handle editing a client
+  const handleEditClient = async () => {
+    if (!editClientForm.id || !editClientForm.company || !editClientForm.contactName || !editClientForm.email) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await updateClient(editClientForm.id, {
+        name: editClientForm.contactName,
+        email: editClientForm.email,
+        phone: editClientForm.phone || null,
+        company: editClientForm.company,
+        website: editClientForm.website || null,
+        industry: editClientForm.industry,
+        status: editClientForm.status
+      } as any)
+      setShowEditDialog(false)
+      setSelectedClient(null)
+      setEditClientForm({
+        id: '',
+        company: '',
+        industry: 'Technology',
+        website: '',
+        contactName: '',
+        email: '',
+        phone: '',
+        status: 'active'
+      })
+    } catch (error) {
+      console.error('Failed to update client:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Open edit dialog with client data
+  const openEditDialog = (client: any) => {
+    // Handle both mock and database client format
+    const dbClient = dbClients.find(c => c.id === client.id)
+    if (dbClient) {
+      setEditClientForm({
+        id: dbClient.id,
+        company: dbClient.company || '',
+        industry: dbClient.industry || 'Technology',
+        website: dbClient.website || '',
+        contactName: dbClient.name || '',
+        email: dbClient.email || '',
+        phone: dbClient.phone || '',
+        status: dbClient.status || 'active'
+      })
+    } else {
+      // Mock client format
+      setEditClientForm({
+        id: client.id,
+        company: client.company || '',
+        industry: client.industry || 'Technology',
+        website: client.website || '',
+        contactName: client.primaryContact?.name || client.name || '',
+        email: client.primaryContact?.email || client.email || '',
+        phone: client.primaryContact?.phone || client.phone || '',
+        status: client.status === 'customer' ? 'active' : (client.status as any) || 'active'
+      })
+    }
+    setShowEditDialog(true)
+  }
+
+  // Handle deleting a client
+  const handleDeleteClient = async () => {
+    if (!clientToDelete) return
+    setIsSubmitting(true)
+    try {
+      await deleteClient(clientToDelete)
+      setShowDeleteConfirm(false)
+      setClientToDelete(null)
+      setSelectedClient(null)
+    } catch (error) {
+      console.error('Failed to delete client:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Handle archiving a client
+  const handleArchiveClient = async (clientId: string) => {
+    setIsSubmitting(true)
+    try {
+      await archiveClient(clientId)
+      setSelectedClient(null)
+    } catch (error) {
+      console.error('Failed to archive client:', error)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Confirm delete dialog
+  const confirmDeleteClient = (clientId: string) => {
+    setClientToDelete(clientId)
+    setShowDeleteConfirm(true)
+  }
+
+  // Filter clients - combine mock and database clients
   const filteredClients = useMemo(() => {
-    let result = [...mockClients]
+    // Transform database clients to display format
+    const dbClientsTransformed = dbClients.map(c => ({
+      id: c.id,
+      name: c.name,
+      company: c.company || c.name,
+      industry: c.industry || 'Other',
+      website: c.website,
+      status: c.status === 'active' ? 'customer' as ClientStatus : (c.status as ClientStatus) || 'prospect',
+      contacts: [{
+        id: c.id,
+        name: c.name,
+        email: c.email || '',
+        phone: c.phone || undefined,
+        title: 'Primary Contact',
+        isPrimary: true
+      }],
+      primaryContact: {
+        id: c.id,
+        name: c.name,
+        email: c.email || '',
+        phone: c.phone || undefined,
+        title: 'Primary Contact',
+        isPrimary: true
+      },
+      revenue: c.total_revenue || 0,
+      lifetime_value: c.total_revenue || 0,
+      projects: c.total_projects || 0,
+      health_score: c.rating ? c.rating * 20 : 50,
+      nps: c.rating,
+      createdAt: c.created_at,
+      lastActivity: c.last_contact_at || c.updated_at,
+      tags: c.tags || [],
+      address: {
+        city: c.city || '',
+        state: '',
+        country: c.country || ''
+      },
+      owner: 'You',
+      team: [],
+      source: 'Direct',
+      deals: [],
+      tier: (c.total_revenue || 0) >= 100000 ? 'platinum' as const :
+            (c.total_revenue || 0) >= 50000 ? 'gold' as const :
+            (c.total_revenue || 0) >= 10000 ? 'silver' as const : 'bronze' as const,
+      isFromDatabase: true
+    }))
+
+    // Combine database and mock clients, database clients first
+    let result = [...dbClientsTransformed, ...mockClients]
 
     if (searchQuery) {
       const query = searchQuery.toLowerCase()
@@ -525,22 +698,24 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
     }
 
     return result
-  }, [searchQuery, statusFilter])
+  }, [searchQuery, statusFilter, dbClients])
 
-  // Calculate stats
+  // Calculate stats including database clients
   const stats = useMemo(() => {
-    const customers = mockClients.filter(c => c.status === 'customer')
+    const allClients = [...filteredClients]
+    const customers = allClients.filter(c => c.status === 'customer')
+    const dbClientCount = dbClients.length
     return {
-      totalClients: mockClients.length,
+      totalClients: mockClients.length + dbClientCount,
       totalCustomers: customers.length,
-      totalRevenue: mockClients.reduce((sum, c) => sum + c.revenue, 0),
-      totalLTV: mockClients.reduce((sum, c) => sum + c.lifetime_value, 0),
-      avgHealthScore: customers.length > 0 ? customers.reduce((sum, c) => sum + c.health_score, 0) / customers.length : 0,
+      totalRevenue: allClients.reduce((sum, c) => sum + (c.revenue || 0), 0),
+      totalLTV: allClients.reduce((sum, c) => sum + (c.lifetime_value || 0), 0),
+      avgHealthScore: customers.length > 0 ? customers.reduce((sum, c) => sum + (c.health_score || 0), 0) / customers.length : 0,
       pipelineValue: mockClients.flatMap(c => c.deals).filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost').reduce((sum, d) => sum + (d.value * d.probability / 100), 0),
       openDeals: mockClients.flatMap(c => c.deals).filter(d => d.stage !== 'closed_won' && d.stage !== 'closed_lost').length,
       pendingTasks: mockTasks.filter(t => !t.completed).length
     }
-  }, [])
+  }, [filteredClients, dbClients])
 
   // Pipeline stages for kanban
   const pipelineStages: { stage: DealStage; label: string; color: string }[] = [
@@ -555,27 +730,72 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
 
   // Handlers
   const handleExportClients = () => {
-    toast.success('Export started', {
-      description: 'Client data is being exported'
+    // Export clients to CSV
+    const exportData = filteredClients.map(c => ({
+      Company: c.company,
+      Contact: c.primaryContact.name,
+      Email: c.primaryContact.email,
+      Phone: c.primaryContact.phone || '',
+      Industry: c.industry,
+      Status: c.status,
+      Revenue: c.revenue,
+      Projects: c.projects
+    }))
+    const csv = [
+      Object.keys(exportData[0] || {}).join(','),
+      ...exportData.map(row => Object.values(row).join(','))
+    ].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `clients-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Export completed', {
+      description: `Exported ${exportData.length} clients to CSV`
     })
   }
 
   const handleCreateDeal = (client: typeof mockClients[0]) => {
     toast.info('Create Deal', {
-      description: `Opening deal form for ${client.name}`
+      description: `Opening deal form for ${client.company}`
     })
+    // TODO: Integrate with deals module when available
   }
 
   const handleSendMessage = (client: typeof mockClients[0]) => {
-    toast.info('Send Message', {
-      description: `Opening message composer for ${client.name}`
-    })
+    // Open email client with pre-filled recipient
+    if (client.primaryContact.email) {
+      window.open(`mailto:${client.primaryContact.email}?subject=Hello from FreeFlow`)
+      toast.success('Opening email client', {
+        description: `Composing message to ${client.primaryContact.name}`
+      })
+    } else {
+      toast.error('No email available', {
+        description: 'This client does not have an email address'
+      })
+    }
   }
 
   const handleScheduleMeeting = (client: typeof mockClients[0]) => {
-    toast.success('Meeting scheduled', {
-      description: `Meeting with ${client.name} scheduled`
+    toast.success('Meeting scheduling', {
+      description: `Opening calendar for meeting with ${client.company}`
     })
+    // TODO: Integrate with calendar module when available
+  }
+
+  const handleCallClient = (client: typeof mockClients[0]) => {
+    if (client.primaryContact.phone) {
+      window.open(`tel:${client.primaryContact.phone}`)
+      toast.success('Initiating call', {
+        description: `Calling ${client.primaryContact.name}`
+      })
+    } else {
+      toast.error('No phone number available', {
+        description: 'This client does not have a phone number'
+      })
+    }
   }
 
   return (
@@ -593,7 +813,11 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleExportClients}>
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setActiveTab('settings')}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -1920,22 +2144,32 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 </div>
 
                 <div className="flex gap-2 mt-6">
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={() => handleSendMessage(selectedClient)}>
                     <Mail className="w-4 h-4 mr-2" />
                     Email
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleCallClient(selectedClient)}>
                     <Phone className="w-4 h-4 mr-2" />
                     Call
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleScheduleMeeting(selectedClient)}>
                     <Calendar className="w-4 h-4 mr-2" />
                     Meeting
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => openEditDialog(selectedClient)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
+                  {(selectedClient as any).isFromDatabase && (
+                    <Button
+                      variant="outline"
+                      className="text-red-600 hover:bg-red-50"
+                      onClick={() => confirmDeleteClient(selectedClient.id)}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </Button>
+                  )}
                 </div>
               </>
             )}
@@ -2045,12 +2279,166 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                 <Button
                   className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
                   onClick={handleCreateClient}
-                  disabled={clientsLoading || !newClientForm.company || !newClientForm.contactName || !newClientForm.email}
+                  disabled={isSubmitting || !newClientForm.company || !newClientForm.contactName || !newClientForm.email}
                 >
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  {clientsLoading ? 'Adding...' : 'Add Client'}
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <UserPlus className="w-4 h-4 mr-2" />
+                  )}
+                  {isSubmitting ? 'Adding...' : 'Add Client'}
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Client Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Client</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Company Name *</label>
+                <Input
+                  placeholder="Enter company name"
+                  className="mt-1"
+                  value={editClientForm.company}
+                  onChange={(e) => setEditClientForm(prev => ({ ...prev, company: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium">Industry</label>
+                  <select
+                    className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                    value={editClientForm.industry}
+                    onChange={(e) => setEditClientForm(prev => ({ ...prev, industry: e.target.value }))}
+                  >
+                    <option value="Technology">Technology</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Manufacturing">Manufacturing</option>
+                    <option value="Retail">Retail</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Status</label>
+                  <select
+                    className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                    value={editClientForm.status}
+                    onChange={(e) => setEditClientForm(prev => ({ ...prev, status: e.target.value as any }))}
+                  >
+                    <option value="active">Active</option>
+                    <option value="prospect">Prospect</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Website</label>
+                <Input
+                  placeholder="https://company.com"
+                  className="mt-1"
+                  value={editClientForm.website}
+                  onChange={(e) => setEditClientForm(prev => ({ ...prev, website: e.target.value }))}
+                />
+              </div>
+              <div className="border-t pt-4 mt-4">
+                <h4 className="font-medium mb-3">Contact Information</h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Contact Name *</label>
+                    <Input
+                      placeholder="Contact name"
+                      className="mt-1"
+                      value={editClientForm.contactName}
+                      onChange={(e) => setEditClientForm(prev => ({ ...prev, contactName: e.target.value }))}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">Email *</label>
+                      <Input
+                        type="email"
+                        placeholder="email@company.com"
+                        className="mt-1"
+                        value={editClientForm.email}
+                        onChange={(e) => setEditClientForm(prev => ({ ...prev, email: e.target.value }))}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">Phone</label>
+                      <Input
+                        placeholder="+1 555 000 0000"
+                        className="mt-1"
+                        value={editClientForm.phone}
+                        onChange={(e) => setEditClientForm(prev => ({ ...prev, phone: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowEditDialog(false)} className="flex-1">Cancel</Button>
+                <Button
+                  className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                  onClick={handleEditClient}
+                  disabled={isSubmitting || !editClientForm.company || !editClientForm.contactName || !editClientForm.email}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                  )}
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                Confirm Delete
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete this client? This action cannot be undone and will permanently remove all associated data.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowDeleteConfirm(false)
+                  setClientToDelete(null)
+                }}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteClient}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 mr-2" />
+                )}
+                {isSubmitting ? 'Deleting...' : 'Delete Client'}
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

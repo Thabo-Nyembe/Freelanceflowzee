@@ -2,8 +2,10 @@
 // Comprehensive customer feedback portal with voting, roadmap, and insights
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
+import { useAuth } from '@/lib/hooks/use-auth'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -468,11 +470,34 @@ const mockFeedbackQuickActions = [
   { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
 ]
 
+// Database Types
+interface DBFeedback {
+  id: string
+  user_id: string
+  title: string
+  description: string
+  feedback_type: string
+  status: string
+  priority: string
+  category: string | null
+  tags: string[]
+  upvotes_count: number
+  comments_count: number
+  views_count: number
+  is_public: boolean
+  created_at: string
+  updated_at: string
+}
+
 interface FeedbackClientProps {
   initialFeedback?: any[]
 }
 
 export default function FeedbackClient({ initialFeedback }: FeedbackClientProps) {
+  const supabase = createClientComponentClient()
+  const { user } = useAuth()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('ideas')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<IdeaStatus | 'all'>('all')
@@ -482,6 +507,166 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Data State
+  const [feedbackItems, setFeedbackItems] = useState<DBFeedback[]>([])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  // Form State
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    category: 'feature' as IdeaCategory,
+    product: 'core',
+    tags: ''
+  })
+
+  // Fetch feedback data
+  const fetchFeedback = useCallback(async () => {
+    if (!user?.id) return
+
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setFeedbackItems(data || [])
+    } catch (error) {
+      console.error('Error fetching feedback:', error)
+      toast.error('Failed to load feedback')
+    } finally {
+      setLoading(false)
+    }
+  }, [user?.id, supabase])
+
+  useEffect(() => {
+    fetchFeedback()
+  }, [fetchFeedback])
+
+  // Create feedback
+  const handleCreateFeedback = async () => {
+    if (!user?.id) {
+      toast.error('Please sign in to submit feedback')
+      return
+    }
+
+    if (!formData.title.trim() || !formData.description.trim()) {
+      toast.error('Please fill in title and description')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const { error } = await supabase.from('feedback').insert({
+        user_id: user.id,
+        title: formData.title,
+        description: formData.description,
+        feedback_type: formData.category === 'bug' ? 'bug' : 'feature-request',
+        status: 'new',
+        priority: 'medium',
+        category: formData.category,
+        tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+        is_public: true
+      })
+
+      if (error) throw error
+
+      toast.success('Idea submitted', { description: 'Your feedback has been submitted successfully' })
+      setFormData({ title: '', description: '', category: 'feature', product: 'core', tags: '' })
+      setShowSubmitDialog(false)
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error creating feedback:', error)
+      toast.error('Failed to submit feedback')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Vote on feedback
+  const handleVoteFeedback = async (feedbackId: string, currentVotes: number) => {
+    if (!user?.id) {
+      toast.error('Please sign in to vote')
+      return
+    }
+
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .update({ upvotes_count: currentVotes + 1, updated_at: new Date().toISOString() })
+        .eq('id', feedbackId)
+
+      if (error) throw error
+
+      toast.success('Vote recorded')
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error voting:', error)
+      toast.error('Failed to record vote')
+    }
+  }
+
+  // Delete feedback
+  const handleDeleteFeedback = async (feedbackId: string) => {
+    try {
+      const { error } = await supabase.from('feedback').delete().eq('id', feedbackId)
+      if (error) throw error
+
+      toast.success('Feedback deleted')
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error deleting feedback:', error)
+      toast.error('Failed to delete feedback')
+    }
+  }
+
+  // Update feedback status
+  const handleUpdateStatus = async (feedbackId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', feedbackId)
+
+      if (error) throw error
+
+      toast.success('Status updated')
+      fetchFeedback()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('Failed to update status')
+    }
+  }
+
+  // Export feedback
+  const handleExportFeedback = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .eq('user_id', user?.id)
+
+      if (error) throw error
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `feedback-export-${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      toast.success('Export complete', { description: 'Your feedback data has been exported' })
+    } catch (error) {
+      console.error('Error exporting:', error)
+      toast.error('Failed to export feedback')
+    }
+  }
 
   // Filter and sort ideas
   const filteredIdeas = useMemo(() => {
@@ -535,24 +720,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     shipped: mockIdeas.filter(i => i.status === 'shipped').length
   }), [])
 
-  // Handlers
-  const handleSubmitIdea = () => {
-    toast.info('Submit Idea', {
-      description: 'Opening idea submission form...'
-    })
-    setShowSubmitDialog(true)
-  }
-
+  // Legacy handlers for mock data compatibility
   const handleVote = (idea: Idea) => {
-    toast.success('Vote recorded', {
-      description: `You voted for "${idea.title}"`
-    })
-  }
-
-  const handleExportFeedback = () => {
-    toast.success('Export started', {
-      description: 'Your feedback data is being exported'
-    })
+    // For mock ideas, just show toast - real DB items use handleVoteFeedback
+    toast.success('Vote recorded', { description: `You voted for "${idea.title}"` })
   }
 
   return (
@@ -754,6 +925,11 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             </Card>
 
             {/* Ideas List */}
+            {loading && (
+              <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur border-0 shadow-sm p-8 text-center">
+                <div className="animate-pulse text-gray-500">Loading feedback...</div>
+              </Card>
+            )}
             <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 gap-4' : 'space-y-3'}>
               {filteredIdeas.map((idea) => {
                 const CategoryIcon = getCategoryIcon(idea.category)
@@ -1727,11 +1903,11 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleExportFeedback}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleExportFeedback}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Analytics
                           </Button>
@@ -1991,19 +2167,30 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             <div className="space-y-4">
               <div>
                 <label className="text-sm font-medium">Title</label>
-                <Input placeholder="Brief description of your idea" className="mt-1" />
+                <Input
+                  placeholder="Brief description of your idea"
+                  className="mt-1"
+                  value={formData.title}
+                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                />
               </div>
               <div>
                 <label className="text-sm font-medium">Description</label>
                 <textarea
-                  className="w-full mt-1 p-3 rounded-lg border resize-none h-32"
+                  className="w-full mt-1 p-3 rounded-lg border resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
                   placeholder="Detailed explanation of your idea and why it would be valuable..."
+                  value={formData.description}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium">Category</label>
-                  <select className="w-full mt-1 p-2 rounded-lg border">
+                  <select
+                    className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                    value={formData.category}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value as IdeaCategory }))}
+                  >
                     <option value="feature">Feature Request</option>
                     <option value="improvement">Improvement</option>
                     <option value="bug">Bug Report</option>
@@ -2014,7 +2201,11 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                 </div>
                 <div>
                   <label className="text-sm font-medium">Product Area</label>
-                  <select className="w-full mt-1 p-2 rounded-lg border">
+                  <select
+                    className="w-full mt-1 p-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700"
+                    value={formData.product}
+                    onChange={(e) => setFormData(prev => ({ ...prev, product: e.target.value }))}
+                  >
                     <option value="core">Core Platform</option>
                     <option value="api">Developer API</option>
                     <option value="integrations">Integrations</option>
@@ -2024,13 +2215,22 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
               </div>
               <div>
                 <label className="text-sm font-medium">Tags (comma separated)</label>
-                <Input placeholder="e.g., mobile, performance, api" className="mt-1" />
+                <Input
+                  placeholder="e.g., mobile, performance, api"
+                  className="mt-1"
+                  value={formData.tags}
+                  onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                />
               </div>
               <div className="flex gap-2 pt-4">
                 <Button variant="outline" onClick={() => setShowSubmitDialog(false)} className="flex-1">Cancel</Button>
-                <Button className="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white">
+                <Button
+                  onClick={handleCreateFeedback}
+                  disabled={saving}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+                >
                   <Send className="w-4 h-4 mr-2" />
-                  Submit Idea
+                  {saving ? 'Submitting...' : 'Submit Idea'}
                 </Button>
               </div>
             </div>

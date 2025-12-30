@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -187,6 +188,63 @@ interface Certificate {
   expiresAt: string
   status: 'valid' | 'expiring' | 'expired' | 'revoked'
   fingerprint: string
+}
+
+// Database Types
+interface DbProject {
+  id: string
+  user_id: string
+  project_name: string
+  display_name: string
+  description: string | null
+  target_os: 'windows' | 'macos' | 'linux' | 'cross_platform'
+  framework: string
+  framework_version: string | null
+  app_id: string
+  version: string
+  total_builds: number
+  last_build_at: string | null
+  is_archived: boolean
+  created_at: string
+  updated_at: string
+}
+
+interface DbBuild {
+  id: string
+  user_id: string
+  project_id: string
+  build_number: string
+  build_type: 'development' | 'production' | 'beta' | 'alpha' | 'release_candidate'
+  version: string
+  target_os: 'windows' | 'macos' | 'linux' | 'cross_platform'
+  architecture: string
+  status: string
+  is_signed: boolean
+  started_at: string | null
+  completed_at: string | null
+  duration_seconds: number | null
+  download_count: number
+  created_at: string
+}
+
+interface ProjectFormState {
+  project_name: string
+  display_name: string
+  description: string
+  target_os: 'windows' | 'macos' | 'linux' | 'cross_platform'
+  framework: string
+  app_id: string
+  version: string
+}
+
+const initialProjectForm: ProjectFormState = {
+  project_name: '',
+  display_name: '',
+  description: '',
+  target_os: 'cross_platform',
+  framework: 'electron',
+  app_id: 'com.myapp.desktop',
+  version: '1.0.0',
 }
 
 // Mock Data
@@ -466,6 +524,9 @@ const mockDesktopAppQuickActions = [
 ]
 
 export default function DesktopAppClient() {
+  const supabase = createClientComponentClient()
+
+  // Core UI state
   const [activeTab, setActiveTab] = useState('builds')
   const [searchQuery, setSearchQuery] = useState('')
   const [platformFilter, setPlatformFilter] = useState<Platform>('all')
@@ -474,6 +535,52 @@ export default function DesktopAppClient() {
   const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
   const [selectedCrash, setSelectedCrash] = useState<CrashReport | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Supabase state
+  const [dbProjects, setDbProjects] = useState<DbProject[]>([])
+  const [dbBuilds, setDbBuilds] = useState<DbBuild[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [formState, setFormState] = useState<ProjectFormState>(initialProjectForm)
+
+  // Fetch projects and builds from Supabase
+  const fetchData = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const [projectsRes, buildsRes] = await Promise.all([
+        supabase
+          .from('desktop_projects')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('is_archived', false)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('desktop_builds')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(50)
+      ])
+
+      if (projectsRes.error) throw projectsRes.error
+      if (buildsRes.error) throw buildsRes.error
+
+      setDbProjects(projectsRes.data || [])
+      setDbBuilds(buildsRes.data || [])
+    } catch (error) {
+      console.error('Error fetching desktop data:', error)
+      toast.error('Failed to load desktop projects')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const filteredBuilds = useMemo(() => {
     return mockBuilds.filter(build => {
@@ -549,43 +656,214 @@ export default function DesktopAppClient() {
     return `${mins}m ${secs}s`
   }
 
-  // Stats calculations
-  const stats = {
-    totalBuilds: mockBuilds.length,
-    successfulBuilds: mockBuilds.filter(b => b.status === 'completed').length,
-    failedBuilds: mockBuilds.filter(b => b.status === 'failed').length,
-    inProgress: mockBuilds.filter(b => ['building', 'signing', 'notarizing', 'uploading', 'queued'].includes(b.status)).length
+  // Stats calculations (mock + db data)
+  const stats = useMemo(() => {
+    const dbBuildCount = dbBuilds.length
+    const dbSuccessful = dbBuilds.filter(b => b.status === 'success').length
+    const dbFailed = dbBuilds.filter(b => b.status === 'failed').length
+    const dbInProgress = dbBuilds.filter(b => ['pending', 'building'].includes(b.status)).length
+
+    return {
+      totalBuilds: mockBuilds.length + dbBuildCount,
+      successfulBuilds: mockBuilds.filter(b => b.status === 'completed').length + dbSuccessful,
+      failedBuilds: mockBuilds.filter(b => b.status === 'failed').length + dbFailed,
+      inProgress: mockBuilds.filter(b => ['building', 'signing', 'notarizing', 'uploading', 'queued'].includes(b.status)).length + dbInProgress,
+      projectCount: dbProjects.length
+    }
+  }, [dbBuilds, dbProjects])
+
+  // Create new project
+  const handleCreateProject = async () => {
+    if (!formState.project_name.trim() || !formState.display_name.trim()) {
+      toast.error('Project name and display name are required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create projects')
+        return
+      }
+
+      const { error } = await supabase.from('desktop_projects').insert({
+        user_id: user.id,
+        project_name: formState.project_name,
+        display_name: formState.display_name,
+        description: formState.description || null,
+        target_os: formState.target_os,
+        framework: formState.framework,
+        app_id: formState.app_id,
+        version: formState.version,
+      })
+
+      if (error) throw error
+
+      toast.success('Project created successfully')
+      setShowCreateDialog(false)
+      setFormState(initialProjectForm)
+      fetchData()
+    } catch (error) {
+      console.error('Error creating project:', error)
+      toast.error('Failed to create project')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  // Handlers
-  const handleStartBuild = () => {
-    toast.info('Starting build', {
-      description: 'Initiating new desktop build...'
-    })
+  // Start a new build
+  const handleStartBuild = async (projectId?: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to start builds')
+        return
+      }
+
+      // Use first project if none specified
+      const project = projectId
+        ? dbProjects.find(p => p.id === projectId)
+        : dbProjects[0]
+
+      if (!project) {
+        toast.info('No project found', { description: 'Create a project first' })
+        return
+      }
+
+      const buildNumber = `${Date.now()}`
+      const { error } = await supabase.from('desktop_builds').insert({
+        user_id: user.id,
+        project_id: project.id,
+        build_number: buildNumber,
+        build_type: 'development',
+        version: project.version,
+        target_os: project.target_os,
+        architecture: 'x64',
+        status: 'pending',
+        started_at: new Date().toISOString(),
+      })
+
+      if (error) throw error
+
+      toast.success('Build started', { description: `Build #${buildNumber} initiated` })
+      fetchData()
+    } catch (error) {
+      console.error('Error starting build:', error)
+      toast.error('Failed to start build')
+    }
   }
 
+  // Cancel a build
+  const handleCancelBuild = async (buildId: string) => {
+    try {
+      const { error } = await supabase
+        .from('desktop_builds')
+        .update({
+          status: 'cancelled',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', buildId)
+
+      if (error) throw error
+
+      toast.info('Build cancelled')
+      fetchData()
+    } catch (error) {
+      console.error('Error cancelling build:', error)
+      toast.error('Failed to cancel build')
+    }
+  }
+
+  // Retry a failed build
+  const handleRetryBuild = async (buildId: string) => {
+    try {
+      const build = dbBuilds.find(b => b.id === buildId)
+      if (!build) return
+
+      const { error } = await supabase
+        .from('desktop_builds')
+        .update({
+          status: 'pending',
+          started_at: new Date().toISOString(),
+          completed_at: null,
+          duration_seconds: null
+        })
+        .eq('id', buildId)
+
+      if (error) throw error
+
+      toast.info('Retrying build', { description: `Build ${build.build_number} restarted` })
+      fetchData()
+    } catch (error) {
+      console.error('Error retrying build:', error)
+      toast.error('Failed to retry build')
+    }
+  }
+
+  // Delete a build
+  const handleDeleteBuild = async (buildId: string) => {
+    try {
+      const { error } = await supabase
+        .from('desktop_builds')
+        .delete()
+        .eq('id', buildId)
+
+      if (error) throw error
+
+      toast.success('Build deleted')
+      fetchData()
+    } catch (error) {
+      console.error('Error deleting build:', error)
+      toast.error('Failed to delete build')
+    }
+  }
+
+  // Archive a project
+  const handleArchiveProject = async (projectId: string) => {
+    try {
+      const { error } = await supabase
+        .from('desktop_projects')
+        .update({ is_archived: true })
+        .eq('id', projectId)
+
+      if (error) throw error
+
+      toast.success('Project archived')
+      fetchData()
+    } catch (error) {
+      console.error('Error archiving project:', error)
+      toast.error('Failed to archive project')
+    }
+  }
+
+  // Download build (mock with toast for actual file download)
   const handleDownloadBuild = (buildVersion: string, platform: string) => {
     toast.success('Downloading build', {
       description: `${buildVersion} for ${platform} download starting...`
     })
   }
 
-  const handleCancelBuild = (buildId: string) => {
-    toast.info('Build cancelled', {
-      description: `Build ${buildId} has been cancelled`
-    })
-  }
+  // Publish release (update build status)
+  const handlePublishRelease = async (buildId: string, buildVersion: string) => {
+    try {
+      const { error } = await supabase
+        .from('desktop_builds')
+        .update({
+          status: 'success',
+          build_type: 'production',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', buildId)
 
-  const handleRetryBuild = (buildVersion: string) => {
-    toast.info('Retrying build', {
-      description: `Retrying ${buildVersion}...`
-    })
-  }
+      if (error) throw error
 
-  const handlePublishRelease = (buildVersion: string) => {
-    toast.success('Publishing release', {
-      description: `${buildVersion} is being published...`
-    })
+      toast.success('Release published', { description: `${buildVersion} is now live` })
+      fetchData()
+    } catch (error) {
+      console.error('Error publishing release:', error)
+      toast.error('Failed to publish release')
+    }
   }
 
   return (
@@ -608,7 +886,11 @@ export default function DesktopAppClient() {
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
-              <Button className="bg-white text-gray-800 hover:bg-white/90">
+              <Button
+                className="bg-white text-gray-800 hover:bg-white/90"
+                onClick={() => handleStartBuild()}
+                disabled={loading || dbProjects.length === 0}
+              >
                 <Play className="w-4 h-4 mr-2" />
                 New Build
               </Button>

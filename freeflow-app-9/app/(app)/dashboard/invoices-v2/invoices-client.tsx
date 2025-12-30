@@ -168,7 +168,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
     recurring: { enabled: false, frequency: 'monthly' as 'weekly' | 'monthly' | 'quarterly' | 'yearly', endDate: '' },
   })
 
-  const { invoices, loading, error, createInvoice, mutating } = useInvoices({ status: statusFilter, limit: 100 })
+  const { invoices, loading, error, createInvoice, updateInvoice, deleteInvoice, mutating } = useInvoices({ status: statusFilter, limit: 100 })
   const displayInvoices = (invoices && invoices.length > 0) ? invoices : (initialInvoices || [])
 
   // Calculate comprehensive stats
@@ -326,33 +326,125 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
     }
   }
 
-  const handleSendInvoice = (invoice: Invoice) => {
-    toast.success('Invoice sent', {
-      description: `Invoice #${invoice.invoice_number} sent to ${invoice.client_name}`
-    })
+  // Send Invoice - updates status to 'sent' and records sent_date
+  const handleSendInvoice = async (invoice: Invoice) => {
+    try {
+      await updateInvoice(invoice.id, {
+        status: 'sent',
+        sent_date: new Date().toISOString()
+      })
+      toast.success('Invoice sent', {
+        description: `Invoice #${invoice.invoice_number} sent to ${invoice.client_name}`
+      })
+    } catch (error) {
+      toast.error('Failed to send invoice', {
+        description: 'An error occurred while sending the invoice'
+      })
+    }
   }
 
-  const handleMarkAsPaid = (invoice: Invoice) => {
-    toast.success('Invoice marked as paid', {
-      description: `Invoice #${invoice.invoice_number} has been marked as paid`
-    })
+  // Mark as Paid - updates status to 'paid' and records paid_date
+  const handleMarkAsPaid = async (invoice: Invoice) => {
+    try {
+      await updateInvoice(invoice.id, {
+        status: 'paid',
+        paid_date: new Date().toISOString(),
+        amount_paid: invoice.total_amount,
+        amount_due: 0
+      })
+      toast.success('Invoice marked as paid', {
+        description: `Invoice #${invoice.invoice_number} has been marked as paid`
+      })
+    } catch (error) {
+      toast.error('Failed to mark invoice as paid', {
+        description: 'An error occurred while updating the invoice'
+      })
+    }
+  }
+
+  // Delete Invoice
+  const handleDeleteInvoice = async (invoice: Invoice) => {
+    try {
+      await deleteInvoice(invoice.id)
+      toast.success('Invoice deleted', {
+        description: `Invoice #${invoice.invoice_number} has been deleted`
+      })
+    } catch (error) {
+      toast.error('Failed to delete invoice', {
+        description: 'An error occurred while deleting the invoice'
+      })
+    }
+  }
+
+  // Void Invoice - updates status to 'cancelled'
+  const handleVoidInvoice = async (invoice: Invoice) => {
+    try {
+      await updateInvoice(invoice.id, { status: 'cancelled' })
+      toast.info('Invoice voided', {
+        description: `Invoice #${invoice.invoice_number} has been cancelled`
+      })
+    } catch (error) {
+      toast.error('Failed to void invoice', {
+        description: 'An error occurred while voiding the invoice'
+      })
+    }
+  }
+
+  // Duplicate Invoice - creates a copy with draft status
+  const handleDuplicateInvoice = async (invoice: Invoice) => {
+    try {
+      await createInvoice({
+        title: `Copy of ${invoice.title}`,
+        client_name: invoice.client_name,
+        client_email: invoice.client_email,
+        invoice_number: `INV-${Date.now()}`,
+        currency: invoice.currency,
+        due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        items: invoice.items,
+        item_count: invoice.item_count,
+        subtotal: invoice.subtotal,
+        tax_amount: invoice.tax_amount,
+        tax_rate: invoice.tax_rate,
+        discount_amount: invoice.discount_amount,
+        discount_percentage: invoice.discount_percentage,
+        total_amount: invoice.total_amount,
+        amount_due: invoice.total_amount,
+        amount_paid: 0,
+        status: 'draft',
+        notes: invoice.notes,
+        terms_and_conditions: invoice.terms_and_conditions,
+        issue_date: new Date().toISOString().split('T')[0]
+      } as any)
+      toast.success('Invoice duplicated', {
+        description: `Copy of invoice #${invoice.invoice_number} created`
+      })
+    } catch (error) {
+      toast.error('Failed to duplicate invoice', {
+        description: 'An error occurred while duplicating the invoice'
+      })
+    }
+  }
+
+  // Send Reminder - updates reminder_sent_count and last_reminder_sent_at
+  const handleSendReminder = async (invoice: Invoice) => {
+    try {
+      await updateInvoice(invoice.id, {
+        reminder_sent_count: (invoice.reminder_sent_count || 0) + 1,
+        last_reminder_sent_at: new Date().toISOString()
+      })
+      toast.success('Reminder sent', {
+        description: `Payment reminder sent for invoice #${invoice.invoice_number}`
+      })
+    } catch (error) {
+      toast.error('Failed to send reminder', {
+        description: 'An error occurred while sending the reminder'
+      })
+    }
   }
 
   const handleExportInvoices = () => {
     toast.success('Export started', {
       description: 'Your invoices are being exported'
-    })
-  }
-
-  const handleDuplicateInvoice = (invoice: Invoice) => {
-    toast.success('Invoice duplicated', {
-      description: `Copy of invoice #${invoice.invoice_number} created`
-    })
-  }
-
-  const handleSendReminder = (invoice: Invoice) => {
-    toast.success('Reminder sent', {
-      description: `Payment reminder sent for invoice #${invoice.invoice_number}`
     })
   }
 
@@ -369,34 +461,9 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
 
   const getCurrencySymbol = (code: string) => currencies.find(c => c.code === code)?.symbol || '$'
 
-  // Handlers
-  const handleCreateInvoice = () => {
-    toast.info('Create Invoice', {
-      description: 'Opening invoice builder...'
-    })
-  }
-
-  const handleSendInvoice = (invoiceId: string) => {
-    toast.success('Invoice sent', {
-      description: 'Invoice has been sent to client'
-    })
-  }
-
-  const handleDownloadInvoice = (invoiceId: string) => {
+  const handleDownloadInvoice = (invoice: Invoice) => {
     toast.success('Downloading invoice', {
-      description: 'PDF will be ready shortly'
-    })
-  }
-
-  const handleMarkAsPaid = (invoiceId: string) => {
-    toast.success('Invoice marked as paid', {
-      description: 'Payment has been recorded'
-    })
-  }
-
-  const handleVoidInvoice = (invoiceId: string) => {
-    toast.info('Invoice voided', {
-      description: 'Invoice has been cancelled'
+      description: `PDF for invoice #${invoice.invoice_number} will be ready shortly`
     })
   }
 
@@ -557,15 +624,41 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             <Plus className="h-5 w-5 text-emerald-600" />
             <span>New Invoice</span>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+          <Button
+            variant="outline"
+            className="h-auto py-4 flex flex-col gap-2"
+            onClick={() => {
+              setNewInvoice(prev => ({ ...prev, recurring: { ...prev.recurring, enabled: true } }))
+              setShowCreateModal(true)
+            }}
+          >
             <RefreshCw className="h-5 w-5 text-blue-600" />
             <span>Recurring Invoice</span>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+          <Button
+            variant="outline"
+            className="h-auto py-4 flex flex-col gap-2"
+            disabled={mutating}
+            onClick={async () => {
+              const overdueInvoices = displayInvoices.filter(inv =>
+                inv.status === 'overdue' || inv.status === 'sent'
+              )
+              if (overdueInvoices.length === 0) {
+                toast.info('No invoices to remind', {
+                  description: 'All invoices are either paid or in draft status'
+                })
+                return
+              }
+              for (const inv of overdueInvoices) {
+                await handleSendReminder(inv)
+              }
+              toast.success(`Reminders sent to ${overdueInvoices.length} clients`)
+            }}
+          >
             <Mail className="h-5 w-5 text-purple-600" />
             <span>Send Reminders</span>
           </Button>
-          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2">
+          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={handleExportInvoices}>
             <FileSpreadsheet className="h-5 w-5 text-orange-600" />
             <span>Export Report</span>
           </Button>
@@ -711,41 +804,45 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast.info('View invoice', { description: `Viewing invoice #${invoice.invoice_number}` })}>
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast.info('Edit invoice', { description: `Editing invoice #${invoice.invoice_number}` })}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSendInvoice(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'cancelled'}>
                               <Send className="h-4 w-4 mr-2" />
                               Send
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDownloadInvoice(invoice)}>
                               <Download className="h-4 w-4 mr-2" />
                               Download PDF
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDuplicateInvoice(invoice)}>
                               <Copy className="h-4 w-4 mr-2" />
                               Duplicate
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => toast.success('Link copied', { description: 'Invoice link copied to clipboard' })}>
                               <Share2 className="h-4 w-4 mr-2" />
                               Share Link
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSendReminder(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'draft'}>
                               <Bell className="h-4 w-4 mr-2" />
                               Send Reminder
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleMarkAsPaid(invoice)} disabled={invoice.status === 'paid' || invoice.status === 'cancelled'}>
                               <CheckCircle2 className="h-4 w-4 mr-2" />
                               Mark as Paid
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleVoidInvoice(invoice)} disabled={invoice.status === 'cancelled' || invoice.status === 'paid'}>
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Void Invoice
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteInvoice(invoice)}>
                               <Trash2 className="h-4 w-4 mr-2" />
                               Delete
                             </DropdownMenuItem>
@@ -1522,19 +1619,75 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
           <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-xl flex items-center gap-4">
             <span>{selectedInvoices.length} selected</span>
             <div className="h-4 w-px bg-gray-700" />
-            <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-white hover:bg-white/10"
+              disabled={mutating}
+              onClick={async () => {
+                const invoicesToSend = displayInvoices.filter(inv =>
+                  selectedInvoices.includes(inv.id) &&
+                  inv.status !== 'paid' &&
+                  inv.status !== 'cancelled'
+                )
+                for (const inv of invoicesToSend) {
+                  await handleSendInvoice(inv)
+                }
+                setSelectedInvoices([])
+              }}
+            >
               <Send className="h-4 w-4 mr-2" />
               Send All
             </Button>
-            <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-white hover:bg-white/10"
+              disabled={mutating}
+              onClick={async () => {
+                const invoicesToRemind = displayInvoices.filter(inv =>
+                  selectedInvoices.includes(inv.id) &&
+                  inv.status !== 'paid' &&
+                  inv.status !== 'draft'
+                )
+                for (const inv of invoicesToRemind) {
+                  await handleSendReminder(inv)
+                }
+                setSelectedInvoices([])
+              }}
+            >
               <Bell className="h-4 w-4 mr-2" />
               Remind All
             </Button>
-            <Button size="sm" variant="ghost" className="text-white hover:bg-white/10">
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-white hover:bg-white/10"
+              onClick={() => {
+                handleExportInvoices()
+                setSelectedInvoices([])
+              }}
+            >
               <Download className="h-4 w-4 mr-2" />
               Export
             </Button>
-            <Button size="sm" variant="ghost" className="text-red-400 hover:bg-red-500/10" onClick={() => setSelectedInvoices([])}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-red-400 hover:bg-red-500/10"
+              disabled={mutating}
+              onClick={async () => {
+                const invoicesToDelete = displayInvoices.filter(inv => selectedInvoices.includes(inv.id))
+                for (const inv of invoicesToDelete) {
+                  await handleDeleteInvoice(inv)
+                }
+                setSelectedInvoices([])
+              }}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete All
+            </Button>
+            <Button size="sm" variant="ghost" className="text-gray-400 hover:bg-white/10" onClick={() => setSelectedInvoices([])}>
               <XCircle className="h-4 w-4" />
             </Button>
           </div>

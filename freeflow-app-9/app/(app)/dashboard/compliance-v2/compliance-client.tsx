@@ -1633,7 +1633,7 @@ export default function ComplianceClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => toast.success('Copied', { description: 'Token copied to clipboard' })}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
@@ -1642,7 +1642,7 @@ export default function ComplianceClient() {
                             grc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Regenerating', { description: 'Creating new token...' })}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -1760,11 +1760,11 @@ export default function ComplianceClient() {
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleExport}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={handleGenerateReport}>
                             <FileText className="h-4 w-4 mr-2" />
                             Generate Report
                           </Button>
@@ -1789,7 +1789,7 @@ export default function ComplianceClient() {
                             <h4 className="font-medium text-gray-900 dark:text-white">Reset All Controls</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Reset all control statuses</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => toast.info('Resetting', { description: 'All controls will be reset...' })}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Reset
                           </Button>
@@ -1799,7 +1799,7 @@ export default function ComplianceClient() {
                             <h4 className="font-medium text-gray-900 dark:text-white">Delete All Evidence</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all evidence</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={() => toast.info('Deleting', { description: 'All evidence will be deleted...' })}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </Button>

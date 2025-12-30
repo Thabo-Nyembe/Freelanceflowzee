@@ -1,13 +1,17 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
@@ -69,7 +73,8 @@ import {
   Webhook,
   Terminal,
   Archive,
-  History
+  History,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -84,12 +89,61 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 import {
-  bugsAIInsights,
-  bugsCollaborators,
-  bugsPredictions,
-  bugsActivities,
-  bugsQuickActions,
+  bugsAIInsights as _bugsAIInsights,
+  bugsCollaborators as _bugsCollaborators,
+  bugsPredictions as _bugsPredictions,
+  bugsActivities as _bugsActivities,
+  bugsQuickActions as _bugsQuickActions,
 } from '@/lib/mock-data/adapters'
+
+// Database Types
+interface DbBug {
+  id: string
+  user_id: string
+  bug_code: string
+  title: string
+  description: string | null
+  severity: string
+  status: string
+  priority: string
+  assignee_name: string | null
+  assignee_email: string | null
+  reporter_name: string | null
+  reporter_email: string | null
+  created_date: string
+  last_updated: string
+  due_date: string | null
+  resolved_date: string | null
+  affected_version: string | null
+  target_version: string | null
+  category: string | null
+  is_reproducible: boolean
+  votes: number
+  watchers: number
+  steps_to_reproduce: string | null
+  expected_behavior: string | null
+  actual_behavior: string | null
+  environment_details: Record<string, any>
+  attachments: any[]
+  related_bugs: any[]
+  configuration: Record<string, any>
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+interface DbBugComment {
+  id: string
+  user_id: string
+  bug_id: string
+  commenter_name: string
+  commenter_email: string | null
+  comment_text: string
+  is_internal: boolean
+  attachments: any[]
+  created_at: string
+  updated_at: string
+}
 
 // Types
 type BugStatus = 'open' | 'in_progress' | 'in_review' | 'resolved' | 'closed' | 'wont_fix' | 'duplicate'
@@ -395,7 +449,7 @@ const mockBugs: BugItem[] = [
   }
 ]
 
-const mockStats: BugStats = {
+const _mockStats: BugStats = {
   total: 156,
   open: 42,
   inProgress: 28,
@@ -520,6 +574,9 @@ const mockBugsQuickActions = [
 ]
 
 export default function BugsClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('list')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<BugStatus | 'all'>('all')
@@ -528,9 +585,261 @@ export default function BugsClient() {
   const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Computed values
+  // Data State
+  const [bugs, setBugs] = useState<DbBug[]>([])
+  const [_comments, _setComments] = useState<DbBugComment[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Dialog State
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editingBug, setEditingBug] = useState<DbBug | null>(null)
+
+  // Form State
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    severity: 'medium',
+    status: 'open',
+    priority: 'P2',
+    assignee_name: '',
+    assignee_email: '',
+    category: '',
+    affected_version: '',
+    steps_to_reproduce: '',
+    expected_behavior: '',
+    actual_behavior: ''
+  })
+
+  // Generate bug code
+  const generateBugCode = () => `BUG-${Date.now().toString(36).toUpperCase()}`
+
+  // Fetch bugs
+  const fetchBugs = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('bugs')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setBugs(data || [])
+    } catch (error) {
+      console.error('Error fetching bugs:', error)
+      toast.error('Failed to load bugs')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Create bug
+  const handleCreateBug = async () => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create bugs')
+        return
+      }
+
+      const { error } = await supabase.from('bugs').insert({
+        user_id: user.id,
+        bug_code: generateBugCode(),
+        title: formData.title,
+        description: formData.description || null,
+        severity: formData.severity,
+        status: formData.status,
+        priority: formData.priority,
+        assignee_name: formData.assignee_name || null,
+        assignee_email: formData.assignee_email || null,
+        reporter_name: user.email?.split('@')[0] || 'User',
+        reporter_email: user.email,
+        category: formData.category || null,
+        affected_version: formData.affected_version || null,
+        steps_to_reproduce: formData.steps_to_reproduce || null,
+        expected_behavior: formData.expected_behavior || null,
+        actual_behavior: formData.actual_behavior || null
+      })
+
+      if (error) throw error
+
+      toast.success('Bug reported successfully')
+      setShowCreateDialog(false)
+      resetForm()
+      fetchBugs()
+    } catch (error) {
+      console.error('Error creating bug:', error)
+      toast.error('Failed to create bug')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update bug
+  const handleUpdateBug = async () => {
+    if (!editingBug) return
+    try {
+      setIsSaving(true)
+      const { error } = await supabase
+        .from('bugs')
+        .update({
+          title: formData.title,
+          description: formData.description || null,
+          severity: formData.severity,
+          status: formData.status,
+          priority: formData.priority,
+          assignee_name: formData.assignee_name || null,
+          assignee_email: formData.assignee_email || null,
+          category: formData.category || null,
+          affected_version: formData.affected_version || null,
+          steps_to_reproduce: formData.steps_to_reproduce || null,
+          expected_behavior: formData.expected_behavior || null,
+          actual_behavior: formData.actual_behavior || null,
+          updated_at: new Date().toISOString(),
+          resolved_date: formData.status === 'resolved' ? new Date().toISOString() : null
+        })
+        .eq('id', editingBug.id)
+
+      if (error) throw error
+
+      toast.success('Bug updated successfully')
+      setShowEditDialog(false)
+      setEditingBug(null)
+      resetForm()
+      fetchBugs()
+    } catch (error) {
+      console.error('Error updating bug:', error)
+      toast.error('Failed to update bug')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Delete bug
+  const handleDeleteBug = async (bugId: string) => {
+    try {
+      const { error } = await supabase
+        .from('bugs')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', bugId)
+
+      if (error) throw error
+
+      toast.success('Bug deleted successfully')
+      fetchBugs()
+    } catch (error) {
+      console.error('Error deleting bug:', error)
+      toast.error('Failed to delete bug')
+    }
+  }
+
+  // Update bug status
+  const handleUpdateStatus = async (bugId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('bugs')
+        .update({
+          status: newStatus,
+          updated_at: new Date().toISOString(),
+          resolved_date: newStatus === 'resolved' ? new Date().toISOString() : null
+        })
+        .eq('id', bugId)
+
+      if (error) throw error
+
+      toast.success(`Bug status updated to ${newStatus}`)
+      fetchBugs()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('Failed to update status')
+    }
+  }
+
+  // Reset form
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      description: '',
+      severity: 'medium',
+      status: 'open',
+      priority: 'P2',
+      assignee_name: '',
+      assignee_email: '',
+      category: '',
+      affected_version: '',
+      steps_to_reproduce: '',
+      expected_behavior: '',
+      actual_behavior: ''
+    })
+  }
+
+  // Open edit dialog
+  const openEditDialog = (bug: DbBug) => {
+    setEditingBug(bug)
+    setFormData({
+      title: bug.title,
+      description: bug.description || '',
+      severity: bug.severity,
+      status: bug.status,
+      priority: bug.priority,
+      assignee_name: bug.assignee_name || '',
+      assignee_email: bug.assignee_email || '',
+      category: bug.category || '',
+      affected_version: bug.affected_version || '',
+      steps_to_reproduce: bug.steps_to_reproduce || '',
+      expected_behavior: bug.expected_behavior || '',
+      actual_behavior: bug.actual_behavior || ''
+    })
+    setShowEditDialog(true)
+  }
+
+  // Initial fetch
+  useEffect(() => {
+    fetchBugs()
+  }, [fetchBugs])
+
+  // Computed values - merge DB bugs with mock for display
+  const allBugs = useMemo(() => {
+    // Convert DB bugs to display format and combine with mock
+    const dbBugsFormatted: BugItem[] = bugs.map(b => ({
+      id: b.id,
+      key: b.bug_code,
+      title: b.title,
+      description: b.description || '',
+      status: b.status as BugStatus,
+      severity: b.severity as BugSeverity,
+      priority: (b.priority === 'P1' ? 'blocker' : b.priority === 'P2' ? 'major' : 'minor') as BugPriority,
+      type: 'bug' as BugType,
+      reporter: { id: 'user', name: b.reporter_name || 'Unknown', avatar: b.reporter_name?.charAt(0) },
+      assignee: b.assignee_name ? { id: 'assignee', name: b.assignee_name, avatar: b.assignee_name.charAt(0) } : undefined,
+      labels: b.category ? [{ id: 'cat', name: b.category, color: '#6366f1' }] : [],
+      affectedVersion: b.affected_version || 'N/A',
+      environment: 'Production',
+      stepsToReproduce: b.steps_to_reproduce?.split('\n') || [],
+      expectedBehavior: b.expected_behavior || '',
+      actualBehavior: b.actual_behavior || '',
+      createdAt: b.created_at,
+      updatedAt: b.updated_at,
+      resolvedAt: b.resolved_date || undefined,
+      dueDate: b.due_date || undefined,
+      comments: [],
+      attachments: b.attachments || [],
+      linkedIssues: [],
+      votes: b.votes,
+      watchers: b.watchers
+    }))
+    return [...dbBugsFormatted, ...mockBugs]
+  }, [bugs])
+
   const filteredBugs = useMemo(() => {
-    return mockBugs.filter(bug => {
+    return allBugs.filter(bug => {
       const matchesSearch = bug.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         bug.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
         bug.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -538,17 +847,17 @@ export default function BugsClient() {
       const matchesSeverity = severityFilter === 'all' || bug.severity === severityFilter
       return matchesSearch && matchesStatus && matchesSeverity
     })
-  }, [searchTerm, statusFilter, severityFilter])
+  }, [allBugs, searchTerm, statusFilter, severityFilter])
 
   const bugsByStatus = useMemo(() => {
     return {
-      open: mockBugs.filter(b => b.status === 'open'),
-      in_progress: mockBugs.filter(b => b.status === 'in_progress'),
-      in_review: mockBugs.filter(b => b.status === 'in_review'),
-      resolved: mockBugs.filter(b => b.status === 'resolved'),
-      closed: mockBugs.filter(b => b.status === 'closed')
+      open: allBugs.filter(b => b.status === 'open'),
+      in_progress: allBugs.filter(b => b.status === 'in_progress'),
+      in_review: allBugs.filter(b => b.status === 'in_review'),
+      resolved: allBugs.filter(b => b.status === 'resolved'),
+      closed: allBugs.filter(b => b.status === 'closed')
     }
-  }, [])
+  }, [allBugs])
 
   const boardColumns = [
     { id: 'open', label: 'Open', bugs: bugsByStatus.open, color: 'border-red-500' },
@@ -557,36 +866,21 @@ export default function BugsClient() {
     { id: 'resolved', label: 'Resolved', bugs: bugsByStatus.resolved, color: 'border-green-500' }
   ]
 
-  // Handlers
-  const handleReportBug = () => {
-    toast.info('Report Bug', {
-      description: 'Opening bug report form...'
-    })
-  }
-
-  const handleAssignBug = (bugTitle: string, assignee: string) => {
-    toast.success('Bug assigned', {
-      description: `"${bugTitle}" assigned to ${assignee}`
-    })
-  }
-
-  const handleResolveBug = (bugTitle: string) => {
-    toast.success('Bug resolved', {
-      description: `"${bugTitle}" has been marked as resolved`
-    })
-  }
-
-  const handleExportBugs = () => {
-    toast.success('Exporting bugs', {
-      description: 'Bug report will be downloaded'
-    })
-  }
-
-  const handleLinkPullRequest = (bugTitle: string) => {
-    toast.info('Link PR', {
-      description: `Linking pull request to "${bugTitle}"...`
-    })
-  }
+  // Stats from DB + mock
+  const stats = useMemo(() => ({
+    total: allBugs.length,
+    open: allBugs.filter(b => b.status === 'open').length,
+    inProgress: allBugs.filter(b => b.status === 'in_progress').length,
+    resolved: allBugs.filter(b => b.status === 'resolved').length,
+    closed: allBugs.filter(b => b.status === 'closed').length,
+    critical: allBugs.filter(b => b.severity === 'critical').length,
+    high: allBugs.filter(b => b.severity === 'high').length,
+    medium: allBugs.filter(b => b.severity === 'medium').length,
+    low: allBugs.filter(b => b.severity === 'low').length,
+    avgResolutionTime: 3.2,
+    openThisWeek: bugs.filter(b => new Date(b.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length,
+    resolvedThisWeek: bugs.filter(b => b.resolved_date && new Date(b.resolved_date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length
+  }), [allBugs, bugs])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-orange-50/30 to-amber-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -623,7 +917,10 @@ export default function BugsClient() {
               <Upload className="w-4 h-4 mr-2" />
               Import
             </Button>
-            <Button className="bg-gradient-to-r from-red-500 to-orange-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-red-500 to-orange-600 text-white"
+              onClick={() => setShowCreateDialog(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Report Bug
             </Button>
@@ -638,7 +935,7 @@ export default function BugsClient() {
                 <Bug className="w-4 h-4" />
                 <span className="text-xs font-medium">Total Bugs</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.total}</p>
+              <p className="text-2xl font-bold">{stats.total}</p>
               <p className="text-xs text-muted-foreground">all time</p>
             </CardContent>
           </Card>
@@ -648,8 +945,8 @@ export default function BugsClient() {
                 <AlertCircle className="w-4 h-4" />
                 <span className="text-xs font-medium">Open</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.open}</p>
-              <p className="text-xs text-red-600">+{mockStats.openThisWeek} this week</p>
+              <p className="text-2xl font-bold">{stats.open}</p>
+              <p className="text-xs text-red-600">+{stats.openThisWeek} this week</p>
             </CardContent>
           </Card>
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -658,7 +955,7 @@ export default function BugsClient() {
                 <Play className="w-4 h-4" />
                 <span className="text-xs font-medium">In Progress</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.inProgress}</p>
+              <p className="text-2xl font-bold">{stats.inProgress}</p>
               <p className="text-xs text-muted-foreground">being fixed</p>
             </CardContent>
           </Card>
@@ -668,8 +965,8 @@ export default function BugsClient() {
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-xs font-medium">Resolved</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.resolved}</p>
-              <p className="text-xs text-green-600">+{mockStats.resolvedThisWeek} this week</p>
+              <p className="text-2xl font-bold">{stats.resolved}</p>
+              <p className="text-xs text-green-600">+{stats.resolvedThisWeek} this week</p>
             </CardContent>
           </Card>
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur">
@@ -678,7 +975,7 @@ export default function BugsClient() {
                 <AlertTriangle className="w-4 h-4" />
                 <span className="text-xs font-medium">Critical</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.critical}</p>
+              <p className="text-2xl font-bold">{stats.critical}</p>
               <p className="text-xs text-muted-foreground">need attention</p>
             </CardContent>
           </Card>
@@ -688,7 +985,7 @@ export default function BugsClient() {
                 <Flag className="w-4 h-4" />
                 <span className="text-xs font-medium">High</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.high}</p>
+              <p className="text-2xl font-bold">{stats.high}</p>
               <p className="text-xs text-muted-foreground">priority</p>
             </CardContent>
           </Card>
@@ -698,7 +995,7 @@ export default function BugsClient() {
                 <Timer className="w-4 h-4" />
                 <span className="text-xs font-medium">Avg Resolution</span>
               </div>
-              <p className="text-2xl font-bold">{mockStats.avgResolutionTime}d</p>
+              <p className="text-2xl font-bold">{stats.avgResolutionTime}d</p>
               <p className="text-xs text-muted-foreground">days to fix</p>
             </CardContent>
           </Card>
@@ -708,8 +1005,8 @@ export default function BugsClient() {
                 <TrendingUp className="w-4 h-4" />
                 <span className="text-xs font-medium">Resolution</span>
               </div>
-              <Progress value={Math.round((mockStats.resolved / mockStats.total) * 100)} className="h-2 mt-2" />
-              <p className="text-xs text-muted-foreground mt-1">{Math.round((mockStats.resolved / mockStats.total) * 100)}% fixed</p>
+              <Progress value={Math.round((stats.resolved / stats.total) * 100)} className="h-2 mt-2" />
+              <p className="text-xs text-muted-foreground mt-1">{Math.round((stats.resolved / stats.total) * 100)}% fixed</p>
             </CardContent>
           </Card>
         </div>
@@ -1045,19 +1342,19 @@ export default function BugsClient() {
                 </p>
                 <div className="grid grid-cols-4 gap-4">
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockStats.avgResolutionTime}d</div>
+                    <div className="text-2xl font-bold">{stats.avgResolutionTime}d</div>
                     <div className="text-xs text-white/70">Avg Resolution</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockStats.resolvedThisWeek}</div>
+                    <div className="text-2xl font-bold">{stats.resolvedThisWeek}</div>
                     <div className="text-xs text-white/70">Fixed This Week</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{Math.round((mockStats.resolved / mockStats.total) * 100)}%</div>
+                    <div className="text-2xl font-bold">{Math.round((stats.resolved / stats.total) * 100)}%</div>
                     <div className="text-xs text-white/70">Resolution Rate</div>
                   </div>
                   <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 text-center">
-                    <div className="text-2xl font-bold">{mockStats.critical}</div>
+                    <div className="text-2xl font-bold">{stats.critical}</div>
                     <div className="text-xs text-white/70">Critical Issues</div>
                   </div>
                 </div>
@@ -1117,10 +1414,10 @@ export default function BugsClient() {
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { label: 'Critical', count: mockStats.critical, color: 'bg-red-500', total: mockStats.total },
-                      { label: 'High', count: mockStats.high, color: 'bg-orange-500', total: mockStats.total },
-                      { label: 'Medium', count: mockStats.medium, color: 'bg-yellow-500', total: mockStats.total },
-                      { label: 'Low', count: mockStats.low, color: 'bg-blue-500', total: mockStats.total }
+                      { label: 'Critical', count: stats.critical, color: 'bg-red-500', total: stats.total },
+                      { label: 'High', count: stats.high, color: 'bg-orange-500', total: stats.total },
+                      { label: 'Medium', count: stats.medium, color: 'bg-yellow-500', total: stats.total },
+                      { label: 'Low', count: stats.low, color: 'bg-blue-500', total: stats.total }
                     ].map(item => (
                       <div key={item.label} className="flex items-center gap-3">
                         <span className="w-16 text-sm font-medium">{item.label}</span>
@@ -1909,6 +2206,227 @@ export default function BugsClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Bug Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bug className="w-5 h-5 text-red-600" />
+                Report New Bug
+              </DialogTitle>
+              <DialogDescription>
+                Fill in the details to report a new bug
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+              <div className="grid gap-2">
+                <Label htmlFor="title">Title *</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  placeholder="Brief description of the bug"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  placeholder="Detailed description of the issue"
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="grid gap-2">
+                  <Label>Severity</Label>
+                  <Select value={formData.severity} onValueChange={(v) => setFormData({ ...formData, severity: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Priority</Label>
+                  <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="P1">P1 - Blocker</SelectItem>
+                      <SelectItem value="P2">P2 - Major</SelectItem>
+                      <SelectItem value="P3">P3 - Minor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Category</Label>
+                  <Input
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    placeholder="e.g., Frontend"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Assignee Name</Label>
+                  <Input
+                    value={formData.assignee_name}
+                    onChange={(e) => setFormData({ ...formData, assignee_name: e.target.value })}
+                    placeholder="Developer name"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Affected Version</Label>
+                  <Input
+                    value={formData.affected_version}
+                    onChange={(e) => setFormData({ ...formData, affected_version: e.target.value })}
+                    placeholder="e.g., 2.4.1"
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label>Steps to Reproduce</Label>
+                <Textarea
+                  value={formData.steps_to_reproduce}
+                  onChange={(e) => setFormData({ ...formData, steps_to_reproduce: e.target.value })}
+                  placeholder="1. Navigate to...\n2. Click on...\n3. Observe..."
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Expected Behavior</Label>
+                  <Textarea
+                    value={formData.expected_behavior}
+                    onChange={(e) => setFormData({ ...formData, expected_behavior: e.target.value })}
+                    placeholder="What should happen"
+                    rows={2}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Actual Behavior</Label>
+                  <Textarea
+                    value={formData.actual_behavior}
+                    onChange={(e) => setFormData({ ...formData, actual_behavior: e.target.value })}
+                    placeholder="What actually happens"
+                    rows={2}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowCreateDialog(false); resetForm(); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateBug} disabled={isSaving || !formData.title}>
+                {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Report Bug
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Bug Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-blue-600" />
+                Edit Bug
+              </DialogTitle>
+              <DialogDescription>
+                Update bug details
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
+              <div className="grid gap-2">
+                <Label htmlFor="edit-title">Title *</Label>
+                <Input
+                  id="edit-title"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="grid gap-2">
+                  <Label>Status</Label>
+                  <Select value={formData.status} onValueChange={(v) => setFormData({ ...formData, status: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="open">Open</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="in_review">In Review</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Severity</Label>
+                  <Select value={formData.severity} onValueChange={(v) => setFormData({ ...formData, severity: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>Priority</Label>
+                  <Select value={formData.priority} onValueChange={(v) => setFormData({ ...formData, priority: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="P1">P1 - Blocker</SelectItem>
+                      <SelectItem value="P2">P2 - Major</SelectItem>
+                      <SelectItem value="P3">P3 - Minor</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Assignee Name</Label>
+                  <Input
+                    value={formData.assignee_name}
+                    onChange={(e) => setFormData({ ...formData, assignee_name: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Category</Label>
+                  <Input
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowEditDialog(false); setEditingBug(null); resetForm(); }}>
+                Cancel
+              </Button>
+              <Button onClick={handleUpdateBug} disabled={isSaving || !formData.title}>
+                {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                Save Changes
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -81,7 +82,8 @@ import {
   Sliders,
   Webhook,
   Upload,
-  Mail
+  Mail,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -116,6 +118,45 @@ type AlertStatus = 'active' | 'acknowledged' | 'resolved' | 'muted'
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical'
 type ComplianceFramework = 'SOC2' | 'GDPR' | 'HIPAA' | 'PCI-DSS' | 'ISO27001'
 type RetentionPeriod = '7d' | '30d' | '90d' | '1y' | '7y'
+
+// Database Types
+interface DbAuditLog {
+  id: string
+  user_id: string
+  log_type: string
+  severity: string
+  action: string
+  description: string | null
+  resource: string | null
+  user_email: string | null
+  ip_address: string | null
+  location: string | null
+  device: string | null
+  status: string
+  request_method: string | null
+  request_path: string | null
+  request_body: Record<string, unknown>
+  response_status: number | null
+  duration_ms: number
+  metadata: Record<string, unknown>
+  created_at: string
+}
+
+interface DbAlertRule {
+  id: string
+  user_id: string
+  rule_name: string
+  description: string | null
+  log_type: string | null
+  severity: string | null
+  action_pattern: string | null
+  conditions: Record<string, unknown>
+  notification_channels: string[]
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
 
 interface AuditLog {
   id: string
@@ -654,6 +695,9 @@ const mockAuditQuickActions = [
 // ============================================================================
 
 export default function AuditLogsClient() {
+  const supabase = createClientComponentClient()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('events')
   const [searchQuery, setSearchQuery] = useState('')
   const [severityFilter, setSeverityFilter] = useState<LogSeverity | 'all'>('all')
@@ -663,9 +707,341 @@ export default function AuditLogsClient() {
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Data State
+  const [dbLogs, setDbLogs] = useState<DbAuditLog[]>([])
+  const [dbAlertRules, setDbAlertRules] = useState<DbAlertRule[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+
+  // Dialog State
+  const [showCreateRuleDialog, setShowCreateRuleDialog] = useState(false)
+  const [showEditRuleDialog, setShowEditRuleDialog] = useState(false)
+  const [editingRule, setEditingRule] = useState<DbAlertRule | null>(null)
+
+  // Form State for Alert Rules
+  const [ruleFormData, setRuleFormData] = useState({
+    rule_name: '',
+    description: '',
+    log_type: '',
+    severity: '',
+    action_pattern: '',
+    notification_channels: ['email'],
+    is_active: true
+  })
+
+  // Fetch audit logs from database
+  const fetchAuditLogs = useCallback(async () => {
+    try {
+      setIsLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(100)
+
+      if (error) throw error
+      setDbLogs(data || [])
+    } catch (error) {
+      console.error('Error fetching audit logs:', error)
+      toast.error('Failed to load audit logs')
+    } finally {
+      setIsLoading(false)
+    }
+  }, [supabase])
+
+  // Fetch alert rules from database
+  const fetchAlertRules = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('audit_alert_rules')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbAlertRules(data || [])
+    } catch (error) {
+      console.error('Error fetching alert rules:', error)
+      toast.error('Failed to load alert rules')
+    }
+  }, [supabase])
+
+  // Create audit log entry
+  const createAuditLog = async (logData: Partial<DbAuditLog>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in')
+        return
+      }
+
+      const { error } = await supabase.from('audit_logs').insert({
+        user_id: user.id,
+        log_type: logData.log_type || 'system',
+        severity: logData.severity || 'info',
+        action: logData.action || 'manual_entry',
+        description: logData.description || null,
+        resource: logData.resource || null,
+        user_email: user.email,
+        ip_address: logData.ip_address || null,
+        location: logData.location || null,
+        device: logData.device || null,
+        status: logData.status || 'success',
+        duration_ms: logData.duration_ms || 0,
+        metadata: logData.metadata || {}
+      })
+
+      if (error) throw error
+      toast.success('Audit log created')
+      fetchAuditLogs()
+    } catch (error) {
+      console.error('Error creating audit log:', error)
+      toast.error('Failed to create audit log')
+    }
+  }
+
+  // Create alert rule
+  const handleCreateAlertRule = async () => {
+    try {
+      setIsSaving(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create alert rules')
+        return
+      }
+
+      const { error } = await supabase.from('audit_alert_rules').insert({
+        user_id: user.id,
+        rule_name: ruleFormData.rule_name,
+        description: ruleFormData.description || null,
+        log_type: ruleFormData.log_type || null,
+        severity: ruleFormData.severity || null,
+        action_pattern: ruleFormData.action_pattern || null,
+        notification_channels: ruleFormData.notification_channels,
+        is_active: ruleFormData.is_active,
+        conditions: {}
+      })
+
+      if (error) throw error
+
+      toast.success('Alert rule created successfully')
+      setShowCreateRuleDialog(false)
+      resetRuleForm()
+      fetchAlertRules()
+    } catch (error) {
+      console.error('Error creating alert rule:', error)
+      toast.error('Failed to create alert rule')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Update alert rule
+  const handleUpdateAlertRule = async () => {
+    if (!editingRule) return
+    try {
+      setIsSaving(true)
+      const { error } = await supabase
+        .from('audit_alert_rules')
+        .update({
+          rule_name: ruleFormData.rule_name,
+          description: ruleFormData.description || null,
+          log_type: ruleFormData.log_type || null,
+          severity: ruleFormData.severity || null,
+          action_pattern: ruleFormData.action_pattern || null,
+          notification_channels: ruleFormData.notification_channels,
+          is_active: ruleFormData.is_active,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingRule.id)
+
+      if (error) throw error
+
+      toast.success('Alert rule updated successfully')
+      setShowEditRuleDialog(false)
+      setEditingRule(null)
+      resetRuleForm()
+      fetchAlertRules()
+    } catch (error) {
+      console.error('Error updating alert rule:', error)
+      toast.error('Failed to update alert rule')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Delete alert rule
+  const handleDeleteAlertRule = async (ruleId: string) => {
+    try {
+      const { error } = await supabase
+        .from('audit_alert_rules')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', ruleId)
+
+      if (error) throw error
+
+      toast.success('Alert rule deleted')
+      fetchAlertRules()
+    } catch (error) {
+      console.error('Error deleting alert rule:', error)
+      toast.error('Failed to delete alert rule')
+    }
+  }
+
+  // Toggle alert rule status
+  const handleToggleRuleStatus = async (ruleId: string, isActive: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('audit_alert_rules')
+        .update({ is_active: isActive, updated_at: new Date().toISOString() })
+        .eq('id', ruleId)
+
+      if (error) throw error
+
+      toast.success(`Alert rule ${isActive ? 'activated' : 'deactivated'}`)
+      fetchAlertRules()
+    } catch (error) {
+      console.error('Error toggling rule status:', error)
+      toast.error('Failed to update rule status')
+    }
+  }
+
+  // Reset form
+  const resetRuleForm = () => {
+    setRuleFormData({
+      rule_name: '',
+      description: '',
+      log_type: '',
+      severity: '',
+      action_pattern: '',
+      notification_channels: ['email'],
+      is_active: true
+    })
+  }
+
+  // Open edit dialog
+  const openEditRuleDialog = (rule: DbAlertRule) => {
+    setEditingRule(rule)
+    setRuleFormData({
+      rule_name: rule.rule_name,
+      description: rule.description || '',
+      log_type: rule.log_type || '',
+      severity: rule.severity || '',
+      action_pattern: rule.action_pattern || '',
+      notification_channels: rule.notification_channels || ['email'],
+      is_active: rule.is_active
+    })
+    setShowEditRuleDialog(true)
+  }
+
+  // Export audit logs
+  const handleExportAuditLogs = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('audit_logs')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+
+      // Create CSV
+      const headers = ['ID', 'Type', 'Severity', 'Action', 'Description', 'Status', 'IP Address', 'Created At']
+      const csvContent = [
+        headers.join(','),
+        ...(data || []).map(log => [
+          log.id,
+          log.log_type,
+          log.severity,
+          log.action,
+          `"${(log.description || '').replace(/"/g, '""')}"`,
+          log.status,
+          log.ip_address || '',
+          log.created_at
+        ].join(','))
+      ].join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+
+      // Log the export action
+      await createAuditLog({
+        log_type: 'data_access',
+        action: 'data.export',
+        description: 'Exported audit logs to CSV',
+        status: 'success'
+      })
+
+      toast.success('Audit logs exported successfully')
+    } catch (error) {
+      console.error('Error exporting logs:', error)
+      toast.error('Failed to export audit logs')
+    }
+  }
+
+  // Initial fetch
+  useEffect(() => {
+    fetchAuditLogs()
+    fetchAlertRules()
+  }, [fetchAuditLogs, fetchAlertRules])
+
+  // Convert DB logs to display format
+  const convertedDbLogs: AuditLog[] = useMemo(() => {
+    return dbLogs.map(log => ({
+      id: log.id,
+      timestamp: log.created_at,
+      log_type: (log.log_type || 'system') as LogType,
+      severity: (log.severity || 'info') as LogSeverity,
+      status: (log.status || 'success') as LogStatus,
+      action: log.action,
+      description: log.description || '',
+      user_id: log.user_id,
+      user_email: log.user_email,
+      user_name: log.user_email?.split('@')[0] || null,
+      user_role: null,
+      ip_address: log.ip_address || '0.0.0.0',
+      user_agent: log.device || 'Unknown',
+      device_type: 'desktop' as const,
+      location: log.location || 'Unknown',
+      country: 'Unknown',
+      city: 'Unknown',
+      resource_type: log.resource || 'unknown',
+      resource_id: log.id,
+      resource_name: log.resource || 'Unknown',
+      request_id: log.id,
+      session_id: null,
+      duration_ms: log.duration_ms || 0,
+      metadata: log.metadata || {},
+      tags: [],
+      is_anomaly: log.severity === 'critical' || log.severity === 'error',
+      risk_score: log.severity === 'critical' ? 90 : log.severity === 'error' ? 60 : log.severity === 'warning' ? 40 : 10
+    }))
+  }, [dbLogs])
+
+  // Combine DB logs with mock logs for display
+  const allLogs = useMemo(() => {
+    return [...convertedDbLogs, ...mockLogs]
+  }, [convertedDbLogs])
+
   // Filtered logs
   const filteredLogs = useMemo(() => {
-    return mockLogs.filter(log => {
+    return allLogs.filter(log => {
       const matchesSearch =
         log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
         log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -675,51 +1051,87 @@ export default function AuditLogsClient() {
       const matchesType = typeFilter === 'all' || log.log_type === typeFilter
       return matchesSearch && matchesSeverity && matchesType
     })
-  }, [searchQuery, severityFilter, typeFilter])
+  }, [allLogs, searchQuery, severityFilter, typeFilter])
+
+  // Convert DB alert rules to display format
+  const allAlertRules = useMemo(() => {
+    const dbRulesFormatted: AlertRule[] = dbAlertRules.map(rule => ({
+      id: rule.id,
+      name: rule.rule_name,
+      description: rule.description || '',
+      condition: rule.action_pattern || 'custom condition',
+      severity: (rule.severity || 'medium') as AlertSeverity,
+      is_active: rule.is_active,
+      threshold: 1,
+      window_minutes: 15,
+      notification_channels: rule.notification_channels || ['email'],
+      last_triggered_at: null,
+      trigger_count_24h: 0,
+      created_at: rule.created_at,
+      updated_at: rule.updated_at
+    }))
+    return [...dbRulesFormatted, ...mockAlertRules]
+  }, [dbAlertRules])
 
   // Stats calculations
   const stats = useMemo(() => {
-    const total = mockLogs.length
-    const critical = mockLogs.filter(l => l.severity === 'critical').length
-    const warnings = mockLogs.filter(l => l.severity === 'warning').length
-    const errors = mockLogs.filter(l => l.severity === 'error').length
-    const anomalies = mockLogs.filter(l => l.is_anomaly).length
-    const blocked = mockLogs.filter(l => l.status === 'blocked').length
+    const total = allLogs.length
+    const critical = allLogs.filter(l => l.severity === 'critical').length
+    const warnings = allLogs.filter(l => l.severity === 'warning').length
+    const errors = allLogs.filter(l => l.severity === 'error').length
+    const anomalies = allLogs.filter(l => l.is_anomaly).length
+    const blocked = allLogs.filter(l => l.status === 'blocked').length
     const activeAlerts = mockAlerts.filter(a => a.status === 'active').length
-    const avgRisk = mockLogs.reduce((acc, l) => acc + l.risk_score, 0) / total
+    const avgRisk = allLogs.length > 0 ? allLogs.reduce((acc, l) => acc + l.risk_score, 0) / total : 0
 
     return { total, critical, warnings, errors, anomalies, blocked, activeAlerts, avgRisk }
-  }, [])
+  }, [allLogs])
 
   // Handlers
-  const handleExportAuditLogs = () => {
-    toast.success('Exporting audit logs', {
-      description: 'Audit log report will be downloaded'
-    })
-  }
-
   const handleCreateAlert = () => {
-    toast.info('Create Alert', {
-      description: 'Opening alert configuration...'
-    })
+    setShowCreateRuleDialog(true)
   }
 
-  const handleInvestigateLog = (logId: string) => {
-    toast.info('Investigating', {
+  const handleInvestigateLog = async (logId: string) => {
+    await createAuditLog({
+      log_type: 'security',
+      action: 'log.investigate',
+      description: `Investigating log ${logId}`,
+      status: 'success'
+    })
+    toast.info('Investigation started', {
       description: `Opening investigation for log ${logId}...`
     })
   }
 
-  const handleMarkResolved = (alertId: string) => {
+  const handleMarkResolved = async (alertId: string) => {
+    await createAuditLog({
+      log_type: 'admin',
+      action: 'alert.resolve',
+      description: `Resolved alert ${alertId}`,
+      status: 'success'
+    })
     toast.success('Alert resolved', {
       description: `Alert ${alertId} has been marked as resolved`
     })
   }
 
-  const handleGenerateReport = () => {
+  const handleGenerateReport = async () => {
+    await createAuditLog({
+      log_type: 'data_access',
+      action: 'report.generate',
+      description: 'Generated compliance report',
+      status: 'success'
+    })
     toast.success('Generating report', {
       description: 'Compliance report is being generated...'
     })
+  }
+
+  const handleRefresh = () => {
+    fetchAuditLogs()
+    fetchAlertRules()
+    toast.success('Data refreshed')
   }
 
   return (
@@ -746,11 +1158,11 @@ export default function AuditLogsClient() {
               {isLiveMode ? <Play className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
               {isLiveMode ? 'Live' : 'Paused'}
             </Button>
-            <Button variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isLoading}>
+              {isLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <RefreshCw className="w-4 h-4 mr-2" />}
               Refresh
             </Button>
-            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+            <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white" onClick={handleExportAuditLogs}>
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
@@ -1127,7 +1539,7 @@ export default function AuditLogsClient() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Alert Rules</CardTitle>
-                      <Button size="sm">
+                      <Button size="sm" onClick={handleCreateAlert}>
                         <Plus className="w-4 h-4 mr-2" />
                         New Rule
                       </Button>
@@ -1135,7 +1547,7 @@ export default function AuditLogsClient() {
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="divide-y">
-                      {mockAlertRules.map(rule => (
+                      {allAlertRules.map(rule => (
                         <div key={rule.id} className="p-4">
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2">
@@ -1145,9 +1557,24 @@ export default function AuditLogsClient() {
                                 {rule.is_active ? 'Active' : 'Inactive'}
                               </Badge>
                             </div>
-                            <span className="text-sm text-gray-500">
-                              {rule.trigger_count_24h} triggers/24h
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-500">
+                                {rule.trigger_count_24h} triggers/24h
+                              </span>
+                              {!mockAlertRules.find(m => m.id === rule.id) && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    const dbRule = dbAlertRules.find(r => r.id === rule.id)
+                                    if (dbRule) openEditRuleDialog(dbRule)
+                                  }}
+                                >
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-300">{rule.description}</p>
                           <code className="text-xs text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded mt-2 inline-block">
@@ -1908,6 +2335,210 @@ export default function AuditLogsClient() {
                 </div>
               )}
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Alert Rule Dialog */}
+        <Dialog open={showCreateRuleDialog} onOpenChange={setShowCreateRuleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Create Alert Rule
+              </DialogTitle>
+              <DialogDescription>
+                Configure a new alert rule for audit log monitoring
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="rule_name">Rule Name</Label>
+                <Input
+                  id="rule_name"
+                  value={ruleFormData.rule_name}
+                  onChange={(e) => setRuleFormData({ ...ruleFormData, rule_name: e.target.value })}
+                  placeholder="e.g., Failed Login Threshold"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  value={ruleFormData.description}
+                  onChange={(e) => setRuleFormData({ ...ruleFormData, description: e.target.value })}
+                  placeholder="What does this rule monitor?"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="log_type">Log Type</Label>
+                  <select
+                    id="log_type"
+                    value={ruleFormData.log_type}
+                    onChange={(e) => setRuleFormData({ ...ruleFormData, log_type: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="">Any</option>
+                    <option value="authentication">Authentication</option>
+                    <option value="security">Security</option>
+                    <option value="data_access">Data Access</option>
+                    <option value="admin">Admin</option>
+                    <option value="system">System</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="severity">Severity</Label>
+                  <select
+                    id="severity"
+                    value={ruleFormData.severity}
+                    onChange={(e) => setRuleFormData({ ...ruleFormData, severity: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="">Any</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="action_pattern">Action Pattern</Label>
+                <Input
+                  id="action_pattern"
+                  value={ruleFormData.action_pattern}
+                  onChange={(e) => setRuleFormData({ ...ruleFormData, action_pattern: e.target.value })}
+                  placeholder="e.g., user.login_failed"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="is_active">Active</Label>
+                <Switch
+                  id="is_active"
+                  checked={ruleFormData.is_active}
+                  onCheckedChange={(checked) => setRuleFormData({ ...ruleFormData, is_active: checked })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCreateRuleDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateAlertRule} disabled={isSaving || !ruleFormData.rule_name}>
+                {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+                Create Rule
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Alert Rule Dialog */}
+        <Dialog open={showEditRuleDialog} onOpenChange={setShowEditRuleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5" />
+                Edit Alert Rule
+              </DialogTitle>
+              <DialogDescription>
+                Update alert rule configuration
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit_rule_name">Rule Name</Label>
+                <Input
+                  id="edit_rule_name"
+                  value={ruleFormData.rule_name}
+                  onChange={(e) => setRuleFormData({ ...ruleFormData, rule_name: e.target.value })}
+                  placeholder="e.g., Failed Login Threshold"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_description">Description</Label>
+                <Input
+                  id="edit_description"
+                  value={ruleFormData.description}
+                  onChange={(e) => setRuleFormData({ ...ruleFormData, description: e.target.value })}
+                  placeholder="What does this rule monitor?"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit_log_type">Log Type</Label>
+                  <select
+                    id="edit_log_type"
+                    value={ruleFormData.log_type}
+                    onChange={(e) => setRuleFormData({ ...ruleFormData, log_type: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="">Any</option>
+                    <option value="authentication">Authentication</option>
+                    <option value="security">Security</option>
+                    <option value="data_access">Data Access</option>
+                    <option value="admin">Admin</option>
+                    <option value="system">System</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit_severity">Severity</Label>
+                  <select
+                    id="edit_severity"
+                    value={ruleFormData.severity}
+                    onChange={(e) => setRuleFormData({ ...ruleFormData, severity: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                  >
+                    <option value="">Any</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit_action_pattern">Action Pattern</Label>
+                <Input
+                  id="edit_action_pattern"
+                  value={ruleFormData.action_pattern}
+                  onChange={(e) => setRuleFormData({ ...ruleFormData, action_pattern: e.target.value })}
+                  placeholder="e.g., user.login_failed"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="edit_is_active">Active</Label>
+                <Switch
+                  id="edit_is_active"
+                  checked={ruleFormData.is_active}
+                  onCheckedChange={(checked) => setRuleFormData({ ...ruleFormData, is_active: checked })}
+                />
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (editingRule) {
+                    handleDeleteAlertRule(editingRule.id)
+                    setShowEditRuleDialog(false)
+                    setEditingRule(null)
+                    resetRuleForm()
+                  }
+                }}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowEditRuleDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleUpdateAlertRule} disabled={isSaving || !ruleFormData.rule_name}>
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-2" />}
+                  Save Changes
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

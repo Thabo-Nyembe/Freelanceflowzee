@@ -74,19 +74,8 @@ export function useAutomation(options: UseAutomationOptions = {}) {
 
   const { data, loading, error, refetch } = useSupabaseQuery<Automation>(queryOptions)
 
-  const { mutate: create } = useSupabaseMutation<Automation>({
-    table: 'automation',
-    operation: 'insert'
-  })
-
-  const { mutate: update } = useSupabaseMutation<Automation>({
-    table: 'automation',
-    operation: 'update'
-  })
-
-  const { mutate: remove } = useSupabaseMutation<Automation>({
-    table: 'automation',
-    operation: 'delete'
+  const { create, update, remove } = useSupabaseMutation({
+    table: 'automation'
   })
 
   return {

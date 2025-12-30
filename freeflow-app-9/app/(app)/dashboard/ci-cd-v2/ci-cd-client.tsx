@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -211,6 +212,51 @@ interface UsageStats {
   storageLimit: number
   concurrentJobs: number
   maxConcurrentJobs: number
+}
+
+// Database types for Supabase
+interface DbPipeline {
+  id: string
+  user_id: string
+  pipeline_name: string
+  description: string | null
+  pipeline_type: string
+  config: Record<string, unknown>
+  trigger_type: string
+  trigger_branch: string | null
+  status: string
+  last_status: string | null
+  is_running: boolean
+  run_count: number
+  success_count: number
+  failure_count: number
+  avg_duration_seconds: number | null
+  last_run_at: string | null
+  deployment_environment: string | null
+  repository_url: string | null
+  tags: string[] | null
+  created_at: string
+  updated_at: string
+}
+
+interface PipelineFormState {
+  pipeline_name: string
+  description: string
+  pipeline_type: string
+  trigger_type: string
+  trigger_branch: string
+  deployment_environment: string
+  repository_url: string
+}
+
+const initialFormState: PipelineFormState = {
+  pipeline_name: '',
+  description: '',
+  pipeline_type: 'deployment',
+  trigger_type: 'manual',
+  trigger_branch: 'main',
+  deployment_environment: 'staging',
+  repository_url: '',
 }
 
 interface CiCdStats {
@@ -584,6 +630,9 @@ const mockCiCdQuickActions = [
 ]
 
 export default function CiCdClient() {
+  const supabase = createClientComponentClient()
+
+  // Core state
   const [activeTab, setActiveTab] = useState('workflows')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<WorkflowStatus | 'all'>('all')
@@ -591,17 +640,169 @@ export default function CiCdClient() {
   const [selectedRun, setSelectedRun] = useState<WorkflowRun | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  // Calculate stats
-  const stats: CiCdStats = useMemo(() => ({
-    totalWorkflows: mockWorkflows.length,
-    activeWorkflows: mockWorkflows.filter(w => w.status === 'running').length,
-    totalRuns: mockRuns.length,
-    successfulRuns: mockRuns.filter(r => r.conclusion === 'success').length,
-    failedRuns: mockRuns.filter(r => r.conclusion === 'failure').length,
-    avgDuration: mockWorkflows.reduce((sum, w) => sum + w.avgDuration, 0) / mockWorkflows.length,
-    successRate: mockWorkflows.reduce((sum, w) => sum + w.successRate, 0) / mockWorkflows.length,
-    runningNow: mockRuns.filter(r => r.status === 'in_progress').length
-  }), [])
+  // Supabase data state
+  const [dbPipelines, setDbPipelines] = useState<DbPipeline[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [formState, setFormState] = useState<PipelineFormState>(initialFormState)
+
+  // Fetch pipelines from Supabase
+  const fetchPipelines = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('ci_cd')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbPipelines(data || [])
+    } catch (error) {
+      console.error('Error fetching pipelines:', error)
+      toast.error('Failed to load pipelines')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchPipelines()
+  }, [fetchPipelines])
+
+  // Create pipeline
+  const handleCreatePipeline = async () => {
+    if (!formState.pipeline_name.trim()) {
+      toast.error('Pipeline name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create pipelines')
+        return
+      }
+
+      const { error } = await supabase.from('ci_cd').insert({
+        user_id: user.id,
+        pipeline_name: formState.pipeline_name,
+        description: formState.description || null,
+        pipeline_type: formState.pipeline_type,
+        trigger_type: formState.trigger_type,
+        trigger_branch: formState.trigger_branch || 'main',
+        deployment_environment: formState.deployment_environment || null,
+        repository_url: formState.repository_url || null,
+        status: 'active',
+        config: {},
+        run_count: 0,
+        success_count: 0,
+        failure_count: 0,
+      })
+
+      if (error) throw error
+
+      toast.success('Pipeline created successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      fetchPipelines()
+    } catch (error) {
+      console.error('Error creating pipeline:', error)
+      toast.error('Failed to create pipeline')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Trigger/Run pipeline
+  const handleTriggerPipeline = async (pipelineId: string, pipelineName: string) => {
+    try {
+      const { error } = await supabase
+        .from('ci_cd')
+        .update({
+          is_running: true,
+          last_run_at: new Date().toISOString(),
+          run_count: dbPipelines.find(p => p.id === pipelineId)?.run_count ?? 0 + 1,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', pipelineId)
+
+      if (error) throw error
+
+      toast.success(`Pipeline "${pipelineName}" triggered`, {
+        description: 'Build started...'
+      })
+      fetchPipelines()
+    } catch (error) {
+      console.error('Error triggering pipeline:', error)
+      toast.error('Failed to trigger pipeline')
+    }
+  }
+
+  // Update pipeline status
+  const handleUpdateStatus = async (pipelineId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('ci_cd')
+        .update({
+          status: newStatus,
+          is_running: newStatus === 'running',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', pipelineId)
+
+      if (error) throw error
+
+      toast.success(`Pipeline status updated to ${newStatus}`)
+      fetchPipelines()
+    } catch (error) {
+      console.error('Error updating pipeline:', error)
+      toast.error('Failed to update pipeline status')
+    }
+  }
+
+  // Delete pipeline
+  const handleDeletePipeline = async (pipelineId: string) => {
+    try {
+      const { error } = await supabase
+        .from('ci_cd')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', pipelineId)
+
+      if (error) throw error
+
+      toast.success('Pipeline deleted')
+      fetchPipelines()
+    } catch (error) {
+      console.error('Error deleting pipeline:', error)
+      toast.error('Failed to delete pipeline')
+    }
+  }
+
+  // Calculate stats from DB data + mock data for display
+  const stats: CiCdStats = useMemo(() => {
+    const dbCount = dbPipelines.length
+    const dbRunning = dbPipelines.filter(p => p.is_running).length
+    const dbSuccess = dbPipelines.reduce((sum, p) => sum + (p.success_count || 0), 0)
+    const dbFailed = dbPipelines.reduce((sum, p) => sum + (p.failure_count || 0), 0)
+    const dbTotalRuns = dbPipelines.reduce((sum, p) => sum + (p.run_count || 0), 0)
+
+    return {
+      totalWorkflows: mockWorkflows.length + dbCount,
+      activeWorkflows: mockWorkflows.filter(w => w.status === 'running').length + dbRunning,
+      totalRuns: mockRuns.length + dbTotalRuns,
+      successfulRuns: mockRuns.filter(r => r.conclusion === 'success').length + dbSuccess,
+      failedRuns: mockRuns.filter(r => r.conclusion === 'failure').length + dbFailed,
+      avgDuration: mockWorkflows.reduce((sum, w) => sum + w.avgDuration, 0) / mockWorkflows.length,
+      successRate: mockWorkflows.reduce((sum, w) => sum + w.successRate, 0) / mockWorkflows.length,
+      runningNow: mockRuns.filter(r => r.status === 'in_progress').length + dbRunning
+    }
+  }, [dbPipelines])
 
   // Filter workflows
   const filteredWorkflows = useMemo(() => {
@@ -613,28 +814,22 @@ export default function CiCdClient() {
     })
   }, [searchQuery, statusFilter])
 
-  // Handlers
+  // Mock workflow handlers (for demo workflows)
   const handleTriggerWorkflow = (workflow: Workflow) => {
     toast.info('Workflow triggered', {
       description: `Starting ${workflow.name}...`
     })
   }
 
-  const handleCreateWorkflow = () => {
-    toast.info('Create Workflow', {
-      description: 'Opening workflow editor...'
-    })
-  }
-
   const handleCancelRun = (run: WorkflowRun) => {
     toast.success('Run cancelled', {
-      description: `Workflow run ${run.run_number} cancelled`
+      description: `Workflow run #${run.runNumber} cancelled`
     })
   }
 
   const handleRerunWorkflow = (run: WorkflowRun) => {
     toast.info('Rerunning workflow', {
-      description: `Restarting run ${run.run_number}`
+      description: `Restarting run #${run.runNumber}`
     })
   }
 
@@ -657,13 +852,16 @@ export default function CiCdClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => toast.info('Exporting logs...')}>
               <Download className="w-4 h-4" />
               Export Logs
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+            <Button
+              className="gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              onClick={() => setShowCreateDialog(true)}
+            >
               <Plus className="w-4 h-4" />
-              New Workflow
+              New Pipeline
             </Button>
           </div>
         </div>
@@ -813,19 +1011,20 @@ export default function CiCdClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Workflow', color: 'text-blue-500' },
-                { icon: Play, label: 'Run All', color: 'text-green-500' },
-                { icon: FileCode, label: 'Edit YAML', color: 'text-purple-500' },
-                { icon: Copy, label: 'Duplicate', color: 'text-amber-500' },
-                { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500' },
-                { icon: History, label: 'Run History', color: 'text-indigo-500' },
-                { icon: Download, label: 'Export', color: 'text-cyan-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500' },
+                { icon: Plus, label: 'New Pipeline', color: 'text-blue-500', onClick: () => setShowCreateDialog(true) },
+                { icon: Play, label: 'Run All', color: 'text-green-500', onClick: () => toast.info('Running all pipelines...') },
+                { icon: FileCode, label: 'Edit YAML', color: 'text-purple-500', onClick: () => toast.info('Opening YAML editor...') },
+                { icon: Copy, label: 'Duplicate', color: 'text-amber-500', onClick: () => toast.info('Select a pipeline to duplicate') },
+                { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500', onClick: () => toast.info('Opening branch rules...') },
+                { icon: History, label: 'Run History', color: 'text-indigo-500', onClick: () => setActiveTab('runs') },
+                { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => toast.info('Exporting pipelines...') },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500', onClick: () => { fetchPipelines(); toast.success('Refreshed') } },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.onClick}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -891,7 +1090,12 @@ export default function CiCdClient() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" className="gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="gap-1"
+                          onClick={(e) => { e.stopPropagation(); handleTriggerWorkflow(workflow) }}
+                        >
                           <Play className="w-4 h-4" />
                           Run
                         </Button>
@@ -903,6 +1107,122 @@ export default function CiCdClient() {
                   </CardContent>
                 </Card>
               ))}
+
+              {/* Database Pipelines */}
+              {dbPipelines.length > 0 && (
+                <>
+                  <div className="flex items-center gap-2 mt-6 mb-2">
+                    <Database className="w-4 h-4 text-blue-600" />
+                    <h4 className="text-sm font-semibold text-gray-600">Your Pipelines</h4>
+                    <Badge variant="outline">{dbPipelines.length}</Badge>
+                  </div>
+                  {dbPipelines
+                    .filter(pipeline => {
+                      const matchesSearch = pipeline.pipeline_name.toLowerCase().includes(searchQuery.toLowerCase())
+                      const matchesStatus = statusFilter === 'all' || pipeline.status === statusFilter
+                      return matchesSearch && matchesStatus
+                    })
+                    .map((pipeline) => (
+                    <Card key={pipeline.id} className="hover:shadow-md transition-shadow border-l-4 border-l-blue-500">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              {pipeline.is_running ? (
+                                <RefreshCw className="w-4 h-4 text-blue-600 animate-spin" />
+                              ) : pipeline.status === 'active' ? (
+                                <CheckCircle2 className="w-4 h-4 text-green-600" />
+                              ) : (
+                                <Circle className="w-4 h-4 text-gray-400" />
+                              )}
+                              <h3 className="text-lg font-semibold">{pipeline.pipeline_name}</h3>
+                              <Badge className={pipeline.is_running ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                                {pipeline.is_running ? 'running' : pipeline.status}
+                              </Badge>
+                              <Badge variant="outline">{pipeline.pipeline_type}</Badge>
+                            </div>
+                            {pipeline.description && (
+                              <p className="text-gray-500 text-sm mb-3">{pipeline.description}</p>
+                            )}
+                            <div className="flex items-center gap-6 text-sm">
+                              <div className="flex items-center gap-2">
+                                <Play className="w-4 h-4 text-gray-400" />
+                                <span>{pipeline.run_count || 0} runs</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-green-500" />
+                                <span>{pipeline.success_count || 0} success</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <XCircle className="w-4 h-4 text-red-500" />
+                                <span>{pipeline.failure_count || 0} failed</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <GitBranch className="w-4 h-4 text-gray-400" />
+                                <span>{pipeline.trigger_branch || 'main'}</span>
+                              </div>
+                              {pipeline.deployment_environment && (
+                                <div className="flex items-center gap-2">
+                                  <Globe className="w-4 h-4 text-gray-400" />
+                                  <span>{pipeline.deployment_environment}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="gap-1"
+                              onClick={() => handleTriggerPipeline(pipeline.id, pipeline.pipeline_name)}
+                              disabled={pipeline.is_running}
+                            >
+                              <Play className="w-4 h-4" />
+                              {pipeline.is_running ? 'Running...' : 'Run'}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUpdateStatus(pipeline.id, pipeline.status === 'active' ? 'paused' : 'active')}
+                            >
+                              {pipeline.status === 'active' ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 hover:text-red-700"
+                              onClick={() => handleDeletePipeline(pipeline.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </>
+              )}
+
+              {/* Empty state */}
+              {filteredWorkflows.length === 0 && dbPipelines.length === 0 && !loading && (
+                <Card className="border-dashed">
+                  <CardContent className="p-12 text-center">
+                    <Workflow className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No pipelines yet</h3>
+                    <p className="text-gray-500 mb-4">Create your first CI/CD pipeline to automate your workflow</p>
+                    <Button onClick={() => setShowCreateDialog(true)}>
+                      <Plus className="w-4 h-4 mr-2" />
+                      Create Pipeline
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+
+              {loading && (
+                <div className="flex items-center justify-center py-8">
+                  <RefreshCw className="w-6 h-6 text-blue-600 animate-spin" />
+                </div>
+              )}
             </div>
           </TabsContent>
 
@@ -2071,16 +2391,12 @@ export default function CiCdClient() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-4">
-                  <Button variant="outline" className="gap-2">
-                    <Terminal className="w-4 h-4" />
-                    View Logs
-                  </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => handleRerunWorkflow(selectedRun)}>
                     <RotateCcw className="w-4 h-4" />
                     Re-run
                   </Button>
                   {selectedRun.status === 'in_progress' && (
-                    <Button variant="outline" className="gap-2 text-red-600">
+                    <Button variant="outline" className="gap-2 text-red-600" onClick={() => handleCancelRun(selectedRun)}>
                       <StopCircle className="w-4 h-4" />
                       Cancel
                     </Button>
@@ -2088,6 +2404,108 @@ export default function CiCdClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Pipeline Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-600" />
+                Create New Pipeline
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="pipeline_name">Pipeline Name *</Label>
+                <Input
+                  id="pipeline_name"
+                  placeholder="e.g., Deploy to Production"
+                  value={formState.pipeline_name}
+                  onChange={(e) => setFormState(prev => ({ ...prev, pipeline_name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  placeholder="Pipeline description..."
+                  value={formState.description}
+                  onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Pipeline Type</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formState.pipeline_type}
+                    onChange={(e) => setFormState(prev => ({ ...prev, pipeline_type: e.target.value }))}
+                  >
+                    <option value="deployment">Deployment</option>
+                    <option value="build">Build</option>
+                    <option value="test">Test</option>
+                    <option value="release">Release</option>
+                    <option value="integration">Integration</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Trigger Type</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formState.trigger_type}
+                    onChange={(e) => setFormState(prev => ({ ...prev, trigger_type: e.target.value }))}
+                  >
+                    <option value="manual">Manual</option>
+                    <option value="push">On Push</option>
+                    <option value="pull_request">Pull Request</option>
+                    <option value="schedule">Scheduled</option>
+                    <option value="webhook">Webhook</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="trigger_branch">Branch</Label>
+                  <Input
+                    id="trigger_branch"
+                    placeholder="main"
+                    value={formState.trigger_branch}
+                    onChange={(e) => setFormState(prev => ({ ...prev, trigger_branch: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Environment</Label>
+                  <select
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formState.deployment_environment}
+                    onChange={(e) => setFormState(prev => ({ ...prev, deployment_environment: e.target.value }))}
+                  >
+                    <option value="development">Development</option>
+                    <option value="staging">Staging</option>
+                    <option value="production">Production</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="repository_url">Repository URL</Label>
+                <Input
+                  id="repository_url"
+                  placeholder="https://github.com/org/repo"
+                  value={formState.repository_url}
+                  onChange={(e) => setFormState(prev => ({ ...prev, repository_url: e.target.value }))}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleCreatePipeline} disabled={isSubmitting}>
+                  {isSubmitting ? 'Creating...' : 'Create Pipeline'}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

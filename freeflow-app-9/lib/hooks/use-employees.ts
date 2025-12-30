@@ -1,6 +1,6 @@
 'use client'
 
-import { useSupabaseQuery, useSupabaseMutation } from './base-hooks'
+import { useSupabaseQuery, useSupabaseMutation } from './use-supabase-query'
 
 export type EmploymentType = 'full-time' | 'part-time' | 'contract' | 'intern' | 'temporary'
 export type EmployeeStatus = 'active' | 'inactive' | 'on-leave' | 'terminated' | 'suspended'
@@ -88,35 +88,44 @@ interface UseEmployeesOptions {
 export function useEmployees(options: UseEmployeesOptions = {}) {
   const { department, status } = options
 
-  const buildQuery = (supabase: any) => {
-    let query = supabase
-      .from('employees')
-      .select('*')
-      .is('deleted_at', null)
-      .order('created_at', { ascending: false })
-
-    if (department && department !== 'all') {
-      query = query.eq('department', department)
-    }
-
-    if (status && status !== 'all') {
-      query = query.eq('status', status)
-    }
-
-    return query
+  const filters: Record<string, any> = {}
+  if (department && department !== 'all') {
+    filters.department = department
+  }
+  if (status && status !== 'all') {
+    filters.status = status
   }
 
-  return useSupabaseQuery<Employee>('employees', buildQuery, [department, status])
+  return useSupabaseQuery<Employee>({
+    table: 'employees',
+    filters,
+    orderBy: { column: 'created_at', ascending: false }
+  })
 }
 
 export function useCreateEmployee() {
-  return useSupabaseMutation<Employee>('employees', 'insert')
+  const result = useSupabaseMutation<Employee>({ table: 'employees' })
+  return {
+    mutate: result.mutate,
+    loading: result.loading,
+    error: result.error
+  }
 }
 
 export function useUpdateEmployee() {
-  return useSupabaseMutation<Employee>('employees', 'update')
+  const result = useSupabaseMutation<Employee>({ table: 'employees' })
+  return {
+    mutate: result.mutate,
+    loading: result.loading,
+    error: result.error
+  }
 }
 
 export function useDeleteEmployee() {
-  return useSupabaseMutation<Employee>('employees', 'delete')
+  const result = useSupabaseMutation<Employee>({ table: 'employees' })
+  return {
+    mutate: result.remove,
+    loading: result.loading,
+    error: result.error
+  }
 }

@@ -3,6 +3,16 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import {
+  useDashboards,
+  useWorksheets,
+  useReportDataSources,
+  useScheduledReports,
+  type ChartType,
+  type DataSourceType,
+  type ScheduleType,
+  type ExportFormat
+} from '@/lib/hooks/use-reporting'
+import {
   FileText,
   BarChart3,
   LineChart,
@@ -100,323 +110,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
-// Types
-type ChartType = 'bar' | 'line' | 'pie' | 'area' | 'scatter' | 'heatmap' | 'gauge' | 'table' | 'kpi' | 'map'
-type DataSourceType = 'postgresql' | 'mysql' | 'mongodb' | 'csv' | 'api' | 'snowflake' | 'bigquery'
-
-interface Dashboard {
-  id: string
-  name: string
-  description: string
-  thumbnail: string
-  widgets: Widget[]
-  createdAt: string
-  updatedAt: string
-  author: string
-  views: number
-  favorites: number
-  isFavorite: boolean
-  isPublished: boolean
-  tags: string[]
-}
-
-interface Widget {
-  id: string
-  type: ChartType
-  title: string
-  dataSource: string
-  metrics: string[]
-  dimensions: string[]
-  filters: WidgetFilter[]
-  position: { x: number; y: number; w: number; h: number }
-  config: Record<string, unknown>
-}
-
-interface WidgetFilter {
-  field: string
-  operator: 'equals' | 'contains' | 'greater' | 'less' | 'between' | 'in'
-  value: string | number | string[]
-}
-
-interface Worksheet {
-  id: string
-  name: string
-  chartType: ChartType
-  dataSource: string
-  metrics: string[]
-  dimensions: string[]
-  filters: WidgetFilter[]
-  lastModified: string
-  author: string
-}
-
-interface DataSource {
-  id: string
-  name: string
-  type: DataSourceType
-  host: string
-  database: string
-  status: 'connected' | 'disconnected' | 'error'
-  lastSync: string
-  tables: number
-  rowCount: number
-}
-
-interface ScheduledReport {
-  id: string
-  name: string
-  dashboard: string
-  schedule: 'daily' | 'weekly' | 'monthly'
-  nextRun: string
-  lastRun: string | null
-  recipients: string[]
-  format: 'pdf' | 'xlsx' | 'png'
-  enabled: boolean
-}
-
-// Mock Data
-const mockDashboards: Dashboard[] = [
-  {
-    id: '1',
-    name: 'Executive Summary',
-    description: 'High-level business metrics and KPIs for leadership team',
-    thumbnail: '/dashboards/executive.png',
-    widgets: [],
-    createdAt: '2024-12-01T10:00:00Z',
-    updatedAt: '2024-12-23T14:30:00Z',
-    author: 'John Smith',
-    views: 1842,
-    favorites: 45,
-    isFavorite: true,
-    isPublished: true,
-    tags: ['executive', 'kpi', 'monthly']
-  },
-  {
-    id: '2',
-    name: 'Sales Performance',
-    description: 'Pipeline analysis, conversion rates, and revenue tracking',
-    thumbnail: '/dashboards/sales.png',
-    widgets: [],
-    createdAt: '2024-12-05T09:00:00Z',
-    updatedAt: '2024-12-22T11:45:00Z',
-    author: 'Sarah Chen',
-    views: 956,
-    favorites: 32,
-    isFavorite: true,
-    isPublished: true,
-    tags: ['sales', 'pipeline', 'revenue']
-  },
-  {
-    id: '3',
-    name: 'Marketing Analytics',
-    description: 'Campaign performance, lead generation, and attribution',
-    thumbnail: '/dashboards/marketing.png',
-    widgets: [],
-    createdAt: '2024-12-10T15:00:00Z',
-    updatedAt: '2024-12-21T16:20:00Z',
-    author: 'Mike Johnson',
-    views: 723,
-    favorites: 28,
-    isFavorite: false,
-    isPublished: true,
-    tags: ['marketing', 'campaigns', 'leads']
-  },
-  {
-    id: '4',
-    name: 'Customer Success',
-    description: 'Retention metrics, NPS scores, and customer health',
-    thumbnail: '/dashboards/cs.png',
-    widgets: [],
-    createdAt: '2024-12-12T14:00:00Z',
-    updatedAt: '2024-12-20T10:15:00Z',
-    author: 'Emily Davis',
-    views: 542,
-    favorites: 19,
-    isFavorite: false,
-    isPublished: true,
-    tags: ['customer', 'retention', 'nps']
-  },
-  {
-    id: '5',
-    name: 'Product Analytics',
-    description: 'Feature usage, user engagement, and product metrics',
-    thumbnail: '/dashboards/product.png',
-    widgets: [],
-    createdAt: '2024-12-15T11:00:00Z',
-    updatedAt: '2024-12-19T09:30:00Z',
-    author: 'Alex Turner',
-    views: 389,
-    favorites: 15,
-    isFavorite: false,
-    isPublished: false,
-    tags: ['product', 'engagement', 'features']
-  }
-]
-
-const mockWorksheets: Worksheet[] = [
-  {
-    id: '1',
-    name: 'Revenue by Region',
-    chartType: 'bar',
-    dataSource: 'Sales Database',
-    metrics: ['revenue', 'orders'],
-    dimensions: ['region', 'quarter'],
-    filters: [],
-    lastModified: '2024-12-23T10:00:00Z',
-    author: 'John Smith'
-  },
-  {
-    id: '2',
-    name: 'User Growth Trend',
-    chartType: 'line',
-    dataSource: 'Analytics DB',
-    metrics: ['users', 'growth_rate'],
-    dimensions: ['date'],
-    filters: [],
-    lastModified: '2024-12-22T15:30:00Z',
-    author: 'Sarah Chen'
-  },
-  {
-    id: '3',
-    name: 'Market Share',
-    chartType: 'pie',
-    dataSource: 'Sales Database',
-    metrics: ['revenue_share'],
-    dimensions: ['product_category'],
-    filters: [],
-    lastModified: '2024-12-21T09:45:00Z',
-    author: 'Mike Johnson'
-  },
-  {
-    id: '4',
-    name: 'Conversion Funnel',
-    chartType: 'bar',
-    dataSource: 'Analytics DB',
-    metrics: ['conversion_rate'],
-    dimensions: ['funnel_stage'],
-    filters: [],
-    lastModified: '2024-12-20T14:20:00Z',
-    author: 'Emily Davis'
-  },
-  {
-    id: '5',
-    name: 'Customer Heatmap',
-    chartType: 'heatmap',
-    dataSource: 'CRM Database',
-    metrics: ['engagement_score'],
-    dimensions: ['segment', 'activity'],
-    filters: [],
-    lastModified: '2024-12-19T11:00:00Z',
-    author: 'Alex Turner'
-  }
-]
-
-const mockDataSources: DataSource[] = [
-  {
-    id: '1',
-    name: 'Sales Database',
-    type: 'postgresql',
-    host: 'db.company.com',
-    database: 'sales_prod',
-    status: 'connected',
-    lastSync: '2024-12-23T12:00:00Z',
-    tables: 45,
-    rowCount: 2450000
-  },
-  {
-    id: '2',
-    name: 'Analytics DB',
-    type: 'bigquery',
-    host: 'bigquery.googleapis.com',
-    database: 'analytics_warehouse',
-    status: 'connected',
-    lastSync: '2024-12-23T11:30:00Z',
-    tables: 128,
-    rowCount: 15600000
-  },
-  {
-    id: '3',
-    name: 'CRM Database',
-    type: 'mysql',
-    host: 'crm-db.company.com',
-    database: 'crm_production',
-    status: 'connected',
-    lastSync: '2024-12-23T12:15:00Z',
-    tables: 32,
-    rowCount: 890000
-  },
-  {
-    id: '4',
-    name: 'Marketing Data',
-    type: 'snowflake',
-    host: 'xy12345.snowflakecomputing.com',
-    database: 'marketing_dw',
-    status: 'connected',
-    lastSync: '2024-12-23T10:45:00Z',
-    tables: 67,
-    rowCount: 5200000
-  },
-  {
-    id: '5',
-    name: 'External API',
-    type: 'api',
-    host: 'api.partner.com',
-    database: 'N/A',
-    status: 'error',
-    lastSync: '2024-12-22T18:00:00Z',
-    tables: 0,
-    rowCount: 0
-  }
-]
-
-const mockScheduledReports: ScheduledReport[] = [
-  {
-    id: '1',
-    name: 'Weekly Executive Report',
-    dashboard: 'Executive Summary',
-    schedule: 'weekly',
-    nextRun: '2024-12-30T09:00:00Z',
-    lastRun: '2024-12-23T09:00:00Z',
-    recipients: ['ceo@company.com', 'cfo@company.com', 'coo@company.com'],
-    format: 'pdf',
-    enabled: true
-  },
-  {
-    id: '2',
-    name: 'Daily Sales Report',
-    dashboard: 'Sales Performance',
-    schedule: 'daily',
-    nextRun: '2024-12-24T07:00:00Z',
-    lastRun: '2024-12-23T07:00:00Z',
-    recipients: ['sales-team@company.com'],
-    format: 'xlsx',
-    enabled: true
-  },
-  {
-    id: '3',
-    name: 'Monthly Marketing Review',
-    dashboard: 'Marketing Analytics',
-    schedule: 'monthly',
-    nextRun: '2025-01-01T08:00:00Z',
-    lastRun: '2024-12-01T08:00:00Z',
-    recipients: ['marketing@company.com'],
-    format: 'pdf',
-    enabled: true
-  },
-  {
-    id: '4',
-    name: 'Customer Health Report',
-    dashboard: 'Customer Success',
-    schedule: 'weekly',
-    nextRun: '2024-12-30T10:00:00Z',
-    lastRun: '2024-12-23T10:00:00Z',
-    recipients: ['cs-team@company.com'],
-    format: 'pdf',
-    enabled: false
-  }
-]
-
-const chartTypes: { type: ChartType; label: string; icon: typeof BarChart3 }[] = [
+// Chart types configuration
+const CHART_TYPES: { type: ChartType; label: string; icon: typeof BarChart3 }[] = [
   { type: 'bar', label: 'Bar Chart', icon: BarChart3 },
   { type: 'line', label: 'Line Chart', icon: LineChart },
   { type: 'pie', label: 'Pie Chart', icon: PieChart },
@@ -428,6 +123,20 @@ const chartTypes: { type: ChartType; label: string; icon: typeof BarChart3 }[] =
   { type: 'kpi', label: 'KPI Card', icon: TrendingUp },
   { type: 'map', label: 'Map', icon: Map }
 ]
+
+// Data source types
+const DATA_SOURCE_TYPES: { type: DataSourceType; label: string; icon: typeof Database }[] = [
+  { type: 'postgresql', label: 'PostgreSQL', icon: Database },
+  { type: 'mysql', label: 'MySQL', icon: Database },
+  { type: 'mongodb', label: 'MongoDB', icon: Layers },
+  { type: 'snowflake', label: 'Snowflake', icon: Database },
+  { type: 'bigquery', label: 'BigQuery', icon: Database },
+  { type: 'csv', label: 'CSV Upload', icon: FileText },
+  { type: 'api', label: 'API', icon: Globe }
+]
+
+// Use CHART_TYPES for backward compatibility
+const chartTypes = CHART_TYPES
 
 // Enhanced Reporting Mock Data
 const mockReportingAIInsights = [
@@ -462,31 +171,107 @@ const mockReportingQuickActions = [
 ]
 
 export default function ReportingClient() {
+  // Hooks for data
+  const {
+    dashboards,
+    loading: dashboardsLoading,
+    createDashboard,
+    updateDashboard,
+    deleteDashboard,
+    toggleFavorite,
+    publishDashboard,
+    refetch: refetchDashboards
+  } = useDashboards()
+
+  const {
+    worksheets,
+    loading: worksheetsLoading,
+    createWorksheet,
+    updateWorksheet,
+    deleteWorksheet,
+    refetch: refetchWorksheets
+  } = useWorksheets()
+
+  const {
+    dataSources,
+    loading: dataSourcesLoading,
+    createDataSource,
+    updateDataSource,
+    deleteDataSource,
+    syncDataSource,
+    refetch: refetchDataSources
+  } = useReportDataSources()
+
+  const {
+    scheduledReports,
+    loading: scheduledReportsLoading,
+    createScheduledReport,
+    updateScheduledReport,
+    deleteScheduledReport,
+    toggleScheduledReport,
+    runReportNow,
+    refetch: refetchScheduledReports
+  } = useScheduledReports()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('dashboards')
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedDashboard, setSelectedDashboard] = useState<Dashboard | null>(null)
-  const [selectedWorksheet, setSelectedWorksheet] = useState<Worksheet | null>(null)
+  const [selectedDashboard, setSelectedDashboard] = useState<any | null>(null)
+  const [selectedWorksheet, setSelectedWorksheet] = useState<any | null>(null)
   const [showCreateDashboard, setShowCreateDashboard] = useState(false)
   const [showCreateWorksheet, setShowCreateWorksheet] = useState(false)
   const [showDataSourceDialog, setShowDataSourceDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [filterFavorites, setFilterFavorites] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Form State - Dashboard
+  const [dashboardForm, setDashboardForm] = useState({
+    name: '',
+    description: '',
+    tags: ''
+  })
+
+  // Form State - Worksheet
+  const [worksheetForm, setWorksheetForm] = useState({
+    name: '',
+    chart_type: 'bar' as ChartType,
+    data_source: ''
+  })
+
+  // Form State - Data Source
+  const [dataSourceForm, setDataSourceForm] = useState({
+    name: '',
+    type: 'postgresql' as DataSourceType,
+    host: '',
+    database_name: ''
+  })
+
+  // Form State - Scheduled Report
+  const [scheduleForm, setScheduleForm] = useState({
+    name: '',
+    dashboard_id: '',
+    schedule: 'weekly' as ScheduleType,
+    recipients: '',
+    format: 'pdf' as ExportFormat
+  })
 
   // Stats
-  const totalDashboards = mockDashboards.length
-  const totalWorksheets = mockWorksheets.length
-  const totalDataSources = mockDataSources.filter(d => d.status === 'connected').length
-  const totalViews = mockDashboards.reduce((sum, d) => sum + d.views, 0)
+  const totalDashboards = dashboards.length
+  const totalWorksheets = worksheets.length
+  const totalDataSources = dataSources.filter(d => d.status === 'connected').length
+  const totalViews = dashboards.reduce((sum, d) => sum + (d.views || 0), 0)
 
   const filteredDashboards = useMemo(() => {
-    return mockDashboards.filter(d => {
+    return dashboards.filter(d => {
       const matchesSearch = d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           d.description.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesFavorites = !filterFavorites || d.isFavorite
+                           (d.description || '').toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesFavorites = !filterFavorites || d.is_favorite
       return matchesSearch && matchesFavorites
     })
-  }, [searchQuery, filterFavorites])
+  }, [dashboards, searchQuery, filterFavorites])
 
   const getChartIcon = (type: ChartType) => {
     const chart = chartTypes.find(c => c.type === type)
@@ -512,7 +297,7 @@ export default function ReportingClient() {
     }
   }
 
-  const getStatusColor = (status: DataSource['status']) => {
+  const getStatusColor = (status: 'connected' | 'disconnected' | 'error') => {
     switch (status) {
       case 'connected': return 'text-green-500 bg-green-500/10'
       case 'disconnected': return 'text-yellow-500 bg-yellow-500/10'
@@ -520,28 +305,168 @@ export default function ReportingClient() {
     }
   }
 
-  // Handlers
-  const handleCreateReport = () => {
-    toast.info('Create Report', {
-      description: 'Opening report builder...'
-    })
+  // Reset forms
+  const resetDashboardForm = () => {
+    setDashboardForm({ name: '', description: '', tags: '' })
   }
 
-  const handleExportReport = (report: Report) => {
+  const resetWorksheetForm = () => {
+    setWorksheetForm({ name: '', chart_type: 'bar', data_source: '' })
+  }
+
+  const resetDataSourceForm = () => {
+    setDataSourceForm({ name: '', type: 'postgresql', host: '', database_name: '' })
+  }
+
+  const resetScheduleForm = () => {
+    setScheduleForm({ name: '', dashboard_id: '', schedule: 'weekly', recipients: '', format: 'pdf' })
+  }
+
+  // Handlers - Dashboard
+  const handleCreateDashboard = async () => {
+    if (!dashboardForm.name.trim()) {
+      toast.error('Dashboard name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await createDashboard({
+        name: dashboardForm.name,
+        description: dashboardForm.description,
+        tags: dashboardForm.tags.split(',').map(t => t.trim()).filter(Boolean)
+      })
+      setShowCreateDashboard(false)
+      resetDashboardForm()
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleToggleFavorite = async (id: string, currentStatus: boolean) => {
+    await toggleFavorite(id, !currentStatus)
+  }
+
+  const handleDeleteDashboard = async (id: string) => {
+    if (confirm('Are you sure you want to delete this dashboard?')) {
+      await deleteDashboard(id)
+    }
+  }
+
+  const handleShareDashboard = (dashboard: any) => {
+    toast.success('Share link copied', {
+      description: `Dashboard "${dashboard.name}" share link copied to clipboard`
+    })
+    navigator.clipboard.writeText(`${window.location.origin}/shared/dashboard/${dashboard.id}`)
+  }
+
+  const handleExportDashboard = (dashboard: any) => {
     toast.success('Export started', {
-      description: `"${report.name}" is being exported`
+      description: `Dashboard "${dashboard.name}" is being exported as PDF`
     })
   }
 
-  const handleScheduleReport = (report: Report) => {
-    toast.success('Report scheduled', {
-      description: `"${report.name}" has been scheduled`
-    })
+  // Handlers - Worksheet
+  const handleCreateWorksheet = async () => {
+    if (!worksheetForm.name.trim()) {
+      toast.error('Worksheet name is required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await createWorksheet({
+        name: worksheetForm.name,
+        chart_type: worksheetForm.chart_type,
+        data_source: worksheetForm.data_source
+      })
+      setShowCreateWorksheet(false)
+      resetWorksheetForm()
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleRefreshData = () => {
+  const handleDeleteWorksheet = async (id: string) => {
+    if (confirm('Are you sure you want to delete this worksheet?')) {
+      await deleteWorksheet(id)
+    }
+  }
+
+  // Handlers - Data Source
+  const handleCreateDataSource = async (type: DataSourceType) => {
+    setDataSourceForm(prev => ({ ...prev, type }))
+    // For now, create with just the type selected
+    setIsSubmitting(true)
+    try {
+      await createDataSource({
+        name: `New ${type} Connection`,
+        type,
+        host: '',
+        database_name: ''
+      })
+      setShowDataSourceDialog(false)
+      resetDataSourceForm()
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleSyncDataSource = async (id: string) => {
+    await syncDataSource(id)
+  }
+
+  const handleDeleteDataSource = async (id: string) => {
+    if (confirm('Are you sure you want to delete this data source?')) {
+      await deleteDataSource(id)
+    }
+  }
+
+  // Handlers - Scheduled Reports
+  const handleCreateScheduledReport = async () => {
+    if (!scheduleForm.name.trim() || !scheduleForm.dashboard_id) {
+      toast.error('Report name and dashboard are required')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      await createScheduledReport({
+        name: scheduleForm.name,
+        dashboard_id: scheduleForm.dashboard_id,
+        schedule: scheduleForm.schedule,
+        recipients: scheduleForm.recipients.split(',').map(r => r.trim()).filter(Boolean),
+        format: scheduleForm.format
+      })
+      setShowScheduleDialog(false)
+      resetScheduleForm()
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleToggleSchedule = async (id: string, enabled: boolean) => {
+    await toggleScheduledReport(id, !enabled)
+  }
+
+  const handleRunNow = async (id: string) => {
+    await runReportNow(id)
+  }
+
+  const handleDeleteSchedule = async (id: string) => {
+    if (confirm('Are you sure you want to delete this scheduled report?')) {
+      await deleteScheduledReport(id)
+    }
+  }
+
+  // Refresh all data
+  const handleRefreshData = async () => {
+    toast.info('Refreshing data...')
+    await Promise.all([
+      refetchDashboards(),
+      refetchWorksheets(),
+      refetchDataSources(),
+      refetchScheduledReports()
+    ])
     toast.success('Data refreshed', {
-      description: 'Report data has been refreshed'
+      description: 'All report data has been refreshed'
     })
   }
 
@@ -688,11 +613,11 @@ export default function ReportingClient() {
                       <div className="text-sm text-indigo-100">Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{filteredDashboards.filter(d => d.isFavorite).length}</div>
+                      <div className="text-2xl font-bold">{filteredDashboards.filter(d => d.is_favorite).length}</div>
                       <div className="text-sm text-indigo-100">Favorites</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{filteredDashboards.filter(d => d.isPublished).length}</div>
+                      <div className="text-2xl font-bold">{filteredDashboards.filter(d => d.is_published).length}</div>
                       <div className="text-sm text-indigo-100">Published</div>
                     </div>
                   </div>
@@ -769,7 +694,7 @@ export default function ReportingClient() {
                         <LayoutDashboard className="w-16 h-16 text-indigo-300 dark:text-indigo-700" />
                       </div>
                       <div className="absolute top-3 right-3 flex items-center gap-2">
-                        {dashboard.isPublished && (
+                        {dashboard.is_published && (
                           <span className="px-2 py-1 bg-green-500 text-white text-xs rounded-full">Published</span>
                         )}
                         <button className="p-1.5 bg-white/80 dark:bg-gray-800/80 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
@@ -777,12 +702,13 @@ export default function ReportingClient() {
                         </button>
                       </div>
                       <button
-                        onClick={() => {
-                          // Toggle favorite
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleToggleFavorite(dashboard.id, dashboard.is_favorite)
                         }}
                         className="absolute top-3 left-3 p-1.5 bg-white/80 dark:bg-gray-800/80 rounded-lg"
                       >
-                        {dashboard.isFavorite ? (
+                        {dashboard.is_favorite ? (
                           <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                         ) : (
                           <StarOff className="w-4 h-4 text-gray-400" />
@@ -798,20 +724,20 @@ export default function ReportingClient() {
                       <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400 mb-3">
                         <span className="flex items-center gap-1">
                           <Eye className="w-3 h-3" />
-                          {dashboard.views}
+                          {dashboard.views || 0}
                         </span>
                         <span className="flex items-center gap-1">
                           <Star className="w-3 h-3" />
-                          {dashboard.favorites}
+                          {dashboard.favorites || 0}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {new Date(dashboard.updatedAt).toLocaleDateString()}
+                          {new Date(dashboard.updated_at).toLocaleDateString()}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2 mb-3">
-                        {dashboard.tags.slice(0, 3).map(tag => (
+                        {(dashboard.tags || []).slice(0, 3).map(tag => (
                           <span key={tag} className="px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-xs rounded-full">
                             {tag}
                           </span>
@@ -825,10 +751,22 @@ export default function ReportingClient() {
                         >
                           Open
                         </button>
-                        <button className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedDashboard(dashboard)
+                          }}
+                          className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
                           <Edit className="w-4 h-4 text-gray-500" />
                         </button>
-                        <button className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleShareDashboard(dashboard)
+                          }}
+                          className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+                        >
                           <Share2 className="w-4 h-4 text-gray-500" />
                         </button>
                       </div>
@@ -871,23 +809,23 @@ export default function ReportingClient() {
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">{dashboard.name}</p>
-                              <p className="text-xs text-gray-500 dark:text-gray-400">{dashboard.tags.join(', ')}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400">{(dashboard.tags || []).join(', ')}</p>
                             </div>
-                            {dashboard.isFavorite && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
+                            {dashboard.is_favorite && <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />}
                           </div>
                         </td>
-                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{dashboard.author}</td>
-                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{dashboard.views.toLocaleString()}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{dashboard.author || 'Unknown'}</td>
+                        <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{(dashboard.views || 0).toLocaleString()}</td>
                         <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(dashboard.updatedAt).toLocaleDateString()}
+                          {new Date(dashboard.updated_at).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded-full text-xs ${
-                            dashboard.isPublished
+                            dashboard.is_published
                               ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
                               : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                           }`}>
-                            {dashboard.isPublished ? 'Published' : 'Draft'}
+                            {dashboard.is_published ? 'Published' : 'Draft'}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
@@ -895,10 +833,10 @@ export default function ReportingClient() {
                             <button onClick={() => setSelectedDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                               <Eye className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <button onClick={() => setSelectedDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                               <Edit className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                            <button onClick={() => handleShareDashboard(dashboard)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                               <Share2 className="w-4 h-4 text-gray-500" />
                             </button>
                           </div>
@@ -928,7 +866,7 @@ export default function ReportingClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockWorksheets.length}</div>
+                      <div className="text-2xl font-bold">{worksheets.length}</div>
                       <div className="text-sm text-green-100">Worksheets</div>
                     </div>
                     <div className="text-center">
@@ -936,7 +874,7 @@ export default function ReportingClient() {
                       <div className="text-sm text-green-100">Chart Types</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockDataSources.filter(d => d.status === 'connected').length}</div>
+                      <div className="text-2xl font-bold">{dataSources.filter(d => d.status === 'connected').length}</div>
                       <div className="text-sm text-green-100">Data Sources</div>
                     </div>
                   </div>
@@ -947,11 +885,11 @@ export default function ReportingClient() {
             {/* Worksheet Stats */}
             <div className="grid grid-cols-5 gap-4 mb-6">
               {[
-                { type: 'bar', count: mockWorksheets.filter(w => w.chartType === 'bar').length, icon: BarChart3, color: 'indigo' },
-                { type: 'line', count: mockWorksheets.filter(w => w.chartType === 'line').length, icon: LineChart, color: 'blue' },
-                { type: 'pie', count: mockWorksheets.filter(w => w.chartType === 'pie').length, icon: PieChart, color: 'purple' },
-                { type: 'heatmap', count: mockWorksheets.filter(w => w.chartType === 'heatmap').length, icon: Grid3X3, color: 'orange' },
-                { type: 'table', count: mockWorksheets.filter(w => w.chartType === 'table').length, icon: Table, color: 'green' }
+                { type: 'bar', count: worksheets.filter(w => w.chart_type === 'bar').length, icon: BarChart3, color: 'indigo' },
+                { type: 'line', count: worksheets.filter(w => w.chart_type === 'line').length, icon: LineChart, color: 'blue' },
+                { type: 'pie', count: worksheets.filter(w => w.chart_type === 'pie').length, icon: PieChart, color: 'purple' },
+                { type: 'heatmap', count: worksheets.filter(w => w.chart_type === 'heatmap').length, icon: Grid3X3, color: 'orange' },
+                { type: 'table', count: worksheets.filter(w => w.chart_type === 'table').length, icon: Table, color: 'green' }
               ].map((stat, idx) => (
                 <Card key={idx} className="bg-white dark:bg-gray-800">
                   <CardContent className="p-3 text-center">
@@ -965,7 +903,7 @@ export default function ReportingClient() {
 
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-500 dark:text-gray-400">{mockWorksheets.length} worksheets</span>
+                <span className="text-sm text-gray-500 dark:text-gray-400">{worksheets.length} worksheets</span>
               </div>
               <button
                 onClick={() => setShowCreateWorksheet(true)}
@@ -977,8 +915,8 @@ export default function ReportingClient() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {mockWorksheets.map(worksheet => {
-                const ChartIcon = getChartIcon(worksheet.chartType)
+              {worksheets.map(worksheet => {
+                const ChartIcon = getChartIcon(worksheet.chart_type)
                 return (
                   <div
                     key={worksheet.id}
@@ -991,17 +929,17 @@ export default function ReportingClient() {
                       </div>
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900 dark:text-white">{worksheet.name}</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">{worksheet.dataSource}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">{worksheet.data_source}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 mb-3">
-                      <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded capitalize">{worksheet.chartType}</span>
-                      <span>{worksheet.metrics.length} metrics</span>
-                      <span>{worksheet.dimensions.length} dimensions</span>
+                      <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded capitalize">{worksheet.chart_type}</span>
+                      <span>{(worksheet.metrics || []).length} metrics</span>
+                      <span>{(worksheet.dimensions || []).length} dimensions</span>
                     </div>
                     <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                      <span>{worksheet.author}</span>
-                      <span>{new Date(worksheet.lastModified).toLocaleDateString()}</span>
+                      <span>{worksheet.author || 'Unknown'}</span>
+                      <span>{new Date(worksheet.updated_at).toLocaleDateString()}</span>
                     </div>
                   </div>
                 )
@@ -1045,15 +983,15 @@ export default function ReportingClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockDataSources.filter(d => d.status === 'connected').length}</div>
+                      <div className="text-2xl font-bold">{dataSources.filter(d => d.status === 'connected').length}</div>
                       <div className="text-sm text-blue-100">Connected</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockDataSources.reduce((sum, d) => sum + d.tables, 0)}</div>
+                      <div className="text-2xl font-bold">{dataSources.reduce((sum, d) => sum + (d.tables || 0), 0)}</div>
                       <div className="text-sm text-blue-100">Tables</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{(mockDataSources.reduce((sum, d) => sum + d.rowCount, 0) / 1000000).toFixed(1)}M</div>
+                      <div className="text-2xl font-bold">{(dataSources.reduce((sum, d) => sum + (d.row_count || 0), 0) / 1000000).toFixed(1)}M</div>
                       <div className="text-sm text-blue-100">Total Rows</div>
                     </div>
                   </div>
@@ -1069,7 +1007,7 @@ export default function ReportingClient() {
                     <CheckCircle className="w-8 h-8 text-green-500" />
                     <div>
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {mockDataSources.filter(d => d.status === 'connected').length}
+                        {dataSources.filter(d => d.status === 'connected').length}
                       </div>
                       <div className="text-sm text-gray-500">Healthy Connections</div>
                     </div>
@@ -1082,7 +1020,7 @@ export default function ReportingClient() {
                     <AlertCircle className="w-8 h-8 text-yellow-500" />
                     <div>
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {mockDataSources.filter(d => d.status === 'disconnected').length}
+                        {dataSources.filter(d => d.status === 'disconnected').length}
                       </div>
                       <div className="text-sm text-gray-500">Disconnected</div>
                     </div>
@@ -1095,7 +1033,7 @@ export default function ReportingClient() {
                     <XCircle className="w-8 h-8 text-red-500" />
                     <div>
                       <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {mockDataSources.filter(d => d.status === 'error').length}
+                        {dataSources.filter(d => d.status === 'error').length}
                       </div>
                       <div className="text-sm text-gray-500">Errors</div>
                     </div>
@@ -1107,7 +1045,7 @@ export default function ReportingClient() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {mockDataSources.filter(d => d.status === 'connected').length} of {mockDataSources.length} connected
+                  {dataSources.filter(d => d.status === 'connected').length} of {dataSources.length} connected
                 </span>
               </div>
               <button
@@ -1133,7 +1071,7 @@ export default function ReportingClient() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {mockDataSources.map(source => {
+                  {dataSources.map(source => {
                     const SourceIcon = getDataSourceIcon(source.type)
                     return (
                       <tr key={source.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -1160,20 +1098,28 @@ export default function ReportingClient() {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{source.tables}</td>
                         <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                          {source.rowCount > 0 ? `${(source.rowCount / 1000000).toFixed(1)}M` : '-'}
+                          {(source.row_count || 0) > 0 ? `${((source.row_count || 0) / 1000000).toFixed(1)}M` : '-'}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                          {new Date(source.lastSync).toLocaleString()}
+                          {source.last_sync ? new Date(source.last_sync).toLocaleString() : 'Never'}
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Sync">
+                            <button
+                              onClick={() => handleSyncDataSource(source.id)}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                              title="Sync"
+                            >
                               <RefreshCw className="w-4 h-4 text-gray-500" />
                             </button>
                             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Settings">
                               <Settings className="w-4 h-4 text-gray-500" />
                             </button>
-                            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Delete">
+                            <button
+                              onClick={() => handleDeleteDataSource(source.id)}
+                              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                              title="Delete"
+                            >
                               <Trash2 className="w-4 h-4 text-gray-500" />
                             </button>
                           </div>
@@ -1203,19 +1149,19 @@ export default function ReportingClient() {
                   </div>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockScheduledReports.filter(r => r.enabled).length}</div>
+                      <div className="text-2xl font-bold">{scheduledReports.filter(r => r.enabled).length}</div>
                       <div className="text-sm text-orange-100">Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'daily').length}</div>
+                      <div className="text-2xl font-bold">{scheduledReports.filter(r => r.schedule === 'daily').length}</div>
                       <div className="text-sm text-orange-100">Daily</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'weekly').length}</div>
+                      <div className="text-2xl font-bold">{scheduledReports.filter(r => r.schedule === 'weekly').length}</div>
                       <div className="text-sm text-orange-100">Weekly</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockScheduledReports.reduce((sum, r) => sum + r.recipients.length, 0)}</div>
+                      <div className="text-2xl font-bold">{scheduledReports.reduce((sum, r) => sum + (r.recipients || []).length, 0)}</div>
                       <div className="text-sm text-orange-100">Recipients</div>
                     </div>
                   </div>
@@ -1232,7 +1178,7 @@ export default function ReportingClient() {
                       <Clock className="w-5 h-5 text-blue-600" />
                     </div>
                     <div>
-                      <div className="text-xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'daily').length}</div>
+                      <div className="text-xl font-bold">{scheduledReports.filter(r => r.schedule === 'daily').length}</div>
                       <div className="text-sm text-gray-500">Daily Reports</div>
                     </div>
                   </div>
@@ -1245,7 +1191,7 @@ export default function ReportingClient() {
                       <Calendar className="w-5 h-5 text-purple-600" />
                     </div>
                     <div>
-                      <div className="text-xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'weekly').length}</div>
+                      <div className="text-xl font-bold">{scheduledReports.filter(r => r.schedule === 'weekly').length}</div>
                       <div className="text-sm text-gray-500">Weekly Reports</div>
                     </div>
                   </div>
@@ -1258,7 +1204,7 @@ export default function ReportingClient() {
                       <Calendar className="w-5 h-5 text-green-600" />
                     </div>
                     <div>
-                      <div className="text-xl font-bold">{mockScheduledReports.filter(r => r.schedule === 'monthly').length}</div>
+                      <div className="text-xl font-bold">{scheduledReports.filter(r => r.schedule === 'monthly').length}</div>
                       <div className="text-sm text-gray-500">Monthly Reports</div>
                     </div>
                   </div>
@@ -1271,7 +1217,7 @@ export default function ReportingClient() {
                       <CheckCircle className="w-5 h-5 text-orange-600" />
                     </div>
                     <div>
-                      <div className="text-xl font-bold">{mockScheduledReports.filter(r => r.lastRun !== null).length}</div>
+                      <div className="text-xl font-bold">{scheduledReports.filter(r => r.last_run !== null).length}</div>
                       <div className="text-sm text-gray-500">Delivered</div>
                     </div>
                   </div>
@@ -1282,10 +1228,13 @@ export default function ReportingClient() {
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                  {mockScheduledReports.filter(r => r.enabled).length} active schedules
+                  {scheduledReports.filter(r => r.enabled).length} active schedules
                 </span>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              <button
+                onClick={() => setShowScheduleDialog(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
                 <Plus className="w-4 h-4" />
                 Schedule Report
               </button>
@@ -1306,7 +1255,7 @@ export default function ReportingClient() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {mockScheduledReports.map(report => (
+                  {scheduledReports.map(report => (
                     <tr key={report.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
@@ -1316,19 +1265,19 @@ export default function ReportingClient() {
                           <span className="font-medium text-gray-900 dark:text-white">{report.name}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{report.dashboard}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{report.dashboard_name || 'Dashboard'}</td>
                       <td className="px-6 py-4">
                         <span className="px-2 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded text-xs capitalize">
                           {report.schedule}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                        {new Date(report.nextRun).toLocaleString()}
+                        {report.next_run ? new Date(report.next_run).toLocaleString() : 'Not scheduled'}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1">
                           <Users className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{report.recipients.length}</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">{(report.recipients || []).length}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -1338,19 +1287,32 @@ export default function ReportingClient() {
                       </td>
                       <td className="px-6 py-4">
                         <label className="relative inline-flex items-center cursor-pointer">
-                          <input type="checkbox" checked={report.enabled} className="sr-only peer" readOnly />
+                          <input
+                            type="checkbox"
+                            checked={report.enabled}
+                            onChange={() => handleToggleSchedule(report.id, report.enabled)}
+                            className="sr-only peer"
+                          />
                           <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
                         </label>
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Run Now">
+                          <button
+                            onClick={() => handleRunNow(report.id)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="Run Now"
+                          >
                             <Play className="w-4 h-4 text-gray-500" />
                           </button>
                           <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Edit">
                             <Edit className="w-4 h-4 text-gray-500" />
                           </button>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Delete">
+                          <button
+                            onClick={() => handleDeleteSchedule(report.id)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
+                            title="Delete"
+                          >
                             <Trash2 className="w-4 h-4 text-gray-500" />
                           </button>
                         </div>
@@ -1816,15 +1778,21 @@ export default function ReportingClient() {
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
                   <div className="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                    <span>By {selectedDashboard.author}</span>
-                    <span>{selectedDashboard.views.toLocaleString()} views</span>
-                    <span>Updated {new Date(selectedDashboard.updatedAt).toLocaleDateString()}</span>
+                    <span>By {selectedDashboard.author || 'Unknown'}</span>
+                    <span>{(selectedDashboard.views || 0).toLocaleString()} views</span>
+                    <span>Updated {new Date(selectedDashboard.updated_at).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <button className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <button
+                      onClick={() => handleShareDashboard(selectedDashboard)}
+                      className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
                       <Share2 className="w-4 h-4 inline mr-2" /> Share
                     </button>
-                    <button className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <button
+                      onClick={() => handleExportDashboard(selectedDashboard)}
+                      className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
                       <Download className="w-4 h-4 inline mr-2" /> Export
                     </button>
                     <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
@@ -1838,7 +1806,10 @@ export default function ReportingClient() {
         </Dialog>
 
         {/* Create Dashboard Dialog */}
-        <Dialog open={showCreateDashboard} onOpenChange={setShowCreateDashboard}>
+        <Dialog open={showCreateDashboard} onOpenChange={(open) => {
+          setShowCreateDashboard(open)
+          if (!open) resetDashboardForm()
+        }}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
               <DialogTitle>Create New Dashboard</DialogTitle>
@@ -1849,6 +1820,8 @@ export default function ReportingClient() {
                 <input
                   type="text"
                   placeholder="e.g., Sales Overview"
+                  value={dashboardForm.name}
+                  onChange={(e) => setDashboardForm({ ...dashboardForm, name: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
               </div>
@@ -1857,30 +1830,37 @@ export default function ReportingClient() {
                 <textarea
                   placeholder="What insights will this dashboard provide?"
                   rows={3}
+                  value={dashboardForm.description}
+                  onChange={(e) => setDashboardForm({ ...dashboardForm, description: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start From</label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors text-left">
-                    <Sparkles className="w-6 h-6 text-indigo-600 mb-2" />
-                    <div className="font-medium text-gray-900 dark:text-white">Blank</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Start from scratch</div>
-                  </button>
-                  <button className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors text-left">
-                    <FolderOpen className="w-6 h-6 text-indigo-600 mb-2" />
-                    <div className="font-medium text-gray-900 dark:text-white">Template</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Use a template</div>
-                  </button>
-                </div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  placeholder="e.g., sales, monthly, kpi"
+                  value={dashboardForm.tags}
+                  onChange={(e) => setDashboardForm({ ...dashboardForm, tags: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
               </div>
               <div className="flex gap-3 pt-4">
-                <button onClick={() => setShowCreateDashboard(false)} className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
+                <button
+                  onClick={() => {
+                    setShowCreateDashboard(false)
+                    resetDashboardForm()
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300"
+                >
                   Cancel
                 </button>
-                <button className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                  Create Dashboard
+                <button
+                  onClick={handleCreateDashboard}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Dashboard'}
                 </button>
               </div>
             </div>
@@ -1888,7 +1868,10 @@ export default function ReportingClient() {
         </Dialog>
 
         {/* Create Worksheet Dialog */}
-        <Dialog open={showCreateWorksheet} onOpenChange={setShowCreateWorksheet}>
+        <Dialog open={showCreateWorksheet} onOpenChange={(open) => {
+          setShowCreateWorksheet(open)
+          if (!open) resetWorksheetForm()
+        }}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
               <DialogTitle>Create New Worksheet</DialogTitle>
@@ -1900,14 +1883,21 @@ export default function ReportingClient() {
                   <input
                     type="text"
                     placeholder="e.g., Revenue by Region"
+                    value={worksheetForm.name}
+                    onChange={(e) => setWorksheetForm({ ...worksheetForm, name: e.target.value })}
                     className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data Source</label>
-                  <select className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
-                    {mockDataSources.filter(d => d.status === 'connected').map(source => (
-                      <option key={source.id} value={source.id}>{source.name}</option>
+                  <select
+                    value={worksheetForm.data_source}
+                    onChange={(e) => setWorksheetForm({ ...worksheetForm, data_source: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="">Select a data source</option>
+                    {dataSources.filter(d => d.status === 'connected').map(source => (
+                      <option key={source.id} value={source.name}>{source.name}</option>
                     ))}
                   </select>
                 </div>
@@ -1918,7 +1908,13 @@ export default function ReportingClient() {
                   {chartTypes.map(chart => (
                     <button
                       key={chart.type}
-                      className="p-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg hover:border-indigo-500 transition-colors flex flex-col items-center"
+                      type="button"
+                      onClick={() => setWorksheetForm({ ...worksheetForm, chart_type: chart.type })}
+                      className={`p-3 border-2 rounded-lg transition-colors flex flex-col items-center ${
+                        worksheetForm.chart_type === chart.type
+                          ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-indigo-500'
+                      }`}
                     >
                       <chart.icon className="w-6 h-6 text-indigo-600 mb-1" />
                       <span className="text-xs text-gray-700 dark:text-gray-300">{chart.label}</span>
@@ -1927,11 +1923,21 @@ export default function ReportingClient() {
                 </div>
               </div>
               <div className="flex gap-3 pt-4">
-                <button onClick={() => setShowCreateWorksheet(false)} className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300">
+                <button
+                  onClick={() => {
+                    setShowCreateWorksheet(false)
+                    resetWorksheetForm()
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300"
+                >
                   Cancel
                 </button>
-                <button className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-                  Create Worksheet
+                <button
+                  onClick={handleCreateWorksheet}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Worksheet'}
                 </button>
               </div>
             </div>
@@ -1945,18 +1951,16 @@ export default function ReportingClient() {
               <DialogTitle>Add Data Source</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Select a data source type to create a new connection
+              </p>
               <div className="grid grid-cols-3 gap-3">
-                {[
-                  { type: 'postgresql', label: 'PostgreSQL', icon: Database },
-                  { type: 'mysql', label: 'MySQL', icon: Database },
-                  { type: 'mongodb', label: 'MongoDB', icon: Layers },
-                  { type: 'snowflake', label: 'Snowflake', icon: Database },
-                  { type: 'bigquery', label: 'BigQuery', icon: Database },
-                  { type: 'csv', label: 'CSV Upload', icon: FileText }
-                ].map(source => (
+                {DATA_SOURCE_TYPES.map(source => (
                   <button
                     key={source.type}
-                    className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors flex flex-col items-center"
+                    onClick={() => handleCreateDataSource(source.type)}
+                    disabled={isSubmitting}
+                    className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors flex flex-col items-center disabled:opacity-50"
                   >
                     <source.icon className="w-8 h-8 text-indigo-600 mb-2" />
                     <span className="text-sm font-medium text-gray-900 dark:text-white">{source.label}</span>
@@ -1966,6 +1970,98 @@ export default function ReportingClient() {
               <div className="text-center pt-4 border-t border-gray-200 dark:border-gray-700">
                 <button className="text-sm text-indigo-600 hover:underline">
                   View all connectors
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Report Dialog */}
+        <Dialog open={showScheduleDialog} onOpenChange={(open) => {
+          setShowScheduleDialog(open)
+          if (!open) resetScheduleForm()
+        }}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Schedule Report</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Report Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g., Weekly Sales Report"
+                  value={scheduleForm.name}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, name: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dashboard</label>
+                <select
+                  value={scheduleForm.dashboard_id}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, dashboard_id: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                >
+                  <option value="">Select a dashboard</option>
+                  {dashboards.map(dashboard => (
+                    <option key={dashboard.id} value={dashboard.id}>{dashboard.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Schedule</label>
+                  <select
+                    value={scheduleForm.schedule}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, schedule: e.target.value as ScheduleType })}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Format</label>
+                  <select
+                    value={scheduleForm.format}
+                    onChange={(e) => setScheduleForm({ ...scheduleForm, format: e.target.value as ExportFormat })}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="pdf">PDF</option>
+                    <option value="xlsx">Excel</option>
+                    <option value="png">PNG</option>
+                    <option value="csv">CSV</option>
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Recipients (comma-separated emails)</label>
+                <input
+                  type="text"
+                  placeholder="e.g., team@company.com, manager@company.com"
+                  value={scheduleForm.recipients}
+                  onChange={(e) => setScheduleForm({ ...scheduleForm, recipients: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    setShowScheduleDialog(false)
+                    resetScheduleForm()
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleCreateScheduledReport}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Scheduling...' : 'Schedule Report'}
                 </button>
               </div>
             </div>

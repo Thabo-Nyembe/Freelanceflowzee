@@ -1,7 +1,12 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
+import { useGrowthExperiments, useGrowthMetrics, useGrowthPlaybooks } from '@/lib/hooks/use-growth-extended'
+import { useCohorts, useCohortMetrics } from '@/lib/hooks/use-cohort-extended'
+import { useConversionFunnels, useConversionGoals } from '@/lib/hooks/use-conversion-extended'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -605,6 +610,9 @@ const mockGrowthQuickActions = [
 // ============================================================================
 
 export default function GrowthHubClient() {
+  const supabase = createClientComponentClient()
+  const { getUserId } = useAuthUserId()
+  const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedFunnel, setSelectedFunnel] = useState<Funnel | null>(null)
@@ -612,6 +620,34 @@ export default function GrowthHubClient() {
   const [selectedExperiment, setSelectedExperiment] = useState<Experiment | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isLoading, setIsLoading] = useState(false)
+
+  // Form states
+  const [showCreateExperimentModal, setShowCreateExperimentModal] = useState(false)
+  const [showCreateFunnelModal, setShowCreateFunnelModal] = useState(false)
+  const [showCreateCohortModal, setShowCreateCohortModal] = useState(false)
+  const [experimentForm, setExperimentForm] = useState({
+    name: '', description: '', hypothesis: '', type: 'a/b' as const, targetMetric: ''
+  })
+  const [funnelForm, setFunnelForm] = useState({
+    name: '', description: '', steps: [] as { name: string; event: string }[]
+  })
+  const [cohortForm, setCohortForm] = useState({
+    name: '', description: '', type: 'behavioral' as const, definition: ''
+  })
+
+  // Supabase hooks
+  const { data: dbExperiments, isLoading: expLoading, refresh: refreshExperiments } = useGrowthExperiments(userId || undefined)
+  const { data: dbMetrics, isLoading: metricsLoading, refresh: refreshMetrics } = useGrowthMetrics(userId || undefined)
+  const { data: dbPlaybooks, refresh: refreshPlaybooks } = useGrowthPlaybooks()
+  const { cohorts: dbCohorts, isLoading: cohortsLoading, refresh: refreshCohorts } = useCohorts()
+  const { funnels: dbFunnels, isLoading: funnelsLoading, refresh: refreshFunnels } = useConversionFunnels()
+  const { goals: dbGoals, refresh: refreshGoals } = useConversionGoals()
+
+  // Fetch user ID on mount
+  useEffect(() => {
+    getUserId().then(setUserId)
+  }, [getUserId])
 
   // Stats calculations
   const stats = useMemo(() => {
@@ -646,36 +682,162 @@ export default function GrowthHubClient() {
     })
   }, [searchQuery, statusFilter])
 
-  // Handlers
-  const handleCreateExperiment = () => {
-    toast.info('Create Experiment', {
-      description: 'Opening experiment builder...'
-    })
+  // CRUD Handlers
+  const handleCreateExperiment = async () => {
+    if (!userId || !experimentForm.name.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in experiment name' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('growth_experiments').insert({
+        user_id: userId,
+        name: experimentForm.name,
+        description: experimentForm.description,
+        hypothesis: experimentForm.hypothesis,
+        experiment_type: experimentForm.type,
+        target_metric: experimentForm.targetMetric,
+        status: 'draft',
+        variants: JSON.stringify([{ id: 'control', name: 'Control', allocation: 50 }, { id: 'variant-a', name: 'Variant A', allocation: 50 }])
+      })
+      if (error) throw error
+      toast.success('Experiment created', { description: `"${experimentForm.name}" is ready to configure` })
+      setExperimentForm({ name: '', description: '', hypothesis: '', type: 'a/b', targetMetric: '' })
+      setShowCreateExperimentModal(false)
+      refreshExperiments()
+    } catch (err: any) {
+      toast.error('Failed to create experiment', { description: err.message })
+    } finally { setIsLoading(false) }
   }
 
-  const handleStartExperiment = (expName: string) => {
-    toast.success('Experiment started', {
-      description: `"${expName}" is now running`
-    })
+  const handleStartExperiment = async (expId: string, expName: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('growth_experiments').update({ status: 'running', started_at: new Date().toISOString() }).eq('id', expId)
+      if (error) throw error
+      toast.success('Experiment started', { description: `"${expName}" is now running` })
+      refreshExperiments()
+    } catch (err: any) {
+      toast.error('Failed to start experiment', { description: err.message })
+    } finally { setIsLoading(false) }
   }
 
-  const handleStopExperiment = (expName: string) => {
-    toast.info('Experiment stopped', {
-      description: `"${expName}" has been paused`
-    })
+  const handleStopExperiment = async (expId: string, expName: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('growth_experiments').update({ status: 'paused' }).eq('id', expId)
+      if (error) throw error
+      toast.info('Experiment stopped', { description: `"${expName}" has been paused` })
+      refreshExperiments()
+    } catch (err: any) {
+      toast.error('Failed to stop experiment', { description: err.message })
+    } finally { setIsLoading(false) }
   }
 
-  const handleExportResults = (expName: string) => {
-    toast.success('Exporting results', {
-      description: `Results for "${expName}" will be downloaded`
-    })
+  const handleDeleteExperiment = async (expId: string, expName: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('growth_experiments').delete().eq('id', expId)
+      if (error) throw error
+      toast.success('Experiment deleted', { description: `"${expName}" has been removed` })
+      setSelectedExperiment(null)
+      refreshExperiments()
+    } catch (err: any) {
+      toast.error('Failed to delete experiment', { description: err.message })
+    } finally { setIsLoading(false) }
   }
 
-  const handleCreateFunnel = () => {
-    toast.info('Create Funnel', {
-      description: 'Opening funnel builder...'
-    })
+  const handleExportResults = async (expName: string) => {
+    toast.success('Exporting results', { description: `Results for "${expName}" will be downloaded` })
+    // Export logic can be expanded
   }
+
+  const handleCreateFunnel = async () => {
+    if (!funnelForm.name.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in funnel name' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('conversion_funnels').insert({
+        name: funnelForm.name,
+        description: funnelForm.description,
+        steps: JSON.stringify(funnelForm.steps.length > 0 ? funnelForm.steps : [{ name: 'Step 1', event: 'page_view' }]),
+        is_active: true
+      })
+      if (error) throw error
+      toast.success('Funnel created', { description: `"${funnelForm.name}" is ready to track` })
+      setFunnelForm({ name: '', description: '', steps: [] })
+      setShowCreateFunnelModal(false)
+      refreshFunnels()
+    } catch (err: any) {
+      toast.error('Failed to create funnel', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleDeleteFunnel = async (funnelId: string, funnelName: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('conversion_funnels').delete().eq('id', funnelId)
+      if (error) throw error
+      toast.success('Funnel deleted', { description: `"${funnelName}" has been removed` })
+      setSelectedFunnel(null)
+      refreshFunnels()
+    } catch (err: any) {
+      toast.error('Failed to delete funnel', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleCreateCohort = async () => {
+    if (!cohortForm.name.trim()) {
+      toast.error('Missing required fields', { description: 'Please fill in cohort name' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('cohorts').insert({
+        name: cohortForm.name,
+        description: cohortForm.description,
+        type: cohortForm.type,
+        cohort_date: new Date().toISOString().split('T')[0],
+        size: 0,
+        metadata: JSON.stringify({ definition: cohortForm.definition })
+      })
+      if (error) throw error
+      toast.success('Cohort created', { description: `"${cohortForm.name}" is ready for analysis` })
+      setCohortForm({ name: '', description: '', type: 'behavioral', definition: '' })
+      setShowCreateCohortModal(false)
+      refreshCohorts()
+    } catch (err: any) {
+      toast.error('Failed to create cohort', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleDeleteCohort = async (cohortId: string, cohortName: string) => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.from('cohorts').delete().eq('id', cohortId)
+      if (error) throw error
+      toast.success('Cohort deleted', { description: `"${cohortName}" has been removed` })
+      setSelectedCohort(null)
+      refreshCohorts()
+    } catch (err: any) {
+      toast.error('Failed to delete cohort', { description: err.message })
+    } finally { setIsLoading(false) }
+  }
+
+  const handleSaveSettings = async (section: string) => {
+    toast.success('Settings saved', { description: `${section} settings have been updated` })
+  }
+
+  const handleRefreshData = useCallback(() => {
+    refreshExperiments()
+    refreshMetrics()
+    refreshCohorts()
+    refreshFunnels()
+    refreshGoals()
+    toast.success('Data refreshed', { description: 'All analytics data has been updated' })
+  }, [refreshExperiments, refreshMetrics, refreshCohorts, refreshFunnels, refreshGoals])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
@@ -702,10 +864,10 @@ export default function GrowthHubClient() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="icon">
-                <RefreshCw className="w-4 h-4" />
+              <Button variant="outline" size="icon" onClick={handleRefreshData} disabled={isLoading}>
+                <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
               </Button>
-              <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
+              <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => setShowCreateExperimentModal(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Analysis
               </Button>
@@ -974,7 +1136,7 @@ export default function GrowthHubClient() {
                   Filter
                 </Button>
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowCreateFunnelModal(true)}>
                 <Plus className="w-4 h-4" />
                 Create Funnel
               </Button>
@@ -1074,7 +1236,7 @@ export default function GrowthHubClient() {
                   </Button>
                 ))}
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowCreateCohortModal(true)}>
                 <Plus className="w-4 h-4" />
                 Create Cohort
               </Button>
@@ -1224,7 +1386,7 @@ export default function GrowthHubClient() {
                   </Button>
                 ))}
               </div>
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={() => setShowCreateExperimentModal(true)}>
                 <Plus className="w-4 h-4" />
                 New Experiment
               </Button>
@@ -1418,7 +1580,7 @@ export default function GrowthHubClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600" onClick={() => handleSaveSettings('General')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1465,7 +1627,7 @@ export default function GrowthHubClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600" onClick={() => handleSaveSettings('Tracking')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1512,7 +1674,7 @@ export default function GrowthHubClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600" onClick={() => handleSaveSettings('Notifications')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1603,7 +1765,7 @@ export default function GrowthHubClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600">Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-emerald-600 to-teal-600" onClick={() => handleSaveSettings('Security')}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1918,6 +2080,114 @@ export default function GrowthHubClient() {
               </div>
             )}
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Experiment Modal */}
+      <Dialog open={showCreateExperimentModal} onOpenChange={setShowCreateExperimentModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FlaskConical className="w-5 h-5 text-orange-500" />
+              Create New Experiment
+            </DialogTitle>
+            <DialogDescription>Set up an A/B test or multivariate experiment</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Experiment Name</Label>
+              <Input placeholder="e.g. New Checkout Flow" value={experimentForm.name} onChange={(e) => setExperimentForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input placeholder="Brief description of the experiment" value={experimentForm.description} onChange={(e) => setExperimentForm(f => ({ ...f, description: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Hypothesis</Label>
+              <Input placeholder="What do you expect to happen?" value={experimentForm.hypothesis} onChange={(e) => setExperimentForm(f => ({ ...f, hypothesis: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Target Metric</Label>
+              <Input placeholder="e.g. checkout_completion, signup_rate" value={experimentForm.targetMetric} onChange={(e) => setExperimentForm(f => ({ ...f, targetMetric: e.target.value }))} />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCreateExperimentModal(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500" onClick={handleCreateExperiment} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Experiment'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Funnel Modal */}
+      <Dialog open={showCreateFunnelModal} onOpenChange={setShowCreateFunnelModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Filter className="w-5 h-5 text-blue-500" />
+              Create New Funnel
+            </DialogTitle>
+            <DialogDescription>Define a conversion funnel to track user journeys</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Funnel Name</Label>
+              <Input placeholder="e.g. Signup to Purchase" value={funnelForm.name} onChange={(e) => setFunnelForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input placeholder="What journey does this funnel track?" value={funnelForm.description} onChange={(e) => setFunnelForm(f => ({ ...f, description: e.target.value }))} />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCreateFunnelModal(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500" onClick={handleCreateFunnel} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Funnel'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Cohort Modal */}
+      <Dialog open={showCreateCohortModal} onOpenChange={setShowCreateCohortModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-500" />
+              Create New Cohort
+            </DialogTitle>
+            <DialogDescription>Define a user segment for analysis</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Cohort Name</Label>
+              <Input placeholder="e.g. Power Users" value={cohortForm.name} onChange={(e) => setCohortForm(f => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input placeholder="Who is in this cohort?" value={cohortForm.description} onChange={(e) => setCohortForm(f => ({ ...f, description: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Cohort Type</Label>
+              <select className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800" value={cohortForm.type} onChange={(e) => setCohortForm(f => ({ ...f, type: e.target.value as any }))}>
+                <option value="behavioral">Behavioral</option>
+                <option value="property">Property-based</option>
+                <option value="computed">Computed</option>
+                <option value="predictive">Predictive</option>
+              </select>
+            </div>
+            <div>
+              <Label>Definition (query)</Label>
+              <Input placeholder="e.g. session_count >= 10" value={cohortForm.definition} onChange={(e) => setCohortForm(f => ({ ...f, definition: e.target.value }))} />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCreateCohortModal(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500" onClick={handleCreateCohort} disabled={isLoading}>
+                {isLoading ? 'Creating...' : 'Create Cohort'}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

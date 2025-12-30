@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -15,13 +16,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Target, Calendar, Flag, AlertTriangle, CheckCircle2, Clock,
-  Users, Link2, TrendingUp, ArrowRight, ChevronRight, FileText,
-  BarChart3, Settings, Plus, Search, Filter, LayoutGrid, List,
+  Link2, TrendingUp, ArrowRight, FileText,
+  BarChart3, Settings, Plus, Search, LayoutGrid, List,
   GitBranch, Milestone, Zap, Shield, AlertCircle, XCircle,
-  PauseCircle, PlayCircle, Timer, DollarSign, Briefcase, Award,
-  Activity, Eye, MessageSquare, Bell, ArrowUpRight, ArrowDownRight,
-  Hash, Star, Sparkles, RefreshCw, CalendarDays, Package,
-  Sliders, Webhook, Key, Lock, Mail, Globe, Database, Archive, Trash2, Terminal, Copy, Download
+  PauseCircle, PlayCircle, Timer, DollarSign, Briefcase,
+  Eye, MessageSquare, Bell, ArrowUpRight, ArrowDownRight,
+  RefreshCw, CalendarDays, Package,
+  Sliders, Webhook, Lock, Mail, Globe, Database, Archive, Trash2, Terminal, Copy, Download
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -607,14 +608,266 @@ const mockMilestonesQuickActions = [
   { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
 ]
 
+// Database milestone type (matches Supabase schema)
+interface DbMilestone {
+  id: string
+  user_id: string
+  milestone_code: string
+  name: string
+  description: string | null
+  type: string
+  status: string
+  priority: string
+  due_date: string | null
+  days_remaining: number
+  progress: number
+  owner_name: string | null
+  owner_email: string | null
+  team_name: string | null
+  deliverables: number
+  completed_deliverables: number
+  budget: number
+  spent: number
+  currency: string
+  dependencies: number
+  configuration: Record<string, unknown>
+  created_at: string
+  updated_at: string
+}
+
+// Form state for creating/editing milestones
+interface MilestoneFormState {
+  name: string
+  description: string
+  type: MilestoneType
+  status: MilestoneStatus
+  priority: Priority
+  due_date: string
+  owner_name: string
+  owner_email: string
+  team_name: string
+  budget: string
+}
+
+const initialFormState: MilestoneFormState = {
+  name: '',
+  description: '',
+  type: 'project',
+  status: 'not_started',
+  priority: 'medium',
+  due_date: '',
+  owner_name: '',
+  owner_email: '',
+  team_name: '',
+  budget: '0',
+}
+
 export default function MilestonesClient() {
+  const supabase = createClientComponentClient()
+
+  // Core state
   const [activeTab, setActiveTab] = useState('milestones')
   const [selectedMilestone, setSelectedMilestone] = useState<Milestone | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'timeline'>('grid')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<MilestoneStatus | 'all'>('all')
-  const [priorityFilter, setPriorityFilter] = useState<Priority | 'all'>('all')
+  const [priorityFilter, _setPriorityFilter] = useState<Priority | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Supabase data state
+  const [dbMilestones, setDbMilestones] = useState<DbMilestone[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [_editingMilestone, _setEditingMilestone] = useState<DbMilestone | null>(null)
+  const [formState, setFormState] = useState<MilestoneFormState>(initialFormState)
+
+  // Fetch milestones from Supabase
+  const fetchMilestones = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('milestones')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbMilestones(data || [])
+    } catch (error) {
+      console.error('Error fetching milestones:', error)
+      toast.error('Failed to load milestones')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchMilestones()
+  }, [fetchMilestones])
+
+  // Create milestone
+  const handleCreateMilestone = async () => {
+    if (!formState.name.trim()) {
+      toast.error('Milestone name is required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create milestones')
+        return
+      }
+
+      const milestoneCode = `MS-${Date.now().toString(36).toUpperCase()}`
+      const dueDate = formState.due_date ? new Date(formState.due_date) : null
+      const daysRemaining = dueDate ? Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)) : 0
+
+      const { error } = await supabase.from('milestones').insert({
+        user_id: user.id,
+        milestone_code: milestoneCode,
+        name: formState.name,
+        description: formState.description || null,
+        type: formState.type,
+        status: formState.status,
+        priority: formState.priority,
+        due_date: formState.due_date || null,
+        days_remaining: daysRemaining,
+        progress: 0,
+        owner_name: formState.owner_name || null,
+        owner_email: formState.owner_email || null,
+        team_name: formState.team_name || null,
+        budget: parseFloat(formState.budget) || 0,
+        spent: 0,
+        currency: 'USD',
+        deliverables: 0,
+        completed_deliverables: 0,
+        dependencies: 0,
+      })
+
+      if (error) throw error
+
+      toast.success('Milestone created successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      fetchMilestones()
+    } catch (error) {
+      console.error('Error creating milestone:', error)
+      toast.error('Failed to create milestone')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Update milestone status
+  const handleUpdateStatus = async (milestoneId: string, newStatus: MilestoneStatus) => {
+    try {
+      const progress = newStatus === 'completed' ? 100 : newStatus === 'not_started' ? 0 : undefined
+
+      const updateData: Record<string, unknown> = { status: newStatus, updated_at: new Date().toISOString() }
+      if (progress !== undefined) updateData.progress = progress
+
+      const { error } = await supabase
+        .from('milestones')
+        .update(updateData)
+        .eq('id', milestoneId)
+
+      if (error) throw error
+
+      toast.success(`Milestone marked as ${newStatus.replace('_', ' ')}`)
+      fetchMilestones()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('Failed to update milestone status')
+    }
+  }
+
+  // Update milestone progress (available for future use)
+  const _handleUpdateProgress = async (milestoneId: string, progress: number) => {
+    try {
+      const { error } = await supabase
+        .from('milestones')
+        .update({
+          progress,
+          status: progress === 100 ? 'completed' : progress > 0 ? 'in_progress' : 'not_started',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', milestoneId)
+
+      if (error) throw error
+      toast.success('Progress updated')
+      fetchMilestones()
+    } catch (error) {
+      console.error('Error updating progress:', error)
+      toast.error('Failed to update progress')
+    }
+  }
+
+  // Delete/Archive milestone (available for future use)
+  const _handleArchiveMilestone = async (milestoneId: string) => {
+    try {
+      const { error } = await supabase
+        .from('milestones')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .eq('id', milestoneId)
+
+      if (error) throw error
+      toast.success('Milestone archived')
+      fetchMilestones()
+    } catch (error) {
+      console.error('Error archiving milestone:', error)
+      toast.error('Failed to archive milestone')
+    }
+  }
+
+  // Delete milestone permanently (available for future use)
+  const _handleDeleteMilestone = async (milestoneId: string) => {
+    try {
+      const { error } = await supabase
+        .from('milestones')
+        .delete()
+        .eq('id', milestoneId)
+
+      if (error) throw error
+      toast.success('Milestone deleted')
+      fetchMilestones()
+    } catch (error) {
+      console.error('Error deleting milestone:', error)
+      toast.error('Failed to delete milestone')
+    }
+  }
+
+  // Complete milestone (available for future use)
+  const _handleCompleteMilestone = async (milestone: Milestone | DbMilestone) => {
+    await handleUpdateStatus(milestone.id, 'completed')
+  }
+
+  // Export milestones report
+  const handleExportReport = () => {
+    const csvContent = dbMilestones.map(m =>
+      `${m.name},${m.status},${m.priority},${m.progress}%,${m.due_date || 'N/A'}`
+    ).join('\n')
+
+    const blob = new Blob([`Name,Status,Priority,Progress,Due Date\n${csvContent}`], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `milestones-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Report exported successfully')
+  }
+
+  // Sync/Refresh data
+  const handleSync = async () => {
+    setLoading(true)
+    await fetchMilestones()
+    toast.success('Data synced')
+  }
 
   // Calculate stats
   const stats = useMemo(() => {
@@ -658,24 +911,6 @@ export default function MilestonesClient() {
     })
   }, [searchQuery, statusFilter, priorityFilter])
 
-  const handleCreateMilestone = () => {
-    toast.info('Create Milestone', {
-      description: 'Opening milestone form...'
-    })
-  }
-
-  const handleCompleteMilestone = (milestone: Milestone) => {
-    toast.success('Milestone completed', {
-      description: `${milestone.name} marked as complete`
-    })
-  }
-
-  const handleExportReport = () => {
-    toast.success('Export started', {
-      description: 'Milestone report is being generated'
-    })
-  }
-
   // Get all dependencies for visualization
   const allDependencies = useMemo(() => {
     const deps: Dependency[] = []
@@ -685,35 +920,13 @@ export default function MilestonesClient() {
     return [...new Map(deps.map(d => [d.id, d])).values()]
   }, [])
 
-  // Handlers
-  const handleCreateMilestone = () => {
-    toast.info('Create Milestone', {
-      description: 'Opening milestone wizard...'
-    })
+  // Additional handlers (available for future use)
+  const _handleAddDependency = (_milestoneId: string) => {
+    toast.info('Add Dependency', { description: 'Select a milestone to link' })
   }
 
-  const handleUpdateStatus = (milestoneId: string, status: string) => {
-    toast.success('Status updated', {
-      description: `Milestone marked as ${status}`
-    })
-  }
-
-  const handleAddDependency = (milestoneId: string) => {
-    toast.info('Add Dependency', {
-      description: 'Select a milestone to link'
-    })
-  }
-
-  const handleExportTimeline = () => {
-    toast.success('Exporting timeline', {
-      description: 'Timeline chart will be downloaded'
-    })
-  }
-
-  const handleArchiveMilestone = (milestoneId: string) => {
-    toast.info('Milestone archived', {
-      description: 'Milestone moved to archive'
-    })
+  const _handleExportTimeline = () => {
+    toast.success('Exporting timeline', { description: 'Timeline chart will be downloaded' })
   }
 
   return (
@@ -736,11 +949,14 @@ export default function MilestonesClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
-              <RefreshCw className="w-4 h-4 mr-2" />
+            <Button variant="outline" size="sm" onClick={handleSync} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Sync
             </Button>
-            <Button className="bg-gradient-to-r from-rose-600 to-pink-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-rose-600 to-pink-600 text-white"
+              onClick={() => setShowCreateDialog(true)}
+            >
               <Plus className="w-4 h-4 mr-2" />
               New Milestone
             </Button>
@@ -872,19 +1088,20 @@ export default function MilestonesClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Milestone', color: 'text-rose-500' },
-                { icon: CalendarDays, label: 'Timeline', color: 'text-blue-500' },
-                { icon: Package, label: 'Deliverables', color: 'text-green-500' },
-                { icon: Link2, label: 'Dependencies', color: 'text-purple-500' },
-                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500' },
-                { icon: BarChart3, label: 'Reports', color: 'text-indigo-500' },
-                { icon: Download, label: 'Export', color: 'text-cyan-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-pink-500' },
+                { icon: Plus, label: 'New Milestone', color: 'text-rose-500', action: () => setShowCreateDialog(true) },
+                { icon: CalendarDays, label: 'Timeline', color: 'text-blue-500', action: () => setActiveTab('timeline') },
+                { icon: Package, label: 'Deliverables', color: 'text-green-500', action: () => setActiveTab('deliverables') },
+                { icon: Link2, label: 'Dependencies', color: 'text-purple-500', action: () => setActiveTab('dependencies') },
+                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => toast.info('Viewing risks') },
+                { icon: BarChart3, label: 'Reports', color: 'text-indigo-500', action: () => setActiveTab('reports') },
+                { icon: Download, label: 'Export', color: 'text-cyan-500', action: handleExportReport },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-pink-500', action: handleSync },
               ].map((action, i) => (
                 <Button
                   key={i}
                   variant="outline"
                   className="h-auto py-3 flex flex-col items-center gap-2 hover:scale-105 transition-all duration-200"
+                  onClick={action.action}
                 >
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
@@ -1705,19 +1922,19 @@ export default function MilestonesClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={handleExportReport}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => toast.info('Archiving old milestones...')}>
                             <Archive className="w-5 h-5" />
                             <span>Archive Old</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={handleSync}>
                             <RefreshCw className="w-5 h-5" />
                             <span>Reset Stats</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => toast.warning('This will delete all completed milestones')}>
                             <Trash2 className="w-5 h-5" />
                             <span>Purge Completed</span>
                           </Button>
@@ -1929,6 +2146,128 @@ export default function MilestonesClient() {
                 </ScrollArea>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Milestone Dialog */}
+        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-rose-500" />
+                Create New Milestone
+              </DialogTitle>
+              <DialogDescription>
+                Add a new milestone to track project progress
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Milestone Name *</Label>
+                <Input
+                  id="name"
+                  placeholder="e.g., Product Launch Q1"
+                  value={formState.name}
+                  onChange={(e) => setFormState(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  placeholder="Brief description of this milestone"
+                  value={formState.description}
+                  onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="type">Type</Label>
+                  <select
+                    id="type"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formState.type}
+                    onChange={(e) => setFormState(prev => ({ ...prev, type: e.target.value as MilestoneType }))}
+                  >
+                    <option value="project">Project</option>
+                    <option value="release">Release</option>
+                    <option value="phase">Phase</option>
+                    <option value="checkpoint">Checkpoint</option>
+                    <option value="gate">Gate</option>
+                    <option value="delivery">Delivery</option>
+                    <option value="launch">Launch</option>
+                    <option value="review">Review</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="priority">Priority</Label>
+                  <select
+                    id="priority"
+                    className="w-full h-10 px-3 rounded-md border border-input bg-background"
+                    value={formState.priority}
+                    onChange={(e) => setFormState(prev => ({ ...prev, priority: e.target.value as Priority }))}
+                  >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="due_date">Due Date</Label>
+                  <Input
+                    id="due_date"
+                    type="date"
+                    value={formState.due_date}
+                    onChange={(e) => setFormState(prev => ({ ...prev, due_date: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="budget">Budget (USD)</Label>
+                  <Input
+                    id="budget"
+                    type="number"
+                    placeholder="0"
+                    value={formState.budget}
+                    onChange={(e) => setFormState(prev => ({ ...prev, budget: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="owner_name">Owner Name</Label>
+                  <Input
+                    id="owner_name"
+                    placeholder="Project owner"
+                    value={formState.owner_name}
+                    onChange={(e) => setFormState(prev => ({ ...prev, owner_name: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="team_name">Team Name</Label>
+                  <Input
+                    id="team_name"
+                    placeholder="Assigned team"
+                    value={formState.team_name}
+                    onChange={(e) => setFormState(prev => ({ ...prev, team_name: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowCreateDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateMilestone}
+                disabled={isSubmitting}
+                className="bg-gradient-to-r from-rose-600 to-pink-600 text-white"
+              >
+                {isSubmitting ? 'Creating...' : 'Create Milestone'}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

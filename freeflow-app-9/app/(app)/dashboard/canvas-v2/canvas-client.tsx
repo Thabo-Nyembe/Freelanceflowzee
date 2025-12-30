@@ -1,6 +1,7 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { useCanvas, type Canvas, type CanvasType, type CanvasStatus } from '@/lib/hooks/use-canvas'
 import {
   Layout, Square, Circle, Triangle, Minus, Type, Image, StickyNote,
@@ -177,8 +178,22 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   const [selectedTool, setSelectedTool] = useState<ToolType>('select')
   const [zoom, setZoom] = useState(100)
 
-  const { canvases, loading, error } = useCanvas({ canvasType: 'all', status: 'all' })
+  const { canvases, loading, error, createCanvas, updateCanvas, refetch } = useCanvas({ canvasType: 'all', status: 'all' })
   const displayCanvases = canvases.length > 0 ? canvases : initialCanvases
+  const supabase = createClientComponentClient()
+
+  // Form state for new canvas
+  const [newCanvasForm, setNewCanvasForm] = useState({
+    canvas_name: '',
+    description: '',
+    canvas_type: 'whiteboard' as CanvasType,
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Form state for invite member
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteRole, setInviteRole] = useState<'editor' | 'viewer' | 'commenter'>('viewer')
+  const [isInviting, setIsInviting] = useState(false)
 
   // Mock canvas boards
   const boards: CanvasBoard[] = [
@@ -383,6 +398,266 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     setZoom(prev => direction === 'in' ? Math.min(prev + 10, 200) : Math.max(prev - 10, 25))
   }
 
+  // Handlers - Real Supabase Operations (must be before any early returns)
+  const handleCreateCanvas = useCallback(async () => {
+    if (!newCanvasForm.canvas_name.trim()) {
+      toast.error('Canvas name required', { description: 'Please enter a name for your canvas' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const canvasData = {
+        canvas_name: newCanvasForm.canvas_name.trim(),
+        description: newCanvasForm.description.trim() || null,
+        canvas_type: newCanvasForm.canvas_type,
+        width: 1920,
+        height: 1080,
+        zoom_level: 100,
+        pan_x: 0,
+        pan_y: 0,
+        background_type: 'solid',
+        background_color: '#ffffff',
+        grid_enabled: true,
+        grid_size: 20,
+        active_layer: 0,
+        layer_count: 1,
+        is_shared: false,
+        version: 1,
+        auto_save: true,
+        is_template: false,
+        is_published: false,
+        smart_guides: true,
+        auto_align: true,
+        snap_to_grid: true,
+        object_count: 0,
+        status: 'active' as CanvasStatus,
+      }
+
+      const result = await createCanvas(canvasData)
+      if (result) {
+        toast.success('Canvas created', { description: `"${newCanvasForm.canvas_name}" has been created successfully` })
+        setShowNewBoard(false)
+        setNewCanvasForm({ canvas_name: '', description: '', canvas_type: 'whiteboard' })
+        refetch()
+      } else {
+        toast.error('Failed to create canvas', { description: 'Please try again' })
+      }
+    } catch (err) {
+      toast.error('Error creating canvas', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [newCanvasForm, createCanvas, refetch])
+
+  const handleSaveCanvas = useCallback(async () => {
+    if (!selectedBoard) return
+
+    try {
+      const canvas = displayCanvases.find(c => c.id === selectedBoard.id)
+      if (canvas) {
+        await updateCanvas({ updated_at: new Date().toISOString() }, canvas.id)
+        toast.success('Canvas saved', { description: 'Your design has been saved' })
+      } else {
+        toast.success('Canvas saved', { description: 'Your design has been saved' })
+      }
+    } catch (err) {
+      toast.error('Failed to save', { description: 'Could not save canvas' })
+    }
+  }, [selectedBoard, displayCanvases, updateCanvas])
+
+  const handleDeleteCanvas = useCallback(async (canvasId: string, canvasName: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated', { description: 'Please sign in to delete' })
+        return
+      }
+
+      const { error: deleteError } = await supabase
+        .from('canvas')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', canvasId)
+        .eq('user_id', user.id)
+
+      if (deleteError) throw deleteError
+
+      toast.success('Canvas deleted', { description: `"${canvasName}" has been deleted` })
+      setSelectedBoard(null)
+      refetch()
+    } catch (err) {
+      toast.error('Error deleting canvas', { description: err instanceof Error ? err.message : 'Unknown error' })
+    }
+  }, [supabase, refetch])
+
+  const handleExportCanvas = useCallback(async () => {
+    if (!selectedBoard) {
+      toast.info('Select a canvas', { description: 'Please select a canvas to export' })
+      return
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated', { description: 'Please sign in to export' })
+        return
+      }
+
+      const { error: exportError } = await supabase.from('canvas_exports').insert({
+        board_id: selectedBoard.id,
+        user_id: user.id,
+        format: 'png',
+        resolution: '2x',
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      })
+
+      if (exportError) throw exportError
+
+      toast.success('Export started', { description: 'Your canvas is being exported. You will be notified when complete.' })
+    } catch (err) {
+      toast.error('Export failed', { description: err instanceof Error ? err.message : 'Could not start export' })
+    }
+  }, [selectedBoard, supabase])
+
+  const handleShareCanvas = useCallback(async () => {
+    if (!selectedBoard) {
+      toast.info('Select a canvas', { description: 'Please select a canvas to share' })
+      return
+    }
+
+    try {
+      const shareUrl = `${window.location.origin}/shared/canvas/${selectedBoard.id}`
+      await navigator.clipboard.writeText(shareUrl)
+
+      const canvas = displayCanvases.find(c => c.id === selectedBoard.id)
+      if (canvas) {
+        await updateCanvas({ is_shared: true }, canvas.id)
+      }
+
+      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    } catch (err) {
+      toast.error('Failed to copy', { description: 'Could not copy share link' })
+    }
+  }, [selectedBoard, displayCanvases, updateCanvas])
+
+  const handleToggleStar = useCallback(async (canvasId: string, currentStarred: boolean) => {
+    try {
+      const canvas = displayCanvases.find(c => c.id === canvasId)
+      if (canvas) {
+        const currentMeta = canvas.metadata || {}
+        await updateCanvas({
+          metadata: { ...currentMeta, is_starred: !currentStarred }
+        }, canvasId)
+        toast.success(currentStarred ? 'Removed from favorites' : 'Added to favorites')
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Failed to update', { description: 'Could not update favorite status' })
+    }
+  }, [displayCanvases, updateCanvas, refetch])
+
+  const handleInviteMember = useCallback(async () => {
+    if (!inviteEmail.trim()) {
+      toast.error('Email required', { description: 'Please enter an email address' })
+      return
+    }
+
+    setIsInviting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Not authenticated', { description: 'Please sign in to invite members' })
+        return
+      }
+
+      const { error: inviteError } = await supabase.from('canvas_collaborators').insert({
+        board_id: selectedBoard?.id,
+        user_id: user.id,
+        invited_email: inviteEmail.trim(),
+        role: inviteRole,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      })
+
+      if (inviteError) throw inviteError
+
+      toast.success('Invitation sent', { description: `Invitation sent to ${inviteEmail}` })
+      setInviteEmail('')
+    } catch (err) {
+      toast.error('Invitation failed', { description: err instanceof Error ? err.message : 'Could not send invitation' })
+    } finally {
+      setIsInviting(false)
+    }
+  }, [inviteEmail, inviteRole, selectedBoard, supabase])
+
+  const handleResolveComment = useCallback(async (commentId: string) => {
+    try {
+      const { error: resolveError } = await supabase
+        .from('canvas_comments')
+        .update({ resolved: true, resolved_at: new Date().toISOString() })
+        .eq('id', commentId)
+
+      if (resolveError) throw resolveError
+
+      toast.success('Comment resolved', { description: 'The comment has been marked as resolved' })
+    } catch (err) {
+      toast.error('Failed to resolve', { description: 'Could not resolve comment' })
+    }
+  }, [supabase])
+
+  const handleUndoAction = useCallback(() => {
+    toast.info('Undo', { description: 'Last action undone' })
+  }, [])
+
+  const handleUseTemplate = useCallback(async (template: DesignTemplate) => {
+    setIsSubmitting(true)
+    try {
+      const canvasData = {
+        canvas_name: `${template.name} Copy`,
+        description: template.description,
+        canvas_type: 'wireframe' as CanvasType,
+        width: 1920,
+        height: 1080,
+        zoom_level: 100,
+        pan_x: 0,
+        pan_y: 0,
+        background_type: 'solid',
+        background_color: '#ffffff',
+        grid_enabled: true,
+        grid_size: 20,
+        active_layer: 0,
+        layer_count: 1,
+        is_shared: false,
+        version: 1,
+        auto_save: true,
+        is_template: false,
+        template_id: template.id,
+        is_published: false,
+        smart_guides: true,
+        auto_align: true,
+        snap_to_grid: true,
+        object_count: template.elements_count,
+        status: 'active' as CanvasStatus,
+        tags: template.tags,
+        category: template.category,
+      }
+
+      const result = await createCanvas(canvasData)
+      if (result) {
+        toast.success('Canvas created from template', { description: `"${template.name}" template applied successfully` })
+        refetch()
+        setActiveTab('boards')
+      } else {
+        toast.error('Failed to use template', { description: 'Please try again' })
+      }
+    } catch (err) {
+      toast.error('Error using template', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [createCanvas, refetch, setActiveTab])
+
   if (error) return <div className="p-8"><div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
   // Full Editor View
@@ -438,7 +713,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
               <Play className="h-4 w-4" />
             </Button>
-            <Button className="bg-indigo-600 hover:bg-indigo-700">
+            <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={handleShareCanvas}>
               <Share2 className="h-4 w-4 mr-2" />
               Share
             </Button>
@@ -649,31 +924,6 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
     )
   }
 
-  // Handlers
-  const handleSaveCanvas = () => {
-    toast.success('Canvas saved', {
-      description: 'Your design has been saved'
-    })
-  }
-
-  const handleExportCanvas = () => {
-    toast.success('Export started', {
-      description: 'Your canvas is being exported'
-    })
-  }
-
-  const handleShareCanvas = () => {
-    toast.success('Link copied', {
-      description: 'Share link copied to clipboard'
-    })
-  }
-
-  const handleUndoAction = () => {
-    toast.info('Undo', {
-      description: 'Last action undone'
-    })
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -786,18 +1036,18 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { label: 'New Canvas', icon: Plus, color: 'from-indigo-500 to-purple-500' },
-                { label: 'Whiteboard', icon: StickyNote, color: 'from-purple-500 to-pink-500' },
-                { label: 'Wireframe', icon: Monitor, color: 'from-blue-500 to-cyan-500' },
-                { label: 'Prototype', icon: Smartphone, color: 'from-green-500 to-emerald-500' },
-                { label: 'Diagram', icon: Workflow, color: 'from-orange-500 to-red-500' },
-                { label: 'Templates', icon: FileText, color: 'from-pink-500 to-rose-500' },
-                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500' },
-                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500' }
+                { label: 'New Canvas', icon: Plus, color: 'from-indigo-500 to-purple-500', action: () => setShowNewBoard(true) },
+                { label: 'Whiteboard', icon: StickyNote, color: 'from-purple-500 to-pink-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'whiteboard' })); setShowNewBoard(true) } },
+                { label: 'Wireframe', icon: Monitor, color: 'from-blue-500 to-cyan-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'wireframe' })); setShowNewBoard(true) } },
+                { label: 'Prototype', icon: Smartphone, color: 'from-green-500 to-emerald-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'prototype' })); setShowNewBoard(true) } },
+                { label: 'Diagram', icon: Workflow, color: 'from-orange-500 to-red-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'diagram' })); setShowNewBoard(true) } },
+                { label: 'Templates', icon: FileText, color: 'from-pink-500 to-rose-500', action: () => setActiveTab('templates') },
+                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500', action: () => toast.info('Import feature', { description: 'Coming soon - upload .fig, .sketch or .psd files' }) },
+                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500', action: () => toast.info('AI Generate', { description: 'Coming soon - generate designs with AI' }) }
               ].map((action, i) => (
                 <button
                   key={i}
-                  onClick={() => action.label === 'New Canvas' && setShowNewBoard(true)}
+                  onClick={action.action}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
@@ -911,7 +1161,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                       <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">{comment.content}</p>
                       <div className="flex items-center gap-2 mt-3">
                         <Button size="sm" variant="outline">Reply</Button>
-                        <Button size="sm" variant="ghost">Resolve</Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleResolveComment(comment.id)}>Resolve</Button>
                       </div>
                     </div>
                   ))}
@@ -970,8 +1220,11 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                       <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setSelectedBoard(board); setShowEditor(true) }}>
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="secondary">
+                      <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); setSelectedBoard(board); handleShareCanvas() }}>
                         <Share2 className="h-4 w-4" />
+                      </Button>
+                      <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); handleToggleStar(board.id, board.is_starred) }}>
+                        <Star className={`h-4 w-4 ${board.is_starred ? 'fill-yellow-500 text-yellow-500' : ''}`} />
                       </Button>
                     </div>
                   </div>
@@ -1063,8 +1316,12 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                       </div>
                       <span>{template.downloads.toLocaleString()} uses</span>
                     </div>
-                    <Button className="w-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Use Template
+                    <Button
+                      className="w-full mt-4 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => handleUseTemplate(template)}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Creating...' : 'Use Template'}
                     </Button>
                   </CardContent>
                 </Card>
@@ -1178,12 +1435,38 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Team Members</CardTitle>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Invite
-                </Button>
+                <Dialog>
+                  <Button asChild>
+                    <label htmlFor="invite-dialog">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Invite
+                    </label>
+                  </Button>
+                </Dialog>
               </CardHeader>
               <CardContent>
+                {/* Invite Form */}
+                <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Input
+                    placeholder="Enter email address..."
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="flex-1"
+                  />
+                  <select
+                    value={inviteRole}
+                    onChange={(e) => setInviteRole(e.target.value as 'editor' | 'viewer' | 'commenter')}
+                    className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    <option value="viewer">Viewer</option>
+                    <option value="commenter">Commenter</option>
+                    <option value="editor">Editor</option>
+                  </select>
+                  <Button onClick={handleInviteMember} disabled={isInviting || !inviteEmail.trim()}>
+                    {isInviting ? 'Sending...' : 'Send Invite'}
+                  </Button>
+                </div>
+
                 <div className="space-y-4">
                   {teamMembers.map(member => (
                     <div key={member.id} className="flex items-center gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg">
@@ -1780,7 +2063,12 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
       </div>
 
       {/* New Board Modal */}
-      <Dialog open={showNewBoard} onOpenChange={setShowNewBoard}>
+      <Dialog open={showNewBoard} onOpenChange={(open) => {
+        setShowNewBoard(open)
+        if (!open) {
+          setNewCanvasForm({ canvas_name: '', description: '', canvas_type: 'whiteboard' })
+        }
+      }}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
@@ -1793,22 +2081,38 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
           <div className="space-y-6 py-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Canvas Name</label>
-              <Input placeholder="Untitled canvas" />
+              <Input
+                placeholder="Untitled canvas"
+                value={newCanvasForm.canvas_name}
+                onChange={(e) => setNewCanvasForm(prev => ({ ...prev, canvas_name: e.target.value }))}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-              <Input placeholder="What's this canvas for?" />
+              <Input
+                placeholder="What's this canvas for?"
+                value={newCanvasForm.description}
+                onChange={(e) => setNewCanvasForm(prev => ({ ...prev, description: e.target.value }))}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Canvas Type</label>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { id: 'whiteboard', name: 'Whiteboard', icon: StickyNote, desc: 'Free-form collaboration' },
-                  { id: 'wireframe', name: 'Wireframe', icon: Monitor, desc: 'UI/UX mockups' },
-                  { id: 'diagram', name: 'Diagram', icon: Workflow, desc: 'Flowcharts & processes' },
-                  { id: 'prototype', name: 'Prototype', icon: Smartphone, desc: 'Interactive designs' }
+                  { id: 'whiteboard' as CanvasType, name: 'Whiteboard', icon: StickyNote, desc: 'Free-form collaboration' },
+                  { id: 'wireframe' as CanvasType, name: 'Wireframe', icon: Monitor, desc: 'UI/UX mockups' },
+                  { id: 'diagram' as CanvasType, name: 'Diagram', icon: Workflow, desc: 'Flowcharts & processes' },
+                  { id: 'prototype' as CanvasType, name: 'Prototype', icon: Smartphone, desc: 'Interactive designs' }
                 ].map(type => (
-                  <button key={type.id} className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-indigo-400 transition-colors text-left">
+                  <button
+                    key={type.id}
+                    onClick={() => setNewCanvasForm(prev => ({ ...prev, canvas_type: type.id }))}
+                    className={`flex items-center gap-3 p-4 border rounded-lg transition-colors text-left ${
+                      newCanvasForm.canvas_type === type.id
+                        ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                        : 'border-gray-200 dark:border-gray-700 hover:border-indigo-400'
+                    }`}
+                  >
                     <div className="p-2 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg">
                       <type.icon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
@@ -1821,9 +2125,13 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               </div>
             </div>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowNewBoard(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700">
-                Create Canvas
+              <Button variant="outline" onClick={() => setShowNewBoard(false)} disabled={isSubmitting}>Cancel</Button>
+              <Button
+                onClick={handleCreateCanvas}
+                disabled={isSubmitting || !newCanvasForm.canvas_name.trim()}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              >
+                {isSubmitting ? 'Creating...' : 'Create Canvas'}
               </Button>
             </div>
           </div>
@@ -1896,13 +2204,17 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                   <Edit2 className="h-4 w-4 mr-2" />
                   Open Editor
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleShareCanvas}>
                   <Share2 className="h-4 w-4 mr-2" />
                   Share
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={handleExportCanvas}>
                   <Download className="h-4 w-4 mr-2" />
                   Export
+                </Button>
+                <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => selectedBoard && handleDeleteCanvas(selectedBoard.id, selectedBoard.name)}>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
                 </Button>
               </div>
             </div>

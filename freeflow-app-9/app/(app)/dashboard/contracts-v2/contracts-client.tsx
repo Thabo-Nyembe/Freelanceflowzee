@@ -180,7 +180,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
-  const { contracts, loading, error } = useContracts({ status: 'all' })
+  const { contracts, loading, error, createContract, updateContract, deleteContract, mutating } = useContracts({ status: 'all' })
   const display = (contracts && contracts.length > 0) ? contracts : (initialContracts || [])
 
   // Mock envelopes
@@ -362,34 +362,159 @@ export default function ContractsClient({ initialContracts }: { initialContracts
     return colors[color] || colors.gray
   }
 
-  // Handlers
-  const handleCreateContract = () => {
-    toast.info('Create Contract', {
-      description: 'Opening contract builder...'
-    })
+  // Handlers - Real Supabase Operations
+  const handleCreateContract = async (contractData?: Partial<Contract>) => {
+    try {
+      const newContract = {
+        title: contractData?.title || 'New Contract',
+        contract_number: `CTR-${Date.now()}`,
+        contract_type: contractData?.contract_type || 'service' as const,
+        status: 'draft' as const,
+        contract_value: contractData?.contract_value || 0,
+        currency: 'USD',
+        start_date: new Date().toISOString(),
+        terms: contractData?.terms || '',
+        is_template: false,
+        is_auto_renewable: false,
+        renewal_notice_period_days: 30,
+        termination_notice_period_days: 30,
+        has_attachments: false,
+        requires_legal_review: false,
+        version: 1,
+        ...contractData,
+      }
+      await createContract(newContract)
+      toast.success('Contract Created', {
+        description: `Contract "${newContract.title}" has been created successfully.`
+      })
+      setShowNewContract(false)
+    } catch (err) {
+      toast.error('Failed to create contract', {
+        description: err instanceof Error ? err.message : 'An error occurred'
+      })
+    }
   }
 
-  const handleSignContract = (contractName: string) => {
-    toast.success('Signing contract', {
-      description: `Opening signature for "${contractName}"...`
-    })
+  const handleSignContract = async (contractId: string, contractName: string) => {
+    try {
+      await updateContract(contractId, {
+        status: 'active' as const,
+        signed_date: new Date().toISOString(),
+        effective_date: new Date().toISOString()
+      })
+      toast.success('Contract Signed', {
+        description: `"${contractName}" has been signed and is now active.`
+      })
+    } catch (err) {
+      toast.error('Failed to sign contract', {
+        description: err instanceof Error ? err.message : 'An error occurred'
+      })
+    }
   }
 
-  const handleSendForSignature = (contractName: string) => {
-    toast.success('Sent for signature', {
-      description: `"${contractName}" sent to recipients`
-    })
+  const handleSendForSignature = async (contractId: string, contractName: string) => {
+    try {
+      await updateContract(contractId, {
+        status: 'pending-signature' as const
+      })
+      toast.success('Sent for Signature', {
+        description: `"${contractName}" has been sent to recipients for signature.`
+      })
+    } catch (err) {
+      toast.error('Failed to send contract', {
+        description: err instanceof Error ? err.message : 'An error occurred'
+      })
+    }
+  }
+
+  const handleTerminateContract = async (contractId: string, contractName: string) => {
+    try {
+      await updateContract(contractId, {
+        status: 'terminated' as const,
+        termination_date: new Date().toISOString()
+      })
+      toast.success('Contract Terminated', {
+        description: `"${contractName}" has been terminated.`
+      })
+    } catch (err) {
+      toast.error('Failed to terminate contract', {
+        description: err instanceof Error ? err.message : 'An error occurred'
+      })
+    }
+  }
+
+  const handleRenewContract = async (contract: Contract) => {
+    try {
+      const renewedContract = {
+        title: `${contract.title} (Renewed)`,
+        contract_number: `CTR-${Date.now()}`,
+        contract_type: contract.contract_type,
+        status: 'draft' as const,
+        contract_value: contract.contract_value,
+        currency: contract.currency,
+        start_date: new Date().toISOString(),
+        terms: contract.terms,
+        is_template: false,
+        is_auto_renewable: contract.is_auto_renewable,
+        renewal_notice_period_days: contract.renewal_notice_period_days,
+        termination_notice_period_days: contract.termination_notice_period_days,
+        termination_clause: contract.termination_clause,
+        has_attachments: false,
+        requires_legal_review: contract.requires_legal_review,
+        version: 1,
+        parent_contract_id: contract.id,
+        party_a_name: contract.party_a_name,
+        party_a_email: contract.party_a_email,
+        party_b_name: contract.party_b_name,
+        party_b_email: contract.party_b_email,
+      }
+      await createContract(renewedContract)
+      // Update the original contract to show it was renewed
+      await updateContract(contract.id, {
+        status: 'renewed' as const,
+        renewal_date: new Date().toISOString()
+      })
+      toast.success('Contract Renewed', {
+        description: `A new contract based on "${contract.title}" has been created.`
+      })
+    } catch (err) {
+      toast.error('Failed to renew contract', {
+        description: err instanceof Error ? err.message : 'An error occurred'
+      })
+    }
+  }
+
+  const handleDeleteContract = async (contractId: string, contractName: string) => {
+    try {
+      await deleteContract(contractId)
+      toast.success('Contract Deleted', {
+        description: `"${contractName}" has been permanently deleted.`
+      })
+    } catch (err) {
+      toast.error('Failed to delete contract', {
+        description: err instanceof Error ? err.message : 'An error occurred'
+      })
+    }
+  }
+
+  const handleArchiveContract = async (contractId: string, contractName: string) => {
+    try {
+      await updateContract(contractId, {
+        status: 'completed' as const
+      })
+      toast.success('Contract Archived', {
+        description: `"${contractName}" has been moved to archive.`
+      })
+    } catch (err) {
+      toast.error('Failed to archive contract', {
+        description: err instanceof Error ? err.message : 'An error occurred'
+      })
+    }
   }
 
   const handleDownloadContract = (contractName: string) => {
     toast.success('Downloading contract', {
       description: `"${contractName}" will be downloaded`
-    })
-  }
-
-  const handleArchiveContract = (contractName: string) => {
-    toast.info('Contract archived', {
-      description: `"${contractName}" moved to archive`
     })
   }
 
@@ -735,6 +860,86 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                 </div>
               </CardContent>
             </Card>
+
+            {/* Active Contracts from Database */}
+            {display.length > 0 && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileSignature className="h-5 w-5 text-purple-600" />
+                    Your Contracts ({display.length})
+                  </CardTitle>
+                  <Button size="sm" onClick={() => setShowNewContract(true)}>
+                    <Plus className="h-4 w-4 mr-1" />
+                    New Contract
+                  </Button>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {display.slice(0, 5).map((contract: Contract) => (
+                      <div key={contract.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg ${
+                            contract.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' :
+                            contract.status === 'draft' ? 'bg-gray-100 dark:bg-gray-700' :
+                            'bg-blue-100 dark:bg-blue-900/30'
+                          }`}>
+                            <FileSignature className={`h-4 w-4 ${
+                              contract.status === 'active' ? 'text-green-600' :
+                              contract.status === 'draft' ? 'text-gray-600' :
+                              'text-blue-600'
+                            }`} />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white text-sm">{contract.title}</h4>
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Badge variant="outline" className="text-[10px]">{contract.contract_type}</Badge>
+                              <span>{contract.status}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          {contract.status === 'draft' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSendForSignature(contract.id, contract.title)}
+                              disabled={mutating}
+                            >
+                              <Send className="h-3 w-3" />
+                            </Button>
+                          )}
+                          {contract.status === 'pending-signature' && (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => handleSignContract(contract.id, contract.title)}
+                              disabled={mutating}
+                            >
+                              <PenTool className="h-3 w-3" />
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-600"
+                            onClick={() => handleDeleteContract(contract.id, contract.title)}
+                            disabled={mutating}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {display.length > 5 && (
+                      <Button variant="link" className="w-full" onClick={() => setActiveTab('envelopes')}>
+                        View all {display.length} contracts
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Envelopes Tab */}
@@ -845,6 +1050,115 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                 </Card>
               ))}
             </div>
+
+            {/* Real Contracts from Database */}
+            {display.length > 0 && (
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileSignature className="h-5 w-5 text-purple-600" />
+                    Database Contracts ({display.length})
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {display.map((contract: Contract) => (
+                      <div key={contract.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                        <div className="flex items-center gap-4">
+                          <div className={`p-2 rounded-lg ${
+                            contract.status === 'active' ? 'bg-green-100 dark:bg-green-900/30' :
+                            contract.status === 'draft' ? 'bg-gray-100 dark:bg-gray-700' :
+                            contract.status === 'terminated' ? 'bg-red-100 dark:bg-red-900/30' :
+                            'bg-blue-100 dark:bg-blue-900/30'
+                          }`}>
+                            <FileSignature className={`h-5 w-5 ${
+                              contract.status === 'active' ? 'text-green-600' :
+                              contract.status === 'draft' ? 'text-gray-600' :
+                              contract.status === 'terminated' ? 'text-red-600' :
+                              'text-blue-600'
+                            }`} />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-gray-900 dark:text-white">{contract.title}</h4>
+                            <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <Badge variant="outline">{contract.contract_type}</Badge>
+                              <Badge className={
+                                contract.status === 'active' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                                contract.status === 'draft' ? 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300' :
+                                contract.status === 'terminated' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                                contract.status === 'pending-signature' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                                'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                              }>{contract.status}</Badge>
+                              {contract.contract_value > 0 && (
+                                <span className="flex items-center gap-1">
+                                  <DollarSign className="h-3 w-3" />
+                                  {contract.contract_value.toLocaleString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {contract.status === 'draft' && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleSendForSignature(contract.id, contract.title)}
+                              disabled={mutating}
+                            >
+                              <Send className="h-4 w-4 mr-1" />
+                              Send
+                            </Button>
+                          )}
+                          {contract.status === 'pending-signature' && (
+                            <Button
+                              size="sm"
+                              onClick={() => handleSignContract(contract.id, contract.title)}
+                              disabled={mutating}
+                            >
+                              <PenTool className="h-4 w-4 mr-1" />
+                              Sign
+                            </Button>
+                          )}
+                          {contract.status === 'active' && (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleRenewContract(contract)}
+                                disabled={mutating}
+                              >
+                                <RefreshCw className="h-4 w-4 mr-1" />
+                                Renew
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="text-red-600 hover:bg-red-50"
+                                onClick={() => handleTerminateContract(contract.id, contract.title)}
+                                disabled={mutating}
+                              >
+                                <XCircle className="h-4 w-4 mr-1" />
+                                Terminate
+                              </Button>
+                            </>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-red-600 hover:bg-red-50"
+                            onClick={() => handleDeleteContract(contract.id, contract.title)}
+                            disabled={mutating}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Templates Tab */}
@@ -1662,7 +1976,11 @@ export default function ContractsClient({ initialContracts }: { initialContracts
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockContractsQuickActions}
+            actions={[
+              { id: '1', label: 'New Contract', icon: 'file-plus', action: () => setShowNewContract(true), variant: 'default' as const },
+              { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.info('Select a contract to send for signing'), variant: 'default' as const },
+              { id: '3', label: 'Templates', icon: 'copy', action: () => setActiveTab('templates'), variant: 'outline' as const },
+            ]}
             variant="grid"
           />
         </div>
@@ -1871,35 +2189,77 @@ export default function ContractsClient({ initialContracts }: { initialContracts
               <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg">
                 <Plus className="h-5 w-5 text-white" />
               </div>
-              Create New Envelope
+              Create New Contract
             </DialogTitle>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
             <div className="grid grid-cols-3 gap-4">
-              <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group">
+              <button
+                onClick={() => handleCreateContract({ contract_type: 'service', title: 'New Service Agreement' })}
+                disabled={mutating}
+                className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group disabled:opacity-50"
+              >
                 <FileText className="h-8 w-8 text-gray-400 group-hover:text-purple-600" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">Blank Document</span>
-                <span className="text-xs text-gray-500">Start from scratch</span>
+                <span className="font-medium text-gray-700 dark:text-gray-300">Service Agreement</span>
+                <span className="text-xs text-gray-500">Standard service contract</span>
               </button>
-              <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group">
+              <button
+                onClick={() => handleCreateContract({ contract_type: 'nda', title: 'New NDA' })}
+                disabled={mutating}
+                className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group disabled:opacity-50"
+              >
                 <FileCheck className="h-8 w-8 text-gray-400 group-hover:text-purple-600" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">Use Template</span>
-                <span className="text-xs text-gray-500">Choose from library</span>
+                <span className="font-medium text-gray-700 dark:text-gray-300">NDA</span>
+                <span className="text-xs text-gray-500">Non-disclosure agreement</span>
               </button>
-              <button className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group">
-                <Layers className="h-8 w-8 text-gray-400 group-hover:text-purple-600" />
-                <span className="font-medium text-gray-700 dark:text-gray-300">Bulk Send</span>
-                <span className="text-xs text-gray-500">Send to many</span>
+              <button
+                onClick={() => handleCreateContract({ contract_type: 'employment', title: 'New Employment Contract' })}
+                disabled={mutating}
+                className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group disabled:opacity-50"
+              >
+                <Briefcase className="h-8 w-8 text-gray-400 group-hover:text-purple-600" />
+                <span className="font-medium text-gray-700 dark:text-gray-300">Employment</span>
+                <span className="text-xs text-gray-500">Employment contract</span>
               </button>
             </div>
 
-            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center">
-              <FileUp className="h-8 w-8 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-600 dark:text-gray-400">Drag & drop files here</p>
-              <p className="text-sm text-gray-500 mt-1">PDF, Word, Excel, or images</p>
-              <Button variant="link" className="mt-2">or browse files</Button>
+            <div className="grid grid-cols-3 gap-4">
+              <button
+                onClick={() => handleCreateContract({ contract_type: 'partnership', title: 'New Partnership Agreement' })}
+                disabled={mutating}
+                className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group disabled:opacity-50"
+              >
+                <Users className="h-8 w-8 text-gray-400 group-hover:text-purple-600" />
+                <span className="font-medium text-gray-700 dark:text-gray-300">Partnership</span>
+                <span className="text-xs text-gray-500">Partnership agreement</span>
+              </button>
+              <button
+                onClick={() => handleCreateContract({ contract_type: 'license', title: 'New License Agreement' })}
+                disabled={mutating}
+                className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group disabled:opacity-50"
+              >
+                <Key className="h-8 w-8 text-gray-400 group-hover:text-purple-600" />
+                <span className="font-medium text-gray-700 dark:text-gray-300">License</span>
+                <span className="text-xs text-gray-500">License agreement</span>
+              </button>
+              <button
+                onClick={() => handleCreateContract({ contract_type: 'custom', title: 'New Custom Contract' })}
+                disabled={mutating}
+                className="flex flex-col items-center gap-3 p-6 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-purple-400 transition-colors group disabled:opacity-50"
+              >
+                <Layers className="h-8 w-8 text-gray-400 group-hover:text-purple-600" />
+                <span className="font-medium text-gray-700 dark:text-gray-300">Custom</span>
+                <span className="text-xs text-gray-500">Custom contract type</span>
+              </button>
             </div>
+
+            {mutating && (
+              <div className="text-center py-4">
+                <div className="inline-block h-6 w-6 animate-spin rounded-full border-4 border-solid border-purple-600 border-r-transparent"></div>
+                <p className="text-sm text-gray-500 mt-2">Creating contract...</p>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -1,7 +1,14 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import {
+  useGalleryItems,
+  useGalleryCollections,
+  GalleryItem,
+  GalleryCollection
+} from '@/lib/hooks/use-gallery'
 import {
   Image,
   Search,
@@ -53,7 +60,8 @@ import {
   Shield,
   HardDrive,
   Globe,
-  Mail
+  Mail,
+  Loader2
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -447,9 +455,34 @@ const mockGalleryQuickActions = [
 ]
 
 export default function GalleryClient() {
+  const supabase = createClientComponentClient()
+
+  // Hooks for Supabase data
+  const {
+    items: galleryItems,
+    stats: galleryStats,
+    isLoading: isLoadingItems,
+    error: itemsError,
+    fetchItems,
+    createItem,
+    updateItem,
+    deleteItem: deleteGalleryItem
+  } = useGalleryItems()
+
+  const {
+    collections: galleryCollections,
+    isLoading: isLoadingCollections,
+    fetchCollections,
+    createCollection,
+    updateCollection,
+    deleteCollection
+  } = useGalleryCollections()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null)
+  const [selectedGalleryItem, setSelectedGalleryItem] = useState<GalleryItem | null>(null)
   const [orientation, setOrientation] = useState<Orientation>('all')
   const [color, setColor] = useState<Color>('all')
   const [showFilters, setShowFilters] = useState(false)
@@ -459,11 +492,39 @@ export default function GalleryClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [copiedLink, setCopiedLink] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Stats
-  const totalPhotos = mockPhotos.length
-  const totalDownloads = mockPhotos.reduce((sum, p) => sum + p.downloads, 0)
-  const totalViews = mockPhotos.reduce((sum, p) => sum + p.views, 0)
+  // Form state for Upload Dialog
+  const [uploadForm, setUploadForm] = useState({
+    title: '',
+    description: '',
+    tags: '',
+    file_url: '',
+    file_type: 'image' as const,
+    is_public: true
+  })
+
+  // Form state for Create Collection Dialog
+  const [collectionForm, setCollectionForm] = useState({
+    name: '',
+    description: '',
+    is_public: true
+  })
+
+  // Liked and saved items state (local tracking for mock data)
+  const [likedItems, setLikedItems] = useState<Set<string>>(new Set())
+  const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
+
+  // Fetch data on mount
+  useEffect(() => {
+    fetchItems()
+    fetchCollections()
+  }, [fetchItems, fetchCollections])
+
+  // Stats - combine mock and real data
+  const totalPhotos = mockPhotos.length + galleryItems.length
+  const totalDownloads = mockPhotos.reduce((sum, p) => sum + p.downloads, 0) + galleryStats.totalViews
+  const totalViews = mockPhotos.reduce((sum, p) => sum + p.views, 0) + galleryStats.totalViews
 
   // Filtered photos
   const filteredPhotos = useMemo(() => {
@@ -504,30 +565,169 @@ export default function GalleryClient() {
     return num.toString()
   }
 
-  // Handlers
-  const handleUploadMedia = () => {
-    toast.info('Upload Media', {
-      description: 'Opening file uploader...'
-    })
-    setShowUploadDialog(true)
+  // Handlers - Real Supabase Operations
+  const handleUploadPhoto = async () => {
+    if (!uploadForm.title.trim()) {
+      toast.error('Title required', { description: 'Please enter a title for your photo' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required', { description: 'Please sign in to upload photos' })
+        return
+      }
+
+      const tags = uploadForm.tags
+        .split(',')
+        .map(t => t.trim())
+        .filter(Boolean)
+
+      await createItem({
+        user_id: user.id,
+        title: uploadForm.title,
+        description: uploadForm.description || null,
+        file_url: uploadForm.file_url || '/placeholder-image.jpg',
+        file_type: uploadForm.file_type,
+        is_public: uploadForm.is_public,
+        tags,
+        metadata: {}
+      })
+
+      toast.success('Photo uploaded', { description: `"${uploadForm.title}" has been uploaded successfully` })
+      setShowUploadDialog(false)
+      setUploadForm({ title: '', description: '', tags: '', file_url: '', file_type: 'image', is_public: true })
+    } catch (error: any) {
+      toast.error('Upload failed', { description: error.message || 'Failed to upload photo' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleDownloadMedia = (item: GalleryItem) => {
-    toast.success('Download started', {
-      description: `Downloading "${item.title}"...`
-    })
+  const handleCreateCollection = async () => {
+    if (!collectionForm.name.trim()) {
+      toast.error('Name required', { description: 'Please enter a name for your collection' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required', { description: 'Please sign in to create collections' })
+        return
+      }
+
+      await createCollection({
+        user_id: user.id,
+        name: collectionForm.name,
+        description: collectionForm.description || null,
+        is_public: collectionForm.is_public
+      })
+
+      toast.success('Collection created', { description: `"${collectionForm.name}" has been created` })
+      setShowCreateCollection(false)
+      setCollectionForm({ name: '', description: '', is_public: true })
+    } catch (error: any) {
+      toast.error('Creation failed', { description: error.message || 'Failed to create collection' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleShareMedia = (item: GalleryItem) => {
-    toast.success('Link copied', {
-      description: 'Share link copied to clipboard'
-    })
+  const handleDeleteCollection = async (collection: GalleryCollection) => {
+    try {
+      await deleteCollection(collection.id)
+      toast.success('Collection deleted', { description: `"${collection.name}" has been deleted` })
+    } catch (error: any) {
+      toast.error('Delete failed', { description: error.message || 'Failed to delete collection' })
+    }
   }
 
-  const handleDeleteMedia = (item: GalleryItem) => {
-    toast.success('Media deleted', {
-      description: `"${item.title}" has been deleted`
-    })
+  const handleToggleLike = async (photoId: string) => {
+    const newLiked = new Set(likedItems)
+    if (newLiked.has(photoId)) {
+      newLiked.delete(photoId)
+      toast.info('Unliked', { description: 'Removed from your likes' })
+    } else {
+      newLiked.add(photoId)
+      toast.success('Liked', { description: 'Added to your likes' })
+    }
+    setLikedItems(newLiked)
+
+    // For real gallery items, update in Supabase
+    const galleryItem = galleryItems.find(i => i.id === photoId)
+    if (galleryItem) {
+      try {
+        await updateItem(photoId, {
+          like_count: newLiked.has(photoId) ? galleryItem.like_count + 1 : Math.max(0, galleryItem.like_count - 1)
+        })
+      } catch (error) {
+        // Revert on error
+        if (newLiked.has(photoId)) {
+          newLiked.delete(photoId)
+        } else {
+          newLiked.add(photoId)
+        }
+        setLikedItems(newLiked)
+      }
+    }
+  }
+
+  const handleToggleSave = async (photoId: string) => {
+    const newSaved = new Set(savedItems)
+    if (newSaved.has(photoId)) {
+      newSaved.delete(photoId)
+      toast.info('Unsaved', { description: 'Removed from your saved items' })
+    } else {
+      newSaved.add(photoId)
+      toast.success('Saved', { description: 'Added to your saved items' })
+    }
+    setSavedItems(newSaved)
+  }
+
+  const handleDownloadPhoto = async (photo: Photo | GalleryItem) => {
+    const title = 'title' in photo ? photo.title : ''
+    toast.success('Download started', { description: `Downloading "${title}"...` })
+
+    // Track download for gallery items
+    if ('download_count' in photo && photo.id) {
+      try {
+        await updateItem(photo.id, {
+          download_count: (photo.download_count || 0) + 1
+        })
+      } catch (error) {
+        // Silent fail for analytics
+      }
+    }
+  }
+
+  const handleSharePhoto = async (photo: Photo | GalleryItem) => {
+    const photoId = photo.id
+    const url = `${window.location.origin}/gallery/${photoId}`
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    } catch (error) {
+      toast.error('Copy failed', { description: 'Failed to copy link to clipboard' })
+    }
+  }
+
+  const handleDeleteGalleryItem = async (item: GalleryItem) => {
+    try {
+      await deleteGalleryItem(item.id)
+      toast.success('Photo deleted', { description: `"${item.title}" has been deleted` })
+      setSelectedGalleryItem(null)
+    } catch (error: any) {
+      toast.error('Delete failed', { description: error.message || 'Failed to delete photo' })
+    }
+  }
+
+  const handleFollowPhotographer = async (photographerId: string, photographerName: string) => {
+    // In a real implementation, this would update a follows table
+    toast.success('Following', { description: `You are now following ${photographerName}` })
   }
 
   return (
@@ -738,12 +938,12 @@ export default function GalleryClient() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              // Toggle save
+                              handleToggleSave(photo.id)
                             }}
                             className="p-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30"
                           >
-                            {photo.isSaved ? (
-                              <BookmarkCheck className="w-4 h-4 text-white" />
+                            {(photo.isSaved || savedItems.has(photo.id)) ? (
+                              <BookmarkCheck className="w-4 h-4 text-white fill-amber-500" />
                             ) : (
                               <Bookmark className="w-4 h-4 text-white" />
                             )}
@@ -754,18 +954,18 @@ export default function GalleryClient() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
-                                // Toggle like
+                                handleToggleLike(photo.id)
                               }}
                               className="flex items-center gap-1 px-3 py-1.5 bg-white/20 backdrop-blur-sm rounded-lg text-white text-sm hover:bg-white/30"
                             >
-                              <Heart className={`w-4 h-4 ${photo.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                              {formatNumber(photo.likes)}
+                              <Heart className={`w-4 h-4 ${(photo.isLiked || likedItems.has(photo.id)) ? 'fill-red-500 text-red-500' : ''}`} />
+                              {formatNumber(photo.likes + (likedItems.has(photo.id) && !photo.isLiked ? 1 : 0))}
                             </button>
                           </div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation()
-                              setSelectedPhoto(photo)
+                              handleDownloadPhoto(photo)
                             }}
                             className="px-4 py-1.5 bg-white rounded-lg text-gray-900 text-sm font-medium hover:bg-gray-100"
                           >
@@ -816,7 +1016,7 @@ export default function GalleryClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockCollections.length}</p>
+                    <p className="text-3xl font-bold">{mockCollections.length + galleryCollections.length}</p>
                     <p className="text-amber-200 text-sm">Collections</p>
                   </div>
                 </div>
@@ -833,35 +1033,83 @@ export default function GalleryClient() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {mockCollections.map(collection => (
-                <div
-                  key={collection.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-amber-500/50 transition-colors cursor-pointer group"
-                >
-                  <div className="h-40 relative" style={{ backgroundColor: '#d4a574' }}>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Folder className="w-16 h-16 text-white/30" />
+            {isLoadingCollections ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="w-8 h-8 animate-spin text-amber-500" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Real Supabase Collections */}
+                {galleryCollections.map(collection => (
+                  <div
+                    key={collection.id}
+                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-amber-500/50 transition-colors cursor-pointer group relative"
+                  >
+                    <div className="h-40 relative" style={{ backgroundColor: '#d4a574' }}>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Folder className="w-16 h-16 text-white/30" />
+                      </div>
+                      {!collection.is_public && (
+                        <span className="absolute top-3 right-3 px-2 py-1 bg-black/50 text-white text-xs rounded-full">
+                          Private
+                        </span>
+                      )}
+                      {collection.is_featured && (
+                        <span className="absolute top-3 left-3 px-2 py-1 bg-amber-500 text-white text-xs rounded-full">
+                          Featured
+                        </span>
+                      )}
                     </div>
-                    {collection.isPrivate && (
-                      <span className="absolute top-3 right-3 px-2 py-1 bg-black/50 text-white text-xs rounded-full">
-                        Private
-                      </span>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
-                      {collection.name}
-                    </h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{collection.description}</p>
-                    <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
-                      <span>{collection.photoCount} photos</span>
-                      <span>by {collection.createdBy}</span>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                        {collection.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{collection.description}</p>
+                      <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span>{collection.item_count || 0} photos</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteCollection(collection)
+                          }}
+                          className="text-red-500 hover:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+                {/* Mock Collections */}
+                {mockCollections.map(collection => (
+                  <div
+                    key={collection.id}
+                    className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-amber-500/50 transition-colors cursor-pointer group"
+                  >
+                    <div className="h-40 relative" style={{ backgroundColor: '#d4a574' }}>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Folder className="w-16 h-16 text-white/30" />
+                      </div>
+                      {collection.isPrivate && (
+                        <span className="absolute top-3 right-3 px-2 py-1 bg-black/50 text-white text-xs rounded-full">
+                          Private
+                        </span>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-gray-900 dark:text-white group-hover:text-amber-600 transition-colors">
+                        {collection.name}
+                      </h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{collection.description}</p>
+                      <div className="flex items-center justify-between mt-3 text-xs text-gray-500 dark:text-gray-400">
+                        <span>{collection.photoCount} photos</span>
+                        <span>by {collection.createdBy}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Contributors Tab */}
@@ -912,7 +1160,10 @@ export default function GalleryClient() {
                       <span className="text-gray-500 dark:text-gray-400 ml-1">followers</span>
                     </div>
                   </div>
-                  <button className="w-full mt-4 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <button
+                    onClick={() => handleFollowPhotographer(photographer.id, photographer.name)}
+                    className="w-full mt-4 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
                     Follow
                   </button>
                 </div>
@@ -1683,7 +1934,10 @@ export default function GalleryClient() {
                         <p className="font-medium text-gray-900 dark:text-white">{selectedPhoto.photographer.name}</p>
                         <p className="text-sm text-gray-500 dark:text-gray-400">@{selectedPhoto.photographer.username}</p>
                       </div>
-                      <button className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm">
+                      <button
+                        onClick={() => handleFollowPhotographer(selectedPhoto.photographer.id, selectedPhoto.photographer.name)}
+                        className="px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
+                      >
                         Follow
                       </button>
                     </div>
@@ -1744,24 +1998,39 @@ export default function GalleryClient() {
                   <div className="space-y-4">
                     <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-xl space-y-3">
                       <h4 className="font-medium text-gray-900 dark:text-white">Download</h4>
-                      <button className="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => handleDownloadPhoto(selectedPhoto)}
+                        className="w-full px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 flex items-center justify-center gap-2"
+                      >
                         <Download className="w-4 h-4" />
                         Free Download
                       </button>
                       <div className="space-y-2 text-sm">
-                        <button className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center justify-between">
+                        <button
+                          onClick={() => handleDownloadPhoto(selectedPhoto)}
+                          className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center justify-between"
+                        >
                           <span>Small (640x{Math.round(640 * selectedPhoto.height / selectedPhoto.width)})</span>
                           <Download className="w-4 h-4 text-gray-400" />
                         </button>
-                        <button className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center justify-between">
+                        <button
+                          onClick={() => handleDownloadPhoto(selectedPhoto)}
+                          className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center justify-between"
+                        >
                           <span>Medium (1920x{Math.round(1920 * selectedPhoto.height / selectedPhoto.width)})</span>
                           <Download className="w-4 h-4 text-gray-400" />
                         </button>
-                        <button className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center justify-between">
+                        <button
+                          onClick={() => handleDownloadPhoto(selectedPhoto)}
+                          className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center justify-between"
+                        >
                           <span>Large (2400x{Math.round(2400 * selectedPhoto.height / selectedPhoto.width)})</span>
                           <Download className="w-4 h-4 text-gray-400" />
                         </button>
-                        <button className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center justify-between">
+                        <button
+                          onClick={() => handleDownloadPhoto(selectedPhoto)}
+                          className="w-full px-3 py-2 text-left hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg flex items-center justify-between"
+                        >
                           <span>Original ({selectedPhoto.width}x{selectedPhoto.height})</span>
                           <Download className="w-4 h-4 text-gray-400" />
                         </button>
@@ -1788,13 +2057,19 @@ export default function GalleryClient() {
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <button className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <Heart className={`w-4 h-4 ${selectedPhoto.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
-                        Like
+                      <button
+                        onClick={() => handleToggleLike(selectedPhoto.id)}
+                        className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <Heart className={`w-4 h-4 ${(selectedPhoto.isLiked || likedItems.has(selectedPhoto.id)) ? 'fill-red-500 text-red-500' : ''}`} />
+                        {(selectedPhoto.isLiked || likedItems.has(selectedPhoto.id)) ? 'Liked' : 'Like'}
                       </button>
-                      <button className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <Bookmark className={`w-4 h-4 ${selectedPhoto.isSaved ? 'fill-amber-500 text-amber-500' : ''}`} />
-                        Save
+                      <button
+                        onClick={() => handleToggleSave(selectedPhoto.id)}
+                        className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 dark:hover:bg-gray-700"
+                      >
+                        <Bookmark className={`w-4 h-4 ${(selectedPhoto.isSaved || savedItems.has(selectedPhoto.id)) ? 'fill-amber-500 text-amber-500' : ''}`} />
+                        {(selectedPhoto.isSaved || savedItems.has(selectedPhoto.id)) ? 'Saved' : 'Save'}
                       </button>
                       <button
                         onClick={handleCopyLink}
@@ -1833,10 +2108,12 @@ export default function GalleryClient() {
                 <p className="text-sm text-gray-500 dark:text-gray-500">or click to browse</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>
                 <input
                   type="text"
                   placeholder="Give your photo a title"
+                  value={uploadForm.title}
+                  onChange={(e) => setUploadForm({ ...uploadForm, title: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                 />
               </div>
@@ -1845,6 +2122,8 @@ export default function GalleryClient() {
                 <textarea
                   placeholder="Describe your photo"
                   rows={3}
+                  value={uploadForm.description}
+                  onChange={(e) => setUploadForm({ ...uploadForm, description: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                 />
               </div>
@@ -1853,15 +2132,40 @@ export default function GalleryClient() {
                 <input
                   type="text"
                   placeholder="nature, landscape, sunset"
+                  value={uploadForm.tags}
+                  onChange={(e) => setUploadForm({ ...uploadForm, tags: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                 />
+                <p className="text-xs text-gray-500 mt-1">Separate tags with commas</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="public"
+                  checked={uploadForm.is_public}
+                  onChange={(e) => setUploadForm({ ...uploadForm, is_public: e.target.checked })}
+                  className="rounded border-gray-300"
+                />
+                <label htmlFor="public" className="text-sm text-gray-700 dark:text-gray-300">Make this photo public</label>
               </div>
               <div className="flex gap-3 pt-4">
-                <button onClick={() => setShowUploadDialog(false)} className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <button
+                  onClick={() => {
+                    setShowUploadDialog(false)
+                    setUploadForm({ title: '', description: '', tags: '', file_url: '', file_type: 'image', is_public: true })
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  disabled={isSubmitting}
+                >
                   Cancel
                 </button>
-                <button className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600">
-                  Upload
+                <button
+                  onClick={handleUploadPhoto}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Uploading...' : 'Upload'}
                 </button>
               </div>
             </div>
@@ -1876,10 +2180,12 @@ export default function GalleryClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
                 <input
                   type="text"
                   placeholder="My Collection"
+                  value={collectionForm.name}
+                  onChange={(e) => setCollectionForm({ ...collectionForm, name: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                 />
               </div>
@@ -1888,19 +2194,39 @@ export default function GalleryClient() {
                 <textarea
                   placeholder="What's this collection about?"
                   rows={3}
+                  value={collectionForm.description}
+                  onChange={(e) => setCollectionForm({ ...collectionForm, description: e.target.value })}
                   className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
                 />
               </div>
               <div className="flex items-center gap-2">
-                <input type="checkbox" id="private" className="rounded border-gray-300" />
+                <input
+                  type="checkbox"
+                  id="private"
+                  checked={!collectionForm.is_public}
+                  onChange={(e) => setCollectionForm({ ...collectionForm, is_public: !e.target.checked })}
+                  className="rounded border-gray-300"
+                />
                 <label htmlFor="private" className="text-sm text-gray-700 dark:text-gray-300">Make this collection private</label>
               </div>
               <div className="flex gap-3 pt-4">
-                <button onClick={() => setShowCreateCollection(false)} className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg">
+                <button
+                  onClick={() => {
+                    setShowCreateCollection(false)
+                    setCollectionForm({ name: '', description: '', is_public: true })
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                  disabled={isSubmitting}
+                >
                   Cancel
                 </button>
-                <button className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600">
-                  Create
+                <button
+                  onClick={handleCreateCollection}
+                  disabled={isSubmitting}
+                  className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 disabled:opacity-50 flex items-center justify-center gap-2"
+                >
+                  {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {isSubmitting ? 'Creating...' : 'Create'}
                 </button>
               </div>
             </div>

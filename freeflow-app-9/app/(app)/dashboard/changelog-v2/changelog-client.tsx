@@ -1,7 +1,8 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
-import { useChangelog, type Changelog, type ChangeType, type ReleaseStatus } from '@/lib/hooks/use-changelog'
+import { useChangelog, type Changelog, type ChangeType, type ReleaseStatus, type ImpactLevel } from '@/lib/hooks/use-changelog'
+import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -399,6 +400,25 @@ const mockChangelogQuickActions = [
   { id: '4', label: 'Notify', icon: 'Bell', shortcut: 'T', action: () => console.log('Notify') },
 ]
 
+// Default form state for new changelog entry
+const defaultChangelogForm: Partial<Changelog> = {
+  title: '',
+  description: '',
+  version: '',
+  change_type: 'feature',
+  release_status: 'draft',
+  impact_level: 'minor',
+  breaking_change: false,
+  requires_migration: false,
+  requires_downtime: false,
+  is_public: true,
+  is_featured: false,
+  show_in_changelog: true,
+  visibility: 'public',
+  notify_users: false,
+  rollout_percentage: 100,
+}
+
 export default function ChangelogClient({ initialChangelog }: { initialChangelog: Changelog[] }) {
   const [activeTab, setActiveTab] = useState('releases')
   const [settingsTab, setSettingsTab] = useState('general')
@@ -406,7 +426,25 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   const [releaseTypeFilter, setReleaseTypeFilter] = useState<string>('all')
   const [selectedRelease, setSelectedRelease] = useState<Release | null>(null)
   const [showDrafts, setShowDrafts] = useState(false)
-  const { changelog, loading, error } = useChangelog()
+
+  // Form state for create/edit dialogs
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [changelogForm, setChangelogForm] = useState<Partial<Changelog>>(defaultChangelogForm)
+  const [editingChangelog, setEditingChangelog] = useState<Changelog | null>(null)
+  const [deletingChangelog, setDeletingChangelog] = useState<Changelog | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Webhook form state
+  const [isWebhookDialogOpen, setIsWebhookDialogOpen] = useState(false)
+  const [webhookForm, setWebhookForm] = useState({ name: '', url: '', events: [] as string[] })
+
+  // Discussion form state
+  const [isDiscussionDialogOpen, setIsDiscussionDialogOpen] = useState(false)
+  const [discussionForm, setDiscussionForm] = useState({ title: '', body: '', category: 'feedback' })
+
+  const { changelog, loading, error, createChange, updateChange, deleteChange, refetch } = useChangelog()
 
   // Filter releases
   const filteredReleases = useMemo(() => {
@@ -440,36 +478,208 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
     }
   }, [])
 
-  // Handlers
-  const handleCreateRelease = () => {
-    toast.info('Create Release', {
-      description: 'Opening release builder...'
-    })
-  }
+  // CRUD Handlers for Changelog/Release entries
+  const handleCreateRelease = useCallback(async () => {
+    if (!changelogForm.title || !changelogForm.version) {
+      toast.error('Validation Error', {
+        description: 'Title and version are required'
+      })
+      return
+    }
 
-  const handleDownloadRelease = (version: string) => {
+    setIsSubmitting(true)
+    try {
+      const result = await createChange({
+        ...changelogForm,
+        release_date: new Date().toISOString(),
+      })
+      if (result) {
+        toast.success('Release Created', {
+          description: `Version ${changelogForm.version} has been created successfully`
+        })
+        setIsCreateDialogOpen(false)
+        setChangelogForm(defaultChangelogForm)
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error Creating Release', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [changelogForm, createChange, refetch])
+
+  const handleUpdateRelease = useCallback(async () => {
+    if (!editingChangelog?.id) return
+
+    setIsSubmitting(true)
+    try {
+      const result = await updateChange(changelogForm, editingChangelog.id)
+      if (result) {
+        toast.success('Release Updated', {
+          description: `Version ${changelogForm.version || editingChangelog.version} has been updated`
+        })
+        setIsEditDialogOpen(false)
+        setEditingChangelog(null)
+        setChangelogForm(defaultChangelogForm)
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error Updating Release', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [editingChangelog, changelogForm, updateChange, refetch])
+
+  const handleDeleteRelease = useCallback(async () => {
+    if (!deletingChangelog?.id) return
+
+    setIsSubmitting(true)
+    try {
+      const result = await deleteChange(deletingChangelog.id)
+      if (result) {
+        toast.success('Release Deleted', {
+          description: `Version ${deletingChangelog.version} has been removed`
+        })
+        setIsDeleteDialogOpen(false)
+        setDeletingChangelog(null)
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error Deleting Release', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [deletingChangelog, deleteChange, refetch])
+
+  const handlePublishRelease = useCallback(async (entry: Changelog) => {
+    setIsSubmitting(true)
+    try {
+      const result = await updateChange({
+        release_status: 'released',
+        published_at: new Date().toISOString(),
+        last_published_at: new Date().toISOString(),
+      }, entry.id)
+      if (result) {
+        toast.success('Release Published', {
+          description: `Version ${entry.version} is now live`
+        })
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error Publishing Release', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [updateChange, refetch])
+
+  const handleScheduleRelease = useCallback(async (entry: Changelog, scheduledDate: string) => {
+    setIsSubmitting(true)
+    try {
+      const result = await updateChange({
+        release_status: 'scheduled',
+        scheduled_for: scheduledDate,
+      }, entry.id)
+      if (result) {
+        toast.success('Release Scheduled', {
+          description: `Version ${entry.version} scheduled for ${new Date(scheduledDate).toLocaleDateString()}`
+        })
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error Scheduling Release', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [updateChange, refetch])
+
+  const handleArchiveRelease = useCallback(async (entry: Changelog) => {
+    setIsSubmitting(true)
+    try {
+      const result = await updateChange({
+        release_status: 'archived',
+      }, entry.id)
+      if (result) {
+        toast.success('Release Archived', {
+          description: `Version ${entry.version} has been archived`
+        })
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error Archiving Release', {
+        description: err instanceof Error ? err.message : 'An unexpected error occurred'
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }, [updateChange, refetch])
+
+  const openEditDialog = useCallback((entry: Changelog) => {
+    setEditingChangelog(entry)
+    setChangelogForm({
+      title: entry.title,
+      description: entry.description,
+      version: entry.version,
+      change_type: entry.change_type,
+      release_status: entry.release_status,
+      impact_level: entry.impact_level,
+      breaking_change: entry.breaking_change,
+      requires_migration: entry.requires_migration,
+      requires_downtime: entry.requires_downtime,
+      summary: entry.summary,
+      details: entry.details,
+      technical_details: entry.technical_details,
+      migration_notes: entry.migration_notes,
+      is_public: entry.is_public,
+      is_featured: entry.is_featured,
+      show_in_changelog: entry.show_in_changelog,
+      notify_users: entry.notify_users,
+    })
+    setIsEditDialogOpen(true)
+  }, [])
+
+  const openDeleteDialog = useCallback((entry: Changelog) => {
+    setDeletingChangelog(entry)
+    setIsDeleteDialogOpen(true)
+  }, [])
+
+  const handleDownloadRelease = useCallback((version: string) => {
     toast.success('Downloading release', {
       description: `${version} download starting...`
     })
-  }
+  }, [])
 
-  const handleCompareVersions = () => {
+  const handleCompareVersions = useCallback(() => {
     toast.info('Compare Versions', {
       description: 'Opening version comparison tool...'
     })
-  }
+  }, [])
 
-  const handleSubscribeUpdates = () => {
+  const handleSubscribeUpdates = useCallback(async () => {
     toast.success('Subscribed to updates', {
       description: 'You will receive notifications for new releases'
     })
-  }
+  }, [])
 
-  const handleViewReleaseNotes = (version: string) => {
+  const handleViewReleaseNotes = useCallback((version: string) => {
     toast.info('Loading release notes', {
       description: `Opening notes for ${version}...`
     })
-  }
+  }, [])
+
+  // Form field update helper
+  const updateFormField = useCallback((field: keyof Changelog, value: any) => {
+    setChangelogForm(prev => ({ ...prev, [field]: value }))
+  }, [])
 
   if (error) {
     return (
@@ -496,14 +706,165 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
               <p className="text-gray-400">Manage releases, assets, and changelogs</p>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+              <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800" onClick={handleSubscribeUpdates}>
                 <Bell className="h-4 w-4 mr-2" />
                 Watch
               </Button>
-              <Button className="bg-green-600 hover:bg-green-700">
-                <Plus className="h-4 w-4 mr-2" />
-                Draft Release
-              </Button>
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="bg-green-600 hover:bg-green-700">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Draft Release
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Create New Release</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="version">Version *</Label>
+                        <Input
+                          id="version"
+                          placeholder="v1.0.0"
+                          value={changelogForm.version || ''}
+                          onChange={(e) => updateFormField('version', e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="change_type">Change Type</Label>
+                        <Select
+                          value={changelogForm.change_type}
+                          onValueChange={(value) => updateFormField('change_type', value as ChangeType)}
+                        >
+                          <SelectTrigger id="change_type">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="feature">Feature</SelectItem>
+                            <SelectItem value="improvement">Improvement</SelectItem>
+                            <SelectItem value="bug_fix">Bug Fix</SelectItem>
+                            <SelectItem value="security">Security</SelectItem>
+                            <SelectItem value="performance">Performance</SelectItem>
+                            <SelectItem value="breaking_change">Breaking Change</SelectItem>
+                            <SelectItem value="deprecated">Deprecated</SelectItem>
+                            <SelectItem value="removed">Removed</SelectItem>
+                            <SelectItem value="documentation">Documentation</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="title">Title *</Label>
+                      <Input
+                        id="title"
+                        placeholder="Release title"
+                        value={changelogForm.title || ''}
+                        onChange={(e) => updateFormField('title', e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="description">Description</Label>
+                      <Textarea
+                        id="description"
+                        placeholder="Describe the changes in this release..."
+                        rows={4}
+                        value={changelogForm.description || ''}
+                        onChange={(e) => updateFormField('description', e.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="release_status">Status</Label>
+                        <Select
+                          value={changelogForm.release_status}
+                          onValueChange={(value) => updateFormField('release_status', value as ReleaseStatus)}
+                        >
+                          <SelectTrigger id="release_status">
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="scheduled">Scheduled</SelectItem>
+                            <SelectItem value="released">Released</SelectItem>
+                            <SelectItem value="archived">Archived</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="impact_level">Impact Level</Label>
+                        <Select
+                          value={changelogForm.impact_level}
+                          onValueChange={(value) => updateFormField('impact_level', value as ImpactLevel)}
+                        >
+                          <SelectTrigger id="impact_level">
+                            <SelectValue placeholder="Select impact" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="critical">Critical</SelectItem>
+                            <SelectItem value="major">Major</SelectItem>
+                            <SelectItem value="minor">Minor</SelectItem>
+                            <SelectItem value="patch">Patch</SelectItem>
+                            <SelectItem value="none">None</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="space-y-4 pt-4 border-t">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Breaking Change</Label>
+                          <p className="text-sm text-gray-500">This release contains breaking changes</p>
+                        </div>
+                        <Switch
+                          checked={changelogForm.breaking_change || false}
+                          onCheckedChange={(checked) => updateFormField('breaking_change', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Requires Migration</Label>
+                          <p className="text-sm text-gray-500">Users need to follow migration steps</p>
+                        </div>
+                        <Switch
+                          checked={changelogForm.requires_migration || false}
+                          onCheckedChange={(checked) => updateFormField('requires_migration', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Public Release</Label>
+                          <p className="text-sm text-gray-500">Visible to all users</p>
+                        </div>
+                        <Switch
+                          checked={changelogForm.is_public || false}
+                          onCheckedChange={(checked) => updateFormField('is_public', checked)}
+                        />
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Label>Notify Users</Label>
+                          <p className="text-sm text-gray-500">Send notification on publish</p>
+                        </div>
+                        <Switch
+                          checked={changelogForm.notify_users || false}
+                          onCheckedChange={(checked) => updateFormField('notify_users', checked)}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleCreateRelease} disabled={isSubmitting}>
+                        {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        Create Release
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </div>
 
@@ -967,9 +1328,70 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                   <Button key={cat} variant="outline" size="sm" className="capitalize">{cat}</Button>
                 ))}
               </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />New Discussion
-              </Button>
+              <Dialog open={isDiscussionDialogOpen} onOpenChange={setIsDiscussionDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />New Discussion
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Start New Discussion</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="discussion-title">Title</Label>
+                      <Input
+                        id="discussion-title"
+                        placeholder="What would you like to discuss?"
+                        value={discussionForm.title}
+                        onChange={(e) => setDiscussionForm(prev => ({ ...prev, title: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="discussion-category">Category</Label>
+                      <Select
+                        value={discussionForm.category}
+                        onValueChange={(value) => setDiscussionForm(prev => ({ ...prev, category: value }))}
+                      >
+                        <SelectTrigger id="discussion-category">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="announcements">Announcements</SelectItem>
+                          <SelectItem value="feedback">Feedback</SelectItem>
+                          <SelectItem value="questions">Questions</SelectItem>
+                          <SelectItem value="ideas">Ideas</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="discussion-body">Description</Label>
+                      <Textarea
+                        id="discussion-body"
+                        placeholder="Share your thoughts..."
+                        rows={5}
+                        value={discussionForm.body}
+                        onChange={(e) => setDiscussionForm(prev => ({ ...prev, body: e.target.value }))}
+                      />
+                    </div>
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button variant="outline" onClick={() => setIsDiscussionDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={() => {
+                        toast.success('Discussion Created', {
+                          description: 'Your discussion has been posted'
+                        })
+                        setIsDiscussionDialogOpen(false)
+                        setDiscussionForm({ title: '', body: '', category: 'feedback' })
+                      }}>
+                        Post Discussion
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="space-y-4">
@@ -1060,9 +1482,76 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Webhook Integrations</h3>
                 <p className="text-sm text-gray-500">Get notified when releases are created or published</p>
               </div>
-              <Button>
-                <Plus className="h-4 w-4 mr-2" />Add Webhook
-              </Button>
+              <Dialog open={isWebhookDialogOpen} onOpenChange={setIsWebhookDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="h-4 w-4 mr-2" />Add Webhook
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-lg">
+                  <DialogHeader>
+                    <DialogTitle>Add Webhook</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="webhook-name">Name</Label>
+                      <Input
+                        id="webhook-name"
+                        placeholder="My Webhook"
+                        value={webhookForm.name}
+                        onChange={(e) => setWebhookForm(prev => ({ ...prev, name: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="webhook-url">Payload URL</Label>
+                      <Input
+                        id="webhook-url"
+                        placeholder="https://example.com/webhook"
+                        value={webhookForm.url}
+                        onChange={(e) => setWebhookForm(prev => ({ ...prev, url: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Events</Label>
+                      <div className="space-y-2">
+                        {['release.created', 'release.published', 'release.edited', 'release.deleted'].map(event => (
+                          <div key={event} className="flex items-center gap-2">
+                            <Switch
+                              checked={webhookForm.events.includes(event)}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setWebhookForm(prev => ({ ...prev, events: [...prev.events, event] }))
+                                } else {
+                                  setWebhookForm(prev => ({ ...prev, events: prev.events.filter(e => e !== event) }))
+                                }
+                              }}
+                            />
+                            <Label className="font-normal">{event}</Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-2 pt-4">
+                      <Button variant="outline" onClick={() => setIsWebhookDialogOpen(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={() => {
+                        if (!webhookForm.name || !webhookForm.url) {
+                          toast.error('Validation Error', { description: 'Name and URL are required' })
+                          return
+                        }
+                        toast.success('Webhook Created', {
+                          description: `${webhookForm.name} has been configured`
+                        })
+                        setIsWebhookDialogOpen(false)
+                        setWebhookForm({ name: '', url: '', events: [] })
+                      }}>
+                        Create Webhook
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
 
             <div className="space-y-4">
@@ -1956,6 +2445,187 @@ Thanks to all contributors!`}
             variant="grid"
           />
         </div>
+
+        {/* Edit Release Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Release {editingChangelog?.version}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-version">Version</Label>
+                  <Input
+                    id="edit-version"
+                    placeholder="v1.0.0"
+                    value={changelogForm.version || ''}
+                    onChange={(e) => updateFormField('version', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-change_type">Change Type</Label>
+                  <Select
+                    value={changelogForm.change_type}
+                    onValueChange={(value) => updateFormField('change_type', value as ChangeType)}
+                  >
+                    <SelectTrigger id="edit-change_type">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="feature">Feature</SelectItem>
+                      <SelectItem value="improvement">Improvement</SelectItem>
+                      <SelectItem value="bug_fix">Bug Fix</SelectItem>
+                      <SelectItem value="security">Security</SelectItem>
+                      <SelectItem value="performance">Performance</SelectItem>
+                      <SelectItem value="breaking_change">Breaking Change</SelectItem>
+                      <SelectItem value="deprecated">Deprecated</SelectItem>
+                      <SelectItem value="removed">Removed</SelectItem>
+                      <SelectItem value="documentation">Documentation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Title</Label>
+                <Input
+                  id="edit-title"
+                  placeholder="Release title"
+                  value={changelogForm.title || ''}
+                  onChange={(e) => updateFormField('title', e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  placeholder="Describe the changes..."
+                  rows={4}
+                  value={changelogForm.description || ''}
+                  onChange={(e) => updateFormField('description', e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="edit-release_status">Status</Label>
+                  <Select
+                    value={changelogForm.release_status}
+                    onValueChange={(value) => updateFormField('release_status', value as ReleaseStatus)}
+                  >
+                    <SelectTrigger id="edit-release_status">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="scheduled">Scheduled</SelectItem>
+                      <SelectItem value="released">Released</SelectItem>
+                      <SelectItem value="archived">Archived</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="edit-impact_level">Impact Level</Label>
+                  <Select
+                    value={changelogForm.impact_level}
+                    onValueChange={(value) => updateFormField('impact_level', value as ImpactLevel)}
+                  >
+                    <SelectTrigger id="edit-impact_level">
+                      <SelectValue placeholder="Select impact" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="major">Major</SelectItem>
+                      <SelectItem value="minor">Minor</SelectItem>
+                      <SelectItem value="patch">Patch</SelectItem>
+                      <SelectItem value="none">None</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Breaking Change</Label>
+                    <p className="text-sm text-gray-500">This release contains breaking changes</p>
+                  </div>
+                  <Switch
+                    checked={changelogForm.breaking_change || false}
+                    onCheckedChange={(checked) => updateFormField('breaking_change', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Requires Migration</Label>
+                    <p className="text-sm text-gray-500">Users need to follow migration steps</p>
+                  </div>
+                  <Switch
+                    checked={changelogForm.requires_migration || false}
+                    onCheckedChange={(checked) => updateFormField('requires_migration', checked)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Notify Users</Label>
+                    <p className="text-sm text-gray-500">Send notification on publish</p>
+                  </div>
+                  <Switch
+                    checked={changelogForm.notify_users || false}
+                    onCheckedChange={(checked) => updateFormField('notify_users', checked)}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setIsEditDialogOpen(false)
+                  setEditingChangelog(null)
+                  setChangelogForm(defaultChangelogForm)
+                }}>
+                  Cancel
+                </Button>
+                <Button onClick={handleUpdateRelease} disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Delete Release</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete version <span className="font-semibold">{deletingChangelog?.version}</span>?
+                This action cannot be undone.
+              </p>
+              <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm font-medium">Warning</span>
+                </div>
+                <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                  All associated assets and metadata will be permanently removed.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => {
+                setIsDeleteDialogOpen(false)
+                setDeletingChangelog(null)
+              }}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteRelease} disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                Delete Release
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {loading && (
           <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 flex items-center gap-3">

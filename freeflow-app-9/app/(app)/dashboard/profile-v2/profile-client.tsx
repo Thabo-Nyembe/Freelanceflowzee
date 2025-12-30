@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
+import { useAuth } from '@/lib/hooks/use-auth'
 import {
   User, Edit, Camera, Phone, Mail, MapPin, Calendar, Globe,
   Briefcase, Award, Star, Users, Shield, MessageSquare, Settings,
@@ -612,25 +614,330 @@ const mockProfileQuickActions = [
   { id: '3', label: 'Download CV', icon: 'download', action: () => console.log('Download'), variant: 'outline' as const },
 ]
 
+// Database types
+interface UserProfile {
+  id: string
+  user_id: string
+  first_name: string
+  last_name: string
+  display_name: string
+  email: string
+  phone: string | null
+  bio: string | null
+  avatar: string | null
+  cover_image: string | null
+  location: string | null
+  timezone: string
+  website: string | null
+  company: string | null
+  title: string | null
+  status: string
+  account_type: string
+  created_at: string
+  updated_at: string
+}
+
+interface DBSkill {
+  id: string
+  user_id: string
+  name: string
+  category: string
+  level: string
+  years_of_experience: number
+  endorsements: number
+}
+
+interface DBExperience {
+  id: string
+  user_id: string
+  company: string
+  title: string
+  location: string | null
+  start_date: string
+  end_date: string | null
+  current: boolean
+  description: string | null
+  achievements: string[]
+}
+
+interface DBEducation {
+  id: string
+  user_id: string
+  school: string
+  degree: string
+  field: string
+  start_date: string
+  end_date: string | null
+  current: boolean
+  grade: string | null
+  activities: string[]
+}
+
+interface ProfileSettings {
+  id: string
+  user_id: string
+  privacy_level: string
+  show_email: boolean
+  show_phone: boolean
+  show_location: boolean
+  allow_messages: boolean
+  allow_connections: boolean
+  email_notifications: boolean
+  push_notifications: boolean
+  marketing_emails: boolean
+  language: string
+  theme: string
+}
+
 export default function ProfileClient() {
+  const supabase = createClientComponentClient()
+  const { user } = useAuth()
+
+  // UI State
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSkillCategory, setSelectedSkillCategory] = useState<string | 'all'>('all')
   const [showAnalytics, setShowAnalytics] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Data State
+  const [profile, setProfile] = useState<UserProfile | null>(null)
+  const [skills, setSkills] = useState<DBSkill[]>([])
+  const [experiences, setExperiences] = useState<DBExperience[]>([])
+  const [education, setEducation] = useState<DBEducation[]>([])
+  const [settings, setSettings] = useState<ProfileSettings | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+
+  // Form State for Settings
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    headline: '',
+    location: '',
+    industry: '',
+    customUrl: '',
+    email: '',
+    phone: '',
+    website: '',
+    bio: ''
+  })
+
+  // Fetch profile data
+  const fetchProfileData = useCallback(async () => {
+    if (!user?.id) return
+
+    setLoading(true)
+    try {
+      const [profileRes, skillsRes, expRes, eduRes, settingsRes] = await Promise.all([
+        supabase.from('user_profiles').select('*').eq('user_id', user.id).single(),
+        supabase.from('skills').select('*').eq('user_id', user.id).order('endorsements', { ascending: false }),
+        supabase.from('experience').select('*').eq('user_id', user.id).order('start_date', { ascending: false }),
+        supabase.from('education').select('*').eq('user_id', user.id).order('start_date', { ascending: false }),
+        supabase.from('profile_settings').select('*').eq('user_id', user.id).single()
+      ])
+
+      if (profileRes.data) {
+        setProfile(profileRes.data)
+        setFormData({
+          firstName: profileRes.data.first_name || '',
+          lastName: profileRes.data.last_name || '',
+          headline: profileRes.data.title || '',
+          location: profileRes.data.location || '',
+          industry: '',
+          customUrl: '',
+          email: profileRes.data.email || '',
+          phone: profileRes.data.phone || '',
+          website: profileRes.data.website || '',
+          bio: profileRes.data.bio || ''
+        })
+      }
+      if (skillsRes.data) setSkills(skillsRes.data)
+      if (expRes.data) setExperiences(expRes.data)
+      if (eduRes.data) setEducation(eduRes.data)
+      if (settingsRes.data) setSettings(settingsRes.data)
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+      toast.error('Failed to load profile data')
+    } finally {
+      setLoading(false)
+    }
+  }, [user?.id, supabase])
+
+  useEffect(() => {
+    fetchProfileData()
+  }, [fetchProfileData])
+
+  // Update profile
+  const handleUpdateProfile = async () => {
+    if (!user?.id || !profile?.id) return
+
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          title: formData.headline,
+          location: formData.location,
+          email: formData.email,
+          phone: formData.phone,
+          website: formData.website,
+          bio: formData.bio,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', profile.id)
+
+      if (error) throw error
+
+      toast.success('Profile updated successfully')
+      fetchProfileData()
+    } catch (error) {
+      console.error('Error updating profile:', error)
+      toast.error('Failed to update profile')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Add skill
+  const handleAddSkill = async (skillName: string, category: string = 'General') => {
+    if (!user?.id) return
+
+    try {
+      const { error } = await supabase.from('skills').insert({
+        user_id: user.id,
+        name: skillName,
+        category,
+        level: 'intermediate',
+        years_of_experience: 0,
+        endorsements: 0
+      })
+
+      if (error) throw error
+
+      toast.success('Skill added', { description: `${skillName} has been added to your profile` })
+      fetchProfileData()
+    } catch (error: any) {
+      if (error.code === '23505') {
+        toast.error('Skill already exists')
+      } else {
+        toast.error('Failed to add skill')
+      }
+    }
+  }
+
+  // Delete skill
+  const handleDeleteSkill = async (skillId: string) => {
+    try {
+      const { error } = await supabase.from('skills').delete().eq('id', skillId)
+      if (error) throw error
+
+      toast.success('Skill removed')
+      fetchProfileData()
+    } catch (error) {
+      toast.error('Failed to remove skill')
+    }
+  }
+
+  // Add experience
+  const handleAddExperience = async (exp: Partial<DBExperience>) => {
+    if (!user?.id) return
+
+    try {
+      const { error } = await supabase.from('experience').insert({
+        user_id: user.id,
+        company: exp.company || '',
+        title: exp.title || '',
+        location: exp.location,
+        start_date: exp.start_date,
+        end_date: exp.end_date,
+        current: exp.current || false,
+        description: exp.description,
+        achievements: exp.achievements || []
+      })
+
+      if (error) throw error
+
+      toast.success('Experience added')
+      fetchProfileData()
+    } catch (error) {
+      toast.error('Failed to add experience')
+    }
+  }
+
+  // Delete experience
+  const handleDeleteExperience = async (expId: string) => {
+    try {
+      const { error } = await supabase.from('experience').delete().eq('id', expId)
+      if (error) throw error
+
+      toast.success('Experience removed')
+      fetchProfileData()
+    } catch (error) {
+      toast.error('Failed to remove experience')
+    }
+  }
+
+  // Update settings
+  const handleUpdateSettings = async (updates: Partial<ProfileSettings>) => {
+    if (!user?.id || !settings?.id) return
+
+    setSaving(true)
+    try {
+      const { error } = await supabase
+        .from('profile_settings')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', settings.id)
+
+      if (error) throw error
+
+      toast.success('Settings updated')
+      fetchProfileData()
+    } catch (error) {
+      toast.error('Failed to update settings')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Share profile
+  const handleShareProfile = () => {
+    const profileUrl = `${window.location.origin}/profile/${user?.id}`
+    navigator.clipboard.writeText(profileUrl)
+    toast.success('Link copied', { description: 'Profile link copied to clipboard' })
+  }
+
+  // Download profile as PDF (placeholder)
+  const handleDownloadPDF = () => {
+    toast.info('Generating PDF...', { description: 'Your profile PDF will download shortly' })
+  }
+
   const skillCategories = useMemo(() => {
-    const categories = [...new Set(mockSkills.map(s => s.category))]
-    return ['all', ...categories]
-  }, [])
+    const dbCategories = [...new Set(skills.map(s => s.category))]
+    const mockCategories = [...new Set(mockSkills.map(s => s.category))]
+    const allCategories = [...new Set([...dbCategories, ...mockCategories])]
+    return ['all', ...allCategories]
+  }, [skills])
 
   const filteredSkills = useMemo(() => {
-    return mockSkills.filter(skill => {
+    // Merge DB skills with mock for display
+    const displaySkills = skills.length > 0 ? skills.map(s => ({
+      ...s,
+      level: s.level as SkillLevel,
+      endorsers: [],
+      isTopSkill: s.endorsements > 50,
+      isPinned: false,
+      assessmentStatus: 'not-taken' as AssessmentStatus
+    })) : mockSkills
+
+    return displaySkills.filter((skill: any) => {
       const matchesCategory = selectedSkillCategory === 'all' || skill.category === selectedSkillCategory
       const matchesSearch = skill.name.toLowerCase().includes(searchQuery.toLowerCase())
       return matchesCategory && matchesSearch
     })
-  }, [selectedSkillCategory, searchQuery])
+  }, [selectedSkillCategory, searchQuery, skills])
 
   const stats = useMemo(() => ({
     profileViews: mockProfile.profileViews,
@@ -641,11 +948,13 @@ export default function ProfileClient() {
     postImpressionsChange: mockProfile.postImpressionsChange,
     connections: mockProfile.connections,
     followers: mockProfile.followers,
-    skills: mockSkills.length,
-    endorsements: mockSkills.reduce((sum, s) => sum + s.endorsements, 0),
+    skills: skills.length > 0 ? skills.length : mockSkills.length,
+    endorsements: skills.length > 0
+      ? skills.reduce((sum, s) => sum + s.endorsements, 0)
+      : mockSkills.reduce((sum, s) => sum + s.endorsements, 0),
     recommendations: mockRecommendations.filter(r => r.isReceived).length,
     assessmentsPassed: mockSkills.filter(s => s.assessmentStatus === 'passed').length
-  }), [])
+  }), [skills])
 
   const statCards = [
     { label: 'Profile Views', value: formatNumber(stats.profileViews), change: stats.profileViewsChange, icon: Eye, gradient: 'from-blue-500 to-cyan-600' },
@@ -658,36 +967,53 @@ export default function ProfileClient() {
     { label: 'Assessments', value: stats.assessmentsPassed.toString(), change: null, icon: CheckCircle, gradient: 'from-indigo-500 to-purple-600' }
   ]
 
-  // Handlers
-  const handleEditProfile = () => {
-    toast.info('Edit Profile', {
-      description: 'Opening profile editor...'
-    })
-  }
+  // Display profile - use DB data if available, otherwise mock
+  const displayProfile = profile ? {
+    ...mockProfile,
+    firstName: profile.first_name,
+    lastName: profile.last_name,
+    headline: profile.title || mockProfile.headline,
+    summary: profile.bio || mockProfile.summary,
+    location: profile.location || mockProfile.location,
+    email: profile.email,
+    phone: profile.phone || mockProfile.phone,
+    website: profile.website || mockProfile.website,
+    avatar: profile.avatar || mockProfile.avatar,
+    banner: profile.cover_image || mockProfile.banner,
+    currentCompany: profile.company || mockProfile.currentCompany,
+    currentTitle: profile.title || mockProfile.currentTitle
+  } : mockProfile
 
-  const handleUpdatePhoto = () => {
-    toast.info('Update Photo', {
-      description: 'Opening photo uploader...'
-    })
-  }
+  // Display experiences - use DB data if available
+  const displayExperiences = experiences.length > 0 ? experiences.map(exp => ({
+    id: exp.id,
+    company: exp.company,
+    title: exp.title,
+    location: exp.location || '',
+    locationType: 'hybrid' as LocationType,
+    employmentType: 'full-time' as EmploymentType,
+    startDate: exp.start_date,
+    endDate: exp.end_date || undefined,
+    isCurrent: exp.current,
+    description: exp.description || '',
+    skills: [],
+    media: [],
+    achievements: exp.achievements
+  })) : mockExperiences
 
-  const handleAddSkill = (skill: string) => {
-    toast.success('Skill added', {
-      description: `${skill} has been added to your profile`
-    })
-  }
-
-  const handleRequestEndorsement = () => {
-    toast.success('Request sent', {
-      description: 'Endorsement request sent to connections'
-    })
-  }
-
-  const handleShareProfile = () => {
-    toast.success('Link copied', {
-      description: 'Profile link copied to clipboard'
-    })
-  }
+  // Display education - use DB data if available
+  const displayEducation = education.length > 0 ? education.map(edu => ({
+    id: edu.id,
+    school: edu.school,
+    degree: edu.degree,
+    field: edu.field,
+    startYear: new Date(edu.start_date).getFullYear(),
+    endYear: edu.end_date ? new Date(edu.end_date).getFullYear() : undefined,
+    grade: edu.grade || undefined,
+    activities: edu.activities.join(', '),
+    description: '',
+    societies: []
+  })) : mockEducation
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:bg-none dark:bg-gray-900">
@@ -705,15 +1031,19 @@ export default function ProfileClient() {
               </div>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setShowAnalytics(true)}>
+              <Button variant="outline" onClick={() => setShowAnalytics(true)} disabled={loading}>
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Analytics
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleShareProfile} disabled={loading}>
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
               </Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+              <Button
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                onClick={() => setActiveTab('settings')}
+                disabled={loading}
+              >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Profile
               </Button>
@@ -746,7 +1076,7 @@ export default function ProfileClient() {
           {/* Profile Card */}
           <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-lg overflow-hidden">
             <div className="h-32 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 relative">
-              {mockProfile.coverStory && (
+              {displayProfile.coverStory && (
                 <Button size="sm" variant="secondary" className="absolute bottom-2 right-2">
                   <Play className="w-3 h-3 mr-1" />
                   Cover Story
@@ -757,12 +1087,12 @@ export default function ProfileClient() {
               <div className="flex flex-col lg:flex-row gap-6 -mt-16">
                 <div className="relative flex-shrink-0">
                   <Avatar className="w-32 h-32 border-4 border-white shadow-xl">
-                    <AvatarImage src={mockProfile.avatar} />
+                    <AvatarImage src={displayProfile.avatar} />
                     <AvatarFallback className="text-3xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
-                      {mockProfile.firstName[0]}{mockProfile.lastName[0]}
+                      {displayProfile.firstName[0]}{displayProfile.lastName[0]}
                     </AvatarFallback>
                   </Avatar>
-                  {mockProfile.isPremium && (
+                  {displayProfile.isPremium && (
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-gradient-to-r from-amber-400 to-yellow-500 rounded-full text-xs font-bold text-amber-900 flex items-center gap-1">
                       <Crown className="w-3 h-3" />
                       Premium
@@ -772,34 +1102,34 @@ export default function ProfileClient() {
                 <div className="flex-1 pt-16 lg:pt-4">
                   <div className="flex flex-wrap items-center gap-2 mb-1">
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      {mockProfile.firstName} {mockProfile.lastName}
+                      {displayProfile.firstName} {displayProfile.lastName}
                     </h2>
-                    {mockProfile.pronouns && <span className="text-sm text-gray-500">({mockProfile.pronouns})</span>}
-                    {mockProfile.isVerified && <Shield className="w-5 h-5 text-blue-500" />}
-                    {mockProfile.topVoice && (
+                    {displayProfile.pronouns && <span className="text-sm text-gray-500">({displayProfile.pronouns})</span>}
+                    {displayProfile.isVerified && <Shield className="w-5 h-5 text-blue-500" />}
+                    {displayProfile.topVoice && (
                       <Badge className="bg-orange-100 text-orange-700">
                         <Mic className="w-3 h-3 mr-1" />
                         Top Voice
                       </Badge>
                     )}
-                    {mockProfile.isCreatorMode && (
+                    {displayProfile.isCreatorMode && (
                       <Badge className="bg-purple-100 text-purple-700">
                         <Sparkles className="w-3 h-3 mr-1" />
                         Creator
                       </Badge>
                     )}
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 mb-2">{mockProfile.headline}</p>
+                  <p className="text-gray-600 dark:text-gray-300 mb-2">{displayProfile.headline}</p>
                   <div className="flex flex-wrap gap-4 text-sm text-gray-500 mb-3">
-                    <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{mockProfile.location}</span>
-                    <span className="flex items-center gap-1"><Building2 className="w-4 h-4" />{mockProfile.currentCompany}</span>
-                    <span className="flex items-center gap-1"><Users className="w-4 h-4" />{formatNumber(mockProfile.connections)} connections</span>
-                    <span className="flex items-center gap-1"><Heart className="w-4 h-4" />{formatNumber(mockProfile.followers)} followers</span>
+                    <span className="flex items-center gap-1"><MapPin className="w-4 h-4" />{displayProfile.location}</span>
+                    <span className="flex items-center gap-1"><Building2 className="w-4 h-4" />{displayProfile.currentCompany}</span>
+                    <span className="flex items-center gap-1"><Users className="w-4 h-4" />{formatNumber(displayProfile.connections)} connections</span>
+                    <span className="flex items-center gap-1"><Heart className="w-4 h-4" />{formatNumber(displayProfile.followers)} followers</span>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 mb-4">
-                    {mockProfile.isOpenToWork && <Badge className="bg-green-100 text-green-700"><Target className="w-3 h-3 mr-1" />Open to Work</Badge>}
-                    {mockProfile.isHiring && <Badge className="bg-purple-100 text-purple-700"><Briefcase className="w-3 h-3 mr-1" />Hiring</Badge>}
-                    {mockProfile.socialLinks.map((link, i) => (
+                    {displayProfile.isOpenToWork && <Badge className="bg-green-100 text-green-700"><Target className="w-3 h-3 mr-1" />Open to Work</Badge>}
+                    {displayProfile.isHiring && <Badge className="bg-purple-100 text-purple-700"><Briefcase className="w-3 h-3 mr-1" />Hiring</Badge>}
+                    {displayProfile.socialLinks.map((link, i) => (
                       <Button key={i} variant="ghost" size="sm" className="h-7 px-2" asChild>
                         <a href={link.url} target="_blank" rel="noopener noreferrer">
                           {link.platform === 'Twitter' && <Twitter className="w-4 h-4" />}
@@ -827,13 +1157,13 @@ export default function ProfileClient() {
                   <div>
                     <div className="text-sm text-gray-500 mb-1">Profile Strength</div>
                     <div className="w-32 lg:ml-auto">
-                      <Progress value={mockProfile.profileStrength} className="h-2" />
-                      <p className="text-xs text-gray-500 mt-1">{mockProfile.profileStrength}% All-Star</p>
+                      <Progress value={displayProfile.profileStrength} className="h-2" />
+                      <p className="text-xs text-gray-500 mt-1">{displayProfile.profileStrength}% All-Star</p>
                     </div>
                   </div>
                   <div className="flex lg:justify-end gap-2">
-                    <Badge variant="outline">{mockProfile.featuredCount} Featured</Badge>
-                    <Badge variant="outline">{mockProfile.articlesCount} Articles</Badge>
+                    <Badge variant="outline">{displayProfile.featuredCount} Featured</Badge>
+                    <Badge variant="outline">{displayProfile.articlesCount} Articles</Badge>
                   </div>
                 </div>
               </div>
@@ -894,19 +1224,20 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Edit, label: 'Edit Profile', color: 'from-blue-500 to-indigo-600' },
-                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600' },
-                  { icon: Share2, label: 'Share Profile', color: 'from-green-500 to-emerald-600' },
-                  { icon: Download, label: 'Export PDF', color: 'from-orange-500 to-amber-600' },
-                  { icon: UserPlus, label: 'Grow Network', color: 'from-cyan-500 to-blue-600' },
-                  { icon: FileText, label: 'Add Post', color: 'from-pink-500 to-rose-600' },
-                  { icon: Briefcase, label: 'Update Jobs', color: 'from-indigo-500 to-purple-600' },
-                  { icon: BarChart3, label: 'Analytics', color: 'from-yellow-500 to-orange-600' },
+                  { icon: Edit, label: 'Edit Profile', color: 'from-blue-500 to-indigo-600', onClick: () => setActiveTab('settings') },
+                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => toast.info('Photo upload coming soon') },
+                  { icon: Share2, label: 'Share Profile', color: 'from-green-500 to-emerald-600', onClick: handleShareProfile },
+                  { icon: Download, label: 'Export PDF', color: 'from-orange-500 to-amber-600', onClick: handleDownloadPDF },
+                  { icon: UserPlus, label: 'Grow Network', color: 'from-cyan-500 to-blue-600', onClick: () => setActiveTab('network') },
+                  { icon: FileText, label: 'Add Post', color: 'from-pink-500 to-rose-600', onClick: () => setActiveTab('activity') },
+                  { icon: Briefcase, label: 'Update Jobs', color: 'from-indigo-500 to-purple-600', onClick: () => setActiveTab('jobs') },
+                  { icon: BarChart3, label: 'Analytics', color: 'from-yellow-500 to-orange-600', onClick: () => setShowAnalytics(true) },
                 ].map((action, i) => (
                   <Button
                     key={i}
                     variant="outline"
                     className="h-auto py-4 flex flex-col gap-2 hover:scale-105 transition-all duration-200 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm"
+                    onClick={action.onClick}
                   >
                     <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
                       <action.icon className="w-4 h-4 text-white" />
@@ -922,7 +1253,7 @@ export default function ProfileClient() {
                     <CardTitle className="flex items-center gap-2"><User className="w-5 h-5 text-blue-600" />About</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 dark:text-gray-300 whitespace-pre-line">{mockProfile.summary}</p>
+                    <p className="text-gray-600 dark:text-gray-300 whitespace-pre-line">{displayProfile.summary}</p>
                   </CardContent>
                 </Card>
 
@@ -932,10 +1263,10 @@ export default function ProfileClient() {
                       <CardTitle className="flex items-center gap-2 text-base"><Mail className="w-4 h-4 text-blue-600" />Contact</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
-                      <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-gray-400" /><span>{mockProfile.email}</span></div>
-                      <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-gray-400" /><span>{mockProfile.phone}</span></div>
-                      <div className="flex items-center gap-3"><Globe className="w-4 h-4 text-gray-400" /><a href={mockProfile.website} className="text-blue-600 hover:underline">{mockProfile.website}</a></div>
-                      <div className="flex items-center gap-3"><MapPin className="w-4 h-4 text-gray-400" /><span>{mockProfile.location}</span></div>
+                      <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-gray-400" /><span>{displayProfile.email}</span></div>
+                      <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-gray-400" /><span>{displayProfile.phone}</span></div>
+                      <div className="flex items-center gap-3"><Globe className="w-4 h-4 text-gray-400" /><a href={displayProfile.website} className="text-blue-600 hover:underline">{displayProfile.website}</a></div>
+                      <div className="flex items-center gap-3"><MapPin className="w-4 h-4 text-gray-400" /><span>{displayProfile.location}</span></div>
                     </CardContent>
                   </Card>
 
@@ -1007,7 +1338,7 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockExperiences.slice(0, 2).map((exp) => (
+                    {displayExperiences.slice(0, 2).map((exp) => (
                       <div key={exp.id} className="flex gap-4">
                         <Avatar className="w-12 h-12">
                           <AvatarImage src={exp.companyLogo} />
@@ -1042,7 +1373,7 @@ export default function ProfileClient() {
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockExperiences.length}</p>
+                      <p className="text-2xl font-bold">{displayExperiences.length}</p>
                       <p className="text-sm text-purple-100">Positions</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
@@ -1050,7 +1381,7 @@ export default function ProfileClient() {
                       <p className="text-sm text-purple-100">Certifications</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
-                      <p className="text-2xl font-bold">{mockEducation.length}</p>
+                      <p className="text-2xl font-bold">{displayEducation.length}</p>
                       <p className="text-sm text-purple-100">Degrees</p>
                     </div>
                     <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3">
@@ -1097,10 +1428,10 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    {mockExperiences.map((exp) => (
+                    {displayExperiences.map((exp) => (
                       <div key={exp.id} className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
                         <Avatar className="w-14 h-14">
-                          <AvatarImage src={exp.companyLogo} />
+                          <AvatarImage src={(exp as any).companyLogo} />
                           <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-lg">{exp.company[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
@@ -1121,6 +1452,14 @@ export default function ProfileClient() {
                             {exp.skills.map((skill, i) => <Badge key={i} variant="outline">{skill}</Badge>)}
                           </div>
                         </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500 hover:text-red-700"
+                          onClick={() => handleDeleteExperience(exp.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -1162,10 +1501,10 @@ export default function ProfileClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockEducation.map((edu) => (
+                    {displayEducation.map((edu) => (
                       <div key={edu.id} className="flex gap-4">
                         <Avatar className="w-12 h-12">
-                          <AvatarImage src={edu.schoolLogo} />
+                          <AvatarImage src={(edu as any).schoolLogo} />
                           <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white">{edu.school[0]}</AvatarFallback>
                         </Avatar>
                         <div>
@@ -1266,7 +1605,16 @@ export default function ProfileClient() {
                           </Button>
                         ))}
                       </div>
-                      <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"><Plus className="w-4 h-4 mr-1" />Add Skill</Button>
+                      <Button
+                        size="sm"
+                        className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                        onClick={() => {
+                          const skillName = prompt('Enter skill name:')
+                          if (skillName) handleAddSkill(skillName)
+                        }}
+                      >
+                        <Plus className="w-4 h-4 mr-1" />Add Skill
+                      </Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1304,6 +1652,14 @@ export default function ProfileClient() {
                               {skill.assessmentStatus === 'not-taken' ? 'Take Quiz' : skill.assessmentStatus.replace('-', ' ')}
                             </Badge>
                             <Button variant="outline" size="sm">Endorse</Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-500 hover:text-red-700"
+                              onClick={() => handleDeleteSkill(skill.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </div>
                       ))}
@@ -1797,28 +2153,52 @@ export default function ProfileClient() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <Label>First Name</Label>
-                              <Input defaultValue={mockProfile.firstName} className="mt-1" />
+                              <Input
+                                value={formData.firstName}
+                                onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                                className="mt-1"
+                              />
                             </div>
                             <div>
                               <Label>Last Name</Label>
-                              <Input defaultValue={mockProfile.lastName} className="mt-1" />
+                              <Input
+                                value={formData.lastName}
+                                onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                                className="mt-1"
+                              />
                             </div>
                           </div>
                           <div>
                             <Label>Headline</Label>
-                            <Input defaultValue={mockProfile.headline} className="mt-1" />
+                            <Input
+                              value={formData.headline}
+                              onChange={(e) => setFormData(prev => ({ ...prev, headline: e.target.value }))}
+                              className="mt-1"
+                            />
                           </div>
                           <div>
                             <Label>Location</Label>
-                            <Input defaultValue={mockProfile.location} className="mt-1" />
+                            <Input
+                              value={formData.location}
+                              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
+                              className="mt-1"
+                            />
                           </div>
                           <div>
                             <Label>Industry</Label>
-                            <Input defaultValue={mockProfile.industry} className="mt-1" />
+                            <Input
+                              value={formData.industry}
+                              onChange={(e) => setFormData(prev => ({ ...prev, industry: e.target.value }))}
+                              className="mt-1"
+                            />
                           </div>
                           <div>
                             <Label>Custom URL</Label>
-                            <Input defaultValue={mockProfile.customUrl} className="mt-1" />
+                            <Input
+                              value={formData.customUrl}
+                              onChange={(e) => setFormData(prev => ({ ...prev, customUrl: e.target.value }))}
+                              className="mt-1"
+                            />
                           </div>
                         </CardContent>
                       </Card>
@@ -1831,16 +2211,37 @@ export default function ProfileClient() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                               <Label>Email Address</Label>
-                              <Input defaultValue={mockProfile.email} className="mt-1" />
+                              <Input
+                                value={formData.email}
+                                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                                className="mt-1"
+                              />
                             </div>
                             <div>
                               <Label>Phone Number</Label>
-                              <Input defaultValue={mockProfile.phone} className="mt-1" />
+                              <Input
+                                value={formData.phone}
+                                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                                className="mt-1"
+                              />
                             </div>
                           </div>
                           <div>
                             <Label>Website</Label>
-                            <Input defaultValue={mockProfile.website} className="mt-1" />
+                            <Input
+                              value={formData.website}
+                              onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
+                              className="mt-1"
+                            />
+                          </div>
+                          <div className="pt-4 flex justify-end">
+                            <Button
+                              onClick={handleUpdateProfile}
+                              disabled={saving}
+                              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                            >
+                              {saving ? 'Saving...' : 'Save Changes'}
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -1861,50 +2262,68 @@ export default function ProfileClient() {
                               <p className="font-medium">Public Profile</p>
                               <p className="text-sm text-gray-500">Make your profile visible to everyone</p>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.privacy_level === 'public'}
+                              onCheckedChange={(checked) => handleUpdateSettings({ privacy_level: checked ? 'public' : 'private' })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <p className="font-medium">Open to Work</p>
-                              <p className="text-sm text-gray-500">Let recruiters know you're looking</p>
+                              <p className="font-medium">Show Email</p>
+                              <p className="text-sm text-gray-500">Display email on your profile</p>
                             </div>
-                            <Switch defaultChecked={mockProfile.isOpenToWork} />
+                            <Switch
+                              checked={settings?.show_email ?? false}
+                              onCheckedChange={(checked) => handleUpdateSettings({ show_email: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <p className="font-medium">Hiring Badge</p>
-                              <p className="text-sm text-gray-500">Show that you're hiring</p>
+                              <p className="font-medium">Show Phone</p>
+                              <p className="text-sm text-gray-500">Display phone on your profile</p>
                             </div>
-                            <Switch defaultChecked={mockProfile.isHiring} />
+                            <Switch
+                              checked={settings?.show_phone ?? false}
+                              onCheckedChange={(checked) => handleUpdateSettings({ show_phone: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <p className="font-medium">Creator Mode</p>
-                              <p className="text-sm text-gray-500">Grow your audience with creator tools</p>
+                              <p className="font-medium">Show Location</p>
+                              <p className="text-sm text-gray-500">Display location on your profile</p>
                             </div>
-                            <Switch defaultChecked={mockProfile.isCreatorMode} />
+                            <Switch
+                              checked={settings?.show_location ?? true}
+                              onCheckedChange={(checked) => handleUpdateSettings({ show_location: checked })}
+                            />
                           </div>
                         </CardContent>
                       </Card>
                       <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
                         <CardHeader>
-                          <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5 text-blue-600" />Connection Visibility</CardTitle>
-                          <CardDescription>Control who can see your connections</CardDescription>
+                          <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5 text-blue-600" />Connection Settings</CardTitle>
+                          <CardDescription>Control connections and messaging</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <p className="font-medium">Show Connections</p>
-                              <p className="text-sm text-gray-500">Let others see your connections</p>
+                              <p className="font-medium">Allow Messages</p>
+                              <p className="text-sm text-gray-500">Let others send you messages</p>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.allow_messages ?? true}
+                              onCheckedChange={(checked) => handleUpdateSettings({ allow_messages: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <p className="font-medium">Show Followers Count</p>
-                              <p className="text-sm text-gray-500">Display your follower count</p>
+                              <p className="font-medium">Allow Connection Requests</p>
+                              <p className="text-sm text-gray-500">Let others request to connect</p>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.allow_connections ?? true}
+                              onCheckedChange={(checked) => handleUpdateSettings({ allow_connections: checked })}
+                            />
                           </div>
                         </CardContent>
                       </Card>
@@ -1922,60 +2341,33 @@ export default function ProfileClient() {
                         <CardContent className="space-y-4">
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <p className="font-medium">Connection Requests</p>
-                              <p className="text-sm text-gray-500">Email me when I receive connection requests</p>
+                              <p className="font-medium">Email Notifications</p>
+                              <p className="text-sm text-gray-500">Receive email notifications</p>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.email_notifications ?? true}
+                              onCheckedChange={(checked) => handleUpdateSettings({ email_notifications: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <p className="font-medium">Profile Views</p>
-                              <p className="text-sm text-gray-500">Weekly summary of profile views</p>
+                              <p className="font-medium">Push Notifications</p>
+                              <p className="text-sm text-gray-500">Receive push notifications</p>
                             </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.push_notifications ?? true}
+                              onCheckedChange={(checked) => handleUpdateSettings({ push_notifications: checked })}
+                            />
                           </div>
                           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                             <div>
-                              <p className="font-medium">Job Alerts</p>
-                              <p className="text-sm text-gray-500">Jobs matching your preferences</p>
+                              <p className="font-medium">Marketing Emails</p>
+                              <p className="text-sm text-gray-500">Receive marketing and promotional emails</p>
                             </div>
-                            <Switch defaultChecked />
-                          </div>
-                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Messages</p>
-                              <p className="text-sm text-gray-500">Email me for new messages</p>
-                            </div>
-                            <Switch defaultChecked />
-                          </div>
-                        </CardContent>
-                      </Card>
-                      <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm">
-                        <CardHeader>
-                          <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-blue-600" />In-App Notifications</CardTitle>
-                          <CardDescription>Manage push notifications</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Post Reactions</p>
-                              <p className="text-sm text-gray-500">Notify when someone reacts to your posts</p>
-                            </div>
-                            <Switch defaultChecked />
-                          </div>
-                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Comments</p>
-                              <p className="text-sm text-gray-500">Notify when someone comments</p>
-                            </div>
-                            <Switch defaultChecked />
-                          </div>
-                          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                            <div>
-                              <p className="font-medium">Mentions</p>
-                              <p className="text-sm text-gray-500">Notify when you're mentioned</p>
-                            </div>
-                            <Switch defaultChecked />
+                            <Switch
+                              checked={settings?.marketing_emails ?? false}
+                              onCheckedChange={(checked) => handleUpdateSettings({ marketing_emails: checked })}
+                            />
                           </div>
                         </CardContent>
                       </Card>

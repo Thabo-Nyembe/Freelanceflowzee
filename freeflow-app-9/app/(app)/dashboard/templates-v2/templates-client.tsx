@@ -1,8 +1,14 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  useTemplates,
+  useTemplateMutations,
+  Template as DBTemplate,
+  TemplateFilters
+} from '@/lib/hooks/use-templates'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -461,60 +467,217 @@ export default function TemplatesClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [newTemplateName, setNewTemplateName] = useState('')
+  const [newTemplateDescription, setNewTemplateDescription] = useState('')
+  const [newTemplateCategory, setNewTemplateCategory] = useState<TemplateCategory>('social_media')
 
-  // Calculate stats
-  const stats: TemplateStats = useMemo(() => ({
-    totalTemplates: mockTemplates.length,
-    activeTemplates: mockTemplates.filter(t => t.status === 'active').length,
-    totalUsage: mockTemplates.reduce((sum, t) => sum + t.usageCount, 0),
-    totalDownloads: mockTemplates.reduce((sum, t) => sum + t.downloads, 0),
-    avgRating: mockTemplates.filter(t => t.rating > 0).reduce((sum, t) => sum + t.rating, 0) / mockTemplates.filter(t => t.rating > 0).length || 0,
-    favoritesCount: mockTemplates.filter(t => t.isFavorite).length,
-    collectionsCount: mockCollections.length,
-    teamTemplates: mockTemplates.filter(t => t.accessLevel === 'team').length
-  }), [])
+  // Supabase hooks for real database operations
+  const dbFilters: TemplateFilters = useMemo(() => {
+    const f: TemplateFilters = {}
+    if (categoryFilter !== 'all') {
+      f.category = categoryFilter
+    }
+    return f
+  }, [categoryFilter])
+
+  const { templates: dbTemplates, stats: dbStats, isLoading, refetch } = useTemplates([], dbFilters)
+  const {
+    createTemplate,
+    deleteTemplate,
+    useTemplate,
+    downloadTemplate,
+    isCreating,
+    isDeleting
+  } = useTemplateMutations()
+
+  // Merge database templates with local UI format
+  const templatesFromDB: Template[] = useMemo(() => {
+    return dbTemplates.map(t => ({
+      id: t.id,
+      name: t.name,
+      description: t.description || '',
+      category: (t.category || 'document') as TemplateCategory,
+      status: (t.status || 'active') as TemplateStatus,
+      accessLevel: (t.access_level || 'private') as AccessLevel,
+      thumbnail: '/templates/default.jpg',
+      size: 'custom' as TemplateSize,
+      dimensions: { width: 1080, height: 1080 },
+      createdBy: t.creator_name || 'Unknown',
+      createdAt: t.created_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+      updatedAt: t.updated_at?.split('T')[0] || new Date().toISOString().split('T')[0],
+      usageCount: t.usage_count || 0,
+      downloads: t.downloads || 0,
+      rating: Number(t.rating) || 0,
+      reviewsCount: t.reviews_count || 0,
+      isFavorite: false,
+      isPremium: false,
+      tags: t.tags || [],
+      colors: ['#6366F1', '#EC4899', '#10B981'],
+      fonts: ['Inter', 'Open Sans']
+    }))
+  }, [dbTemplates])
+
+  // Use DB templates if available, otherwise fall back to mock data
+  const allTemplates = templatesFromDB.length > 0 ? templatesFromDB : mockTemplates
+
+  // Calculate stats from DB or mock data
+  const stats: TemplateStats = useMemo(() => {
+    if (templatesFromDB.length > 0) {
+      return {
+        totalTemplates: dbStats.total,
+        activeTemplates: dbStats.active,
+        totalUsage: dbStats.totalUsage,
+        totalDownloads: dbStats.totalDownloads,
+        avgRating: dbStats.avgRating,
+        favoritesCount: 0,
+        collectionsCount: mockCollections.length,
+        teamTemplates: templatesFromDB.filter(t => t.accessLevel === 'team').length
+      }
+    }
+    return {
+      totalTemplates: mockTemplates.length,
+      activeTemplates: mockTemplates.filter(t => t.status === 'active').length,
+      totalUsage: mockTemplates.reduce((sum, t) => sum + t.usageCount, 0),
+      totalDownloads: mockTemplates.reduce((sum, t) => sum + t.downloads, 0),
+      avgRating: mockTemplates.filter(t => t.rating > 0).reduce((sum, t) => sum + t.rating, 0) / mockTemplates.filter(t => t.rating > 0).length || 0,
+      favoritesCount: mockTemplates.filter(t => t.isFavorite).length,
+      collectionsCount: mockCollections.length,
+      teamTemplates: mockTemplates.filter(t => t.accessLevel === 'team').length
+    }
+  }, [templatesFromDB, dbStats])
 
   // Filter templates
   const filteredTemplates = useMemo(() => {
-    return mockTemplates.filter(template => {
+    return allTemplates.filter(template => {
       const matchesSearch = template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       const matchesCategory = categoryFilter === 'all' || template.category === categoryFilter
       return matchesSearch && matchesCategory
     })
-  }, [searchQuery, categoryFilter])
+  }, [searchQuery, categoryFilter, allTemplates])
 
-  const favoriteTemplates = mockTemplates.filter(t => t.isFavorite)
+  const favoriteTemplates = allTemplates.filter(t => t.isFavorite)
 
-  // Handlers
-  const handleCreateTemplate = () => {
-    toast.info('Create Template', {
-      description: 'Opening template builder...'
-    })
-  }
+  // REAL Supabase Handlers
+  const handleCreateTemplate = useCallback(async () => {
+    if (!newTemplateName.trim()) {
+      toast.error('Template name required', {
+        description: 'Please enter a name for your template'
+      })
+      return
+    }
 
-  const handleUseTemplate = (templateName: string) => {
-    toast.success('Using template', {
-      description: `Creating project from "${templateName}"...`
-    })
-  }
+    try {
+      await createTemplate({
+        name: newTemplateName.trim(),
+        description: newTemplateDescription.trim() || null,
+        category: newTemplateCategory,
+        status: 'draft',
+        access_level: 'private',
+        version: '1.0',
+        usage_count: 0,
+        downloads: 0,
+        rating: 0,
+        reviews_count: 0,
+        tags: [],
+        template_data: {},
+        configuration: {}
+      })
+      toast.success('Template created', {
+        description: `"${newTemplateName}" has been created successfully`
+      })
+      setNewTemplateName('')
+      setNewTemplateDescription('')
+      setNewTemplateCategory('social_media')
+      setIsCreateDialogOpen(false)
+      refetch()
+    } catch (error) {
+      toast.error('Failed to create template', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }, [newTemplateName, newTemplateDescription, newTemplateCategory, createTemplate, refetch])
 
-  const handleDuplicateTemplate = (templateName: string) => {
-    toast.success('Template duplicated', {
-      description: `Copy of "${templateName}" created`
-    })
-  }
+  const handleUseTemplate = useCallback(async (template: Template) => {
+    try {
+      await useTemplate({
+        templateId: template.id,
+        userName: undefined,
+        department: undefined
+      })
+      toast.success('Using template', {
+        description: `Creating project from "${template.name}"...`
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to use template', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }, [useTemplate, refetch])
+
+  const handleDuplicateTemplate = useCallback(async (template: Template) => {
+    try {
+      await createTemplate({
+        name: `${template.name} (Copy)`,
+        description: template.description,
+        category: template.category,
+        status: 'draft',
+        access_level: 'private',
+        version: '1.0',
+        usage_count: 0,
+        downloads: 0,
+        rating: 0,
+        reviews_count: 0,
+        tags: template.tags,
+        template_data: {},
+        configuration: {}
+      })
+      toast.success('Template duplicated', {
+        description: `Copy of "${template.name}" created`
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to duplicate template', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }, [createTemplate, refetch])
+
+  const handleDeleteTemplate = useCallback(async (template: Template) => {
+    try {
+      await deleteTemplate(template.id)
+      toast.success('Template deleted', {
+        description: `"${template.name}" has been deleted`
+      })
+      setSelectedTemplate(null)
+      refetch()
+    } catch (error) {
+      toast.error('Failed to delete template', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }, [deleteTemplate, refetch])
+
+  const handleDownloadTemplate = useCallback(async (template: Template) => {
+    try {
+      await downloadTemplate(template.id)
+      toast.success('Downloading template', {
+        description: `"${template.name}" download started`
+      })
+      refetch()
+    } catch (error) {
+      toast.error('Failed to download template', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
+  }, [downloadTemplate, refetch])
 
   const handleFavoriteTemplate = (templateName: string) => {
     toast.success('Added to favorites', {
       description: `"${templateName}" saved to favorites`
-    })
-  }
-
-  const handleExportTemplate = (templateName: string) => {
-    toast.success('Exporting template', {
-      description: `"${templateName}" will be downloaded`
     })
   }
 
@@ -541,9 +704,13 @@ export default function TemplatesClient() {
               <Wand2 className="w-4 h-4" />
               AI Generate
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700">
+            <Button
+              className="gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+              onClick={() => setIsCreateDialogOpen(true)}
+              disabled={isCreating}
+            >
               <Plus className="w-4 h-4" />
-              Create Template
+              {isCreating ? 'Creating...' : 'Create Template'}
             </Button>
           </div>
         </div>
@@ -680,9 +847,14 @@ export default function TemplatesClient() {
                     <p className="text-2xl font-bold">{stats.avgRating.toFixed(1)}</p>
                     <p className="text-violet-100 text-sm">Avg Rating</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    disabled={isCreating}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
-                    Create
+                    {isCreating ? 'Creating...' : 'Create'}
                   </Button>
                 </div>
               </div>
@@ -691,19 +863,23 @@ export default function TemplatesClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-violet-500' },
-                { icon: Wand2, label: 'AI Generate', desc: 'Auto-create', color: 'text-purple-500' },
-                { icon: Instagram, label: 'Social Media', desc: 'Post templates', color: 'text-pink-500' },
-                { icon: Presentation, label: 'Presentations', desc: 'Slide decks', color: 'text-blue-500' },
-                { icon: FileText, label: 'Documents', desc: 'Reports & docs', color: 'text-green-500' },
-                { icon: Video, label: 'Video', desc: 'Video templates', color: 'text-red-500' },
-                { icon: Printer, label: 'Print', desc: 'Print-ready', color: 'text-orange-500' },
-                { icon: Mail, label: 'Email', desc: 'Newsletters', color: 'text-cyan-500' },
-              ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
-                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
-                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-violet-500', action: () => setIsCreateDialogOpen(true) },
+                { icon: Wand2, label: 'AI Generate', desc: 'Auto-create', color: 'text-purple-500', action: () => toast.info('AI Generate coming soon') },
+                { icon: Instagram, label: 'Social Media', desc: 'Post templates', color: 'text-pink-500', action: () => setCategoryFilter('social_media') },
+                { icon: Presentation, label: 'Presentations', desc: 'Slide decks', color: 'text-blue-500', action: () => setCategoryFilter('presentation') },
+                { icon: FileText, label: 'Documents', desc: 'Reports & docs', color: 'text-green-500', action: () => setCategoryFilter('document') },
+                { icon: Video, label: 'Video', desc: 'Video templates', color: 'text-red-500', action: () => setCategoryFilter('video') },
+                { icon: Printer, label: 'Print', desc: 'Print-ready', color: 'text-orange-500', action: () => setCategoryFilter('print') },
+                { icon: Mail, label: 'Email', desc: 'Newsletters', color: 'text-cyan-500', action: () => setCategoryFilter('email') },
+              ].map((actionItem, i) => (
+                <Card
+                  key={i}
+                  className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105"
+                  onClick={actionItem.action}
+                >
+                  <actionItem.icon className={`h-8 w-8 ${actionItem.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{actionItem.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{actionItem.desc}</p>
                 </Card>
               ))}
             </div>
@@ -770,6 +946,16 @@ export default function TemplatesClient() {
               ))}
             </div>
 
+            {/* Loading State */}
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="flex items-center gap-3">
+                  <RefreshCw className="w-5 h-5 animate-spin text-violet-600" />
+                  <span className="text-gray-600">Loading templates...</span>
+                </div>
+              </div>
+            )}
+
             {/* Template Grid */}
             <div className={viewMode === 'grid' ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6' : 'space-y-4'}>
               {filteredTemplates.map((template) => (
@@ -789,7 +975,14 @@ export default function TemplatesClient() {
                         <Eye className="w-4 h-4" />
                         Preview
                       </Button>
-                      <Button size="sm" className="gap-1">
+                      <Button
+                        size="sm"
+                        className="gap-1"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleUseTemplate(template)
+                        }}
+                      >
                         <Edit className="w-4 h-4" />
                         Use
                       </Button>
@@ -852,7 +1045,7 @@ export default function TemplatesClient() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">My Templates</h2>
-                    <p className="text-blue-100">{favoriteTemplates.length} favorites • {mockTemplates.length} created</p>
+                    <p className="text-blue-100">{favoriteTemplates.length} favorites • {allTemplates.length} created</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -860,9 +1053,14 @@ export default function TemplatesClient() {
                     <p className="text-2xl font-bold">{stats.totalDownloads.toLocaleString()}</p>
                     <p className="text-blue-100 text-sm">Total Downloads</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    disabled={isCreating}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
-                    Create
+                    {isCreating ? 'Creating...' : 'Create'}
                   </Button>
                 </div>
               </div>
@@ -871,28 +1069,36 @@ export default function TemplatesClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-blue-500' },
-                { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500' },
-                { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500' },
-                { icon: Upload, label: 'Import', desc: 'Upload file', color: 'text-green-500' },
-                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500' },
-                { icon: Download, label: 'Export All', desc: 'Download all', color: 'text-cyan-500' },
-                { icon: FolderPlus, label: 'Organize', desc: 'Add to folder', color: 'text-orange-500' },
-                { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500' },
-              ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
-                  <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
-                  <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
+                { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-blue-500', action: () => setIsCreateDialogOpen(true) },
+                { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500', action: () => toast.info('Favorites feature coming soon') },
+                { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500', action: () => toast.info('Recent templates shown below') },
+                { icon: Upload, label: 'Import', desc: 'Upload file', color: 'text-green-500', action: () => toast.info('Import feature coming soon') },
+                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500', action: () => toast.info('Select a template to duplicate') },
+                { icon: Download, label: 'Export All', desc: 'Download all', color: 'text-cyan-500', action: () => toast.info('Export feature coming soon') },
+                { icon: FolderPlus, label: 'Organize', desc: 'Add to folder', color: 'text-orange-500', action: () => toast.info('Organize feature coming soon') },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500', action: () => toast.info('Cleanup feature coming soon') },
+              ].map((actionItem, i) => (
+                <Card
+                  key={i}
+                  className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105"
+                  onClick={actionItem.action}
+                >
+                  <actionItem.icon className={`h-8 w-8 ${actionItem.color} mb-3`} />
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{actionItem.label}</h4>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{actionItem.desc}</p>
                 </Card>
               ))}
             </div>
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">My Templates</h3>
-              <Button className="gap-2">
+              <Button
+                className="gap-2"
+                onClick={() => setIsCreateDialogOpen(true)}
+                disabled={isCreating}
+              >
                 <Plus className="w-4 h-4" />
-                Create New
+                {isCreating ? 'Creating...' : 'Create New'}
               </Button>
             </div>
 
@@ -924,7 +1130,7 @@ export default function TemplatesClient() {
                 Recent
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {mockTemplates.slice(0, 4).map((template) => (
+                {allTemplates.slice(0, 4).map((template) => (
                   <Card key={template.id} className="cursor-pointer hover:shadow-lg transition-shadow" onClick={() => setSelectedTemplate(template)}>
                     <div className="aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
                       {getCategoryIcon(template.category)}
@@ -1233,7 +1439,7 @@ export default function TemplatesClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockTemplates.slice(0, 5).map((template) => (
+                    {allTemplates.slice(0, 5).map((template) => (
                       <div key={template.id} className="space-y-2">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">{template.name}</span>
@@ -1253,7 +1459,7 @@ export default function TemplatesClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockTemplates.sort((a, b) => b.rating - a.rating).slice(0, 5).map((template, index) => (
+                    {[...allTemplates].sort((a, b) => b.rating - a.rating).slice(0, 5).map((template, index) => (
                       <div key={template.id} className="flex items-center gap-4">
                         <div className="w-8 h-8 rounded-full bg-violet-100 dark:bg-violet-900 flex items-center justify-center font-bold text-sm text-violet-600">
                           {index + 1}
@@ -1280,8 +1486,8 @@ export default function TemplatesClient() {
                 <CardContent>
                   <div className="space-y-3">
                     {['social_media', 'presentation', 'print', 'email', 'infographic'].map((cat) => {
-                      const count = mockTemplates.filter(t => t.category === cat).length
-                      const percentage = (count / mockTemplates.length) * 100
+                      const count = allTemplates.filter(t => t.category === cat).length
+                      const percentage = (count / allTemplates.length) * 100
                       return (
                         <div key={cat} className="flex items-center gap-3">
                           <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${getCategoryColor(cat as TemplateCategory)}`}>
@@ -1907,15 +2113,27 @@ export default function TemplatesClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2 flex-1">
+                  <Button
+                    className="gap-2 flex-1"
+                    onClick={() => handleUseTemplate(selectedTemplate)}
+                  >
                     <Edit className="w-4 h-4" />
                     Use This Template
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => handleDuplicateTemplate(selectedTemplate)}
+                    disabled={isCreating}
+                  >
                     <Copy className="w-4 h-4" />
-                    Duplicate
+                    {isCreating ? 'Duplicating...' : 'Duplicate'}
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => handleDownloadTemplate(selectedTemplate)}
+                  >
                     <Download className="w-4 h-4" />
                     Download
                   </Button>
@@ -1926,12 +2144,95 @@ export default function TemplatesClient() {
                   <Button
                     variant="outline"
                     className={selectedTemplate.isFavorite ? 'text-pink-600' : ''}
+                    onClick={() => handleFavoriteTemplate(selectedTemplate.name)}
                   >
                     <Heart className={`w-4 h-4 ${selectedTemplate.isFavorite ? 'fill-current' : ''}`} />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="gap-2 text-red-600 hover:bg-red-50"
+                    onClick={() => handleDeleteTemplate(selectedTemplate)}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    {isDeleting ? 'Deleting...' : 'Delete'}
                   </Button>
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Template Dialog */}
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Plus className="w-5 h-5 text-violet-600" />
+                Create New Template
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 pt-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Template Name *</label>
+                <Input
+                  placeholder="Enter template name..."
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <Input
+                  placeholder="Enter template description..."
+                  value={newTemplateDescription}
+                  onChange={(e) => setNewTemplateDescription(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Category</label>
+                <select
+                  value={newTemplateCategory}
+                  onChange={(e) => setNewTemplateCategory(e.target.value as TemplateCategory)}
+                  className="w-full px-3 py-2 border rounded-lg text-sm bg-white dark:bg-gray-800"
+                >
+                  <option value="social_media">Social Media</option>
+                  <option value="presentation">Presentations</option>
+                  <option value="document">Documents</option>
+                  <option value="video">Video</option>
+                  <option value="print">Print</option>
+                  <option value="email">Email</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="infographic">Infographics</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    setIsCreateDialogOpen(false)
+                    setNewTemplateName('')
+                    setNewTemplateDescription('')
+                    setNewTemplateCategory('social_media')
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  onClick={handleCreateTemplate}
+                  disabled={isCreating || !newTemplateName.trim()}
+                >
+                  <Plus className="w-4 h-4" />
+                  {isCreating ? 'Creating...' : 'Create Template'}
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

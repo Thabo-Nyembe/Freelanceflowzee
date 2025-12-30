@@ -112,32 +112,33 @@ export function useChangelog(options: UseChangelogOptions = {}) {
     filters,
     orderBy: { column: 'version', ascending: false },
     limit: limit || 50,
-    realtime: true
   }
 
-  const { data, loading, error, refetch } = useSupabaseQuery<Changelog>(queryOptions)
+  const { data, isLoading: loading, error, refetch } = useSupabaseQuery<Changelog>(queryOptions)
 
-  const { mutate: createChange } = useSupabaseMutation({
+  const { mutate, remove, isLoading: mutationLoading } = useSupabaseMutation<Changelog>({
     table: 'changelog',
-    action: 'insert',
     onSuccess: refetch
   })
 
-  const { mutate: updateChange } = useSupabaseMutation({
-    table: 'changelog',
-    action: 'update',
-    onSuccess: refetch
-  })
+  // Create a new changelog entry (no id = insert)
+  const createChange = async (changeData: Partial<Changelog>) => {
+    return mutate(changeData)
+  }
 
-  const { mutate: deleteChange } = useSupabaseMutation({
-    table: 'changelog',
-    action: 'delete',
-    onSuccess: refetch
-  })
+  // Update an existing changelog entry (with id = update)
+  const updateChange = async (changeData: Partial<Changelog>, id: string) => {
+    return mutate(changeData, id)
+  }
+
+  // Delete (soft delete) a changelog entry
+  const deleteChange = async (id: string) => {
+    return remove(id)
+  }
 
   return {
     changelog: data,
-    loading,
+    loading: loading || mutationLoading,
     error,
     createChange,
     updateChange,

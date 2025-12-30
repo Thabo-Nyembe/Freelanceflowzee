@@ -1,7 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
+import { useLearning, useCourses, useUserProgress, useCollections, type Course as DBCourse, type LearningPath as DBLearningPath, type Collection as DBCollection } from '@/lib/hooks/use-learning'
 import {
   GraduationCap,
   BookOpen,
@@ -85,7 +87,14 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
@@ -93,6 +102,8 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 // ============================================================================
 // TYPE DEFINITIONS - LinkedIn Learning Level
@@ -554,13 +565,8 @@ const mockLearningQuickActions = [
 // ============================================================================
 
 export default function LearningClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('my-learning')
-  const [courses] = useState<Course[]>(mockCourses)
-  const [learningPaths] = useState<LearningPath[]>(mockLearningPaths)
-  const [skills] = useState<Skill[]>(mockSkills)
-  const [collections] = useState<Collection[]>(mockCollections)
-  const [stats] = useState<LearningStats>(mockStats)
-  const [progress] = useState<UserProgress[]>(mockProgress)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | 'all'>('all')
   const [selectedLevel, setSelectedLevel] = useState<string | 'all'>('all')
@@ -568,6 +574,92 @@ export default function LearningClient() {
   const [selectedPath, setSelectedPath] = useState<LearningPath | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showCreatePathModal, setShowCreatePathModal] = useState(false)
+  const [showCreateCollectionModal, setShowCreateCollectionModal] = useState(false)
+
+  // Form state for new learning path
+  const [newPathForm, setNewPathForm] = useState({
+    title: '',
+    description: '',
+    level: 'beginner' as const,
+    estimated_weeks: 4
+  })
+
+  // Form state for new collection
+  const [newCollectionForm, setNewCollectionForm] = useState({
+    name: '',
+    description: '',
+    is_public: false
+  })
+
+  // Supabase hooks
+  const { paths: dbPaths, loading: pathsLoading, createPath, updatePath, deletePath, mutating: pathsMutating } = useLearning()
+  const { courses: dbCourses, loading: coursesLoading, createCourse, updateCourse, deleteCourse, mutating: coursesMutating } = useCourses({ category: selectedCategory, level: selectedLevel as any })
+  const { progress: dbProgress, loading: progressLoading, updateProgress } = useUserProgress()
+  const { collections: dbCollections, loading: collectionsLoading, createCollection, updateCollection, deleteCollection, mutating: collectionsMutating } = useCollections()
+
+  // Merge DB data with mock data as fallback
+  const courses = dbCourses?.length ? dbCourses.map(c => ({
+    ...mockCourses[0],
+    id: c.id,
+    title: c.title,
+    description: c.description || '',
+    shortDescription: c.short_description || '',
+    category: c.category,
+    level: c.level,
+    totalDuration: c.total_duration,
+    lessonsCount: c.lessons_count,
+    enrolledCount: c.enrolled_count,
+    rating: c.rating,
+    reviewsCount: c.reviews_count,
+    isBestseller: c.is_bestseller,
+    isNew: c.is_new,
+    isFeatured: c.is_featured,
+    skills: c.skills || []
+  })) : mockCourses
+
+  const learningPaths = dbPaths?.length ? dbPaths.map(p => ({
+    ...mockLearningPaths[0],
+    id: p.id,
+    title: p.title,
+    description: p.description || '',
+    totalDuration: p.total_duration,
+    lessonsCount: p.lessons_count,
+    enrolledCount: p.enrolled_count,
+    skills: p.skills || [],
+    level: p.level,
+    estimatedWeeks: p.estimated_weeks,
+    progress: 0,
+    completedCourses: 0,
+    courses: [],
+    milestones: []
+  })) : mockLearningPaths
+
+  const collections = dbCollections?.length ? dbCollections.map(c => ({
+    id: c.id,
+    name: c.name,
+    description: c.description || '',
+    courses: [],
+    isPublic: c.is_public,
+    createdAt: c.created_at,
+    likes: c.likes
+  })) : mockCollections
+
+  const progress = dbProgress?.length ? dbProgress.map(p => ({
+    courseId: p.course_id,
+    lessonsCompleted: p.lessons_completed,
+    totalLessons: p.total_lessons,
+    progress: p.progress,
+    timeSpent: p.time_spent,
+    lastAccessedAt: p.last_accessed_at,
+    notes: [],
+    bookmarks: [],
+    completedAt: p.completed_at,
+    certificateUrl: p.certificate_url
+  })) : mockProgress
+
+  const [skills] = useState<Skill[]>(mockSkills)
+  const [stats] = useState<LearningStats>(mockStats)
 
   const categories = useMemo(() => {
     const cats = new Set(courses.map(c => c.category))
@@ -612,41 +704,116 @@ export default function LearningClient() {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
   }
 
-  const handleStartCourse = (course: Course) => {
-    toast.success('Course started', {
-      description: `Starting ${course.title}`
-    })
+  // CRUD Handlers
+  const handleStartCourse = async (course: any) => {
+    try {
+      await updateProgress({ course_id: course.id, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
+      toast.success('Course started', { description: `Starting ${course.title}` })
+    } catch (err) {
+      toast.error('Failed to start course')
+    }
   }
 
-  // Handlers
-  const handleResumeCourse = (course: Course) => {
-    toast.success('Resuming course', {
-      description: `Continuing ${course.title}`
-    })
+  const handleResumeCourse = async (course: any) => {
+    try {
+      await updateProgress({ course_id: course.id, last_accessed_at: new Date().toISOString() })
+      toast.success('Resuming course', { description: `Continuing ${course.title}` })
+    } catch (err) {
+      toast.error('Failed to resume course')
+    }
   }
 
-  const handleDownloadCertificate = () => {
-    toast.success('Certificate download started', {
-      description: 'Your certificate is being generated'
-    })
+  const handleDownloadCertificate = async () => {
+    toast.success('Certificate download started', { description: 'Your certificate is being generated' })
   }
 
-  const handleShareProgress = () => {
-    toast.success('Progress shared', {
-      description: 'Your learning progress has been shared'
-    })
+  const handleShareProgress = async () => {
+    toast.success('Progress shared', { description: 'Your learning progress has been shared' })
   }
 
-  const handleEnrollCourse = (courseName: string) => {
-    toast.success('Enrolled', {
-      description: `You are now enrolled in "${courseName}"`
-    })
+  const handleEnrollCourse = async (courseId: string, courseName: string) => {
+    try {
+      await updateProgress({ course_id: courseId, progress: 0, lessons_completed: 0, last_accessed_at: new Date().toISOString() })
+      toast.success('Enrolled', { description: `You are now enrolled in "${courseName}"` })
+    } catch (err) {
+      toast.error('Failed to enroll in course')
+    }
   }
 
-  const handleBookmarkLesson = (lessonName: string) => {
-    toast.success('Lesson bookmarked', {
-      description: `"${lessonName}" saved to bookmarks`
-    })
+  const handleBookmarkLesson = async (lessonId: string, lessonName: string) => {
+    toast.success('Lesson bookmarked', { description: `"${lessonName}" saved to bookmarks` })
+  }
+
+  const handleCreatePath = async () => {
+    if (!newPathForm.title.trim()) {
+      toast.error('Title is required')
+      return
+    }
+    try {
+      await createPath({
+        title: newPathForm.title,
+        description: newPathForm.description,
+        level: newPathForm.level,
+        estimated_weeks: newPathForm.estimated_weeks,
+        skills: [],
+        total_duration: 0,
+        lessons_count: 0,
+        enrolled_count: 0,
+        status: 'draft'
+      })
+      toast.success('Learning path created', { description: `"${newPathForm.title}" has been created` })
+      setShowCreatePathModal(false)
+      setNewPathForm({ title: '', description: '', level: 'beginner', estimated_weeks: 4 })
+    } catch (err) {
+      toast.error('Failed to create learning path')
+    }
+  }
+
+  const handleDeletePath = async (pathId: string, pathTitle: string) => {
+    try {
+      await deletePath(pathId)
+      toast.success('Learning path deleted', { description: `"${pathTitle}" has been removed` })
+    } catch (err) {
+      toast.error('Failed to delete learning path')
+    }
+  }
+
+  const handleCreateCollection = async () => {
+    if (!newCollectionForm.name.trim()) {
+      toast.error('Name is required')
+      return
+    }
+    try {
+      await createCollection({
+        name: newCollectionForm.name,
+        description: newCollectionForm.description,
+        is_public: newCollectionForm.is_public,
+        likes: 0
+      })
+      toast.success('Collection created', { description: `"${newCollectionForm.name}" has been created` })
+      setShowCreateCollectionModal(false)
+      setNewCollectionForm({ name: '', description: '', is_public: false })
+    } catch (err) {
+      toast.error('Failed to create collection')
+    }
+  }
+
+  const handleDeleteCollection = async (collectionId: string, collectionName: string) => {
+    try {
+      await deleteCollection(collectionId)
+      toast.success('Collection deleted', { description: `"${collectionName}" has been removed` })
+    } catch (err) {
+      toast.error('Failed to delete collection')
+    }
+  }
+
+  const handleToggleCollectionVisibility = async (collection: any) => {
+    try {
+      await updateCollection({ id: collection.id, is_public: !collection.isPublic })
+      toast.success(collection.isPublic ? 'Collection set to private' : 'Collection set to public')
+    } catch (err) {
+      toast.error('Failed to update collection')
+    }
   }
 
   return (
@@ -939,8 +1106,12 @@ export default function LearningClient() {
                   <FolderOpen className="w-5 h-5 text-purple-600" />
                   Your Collections
                 </h2>
-                <button className="px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors flex items-center gap-2">
-                  <Plus className="w-4 h-4" />
+                <button
+                  onClick={() => setShowCreateCollectionModal(true)}
+                  disabled={collectionsMutating}
+                  className="px-4 py-2 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors flex items-center gap-2 disabled:opacity-50"
+                >
+                  {collectionsMutating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   New Collection
                 </button>
               </div>
@@ -973,9 +1144,24 @@ export default function LearningClient() {
                           )}
                         </div>
                       </div>
-                      <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                        <MoreVertical className="w-4 h-4 text-gray-400" />
-                      </button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                            <MoreVertical className="w-4 h-4 text-gray-400" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleToggleCollectionVisibility(collection)}>
+                            {collection.isPublic ? <Lock className="w-4 h-4 mr-2" /> : <Unlock className="w-4 h-4 mr-2" />}
+                            {collection.isPublic ? 'Make Private' : 'Make Public'}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem className="text-red-600" onClick={() => handleDeleteCollection(collection.id, collection.name)}>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Collection
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 ))}
@@ -1929,14 +2115,24 @@ export default function LearningClient() {
                       <span className="text-gray-500">{selectedCourse.enrolledCount.toLocaleString()} enrolled</span>
                     </div>
                     <div className="flex items-center gap-3 mt-4">
-                      <button className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg font-medium hover:from-emerald-600 hover:to-teal-600 transition-all flex items-center gap-2">
-                        <Play className="w-4 h-4" />
+                      <Button
+                        onClick={() => handleStartCourse(selectedCourse)}
+                        disabled={progressLoading}
+                        className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-lg font-medium hover:from-emerald-600 hover:to-teal-600 transition-all flex items-center gap-2"
+                      >
+                        {progressLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
                         Start Learning
-                      </button>
-                      <button className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      </Button>
+                      <button
+                        onClick={() => handleBookmarkLesson(selectedCourse.id, selectedCourse.title)}
+                        className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
                         <Bookmark className="w-5 h-5" />
                       </button>
-                      <button className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <button
+                        onClick={handleShareProgress}
+                        className="p-2 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                      >
                         <Share2 className="w-5 h-5" />
                       </button>
                     </div>
@@ -2014,6 +2210,129 @@ export default function LearningClient() {
               </div>
             </ScrollArea>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Collection Modal */}
+      <Dialog open={showCreateCollectionModal} onOpenChange={setShowCreateCollectionModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-purple-600" />
+              Create New Collection
+            </DialogTitle>
+            <DialogDescription>Organize your favorite courses into collections</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="collection-name">Collection Name</Label>
+              <Input
+                id="collection-name"
+                placeholder="e.g., Career Development"
+                value={newCollectionForm.name}
+                onChange={(e) => setNewCollectionForm(prev => ({ ...prev, name: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="collection-description">Description</Label>
+              <Textarea
+                id="collection-description"
+                placeholder="What is this collection about?"
+                value={newCollectionForm.description}
+                onChange={(e) => setNewCollectionForm(prev => ({ ...prev, description: e.target.value }))}
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <div>
+                <p className="font-medium text-sm">Make Public</p>
+                <p className="text-xs text-gray-500">Others can view this collection</p>
+              </div>
+              <Switch
+                checked={newCollectionForm.is_public}
+                onCheckedChange={(checked) => setNewCollectionForm(prev => ({ ...prev, is_public: checked }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateCollectionModal(false)}>Cancel</Button>
+            <Button onClick={handleCreateCollection} disabled={collectionsMutating} className="bg-purple-600 hover:bg-purple-700">
+              {collectionsMutating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Create Collection
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Learning Path Modal */}
+      <Dialog open={showCreatePathModal} onOpenChange={setShowCreatePathModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Route className="w-5 h-5 text-teal-600" />
+              Create Learning Path
+            </DialogTitle>
+            <DialogDescription>Build a structured learning journey</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="path-title">Title</Label>
+              <Input
+                id="path-title"
+                placeholder="e.g., Become a Data Scientist"
+                value={newPathForm.title}
+                onChange={(e) => setNewPathForm(prev => ({ ...prev, title: e.target.value }))}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="path-description">Description</Label>
+              <Textarea
+                id="path-description"
+                placeholder="Describe this learning path..."
+                value={newPathForm.description}
+                onChange={(e) => setNewPathForm(prev => ({ ...prev, description: e.target.value }))}
+                className="mt-1"
+                rows={3}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Level</Label>
+                <Select value={newPathForm.level} onValueChange={(value: any) => setNewPathForm(prev => ({ ...prev, level: value }))}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="path-weeks">Est. Weeks</Label>
+                <Input
+                  id="path-weeks"
+                  type="number"
+                  min={1}
+                  max={52}
+                  value={newPathForm.estimated_weeks}
+                  onChange={(e) => setNewPathForm(prev => ({ ...prev, estimated_weeks: parseInt(e.target.value) || 4 }))}
+                  className="mt-1"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreatePathModal(false)}>Cancel</Button>
+            <Button onClick={handleCreatePath} disabled={pathsMutating} className="bg-teal-600 hover:bg-teal-700">
+              {pathsMutating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
+              Create Path
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

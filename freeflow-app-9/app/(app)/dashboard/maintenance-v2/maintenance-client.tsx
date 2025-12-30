@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { toast } from 'sonner'
 import {
   Wrench, Clock, CheckCircle, AlertCircle, XCircle, Server,
@@ -535,12 +536,103 @@ const mockMaintenanceQuickActions = [
   { id: '3', label: 'Asset List', icon: 'list', action: () => console.log('Assets'), variant: 'outline' as const },
 ]
 
+// Database types
+interface DbMaintenanceWindow {
+  id: string
+  user_id: string
+  window_code: string
+  title: string
+  description: string | null
+  type: string
+  status: string
+  impact: string
+  priority: string
+  start_time: string
+  end_time: string
+  duration_minutes: number
+  actual_start: string | null
+  actual_end: string | null
+  affected_systems: string[]
+  downtime_expected: boolean
+  assigned_to: string[]
+  completion_rate: number
+  notes: string | null
+  tags: string[]
+  created_at: string
+  updated_at: string
+}
+
+interface MaintenanceFormState {
+  title: string
+  description: string
+  type: string
+  priority: string
+  impact: string
+  start_time: string
+  end_time: string
+  duration_minutes: string
+  affected_systems: string
+  downtime_expected: boolean
+  assigned_to: string
+  notes: string
+}
+
+const initialFormState: MaintenanceFormState = {
+  title: '',
+  description: '',
+  type: 'preventive',
+  priority: 'medium',
+  impact: 'low',
+  start_time: '',
+  end_time: '',
+  duration_minutes: '60',
+  affected_systems: '',
+  downtime_expected: false,
+  assigned_to: '',
+  notes: '',
+}
+
 export default function MaintenanceClient() {
+  const supabase = createClientComponentClient()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedOrder, setSelectedOrder] = useState<WorkOrder | null>(null)
   const [statusFilter, setStatusFilter] = useState<MaintenanceStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Supabase data state
+  const [dbMaintenanceWindows, setDbMaintenanceWindows] = useState<DbMaintenanceWindow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [formState, setFormState] = useState<MaintenanceFormState>(initialFormState)
+
+  // Fetch maintenance windows from Supabase
+  const fetchMaintenanceWindows = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      const { data, error } = await supabase
+        .from('maintenance_windows')
+        .select('*')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      setDbMaintenanceWindows(data || [])
+    } catch (error) {
+      console.error('Error fetching maintenance windows:', error)
+      toast.error('Failed to load maintenance data')
+    } finally {
+      setLoading(false)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchMaintenanceWindows()
+  }, [fetchMaintenanceWindows])
 
   // Computed stats
   const stats = useMemo(() => {
@@ -578,35 +670,145 @@ export default function MaintenanceClient() {
     })
   }, [searchQuery, statusFilter])
 
-  // Handlers
-  const handleCreateWorkOrder = () => {
-    toast.info('Create Work Order', {
-      description: 'Opening work order form...'
-    })
+  // Create maintenance window
+  const handleCreateWorkOrder = async () => {
+    if (!formState.title.trim()) {
+      toast.error('Title is required')
+      return
+    }
+    if (!formState.start_time || !formState.end_time) {
+      toast.error('Start and end times are required')
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to create maintenance windows')
+        return
+      }
+
+      const { error } = await supabase.from('maintenance_windows').insert({
+        user_id: user.id,
+        title: formState.title,
+        description: formState.description || null,
+        type: formState.type,
+        status: 'scheduled',
+        priority: formState.priority,
+        impact: formState.impact,
+        start_time: formState.start_time,
+        end_time: formState.end_time,
+        duration_minutes: parseInt(formState.duration_minutes) || 60,
+        affected_systems: formState.affected_systems ? formState.affected_systems.split(',').map(s => s.trim()) : [],
+        downtime_expected: formState.downtime_expected,
+        assigned_to: formState.assigned_to ? formState.assigned_to.split(',').map(s => s.trim()) : [],
+        notes: formState.notes || null,
+        completion_rate: 0,
+      })
+
+      if (error) throw error
+
+      toast.success('Maintenance window created successfully')
+      setShowCreateDialog(false)
+      setFormState(initialFormState)
+      fetchMaintenanceWindows()
+    } catch (error) {
+      console.error('Error creating maintenance window:', error)
+      toast.error('Failed to create maintenance window')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
-  const handleAssignTechnician = (orderId: string) => {
-    toast.info('Assign Technician', {
-      description: 'Opening technician selection...'
-    })
+  // Update maintenance status
+  const handleUpdateStatus = async (windowId: string, newStatus: string) => {
+    try {
+      const completionRate = newStatus === 'completed' ? 100 : newStatus === 'scheduled' ? 0 : undefined
+      const updateData: Record<string, unknown> = { status: newStatus, updated_at: new Date().toISOString() }
+      if (completionRate !== undefined) updateData.completion_rate = completionRate
+      if (newStatus === 'in-progress') updateData.actual_start = new Date().toISOString()
+      if (newStatus === 'completed') updateData.actual_end = new Date().toISOString()
+
+      const { error } = await supabase
+        .from('maintenance_windows')
+        .update(updateData)
+        .eq('id', windowId)
+
+      if (error) throw error
+
+      toast.success(`Status updated to ${newStatus.replace('-', ' ')}`)
+      fetchMaintenanceWindows()
+    } catch (error) {
+      console.error('Error updating status:', error)
+      toast.error('Failed to update status')
+    }
   }
 
-  const handleCompleteTask = (orderId: string) => {
-    toast.success('Task completed', {
-      description: 'Work order marked as complete'
-    })
+  // Delete maintenance window
+  const handleDeleteWindow = async (windowId: string) => {
+    try {
+      const { error } = await supabase
+        .from('maintenance_windows')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', windowId)
+
+      if (error) throw error
+
+      toast.success('Maintenance window deleted')
+      fetchMaintenanceWindows()
+    } catch (error) {
+      console.error('Error deleting window:', error)
+      toast.error('Failed to delete maintenance window')
+    }
   }
 
+  // Assign technician (update assigned_to)
+  const handleAssignTechnician = async (windowId: string, techName?: string) => {
+    try {
+      const window = dbMaintenanceWindows.find(w => w.id === windowId)
+      const currentAssigned = window?.assigned_to || []
+      const newAssigned = techName ? [...currentAssigned, techName] : currentAssigned
+
+      const { error } = await supabase
+        .from('maintenance_windows')
+        .update({ assigned_to: newAssigned, updated_at: new Date().toISOString() })
+        .eq('id', windowId)
+
+      if (error) throw error
+
+      toast.success('Technician assigned successfully')
+      fetchMaintenanceWindows()
+    } catch (error) {
+      console.error('Error assigning technician:', error)
+      toast.error('Failed to assign technician')
+    }
+  }
+
+  // Complete task
+  const handleCompleteTask = async (windowId: string) => {
+    await handleUpdateStatus(windowId, 'completed')
+  }
+
+  // Schedule maintenance (opens dialog)
   const handleScheduleMaintenance = () => {
-    toast.info('Schedule Maintenance', {
-      description: 'Opening scheduler...'
-    })
+    setShowCreateDialog(true)
   }
 
+  // Export report
   const handleExportReport = () => {
-    toast.success('Exporting report', {
-      description: 'Maintenance report will be downloaded'
-    })
+    const csvContent = dbMaintenanceWindows.map(w =>
+      `${w.title},${w.status},${w.priority},${w.completion_rate}%,${w.start_time}`
+    ).join('\n')
+
+    const blob = new Blob([`Title,Status,Priority,Completion,Start Time\n${csvContent}`], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `maintenance-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Report exported successfully')
   }
 
   return (
@@ -629,11 +831,11 @@ export default function MaintenanceClient() {
               </div>
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button variant="outline" className="flex items-center gap-2" onClick={handleExportReport}>
                 <Download className="w-4 h-4" />
                 Export
               </Button>
-              <Button className="bg-gradient-to-r from-orange-600 to-amber-600 text-white flex items-center gap-2">
+              <Button className="bg-gradient-to-r from-orange-600 to-amber-600 text-white flex items-center gap-2" onClick={() => setShowCreateDialog(true)}>
                 <Plus className="w-4 h-4" />
                 New Work Order
               </Button>
@@ -1910,6 +2112,149 @@ export default function MaintenanceClient() {
           </div>
         </div>
       </div>
+
+      {/* Create Maintenance Window Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create Maintenance Window</DialogTitle>
+            <DialogDescription>Schedule a new maintenance window for your systems</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label>Title *</Label>
+                <Input
+                  value={formState.title}
+                  onChange={(e) => setFormState(prev => ({ ...prev, title: e.target.value }))}
+                  placeholder="e.g., HVAC System Annual Inspection"
+                  className="mt-1.5"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Description</Label>
+                <Input
+                  value={formState.description}
+                  onChange={(e) => setFormState(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Describe the maintenance work..."
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label>Type</Label>
+                <select
+                  value={formState.type}
+                  onChange={(e) => setFormState(prev => ({ ...prev, type: e.target.value }))}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                >
+                  <option value="preventive">Preventive</option>
+                  <option value="corrective">Corrective</option>
+                  <option value="emergency">Emergency</option>
+                  <option value="upgrade">Upgrade</option>
+                  <option value="inspection">Inspection</option>
+                </select>
+              </div>
+              <div>
+                <Label>Priority</Label>
+                <select
+                  value={formState.priority}
+                  onChange={(e) => setFormState(prev => ({ ...prev, priority: e.target.value }))}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                </select>
+              </div>
+              <div>
+                <Label>Start Time *</Label>
+                <Input
+                  type="datetime-local"
+                  value={formState.start_time}
+                  onChange={(e) => setFormState(prev => ({ ...prev, start_time: e.target.value }))}
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label>End Time *</Label>
+                <Input
+                  type="datetime-local"
+                  value={formState.end_time}
+                  onChange={(e) => setFormState(prev => ({ ...prev, end_time: e.target.value }))}
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label>Duration (minutes)</Label>
+                <Input
+                  type="number"
+                  value={formState.duration_minutes}
+                  onChange={(e) => setFormState(prev => ({ ...prev, duration_minutes: e.target.value }))}
+                  className="mt-1.5"
+                />
+              </div>
+              <div>
+                <Label>Impact</Label>
+                <select
+                  value={formState.impact}
+                  onChange={(e) => setFormState(prev => ({ ...prev, impact: e.target.value }))}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700"
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                  <option value="critical">Critical</option>
+                </select>
+              </div>
+              <div className="col-span-2">
+                <Label>Affected Systems (comma-separated)</Label>
+                <Input
+                  value={formState.affected_systems}
+                  onChange={(e) => setFormState(prev => ({ ...prev, affected_systems: e.target.value }))}
+                  placeholder="e.g., HVAC, Server Room, Building A"
+                  className="mt-1.5"
+                />
+              </div>
+              <div className="col-span-2">
+                <Label>Assigned To (comma-separated)</Label>
+                <Input
+                  value={formState.assigned_to}
+                  onChange={(e) => setFormState(prev => ({ ...prev, assigned_to: e.target.value }))}
+                  placeholder="e.g., John Smith, Sarah Johnson"
+                  className="mt-1.5"
+                />
+              </div>
+              <div className="col-span-2 flex items-center gap-2">
+                <Switch
+                  checked={formState.downtime_expected}
+                  onCheckedChange={(checked) => setFormState(prev => ({ ...prev, downtime_expected: checked }))}
+                />
+                <Label>Downtime Expected</Label>
+              </div>
+              <div className="col-span-2">
+                <Label>Notes</Label>
+                <Input
+                  value={formState.notes}
+                  onChange={(e) => setFormState(prev => ({ ...prev, notes: e.target.value }))}
+                  placeholder="Additional notes..."
+                  className="mt-1.5"
+                />
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
+            <Button
+              onClick={handleCreateWorkOrder}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-orange-600 to-amber-600 text-white"
+            >
+              {isSubmitting ? 'Creating...' : 'Create Maintenance Window'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

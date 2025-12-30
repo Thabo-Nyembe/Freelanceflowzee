@@ -3,7 +3,7 @@
 
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -53,7 +53,7 @@ import {
   customersQuickActions,
 } from '@/lib/mock-data/adapters'
 
-import { useCustomers, useCreateCustomer, type Customer, type CustomerSegment } from '@/lib/hooks/use-customers'
+import { useCustomers, useCustomerMutations, type Customer, type CustomerSegment, type CustomerStatus } from '@/lib/hooks/use-customers'
 
 // ============================================================================
 // TYPES - SALESFORCE CRM LEVEL
@@ -466,9 +466,23 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [showAddOpportunity, setShowAddOpportunity] = useState(false)
   const [stageFilter, setStageFilter] = useState<DealStage | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [customerToDelete, setCustomerToDelete] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
+  const [showEditDialog, setShowEditDialog] = useState(false)
 
-  const { customers, loading, error, refetch } = useCustomers({ segment: 'all' })
-  const { mutate: createCustomer, loading: creating } = useCreateCustomer()
+  // Supabase hooks
+  const { customers: dbCustomers, stats: dbStats, isLoading, error, refetch } = useCustomers({ segment: 'all' })
+  const {
+    createCustomer,
+    updateCustomer,
+    deleteCustomer,
+    updateCustomerStatus,
+    updateCustomerSegment,
+    isCreating,
+    isUpdating,
+    isDeleting
+  } = useCustomerMutations()
 
   // Form state for new contact
   const [newContactForm, setNewContactForm] = useState({
@@ -477,7 +491,22 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
     email: '',
     phone: '',
     title: '',
-    accountId: ''
+    accountId: '',
+    company: '',
+    notes: ''
+  })
+
+  // Form state for editing contact
+  const [editContactForm, setEditContactForm] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    title: '',
+    company: '',
+    notes: '',
+    segment: 'new' as CustomerSegment,
+    status: 'active' as CustomerStatus
   })
 
   // Handle creating a new contact
@@ -487,23 +516,144 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
       return
     }
     try {
-      await createCustomer({
+      const result = await createCustomer({
         customer_name: `${newContactForm.firstName} ${newContactForm.lastName}`,
         first_name: newContactForm.firstName,
         last_name: newContactForm.lastName,
         email: newContactForm.email,
-        phone: newContactForm.phone || null,
-        job_title: newContactForm.title || null,
+        phone: newContactForm.phone || undefined,
+        job_title: newContactForm.title || undefined,
+        company_name: newContactForm.company || undefined,
+        notes: newContactForm.notes || undefined,
         status: 'active',
-        segment: 'new'
-      } as any)
-      setShowAddContact(false)
-      setNewContactForm({ firstName: '', lastName: '', email: '', phone: '', title: '', accountId: '' })
-      toast.success('Contact created successfully')
-      refetch()
-    } catch (error) {
-      console.error('Failed to create contact:', error)
+        segment: 'new',
+        total_orders: 0,
+        total_spent: 0,
+        lifetime_value: 0,
+        avg_order_value: 0,
+        join_date: new Date().toISOString(),
+        loyalty_points: 0,
+        referral_count: 0,
+        email_opt_in: true,
+        sms_opt_in: false,
+        churn_risk_score: 0,
+        support_ticket_count: 0
+      })
+      if (result) {
+        setShowAddContact(false)
+        setNewContactForm({ firstName: '', lastName: '', email: '', phone: '', title: '', accountId: '', company: '', notes: '' })
+        toast.success('Contact Created', { description: `${newContactForm.firstName} ${newContactForm.lastName} has been added to your CRM` })
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to create contact' })
+      console.error('Failed to create contact:', err)
     }
+  }
+
+  // Handle editing a customer
+  const handleOpenEditDialog = (customer: Customer) => {
+    setEditingCustomer(customer)
+    setEditContactForm({
+      firstName: customer.first_name || '',
+      lastName: customer.last_name || '',
+      email: customer.email || '',
+      phone: customer.phone || '',
+      title: customer.job_title || '',
+      company: customer.company_name || '',
+      notes: customer.notes || '',
+      segment: customer.segment,
+      status: customer.status
+    })
+    setShowEditDialog(true)
+  }
+
+  const handleUpdateContact = async () => {
+    if (!editingCustomer) return
+    if (!editContactForm.firstName || !editContactForm.lastName || !editContactForm.email) {
+      toast.error('Please fill in required fields')
+      return
+    }
+    try {
+      const result = await updateCustomer({
+        id: editingCustomer.id,
+        customer_name: `${editContactForm.firstName} ${editContactForm.lastName}`,
+        first_name: editContactForm.firstName,
+        last_name: editContactForm.lastName,
+        email: editContactForm.email,
+        phone: editContactForm.phone || undefined,
+        job_title: editContactForm.title || undefined,
+        company_name: editContactForm.company || undefined,
+        notes: editContactForm.notes || undefined,
+        segment: editContactForm.segment,
+        status: editContactForm.status
+      })
+      if (result) {
+        setShowEditDialog(false)
+        setEditingCustomer(null)
+        toast.success('Contact Updated', { description: `${editContactForm.firstName} ${editContactForm.lastName} has been updated` })
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to update contact' })
+      console.error('Failed to update contact:', err)
+    }
+  }
+
+  // Handle delete confirmation
+  const handleDeleteClick = (customerId: string) => {
+    setCustomerToDelete(customerId)
+    setShowDeleteDialog(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!customerToDelete) return
+    try {
+      const success = await deleteCustomer(customerToDelete)
+      if (success) {
+        toast.success('Contact Deleted', { description: 'The contact has been removed from your CRM' })
+        setShowDeleteDialog(false)
+        setCustomerToDelete(null)
+        setSelectedContact(null)
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to delete contact' })
+      console.error('Failed to delete contact:', err)
+    }
+  }
+
+  // Handle status change
+  const handleStatusChange = async (customerId: string, newStatus: CustomerStatus) => {
+    try {
+      const result = await updateCustomer({ id: customerId, status: newStatus })
+      if (result) {
+        toast.success('Status Updated', { description: `Contact status changed to ${newStatus}` })
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to update status' })
+    }
+  }
+
+  // Handle segment change
+  const handleSegmentChange = async (customerId: string, newSegment: CustomerSegment) => {
+    try {
+      const result = await updateCustomer({ id: customerId, segment: newSegment })
+      if (result) {
+        toast.success('Segment Updated', { description: `Contact moved to ${newSegment} segment` })
+        refetch()
+      }
+    } catch (err) {
+      toast.error('Error', { description: 'Failed to update segment' })
+    }
+  }
+
+  // Handle refresh
+  const handleRefresh = async () => {
+    toast.info('Refreshing', { description: 'Refreshing customer data...' })
+    await refetch()
+    toast.success('Refreshed', { description: 'Customer data updated' })
   }
 
   // Stats
@@ -583,9 +733,22 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
   // Handlers
   const handleExportCustomers = () => {
-    toast.success('Export started', {
-      description: 'Customer data is being exported'
-    })
+    // Export customers to CSV
+    const customersToExport = dbCustomers || MOCK_CONTACTS
+    const csvContent = customersToExport.map((c: any) =>
+      `${c.customer_name || `${c.firstName} ${c.lastName}`},${c.email},${c.phone || ''},${c.status || ''},${c.segment || ''}`
+    ).join('\n')
+
+    const header = 'Name,Email,Phone,Status,Segment\n'
+    const blob = new Blob([header + csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `customers-export-${new Date().toISOString().split('T')[0]}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+
+    toast.success('Export Complete', { description: 'Customer data exported to CSV file' })
   }
 
   const handleCreateOpportunity = () => {
@@ -628,7 +791,10 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline"><Download className="h-4 w-4 mr-2" />Export</Button>
+            <Button variant="outline" onClick={handleRefresh} disabled={isLoading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
+            </Button>
+            <Button variant="outline" onClick={handleExportCustomers}><Download className="h-4 w-4 mr-2" />Export</Button>
             <Button variant="outline"><Upload className="h-4 w-4 mr-2" />Import</Button>
             <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => setShowAddContact(true)}>
               <UserPlus className="h-4 w-4 mr-2" />Add Contact
@@ -681,6 +847,84 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
           {/* Contacts Tab */}
           <TabsContent value="contacts" className="space-y-4">
+            {/* Real Database Customers */}
+            {dbCustomers && dbCustomers.length > 0 && (
+              <>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Your Customers ({dbCustomers.length})</h3>
+                  <Badge className="bg-green-100 text-green-700">From Database</Badge>
+                </div>
+                {dbCustomers.map(customer => (
+                  <Card key={customer.id} className="bg-white/90 dark:bg-gray-800/90 backdrop-blur hover:shadow-lg transition-all">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={customer.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${customer.customer_name}`} />
+                          <AvatarFallback className="bg-gradient-to-r from-violet-500 to-purple-500 text-white">
+                            {customer.first_name?.[0] || customer.customer_name?.[0] || 'C'}{customer.last_name?.[0] || ''}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-semibold text-lg">{customer.customer_name}</h3>
+                            <Badge className={
+                              customer.segment === 'vip' ? 'bg-purple-100 text-purple-700' :
+                              customer.segment === 'active' ? 'bg-green-100 text-green-700' :
+                              customer.segment === 'new' ? 'bg-blue-100 text-blue-700' :
+                              customer.segment === 'at_risk' ? 'bg-red-100 text-red-700' :
+                              'bg-gray-100 text-gray-700'
+                            }>{customer.segment}</Badge>
+                            <Badge variant="outline" className={
+                              customer.status === 'active' ? 'text-green-600' :
+                              customer.status === 'inactive' ? 'text-gray-500' :
+                              'text-yellow-600'
+                            }>{customer.status}</Badge>
+                          </div>
+                          <p className="text-gray-600 dark:text-gray-300">{customer.job_title ? `${customer.job_title}` : ''}{customer.company_name ? ` at ${customer.company_name}` : ''}</p>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+                            {customer.email && <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{customer.email}</span>}
+                            {customer.phone && <span className="flex items-center gap-1"><Phone className="h-3 w-3" />{customer.phone}</span>}
+                            {(customer.city || customer.state) && <span className="flex items-center gap-1"><MapPin className="h-3 w-3" />{customer.city}{customer.city && customer.state ? ', ' : ''}{customer.state}</span>}
+                          </div>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+                            <span>Lifetime Value: {formatCurrency(customer.lifetime_value || 0)}</span>
+                            <span>Orders: {customer.total_orders || 0}</span>
+                            <span>Points: {customer.loyalty_points || 0}</span>
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="flex items-center gap-1">
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(customer) }}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.info('Compose Email', { description: `Opening email composer for ${customer.email}` }) }}>
+                              <Mail className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.info('Log Call', { description: 'Opening call log form...' }) }}>
+                              <PhoneCall className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(customer.id) }}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <span className="text-xs text-gray-500">
+                            {customer.last_activity_date ? `Last activity: ${formatTimeAgo(customer.last_activity_date)}` : `Joined: ${formatDate(customer.join_date || customer.created_at)}`}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
+            )}
+
+            {/* Mock Contacts (Demo Data) */}
+            {(!dbCustomers || dbCustomers.length === 0) && (
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">Sample Contacts (Demo Data)</h3>
+                <Badge variant="outline">Demo Data</Badge>
+              </div>
+            )}
             {MOCK_CONTACTS.map(contact => {
               const account = MOCK_ACCOUNTS.find(a => a.id === contact.accountId)
               return (
@@ -1452,7 +1696,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
                             <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                               <div className="flex-1">
-                                <div className="font-medium">Company Size > 100 employees</div>
+                                <div className="font-medium">Company Size &gt; 100 employees</div>
                                 <div className="text-sm text-gray-500">Enterprise prospect</div>
                               </div>
                               <Input type="number" defaultValue="10" className="w-20 text-center" />
@@ -2049,8 +2293,107 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAddContact(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={handleCreateContact} disabled={creating || !newContactForm.firstName || !newContactForm.email}>
-                <UserPlus className="h-4 w-4 mr-2" />{creating ? 'Creating...' : 'Create Contact'}
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={handleCreateContact} disabled={isCreating || !newContactForm.firstName || !newContactForm.email}>
+                <UserPlus className="h-4 w-4 mr-2" />{isCreating ? 'Creating...' : 'Create Contact'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Contact Dialog */}
+        <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Contact</DialogTitle>
+              <DialogDescription>Update contact information</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>First Name *</Label>
+                  <Input placeholder="John" value={editContactForm.firstName} onChange={(e) => setEditContactForm(prev => ({ ...prev, firstName: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Last Name *</Label>
+                  <Input placeholder="Smith" value={editContactForm.lastName} onChange={(e) => setEditContactForm(prev => ({ ...prev, lastName: e.target.value }))} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Email *</Label>
+                <Input type="email" placeholder="john@company.com" value={editContactForm.email} onChange={(e) => setEditContactForm(prev => ({ ...prev, email: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Phone</Label>
+                <Input placeholder="+1 (555) 123-4567" value={editContactForm.phone} onChange={(e) => setEditContactForm(prev => ({ ...prev, phone: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Title</Label>
+                <Input placeholder="VP of Engineering" value={editContactForm.title} onChange={(e) => setEditContactForm(prev => ({ ...prev, title: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Company</Label>
+                <Input placeholder="Acme Corporation" value={editContactForm.company} onChange={(e) => setEditContactForm(prev => ({ ...prev, company: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Segment</Label>
+                  <Select value={editContactForm.segment} onValueChange={(value) => setEditContactForm(prev => ({ ...prev, segment: value as CustomerSegment }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="vip">VIP</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="churned">Churned</SelectItem>
+                      <SelectItem value="at_risk">At Risk</SelectItem>
+                      <SelectItem value="prospect">Prospect</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select value={editContactForm.status} onValueChange={(value) => setEditContactForm(prev => ({ ...prev, status: value as CustomerStatus }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                      <SelectItem value="suspended">Suspended</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="verified">Verified</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea placeholder="Add notes about this contact..." value={editContactForm.notes} onChange={(e) => setEditContactForm(prev => ({ ...prev, notes: e.target.value }))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={handleUpdateContact} disabled={isUpdating || !editContactForm.firstName || !editContactForm.email}>
+                <Edit className="h-4 w-4 mr-2" />{isUpdating ? 'Updating...' : 'Update Contact'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Confirmation Dialog */}
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Delete Contact
+              </DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this contact? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowDeleteDialog(false); setCustomerToDelete(null) }}>Cancel</Button>
+              <Button variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
+                <Trash2 className="h-4 w-4 mr-2" />{isDeleting ? 'Deleting...' : 'Delete Contact'}
               </Button>
             </DialogFooter>
           </DialogContent>

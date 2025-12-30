@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { useCreateCoupon } from '@/lib/hooks/use-coupon-extended'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useCreateCoupon, useCoupons } from '@/lib/hooks/use-coupon-extended'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -345,6 +346,8 @@ const mockMarketplaceQuickActions = [
 ]
 
 export default function MarketplaceClient() {
+  const supabase = createClientComponentClient()
+
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all')
@@ -364,8 +367,16 @@ export default function MarketplaceClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [analyticsTab, setAnalyticsTab] = useState('overview')
 
+  // Database state
+  const [dbApps, setDbApps] = useState<any[]>([])
+  const [dbWebhooks, setDbWebhooks] = useState<any[]>([])
+  const [dbApiKeys, setDbApiKeys] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   // Database integration
   const { create: createCouponMutation, isLoading: creatingCoupon } = useCreateCoupon()
+  const { data: dbCoupons, refresh: refreshCoupons } = useCoupons()
 
   // Form state for marketplace coupon
   const [marketplaceCouponForm, setMarketplaceCouponForm] = useState({
@@ -377,6 +388,64 @@ export default function MarketplaceClient() {
     expiresAt: '',
     applicableProducts: 'all'
   })
+
+  // Form state for bundle
+  const [bundleForm, setBundleForm] = useState({
+    name: '', description: '', products: [] as string[], discount: '', price: ''
+  })
+
+  // Form state for API key
+  const [apiKeyForm, setApiKeyForm] = useState({
+    name: '', permissions: ['read'] as string[], expiration: 'never'
+  })
+
+  // Form state for webhook
+  const [webhookForm, setWebhookForm] = useState({
+    url: '', events: [] as string[], secret: ''
+  })
+
+  // Fetch webhooks from Supabase
+  const fetchWebhooks = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data, error } = await supabase.from('webhooks').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+      if (error) throw error
+      setDbWebhooks(data || [])
+    } catch (error) {
+      console.error('Error fetching webhooks:', error)
+    }
+  }, [supabase])
+
+  // Fetch API keys from Supabase
+  const fetchApiKeys = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data, error } = await supabase.from('api_keys').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+      if (error) throw error
+      setDbApiKeys(data || [])
+    } catch (error) {
+      console.error('Error fetching API keys:', error)
+    }
+  }, [supabase])
+
+  // Fetch marketplace apps from Supabase
+  const fetchMarketplaceApps = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.from('marketplace_apps').select('*').eq('status', 'published').order('total_downloads', { ascending: false })
+      if (error) throw error
+      setDbApps(data || [])
+    } catch (error) {
+      console.error('Error fetching marketplace apps:', error)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    fetchWebhooks()
+    fetchApiKeys()
+    fetchMarketplaceApps()
+  }, [fetchWebhooks, fetchApiKeys, fetchMarketplaceApps])
 
   const handleCreateMarketplaceCoupon = async () => {
     if (!marketplaceCouponForm.code || !marketplaceCouponForm.value) {
@@ -409,10 +478,106 @@ export default function MarketplaceClient() {
         expiresAt: '',
         applicableProducts: 'all'
       })
+      refreshCoupons()
     } catch (error) {
       toast.error('Failed to create coupon')
       console.error(error)
     }
+  }
+
+  // Create API key handler
+  const handleCreateApiKey = async () => {
+    if (!apiKeyForm.name) {
+      toast.error('Please enter a key name')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { toast.error('Please sign in'); return }
+      const keyPrefix = 'mk_' + Math.random().toString(36).substring(2, 8)
+      const keyHash = 'hashed_' + Math.random().toString(36).substring(2, 20)
+      const expiresAt = apiKeyForm.expiration === 'never' ? null : new Date(Date.now() + parseInt(apiKeyForm.expiration) * 24 * 60 * 60 * 1000).toISOString()
+
+      const { error } = await supabase.from('api_keys').insert({
+        user_id: user.id, name: apiKeyForm.name, key_prefix: keyPrefix, key_hash: keyHash,
+        scopes: apiKeyForm.permissions, expires_at: expiresAt, is_active: true
+      })
+      if (error) throw error
+      toast.success('API key created!', { description: `Key prefix: ${keyPrefix}...` })
+      setShowAPIKeyDialog(false)
+      setApiKeyForm({ name: '', permissions: ['read'], expiration: 'never' })
+      fetchApiKeys()
+    } catch (error) {
+      toast.error('Failed to create API key')
+      console.error(error)
+    } finally { setIsSubmitting(false) }
+  }
+
+  // Delete API key handler
+  const handleDeleteApiKey = async (id: string) => {
+    try {
+      const { error } = await supabase.from('api_keys').delete().eq('id', id)
+      if (error) throw error
+      toast.success('API key deleted')
+      fetchApiKeys()
+    } catch (error) {
+      toast.error('Failed to delete API key')
+    }
+  }
+
+  // Create webhook handler
+  const handleCreateWebhook = async () => {
+    if (!webhookForm.url || webhookForm.events.length === 0) {
+      toast.error('Please enter URL and select events')
+      return
+    }
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { toast.error('Please sign in'); return }
+
+      const { error } = await supabase.from('webhooks').insert({
+        user_id: user.id, name: `Webhook ${webhookForm.url.split('/').pop()}`,
+        url: webhookForm.url, secret: webhookForm.secret || null, events: webhookForm.events, is_active: true
+      })
+      if (error) throw error
+      toast.success('Webhook created!')
+      setShowWebhookDialog(false)
+      setWebhookForm({ url: '', events: [], secret: '' })
+      fetchWebhooks()
+    } catch (error) {
+      toast.error('Failed to create webhook')
+      console.error(error)
+    } finally { setIsSubmitting(false) }
+  }
+
+  // Delete webhook handler
+  const handleDeleteWebhook = async (id: string) => {
+    try {
+      const { error } = await supabase.from('webhooks').delete().eq('id', id)
+      if (error) throw error
+      toast.success('Webhook deleted')
+      fetchWebhooks()
+    } catch (error) {
+      toast.error('Failed to delete webhook')
+    }
+  }
+
+  // Toggle webhook event selection
+  const toggleWebhookEvent = (event: string) => {
+    setWebhookForm(prev => ({
+      ...prev,
+      events: prev.events.includes(event) ? prev.events.filter(e => e !== event) : [...prev.events, event]
+    }))
+  }
+
+  // Toggle API key permission
+  const toggleApiKeyPermission = (perm: string) => {
+    setApiKeyForm(prev => ({
+      ...prev,
+      permissions: prev.permissions.includes(perm) ? prev.permissions.filter(p => p !== perm) : [...prev.permissions, perm]
+    }))
   }
 
   const filteredProducts = useMemo(() => {
@@ -1690,8 +1855,25 @@ export default function MarketplaceClient() {
                 {settingsTab === 'coupons' && (
                   <>
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Active Coupons</CardTitle><Button onClick={() => setShowCouponDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Coupon</Button></CardHeader>
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Active Coupons ({(dbCoupons?.length || 0) + mockCoupons.length})</CardTitle><Button onClick={() => setShowCouponDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Coupon</Button></CardHeader>
                       <CardContent className="space-y-4">
+                        {(dbCoupons || []).map((coupon: any) => (
+                          <div key={coupon.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-violet-500">
+                            <div className="flex items-center gap-4">
+                              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${coupon.is_active ? 'bg-violet-100' : 'bg-gray-100'}`}>
+                                <Percent className="h-6 w-6 text-violet-600" />
+                              </div>
+                              <div>
+                                <div className="flex items-center gap-2"><h4 className="font-mono font-bold">{coupon.code}</h4><Badge className={coupon.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{coupon.is_active ? 'active' : 'inactive'}</Badge></div>
+                                <p className="text-sm text-gray-500">{coupon.discount_type === 'percent_off' ? `${coupon.discount_value}% off` : `$${coupon.discount_value} off`} {coupon.expires_at && `• Expires ${new Date(coupon.expires_at).toLocaleDateString()}`}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right"><p className="font-medium">{coupon.times_redeemed || 0}/{coupon.max_redemptions || 'Unlimited'}</p><Progress value={coupon.max_redemptions ? ((coupon.times_redeemed || 0) / coupon.max_redemptions) * 100 : 0} className="w-20 h-2" /></div>
+                              <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
                         {mockCoupons.map(coupon => (
                           <div key={coupon.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div className="flex items-center gap-4">
@@ -1731,8 +1913,22 @@ export default function MarketplaceClient() {
                 {settingsTab === 'developers' && (
                   <>
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>API Keys</CardTitle><Button onClick={() => setShowAPIKeyDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Key</Button></CardHeader>
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>API Keys ({dbApiKeys.length + mockAPIKeys.length})</CardTitle><Button onClick={() => setShowAPIKeyDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Key</Button></CardHeader>
                       <CardContent className="space-y-4">
+                        {dbApiKeys.map(apiKey => (
+                          <div key={apiKey.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-violet-500">
+                            <div>
+                              <div className="flex items-center gap-2"><h4 className="font-medium">{apiKey.name}</h4><Badge className={apiKey.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{apiKey.is_active ? 'active' : 'inactive'}</Badge></div>
+                              <p className="font-mono text-sm text-gray-500">{apiKey.key_prefix}...</p>
+                              <div className="flex items-center gap-2 mt-1">{(apiKey.scopes || []).map((p: string) => <Badge key={p} variant="outline" className="text-xs">{p}</Badge>)}</div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right text-sm text-gray-500"><p>Used: {apiKey.usage_count} times</p><p>Created: {new Date(apiKey.created_at).toLocaleDateString()}</p></div>
+                              <Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(apiKey.key_prefix); toast.success('Key prefix copied') }}><Copy className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteApiKey(apiKey.id)}><Trash2 className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
                         {mockAPIKeys.map(apiKey => (
                           <div key={apiKey.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div>
@@ -1750,8 +1946,21 @@ export default function MarketplaceClient() {
                       </CardContent>
                     </Card>
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Webhooks</CardTitle><Button onClick={() => setShowWebhookDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button></CardHeader>
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Webhooks ({dbWebhooks.length + mockWebhooks.length})</CardTitle><Button onClick={() => setShowWebhookDialog(true)}><Plus className="h-4 w-4 mr-2" />Add Webhook</Button></CardHeader>
                       <CardContent className="space-y-4">
+                        {dbWebhooks.map(webhook => (
+                          <div key={webhook.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-violet-500">
+                            <div>
+                              <div className="flex items-center gap-2"><Code className="h-4 w-4 text-violet-500" /><span className="font-mono text-sm">{webhook.url}</span></div>
+                              <div className="flex items-center gap-2 mt-1">{(webhook.events || []).map((e: string) => <Badge key={e} variant="outline" className="text-xs">{e}</Badge>)}</div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <div className="text-right"><p className="text-sm">Deliveries: {webhook.total_deliveries || 0}</p><p className="text-xs text-gray-500">Created: {new Date(webhook.created_at).toLocaleDateString()}</p></div>
+                              <Badge className={webhook.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{webhook.is_active ? 'active' : 'inactive'}</Badge>
+                              <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteWebhook(webhook.id)}><Trash2 className="h-4 w-4" /></Button>
+                            </div>
+                          </div>
+                        ))}
                         {mockWebhooks.map(webhook => (
                           <div key={webhook.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div>
@@ -1943,16 +2152,16 @@ export default function MarketplaceClient() {
         <Dialog open={showAPIKeyDialog} onOpenChange={setShowAPIKeyDialog}>
           <DialogContent><DialogHeader><DialogTitle>Create API Key</DialogTitle><DialogDescription>Generate a new API key for integrations</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Key Name</Label><Input placeholder="Production API" className="mt-1" /></div>
+              <div><Label>Key Name</Label><Input placeholder="Production API" className="mt-1" value={apiKeyForm.name} onChange={(e) => setApiKeyForm(prev => ({ ...prev, name: e.target.value }))} /></div>
               <div><Label>Permissions</Label>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {['read', 'write', 'delete', 'admin'].map(perm => <Badge key={perm} variant="outline" className="cursor-pointer hover:bg-violet-50">{perm}</Badge>)}
+                  {['read', 'write', 'delete', 'admin'].map(perm => <Badge key={perm} variant="outline" className={`cursor-pointer hover:bg-violet-50 ${apiKeyForm.permissions.includes(perm) ? 'bg-violet-100 border-violet-500' : ''}`} onClick={() => toggleApiKeyPermission(perm)}>{perm}</Badge>)}
                 </div>
               </div>
-              <div><Label>Expiration</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select expiration" /></SelectTrigger><SelectContent><SelectItem value="never">Never</SelectItem><SelectItem value="30">30 days</SelectItem><SelectItem value="90">90 days</SelectItem><SelectItem value="365">1 year</SelectItem></SelectContent></Select></div>
+              <div><Label>Expiration</Label><Select value={apiKeyForm.expiration} onValueChange={(v) => setApiKeyForm(prev => ({ ...prev, expiration: v }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select expiration" /></SelectTrigger><SelectContent><SelectItem value="never">Never</SelectItem><SelectItem value="30">30 days</SelectItem><SelectItem value="90">90 days</SelectItem><SelectItem value="365">1 year</SelectItem></SelectContent></Select></div>
               <div className="p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200"><p className="text-sm text-amber-700">API keys are shown only once after creation. Make sure to copy it!</p></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowAPIKeyDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Generate Key</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowAPIKeyDialog(false)}>Cancel</Button><Button onClick={handleCreateApiKey} disabled={isSubmitting || !apiKeyForm.name} className="bg-gradient-to-r from-violet-600 to-purple-600">{isSubmitting ? 'Creating...' : 'Generate Key'}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -1960,17 +2169,17 @@ export default function MarketplaceClient() {
         <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
           <DialogContent><DialogHeader><DialogTitle>Add Webhook</DialogTitle><DialogDescription>Configure a webhook endpoint for event notifications</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Endpoint URL</Label><Input placeholder="https://your-api.com/webhooks" className="mt-1" /></div>
+              <div><Label>Endpoint URL</Label><Input placeholder="https://your-api.com/webhooks" className="mt-1" value={webhookForm.url} onChange={(e) => setWebhookForm(prev => ({ ...prev, url: e.target.value }))} /></div>
               <div><Label>Events</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {['order.created', 'order.completed', 'order.refunded', 'review.created', 'review.flagged', 'install', 'uninstall'].map(event => (
-                    <div key={event} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm font-mono">{event}</span></div>
+                    <div key={event} className={`flex items-center gap-2 p-2 rounded cursor-pointer ${webhookForm.events.includes(event) ? 'bg-violet-100 dark:bg-violet-900/30' : 'bg-gray-50 dark:bg-gray-800'}`} onClick={() => toggleWebhookEvent(event)}><input type="checkbox" checked={webhookForm.events.includes(event)} readOnly /><span className="text-sm font-mono">{event}</span></div>
                   ))}
                 </div>
               </div>
-              <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" /></div>
+              <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" value={webhookForm.secret} onChange={(e) => setWebhookForm(prev => ({ ...prev, secret: e.target.value }))} /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-violet-600 to-purple-600">Add Webhook</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button onClick={handleCreateWebhook} disabled={isSubmitting || !webhookForm.url || webhookForm.events.length === 0} className="bg-gradient-to-r from-violet-600 to-purple-600">{isSubmitting ? 'Adding...' : 'Add Webhook'}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
