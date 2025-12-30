@@ -521,6 +521,7 @@ export default function AIAssistantClient() {
     if (activeConversation) {
       fetchMessages(activeConversation.id)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only re-run when conversation ID changes, not other properties
   }, [activeConversation?.id, fetchMessages])
 
   // Filtered data

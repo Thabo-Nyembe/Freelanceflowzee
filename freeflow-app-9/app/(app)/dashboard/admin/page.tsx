@@ -214,7 +214,7 @@ export default function AdminPage() {
     } finally {
       setIsCreatingBackup(false)
     }
-  }, [announce])
+  }, [announce, platformConfig])
 
   const handleTestNotifications = useCallback(async () => {
     announce('Sending test notification...', 'polite')
