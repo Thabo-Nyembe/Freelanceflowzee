@@ -78,6 +78,154 @@ import {
   deleteProject
 } from '@/lib/projects-hub-queries'
 
+// Demo projects for investor presentations (shown when database is empty)
+const DEMO_PROJECTS: Project[] = [
+  {
+    id: 'demo-proj-001',
+    title: 'TechCorp Brand Refresh',
+    description: 'Complete brand identity redesign including logo, color palette, typography, and brand guidelines for a leading tech company.',
+    status: 'active',
+    progress: 75,
+    client_name: 'TechCorp Industries',
+    budget: 45000,
+    spent: 33750,
+    start_date: '2024-11-01',
+    end_date: '2025-01-31',
+    team_members: [],
+    priority: 'high',
+    comments_count: 12,
+    attachments: [],
+    category: 'Branding',
+    tags: ['branding', 'design', 'enterprise']
+  },
+  {
+    id: 'demo-proj-002',
+    title: 'E-Commerce Platform Redesign',
+    description: 'Full UX/UI redesign of an e-commerce platform to improve conversion rates and user experience.',
+    status: 'active',
+    progress: 45,
+    client_name: 'ShopWave Inc.',
+    budget: 68000,
+    spent: 30600,
+    start_date: '2024-12-01',
+    end_date: '2025-03-15',
+    team_members: [],
+    priority: 'high',
+    comments_count: 8,
+    attachments: [],
+    category: 'Web Design',
+    tags: ['ecommerce', 'ux', 'conversion']
+  },
+  {
+    id: 'demo-proj-003',
+    title: 'Mobile App UI Kit',
+    description: 'Custom mobile app UI kit with 150+ components for iOS and Android platforms.',
+    status: 'completed',
+    progress: 100,
+    client_name: 'AppVenture Labs',
+    budget: 28000,
+    spent: 28000,
+    start_date: '2024-09-15',
+    end_date: '2024-11-30',
+    team_members: [],
+    priority: 'medium',
+    comments_count: 24,
+    attachments: [],
+    category: 'Mobile Design',
+    tags: ['mobile', 'ui-kit', 'components']
+  },
+  {
+    id: 'demo-proj-004',
+    title: 'Marketing Campaign Assets',
+    description: 'Social media graphics, email templates, and landing page designs for Q1 marketing campaign.',
+    status: 'active',
+    progress: 60,
+    client_name: 'GrowthPro Marketing',
+    budget: 15000,
+    spent: 9000,
+    start_date: '2024-12-15',
+    end_date: '2025-01-15',
+    team_members: [],
+    priority: 'medium',
+    comments_count: 6,
+    attachments: [],
+    category: 'Marketing',
+    tags: ['marketing', 'social-media', 'campaign']
+  },
+  {
+    id: 'demo-proj-005',
+    title: 'SaaS Dashboard Design',
+    description: 'Data visualization dashboard for analytics SaaS platform with real-time updates and custom charts.',
+    status: 'active',
+    progress: 30,
+    client_name: 'DataStream Analytics',
+    budget: 52000,
+    spent: 15600,
+    start_date: '2024-12-20',
+    end_date: '2025-02-28',
+    team_members: [],
+    priority: 'high',
+    comments_count: 4,
+    attachments: [],
+    category: 'Dashboard',
+    tags: ['saas', 'analytics', 'dashboard']
+  },
+  {
+    id: 'demo-proj-006',
+    title: 'Video Production Package',
+    description: 'Company overview video, product demos, and testimonial videos for website and social media.',
+    status: 'paused',
+    progress: 25,
+    client_name: 'InnovateTech Solutions',
+    budget: 35000,
+    spent: 8750,
+    start_date: '2024-11-15',
+    end_date: '2025-02-15',
+    team_members: [],
+    priority: 'low',
+    comments_count: 3,
+    attachments: [],
+    category: 'Video',
+    tags: ['video', 'production', 'marketing']
+  },
+  {
+    id: 'demo-proj-007',
+    title: 'Corporate Website Redesign',
+    description: 'Modern website redesign with CMS integration, SEO optimization, and responsive design.',
+    status: 'completed',
+    progress: 100,
+    client_name: 'GlobalFinance Corp',
+    budget: 42000,
+    spent: 42000,
+    start_date: '2024-08-01',
+    end_date: '2024-10-31',
+    team_members: [],
+    priority: 'high',
+    comments_count: 18,
+    attachments: [],
+    category: 'Web Design',
+    tags: ['website', 'corporate', 'seo']
+  },
+  {
+    id: 'demo-proj-008',
+    title: 'Product Photography',
+    description: 'Professional product photography for e-commerce catalog - 200+ SKUs with lifestyle shots.',
+    status: 'active',
+    progress: 80,
+    client_name: 'LuxeHome Decor',
+    budget: 18000,
+    spent: 14400,
+    start_date: '2024-12-01',
+    end_date: '2025-01-10',
+    team_members: [],
+    priority: 'medium',
+    comments_count: 7,
+    attachments: [],
+    category: 'Photography',
+    tags: ['photography', 'ecommerce', 'product']
+  }
+];
+
 // Memoized ProjectCard component
 interface ProjectCardProps {
   project: Project
@@ -627,21 +775,34 @@ export default function ProjectsOverviewPage() {
           total: count
         })
 
-        setProjects(transformedProjects)
-        setFilteredProjects(transformedProjects)
+        // If no projects found, use demo data for investor presentations
+        const finalProjects = transformedProjects.length > 0 ? transformedProjects : DEMO_PROJECTS;
+
+        setProjects(finalProjects)
+        setFilteredProjects(finalProjects)
         setLoading(false)
 
-        announce(`${transformedProjects.length} projects loaded successfully`, 'polite')
-        toast.success('Projects loaded', {
-          description: `${transformedProjects.length} projects from database`
-        })
+        if (transformedProjects.length === 0) {
+          announce('Demo projects loaded for presentation', 'polite')
+          toast.success('Demo Mode', {
+            description: 'Showing sample projects for demonstration'
+          })
+        } else {
+          announce(`${transformedProjects.length} projects loaded successfully`, 'polite')
+          toast.success('Projects loaded', {
+            description: `${transformedProjects.length} projects from database`
+          })
+        }
       } catch (err) {
         logger.error('Failed to load projects', { error: err, userId })
-        setError(err instanceof Error ? err.message : 'Failed to load projects')
+        // On error, fall back to demo data for investor presentations
+        setProjects(DEMO_PROJECTS)
+        setFilteredProjects(DEMO_PROJECTS)
+        setError(null) // Clear error since we're showing demo data
         setLoading(false)
-        announce('Error loading projects', 'assertive')
-        toast.error('Failed to load projects', {
-          description: err instanceof Error ? err.message : 'Please try again'
+        announce('Demo projects loaded for presentation', 'polite')
+        toast.success('Demo Mode', {
+          description: 'Showing sample projects for demonstration'
         })
       }
     }
