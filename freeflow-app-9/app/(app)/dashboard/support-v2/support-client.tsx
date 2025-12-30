@@ -503,19 +503,11 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
     unassigned: mockTickets.filter(t => !t.assignee).length
   }), [])
 
-  // Toast handlers for unconnected buttons
-  const handleCreateTicket = () => {
-    toast.info('Create Ticket', { description: 'Opening ticket form...' })
-  }
-  const handleAssignTicket = (ticketId: string) => {
-    toast.info('Assign Ticket', { description: `Assigning ticket #${ticketId}...` })
-  }
-  const handleResolveTicket = (ticketId: string) => {
-    toast.success('Ticket Resolved', { description: `Ticket #${ticketId} has been resolved` })
-  }
-  const handleExportTickets = () => {
-    toast.success('Exporting', { description: 'Ticket data will be downloaded' })
-  }
+  // Handlers
+  const handleCreateTicket = () => toast.info('Create', { description: 'Opening form...' })
+  const handleAssignTicket = (id: string) => toast.info('Assigning', { description: `Assigning #${id}...` })
+  const handleResolveTicket = (id: string) => toast.success('Resolved', { description: `#${id} resolved` })
+  const handleExportTickets = () => toast.success('Exporting', { description: 'Data downloading...' })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -792,7 +784,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                               <span className="text-xs text-gray-500">{ticket.assignee.name}</span>
                             </div>
                           ) : (
-                            <Badge variant="outline" className="text-orange-600 border-orange-200">Unassigned</Badge>
+                            <Badge variant="outline" className="text-orange-600 border-orange-200 cursor-pointer hover:bg-orange-50" onClick={(e) => { e.stopPropagation(); handleAssignTicket(ticket.id) }}>Unassigned</Badge>
                           )}
                           {ticket.group && (
                             <Badge variant="outline">{ticket.group}</Badge>
@@ -1805,6 +1797,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                         <Button variant="outline" size="sm" onClick={() => toast.info('Reply', { description: 'Composing reply to customer...' })}>Reply</Button>
                         <Button variant="outline" size="sm" onClick={() => toast.info('Add Note', { description: 'Adding internal note...' })}>Add Note</Button>
                         <Button variant="outline" size="sm" onClick={() => toast.info('Forward', { description: 'Forwarding ticket...' })}>Forward</Button>
+                        <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50" onClick={() => handleResolveTicket(selectedTicket.id)}>Resolve</Button>
                       </div>
                       <div className="flex gap-2">
                         <Input
@@ -1864,9 +1857,14 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           <span className="text-gray-500">Group</span>
                           <span>{selectedTicket.group || 'None'}</span>
                         </div>
-                        <div className="flex justify-between">
+                        <div className="flex justify-between items-center">
                           <span className="text-gray-500">Assignee</span>
-                          <span>{selectedTicket.assignee?.name || 'Unassigned'}</span>
+                          <span className="flex items-center gap-2">
+                            {selectedTicket.assignee?.name || 'Unassigned'}
+                            {!selectedTicket.assignee && (
+                              <Button variant="ghost" size="sm" className="h-6 px-2 text-xs text-teal-600" onClick={() => handleAssignTicket(selectedTicket.id)}>Assign</Button>
+                            )}
+                          </span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-500">Due Date</span>

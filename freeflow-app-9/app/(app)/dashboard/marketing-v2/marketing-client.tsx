@@ -935,19 +935,11 @@ export default function MarketingClient() {
     })
   }, [searchQuery, leadFilter])
 
-  // Toast handlers for unconnected buttons
-  const handleCreateCampaign = () => {
-    toast.info('Create Campaign', { description: 'Opening campaign builder...' })
-  }
-  const handleLaunchCampaign = (campaignName: string) => {
-    toast.success('Campaign Launched', { description: `"${campaignName}" is now live` })
-  }
-  const handlePauseCampaign = (campaignName: string) => {
-    toast.info('Campaign Paused', { description: `"${campaignName}" has been paused` })
-  }
-  const handleExportAnalytics = () => {
-    toast.success('Exporting', { description: 'Marketing data will be downloaded' })
-  }
+  // Handlers
+  const handleCreateCampaign = () => toast.info('Create', { description: 'Opening builder...' })
+  const handleLaunchCampaign = (n: string) => toast.success('Launched', { description: `"${n}" is live` })
+  const handlePauseCampaign = (n: string) => toast.info('Paused', { description: `"${n}" paused` })
+  const handleExportAnalytics = () => toast.success('Exporting', { description: 'Data downloading...' })
   const handleAddLead = () => {
     toast.info('Add Lead', { description: 'Opening lead capture form...' })
   }
@@ -1730,19 +1722,20 @@ export default function MarketingClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Dashboards', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: PieChart, label: 'Reports', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Users, label: 'Audiences', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Target, label: 'Goals', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Globe, label: 'Channels', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Calendar, label: 'Schedule', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: ExternalLink, label: 'Export', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
+                { icon: BarChart3, label: 'Dashboards', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', handler: () => handleQuickAction('Dashboards') },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', handler: () => handleQuickAction('Trends') },
+                { icon: PieChart, label: 'Reports', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', handler: () => handleQuickAction('Reports') },
+                { icon: Users, label: 'Audiences', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', handler: () => handleQuickAction('Audiences') },
+                { icon: Target, label: 'Goals', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', handler: () => handleQuickAction('Goals') },
+                { icon: Globe, label: 'Channels', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', handler: () => handleQuickAction('Channels') },
+                { icon: Calendar, label: 'Schedule', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', handler: () => handleQuickAction('Schedule') },
+                { icon: ExternalLink, label: 'Export', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', handler: handleExportAnalytics },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.handler}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>

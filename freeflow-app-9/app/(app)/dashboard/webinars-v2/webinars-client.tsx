@@ -508,22 +508,12 @@ export default function WebinarsClient() {
     })
   }, [searchQuery, statusFilter, typeFilter])
 
-  // Toast Handlers
-  const handleCreateWebinar = () => {
-    toast.info('Create Webinar', { description: 'Opening webinar setup...' })
-  }
-  const handleStartWebinar = (webinarName: string) => {
-    toast.success('Webinar Started', { description: `"${webinarName}" is now live` })
-  }
-  const handleEndWebinar = (webinarName: string) => {
-    toast.info('Webinar Ended', { description: `"${webinarName}" has ended` })
-  }
-  const handleRegisterAttendee = () => {
-    toast.success('Registered', { description: 'Registration confirmed' })
-  }
-  const handleExportAttendees = () => {
-    toast.success('Exporting', { description: 'Attendee list will be downloaded' })
-  }
+  // Handlers
+  const handleCreateWebinar = () => toast.info('Create', { description: 'Opening setup...' })
+  const handleStartWebinar = (n: string) => toast.success('Started', { description: `"${n}" is live` })
+  const handleEndWebinar = (n: string) => toast.info('Ended', { description: `"${n}" ended` })
+  const handleRegister = () => toast.success('Registered', { description: 'Confirmed' })
+  const handleExportAttendees = () => toast.success('Exporting', { description: 'List downloading...' })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
@@ -900,7 +890,7 @@ export default function WebinarsClient() {
             {/* Registrations Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500', action: () => handleRegisterAttendee() },
+                { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500', action: () => handleRegister() },
                 { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => toast.info('Import CSV', { description: 'Opening CSV import dialog...' }) },
                 { icon: Download, label: 'Export', color: 'bg-purple-500', action: () => handleExportAttendees() },
                 { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => toast.info('Email All', { description: 'Composing bulk email...' }) },

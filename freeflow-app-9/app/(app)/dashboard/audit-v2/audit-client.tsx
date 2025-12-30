@@ -498,9 +498,9 @@ const mockAuditActivities = [
 ]
 
 const mockAuditQuickActions = [
-  { id: '1', label: 'New Audit', icon: 'plus', action: () => console.log('New audit'), variant: 'default' as const },
-  { id: '2', label: 'Run Check', icon: 'play', action: () => console.log('Run check'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'Run Audit', icon: 'play', action: () => toast.info('Running', { description: 'Audit started...' }), variant: 'default' as const },
+  { id: '2', label: 'Export', icon: 'download', action: () => toast.success('Exporting', { description: 'Report downloading...' }), variant: 'outline' as const },
+  { id: '3', label: 'Schedule', icon: 'calendar', action: () => toast.info('Schedule', { description: 'Opening scheduler...' }), variant: 'default' as const },
 ]
 
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {
@@ -613,19 +613,11 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
     }
   }
 
-  // Toast handlers for unconnected buttons
-  const handleRunAudit = () => {
-    toast.info('Running Audit', { description: 'Audit scan started...' })
-  }
-  const handleExportAudit = () => {
-    toast.success('Exporting', { description: 'Audit report will be downloaded' })
-  }
-  const handleScheduleAudit = () => {
-    toast.info('Schedule Audit', { description: 'Opening scheduler...' })
-  }
-  const handleResolveIssue = (issueId: string) => {
-    toast.success('Issue Resolved', { description: `Issue #${issueId} resolved` })
-  }
+  // Handlers
+  const handleRunAudit = () => toast.info('Running', { description: 'Audit started...' })
+  const handleExportAudit = () => toast.success('Exporting', { description: 'Report downloading...' })
+  const handleScheduleAudit = () => toast.info('Schedule', { description: 'Opening scheduler...' })
+  const handleResolveIssue = (id: string) => toast.success('Resolved', { description: `Issue #${id} resolved` })
   const handleRefresh = () => {
     toast.info('Refreshing', { description: 'Fetching latest events...' })
   }
@@ -911,20 +903,20 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             {/* Events Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Search, label: 'Search Events', color: 'bg-green-500' },
-                { icon: Filter, label: 'Filter', color: 'bg-blue-500' },
-                { icon: RefreshCw, label: 'Refresh', color: 'bg-purple-500' },
-                { icon: Download, label: 'Export', color: 'bg-orange-500' },
-                { icon: Bell, label: 'Alerts', color: 'bg-pink-500' },
-                { icon: Bookmark, label: 'Save Search', color: 'bg-indigo-500' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-teal-500' },
-                { icon: Terminal, label: 'Query', color: 'bg-gray-500' }
+                { icon: Play, label: 'Run Audit', color: 'bg-green-500', handler: handleRunAudit },
+                { icon: Download, label: 'Export', color: 'bg-orange-500', handler: handleExportAudit },
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', handler: handleScheduleAudit },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-purple-500', handler: handleRefresh },
+                { icon: Bell, label: 'Alerts', color: 'bg-pink-500', handler: () => handleQuickAction('Alerts') },
+                { icon: Bookmark, label: 'Save Search', color: 'bg-indigo-500', handler: () => handleQuickAction('Save Search') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-teal-500', handler: () => handleQuickAction('Analytics') },
+                { icon: Terminal, label: 'Query', color: 'bg-gray-500', handler: () => handleQuickAction('Query') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
-                  onClick={() => handleQuickAction(action.label)}
+                  onClick={action.handler}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />
@@ -1533,20 +1525,20 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
             {/* Compliance Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: RefreshCw, label: 'Run Checks', color: 'bg-green-500' },
-                { icon: Shield, label: 'Frameworks', color: 'bg-blue-500' },
-                { icon: AlertTriangle, label: 'Issues', color: 'bg-red-500' },
-                { icon: FileText, label: 'Reports', color: 'bg-purple-500' },
-                { icon: Target, label: 'Remediation', color: 'bg-orange-500' },
-                { icon: History, label: 'History', color: 'bg-pink-500' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-500' },
-                { icon: Settings, label: 'Configure', color: 'bg-gray-500' }
+                { icon: Play, label: 'Run Audit', color: 'bg-green-500', handler: handleRunAudit },
+                { icon: Download, label: 'Export', color: 'bg-indigo-500', handler: handleExportAudit },
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', handler: handleScheduleAudit },
+                { icon: CheckCircle, label: 'Resolve Issue', color: 'bg-teal-500', handler: () => handleResolveIssue('1') },
+                { icon: Shield, label: 'Frameworks', color: 'bg-purple-500', handler: () => handleQuickAction('Frameworks') },
+                { icon: AlertTriangle, label: 'Issues', color: 'bg-red-500', handler: () => handleQuickAction('Issues') },
+                { icon: History, label: 'History', color: 'bg-pink-500', handler: () => handleQuickAction('History') },
+                { icon: Settings, label: 'Configure', color: 'bg-gray-500', handler: () => handleQuickAction('Configure') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="outline"
                   className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700"
-                  onClick={() => handleQuickAction(action.label)}
+                  onClick={action.handler}
                 >
                   <div className={`w-8 h-8 rounded-lg ${action.color} flex items-center justify-center`}>
                     <action.icon className="w-4 h-4 text-white" />

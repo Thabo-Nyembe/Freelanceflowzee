@@ -660,21 +660,12 @@ export default function BackupsClient() {
     return icons[type] || Database
   }
 
-  const handleCreateBackup = () => {
-    toast.info('Creating Backup', { description: 'Backup process started...' })
-  }
-  const handleRestoreBackup = (backupName: string) => {
-    toast.info('Restoring', { description: `Restoring from "${backupName}"...` })
-  }
-  const handleDeleteBackup = (backupName: string) => {
-    toast.info('Backup Deleted', { description: `"${backupName}" has been removed` })
-  }
-  const handleDownloadBackup = (backupName: string) => {
-    toast.success('Downloading', { description: `Downloading "${backupName}"...` })
-  }
-  const handleScheduleBackup = () => {
-    toast.success('Backup Scheduled', { description: 'Automatic backup configured' })
-  }
+  // Handlers
+  const handleCreateBackup = () => toast.info('Creating', { description: 'Backup started...' })
+  const handleRestoreBackup = (n: string) => toast.info('Restoring', { description: `Restoring "${n}"...` })
+  const handleDeleteBackup = (n: string) => toast.info('Deleted', { description: `"${n}" removed` })
+  const handleDownloadBackup = (n: string) => toast.success('Downloading', { description: `"${n}" downloading...` })
+  const handleScheduleBackup = () => toast.success('Scheduled', { description: 'Auto backup configured' })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">
@@ -1405,19 +1396,20 @@ export default function BackupsClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: HardDrive, label: 'Storage', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Bell, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Webhook, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => toast.info('General', { description: 'General settings...' }) },
+                { icon: HardDrive, label: 'Storage', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Storage', { description: 'Storage settings...' }) },
+                { icon: Bell, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('Alerts', { description: 'Alert settings...' }) },
+                { icon: Webhook, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Integrations', { description: 'Integration settings...' }) },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.info('Security', { description: 'Security settings...' }) },
+                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('Advanced', { description: 'Advanced settings...' }) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleDownloadBackup('Backup Config') },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => handleDeleteBackup('All Settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1754,10 +1746,10 @@ export default function BackupsClient() {
                     {selectedJob.legalHold && <Badge className="bg-rose-100 text-rose-700"><Gavel className="h-3 w-3 mr-1" />Legal Hold</Badge>}
                   </div>
                   <div className="flex gap-3">
-                    <Button className="bg-green-600 hover:bg-green-700"><Play className="h-4 w-4 mr-2" />Run Now</Button>
-                    <Button variant="outline"><Download className="h-4 w-4 mr-2" />Restore</Button>
-                    <Button variant="outline"><ShieldCheck className="h-4 w-4 mr-2" />Verify</Button>
-                    <Button variant="outline"><Gavel className="h-4 w-4 mr-2" />Legal Hold</Button>
+                    <Button className="bg-green-600 hover:bg-green-700" onClick={handleCreateBackup}><Play className="h-4 w-4 mr-2" />Run Now</Button>
+                    <Button variant="outline" onClick={() => handleRestoreBackup(selectedJob.name)}><Download className="h-4 w-4 mr-2" />Restore</Button>
+                    <Button variant="outline" onClick={() => toast.info('Verifying', { description: 'Backup verification started...' })}><ShieldCheck className="h-4 w-4 mr-2" />Verify</Button>
+                    <Button variant="outline" onClick={() => setShowLegalHoldDialog(true)}><Gavel className="h-4 w-4 mr-2" />Legal Hold</Button>
                   </div>
                 </div>
               )}

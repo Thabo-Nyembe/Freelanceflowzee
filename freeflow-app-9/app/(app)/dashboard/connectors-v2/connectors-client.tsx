@@ -704,22 +704,12 @@ export default function ConnectorsClient() {
 
   const categories = [...new Set(mockApps.map(a => a.category))]
 
-  // Toast handlers for connector actions
-  const handleAddConnector = () => {
-    toast.info('Add Connector', { description: 'Opening connector setup...' })
-  }
-  const handleConfigureConnector = (connectorName: string) => {
-    toast.info('Configure', { description: `Opening settings for "${connectorName}"...` })
-  }
-  const handleTestConnector = (connectorName: string) => {
-    toast.info('Testing', { description: `Testing "${connectorName}" connection...` })
-  }
-  const handleDisconnect = (connectorName: string) => {
-    toast.info('Disconnected', { description: `"${connectorName}" has been disconnected` })
-  }
-  const handleRefreshConnector = (connectorName: string) => {
-    toast.success('Refreshed', { description: `"${connectorName}" connection refreshed` })
-  }
+  // Handlers
+  const handleAddConnector = () => toast.info('Add', { description: 'Opening setup...' })
+  const handleConfigureConnector = (n: string) => toast.info('Configure', { description: `Settings for "${n}"...` })
+  const handleTestConnector = (n: string) => toast.info('Testing', { description: `Testing "${n}"...` })
+  const handleDisconnect = (n: string) => toast.info('Disconnected', { description: `"${n}" disconnected` })
+  const handleRefreshConnector = (n: string) => toast.success('Refreshed', { description: `"${n}" refreshed` })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-8">

@@ -869,16 +869,11 @@ export default function HelpCenterClient() {
     setShowArticleDialog(true)
   }
 
-  // Toast handlers for unconnected buttons
-  const handleCreateArticle = () => {
-    toast.info('Create Article', { description: 'Opening article editor...' })
-  }
-  const handlePublishArticle = (articleTitle: string) => {
-    toast.success('Article Published', { description: `"${articleTitle}" is now live` })
-  }
-  const handleCreateCategory = () => {
-    toast.info('Create Category', { description: 'Adding new category...' })
-  }
+  // Handlers
+  const handleCreateArticle = () => toast.info('Create', { description: 'Opening editor...' })
+  const handlePublishArticle = (n: string) => toast.success('Published', { description: `"${n}" is live` })
+  const handleCreateCategory = () => toast.info('Create Category', { description: 'Adding category...' })
+  const handleSearch = () => toast.info('Searching', { description: 'Searching articles...' })
   const handleSearchArticles = () => {
     toast.info('Searching', { description: 'Searching help articles...' })
   }
@@ -1117,6 +1112,7 @@ export default function HelpCenterClient() {
                   placeholder="Search articles..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                   className="pl-10 w-64"
                 />
               </div>
@@ -1996,26 +1992,32 @@ export default function HelpCenterClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={() => handleEditArticle(selectedArticle.title)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Article
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleViewLive(selectedArticle.title)}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View Live
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleDuplicate(selectedArticle.title)}>
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleShare(selectedArticle.title)}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
                   {selectedArticle.status === 'published' && (
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => handleArchive(selectedArticle.title)}>
                       <Archive className="w-4 h-4 mr-2" />
                       Archive
+                    </Button>
+                  )}
+                  {selectedArticle.status !== 'published' && (
+                    <Button variant="outline" onClick={() => handlePublishArticle(selectedArticle.title)}>
+                      <CheckCircle className="w-4 h-4 mr-2" />
+                      Publish
                     </Button>
                   )}
                 </div>

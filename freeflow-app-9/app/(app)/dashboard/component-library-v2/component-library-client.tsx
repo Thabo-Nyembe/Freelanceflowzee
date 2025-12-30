@@ -426,58 +426,24 @@ export default function ComponentLibraryClient() {
     setTimeout(() => setCopiedCode(null), 2000)
   }
 
-  // Toast handlers for unconnected buttons
-  const handleCreateComponent = () => {
-    toast.info('Create Component', { description: 'Opening component builder...' })
-  }
-  const handleCopyCode = (componentName: string) => {
-    toast.success('Copied', { description: `${componentName} code copied to clipboard` })
-  }
-  const handlePreviewComponent = (componentName: string) => {
-    toast.info('Preview', { description: `Previewing ${componentName}...` })
-  }
-  const handleExportComponent = (componentName: string) => {
-    toast.success('Exporting', { description: `Exporting ${componentName}...` })
-  }
-  const handleOpenFigma = () => {
-    toast.info('Figma', { description: 'Opening Figma design kit...' })
-  }
-  const handleOpenGitHub = () => {
-    toast.info('GitHub', { description: 'Opening GitHub repository...' })
-  }
-  const handleOpenDocs = (docType: string) => {
-    toast.info('Documentation', { description: `Opening ${docType}...` })
-  }
-  const handleDownload = (item: string) => {
-    toast.success('Download Started', { description: `Downloading ${item}...` })
-  }
-  const handleConnect = (toolName: string) => {
-    toast.info('Connect', { description: `Connecting to ${toolName}...` })
-  }
-  const handleAddWebhook = () => {
-    toast.info('Add Webhook', { description: 'Opening webhook configuration...' })
-  }
-  const handleViewApiKey = () => {
-    toast.info('API Key', { description: 'Revealing API key...' })
-  }
-  const handleCopyApiKey = () => {
-    toast.success('Copied', { description: 'API key copied to clipboard' })
-  }
-  const handleRegenerateApiKey = () => {
-    toast.warning('Regenerate API Key', { description: 'Are you sure? This will invalidate the current key.' })
-  }
-  const handleViewNpm = () => {
-    toast.info('NPM', { description: 'Opening NPM package page...' })
-  }
-  const handleClearCache = () => {
-    toast.success('Cache Cleared', { description: 'Component cache has been cleared' })
-  }
-  const handleViewAccessLogs = () => {
-    toast.info('Access Logs', { description: 'Opening access logs...' })
-  }
-  const handleDangerAction = (action: string) => {
-    toast.error('Danger Zone', { description: `${action} requires confirmation` })
-  }
+  // Handlers
+  const handleCopyCode = (n: string) => toast.success('Copied', { description: `${n} code copied` })
+  const handlePreview = (n: string) => toast.info('Preview', { description: `Previewing ${n}...` })
+  const handleExport = () => toast.success('Exporting', { description: 'Component exported' })
+  const handleCreate = () => toast.info('Create', { description: 'Opening builder...' })
+  const handleOpenFigma = () => toast.info('Figma', { description: 'Opening Figma design kit...' })
+  const handleOpenGitHub = () => toast.info('GitHub', { description: 'Opening GitHub repository...' })
+  const handleOpenDocs = (docType: string) => toast.info('Documentation', { description: `Opening ${docType}...` })
+  const handleDownload = (item: string) => toast.success('Download Started', { description: `Downloading ${item}...` })
+  const handleConnect = (toolName: string) => toast.info('Connect', { description: `Connecting to ${toolName}...` })
+  const handleAddWebhook = () => toast.info('Add Webhook', { description: 'Opening webhook configuration...' })
+  const handleViewApiKey = () => toast.info('API Key', { description: 'Revealing API key...' })
+  const handleCopyApiKey = () => toast.success('Copied', { description: 'API key copied to clipboard' })
+  const handleRegenerateApiKey = () => toast.warning('Regenerate API Key', { description: 'Are you sure? This will invalidate the current key.' })
+  const handleViewNpm = () => toast.info('NPM', { description: 'Opening NPM package page...' })
+  const handleClearCache = () => toast.success('Cache Cleared', { description: 'Component cache has been cleared' })
+  const handleViewAccessLogs = () => toast.info('Access Logs', { description: 'Opening access logs...' })
+  const handleDangerAction = (action: string) => toast.error('Danger Zone', { description: `${action} requires confirmation` })
 
   // Key metrics for header
   const keyMetrics = [
@@ -516,7 +482,7 @@ export default function ComponentLibraryClient() {
                   <Github className="h-4 w-4 mr-2" />
                   GitHub
                 </Button>
-                <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={handleCreateComponent}>
+                <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={handleCreate}>
                   <Plus className="h-4 w-4 mr-2" />
                   New Component
                 </Button>
@@ -1621,27 +1587,27 @@ export default function App() {
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Tokens as CSS')}>
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
                           <Download className="h-6 w-6" />
                           <span>Export Tokens as CSS</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Tokens as JSON')}>
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
                           <Download className="h-6 w-6" />
                           <span>Export Tokens as JSON</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Icons as SVG')}>
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
                           <Download className="h-6 w-6" />
                           <span>Export Icons as SVG</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Components')}>
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
                           <Download className="h-6 w-6" />
                           <span>Export Components</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Documentation')}>
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
                           <Download className="h-6 w-6" />
                           <span>Export Documentation</span>
                         </Button>
-                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={() => handleExportComponent('Full Library')}>
+                        <Button variant="outline" className="h-24 flex-col gap-2" onClick={handleExport}>
                           <Download className="h-6 w-6" />
                           <span>Export Full Library</span>
                         </Button>

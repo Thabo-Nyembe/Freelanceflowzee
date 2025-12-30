@@ -297,19 +297,11 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const categories: ThemeCategory[] = ['minimal', 'professional', 'creative', 'dark', 'light', 'modern', 'e-commerce', 'portfolio', 'blog', 'dashboard']
   const frameworks: Framework[] = ['react', 'vue', 'angular', 'nextjs', 'nuxt', 'universal']
 
-  // Toast handlers for theme actions
-  const handleInstallTheme = (themeName: string) => {
-    toast.info('Installing Theme', { description: `Installing "${themeName}"...` })
-  }
-  const handlePreviewTheme = (themeName: string) => {
-    toast.info('Preview', { description: `Previewing "${themeName}"...` })
-  }
-  const handleActivateTheme = (themeName: string) => {
-    toast.success('Theme Activated', { description: `"${themeName}" is now active` })
-  }
-  const handleCustomizeTheme = () => {
-    toast.info('Customize', { description: 'Opening theme customizer...' })
-  }
+  // Handlers
+  const handleInstallTheme = (n: string) => toast.info('Installing', { description: `Installing "${n}"...` })
+  const handlePreviewTheme = (n: string) => toast.info('Preview', { description: `Previewing "${n}"...` })
+  const handleActivateTheme = (n: string) => toast.success('Activated', { description: `"${n}" is now active` })
+  const handleCustomize = () => toast.info('Customize', { description: 'Opening customizer...' })
   const handleWishlist = () => {
     toast.info('Wishlist', { description: 'Opening your wishlist...' })
   }
@@ -779,7 +771,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                           <span className="text-sm text-gray-500">Last updated: {activeTheme.lastUpdated}</span>
                         </div>
                         <div className="flex gap-3">
-                          <Button onClick={() => { setCustomizerOpen(true); handleCustomizeTheme() }}>
+                          <Button onClick={() => { setCustomizerOpen(true); handleCustomize() }}>
                             <Paintbrush className="h-4 w-4 mr-2" />
                             Customize
                           </Button>
@@ -1624,7 +1616,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                               {integration.connected ? (
                                 <Badge className="bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400">Connected</Badge>
                               ) : (
-                                <Button size="sm" variant="outline">Connect</Button>
+                                <Button size="sm" variant="outline" onClick={() => handleConnect(integration.name)}>Connect</Button>
                               )}
                             </div>
                             {integration.connected && (
@@ -1646,16 +1638,16 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label>API Key</Label>
-                            <Button variant="ghost" size="sm">Regenerate</Button>
+                            <Button variant="ghost" size="sm" onClick={handleRegenerateKey}>Regenerate</Button>
                           </div>
                           <Input type="password" value="ts_live_••••••••••••••••" readOnly className="font-mono" />
                         </div>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={handleViewDocs}>
                             <FileText className="w-4 h-4" />
                             View Docs
                           </Button>
-                          <Button variant="outline" className="flex items-center gap-2">
+                          <Button variant="outline" className="flex items-center gap-2" onClick={handleDownloadSDK}>
                             <Download className="w-4 h-4" />
                             Download SDK
                           </Button>
@@ -1740,14 +1732,14 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                             <Label className="text-red-700 dark:text-red-400">Remove All Installed Themes</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Uninstall all themes from your account</p>
                           </div>
-                          <Button variant="destructive" size="sm">Remove All</Button>
+                          <Button variant="destructive" size="sm" onClick={handleRemoveAll}>Remove All</Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <Label className="text-red-700 dark:text-red-400">Reset Store Preferences</Label>
                             <p className="text-sm text-red-600 dark:text-red-500">Reset all settings to defaults</p>
                           </div>
-                          <Button variant="destructive" size="sm">Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={handleResetPreferences}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1963,18 +1955,24 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                 </Tabs>
 
                 <div className="flex gap-3 mt-6 sticky bottom-0 bg-white pt-4 border-t">
-                  <Button className="flex-1 bg-rose-600 hover:bg-rose-700">
+                  <Button className="flex-1 bg-rose-600 hover:bg-rose-700" onClick={() => {
+                    if (selectedTheme.status === 'installed' || selectedTheme.status === 'active') {
+                      handleActivateTheme(selectedTheme.name)
+                    } else {
+                      handleInstallTheme(selectedTheme.name)
+                    }
+                  }}>
                     {selectedTheme.status === 'installed' || selectedTheme.status === 'active'
                       ? 'Activate Theme'
                       : selectedTheme.price === 0
                         ? 'Install Free'
                         : `Purchase for $${selectedTheme.discountPrice || selectedTheme.price}`}
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handlePreviewTheme(selectedTheme.name)}>
                     <Eye className="h-4 w-4 mr-2" />
                     Live Preview
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => handleAddToWishlist(selectedTheme.name)}>
                     <Heart className="h-4 w-4" />
                   </Button>
                 </div>

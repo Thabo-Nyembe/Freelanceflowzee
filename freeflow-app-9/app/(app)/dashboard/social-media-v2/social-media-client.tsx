@@ -531,22 +531,12 @@ export default function SocialMediaClient() {
     { label: 'Campaigns', value: campaigns.filter(c => c.status === 'active').length.toString(), change: 10.0, icon: Target, color: 'from-teal-500 to-green-500' }
   ]
 
-  // Toast Handlers
-  const handleCreatePost = () => {
-    toast.info('Create Post', { description: 'Opening post composer...' })
-  }
-  const handleSchedulePost = (postTitle: string) => {
-    toast.success('Post Scheduled', { description: `"${postTitle}" scheduled for publishing` })
-  }
-  const handlePublishPost = (postTitle: string) => {
-    toast.success('Post Published', { description: `"${postTitle}" is now live` })
-  }
-  const handleConnectAccount = (platform: string) => {
-    toast.info('Connect Account', { description: `Connecting to ${platform}...` })
-  }
-  const handleExportAnalytics = () => {
-    toast.success('Exporting', { description: 'Social media data will be downloaded' })
-  }
+  // Handlers
+  const handleCreatePost = () => toast.info('Create', { description: 'Opening composer...' })
+  const handleSchedulePost = (n: string) => toast.success('Scheduled', { description: `"${n}" scheduled` })
+  const handlePublishPost = (n: string) => toast.success('Published', { description: `"${n}" is live` })
+  const handleConnectAccount = (p: string) => toast.info('Connect', { description: `Connecting ${p}...` })
+  const handleExportAnalytics = () => toast.success('Exporting', { description: 'Data downloading...' })
   const handleGenerateCaption = () => {
     toast.info('AI Caption', { description: 'Generating caption with AI...' })
   }
@@ -1945,6 +1935,14 @@ export default function SocialMediaClient() {
                   </div>
 
                   <div className="flex gap-2">
+                    <Button variant="outline" className="flex-1" onClick={() => handleSchedulePost(selectedPost.content.slice(0, 30))}>
+                      <Clock className="w-4 h-4 mr-2" />
+                      Schedule
+                    </Button>
+                    <Button variant="outline" className="flex-1" onClick={() => handlePublishPost(selectedPost.content.slice(0, 30))}>
+                      <Send className="w-4 h-4 mr-2" />
+                      Publish
+                    </Button>
                     <Button variant="outline" className="flex-1" onClick={() => handleDuplicatePost(selectedPost.content)}>
                       <Copy className="w-4 h-4 mr-2" />
                       Duplicate

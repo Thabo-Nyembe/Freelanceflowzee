@@ -496,18 +496,11 @@ export default function ComplianceClient() {
     activeAudits: mockAudits.filter(a => a.status === 'in_progress').length
   }), [])
 
-  const handleRunAudit = () => {
-    toast.info('Running Audit', { description: 'Compliance audit started...' })
-  }
-  const handleGenerateReport = () => {
-    toast.success('Report Generated', { description: 'Compliance report ready' })
-  }
-  const handleResolveIssue = (issueId: string) => {
-    toast.success('Issue Resolved', { description: `Issue #${issueId} marked as resolved` })
-  }
-  const handleExportCompliance = () => {
-    toast.success('Exporting', { description: 'Compliance data will be downloaded' })
-  }
+  // Handlers
+  const handleRunAudit = () => toast.info('Running', { description: 'Audit started...' })
+  const handleGenerateReport = () => toast.success('Generated', { description: 'Report ready' })
+  const handleResolveIssue = (id: string) => toast.success('Resolved', { description: `Issue #${id} resolved` })
+  const handleExport = () => toast.success('Exporting', { description: 'Data downloading...' })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
@@ -525,7 +518,7 @@ export default function ComplianceClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleExportCompliance}>
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={handleExport}>
                 <Download className="w-4 h-4 mr-2" />
                 Export Report
               </Button>
@@ -671,6 +664,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Audit' ? handleRunAudit() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -784,6 +778,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -909,6 +904,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1022,6 +1018,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : action.label === 'New Audit' ? handleRunAudit() : toast.info(action.label, { description: `${action.label} action triggered` })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1146,6 +1143,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => action.label === 'Export' ? handleExport() : toast.info(action.label, { description: `${action.label} action triggered` })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1300,7 +1298,7 @@ export default function ComplianceClient() {
                     <Badge className={evidence.status === 'approved' ? 'bg-green-100 text-green-700' : evidence.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}>
                       {evidence.status}
                     </Badge>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" onClick={handleExport}>
                       <Download className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1363,7 +1361,7 @@ export default function ComplianceClient() {
                             <Label className="text-gray-900 dark:text-white font-medium">Organization Name</Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">FreeFlow Inc.</p>
                           </div>
-                          <Button variant="outline" size="sm">Edit</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Edit', { description: 'Opening edit form...' })}>Edit</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1470,7 +1468,7 @@ export default function ComplianceClient() {
                             <Switch defaultChecked={framework.enabled} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Framework', { description: 'Opening framework form...' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Framework
                         </Button>
@@ -1581,7 +1579,7 @@ export default function ComplianceClient() {
                           <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook</Label>
                           <div className="flex gap-2">
                             <Input placeholder="https://your-webhook-url.com" className="flex-1" />
-                            <Button variant="outline">Test</Button>
+                            <Button variant="outline" onClick={() => toast.info('Testing', { description: 'Webhook test in progress...' })}>Test</Button>
                           </div>
                         </div>
                       </div>
@@ -1613,7 +1611,7 @@ export default function ComplianceClient() {
                         ].map(service => (
                           <div key={service.name} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
                             <span className="font-medium text-gray-900 dark:text-white">{service.name}</span>
-                            <Button variant={service.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={service.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.info(service.connected ? 'Configure' : 'Connect', { description: `${service.connected ? 'Configuring' : 'Connecting'} ${service.name}...` })}>
                               {service.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>

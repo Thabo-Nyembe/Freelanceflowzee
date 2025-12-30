@@ -621,11 +621,8 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     setIsFeatureDialogOpen(true)
   }
 
-  const handleShareRoadmap = () => {
-    toast.success('Link copied', {
-      description: 'Roadmap share link copied to clipboard'
-    })
-  }
+  // Handlers
+  const handleShareRoadmap = () => toast.success('Copied', { description: 'Link copied' })
 
   const handleNewFeature = () => {
     toast.info('New Feature', {
@@ -654,21 +651,13 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
     })
   }
 
-  const handleAddMilestone = () => {
-    toast.info('Add Milestone', { description: 'Opening milestone form...' })
-  }
+  const handleAddMilestone = () => toast.info('Add', { description: 'Opening form...' })
 
-  const handleEditMilestone = (milestoneName: string) => {
-    toast.info('Edit Milestone', { description: `Editing "${milestoneName}"...` })
-  }
+  const handleEditMilestone = (n: string) => toast.info('Edit', { description: `Editing "${n}"...` })
 
-  const handleCompleteMilestone = (milestoneName: string) => {
-    toast.success('Milestone Completed', { description: `"${milestoneName}" marked as complete` })
-  }
+  const handleCompleteMilestone = (n: string) => toast.success('Completed', { description: `"${n}" done` })
 
-  const handleExportRoadmap = () => {
-    toast.success('Exporting', { description: 'Roadmap will be downloaded' })
-  }
+  const handleExportRoadmap = () => toast.success('Exporting', { description: 'Roadmap downloading...' })
 
   const handleQuickAction = (actionLabel: string) => {
     toast.info(actionLabel, { description: `${actionLabel} action triggered` })

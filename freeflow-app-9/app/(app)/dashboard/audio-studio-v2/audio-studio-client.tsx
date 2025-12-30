@@ -687,22 +687,12 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
     setShowTrackDialog(true)
   }
 
-  // Toast handlers for unconnected buttons
-  const handleUploadAudio = () => {
-    toast.info('Upload Audio', { description: 'Opening file picker...' })
-  }
-  const handleStartRecording = () => {
-    toast.success('Recording Started', { description: 'Audio recording is active' })
-  }
-  const handleStopRecording = () => {
-    toast.info('Recording Stopped', { description: 'Audio saved' })
-  }
-  const handleExportAudio = (trackName: string) => {
-    toast.success('Exporting', { description: `Exporting "${trackName}"...` })
-  }
-  const handleApplyEffect = (effectName: string) => {
-    toast.info('Applying Effect', { description: `Applying ${effectName}...` })
-  }
+  // Handlers
+  const handleUploadAudio = () => toast.info('Upload', { description: 'Opening picker...' })
+  const handleStartRecording = () => toast.success('Recording', { description: 'Recording active' })
+  const handleStopRecording = () => toast.info('Stopped', { description: 'Audio saved' })
+  const handleExportAudio = (n: string) => toast.success('Exporting', { description: `Exporting "${n}"...` })
+  const handleApplyEffect = (n: string) => toast.info('Applying', { description: `Applying ${n}...` })
 
   // Stat cards
   const statCards = [

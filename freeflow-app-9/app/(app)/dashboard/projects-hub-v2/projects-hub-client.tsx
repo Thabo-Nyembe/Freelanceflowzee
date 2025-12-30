@@ -226,7 +226,7 @@ const mockAutomations = projectsHubAutomations
 const mockTemplates = projectsHubTemplates
 const mockIssues = projectsHubIssues as Issue[]
 const mockEpics = projectsHubEpics as Epic[]
-const mockActivities = projectsHubActivities as Activity[]
+const mockActivities = projectsHubActivities as unknown as Activity[]
 const mockReports = projectsHubReports as Report[]
 const mockIntegrations = projectsHubIntegrations as Integration[]
 const mockProjectsAIInsights = projectsHubAIInsights
@@ -307,9 +307,9 @@ export default function ProjectsHubClient() {
       // Map DB projects to component format
       return dbProjects.map(p => ({
         id: p.id,
-        name: p.title || p.name || 'Untitled',
+        name: p.name || 'Untitled',
         description: p.description || '',
-        projectCode: `PRJ-${p.id.substring(0, 4).toUpperCase()}`,
+        projectCode: p.project_code || `PRJ-${p.id.substring(0, 4).toUpperCase()}`,
         status: (p.status as ProjectStatus) || 'planning',
         priority: (p.priority as Priority) || 'medium',
         progress: p.progress || 0,
@@ -317,8 +317,8 @@ export default function ProjectsHubClient() {
         spent: p.spent || 0,
         startDate: p.start_date,
         endDate: p.end_date,
-        teamMembers: [],
-        tags: [],
+        teamMembers: p.team_members || [],
+        tags: p.tags || [],
         tasksTotal: 0,
         tasksCompleted: 0
       })) as Project[]
@@ -326,24 +326,24 @@ export default function ProjectsHubClient() {
     return mockProjects
   }, [dbProjects])
 
-  // Handle creating a new project
-  const handleCreateProject = async () => {
+  // Handle creating a new project - writes to Supabase
+  const handleSubmitNewProject = async () => {
     if (!newProjectForm.title) {
-      toast.error('Please enter a project title')
+      toast.error('Please enter a project name')
       return
     }
     try {
       await createProject({
-        title: newProjectForm.title,
+        name: newProjectForm.title,
         description: newProjectForm.description,
         budget: newProjectForm.budget,
         start_date: newProjectForm.start_date || null,
         end_date: newProjectForm.end_date || null,
         progress: 0,
         spent: 0,
-        status: 'planning' as any,
-        priority: newProjectForm.priority as any
-      } as any)
+        status: 'planning',
+        priority: newProjectForm.priority
+      })
       toast.success('Project created successfully!')
       setShowNewProjectDialog(false)
       setNewProjectForm({ title: '', description: '', budget: 0, priority: 'medium', start_date: '', end_date: '' })
@@ -405,30 +405,36 @@ export default function ProjectsHubClient() {
     return colors[type] || 'bg-gray-100'
   }
 
-  // Handlers
-  const handleCreateProject = () => {
-    toast.info('Create Project', {
-      description: 'Opening project creation wizard...'
-    })
-    setShowProjectDialog(true)
+  // Real handlers that work with Supabase
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      await deleteProject(projectId)
+      toast.success('Project deleted successfully')
+    } catch (error) {
+      toast.error('Failed to delete project')
+    }
   }
 
-  const handleStartSprint = (sprint: Sprint) => {
-    toast.success('Sprint started', {
-      description: `"${sprint.name}" is now active`
-    })
+  const handleUpdateProjectStatus = async (projectId: string, status: ProjectStatus) => {
+    try {
+      await updateProject(projectId, { status: status as any })
+      toast.success('Project status updated')
+    } catch (error) {
+      toast.error('Failed to update status')
+    }
   }
 
-  const handleCompleteSprint = (sprint: Sprint) => {
-    toast.success('Sprint completed', {
-      description: `"${sprint.name}" has been marked complete`
-    })
-  }
-
-  const handleExportProjects = () => {
-    toast.success('Export started', {
-      description: 'Project data is being exported'
-    })
+  const handleExportProjects = async () => {
+    const csv = allProjects.map(p =>
+      `${p.name},${p.status},${p.priority},${p.progress}%,$${p.budget},$${p.spent}`
+    ).join('\n')
+    const blob = new Blob([`Name,Status,Priority,Progress,Budget,Spent\n${csv}`], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'projects-export.csv'
+    a.click()
+    toast.success('Projects exported to CSV')
   }
 
   return (
@@ -578,7 +584,7 @@ export default function ProjectsHubClient() {
                   <div key={item.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <div><h3 className="font-semibold text-lg">{item.title}</h3><p className="text-sm text-gray-500">{item.quarter}</p></div>
-                      <Badge className={item.status === 'completed' ? 'bg-green-100 text-green-700' : item.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{item.status.replace('_', ' ')}</Badge>
+                      <Badge className={(item.status as string) === 'completed' ? 'bg-green-100 text-green-700' : item.status === 'in_progress' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{item.status.replace('_', ' ')}</Badge>
                     </div>
                     <div className="flex items-center gap-2 mb-2"><span className="text-sm text-gray-500">{item.progress}% complete</span></div>
                     <Progress value={item.progress} className="h-2" />
@@ -1698,21 +1704,19 @@ export default function ProjectsHubClient() {
           {/* AI Insights Panel */}
           <div className="lg:col-span-2">
             <AIInsightsPanel
-              insights={mockProjectsAIInsights}
-              title="Project Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              insights={mockProjectsAIInsights as any}
+              onInsightAction={(insight: any) => console.log('Insight action:', insight)}
             />
           </div>
 
           {/* Team Collaboration & Activity */}
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockProjectsCollaborators}
+              collaborators={mockProjectsCollaborators.map(c => ({ ...c, color: c.color || '#6366f1' })) as any}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockProjectsPredictions}
-              title="Project Forecasts"
+              predictions={mockProjectsPredictions as any}
             />
           </div>
         </div>
@@ -1720,13 +1724,11 @@ export default function ProjectsHubClient() {
         {/* Activity Feed & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockProjectsActivities}
-            title="Project Activity"
+            activities={mockProjectsActivities as any}
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockProjectsQuickActions}
-            variant="grid"
+            actions={mockProjectsQuickActions as any}
           />
         </div>
 
@@ -1763,7 +1765,7 @@ export default function ProjectsHubClient() {
               <div className="grid grid-cols-2 gap-4"><div><Label>Budget</Label><Input type="number" placeholder="0" className="mt-1" value={newProjectForm.budget} onChange={(e) => setNewProjectForm(f => ({ ...f, budget: parseFloat(e.target.value) || 0 }))} /></div><div><Label>Priority</Label><Select value={newProjectForm.priority} onValueChange={(v) => setNewProjectForm(f => ({ ...f, priority: v as any }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select priority" /></SelectTrigger><SelectContent>{Object.entries(priorityConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}</SelectContent></Select></div></div>
               <div className="grid grid-cols-2 gap-4"><div><Label>Start Date</Label><Input type="date" className="mt-1" value={newProjectForm.start_date} onChange={(e) => setNewProjectForm(f => ({ ...f, start_date: e.target.value }))} /></div><div><Label>Due Date</Label><Input type="date" className="mt-1" value={newProjectForm.end_date} onChange={(e) => setNewProjectForm(f => ({ ...f, end_date: e.target.value }))} /></div></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleCreateProject} disabled={!newProjectForm.title}>Create Project</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-blue-600 to-indigo-600" onClick={handleSubmitNewProject} disabled={!newProjectForm.title}>Create Project</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

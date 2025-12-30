@@ -503,19 +503,11 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     </div>
   )
 
-  // Toast Handlers
-  const handleCreateTutorial = () => {
-    toast.info('Create Tutorial', { description: 'Opening tutorial editor...' })
-  }
-  const handlePublishTutorial = (tutorialName: string) => {
-    toast.success('Tutorial Published', { description: `"${tutorialName}" is now live` })
-  }
-  const handleStartTutorial = (tutorialName: string) => {
-    toast.info('Starting Tutorial', { description: `Loading "${tutorialName}"...` })
-  }
-  const handleCompleteTutorial = (tutorialName: string) => {
-    toast.success('Tutorial Completed', { description: `You finished "${tutorialName}"!` })
-  }
+  // Handlers
+  const handleCreateTutorial = () => toast.info('Create', { description: 'Opening editor...' })
+  const handlePublishTutorial = (n: string) => toast.success('Published', { description: `"${n}" is live` })
+  const handleStartTutorial = (n: string) => toast.info('Starting', { description: `Loading "${n}"...` })
+  const handleCompleteTutorial = (n: string) => toast.success('Completed', { description: `Finished "${n}"!` })
   const handleMyList = () => {
     toast.info('My List', { description: 'Opening your saved courses...' })
   }

@@ -508,18 +508,15 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     { label: 'Health Score', value: `${healthScore}%`, icon: ShieldCheck, color: 'from-emerald-500 to-green-600', change: '+5%' }
   ]
 
+  // Handlers
+  const handleRunAnalysis = () => toast.info('Analyzing', { description: 'SEO analysis started...' })
+  const handleOptimize = (n: string) => toast.info('Optimizing', { description: `Optimizing "${n}"...` })
+  const handleGenerateSitemap = () => toast.success('Generated', { description: 'Sitemap updated' })
+  const handleExportReport = () => toast.success('Exporting', { description: 'Report downloading...' })
+
   // Toast handlers for unconnected buttons
-  const handleRunAnalysis = () => {
-    toast.info('Running Analysis', { description: 'SEO analysis started...' })
-  }
   const handleOptimizePage = (pageName: string) => {
     toast.info('Optimizing', { description: `Optimizing "${pageName}"...` })
-  }
-  const handleGenerateSitemap = () => {
-    toast.success('Sitemap Generated', { description: 'Sitemap.xml has been updated' })
-  }
-  const handleExportReport = () => {
-    toast.success('Exporting', { description: 'SEO report will be downloaded' })
   }
   const handleAddKeywords = () => {
     toast.info('Add Keywords', { description: 'Opening keyword research tool...' })
@@ -1941,18 +1938,18 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
 
             <div className="flex items-center justify-between pt-4 border-t">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleViewHistory}>
                   <LineChart className="w-4 h-4" /> View History
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleViewCompetitors}>
                   <Users className="w-4 h-4" /> Competitors
                 </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleCopyKeyword}>
                   <Copy className="w-4 h-4" /> Copy
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1">
+                <Button variant="outline" size="sm" className="gap-1" onClick={handleViewSerp}>
                   <ExternalLink className="w-4 h-4" /> View SERP
                 </Button>
               </div>

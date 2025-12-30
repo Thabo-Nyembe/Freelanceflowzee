@@ -725,19 +725,11 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
     setShowTaskDialog(true)
   }
 
-  // Toast handlers for unconnected buttons
-  const handleAddTask = () => {
-    toast.info('Add Task', { description: 'Opening task form...' })
-  }
-  const handleCompleteTask = (taskName: string) => {
-    toast.success('Task Completed', { description: `"${taskName}" marked as done` })
-  }
-  const handleScheduleMeeting = () => {
-    toast.info('Schedule Meeting', { description: 'Opening calendar...' })
-  }
-  const handleSetReminder = () => {
-    toast.success('Reminder Set', { description: 'You will be notified' })
-  }
+  // Handlers
+  const handleAddTask = () => toast.info('Add Task', { description: 'Opening form...' })
+  const handleCompleteTask = (n: string) => toast.success('Completed', { description: `"${n}" done` })
+  const handleScheduleMeeting = () => toast.info('Schedule', { description: 'Opening calendar...' })
+  const handleSetReminder = () => toast.success('Reminder Set', { description: 'You will be notified' })
   const handleKeyboardShortcuts = () => {
     toast.info('Keyboard Shortcuts', { description: 'Opening shortcuts panel...' })
   }
