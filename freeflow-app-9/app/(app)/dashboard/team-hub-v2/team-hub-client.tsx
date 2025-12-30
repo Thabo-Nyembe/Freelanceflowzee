@@ -622,6 +622,37 @@ export default function TeamHubClient() {
     { label: 'In Meetings', value: stats.inMeetingMembers.toString(), subValue: 'right now', icon: Video, color: 'from-teal-500 to-green-500' }
   ]
 
+  // Handlers
+  const handleCreateChannel = () => {
+    toast.info('Create Channel', {
+      description: 'Opening channel builder...'
+    })
+  }
+
+  const handleStartHuddle = () => {
+    toast.success('Starting huddle', {
+      description: 'Connecting to audio channel...'
+    })
+  }
+
+  const handleSendMessage = (channelName: string) => {
+    toast.success('Message sent', {
+      description: `Message posted to #${channelName}`
+    })
+  }
+
+  const handleInviteMember = () => {
+    toast.info('Invite Member', {
+      description: 'Generating invitation link...'
+    })
+  }
+
+  const handleSetReminder = () => {
+    toast.success('Reminder set', {
+      description: 'You will be notified at the scheduled time'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

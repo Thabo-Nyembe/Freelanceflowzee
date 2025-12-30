@@ -665,6 +665,37 @@ export default function ResourcesClient() {
     return Array.from(skillMap.values()).sort((a, b) => b.count - a.count)
   }, [])
 
+  // Handlers
+  const handleAssignResource = (resourceName: string, projectName: string) => {
+    toast.success('Resource assigned', {
+      description: `${resourceName} assigned to ${projectName}`
+    })
+  }
+
+  const handleCreateResource = () => {
+    toast.info('Add Resource', {
+      description: 'Opening resource form...'
+    })
+  }
+
+  const handleAllocateCapacity = (resourceName: string) => {
+    toast.info('Allocate Capacity', {
+      description: `Adjusting ${resourceName}'s allocation...`
+    })
+  }
+
+  const handleExportResources = () => {
+    toast.success('Exporting resources', {
+      description: 'Resource report will be downloaded'
+    })
+  }
+
+  const handleScheduleResource = (resourceName: string) => {
+    toast.info('Schedule Resource', {
+      description: `Opening scheduler for ${resourceName}...`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">

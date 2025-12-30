@@ -691,6 +691,37 @@ export default function AuditLogsClient() {
     return { total, critical, warnings, errors, anomalies, blocked, activeAlerts, avgRisk }
   }, [])
 
+  // Handlers
+  const handleExportAuditLogs = () => {
+    toast.success('Exporting audit logs', {
+      description: 'Audit log report will be downloaded'
+    })
+  }
+
+  const handleCreateAlert = () => {
+    toast.info('Create Alert', {
+      description: 'Opening alert configuration...'
+    })
+  }
+
+  const handleInvestigateLog = (logId: string) => {
+    toast.info('Investigating', {
+      description: `Opening investigation for log ${logId}...`
+    })
+  }
+
+  const handleMarkResolved = (alertId: string) => {
+    toast.success('Alert resolved', {
+      description: `Alert ${alertId} has been marked as resolved`
+    })
+  }
+
+  const handleGenerateReport = () => {
+    toast.success('Generating report', {
+      description: 'Compliance report is being generated...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-violet-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

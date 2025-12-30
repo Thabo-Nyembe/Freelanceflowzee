@@ -637,8 +637,36 @@ export default function AICreateClient() {
   const handleGenerate = () => {
     if (!prompt.trim()) return
     setIsGenerating(true)
+    toast.info('Generating...', {
+      description: 'AI is creating your content'
+    })
     // Simulate generation
     setTimeout(() => setIsGenerating(false), 2000)
+  }
+
+  // Handlers
+  const handleSaveCreation = () => {
+    toast.success('Creation saved', {
+      description: 'Your AI creation has been saved to gallery'
+    })
+  }
+
+  const handleDownloadCreation = () => {
+    toast.success('Downloading', {
+      description: 'Your creation will be downloaded shortly'
+    })
+  }
+
+  const handleShareCreation = () => {
+    toast.success('Link copied', {
+      description: 'Share link copied to clipboard'
+    })
+  }
+
+  const handleRegenerateCreation = () => {
+    toast.info('Regenerating', {
+      description: 'Creating a new variation...'
+    })
   }
 
   return (

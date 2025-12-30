@@ -528,6 +528,37 @@ export default function ApiClient() {
     { label: 'Webhooks', value: webhooks.filter(w => w.isActive).length.toString(), change: 12.0, icon: Webhook, gradient: 'from-pink-500 to-rose-500' }
   ]
 
+  // Handlers
+  const handleCreateEndpoint = () => {
+    toast.info('Create Endpoint', {
+      description: 'Opening endpoint builder...'
+    })
+  }
+
+  const handleGenerateApiKey = () => {
+    toast.success('API key generated', {
+      description: 'New API key has been created'
+    })
+  }
+
+  const handleRevokeApiKey = (keyName: string) => {
+    toast.info('Key revoked', {
+      description: `"${keyName}" has been revoked`
+    })
+  }
+
+  const handleTestEndpoint = (endpointName: string) => {
+    toast.info('Testing endpoint', {
+      description: `Running tests on "${endpointName}"...`
+    })
+  }
+
+  const handleExportApiDocs = () => {
+    toast.success('Exporting docs', {
+      description: 'API documentation will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

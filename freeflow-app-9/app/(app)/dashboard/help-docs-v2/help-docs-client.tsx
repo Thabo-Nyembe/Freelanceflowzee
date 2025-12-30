@@ -427,6 +427,37 @@ export default function HelpDocsClient() {
     })
   }, [ticketFilter])
 
+  // Handlers
+  const handleCreateArticle = () => {
+    toast.info('Create Article', {
+      description: 'Opening article editor...'
+    })
+  }
+
+  const handleSearchDocs = (query: string) => {
+    toast.info('Searching', {
+      description: `Searching for "${query}"...`
+    })
+  }
+
+  const handleContactSupport = () => {
+    toast.info('Contact Support', {
+      description: 'Opening support chat...'
+    })
+  }
+
+  const handleSubmitFeedback = (articleId: string) => {
+    toast.success('Feedback submitted', {
+      description: 'Thank you for your feedback!'
+    })
+  }
+
+  const handleBookmarkArticle = (articleTitle: string) => {
+    toast.success('Article bookmarked', {
+      description: `"${articleTitle}" saved to bookmarks`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}

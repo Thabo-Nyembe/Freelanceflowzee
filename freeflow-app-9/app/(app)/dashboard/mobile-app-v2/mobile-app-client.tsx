@@ -272,6 +272,37 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
     setShowReviewDialog(true)
   }
 
+  // Handlers
+  const handleCreateBuild = () => {
+    toast.info('Creating build', {
+      description: 'Initiating new app build...'
+    })
+  }
+
+  const handleSubmitToStore = (platform: string) => {
+    toast.success('Submitting to store', {
+      description: `Submitting build to ${platform} store...`
+    })
+  }
+
+  const handleDownloadBuild = (buildVersion: string) => {
+    toast.success('Downloading build', {
+      description: `Build ${buildVersion} download starting...`
+    })
+  }
+
+  const handleReplyToReview = (reviewerName: string) => {
+    toast.success('Reply sent', {
+      description: `Response sent to ${reviewerName}`
+    })
+  }
+
+  const handleReportReview = (reviewId: string) => {
+    toast.info('Review reported', {
+      description: 'Review has been flagged for moderation'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
       {/* Header */}

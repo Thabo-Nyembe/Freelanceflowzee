@@ -753,6 +753,37 @@ export default function RegistrationsClient() {
     setShowRegistrationDialog(true)
   }
 
+  // Handlers
+  const handleConfirmRegistration = (attendeeName: string) => {
+    toast.success('Registration confirmed', {
+      description: `${attendeeName} has been confirmed`
+    })
+  }
+
+  const handleCheckInAttendee = (attendeeName: string) => {
+    toast.success('Check-in complete', {
+      description: `${attendeeName} has been checked in`
+    })
+  }
+
+  const handleSendReminder = (attendeeName: string) => {
+    toast.success('Reminder sent', {
+      description: `Reminder sent to ${attendeeName}`
+    })
+  }
+
+  const handleExportRegistrations = () => {
+    toast.success('Exporting registrations', {
+      description: 'Attendee list will be downloaded'
+    })
+  }
+
+  const handleCancelRegistration = (attendeeName: string) => {
+    toast.info('Registration cancelled', {
+      description: `${attendeeName}'s registration has been cancelled`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       {/* Header */}

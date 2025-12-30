@@ -494,6 +494,18 @@ export default function WorkflowsClient() {
     })
   }
 
+  const handleDeleteWorkflow = (workflow: Workflow) => {
+    toast.info('Workflow deleted', {
+      description: `${workflow.name} has been removed`
+    })
+  }
+
+  const handleExportWorkflows = () => {
+    toast.success('Exporting workflows', {
+      description: 'Workflow definitions will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50/30 to-yellow-50/40 dark:bg-none dark:bg-gray-900">
       {/* Header */}

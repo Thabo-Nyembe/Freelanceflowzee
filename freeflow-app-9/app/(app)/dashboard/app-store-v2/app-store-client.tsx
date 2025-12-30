@@ -664,6 +664,37 @@ export default function AppStoreClient() {
   const trendingApps = apps.filter(a => a.trending)
   const editorChoiceApps = apps.filter(a => a.editorChoice)
 
+  // Handlers
+  const handleInstallApp = (appName: string) => {
+    toast.success('Installing app', {
+      description: `"${appName}" is being installed...`
+    })
+  }
+
+  const handleUninstallApp = (appName: string) => {
+    toast.info('Uninstalling app', {
+      description: `Removing "${appName}"...`
+    })
+  }
+
+  const handleUpdateApp = (appName: string) => {
+    toast.info('Updating app', {
+      description: `Updating "${appName}" to latest version...`
+    })
+  }
+
+  const handleRateApp = (appName: string) => {
+    toast.success('Rating submitted', {
+      description: `Thank you for rating "${appName}"`
+    })
+  }
+
+  const handleStartTrial = (appName: string) => {
+    toast.success('Trial started', {
+      description: `14-day trial for "${appName}" has begun`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       {/* Header */}
