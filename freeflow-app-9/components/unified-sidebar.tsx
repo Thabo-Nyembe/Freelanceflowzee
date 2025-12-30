@@ -41,17 +41,17 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     name: 'Projects Hub',
-    href: '/dashboard/projects-hub',
+    href: '/dashboard/projects-hub-v2',
     icon: FolderOpen
   },
   {
     name: 'Video Studio',
-    href: '/dashboard/video-studio',
+    href: '/dashboard/video-studio-v2',
     icon: Video
   },
   {
     name: 'Canvas Collaboration',
-    href: '/dashboard/canvas',
+    href: '/dashboard/canvas-v2',
     icon: Monitor
   },
   {
@@ -61,37 +61,37 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     name: 'AI Assistant',
-    href: '/dashboard/ai-assistant',
+    href: '/dashboard/ai-assistant-v2',
     icon: Zap
   },
   {
     name: 'AI Create',
-    href: '/dashboard/ai-create',
+    href: '/dashboard/ai-create-v2',
     icon: Sparkles
   },
   {
     name: 'My Day',
-    href: '/dashboard/my-day',
+    href: '/dashboard/my-day-v2',
     icon: Calendar
   },
   {
     name: 'Escrow',
-    href: '/dashboard/escrow',
+    href: '/dashboard/escrow-v2',
     icon: Shield
   },
   {
     name: 'Files Hub',
-    href: '/dashboard/files-hub',
+    href: '/dashboard/files-hub-v2',
     icon: FileText
   },
   {
     name: 'Collaboration',
-    href: '/dashboard/collaboration',
+    href: '/dashboard/collaboration-v2',
     icon: MessageSquare
   },
   {
     name: 'Analytics',
-    href: '/dashboard/analytics',
+    href: '/dashboard/analytics-v2',
     icon: TrendingUp
   },
   {
@@ -106,7 +106,7 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     name: 'Notifications',
-    href: '/dashboard/notifications',
+    href: '/dashboard/notifications-v2',
     icon: Bell
   }
 ]

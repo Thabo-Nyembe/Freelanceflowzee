@@ -84,28 +84,28 @@ const defaultShortcuts: KeyboardShortcut[] = [
     keys: ['g', 'p'],
     description: 'Go to projects',
     category: 'navigation',
-    action: () => window.location.href = '/dashboard/projects-hub'
+    action: () => window.location.href = '/dashboard/projects-hub-v2'
   },
   {
     id: 'files',
     keys: ['g', 'f'],
     description: 'Go to files',
     category: 'navigation',
-    action: () => window.location.href = '/dashboard/files-hub'
+    action: () => window.location.href = '/dashboard/files-hub-v2'
   },
   {
     id: 'analytics',
     keys: ['g', 'a'],
     description: 'Go to analytics',
     category: 'navigation',
-    action: () => window.location.href = '/dashboard/analytics'
+    action: () => window.location.href = '/dashboard/analytics-v2'
   },
   {
     id: 'settings',
     keys: ['g', 's'],
     description: 'Go to settings',
     category: 'navigation',
-    action: () => window.location.href = '/dashboard/settings'
+    action: () => window.location.href = '/dashboard/settings-v2'
   },
   // Actions
   {

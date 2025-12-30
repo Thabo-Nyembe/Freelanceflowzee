@@ -68,7 +68,7 @@ const mainNavigation: NavGroup[] = [
       },
       {
         title: 'AI Create Studio',
-        href: '/dashboard/ai-create',
+        href: '/dashboard/ai-create-v2',
         description: 'Generate content with advanced AI tools',
         icon: Brain,
         badge: 'AI',
@@ -76,13 +76,13 @@ const mainNavigation: NavGroup[] = [
       },
       {
         title: 'Analytics',
-        href: '/dashboard/analytics',
+        href: '/dashboard/analytics-v2',
         description: 'Insights and performance metrics',
         icon: BarChart3,
       },
       {
         title: 'Canvas Studio',
-        href: '/dashboard/canvas',
+        href: '/dashboard/canvas-v2',
         description: 'Design and collaborative workspace',
         icon: Palette,
       },
@@ -93,20 +93,20 @@ const mainNavigation: NavGroup[] = [
     items: [
       {
         title: 'Video Studio',
-        href: '/dashboard/video-studio',
+        href: '/dashboard/video-studio-v2',
         description: 'Professional video editing and production',
         icon: Video,
         badge: 'Pro',
       },
       {
         title: 'Gallery Studio',
-        href: '/dashboard/gallery',
+        href: '/dashboard/gallery-v2',
         description: 'Media management and portfolio',
         icon: Camera,
       },
       {
         title: 'Time Tracking',
-        href: '/dashboard/time-tracking',
+        href: '/dashboard/time-tracking-v2',
         description: 'Track productivity and project time',
         icon: Clock,
       },
@@ -311,12 +311,12 @@ export function EnhancedNavigationMenu({ className }: EnhancedNavigationMenuProp
 
         {/* Direct Links */}
         <NavigationMenuItem>
-          <Link href="/dashboard/analytics" legacyBehavior passHref>
+          <Link href="/dashboard/analytics-v2" legacyBehavior passHref>
             <NavigationMenuLink 
               className={cn(
                 navigationMenuTriggerStyle(), 
                 "h-9",
-                pathname === '/dashboard/analytics' && "bg-accent text-accent-foreground"
+                pathname === '/dashboard/analytics-v2' && "bg-accent text-accent-foreground"
               )}
             >
               <TrendingUp className="mr-2 h-4 w-4" />

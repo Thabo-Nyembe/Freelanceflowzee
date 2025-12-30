@@ -138,55 +138,41 @@ async function getVideoMetadata(filePath: string, file: File): Promise<any> {
   }
 }
 
-// GET endpoint to list uploaded videos
+// GET endpoint to list uploaded videos - fetches from database
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId') || '00000000-0000-0000-0000-000000000001'
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
 
-    // In production: fetch from database
-    // const videos = await db.videos.findMany({ where: { userId } })
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
+    }
 
-    // Mock data for demo
-    const mockVideos = [
-      {
-        id: 'vid-1',
-        filename: 'intro-video.mp4',
-        originalName: 'My Intro Video.mp4',
-        url: '/uploads/videos/intro-video.mp4',
-        type: 'video/mp4',
-        size: 15728640, // 15MB
-        duration: 30,
-        width: 1920,
-        height: 1080,
-        fps: 30,
-        bitrate: 5000000,
-        codec: 'h264',
-        uploadedAt: new Date(Date.now() - 86400000).toISOString(),
-        status: 'ready'
-      },
-      {
-        id: 'vid-2',
-        filename: 'tutorial-part1.mp4',
-        originalName: 'Tutorial Part 1.mp4',
-        url: '/uploads/videos/tutorial-part1.mp4',
-        type: 'video/mp4',
-        size: 31457280, // 30MB
-        duration: 60,
-        width: 1920,
-        height: 1080,
-        fps: 30,
-        bitrate: 4500000,
-        codec: 'h264',
-        uploadedAt: new Date(Date.now() - 172800000).toISOString(),
-        status: 'ready'
-      }
-    ]
+    // Fetch videos from database
+    const { data: videos, error } = await supabase
+      .from('videos')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      logger.error('Database error fetching videos', { error: error.message })
+      // Return empty array if table doesn't exist yet
+      return NextResponse.json({
+        success: true,
+        videos: [],
+        count: 0
+      })
+    }
 
     return NextResponse.json({
       success: true,
-      videos: mockVideos,
-      count: mockVideos.length
+      videos: videos || [],
+      count: videos?.length || 0
     })
 
   } catch (error) {

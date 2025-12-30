@@ -134,7 +134,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-dashboard'
   },
   { 
-    href: '/dashboard/projects-hub', 
+    href: '/dashboard/projects-hub-v2', 
     title: 'Projects Hub', 
     icon: FolderOpen, 
     description: 'Manage all your projects in one place',
@@ -142,7 +142,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-projects-hub'
   },
   { 
-    href: '/dashboard/my-day', 
+    href: '/dashboard/my-day-v2', 
     title: 'My Day Today', 
     icon: Calendar, 
     description: 'AI-powered daily planning and tasks',
@@ -150,7 +150,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-my-day'
   },
   { 
-    href: '/dashboard/collaboration', 
+    href: '/dashboard/collaboration-v2', 
     title: 'Collaboration', 
     icon: MessageSquare, 
     description: 'Real-time client collaboration tools',
@@ -158,7 +158,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-collaboration'
   },
   { 
-    href: '/dashboard/escrow', 
+    href: '/dashboard/escrow-v2', 
     title: 'Escrow System', 
     icon: Shield, 
     description: 'Secure payment protection',
@@ -166,7 +166,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-escrow'
   },
   { 
-    href: '/dashboard/files-hub', 
+    href: '/dashboard/files-hub-v2', 
     title: 'Files Hub', 
     icon: FolderOpen, 
     description: 'Organize and share project files',
@@ -182,7 +182,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-storage'
   },
   { 
-    href: '/dashboard/community', 
+    href: '/dashboard/community-v2', 
     title: 'Community Hub', 
     icon: Users, 
     description: 'Connect with other creators',
@@ -190,7 +190,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-community'
   },
   { 
-    href: '/dashboard/ai-design', 
+    href: '/dashboard/ai-design-v2', 
     title: 'AI Design Assistant', 
     icon: Cpu, 
     description: 'AI-powered design analysis',
@@ -198,7 +198,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-ai-design'
   },
   { 
-    href: '/dashboard/ai-create', 
+    href: '/dashboard/ai-create-v2', 
     title: 'AI Create', 
     icon: Sparkles, 
     description: 'Generate assets with AI',
@@ -214,7 +214,7 @@ export const DASHBOARD_ROUTES = [
     testId: 'nav-client-zone'
   },
   { 
-    href: '/dashboard/analytics', 
+    href: '/dashboard/analytics-v2', 
     title: 'Analytics', 
     icon: BarChart3, 
     description: 'Business insights and metrics',

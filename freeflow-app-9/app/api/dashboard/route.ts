@@ -17,9 +17,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
 
-    // Demo mode for unauthenticated users
+    // Require authentication - no demo mode
     if (!user) {
-      return handleDemoGet(action);
+      return NextResponse.json(
+        { success: false, error: 'Authentication required. Please log in to access dashboard data.' },
+        { status: 401 }
+      );
     }
 
     switch (action) {
@@ -827,66 +830,4 @@ async function actOnInsight(supabase: any, userId: string, insightId: string, ac
   return { success: true, actionType };
 }
 
-// =====================================================
-// DEMO MODE HANDLER
-// =====================================================
-function handleDemoGet(action: string | null): NextResponse {
-  const mockStats = {
-    projects: { total: 12, active: 5, completed: 7, onHold: 0 },
-    clients: { total: 24, active: 18, new: 3 },
-    revenue: { total: 45231, pending: 8500, thisMonth: 12500, lastMonth: 10000, growth: 25 },
-    tasks: { total: 48, completed: 32, inProgress: 12, overdue: 2 },
-    files: { total: 156, size: 2500000000 },
-    team: { total: 4, active: 4 }
-  };
-
-  const mockActivity = [
-    { id: '1', type: 'project', title: 'Brand Identity Package', status: 'active', timestamp: new Date().toISOString() },
-    { id: '2', type: 'task', title: 'Design mockups', status: 'completed', timestamp: new Date(Date.now() - 3600000).toISOString() },
-    { id: '3', type: 'invoice', title: 'Invoice INV-001', status: 'paid', amount: 2500, timestamp: new Date(Date.now() - 7200000).toISOString() }
-  ];
-
-  const mockProjects = [
-    { id: '1', name: 'Brand Identity Package', client: 'Acme Corp', progress: 85, status: 'active', value: 2500, priority: 'high', deadline: '2024-02-15', category: 'design' },
-    { id: '2', name: 'Mobile App Design', client: 'Tech Startup', progress: 40, status: 'active', value: 5000, priority: 'urgent', deadline: '2024-03-01', category: 'development' }
-  ];
-
-  switch (action) {
-    case 'stats':
-      return NextResponse.json({ success: true, stats: mockStats, demo: true });
-    case 'recent-activity':
-      return NextResponse.json({ success: true, activity: mockActivity, demo: true });
-    case 'recent-projects':
-      return NextResponse.json({ success: true, projects: mockProjects, demo: true });
-    case 'quick-stats':
-      return NextResponse.json({
-        success: true,
-        quickStats: {
-          tasksCompletedToday: 5,
-          tasksCompletedThisWeek: 18,
-          pendingInvoicesCount: 3,
-          pendingInvoicesTotal: 8500,
-          unreadMessages: 7
-        },
-        demo: true
-      });
-    default:
-      return NextResponse.json({
-        success: true,
-        data: {
-          stats: mockStats,
-          activity: mockActivity,
-          projects: mockProjects,
-          quickStats: {
-            tasksCompletedToday: 5,
-            tasksCompletedThisWeek: 18,
-            pendingInvoicesCount: 3,
-            pendingInvoicesTotal: 8500,
-            unreadMessages: 7
-          },
-          deadlines: []
-        },
-        demo: true
-      });
-  }
-}
+// Demo mode removed - all data comes from real database

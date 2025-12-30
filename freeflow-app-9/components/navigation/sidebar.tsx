@@ -42,19 +42,19 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     name: 'Projects Hub',
-    href: '/dashboard/projects-hub',
+    href: '/dashboard/projects-hub-v2',
     icon: FolderOpen,
     description: 'Manage and track all your projects'
   },
   {
     name: 'Video Studio',
-    href: '/dashboard/video-studio',
+    href: '/dashboard/video-studio-v2',
     icon: Video,
     description: 'Professional video editing suite'
   },
   {
     name: 'Collaboration',
-    href: '/dashboard/collaboration',
+    href: '/dashboard/collaboration-v2',
     icon: Palette,
     description: 'Real-time design collaboration'
   },
@@ -66,50 +66,50 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     name: 'AI Design',
-    href: '/dashboard/ai-design',
+    href: '/dashboard/ai-design-v2',
     icon: Zap,
     description: 'AI-powered design tools'
   },
   {
     name: 'AI Create',
-    href: '/dashboard/ai-create',
+    href: '/dashboard/ai-create-v2',
     icon: Sparkles,
     description: 'Generate creative assets with AI'
   },
   {
     name: 'Growth Hub',
-    href: '/dashboard/growth-hub',
+    href: '/dashboard/growth-hub-v2',
     icon: TrendingUp,
     description: 'AI-powered business growth & monetization',
     badge: 'New'
   },
   {
     name: 'My Day',
-    href: '/dashboard/my-day',
+    href: '/dashboard/my-day-v2',
     icon: Calendar,
     description: 'Daily tasks and schedule management'
   },
   {
     name: 'Financial Hub',
-    href: '/dashboard/financial',
+    href: '/dashboard/financial-v2',
     icon: DollarSign,
     description: 'Secure payment protection'
   },
   {
     name: 'Files Hub',
-    href: '/dashboard/files-hub',
+    href: '/dashboard/files-hub-v2',
     icon: FileText,
     description: 'Professional file management'
   },
   {
     name: 'Messages',
-    href: '/dashboard/messages',
+    href: '/dashboard/messages-v2',
     icon: MessageSquare,
     description: 'Team communication tools'
   },
   {
     name: 'Analytics',
-    href: '/dashboard/analytics',
+    href: '/dashboard/analytics-v2',
     icon: TrendingUp,
     description: 'Performance insights and metrics'
   },
@@ -121,7 +121,7 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     name: 'Calendar',
-    href: '/dashboard/calendar',
+    href: '/dashboard/calendar-v2',
     icon: Calendar,
     description: 'Schedule and appointments'
   },
@@ -140,20 +140,20 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     name: 'API Keys',
-    href: '/dashboard/api-keys',
+    href: '/dashboard/api-keys-v2',
     icon: Key,
     description: 'Manage your own API keys',
     badge: 'BYOK'
   },
   {
     name: 'Settings',
-    href: '/dashboard/settings',
+    href: '/dashboard/settings-v2',
     icon: Settings,
     description: 'Account and system settings'
   },
   {
     name: 'Notifications',
-    href: '/dashboard/notifications',
+    href: '/dashboard/notifications-v2',
     icon: Bell,
     description: 'Updates and alerts'
   }

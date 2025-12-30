@@ -203,270 +203,25 @@ export interface GoalMilestone {
 }
 
 // ============================================================================
-// MOCK DATA - Dashboard Activities (50 items)
+// MOCK DATA REMOVED - Use real Supabase data
 // ============================================================================
 
-const activityMessages = {
-  project: ['New project started', 'Project milestone completed', 'Project status updated', 'Project deadline approaching'],
-  payment: ['Payment received', 'Invoice sent', 'Payment overdue', 'Refund processed'],
-  feedback: ['Client feedback received', 'Review posted', 'Rating updated', 'Feedback requested'],
-  message: ['New message from client', 'Message sent', 'Meeting scheduled', 'Call reminder'],
-  system: ['System updated', 'Backup completed', 'Security alert', 'Storage limit reached'],
-  action: ['Quick action completed', 'Template created', 'Export generated', 'Report downloaded'],
-  client: ['New client added', 'Client profile updated', 'Contract signed', 'Proposal sent']
-}
+// Mock data arrays are deprecated - use real database queries instead
+// Kept as empty arrays for backward compatibility
 
-export const mockDashboardActivities: DashboardActivity[] = Array.from({ length: 50 }, (_, i) => {
-  const types: ActivityType[] = ['project', 'payment', 'feedback', 'message', 'system', 'action', 'client']
-  const statuses: ActivityStatus[] = ['success', 'info', 'warning', 'error']
-  const impacts: ActivityImpact[] = ['low', 'medium', 'high', 'critical']
+export const mockDashboardActivities: DashboardActivity[] = []
 
-  const type = types[Math.floor(Math.random() * types.length)]
-  const messages = activityMessages[type]
-  const message = messages[Math.floor(Math.random() * messages.length)]
+// Mock projects deprecated - use real database queries
+export const mockDashboardProjects: DashboardProject[] = []
 
-  const time = new Date()
-  time.setHours(time.getHours() - i * 2)
+// Mock insights deprecated - use real database queries
+export const mockDashboardInsights: DashboardInsight[] = []
 
-  return {
-    id: `DA-${String(i + 1).padStart(4, '0')}`,
-    userId: 'user_demo_123',
-    type,
-    message,
-    description: `Detailed description for ${message}`,
-    time,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    impact: impacts[Math.floor(Math.random() * impacts.length)],
-    isRead: Math.random() > 0.3,
-    relatedId: `rel_${Math.floor(Math.random() * 1000)}`,
-    relatedType: type === 'project' ? 'project' : type === 'client' ? 'client' : 'payment',
-    actionUrl: `/dashboard/${type}s`,
-    actionLabel: 'View Details'
-  }
-})
+// Mock metrics deprecated - use real database queries
+export const mockDashboardMetrics: DashboardMetric[] = []
 
-// ============================================================================
-// MOCK DATA - Dashboard Projects (30 items)
-// ============================================================================
-
-const projectNames = [
-  'Brand Identity Package', 'Mobile App Design', 'Marketing Campaign', 'Website Redesign',
-  'E-commerce Platform', 'Content Strategy', 'Social Media Management', 'Video Production',
-  'SEO Optimization', 'Product Launch', 'Annual Report Design', 'Corporate Branding',
-  'UI/UX Research', 'Customer Portal', 'Analytics Dashboard', 'Email Marketing',
-  'Logo Design Suite', 'Packaging Design', 'Trade Show Materials', 'Brand Guidelines',
-  'App Prototype', 'Landing Page', 'Sales Funnel', 'Marketing Automation',
-  'Content Calendar', 'Influencer Campaign', 'Press Release', 'Event Planning',
-  'Training Materials', 'Employee Onboarding'
-]
-
-const clientNames = [
-  'Acme Corp', 'Tech Startup', 'Local Business', 'Enterprise Inc', 'Small Agency',
-  'Global Brand', 'Regional Chain', 'Nonprofit Org', 'Government Agency', 'Fortune 500'
-]
-
-export const mockDashboardProjects: DashboardProject[] = Array.from({ length: 30 }, (_, i) => {
-  const statuses: ProjectStatus[] = ['Not Started', 'In Progress', 'Review', 'Completed', 'On Hold']
-  const priorities: ProjectPriority[] = ['low', 'medium', 'high', 'urgent']
-  const categories: ProjectCategory[] = ['design', 'development', 'marketing', 'content', 'consulting']
-
-  const startDate = new Date()
-  startDate.setDate(startDate.getDate() - Math.floor(Math.random() * 90))
-
-  const deadline = new Date()
-  deadline.setDate(deadline.getDate() + Math.floor(Math.random() * 60))
-
-  const value = Math.floor(Math.random() * 10000) + 1000
-  const progress = Math.floor(Math.random() * 100)
-  const totalTasks = Math.floor(Math.random() * 50) + 10
-  const completedTasks = Math.floor(totalTasks * (progress / 100))
-  const hoursEstimated = Math.floor(Math.random() * 200) + 20
-  const hoursLogged = Math.floor(hoursEstimated * (progress / 100))
-
-  return {
-    id: `DP-${String(i + 1).padStart(4, '0')}`,
-    userId: 'user_demo_123',
-    name: projectNames[i % projectNames.length],
-    client: clientNames[Math.floor(Math.random() * clientNames.length)],
-    clientId: `CL-${String(Math.floor(Math.random() * 100)).padStart(4, '0')}`,
-    progress,
-    status: statuses[Math.floor(Math.random() * statuses.length)],
-    value,
-    currency: 'USD',
-    priority: priorities[Math.floor(Math.random() * priorities.length)],
-    category: categories[Math.floor(Math.random() * categories.length)],
-    aiAutomation: Math.random() > 0.6,
-    collaboration: Math.floor(Math.random() * 5),
-    deadline,
-    startDate,
-    estimatedCompletion: `${Math.floor(Math.random() * 30) + 1} days`,
-    description: `Comprehensive ${projectNames[i % projectNames.length]} for ${clientNames[Math.floor(Math.random() * clientNames.length)]}`,
-    tags: ['design', 'urgent', 'client-requested', 'ai-enhanced'].slice(0, Math.floor(Math.random() * 4) + 1),
-    isStarred: Math.random() > 0.8,
-    isPinned: Math.random() > 0.9,
-    completedTasks,
-    totalTasks,
-    hoursLogged,
-    hoursEstimated,
-    budget: value,
-    spent: Math.floor(value * (progress / 100))
-  }
-})
-
-// ============================================================================
-// MOCK DATA - Dashboard Insights (20 items)
-// ============================================================================
-
-const insightTitles = {
-  revenue: ['Revenue Optimization', 'Pricing Strategy', 'Upsell Opportunities', 'Revenue Forecast'],
-  productivity: ['Productivity Boost', 'Time Management', 'Automation Opportunity', 'Workflow Optimization'],
-  client: ['Client Retention', 'Satisfaction Improvement', 'Referral Opportunity', 'Account Growth'],
-  performance: ['Performance Metrics', 'Efficiency Gains', 'Quality Improvements', 'Deadline Management'],
-  trend: ['Market Trends', 'Industry Insights', 'Competitor Analysis', 'Emerging Opportunities'],
-  opportunity: ['Growth Opportunity', 'New Market', 'Partnership Potential', 'Expansion Strategy'],
-  risk: ['Risk Alert', 'Budget Concern', 'Resource Issue', 'Timeline Risk']
-}
-
-export const mockDashboardInsights: DashboardInsight[] = Array.from({ length: 20 }, (_, i) => {
-  const types: InsightType[] = ['revenue', 'productivity', 'client', 'performance', 'trend', 'opportunity', 'risk']
-  const impacts: InsightImpact[] = ['low', 'medium', 'high', 'critical']
-
-  const type = types[Math.floor(Math.random() * types.length)]
-  const titles = insightTitles[type]
-  const title = titles[Math.floor(Math.random() * titles.length)]
-
-  const createdDate = new Date()
-  createdDate.setHours(createdDate.getHours() - i * 6)
-
-  const expiresDate = new Date()
-  expiresDate.setDate(expiresDate.getDate() + Math.floor(Math.random() * 30) + 7)
-
-  return {
-    id: `DI-${String(i + 1).padStart(4, '0')}`,
-    userId: 'user_demo_123',
-    type,
-    title,
-    description: `AI-powered insight: ${title}. Analysis shows significant opportunity for improvement.`,
-    impact: impacts[Math.floor(Math.random() * impacts.length)],
-    action: `Take action on ${title.toLowerCase()}`,
-    actionUrl: `/dashboard/insights/${type}`,
-    confidence: Math.floor(Math.random() * 30) + 70, // 70-100
-    actedUpon: Math.random() > 0.7,
-    createdAt: createdDate,
-    expiresAt: expiresDate,
-    priority: Math.floor(Math.random() * 10) + 1,
-    category: type,
-    relatedMetrics: ['revenue', 'productivity', 'satisfaction'].slice(0, Math.floor(Math.random() * 3) + 1),
-    isAIGenerated: true
-  }
-})
-
-// ============================================================================
-// MOCK DATA - Dashboard Metrics (15 items)
-// ============================================================================
-
-export const mockDashboardMetrics: DashboardMetric[] = [
-  {
-    id: 'DM-0001',
-    userId: 'user_demo_123',
-    name: 'Total Earnings',
-    value: 45231,
-    previousValue: 42500,
-    change: 2731,
-    changePercent: 6.4,
-    trend: 'up',
-    unit: 'USD',
-    icon: 'DollarSign',
-    color: 'green',
-    isPositive: true,
-    target: 50000,
-    targetProgress: 90,
-    lastUpdated: new Date(),
-    category: 'Financial',
-    description: 'Total earnings this month'
-  },
-  {
-    id: 'DM-0002',
-    userId: 'user_demo_123',
-    name: 'Active Projects',
-    value: 12,
-    previousValue: 15,
-    change: -3,
-    changePercent: -20,
-    trend: 'down',
-    unit: 'projects',
-    icon: 'Briefcase',
-    color: 'blue',
-    isPositive: false,
-    target: 20,
-    targetProgress: 60,
-    lastUpdated: new Date(),
-    category: 'Projects',
-    description: 'Currently active projects'
-  },
-  {
-    id: 'DM-0003',
-    userId: 'user_demo_123',
-    name: 'Total Clients',
-    value: 156,
-    previousValue: 142,
-    change: 14,
-    changePercent: 9.9,
-    trend: 'up',
-    unit: 'clients',
-    icon: 'Users',
-    color: 'purple',
-    isPositive: true,
-    target: 200,
-    targetProgress: 78,
-    lastUpdated: new Date(),
-    category: 'Clients',
-    description: 'Total client base'
-  },
-  {
-    id: 'DM-0004',
-    userId: 'user_demo_123',
-    name: 'Hours This Month',
-    value: 187,
-    previousValue: 175,
-    change: 12,
-    changePercent: 6.9,
-    trend: 'up',
-    unit: 'hours',
-    icon: 'Clock',
-    color: 'orange',
-    isPositive: true,
-    target: 200,
-    targetProgress: 93,
-    lastUpdated: new Date(),
-    category: 'Time',
-    description: 'Hours logged this month'
-  },
-  {
-    id: 'DM-0005',
-    userId: 'user_demo_123',
-    name: 'Client Satisfaction',
-    value: 4.8,
-    previousValue: 4.6,
-    change: 0.2,
-    changePercent: 4.3,
-    trend: 'up',
-    unit: 'stars',
-    icon: 'Star',
-    color: 'yellow',
-    isPositive: true,
-    target: 5.0,
-    targetProgress: 96,
-    lastUpdated: new Date(),
-    category: 'Quality',
-    description: 'Average client satisfaction rating'
-  }
-]
-
-// ============================================================================
-// MOCK DATA - Quick Actions (20 items)
-// ============================================================================
-
+// Quick actions - these are static UI elements, not mock data
+// They define available actions in the dashboard
 export const mockQuickActions: QuickAction[] = [
   {
     id: 'QA-0001',
@@ -479,8 +234,7 @@ export const mockQuickActions: QuickAction[] = [
     shortcut: 'Cmd+N',
     isPremium: false,
     isNew: false,
-    usageCount: 245,
-    lastUsed: new Date(),
+    usageCount: 0,
     estimatedTime: '5 min',
     complexity: 'simple'
   },
@@ -495,8 +249,7 @@ export const mockQuickActions: QuickAction[] = [
     shortcut: 'Cmd+Shift+C',
     isPremium: false,
     isNew: false,
-    usageCount: 89,
-    lastUsed: new Date(),
+    usageCount: 0,
     estimatedTime: '3 min',
     complexity: 'simple'
   },
@@ -511,8 +264,7 @@ export const mockQuickActions: QuickAction[] = [
     shortcut: 'Cmd+I',
     isPremium: false,
     isNew: false,
-    usageCount: 567,
-    lastUsed: new Date(),
+    usageCount: 0,
     estimatedTime: '2 min',
     complexity: 'simple'
   },
@@ -527,8 +279,7 @@ export const mockQuickActions: QuickAction[] = [
     shortcut: 'Cmd+Shift+A',
     isPremium: true,
     isNew: true,
-    usageCount: 123,
-    lastUsed: new Date(),
+    usageCount: 0,
     estimatedTime: '1 min',
     complexity: 'simple'
   },
@@ -543,8 +294,7 @@ export const mockQuickActions: QuickAction[] = [
     shortcut: 'Cmd+M',
     isPremium: false,
     isNew: false,
-    usageCount: 345,
-    lastUsed: new Date(),
+    usageCount: 0,
     estimatedTime: '2 min',
     complexity: 'simple'
   }
@@ -887,10 +637,4 @@ export function getMostUsedQuickActions(actions: QuickAction[], limit: number = 
   return [...actions].sort((a, b) => b.usageCount - a.usageCount).slice(0, limit)
 }
 
-logger.info('Dashboard utilities initialized', {
-  mockActivities: mockDashboardActivities.length,
-  mockProjects: mockDashboardProjects.length,
-  mockInsights: mockDashboardInsights.length,
-  mockMetrics: mockDashboardMetrics.length,
-  mockQuickActions: mockQuickActions.length
-})
+logger.info('Dashboard utilities initialized - using real database data')

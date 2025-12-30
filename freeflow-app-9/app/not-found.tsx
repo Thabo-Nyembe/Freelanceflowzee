@@ -51,7 +51,7 @@ export default function NotFound() {
                   <Link href="/video-studio">AI Video Studio</Link>
                 </Button>
                 <Button variant="ghost" asChild className="w-full justify-start">
-                  <Link href="/dashboard/projects-hub">Projects Hub</Link>
+                  <Link href="/dashboard/projects-hub-v2">Projects Hub</Link>
                 </Button>
                 <Button variant="ghost" asChild className="w-full justify-start">
                   <Link href="/community">Community</Link>

@@ -20,9 +20,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    // Demo mode for unauthenticated users
+    // Require authentication - no demo mode
     if (!user) {
-      return handleDemoGet(action, period);
+      return NextResponse.json(
+        { success: false, error: 'Authentication required. Please log in to access analytics data.' },
+        { status: 401 }
+      );
     }
 
     // Calculate date range
@@ -983,45 +986,4 @@ async function trackAnalyticsEvent(supabase: any, userId: string, event: any) {
     });
 }
 
-// =====================================================
-// DEMO MODE HANDLER
-// =====================================================
-function handleDemoGet(action: string | null, period: string): NextResponse {
-  const mockOverview = {
-    projects: { total: 12, active: 5, completed: 7, totalValue: 45000 },
-    clients: { total: 24, active: 18, newInPeriod: 3 },
-    revenue: { totalInvoiced: 52000, totalPaid: 45000, pending: 7000, invoiceCount: 18, paidCount: 15 },
-    tasks: { total: 156, created: 42, completed: 38, completionRate: 90 }
-  };
-
-  switch (action) {
-    case 'overview':
-      return NextResponse.json({ success: true, overview: mockOverview, demo: true });
-    case 'revenue':
-      return NextResponse.json({
-        success: true,
-        revenue: {
-          summary: mockOverview.revenue,
-          byMonth: [
-            { month: '2024-01', invoiced: 12000, paid: 10000, count: 4 },
-            { month: '2024-02', invoiced: 15000, paid: 14000, count: 5 }
-          ],
-          topClients: [
-            { clientId: '1', total: 15000, count: 5 },
-            { clientId: '2', total: 12000, count: 4 }
-          ],
-          averageInvoiceValue: 2889
-        },
-        demo: true
-      });
-    default:
-      return NextResponse.json({
-        success: true,
-        analytics: {
-          overview: mockOverview,
-          period
-        },
-        demo: true
-      });
-  }
-}
+// Demo mode removed - all data comes from real database

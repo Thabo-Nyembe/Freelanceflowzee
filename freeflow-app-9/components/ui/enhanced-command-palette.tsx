@@ -103,7 +103,7 @@ export function EnhancedCommandPalette({
       title: 'AI Create Studio',
       description: 'Generate content with AI',
       icon: Brain,
-      action: () => router.push('/dashboard/ai-create'),
+      action: () => router.push('/dashboard/ai-create-v2'),
       shortcut: '⌘A',
       category: 'Navigation',
       keywords: ['ai', 'generate', 'create', 'content']
@@ -113,7 +113,7 @@ export function EnhancedCommandPalette({
       title: 'Analytics Dashboard',
       description: 'View analytics and insights',
       icon: BarChart3,
-      action: () => router.push('/dashboard/analytics'),
+      action: () => router.push('/dashboard/analytics-v2'),
       shortcut: '⌘R',
       category: 'Navigation',
       keywords: ['analytics', 'reports', 'insights', 'data']
@@ -123,7 +123,7 @@ export function EnhancedCommandPalette({
       title: 'Canvas Studio',
       description: 'Design and collaborate',
       icon: Palette,
-      action: () => router.push('/dashboard/canvas'),
+      action: () => router.push('/dashboard/canvas-v2'),
       category: 'Navigation',
       keywords: ['design', 'canvas', 'collaborate', 'create']
     },
@@ -132,7 +132,7 @@ export function EnhancedCommandPalette({
       title: 'Video Studio',
       description: 'Edit and produce videos',
       icon: Video,
-      action: () => router.push('/dashboard/video-studio'),
+      action: () => router.push('/dashboard/video-studio-v2'),
       category: 'Navigation',
       keywords: ['video', 'edit', 'studio', 'production']
     },
@@ -159,7 +159,7 @@ export function EnhancedCommandPalette({
       title: 'Gallery Studio',
       description: 'Manage media and portfolio',
       icon: Camera,
-      action: () => router.push('/dashboard/gallery'),
+      action: () => router.push('/dashboard/gallery-v2'),
       category: 'Navigation',
       keywords: ['gallery', 'media', 'portfolio', 'images']
     },
@@ -177,7 +177,7 @@ export function EnhancedCommandPalette({
       title: 'Time Tracking',
       description: 'Track time and productivity',
       icon: Clock,
-      action: () => router.push('/dashboard/time-tracking'),
+      action: () => router.push('/dashboard/time-tracking-v2'),
       category: 'Navigation',
       keywords: ['time', 'tracking', 'productivity', 'timer']
     },
