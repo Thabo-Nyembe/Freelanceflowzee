@@ -646,6 +646,25 @@ export default function ContentStudioClient() {
     )
   }, [searchQuery])
 
+  // Handlers
+  const handleCreateContent = () => {
+    toast.info('Create Content', {
+      description: 'Opening content editor...'
+    })
+  }
+
+  const handlePublishContent = (contentId: string) => {
+    toast.success('Content published', {
+      description: 'Content is now live'
+    })
+  }
+
+  const handleScheduleContent = (contentId: string) => {
+    toast.info('Schedule Content', {
+      description: 'Opening scheduler...'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

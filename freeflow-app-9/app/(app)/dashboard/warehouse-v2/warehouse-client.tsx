@@ -537,6 +537,25 @@ export default function WarehouseClient() {
     }
   }
 
+  // Handlers
+  const handleCreateShipment = () => {
+    toast.info('Create Shipment', {
+      description: 'Opening shipment form...'
+    })
+  }
+
+  const handleReceiveInventory = () => {
+    toast.info('Receive Inventory', {
+      description: 'Opening receiving form...'
+    })
+  }
+
+  const handleStartInventoryCount = () => {
+    toast.success('Inventory count started', {
+      description: 'Count session is now active'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">

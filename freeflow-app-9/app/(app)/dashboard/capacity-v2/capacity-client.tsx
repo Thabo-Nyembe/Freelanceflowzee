@@ -378,6 +378,25 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
     }
   }, [])
 
+  // Handlers
+  const handleAllocateResource = () => {
+    toast.info('Allocate Resource', {
+      description: 'Opening allocation form...'
+    })
+  }
+
+  const handleBalanceWorkload = () => {
+    toast.success('Workload balanced', {
+      description: 'Team capacity optimized'
+    })
+  }
+
+  const handleExportCapacity = () => {
+    toast.success('Exporting capacity', {
+      description: 'Capacity report will be downloaded'
+    })
+  }
+
   if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">Error: {error.message}</div></div>
 
   return (

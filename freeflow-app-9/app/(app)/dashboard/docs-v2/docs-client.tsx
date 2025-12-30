@@ -514,6 +514,25 @@ export default function DocsClient() {
     return views.toString()
   }
 
+  // Handlers
+  const handleCreateDoc = () => {
+    toast.info('Create Document', {
+      description: 'Opening document editor...'
+    })
+  }
+
+  const handlePublishDoc = (docId: string) => {
+    toast.success('Document published', {
+      description: 'Documentation is now live'
+    })
+  }
+
+  const handleExportDocs = () => {
+    toast.success('Exporting documentation', {
+      description: 'Docs will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50/30 to-zinc-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

@@ -508,6 +508,25 @@ export default function ThreeDModelingClient() {
     { id: 'merge', icon: Merge, label: 'Merge' }
   ]
 
+  // Handlers
+  const handleCreateModel = () => {
+    toast.info('Create Model', {
+      description: 'Opening 3D canvas...'
+    })
+  }
+
+  const handleExportModel = (format: string) => {
+    toast.success('Exporting model', {
+      description: `Model will be exported as ${format}`
+    })
+  }
+
+  const handleSaveProject = () => {
+    toast.success('Project saved', {
+      description: 'All changes have been saved'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-6">

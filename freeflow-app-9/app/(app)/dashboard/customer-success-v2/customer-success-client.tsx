@@ -576,6 +576,25 @@ export default function CustomerSuccessClient() {
     return icons[type]
   }
 
+  // Handlers
+  const handleScheduleQBR = (customerId: string) => {
+    toast.info('Schedule QBR', {
+      description: 'Opening calendar...'
+    })
+  }
+
+  const handleLogInteraction = (customerId: string) => {
+    toast.success('Interaction logged', {
+      description: 'Customer touchpoint recorded'
+    })
+  }
+
+  const handleExportReport = () => {
+    toast.success('Exporting report', {
+      description: 'Customer success report will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

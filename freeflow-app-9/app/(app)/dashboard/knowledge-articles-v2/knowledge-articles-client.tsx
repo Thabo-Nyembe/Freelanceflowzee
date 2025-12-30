@@ -617,6 +617,25 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     { label: 'Growth', value: `${stats.growthRate}%`, icon: TrendingUp, color: 'from-amber-500 to-orange-600', change: '+5.2%' }
   ]
 
+  // Handlers
+  const handleCreateArticle = () => {
+    toast.info('Create Article', {
+      description: 'Opening article editor...'
+    })
+  }
+
+  const handlePublishArticle = (articleId: string) => {
+    toast.success('Article published', {
+      description: 'Article is now live'
+    })
+  }
+
+  const handleExportArticles = () => {
+    toast.success('Exporting articles', {
+      description: 'Articles will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

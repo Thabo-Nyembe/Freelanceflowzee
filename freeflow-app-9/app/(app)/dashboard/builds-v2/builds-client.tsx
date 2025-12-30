@@ -831,6 +831,7 @@ export default function BuildsClient() {
     }
   }, [])
 
+  // Handlers
   const handleTriggerBuild = () => {
     toast.info('Build triggered', {
       description: 'Starting new build...'

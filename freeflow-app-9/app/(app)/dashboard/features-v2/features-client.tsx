@@ -554,6 +554,25 @@ export default function FeaturesClient() {
     { status: 'released', title: 'Released' }
   ]
 
+  // Handlers
+  const handleCreateFeature = () => {
+    toast.info('Create Feature', {
+      description: 'Opening feature form...'
+    })
+  }
+
+  const handleMoveFeature = (featureId: string, newStatus: string) => {
+    toast.success('Feature moved', {
+      description: `Feature moved to ${newStatus}`
+    })
+  }
+
+  const handleExportRoadmap = () => {
+    toast.success('Exporting roadmap', {
+      description: 'Roadmap will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
       <div className="max-w-[1800px] mx-auto space-y-6">

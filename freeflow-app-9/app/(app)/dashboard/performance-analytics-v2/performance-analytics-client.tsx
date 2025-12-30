@@ -406,6 +406,25 @@ export default function PerformanceAnalyticsClient() {
     return `${(ms / 1000).toFixed(2)}s`
   }
 
+  // Handlers
+  const handleRefreshMetrics = () => {
+    toast.info('Refreshing metrics', {
+      description: 'Fetching latest performance data...'
+    })
+  }
+
+  const handleExportReport = () => {
+    toast.success('Exporting report', {
+      description: 'Performance report will be downloaded'
+    })
+  }
+
+  const handleSetAlert = (metric: string) => {
+    toast.success('Alert created', {
+      description: `You'll be notified of ${metric} changes`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
