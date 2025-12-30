@@ -7,6 +7,31 @@ import { test, expect } from '@playwright/test';
 
 const BASE_URL = 'http://localhost:9323';
 
+// Test credentials
+const TEST_EMAIL = 'test@kazi.dev';
+const TEST_PASSWORD = 'test12345';
+
+// Helper function to login
+async function login(page: any) {
+  await page.goto(`${BASE_URL}/login`);
+  await page.waitForLoadState('networkidle');
+
+  const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]').first();
+  const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
+
+  if (await emailInput.isVisible() && await passwordInput.isVisible()) {
+    await emailInput.fill(TEST_EMAIL);
+    await passwordInput.fill(TEST_PASSWORD);
+
+    const loginBtn = page.locator('button[type="submit"], button:has-text("Sign in"), button:has-text("Log in"), button:has-text("Login")').first();
+    if (await loginBtn.isVisible()) {
+      await loginBtn.click();
+      await page.waitForLoadState('networkidle');
+      await page.waitForTimeout(2000);
+    }
+  }
+}
+
 // V2 Pages organized by category for visual testing
 const V2_PAGES_FOR_VISUAL = {
   core: [
@@ -102,6 +127,8 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Set consistent viewport for visual testing
     await page.setViewportSize({ width: 1920, height: 1080 });
+    // Login before each test
+    await login(page);
   });
 
   test.describe('Core Business Pages - Visual Tests @visual', () => {
@@ -230,9 +257,13 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
 
 test.describe('Component Visual Tests', () => {
 
-  test('visual: Create dialog component', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto(`${BASE_URL}/dashboard/invoices-v2`);
+    await login(page);
+  });
+
+  test('visual: Create dialog component', async ({ page }) => {
+    await page.goto(`${BASE_URL}/dashboard/invoices-v2`, { waitUntil: 'networkidle' });
     await page.waitForLoadState('networkidle');
 
     // Click create button to open dialog
@@ -299,6 +330,10 @@ test.describe('Component Visual Tests', () => {
 
 test.describe('Responsive Visual Tests', () => {
 
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
+
   const viewports = [
     { name: 'mobile', width: 375, height: 812 },
     { name: 'tablet', width: 768, height: 1024 },
@@ -346,8 +381,12 @@ test.describe('Responsive Visual Tests', () => {
 
 test.describe('Dark Mode Visual Tests', () => {
 
-  test('visual: invoices-v2 dark mode', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
+    await login(page);
+  });
+
+  test('visual: invoices-v2 dark mode', async ({ page }) => {
 
     // Set dark mode preference
     await page.emulateMedia({ colorScheme: 'dark' });
@@ -393,8 +432,12 @@ test.describe('Dark Mode Visual Tests', () => {
 
 test.describe('Interaction State Visual Tests', () => {
 
-  test('visual: Button hover states', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
+    await login(page);
+  });
+
+  test('visual: Button hover states', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/invoices-v2`);
     await page.waitForLoadState('networkidle');
 

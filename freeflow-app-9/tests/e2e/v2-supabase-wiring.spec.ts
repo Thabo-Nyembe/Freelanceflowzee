@@ -7,6 +7,34 @@ import { test, expect } from '@playwright/test';
 
 const BASE_URL = 'http://localhost:9323';
 
+// Test credentials
+const TEST_EMAIL = 'test@kazi.dev';
+const TEST_PASSWORD = 'test12345';
+
+// Helper function to login
+async function login(page: any) {
+  await page.goto(`${BASE_URL}/login`);
+  await page.waitForLoadState('networkidle');
+
+  // Fill in login form
+  const emailInput = page.locator('input[type="email"], input[name="email"], input[placeholder*="email" i]').first();
+  const passwordInput = page.locator('input[type="password"], input[name="password"]').first();
+
+  if (await emailInput.isVisible() && await passwordInput.isVisible()) {
+    await emailInput.fill(TEST_EMAIL);
+    await passwordInput.fill(TEST_PASSWORD);
+
+    // Click login button
+    const loginBtn = page.locator('button[type="submit"], button:has-text("Sign in"), button:has-text("Log in"), button:has-text("Login")').first();
+    if (await loginBtn.isVisible()) {
+      await loginBtn.click();
+      await page.waitForLoadState('networkidle');
+      // Wait for redirect after login
+      await page.waitForTimeout(2000);
+    }
+  }
+}
+
 // V2 Pages organized by category
 const V2_PAGES = {
   core: [
@@ -88,6 +116,11 @@ const ALL_V2_PAGES = Object.values(V2_PAGES).flat();
 
 test.describe('V2 Dashboard Pages - Supabase Wiring Tests', () => {
 
+  // Login before each test
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
+
   test.describe('Page Load Tests @smoke', () => {
     for (const page of ALL_V2_PAGES.slice(0, 20)) {
       test(`${page} loads successfully`, async ({ page: browserPage }) => {
@@ -167,9 +200,9 @@ test.describe('V2 Dashboard Pages - Supabase Wiring Tests', () => {
       await page.goto(`${BASE_URL}/dashboard/analytics-v2`);
       await page.waitForLoadState('networkidle');
 
-      // Page may redirect to login - check for either dashboard content or login form
-      const dashboardOrLogin = page.locator('h1, h2, h3, [class*="analytics"], form, button:has-text("Sign"), button:has-text("Log")').first();
-      await expect(dashboardOrLogin).toBeVisible({ timeout: 5000 });
+      // Check that page loaded (not on login page)
+      const url = page.url();
+      expect(url).toContain('analytics-v2');
     });
 
     test('billing-v2: Create invoice functionality', async ({ page }) => {
@@ -190,9 +223,9 @@ test.describe('V2 Dashboard Pages - Supabase Wiring Tests', () => {
       await page.goto(`${BASE_URL}/dashboard/security-v2`);
       await page.waitForLoadState('networkidle');
 
-      // Should have security-related content
-      const content = page.locator('main, [class*="content"]');
-      await expect(content).toBeVisible();
+      // Check that page loaded (not on login page)
+      const url = page.url();
+      expect(url).toContain('security-v2');
     });
 
     test('audit-logs-v2: Logs display and export', async ({ page }) => {
@@ -214,18 +247,18 @@ test.describe('V2 Dashboard Pages - Supabase Wiring Tests', () => {
       await page.goto(`${BASE_URL}/dashboard/ai-assistant-v2`);
       await page.waitForLoadState('networkidle');
 
-      // Page may redirect to login - check for either AI content or login form
-      const aiOrLogin = page.locator('h1, h2, h3, input, textarea, form, button:has-text("Sign"), button:has-text("Log"), [class*="chat"], [class*="ai"]').first();
-      await expect(aiOrLogin).toBeVisible({ timeout: 10000 });
+      // Check for AI dashboard content
+      const content = page.locator('main.flex-1, [class*="ai"], [class*="chat"], .container').first();
+      await expect(content).toBeVisible({ timeout: 10000 });
     });
 
     test('ai-design-v2: Design tools load', async ({ page }) => {
       await page.goto(`${BASE_URL}/dashboard/ai-design-v2`);
       await page.waitForLoadState('networkidle');
 
-      // Page may redirect to login - check for either design content or login form
-      const designOrLogin = page.locator('h1, h2, h3, form, button:has-text("Sign"), button:has-text("Log"), [class*="design"], [class*="canvas"]').first();
-      await expect(designOrLogin).toBeVisible({ timeout: 5000 });
+      // Check that page loaded (not on login page)
+      const url = page.url();
+      expect(url).toContain('ai-design-v2');
     });
   });
 
@@ -249,18 +282,18 @@ test.describe('V2 Dashboard Pages - Supabase Wiring Tests', () => {
       await page.goto(`${BASE_URL}/dashboard/crm-v2`);
       await page.waitForLoadState('networkidle');
 
-      // Page may redirect to login - check for either CRM content or login form
-      const crmOrLogin = page.locator('h1, h2, h3, form, button:has-text("Sign"), button:has-text("Log"), [class*="crm"], [class*="contact"]').first();
-      await expect(crmOrLogin).toBeVisible({ timeout: 5000 });
+      // Check that page loaded (not on login page)
+      const url = page.url();
+      expect(url).toContain('crm-v2');
     });
 
     test('sales-v2: Sales pipeline view', async ({ page }) => {
       await page.goto(`${BASE_URL}/dashboard/sales-v2`);
       await page.waitForLoadState('networkidle');
 
-      // Page may redirect to login - check for either sales content or login form
-      const salesOrLogin = page.locator('h1, h2, h3, form, button:has-text("Sign"), button:has-text("Log"), [class*="pipeline"], [class*="kanban"], [class*="sales"]').first();
-      await expect(salesOrLogin).toBeVisible({ timeout: 5000 });
+      // Check that page loaded (not on login page)
+      const url = page.url();
+      expect(url).toContain('sales-v2');
     });
   });
 
@@ -308,9 +341,9 @@ test.describe('V2 Dashboard Pages - Supabase Wiring Tests', () => {
       await page.goto(`${BASE_URL}/dashboard/monitoring-v2`);
       await page.waitForLoadState('networkidle');
 
-      // Page may redirect to login - check for either monitoring content or login form
-      const monitoringOrLogin = page.locator('h1, h2, h3, form, button:has-text("Sign"), button:has-text("Log"), [class*="monitor"], [class*="chart"], [class*="stat"]').first();
-      await expect(monitoringOrLogin).toBeVisible({ timeout: 5000 });
+      // Check that page loaded (not on login page)
+      const url = page.url();
+      expect(url).toContain('monitoring-v2');
     });
 
     test('cloud-storage-v2: File upload functionality', async ({ page }) => {
@@ -462,6 +495,11 @@ test.describe('V2 Dashboard Pages - Supabase Wiring Tests', () => {
 });
 
 test.describe('Quick Smoke Tests - All V2 Pages', () => {
+  // Login before each test
+  test.beforeEach(async ({ page }) => {
+    await login(page);
+  });
+
   // Quick check that all pages load without 500 errors
   const samplePages = [
     'invoices-v2', 'customers-v2', 'analytics-v2', 'security-v2',
