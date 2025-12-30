@@ -297,8 +297,9 @@ export function useUserMetrics(userId?: string) {
 // ============================================================================
 
 // Demo user for investor presentations - ensures app works without auth
+// Using valid UUID format for database compatibility
 const DEMO_USER = {
-  id: 'demo-user-001',
+  id: '00000000-0000-0000-0000-000000000001',
   email: 'alex@freeflow.io',
   name: 'Alexandra Chen'
 }

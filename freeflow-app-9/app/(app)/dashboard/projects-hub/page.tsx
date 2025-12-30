@@ -828,9 +828,9 @@ export default function ProjectsOverviewPage() {
       {showAIPanel && (
         <div className="mb-8">
           <RevenueInsightsWidget
-            userId={userId || "demo-user-id"}
+            userId={userId || "00000000-0000-0000-0000-000000000001"}
             revenueData={revenueData || {
-              userId: userId || "demo-user-id",
+              userId: userId || "00000000-0000-0000-0000-000000000001",
               timeframe: "monthly" as const,
               totalRevenue: stats.revenue,
               revenueBySource: {

@@ -993,7 +993,7 @@ export function SidebarEnhanced() {
 
       {/* Online Presence Widget */}
       <div className="px-4 pb-4">
-        <GlobalPresenceWidget userId={userId || 'demo-user'} />
+        <GlobalPresenceWidget userId={userId || '00000000-0000-0000-0000-000000000001'} />
       </div>
 
       {/* Customize Navigation - Bottom Section */}

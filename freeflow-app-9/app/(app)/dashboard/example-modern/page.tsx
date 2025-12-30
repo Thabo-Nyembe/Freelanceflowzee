@@ -22,7 +22,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function ModernDashboardPage() {
   // Example user ID - in production, get from auth
-  const userId = 'demo-user-123'
+  // Using valid UUID format for database compatibility
+  const userId = '00000000-0000-0000-0000-000000000001'
 
   // Preload data early to start fetching
   preloadUser(userId)

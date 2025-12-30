@@ -78,7 +78,7 @@ export default function CommunityPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      <CommunityHub currentUserId={userId || 'demo-user'} />
+      <CommunityHub currentUserId={userId || '00000000-0000-0000-0000-000000000001'} />
     </div>
   )
 }

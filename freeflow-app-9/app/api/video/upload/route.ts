@@ -142,7 +142,7 @@ async function getVideoMetadata(filePath: string, file: File): Promise<any> {
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const userId = searchParams.get('userId') || 'demo-user'
+    const userId = searchParams.get('userId') || '00000000-0000-0000-0000-000000000001'
 
     // In production: fetch from database
     // const videos = await db.videos.findMany({ where: { userId } })

@@ -93,7 +93,7 @@ export default function AdvancedFeaturesDemo() {
 
         {/* Real-Time Features Demo */}
         <TabsContent value="realtime" className="space-y-4">
-          <RealTimeDemo userId={userId || 'demo-user'} />
+          <RealTimeDemo userId={userId || '00000000-0000-0000-0000-000000000001'} />
         </TabsContent>
 
         {/* PWA Status Demo */}

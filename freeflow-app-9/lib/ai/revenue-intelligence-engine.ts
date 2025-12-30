@@ -249,19 +249,26 @@ export class RevenueIntelligenceEngine {
     revenueData: RevenueData,
     industry?: string
   ): Promise<PricingRecommendation[]> {
+    // Ensure revenueBySource has default values to prevent undefined errors
+    const revenueBySource = revenueData.revenueBySource || {
+      projects: 0,
+      retainers: 0,
+      passive: 0,
+      other: 0
+    };
 
     const prompt = `You are a world-class pricing strategist specializing in ${industry || 'creative services'}.
 
 Analyze this revenue data and provide pricing optimization recommendations:
 
-Total Revenue: $${revenueData.totalRevenue}
+Total Revenue: $${revenueData.totalRevenue || 0}
 Revenue Sources:
-- Projects: $${revenueData.revenueBySource.projects}
-- Retainers: $${revenueData.revenueBySource.retainers}
-- Passive: $${revenueData.revenueBySource.passive}
+- Projects: $${revenueBySource.projects}
+- Retainers: $${revenueBySource.retainers}
+- Passive: $${revenueBySource.passive}
 
 Client Revenue Distribution:
-${revenueData.revenueByClient.map(c => `- ${c.clientName}: $${c.revenue} (${c.projectCount} projects)`).join('\n')}
+${(revenueData.revenueByClient || []).map(c => `- ${c.clientName}: $${c.revenue} (${c.projectCount} projects)`).join('\n') || 'No client data available'}
 
 Provide:
 1. Analysis of current pricing strategy
@@ -335,6 +342,10 @@ Format as JSON with this structure:
   async calculateClientLifetimeValues(
     revenueData: RevenueData
   ): Promise<ClientLifetimeValue[]> {
+    // Guard against undefined revenueByClient
+    if (!revenueData.revenueByClient || revenueData.revenueByClient.length === 0) {
+      return [];
+    }
 
     return revenueData.revenueByClient.map(client => {
       const avgProjectValue = client.revenue / client.projectCount;
@@ -381,18 +392,21 @@ Format as JSON with this structure:
   async detectRevenueLeaks(
     revenueData: RevenueData
   ): Promise<RevenueLeak[]> {
+    // Guard against undefined data
+    const revenueBySource = revenueData.revenueBySource || { projects: 0, retainers: 0, passive: 0, other: 0 };
+    const revenueByClient = revenueData.revenueByClient || [];
 
     const leaks: RevenueLeak[] = [];
 
     // Check for underpricing
-    const avgProjectValue = revenueData.revenueBySource.projects /
-                           revenueData.revenueByClient.reduce((sum, c) => sum + c.projectCount, 0);
+    const totalProjects = revenueByClient.reduce((sum, c) => sum + c.projectCount, 0);
+    const avgProjectValue = totalProjects > 0 ? revenueBySource.projects / totalProjects : 0;
 
-    if (avgProjectValue < 5000) { // Threshold for underpricing
+    if (avgProjectValue > 0 && avgProjectValue < 5000) { // Threshold for underpricing
       leaks.push({
         type: 'underpricing',
         severity: 'high',
-        estimatedLoss: avgProjectValue * 0.3 * revenueData.revenueByClient.length,
+        estimatedLoss: avgProjectValue * 0.3 * revenueByClient.length,
         description: 'Your average project value is below market rate. Increasing prices by 30% could capture significant additional revenue.',
         recommendations: [
           'Research competitor pricing in your niche',
@@ -404,7 +418,7 @@ Format as JSON with this structure:
     }
 
     // Check for retainer opportunity
-    const retainerPercentage = (revenueData.revenueBySource.retainers / revenueData.totalRevenue) * 100;
+    const retainerPercentage = revenueData.totalRevenue > 0 ? (revenueBySource.retainers / revenueData.totalRevenue) * 100 : 0;
 
     if (retainerPercentage < 30) {
       leaks.push({
@@ -448,11 +462,16 @@ Format as JSON with this structure:
   async identifyUpsellOpportunities(
     revenueData: RevenueData
   ): Promise<UpsellOpportunity[]> {
+    // Guard against undefined revenueByClient
+    const revenueByClient = revenueData.revenueByClient || [];
+    if (revenueByClient.length === 0) {
+      return [];
+    }
 
     const opportunities: UpsellOpportunity[] = [];
 
     // Identify clients ready for retainer conversion
-    const highValueClients = revenueData.revenueByClient
+    const highValueClients = revenueByClient
       .filter(c => c.projectCount >= 3)
       .slice(0, 3);
 
@@ -479,7 +498,7 @@ Format as JSON with this structure:
     });
 
     // Identify service expansion opportunities
-    const singleProjectClients = revenueData.revenueByClient
+    const singleProjectClients = revenueByClient
       .filter(c => c.projectCount === 1 && c.revenue > 2000);
 
     singleProjectClients.slice(0, 2).forEach(client => {
@@ -510,12 +529,14 @@ Format as JSON with this structure:
   async calculateInvestorMetrics(
     revenueData: RevenueData
   ): Promise<InvestorMetrics> {
+    // Guard against undefined data
+    const revenueByClient = revenueData.revenueByClient || [];
 
     const mrr = this.calculateMRR(revenueData);
     const arr = mrr * 12;
 
-    const totalCustomers = revenueData.revenueByClient.length;
-    const arpu = revenueData.totalRevenue / totalCustomers;
+    const totalCustomers = revenueByClient.length || 1; // Avoid division by zero
+    const arpu = (revenueData.totalRevenue || 0) / totalCustomers;
 
     // Conservative estimates for metrics requiring historical data
     const churnRate = 5; // 5% monthly churn (industry average)
@@ -524,8 +545,9 @@ Format as JSON with this structure:
     const clv = arpu * 24; // 24 month average lifetime
     const clvCacRatio = clv / cac;
 
-    const grossMargin = ((revenueData.totalRevenue - revenueData.expenses) / revenueData.totalRevenue) * 100;
-    const netMargin = (revenueData.netProfit / revenueData.totalRevenue) * 100;
+    const totalRevenue = revenueData.totalRevenue || 1; // Avoid division by zero
+    const grossMargin = ((totalRevenue - (revenueData.expenses || 0)) / totalRevenue) * 100;
+    const netMargin = ((revenueData.netProfit || 0) / totalRevenue) * 100;
 
     const revenueGrowthRate = 10; // Assume 10% MoM growth
     const ruleOf40 = revenueGrowthRate + netMargin;
@@ -705,9 +727,12 @@ Format as JSON with this structure:
    * Helper: Calculate Monthly Recurring Revenue
    */
   private calculateMRR(revenueData: RevenueData): number {
+    // Guard against undefined revenueBySource
+    const revenueBySource = revenueData.revenueBySource || { projects: 0, retainers: 0, passive: 0, other: 0 };
+
     // MRR = Retainer revenue (already monthly) + Project revenue normalized to monthly
-    const monthlyRetainers = revenueData.revenueBySource.retainers;
-    const monthlyProjects = revenueData.revenueBySource.projects / 12; // Normalize annual to monthly
+    const monthlyRetainers = revenueBySource.retainers;
+    const monthlyProjects = revenueBySource.projects / 12; // Normalize annual to monthly
 
     return monthlyRetainers + monthlyProjects;
   }

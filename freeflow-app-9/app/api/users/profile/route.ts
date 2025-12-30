@@ -923,7 +923,7 @@ async function uploadAvatar(supabase: any, userId: string, avatarData: string) {
 // =====================================================
 function handleDemoGet(action: string | null): NextResponse {
   const mockProfile = {
-    id: 'demo-user',
+    id: '00000000-0000-0000-0000-000000000001',
     first_name: 'Alex',
     last_name: 'Johnson',
     bio: 'Creative professional specializing in brand design and digital experiences.',

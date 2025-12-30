@@ -553,7 +553,7 @@ function createDefaultPortfolio(userId: string, name: string): Portfolio {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { action, userId = 'demo-user', ...params } = body;
+    const { action, userId = '00000000-0000-0000-0000-000000000001', ...params } = body;
 
     if (!action) {
       return NextResponse.json({ success: false, error: 'Action is required' }, { status: 400 });
