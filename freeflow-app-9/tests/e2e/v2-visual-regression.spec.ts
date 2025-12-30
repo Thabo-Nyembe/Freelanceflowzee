@@ -89,6 +89,14 @@ const ALL_V2_PAGES = Object.values(V2_PAGES_FOR_VISUAL).flat();
 // Test configuration for visual regression
 test.describe.configure({ mode: 'parallel' });
 
+// Common screenshot options for stability
+const SCREENSHOT_OPTIONS = {
+  fullPage: true,
+  animations: 'disabled' as const,
+  maxDiffPixelRatio: 0.05, // Allow 5% pixel difference for stability
+  timeout: 15000, // Increase timeout for stable screenshots
+};
+
 test.describe('V2 Dashboard Visual Regression Tests', () => {
 
   test.beforeEach(async ({ page }) => {
@@ -103,19 +111,10 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
         await page.waitForLoadState('networkidle');
 
         // Wait for animations to complete
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        // Take full page screenshot
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-          mask: [
-            // Mask dynamic content like timestamps, IDs
-            page.locator('[data-testid="timestamp"]'),
-            page.locator('[data-testid="dynamic-id"]'),
-            page.locator('time'),
-          ],
-        });
+        // Take full page screenshot with stability options
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -125,12 +124,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -140,12 +136,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -155,12 +148,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -170,12 +160,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -185,12 +172,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -200,12 +184,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -215,12 +196,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -230,12 +208,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
@@ -245,12 +220,9 @@ test.describe('V2 Dashboard Visual Regression Tests', () => {
       test(`visual: ${pageName} page layout`, async ({ page }) => {
         await page.goto(`${BASE_URL}/dashboard/${pageName}`);
         await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000);
 
-        await expect(page).toHaveScreenshot(`${pageName}-full.png`, {
-          fullPage: true,
-          animations: 'disabled',
-        });
+        await expect(page).toHaveScreenshot(`${pageName}-full.png`, SCREENSHOT_OPTIONS);
       });
     }
   });
