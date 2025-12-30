@@ -578,6 +578,37 @@ export default function MaintenanceClient() {
     })
   }, [searchQuery, statusFilter])
 
+  // Handlers
+  const handleCreateWorkOrder = () => {
+    toast.info('Create Work Order', {
+      description: 'Opening work order form...'
+    })
+  }
+
+  const handleAssignTechnician = (orderId: string) => {
+    toast.info('Assign Technician', {
+      description: 'Opening technician selection...'
+    })
+  }
+
+  const handleCompleteTask = (orderId: string) => {
+    toast.success('Task completed', {
+      description: 'Work order marked as complete'
+    })
+  }
+
+  const handleScheduleMaintenance = () => {
+    toast.info('Schedule Maintenance', {
+      description: 'Opening scheduler...'
+    })
+  }
+
+  const handleExportReport = () => {
+    toast.success('Exporting report', {
+      description: 'Maintenance report will be downloaded'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900">
       <div className="p-8">

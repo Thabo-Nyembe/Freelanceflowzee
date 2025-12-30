@@ -688,6 +688,7 @@ export default function OrdersClient() {
     }
   }, [])
 
+  // Handlers
   const handleCreateOrder = () => {
     toast.info('Create Order', {
       description: 'Opening order form...'

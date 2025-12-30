@@ -444,6 +444,7 @@ export default function SalesClient() {
     })
   }, [searchQuery, stageFilter])
 
+  // Handlers
   const handleCreateDeal = () => {
     toast.info('Create Deal', {
       description: 'Opening deal creation form...'

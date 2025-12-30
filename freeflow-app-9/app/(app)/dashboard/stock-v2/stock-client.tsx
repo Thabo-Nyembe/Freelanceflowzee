@@ -762,6 +762,7 @@ export default function StockClient() {
     pendingMovements: movements.filter(m => m.status === 'pending').length
   }), [products, alerts, movements])
 
+  // Handlers
   const handleViewProduct = (product: Product) => {
     setSelectedProduct(product)
     setShowProductDialog(true)

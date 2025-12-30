@@ -398,6 +398,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     }).format(amount / 100)
   }
 
+  // Handlers
   const handleCreateProduct = () => {
     toast.info('Create Product', {
       description: 'Opening product form...'

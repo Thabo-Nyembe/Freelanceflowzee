@@ -535,6 +535,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     shipped: mockIdeas.filter(i => i.status === 'shipped').length
   }), [])
 
+  // Handlers
   const handleSubmitIdea = () => {
     toast.info('Submit Idea', {
       description: 'Opening idea submission form...'

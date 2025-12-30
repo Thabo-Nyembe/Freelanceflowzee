@@ -613,6 +613,7 @@ export default function CiCdClient() {
     })
   }, [searchQuery, statusFilter])
 
+  // Handlers
   const handleTriggerWorkflow = (workflow: Workflow) => {
     toast.info('Workflow triggered', {
       description: `Starting ${workflow.name}...`

@@ -295,6 +295,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     }
   }
 
+  // Handlers
   const handleCreate = async () => {
     if (!formData.subject.trim()) {
       toast.error('Please enter a subject')

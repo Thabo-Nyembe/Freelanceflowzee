@@ -333,6 +333,37 @@ export default function SystemInsightsClient() {
     { label: 'Apdex', value: stats.avgApdex, icon: TrendingUp, gradient: 'from-pink-500 to-pink-600', positive: parseFloat(stats.avgApdex) >= 0.9 }
   ]
 
+  // Handlers
+  const handleRefreshMetrics = () => {
+    toast.info('Refreshing metrics', {
+      description: 'Fetching latest system data...'
+    })
+  }
+
+  const handleCreateAlert = () => {
+    toast.success('Alert created', {
+      description: 'You will be notified of anomalies'
+    })
+  }
+
+  const handleExportReport = () => {
+    toast.success('Exporting report', {
+      description: 'System insights report will be downloaded'
+    })
+  }
+
+  const handleRestartService = (serviceName: string) => {
+    toast.info('Restarting service', {
+      description: `${serviceName} is restarting...`
+    })
+  }
+
+  const handleScaleService = (serviceName: string) => {
+    toast.info('Scaling service', {
+      description: `Opening scaling options for ${serviceName}`
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-[1800px] mx-auto space-y-8">

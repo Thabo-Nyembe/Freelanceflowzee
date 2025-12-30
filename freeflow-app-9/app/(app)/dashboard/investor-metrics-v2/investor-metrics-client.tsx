@@ -442,6 +442,37 @@ export default function InvestorMetricsClient() {
     return positive ? 'text-green-600' : change === 0 ? 'text-gray-500' : 'text-red-600'
   }
 
+  // Handlers
+  const handleExportMetrics = () => {
+    toast.success('Exporting metrics', {
+      description: 'Investor report will be downloaded'
+    })
+  }
+
+  const handleRefreshData = () => {
+    toast.info('Refreshing data', {
+      description: 'Fetching latest metrics...'
+    })
+  }
+
+  const handleGenerateReport = () => {
+    toast.success('Generating report', {
+      description: 'Investor presentation is being created'
+    })
+  }
+
+  const handleSetAlert = (metric: string) => {
+    toast.success('Alert set', {
+      description: `You'll be notified when ${metric} changes`
+    })
+  }
+
+  const handleShareDashboard = () => {
+    toast.success('Link copied', {
+      description: 'Dashboard link copied to clipboard'
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-yellow-50/30 to-orange-50/40 dark:bg-none dark:bg-gray-900">
       <div className="p-8">
