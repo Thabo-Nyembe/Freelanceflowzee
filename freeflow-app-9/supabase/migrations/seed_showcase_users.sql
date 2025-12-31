@@ -10,7 +10,7 @@ VALUES (
   '11111111-1111-1111-1111-111111111111',
   'sarah@techstartup.io',
   'Sarah Mitchell',
-  '$2a$10$PwJKQ8x.OQXJzqp.fYU8qO8WYJYBxvkK5.HwzMZLQlXqZqFzqHqHq',
+  '$2b$10$z2MwtOyHFkiY1aOQaNj7mOG0Yb66Ng5Ej7aWscYvWfl2m.4jCSywG',
   'user',
   'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
   '2025-12-31T08:00:00Z'
@@ -22,7 +22,7 @@ VALUES (
   '22222222-2222-2222-2222-222222222222',
   'marcus@designstudio.co',
   'Marcus Johnson',
-  '$2a$10$PwJKQ8x.OQXJzqp.fYU8qO8WYJYBxvkK5.HwzMZLQlXqZqFzqHqHq',
+  '$2b$10$z2MwtOyHFkiY1aOQaNj7mOG0Yb66Ng5Ej7aWscYvWfl2m.4jCSywG',
   'user',
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
   '2025-10-15T10:30:00Z'
