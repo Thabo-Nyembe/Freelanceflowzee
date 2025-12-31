@@ -1,23 +1,28 @@
 'use client'
 
-import { User } from '@supabase/supabase-js'
 import { SidebarEnhanced } from '@/components/navigation/sidebar-enhanced'
 import { MobileAdminNav } from '@/components/admin/mobile-admin-nav'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { OnboardingProvider } from '@/components/onboarding/onboarding-provider'
-import { MockDataProvider } from '@/lib/mock-data/provider'
+import { EngagementProvider } from '@/components/engagement/engagement-provider'
+
+interface UserData {
+  id: string
+  email: string
+  user_metadata: { name: string }
+}
 
 interface DashboardLayoutClientProps {
   children: React.ReactNode
-  user: User
+  user: UserData
 }
 
 export default function DashboardLayoutClient({
-  children, user: _user
+  children, user
 }: DashboardLayoutClientProps) {
   return (
     <OnboardingProvider>
-      <MockDataProvider>
+      <EngagementProvider userId={user.id}>
         <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
           <MobileAdminNav />
 
@@ -39,7 +44,7 @@ export default function DashboardLayoutClient({
             </div>
           </main>
         </div>
-      </MockDataProvider>
+      </EngagementProvider>
     </OnboardingProvider>
   )
 }

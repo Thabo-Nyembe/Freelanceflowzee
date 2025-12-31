@@ -7,6 +7,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSession } from 'next-auth/react'
 import { createClient } from '@/lib/supabase/client'
 import {
   calculateRevenueData,
@@ -495,80 +496,18 @@ export function useUserMetrics(userId?: string) {
 }
 
 // ============================================================================
-// CURRENT USER HOOK - Real authenticated user only
+// CURRENT USER HOOK - Uses NextAuth session (not Supabase Auth)
 // ============================================================================
 
 export function useCurrentUser() {
-  const [userId, setUserId] = useState<string | null>(null)
-  const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [userName, setUserName] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
+  const { data: session, status } = useSession()
 
-  useEffect(() => {
-    const supabase = createClient()
-    let isMounted = true
-
-    const fetchUser = async () => {
-      try {
-        setLoading(true)
-        const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-        if (authError) {
-          if (isMounted) {
-            setError(authError)
-            console.error('Auth error:', authError)
-          }
-          return
-        }
-
-        if (user && isMounted) {
-          setUserId(user.id)
-          setUserEmail(user.email || null)
-          const name = user.user_metadata?.full_name ||
-                       user.user_metadata?.name ||
-                       user.email?.split('@')[0] ||
-                       null
-          setUserName(name)
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError(err as Error)
-          console.error('Failed to fetch user:', err)
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
-      }
-    }
-
-    fetchUser()
-
-    // Subscribe to auth changes in real-time
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUserId(session.user.id)
-        setUserEmail(session.user.email || null)
-        const name = session.user.user_metadata?.full_name ||
-                     session.user.user_metadata?.name ||
-                     session.user.email?.split('@')[0] ||
-                     null
-        setUserName(name)
-        setError(null)
-      } else {
-        setUserId(null)
-        setUserEmail(null)
-        setUserName(null)
-      }
-      setLoading(false)
-    })
-
-    return () => {
-      isMounted = false
-      subscription.unsubscribe()
-    }
-  }, [])
+  // Map NextAuth session to the expected return format
+  const userId = session?.user?.id || null
+  const userEmail = session?.user?.email || null
+  const userName = session?.user?.name || null
+  const loading = status === 'loading'
+  const error = null // NextAuth handles errors differently
 
   return { userId, userEmail, userName, loading, error }
 }

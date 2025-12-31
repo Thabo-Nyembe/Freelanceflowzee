@@ -5,6 +5,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth.config';
 
 // =====================================================
 // GET - Dashboard stats, recent activity, quick actions
@@ -12,13 +14,16 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+
+    // Use NextAuth session instead of Supabase Auth
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
 
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
 
     // Require authentication - no demo mode
-    if (!user) {
+    if (!user?.id) {
       return NextResponse.json(
         { success: false, error: 'Authentication required. Please log in to access dashboard data.' },
         { status: 401 }
@@ -131,12 +136,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+
+    // Use NextAuth session instead of Supabase Auth
+    const session = await getServerSession(authOptions);
+    const user = session?.user;
 
     const body = await request.json();
     const { action, ...data } = body;
 
-    if (!user) {
+    if (!user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
