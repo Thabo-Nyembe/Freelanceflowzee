@@ -5,6 +5,7 @@ import { MobileAdminNav } from '@/components/admin/mobile-admin-nav'
 import { ErrorBoundary } from '@/components/error-boundary'
 import { OnboardingProvider } from '@/components/onboarding/onboarding-provider'
 import { EngagementProvider } from '@/components/engagement/engagement-provider'
+import { AnnouncementsBanner } from '@/components/dashboard/announcements-banner'
 
 interface UserData {
   id: string
@@ -38,6 +39,7 @@ export default function DashboardLayoutClient({
             </div>
 
             <div className="container mx-auto p-4 lg:p-6 max-w-[1600px]">
+              <AnnouncementsBanner />
               <ErrorBoundary>
                 {children}
               </ErrorBoundary>

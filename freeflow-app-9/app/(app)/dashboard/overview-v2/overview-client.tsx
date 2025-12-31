@@ -36,6 +36,11 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import {
+  PlatformStatsWidget,
+  BusinessMetricsWidget,
+} from '@/components/dashboard/dynamic-content-widgets'
+
 
 
 
@@ -999,6 +1004,29 @@ export default function OverviewClient() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Platform Stats & Business Metrics - Dynamic Content */}
+            <div className="space-y-6 mt-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Zap className="w-5 h-5 text-indigo-600" />
+                Platform Insights
+              </h3>
+              <PlatformStatsWidget />
+              <div className="grid md:grid-cols-2 gap-6">
+                <BusinessMetricsWidget />
+                <Card className="border-0 shadow-sm dark:bg-gray-800">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-purple-500" />
+                      Quick Actions
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <QuickActionsToolbar />
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
           {/* Metrics Tab */}

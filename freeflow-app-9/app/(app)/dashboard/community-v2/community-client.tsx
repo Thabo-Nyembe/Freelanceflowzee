@@ -58,6 +58,12 @@ import {
   communityQuickActions,
 } from '@/lib/mock-data/adapters'
 
+import {
+  CommunityAnnouncements,
+  CommunityGrowthMetrics,
+  CommunityTestimonials,
+} from '@/components/community/community-dynamic-content'
+
 // ============== DISCORD-LEVEL INTERFACES ==============
 
 type ChannelType = 'text' | 'voice' | 'video' | 'announcement' | 'stage' | 'forum' | 'rules'
@@ -1474,6 +1480,19 @@ export default function CommunityClient() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Dynamic Platform Content */}
+            <div className="mt-6 space-y-6">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Megaphone className="w-5 h-5 text-orange-500" />
+                Platform Updates & Insights
+              </h3>
+              <CommunityAnnouncements />
+              <div className="grid lg:grid-cols-2 gap-6">
+                <CommunityGrowthMetrics />
+                <CommunityTestimonials />
+              </div>
+            </div>
           </TabsContent>
 
           {/* Settings Tab - Discord Level */}

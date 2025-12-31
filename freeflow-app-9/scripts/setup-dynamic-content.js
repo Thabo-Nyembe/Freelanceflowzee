@@ -155,7 +155,8 @@ const MARKETING_CONTENT = [
     image_url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200',
     category: 'hero',
     is_featured: true,
-    display_order: 1
+    display_order: 1,
+    metadata: { cta_link: '/dashboard/projects-hub-v2', cta_text: 'Start a Project' }
   },
   {
     slug: 'feature-ai-tools',
@@ -165,7 +166,8 @@ const MARKETING_CONTENT = [
     image_url: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800',
     category: 'features',
     is_featured: true,
-    display_order: 2
+    display_order: 2,
+    metadata: { cta_link: '/dashboard/ai-create-v2', cta_text: 'Try AI Tools' }
   },
   {
     slug: 'feature-collaboration',
@@ -174,7 +176,8 @@ const MARKETING_CONTENT = [
     content: 'Share projects, communicate with clients, and collaborate with your team - all in one place.',
     image_url: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=800',
     category: 'features',
-    display_order: 3
+    display_order: 3,
+    metadata: { cta_link: '/dashboard/collaboration-v2', cta_text: 'Collaborate Now' }
   },
   {
     slug: 'feature-invoicing',
@@ -183,7 +186,28 @@ const MARKETING_CONTENT = [
     content: 'Create beautiful invoices, track payments, and manage your finances with ease.',
     image_url: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800',
     category: 'features',
-    display_order: 4
+    display_order: 4,
+    metadata: { cta_link: '/dashboard/invoicing-v2', cta_text: 'Create Invoice' }
+  },
+  {
+    slug: 'new-year-promo',
+    title: '🎉 New Year Special: Upgrade & Save!',
+    subtitle: 'Limited time offer - 30% off all annual plans',
+    content: 'Start 2025 strong with our premium features. Upgrade before January 15th to lock in your discount.',
+    category: 'promo',
+    is_featured: true,
+    display_order: 0,
+    metadata: { cta_link: '/dashboard/pricing-v2', cta_text: 'Upgrade Now', type: 'success' }
+  },
+  {
+    slug: 'community-launch',
+    title: '🚀 Community Hub is Live!',
+    subtitle: 'Connect with 2,500+ creative professionals',
+    content: 'Join discussions, share insights, and grow your network in our new community space.',
+    category: 'feature',
+    is_featured: true,
+    display_order: 1,
+    metadata: { cta_link: '/dashboard/community-v2', cta_text: 'Join Community', type: 'feature' }
   },
   {
     slug: 'testimonial-1',
