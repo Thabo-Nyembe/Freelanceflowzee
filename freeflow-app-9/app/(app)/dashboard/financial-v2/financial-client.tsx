@@ -886,7 +886,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Revenue</h4>
                   <div className="space-y-2">
-                    {Object.entries(profitLossData.revenue).map(([name, amount]) => (
+                    {Object.entries(profitLossData?.revenue || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
                         <span className="font-medium text-gray-900 dark:text-white">{formatCurrency(amount)}</span>
@@ -1077,7 +1077,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Cash Flows from Operating Activities</h4>
                   <div className="space-y-2">
-                    {Object.entries(cashFlowData.operating).map(([name, amount]) => (
+                    {Object.entries(cashFlowData?.operating || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
                         <span className={`font-medium ${amount >= 0 ? 'text-green-600' : 'text-red-600'}`}>

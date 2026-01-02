@@ -571,15 +571,15 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.downloads.toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{(stats?.downloads || 0).toLocaleString()}</p>
                     <p className="text-fuchsia-200 text-sm">Downloads</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.activeUsers.toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{(stats?.activeUsers || 0).toLocaleString()}</p>
                     <p className="text-fuchsia-200 text-sm">Active Users</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.rating.toFixed(1)}</p>
+                    <p className="text-3xl font-bold">{(stats?.rating || 0).toFixed(1)}</p>
                     <p className="text-fuchsia-200 text-sm">Rating</p>
                   </div>
                 </div>

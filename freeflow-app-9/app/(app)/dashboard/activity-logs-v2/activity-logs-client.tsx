@@ -639,7 +639,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                     <p className="text-slate-200 text-sm">Logs Found</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{logs.filter(l => l.level === 'error').length}</p>
+                    <p className="text-3xl font-bold">{filteredLogs.filter(l => l.level === 'error').length}</p>
                     <p className="text-slate-200 text-sm">Errors</p>
                   </div>
                 </div>
@@ -896,7 +896,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{logs.length}</p>
+                    <p className="text-3xl font-bold">{filteredLogs.length}</p>
                     <p className="text-emerald-200 text-sm">Total Logs</p>
                   </div>
                 </div>

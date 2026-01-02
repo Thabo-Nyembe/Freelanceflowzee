@@ -1231,7 +1231,7 @@ export default function CloudStorageClient() {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold">My Files</h2>
-                    <p className="text-sky-100">All your files in one secure location • {stats.storageUsed.toFixed(1)} GB used</p>
+                    <p className="text-sky-100">All your files in one secure location • {(stats?.storageUsed || 0).toFixed(1)} GB used</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-6">

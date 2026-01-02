@@ -499,7 +499,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   const { complianceChecks } = useComplianceChecks()
 
   const displayEvents = useMemo(() => {
-    const events = auditEvents.length > 0 ? auditEvents : initialEvents
+    const events = (auditEvents?.length || 0) > 0 ? auditEvents : initialEvents
     return events.map((e, i) => ({
       ...e,
       source: mockLogEvents[i % mockLogEvents.length]?.source || 'unknown',

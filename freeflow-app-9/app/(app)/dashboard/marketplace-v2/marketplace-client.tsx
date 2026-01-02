@@ -17,7 +17,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Store, Package, Users, Star, Download, TrendingUp,
+  Store, Package, Users, Star, Download, TrendingUp, Rocket,
   DollarSign, Search, Filter, Grid, List, Heart, ExternalLink, MoreHorizontal,
   Plus, Settings, Eye, CreditCard, Award, Shield, Zap, Tag, Percent,
   Clock, CheckCircle, XCircle,

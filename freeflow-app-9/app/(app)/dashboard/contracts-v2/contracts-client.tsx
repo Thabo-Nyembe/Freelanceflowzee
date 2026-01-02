@@ -6,7 +6,7 @@ import {
   FileText, Send, Eye, CheckCircle2, Clock, Users,
   FileSignature, Download, Copy, MoreVertical, Search, Filter,
   Plus, DollarSign, Shield, Share2, Lock, Mail, Phone,
-  PenTool, XCircle, RefreshCw,
+  PenTool, XCircle, RefreshCw, Palette, Sliders,
   Settings, FileCheck, BarChart3, TrendingUp, Folder, Trash2, Star, Bell, Globe, Edit2,
   Fingerprint, Key, AlertTriangle, CheckCheck, Layers, FileUp, Timer, Briefcase
 } from 'lucide-react'

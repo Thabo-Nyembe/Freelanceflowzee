@@ -445,6 +445,9 @@ const mockComplianceQuickActions = [
   { id: '3', label: 'Report', icon: 'file-text', action: () => console.log('Report'), variant: 'outline' as const },
 ]
 
+// Aggregate all evidence from controls
+const mockEvidence = mockControls.flatMap(c => c.evidence || [])
+
 export default function ComplianceClient() {
   const [activeTab, setActiveTab] = useState('frameworks')
   const [searchQuery, setSearchQuery] = useState('')

@@ -573,15 +573,16 @@ export default function AnalyticsClient() {
   }
 
   // Key metrics for header cards - Using investor-ready data
+  const metrics = companyInfo?.metrics || {}
   const keyMetrics = [
-    { label: 'Customers', value: companyInfo.metrics.customers.toLocaleString(), change: '+7.3%', positive: true, icon: Users, gradient: 'from-indigo-500 to-indigo-600' },
-    { label: 'MRR', value: `$${(companyInfo.metrics.mrr / 1000).toFixed(0)}K`, change: '+18.5%', positive: true, icon: DollarSign, gradient: 'from-emerald-500 to-emerald-600' },
+    { label: 'Customers', value: (metrics.customers || 0).toLocaleString(), change: '+7.3%', positive: true, icon: Users, gradient: 'from-indigo-500 to-indigo-600' },
+    { label: 'MRR', value: `$${((metrics.mrr || 0) / 1000).toFixed(0)}K`, change: '+18.5%', positive: true, icon: DollarSign, gradient: 'from-emerald-500 to-emerald-600' },
     { label: 'Conversion', value: '8.5%', change: '+18.1%', positive: true, icon: Target, gradient: 'from-purple-500 to-purple-600' },
-    { label: 'NPS', value: companyInfo.metrics.nps.toString(), change: '+5.9%', positive: true, icon: TrendingUp, gradient: 'from-amber-500 to-amber-600' },
-    { label: 'ARR', value: `$${(companyInfo.metrics.arr / 1000000).toFixed(1)}M`, change: '+312%', positive: true, icon: Eye, gradient: 'from-blue-500 to-blue-600' },
-    { label: 'Churn', value: `${companyInfo.metrics.churnRate}%`, change: '-25%', positive: true, icon: MousePointer, gradient: 'from-rose-500 to-rose-600' },
-    { label: 'LTV:CAC', value: `${companyInfo.metrics.ltvCacRatio.toFixed(1)}x`, change: '+30%', positive: true, icon: Zap, gradient: 'from-cyan-500 to-cyan-600' },
-    { label: 'Enterprise', value: companyInfo.metrics.enterprises.toString(), change: '+9.9%', positive: true, icon: Target, gradient: 'from-pink-500 to-pink-600' }
+    { label: 'NPS', value: (metrics.nps || 0).toString(), change: '+5.9%', positive: true, icon: TrendingUp, gradient: 'from-amber-500 to-amber-600' },
+    { label: 'ARR', value: `$${((metrics.arr || 0) / 1000000).toFixed(1)}M`, change: '+312%', positive: true, icon: Eye, gradient: 'from-blue-500 to-blue-600' },
+    { label: 'Churn', value: `${metrics.churnRate || 0}%`, change: '-25%', positive: true, icon: MousePointer, gradient: 'from-rose-500 to-rose-600' },
+    { label: 'LTV:CAC', value: `${(metrics.ltvCacRatio || 0).toFixed(1)}x`, change: '+30%', positive: true, icon: Zap, gradient: 'from-cyan-500 to-cyan-600' },
+    { label: 'Enterprise', value: (metrics.enterprises || 0).toString(), change: '+9.9%', positive: true, icon: Target, gradient: 'from-pink-500 to-pink-600' }
   ]
 
   // Realtime metrics - Investor demo data
@@ -828,13 +829,13 @@ export default function AnalyticsClient() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {mockFunnels[0].steps.map((step, idx) => (
+                    {(mockFunnels[0]?.steps || []).map((step, idx) => (
                       <div key={idx}>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-sm font-medium">{step.name}</span>
-                          <span className="text-sm text-gray-500">{step.count.toLocaleString()} ({step.conversion}%)</span>
+                          <span className="text-sm text-gray-500">{step.count?.toLocaleString() || 0} ({step.conversion || 0}%)</span>
                         </div>
-                        <Progress value={(step.count / mockFunnels[0].steps[0].count) * 100} className="h-3" />
+                        <Progress value={mockFunnels[0]?.steps?.[0]?.count ? (step.count / mockFunnels[0].steps[0].count) * 100 : 0} className="h-3" />
                       </div>
                     ))}
                   </div>

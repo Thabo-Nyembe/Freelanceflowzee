@@ -279,11 +279,11 @@ export function ActivityFeed({
                       >
                         <div className="flex gap-3">
                           <Avatar className="h-8 w-8 flex-shrink-0">
-                            {activity.user.avatar ? (
+                            {activity.user?.avatar ? (
                               <AvatarImage src={activity.user.avatar} />
                             ) : null}
                             <AvatarFallback>
-                              {activity.user.name.split(' ').map(n => n[0]).join('')}
+                              {(activity.user?.name || 'U').split(' ').map(n => n[0]).join('')}
                             </AvatarFallback>
                           </Avatar>
 
@@ -291,7 +291,7 @@ export function ActivityFeed({
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-center gap-2">
                                 {getActivityIcon(activity.type)}
-                                <span className="font-medium text-sm">{activity.user.name}</span>
+                                <span className="font-medium text-sm">{activity.user?.name || 'User'}</span>
                                 <span className="text-sm text-muted-foreground">{activity.title}</span>
                               </div>
                               <span className="text-xs text-muted-foreground whitespace-nowrap">

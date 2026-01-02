@@ -660,6 +660,33 @@ const mockAnalytics: ShippingAnalytics = {
   topDestination: 'California'
 }
 
+// Enhanced Competitive Upgrade Mock Data
+const mockShippingAIInsights = [
+  { id: '1', type: 'success' as const, title: 'On-Time Delivery', description: 'Delivery performance is 94.5% on-time this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Weather Alert', description: 'Storm expected in Northeast region may cause delays.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Alerts' },
+  { id: '3', type: 'info' as const, title: 'Cost Optimization', description: 'Switching to ground shipping for local orders could save 15%.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockShippingCollaborators = [
+  { id: '1', name: 'Logistics Team', avatar: '', role: 'Team', status: 'online' as const },
+  { id: '2', name: 'Sarah Chen', avatar: '', role: 'Manager', status: 'online' as const },
+]
+
+const mockShippingPredictions = [
+  { id: '1', title: 'Peak Season', prediction: 'Expected 40% volume increase', confidence: 85, trend: 'up' as const, timeframe: 'Next 30 days' },
+  { id: '2', title: 'Cost Trend', prediction: 'Shipping costs may rise 5%', confidence: 70, trend: 'up' as const, timeframe: 'Next Quarter' },
+]
+
+const mockShippingActivities = [
+  { id: '1', user: 'System', action: 'Processed', target: '47 shipments today', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Sarah', action: 'Updated', target: 'carrier rates', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+]
+
+const mockShippingQuickActions = [
+  { id: '1', label: 'Create Shipment', icon: 'plus', action: () => console.log('Create shipment'), variant: 'default' as const },
+  { id: '2', label: 'Print Labels', icon: 'printer', action: () => console.log('Print labels'), variant: 'outline' as const },
+]
+
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================

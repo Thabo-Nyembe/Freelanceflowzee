@@ -839,7 +839,7 @@ export default function DocsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockApiEndpoints.length}</p>
+                    <p className="text-3xl font-bold">{mockDocs.filter(d => d.apiEndpoint).length}</p>
                     <p className="text-orange-200 text-sm">Endpoints</p>
                   </div>
                 </div>

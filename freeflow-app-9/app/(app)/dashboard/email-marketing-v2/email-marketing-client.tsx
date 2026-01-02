@@ -914,7 +914,7 @@ export default function EmailMarketingClient({
                     <p className="text-purple-200 text-sm">Campaigns</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{campaigns.filter(c => c.status === 'sent').length}</p>
+                    <p className="text-3xl font-bold">{mockCampaigns.filter(c => c.status === 'sent').length}</p>
                     <p className="text-purple-200 text-sm">Sent</p>
                   </div>
                 </div>

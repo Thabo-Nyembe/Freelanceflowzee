@@ -266,6 +266,10 @@ export const recruitmentQuickActions: any[] = []
 
 // Notifications
 export const notificationsAIInsights: any[] = []
+export const notificationsCollaborators: any[] = []
+export const notificationsPredictions: any[] = []
+export const notificationsActivities: any[] = []
+export const notificationsQuickActions: any[] = []
 
 // Re-export everything for convenience
 export default {

@@ -70,7 +70,8 @@ import {
   AlertTriangle,
   UploadCloud,
   Cpu,
-  Terminal
+  Terminal,
+  Calendar
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

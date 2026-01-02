@@ -72,6 +72,10 @@ import {
 
 import {
   notificationsAIInsights,
+  notificationsCollaborators,
+  notificationsPredictions,
+  notificationsActivities,
+  notificationsQuickActions,
 } from '@/lib/mock-data/adapters'
 
 // ============================================================================
@@ -2184,11 +2188,11 @@ export default function NotificationsClient() {
           </div>
           <div className="space-y-6">
             <CollaborationIndicator
-              collaborators={mockNotificationsCollaborators}
+              collaborators={notificationsCollaborators}
               maxVisible={4}
             />
             <PredictiveAnalytics
-              predictions={mockNotificationsPredictions}
+              predictions={notificationsPredictions}
               title="Notification Forecasts"
             />
           </div>
@@ -2196,12 +2200,12 @@ export default function NotificationsClient() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
           <ActivityFeed
-            activities={mockNotificationsActivities}
+            activities={notificationsActivities}
             title="Notification Activity"
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockNotificationsQuickActions}
+            actions={notificationsQuickActions}
             variant="grid"
           />
         </div>

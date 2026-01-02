@@ -1257,7 +1257,7 @@ export function PredictiveAnalytics({
                   >
                     <p className="text-sm font-medium mb-2">Contributing Factors</p>
                     <div className="space-y-2">
-                      {prediction.factors.map((factor, i) => (
+                      {(prediction.factors || []).map((factor, i) => (
                         <div key={i} className="flex items-center justify-between text-sm">
                           <span className={getImpactColor(factor.impact)}>{factor.name}</span>
                           <div className="flex items-center gap-2">

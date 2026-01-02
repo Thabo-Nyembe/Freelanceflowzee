@@ -47,7 +47,8 @@ import {
   Layers,
   Webhook,
   Zap,
-  ExternalLink
+  ExternalLink,
+  CreditCard
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

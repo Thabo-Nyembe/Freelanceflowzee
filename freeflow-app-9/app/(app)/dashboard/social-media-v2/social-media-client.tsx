@@ -55,7 +55,8 @@ import {
   Download,
   Upload,
   TrendingDown,
-  Activity
+  Activity,
+  Sliders
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

@@ -654,7 +654,7 @@ export default function ThreeDModelingClient() {
                     <p className="text-purple-200 text-sm">Models</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{models.filter(m => m.status === 'published').length}</p>
+                    <p className="text-3xl font-bold">{filteredModels.filter(m => m.status === 'published').length}</p>
                     <p className="text-purple-200 text-sm">Published</p>
                   </div>
                 </div>
@@ -926,7 +926,7 @@ export default function ThreeDModelingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{materials.length}</p>
+                    <p className="text-3xl font-bold">{mockMaterials.length}</p>
                     <p className="text-emerald-200 text-sm">Materials</p>
                   </div>
                 </div>
@@ -1020,11 +1020,11 @@ export default function ThreeDModelingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{renderQueue.length}</p>
+                    <p className="text-3xl font-bold">{mockRenderJobs.length}</p>
                     <p className="text-orange-200 text-sm">In Queue</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{renderQueue.filter(r => r.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">{mockRenderJobs.filter(r => r.status === 'completed').length}</p>
                     <p className="text-orange-200 text-sm">Completed</p>
                   </div>
                 </div>

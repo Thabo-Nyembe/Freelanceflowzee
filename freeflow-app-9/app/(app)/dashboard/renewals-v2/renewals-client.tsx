@@ -861,15 +861,15 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.totalValue.toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{(stats?.totalValue || 0).toLocaleString()}</p>
                     <p className="text-blue-200 text-sm">Pipeline Value</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.renewalRate}%</p>
+                    <p className="text-3xl font-bold">{stats?.renewalRate || 0}%</p>
                     <p className="text-blue-200 text-sm">Renewal Rate</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.atRiskCount}</p>
+                    <p className="text-3xl font-bold">{stats?.atRiskCount || 0}</p>
                     <p className="text-blue-200 text-sm">At Risk</p>
                   </div>
                 </div>

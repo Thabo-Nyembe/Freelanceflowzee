@@ -609,7 +609,7 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{dashboards.length}</p>
+                    <p className="text-3xl font-bold">{mockReports.length}</p>
                     <p className="text-blue-200 text-sm">Dashboards</p>
                   </div>
                   <div className="text-center">
