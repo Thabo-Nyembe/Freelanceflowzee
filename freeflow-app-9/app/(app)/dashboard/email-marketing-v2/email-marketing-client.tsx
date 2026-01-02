@@ -1204,11 +1204,11 @@ export default function EmailMarketingClient({
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{automations.length}</p>
+                    <p className="text-3xl font-bold">{mockAutomations.length}</p>
                     <p className="text-emerald-200 text-sm">Automations</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{automations.filter(a => a.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{mockAutomations.filter(a => a.status === 'active').length}</p>
                     <p className="text-emerald-200 text-sm">Active</p>
                   </div>
                 </div>

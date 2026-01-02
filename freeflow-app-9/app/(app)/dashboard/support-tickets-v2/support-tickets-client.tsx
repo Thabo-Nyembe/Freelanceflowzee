@@ -393,7 +393,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Pending</p>
-                  <p className="text-2xl font-bold">{stats.inProgress}</p>
+                  <p className="text-2xl font-bold">{stats?.inProgress || 0}</p>
                 </div>
                 <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
                   <Hourglass className="w-5 h-5 text-orange-600" />
@@ -406,7 +406,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Resolved Today</p>
-                  <p className="text-2xl font-bold">{stats.resolved}</p>
+                  <p className="text-2xl font-bold">{stats?.resolved || 0}</p>
                 </div>
                 <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                   <CheckCheck className="w-5 h-5 text-green-600" />

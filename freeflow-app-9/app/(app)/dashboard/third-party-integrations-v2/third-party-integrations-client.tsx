@@ -881,11 +881,11 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{executionHistory.length}</p>
+                    <p className="text-3xl font-bold">{mockLogs.length}</p>
                     <p className="text-pink-200 text-sm">Executions</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{executionHistory.filter(e => e.status === 'success').length}</p>
+                    <p className="text-3xl font-bold">{mockLogs.filter(e => e.status === 'success').length}</p>
                     <p className="text-pink-200 text-sm">Successful</p>
                   </div>
                 </div>

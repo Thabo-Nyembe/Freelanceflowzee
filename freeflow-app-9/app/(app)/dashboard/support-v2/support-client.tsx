@@ -48,6 +48,7 @@ import {
   Sliders,
   Webhook,
   Shield,
+  Bell,
   HardDrive,
   Download,
   AlertOctagon

@@ -57,7 +57,9 @@ import {
   Bell,
   Mail,
   ArrowRightLeft,
-  Upload
+  Upload,
+  ArrowDownToLine,
+  ArrowUpFromLine
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

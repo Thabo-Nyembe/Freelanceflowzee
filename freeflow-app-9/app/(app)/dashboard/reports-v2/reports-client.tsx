@@ -815,7 +815,7 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{datasources.length}</p>
+                    <p className="text-3xl font-bold">{mockDataSources.length}</p>
                     <p className="text-emerald-200 text-sm">Data Sources</p>
                   </div>
                 </div>
@@ -881,7 +881,7 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{datasources.length}</p>
+                    <p className="text-3xl font-bold">{mockDataSources.length}</p>
                     <p className="text-amber-200 text-sm">Connected</p>
                   </div>
                   <div className="text-center">

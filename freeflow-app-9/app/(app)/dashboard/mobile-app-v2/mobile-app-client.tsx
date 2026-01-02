@@ -1034,19 +1034,19 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.activeUsers.toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{(stats?.activeUsers || 0).toLocaleString()}</p>
                     <p className="text-indigo-200 text-sm">MAU</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.sessions.toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{(stats?.sessions || 0).toLocaleString()}</p>
                     <p className="text-indigo-200 text-sm">Sessions</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{(stats.revenue / 1000).toFixed(1)}k</p>
+                    <p className="text-3xl font-bold">{((stats?.revenue || 0) / 1000).toFixed(1)}k</p>
                     <p className="text-indigo-200 text-sm">Revenue</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.crashes}</p>
+                    <p className="text-3xl font-bold">{stats?.crashes || 0}</p>
                     <p className="text-indigo-200 text-sm">Crashes</p>
                   </div>
                   <div className="text-center">
