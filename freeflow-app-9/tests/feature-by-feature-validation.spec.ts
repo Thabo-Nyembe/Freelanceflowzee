@@ -115,7 +115,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('8. Collaboration Page - Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/collaboration`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/collaboration-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     await page.screenshot({ path: 'test-results/08-collaboration.png', fullPage: true })
@@ -123,7 +123,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('9. Collaboration Page - UPS System Check', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/collaboration`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/collaboration-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const content = await page.content()
@@ -158,7 +158,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('11. Financial Hub - Page Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/financial`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/financial-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const hasFinancial = await page.getByText(/Financial|Transaction|Invoice|Payment/i).count() > 0
@@ -202,7 +202,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('15. My Day Page - Page Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/my-day`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/my-day-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const hasMyDay = await page.getByText(/My Day|Today|Task|Schedule/i).count() > 0

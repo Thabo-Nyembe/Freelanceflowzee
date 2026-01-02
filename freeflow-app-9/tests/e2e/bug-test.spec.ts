@@ -7,7 +7,7 @@ test.describe('Bug Detection Tests', () => {
   });
 
   test('should verify homepage loads and has basic content', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:9323');
     
     // Check page loads
     await expect(page).toHaveTitle(/FreeflowZee/);
@@ -33,7 +33,7 @@ test.describe('Bug Detection Tests', () => {
   });
 
   test('should verify contact page loads and has basic content', async ({ page }) => {
-    await page.goto('http://localhost:3000/contact');
+    await page.goto('http://localhost:9323/contact');
     
     // Check page loads
     await expect(page).toHaveTitle(/Contact Us/);
@@ -78,7 +78,7 @@ test.describe('Bug Detection Tests', () => {
   });
 
   test('should check for CSS loading issues', async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:9323');
     
     // Check if stylesheets are loaded
     const stylesheets = await page.locator('link[rel="stylesheet"]').count();
@@ -122,7 +122,7 @@ test.describe('Bug Detection Tests', () => {
     ];
     
     for (const route of routes) {
-      const response = await page.goto(`http://localhost:3000${route}`);
+      const response = await page.goto(`http://localhost:9323${route}`);
       const status = response?.status() || 0;
       console.log(`Route ${route}: Status ${status}`);
       

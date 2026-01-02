@@ -6,7 +6,7 @@ test('Final Theme Verification - Pure Black & White', async ({ page }) => {
   console.log('========================================\n')
 
   // Navigate to My Day page
-  await page.goto('http://localhost:9323/dashboard/my-day', {
+  await page.goto('http://localhost:9323/dashboard/my-day-v2', {
     waitUntil: 'domcontentloaded',
     timeout: 30000
   })

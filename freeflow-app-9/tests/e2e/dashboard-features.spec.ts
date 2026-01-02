@@ -41,7 +41,7 @@ test.describe('Dashboard Features Tests', () => {
   });
 
   test('should have functional AI Design page', async ({ page }) => {
-    await page.goto('/dashboard/ai-design');
+    await page.goto('/dashboard/ai-design-v2');
     
     // Check main elements
     await expect(page.locator('h1')).toContainText('AI Design Studio');
@@ -80,7 +80,7 @@ test.describe('Dashboard Features Tests', () => {
   });
 
   test('should have functional CV Portfolio page', async ({ page }) => {
-    await page.goto('/dashboard/cv-portfolio');
+    await page.goto('/dashboard/profile-v2');
     
     // Check main elements
     await expect(page.locator('h1')).toContainText('CV & Portfolio');

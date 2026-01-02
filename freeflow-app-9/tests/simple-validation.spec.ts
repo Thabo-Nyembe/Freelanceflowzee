@@ -44,7 +44,7 @@ test.describe('KAZI Platform - Simple Validation', () => {
   })
 
   test('Collaboration page loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/collaboration`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/collaboration-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
 
     await page.waitForTimeout(5000)
@@ -61,7 +61,7 @@ test.describe('KAZI Platform - Simple Validation', () => {
   })
 
   test('Financial Hub loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/financial`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/financial-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
     console.log('✅ Financial Hub loaded')
   })
@@ -85,7 +85,7 @@ test.describe('KAZI Platform - Simple Validation', () => {
   })
 
   test('My Day page loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/my-day`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/my-day-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
     console.log('✅ My Day page loaded')
   })

@@ -212,7 +212,7 @@ test.describe('Interactive App Walkthrough', () => {
   test('My Day - Task Management Test', async ({ page }) => {
     console.log('\n=== MY DAY PAGE TEST ===\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
     await waitForHydration(page);
 
     await page.screenshot({ path: 'test-results/my-day.png', fullPage: true });

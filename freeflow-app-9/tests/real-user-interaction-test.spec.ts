@@ -51,7 +51,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     // STEP 3: My Day - Task Management
     // ============================================
     console.log('\n📍 STEP 3: Testing My Day - Task Management');
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
@@ -270,7 +270,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     // STEP 9: Collaboration
     // ============================================
     console.log('\n📍 STEP 9: Testing Collaboration');
-    await page.goto('http://localhost:9323/dashboard/collaboration');
+    await page.goto('http://localhost:9323/dashboard/collaboration-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
@@ -296,7 +296,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     console.log('\n🔧 BUTTON WIRING AUDIT\n');
 
     const pages = [
-      { path: '/dashboard/my-day', name: 'My Day' },
+      { path: '/dashboard/my-day-v2', name: 'My Day' },
       { path: '/dashboard/projects-hub-v2', name: 'Projects Hub' },
       { path: '/dashboard/ai-create-v2', name: 'AI Create' },
       { path: '/dashboard/files-hub-v2', name: 'Files Hub' },
@@ -357,7 +357,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
   test('Click Test - Verify All Buttons Respond', async ({ page }) => {
     console.log('\n🖱️  CLICK RESPONSE TEST\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 

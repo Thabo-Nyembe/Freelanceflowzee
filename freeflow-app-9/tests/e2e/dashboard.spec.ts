@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Dashboard Tests', () => {
   test.beforeEach(async ({ page }) => {
     // Note: In real app, would need to handle authentication
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
   });
 
   test('should redirect to login if not authenticated', async ({ page }) => {
@@ -17,7 +17,7 @@ test.describe('Dashboard Tests', () => {
       window.localStorage.setItem('auth-token', 'mock-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     
     // Should show dashboard content
     await expect(page.locator('text=Dashboard')).toBeVisible();
@@ -29,7 +29,7 @@ test.describe('Dashboard Tests', () => {
       window.localStorage.setItem('auth-token', 'mock-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     
     // Check for navigation items
     const navItems = [
@@ -50,7 +50,7 @@ test.describe('Dashboard Tests', () => {
       window.localStorage.setItem('auth-token', 'mock-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     
     // Test navigation to different sections
     const sections = [
@@ -71,7 +71,7 @@ test.describe('Dashboard Tests', () => {
       window.localStorage.setItem('auth-token', 'mock-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     
     // Should show user avatar or profile section
     await expect(page.locator('[data-testid="user-profile"], .user-avatar, text=Profile')).toBeVisible();
@@ -84,7 +84,7 @@ test.describe('Dashboard Tests', () => {
       window.localStorage.setItem('auth-token', 'mock-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     
     // Mobile navigation should be accessible
     const mobileMenu = page.locator('[data-testid="mobile-menu"], .hamburger-menu, .mobile-nav-toggle');
@@ -100,7 +100,7 @@ test.describe('Dashboard Tests', () => {
       window.localStorage.setItem('auth-token', 'mock-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     
     // Look for search input
     const searchInput = page.locator('input[type="search"], input[placeholder*="search" i], [data-testid="search"]');
@@ -119,7 +119,7 @@ test.describe('Dashboard Tests', () => {
       window.localStorage.setItem('auth-token', 'mock-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     
     // Should show some form of dashboard content
     const contentSelectors = [
@@ -147,7 +147,7 @@ test.describe('Dashboard Tests', () => {
       window.localStorage.setItem('auth-token', 'mock-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     
     // Look for logout button
     const logoutButton = page.locator('text=Logout, text=Sign Out, [data-testid="logout"]');

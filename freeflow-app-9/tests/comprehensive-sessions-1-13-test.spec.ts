@@ -343,7 +343,7 @@ test.describe('Comprehensive Sessions 1-13 Testing', () => {
       await page.waitForTimeout(2500);
 
       // Navigate to gallery
-      await page.goto('http://localhost:9323/dashboard/gallery');
+      await page.goto('http://localhost:9323/dashboard/gallery-v2');
       await page.waitForLoadState('networkidle');
 
       // Click AI Generate button
@@ -363,7 +363,7 @@ test.describe('Comprehensive Sessions 1-13 Testing', () => {
     });
 
     test('should handle view mode toggle', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/gallery');
+      await page.goto('http://localhost:9323/dashboard/gallery-v2');
       await page.waitForLoadState('networkidle');
 
       // Find view mode button

@@ -7,7 +7,7 @@ test.describe('Logout Debug Tests', () => {
       localStorage.setItem('auth-token', 'valid-token');
     });
     
-    await page.goto('http://localhost:3000/dashboard');
+    await page.goto('http://localhost:9323/dashboard');
     await page.waitForLoadState('networkidle');
     
     // Check what page we're actually on

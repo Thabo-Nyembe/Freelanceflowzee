@@ -10,7 +10,7 @@ test.describe('Dashboard Pages - Button & Feature Testing', () => {
   test('My Day - Complete Feature Test', async ({ page }) => {
     console.log('\n🔍 Testing: My Day Page\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
 
     // Wait for page to load
     await page.waitForSelector('[data-testid="add-task-header-btn"]', { state: 'visible', timeout: 15000 });
@@ -204,7 +204,7 @@ test.describe('Button Click & Response Tests', () => {
   test('Test button clicks trigger expected responses', async ({ page }) => {
     console.log('\n🔍 Testing: Button Click Responses\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
     await page.waitForSelector('[data-testid="add-task-header-btn"]', { state: 'visible', timeout: 15000 });
 
     // Test 1: Add Task button

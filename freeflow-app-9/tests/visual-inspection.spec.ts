@@ -93,7 +93,7 @@ test.describe('Visual Feature Inspection', () => {
     const pagesToInspect = [
       { path: '/dashboard/ai-create-v2', name: 'AI Create' },
       { path: '/dashboard/files-hub-v2', name: 'Files Hub' },
-      { path: '/dashboard/my-day', name: 'My Day' },
+      { path: '/dashboard/my-day-v2', name: 'My Day' },
       { path: '/dashboard/time-tracking-v2', name: 'Time Tracking' },
       { path: '/dashboard/calendar-v2', name: 'Calendar' }
     ]

@@ -117,7 +117,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
     console.log('✅ AI Create Studio verified')
 
     // Test 3: Advanced Features Demo
-    await page.goto('/dashboard/advanced-features-demo')
+    await page.goto('/dashboard/overview-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'ai-demo', 'Advanced AI Features Demo')
 
@@ -140,7 +140,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
     }
 
     // Test collaboration features
-    await page.goto('/dashboard/collaboration')
+    await page.goto('/dashboard/collaboration-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'collaboration', 'Team Collaboration Hub')
 
@@ -195,7 +195,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
     expect(hasInvoicing).toBeTruthy()
 
     // Test financial hub
-    await page.goto('/dashboard/financial')
+    await page.goto('/dashboard/financial-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'financial', 'Financial Dashboard')
 
@@ -242,7 +242,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('🔟 Client Zone - Customer Portal', async ({ page }) => {
     console.log('\n=== Testing Client Zone ===')
 
-    await page.goto('/dashboard/client-zone')
+    await page.goto('/dashboard/clients-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'client-zone', 'Client Portal Dashboard')
 
@@ -256,7 +256,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('1️⃣1️⃣ Bookings & Scheduling System', async ({ page }) => {
     console.log('\n=== Testing Bookings System ===')
 
-    await page.goto('/dashboard/bookings')
+    await page.goto('/dashboard/bookings-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'bookings', 'Booking Management System')
 
@@ -284,7 +284,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('1️⃣3️⃣ Gallery & Media Management', async ({ page }) => {
     console.log('\n=== Testing Gallery ===')
 
-    await page.goto('/dashboard/gallery')
+    await page.goto('/dashboard/gallery-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'gallery', 'Media Gallery')
 

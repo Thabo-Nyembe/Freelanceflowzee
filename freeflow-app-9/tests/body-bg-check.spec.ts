@@ -1,7 +1,7 @@
 import { test } from '@playwright/test'
 
 test('Check body and html background colors', async ({ page }) => {
-  await page.goto('http://localhost:9323/dashboard/my-day', {
+  await page.goto('http://localhost:9323/dashboard/my-day-v2', {
     waitUntil: 'domcontentloaded',
     timeout: 30000
   })

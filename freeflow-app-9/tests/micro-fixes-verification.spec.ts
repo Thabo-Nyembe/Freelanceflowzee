@@ -206,10 +206,10 @@ test.describe('Micro-Fixes Verification', () => {
     test('should verify build-generated pages exist', async ({ page }) => {
       // Test that static pages were generated successfully
       const staticPages = [
-        '/dashboard/my-day',
+        '/dashboard/my-day-v2',
         '/dashboard/projects-hub-v2',
-        '/dashboard/invoicing',
-        '/dashboard/team-management',
+        '/dashboard/invoicing-v2',
+        '/dashboard/team-management-v2',
         '/dashboard/analytics-v2'
       ]
 
@@ -264,7 +264,7 @@ test.describe('Micro-Fixes Verification', () => {
 
   test.describe('Regression Testing - Previously Fixed Features', () => {
     test('should verify invoicing feature still works', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/invoicing', {
+      await page.goto('http://localhost:9323/dashboard/invoicing-v2', {
         waitUntil: 'domcontentloaded',
         timeout: 15000
       })
@@ -283,7 +283,7 @@ test.describe('Micro-Fixes Verification', () => {
     })
 
     test('should verify email marketing feature still works', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/email-marketing', {
+      await page.goto('http://localhost:9323/dashboard/email-marketing-v2', {
         waitUntil: 'domcontentloaded',
         timeout: 15000
       })

@@ -10,7 +10,7 @@ test.describe('Button Functionality Tests', () => {
   test('My Day Page - Task Management Buttons', async ({ page }) => {
     console.log('\n🎯 Testing My Day Page Buttons\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day', {
+    await page.goto('http://localhost:9323/dashboard/my-day-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 15000
     });

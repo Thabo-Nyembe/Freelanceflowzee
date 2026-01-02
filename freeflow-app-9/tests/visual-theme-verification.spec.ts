@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Visual Theme Verification - Pure Black/White', () => {
   test('Dashboard shows pure black background in dark mode', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/my-day', {
+    await page.goto('http://localhost:9323/dashboard/my-day-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -38,7 +38,7 @@ test.describe('Visual Theme Verification - Pure Black/White', () => {
   })
 
   test('Dashboard shows pure white background in light mode', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/my-day', {
+    await page.goto('http://localhost:9323/dashboard/my-day-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -75,7 +75,7 @@ test.describe('Visual Theme Verification - Pure Black/White', () => {
 
   test('Text is visible in both modes', async ({ page }) => {
     // Dark mode test
-    await page.goto('http://localhost:9323/dashboard/my-day', {
+    await page.goto('http://localhost:9323/dashboard/my-day-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })

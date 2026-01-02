@@ -48,7 +48,7 @@ test.describe('Production Build Verification - Enhanced Pages', () => {
   });
 
   test('White Label page loads and has test IDs', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/white-label`);
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`);
 
     // Check page loads by heading
     await expect(page.getByRole('heading', { name: /Custom Brand Platform/i })).toBeVisible({ timeout: 10000 });
@@ -108,7 +108,7 @@ test.describe('Production Build Verification - Critical Pages', () => {
   });
 
   test('AI Design page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-design`);
+    await page.goto(`${BASE_URL}/dashboard/ai-design-v2`);
     await expect(page.getByRole('heading', { name: /AI Design Studio/i })).toBeVisible({ timeout: 10000 });
     console.log('✅ AI Design page loaded');
   });

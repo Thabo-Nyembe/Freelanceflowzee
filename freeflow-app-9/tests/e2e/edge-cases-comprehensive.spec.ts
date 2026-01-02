@@ -95,9 +95,9 @@ test.describe('Comprehensive Edge Cases Tests', () => {
 
     const pagesToTest = [
       '/dashboard',
-      '/dashboard/ai-design',
+      '/dashboard/ai-design-v2',
       '/dashboard/calendar-v2',
-      '/dashboard/cv-portfolio'
+      '/dashboard/profile-v2'
     ];
 
     for (const pageUrl of pagesToTest) {
@@ -178,7 +178,7 @@ test.describe('Comprehensive Edge Cases Tests', () => {
   });
 
   test('should handle rapid clicking without issues', async ({ page }) => {
-    await page.goto('/dashboard/ai-design');
+    await page.goto('/dashboard/ai-design-v2');
     
     // Find interactive buttons
     const buttons = page.locator('button:visible');
@@ -197,7 +197,7 @@ test.describe('Comprehensive Edge Cases Tests', () => {
   });
 
   test('should handle tab switching edge cases', async ({ page }) => {
-    await page.goto('/dashboard/cv-portfolio');
+    await page.goto('/dashboard/profile-v2');
     
     const tabs = page.locator('[role="tab"]');
     const tabCount = await tabs.count();

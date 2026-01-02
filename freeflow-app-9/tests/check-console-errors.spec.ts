@@ -15,7 +15,7 @@ test('Check Console Errors on My Day', async ({ page }) => {
     console.log('❌ PAGE ERROR:', error.message);
   });
 
-  await page.goto('http://localhost:9323/dashboard/my-day');
+  await page.goto('http://localhost:9323/dashboard/my-day-v2');
   await page.waitForTimeout(5000); // Wait for everything to load
 
   console.log('\n=== CONSOLE ERRORS ===');

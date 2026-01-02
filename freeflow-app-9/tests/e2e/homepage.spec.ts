@@ -35,7 +35,7 @@ test.describe('Homepage Tests', () => {
     ];
 
     for (const feature of features) {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       await page.click(`text=${feature.text}`);
       await expect(page).toHaveURL(feature.url);
     }
@@ -68,7 +68,7 @@ test.describe('Homepage Tests', () => {
     await page.keyboard.press('Enter');
     
     // Should navigate somewhere
-    await expect(page.url()).not.toBe('http://localhost:3000/');
+    await expect(page.url()).not.toBe('http://localhost:9323/');
   });
 
   test('should load without console errors', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('Homepage Tests', () => {
       }
     });
 
-    await page.goto('http://localhost:3000');
+    await page.goto('http://localhost:9323');
     await page.waitForLoadState('networkidle');
     
     // Should have minimal or no console errors

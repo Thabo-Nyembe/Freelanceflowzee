@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test.describe('New Features Verification', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the dashboard
-    await page.goto('http://localhost:3000/dashboard')
+    await page.goto('http://localhost:9323/dashboard')
     await page.waitForLoadState('networkidle')
   })
 
@@ -33,7 +33,7 @@ test.describe('New Features Verification', () => {
 
     for (const feature of newFeatures) {
       // Try to navigate to each feature
-      await page.goto(`http://localhost:3000/dashboard/${feature}`)
+      await page.goto(`http://localhost:9323/dashboard/${feature}`)
 
       // Verify the page loads without errors
       await expect(page).not.toHaveTitle(/Error/)
@@ -51,7 +51,7 @@ test.describe('New Features Verification', () => {
 
   test('should verify Context7 system integration', async ({ page }) => {
     // Check one of our enhanced pages for Context7 integration
-    await page.goto('http://localhost:3000/dashboard/escrow')
+    await page.goto('http://localhost:9323/dashboard/escrow-v2')
     await page.waitForLoadState('networkidle')
 
     // Look for Context7 design elements
@@ -64,7 +64,7 @@ test.describe('New Features Verification', () => {
   })
 
   test('should verify micro features showcase', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/micro-features-showcase')
+    await page.goto('http://localhost:9323/dashboard/micro-features-showcase')
     await page.waitForLoadState('networkidle')
 
     // Check for the main title
@@ -83,7 +83,7 @@ test.describe('New Features Verification', () => {
   })
 
   test('should verify escrow system functionality', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/escrow')
+    await page.goto('http://localhost:9323/dashboard/escrow-v2')
     await page.waitForLoadState('networkidle')
 
     // Check for main title
@@ -102,7 +102,7 @@ test.describe('New Features Verification', () => {
   })
 
   test('should verify AI voice synthesis feature', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/ai-voice-synthesis')
+    await page.goto('http://localhost:9323/dashboard/ai-voice-synthesis')
     await page.waitForLoadState('networkidle')
 
     // Check for main components
@@ -118,7 +118,7 @@ test.describe('New Features Verification', () => {
   })
 
   test('should verify custom reports builder', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/custom-reports')
+    await page.goto('http://localhost:9323/dashboard/custom-reports')
     await page.waitForLoadState('networkidle')
 
     // Check for main title
@@ -133,7 +133,7 @@ test.describe('New Features Verification', () => {
   })
 
   test('should verify ML insights dashboard', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/ml-insights')
+    await page.goto('http://localhost:9323/dashboard/ml-insights')
     await page.waitForLoadState('networkidle')
 
     // Check for main title
@@ -149,7 +149,7 @@ test.describe('New Features Verification', () => {
   })
 
   test('should verify plugin marketplace', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/plugin-marketplace')
+    await page.goto('http://localhost:9323/dashboard/plugin-marketplace')
     await page.waitForLoadState('networkidle')
 
     // Check for main title
@@ -161,7 +161,7 @@ test.describe('New Features Verification', () => {
   })
 
   test('should verify enhanced navigation includes new features', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard')
+    await page.goto('http://localhost:9323/dashboard')
     await page.waitForLoadState('networkidle')
 
     // Look for search functionality that should include our new features
@@ -185,7 +185,7 @@ test.describe('New Features Verification', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 })
 
-    await page.goto('http://localhost:3000/dashboard/escrow')
+    await page.goto('http://localhost:9323/dashboard/escrow-v2')
     await page.waitForLoadState('networkidle')
 
     // Verify page is still functional on mobile
@@ -197,7 +197,7 @@ test.describe('New Features Verification', () => {
   })
 
   test('should verify dark mode compatibility', async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/micro-features-showcase')
+    await page.goto('http://localhost:9323/dashboard/micro-features-showcase')
     await page.waitForLoadState('networkidle')
 
     // Look for dark mode classes
@@ -235,7 +235,7 @@ test.describe('Feature Integration Tests', () => {
     ]
 
     for (const feature of features) {
-      await page.goto(`http://localhost:3000/dashboard/${feature}`)
+      await page.goto(`http://localhost:9323/dashboard/${feature}`)
       await page.waitForLoadState('networkidle')
       await page.waitForTimeout(1000) // Allow time for any async operations
     }

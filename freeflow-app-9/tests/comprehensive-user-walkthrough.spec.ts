@@ -115,7 +115,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('3. My Day - Task Management', async ({ page }) => {
     console.log('\n📅 TESTING MY DAY PAGE\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
     await waitForPageLoad(page);
 
     // Check main sections
@@ -223,7 +223,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('6. AI Design - Design Tools', async ({ page }) => {
     console.log('\n🎨 TESTING AI DESIGN\n');
 
-    await page.goto('http://localhost:9323/dashboard/ai-design');
+    await page.goto('http://localhost:9323/dashboard/ai-design-v2');
     await waitForPageLoad(page);
 
     // Check design tools
@@ -309,7 +309,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('10. Client Zone - Client Management', async ({ page }) => {
     console.log('\n👥 TESTING CLIENT ZONE\n');
 
-    await page.goto('http://localhost:9323/dashboard/client-zone');
+    await page.goto('http://localhost:9323/dashboard/clients-v2');
     await waitForPageLoad(page);
 
     // Test client management
@@ -357,7 +357,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('12. Collaboration - Team Features', async ({ page }) => {
     console.log('\n🤝 TESTING COLLABORATION\n');
 
-    await page.goto('http://localhost:9323/dashboard/collaboration');
+    await page.goto('http://localhost:9323/dashboard/collaboration-v2');
     await waitForPageLoad(page);
 
     // Test collaboration features
@@ -435,7 +435,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('16. Invoicing - Invoice Management', async ({ page }) => {
     console.log('\n💰 TESTING INVOICING\n');
 
-    await page.goto('http://localhost:9323/dashboard/invoicing');
+    await page.goto('http://localhost:9323/dashboard/invoicing-v2');
     await waitForPageLoad(page);
 
     // Test invoice operations
@@ -492,11 +492,11 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
 
     const pages = [
       '/dashboard',
-      '/dashboard/my-day',
+      '/dashboard/my-day-v2',
       '/dashboard/projects-hub-v2',
       '/dashboard/ai-create-v2',
       '/dashboard/files-hub-v2',
-      '/dashboard/collaboration'
+      '/dashboard/collaboration-v2'
     ];
 
     const brokenButtons: string[] = [];

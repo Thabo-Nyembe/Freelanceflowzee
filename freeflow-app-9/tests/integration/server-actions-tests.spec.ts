@@ -236,7 +236,7 @@ test.describe('File Operations Tests', () => {
 // ============================================
 test.describe('Messaging Actions Tests', () => {
   test('should fetch messages', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/messages-hub`)
+    await page.goto(`${BASE_URL}/dashboard/messages-v2`)
     await waitForPageReady(page)
 
     const messagesList = page.locator('[data-testid="messages-list"], .messages-container, .chat-list')
@@ -244,7 +244,7 @@ test.describe('Messaging Actions Tests', () => {
   })
 
   test('should handle send message action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/messages-hub`)
+    await page.goto(`${BASE_URL}/dashboard/messages-v2`)
     await waitForPageReady(page)
 
     const messageInput = page.locator('textarea, input[placeholder*="message" i]')
@@ -481,7 +481,7 @@ test.describe('Video Studio Actions Tests', () => {
 // ============================================
 test.describe('Gallery Actions Tests', () => {
   test('should fetch gallery items', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/gallery`)
+    await page.goto(`${BASE_URL}/dashboard/gallery-v2`)
     await waitForPageReady(page)
 
     const galleryGrid = page.locator('[data-testid="gallery-grid"], .gallery, .image-grid')
@@ -489,7 +489,7 @@ test.describe('Gallery Actions Tests', () => {
   })
 
   test('should handle image upload action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/gallery`)
+    await page.goto(`${BASE_URL}/dashboard/gallery-v2`)
     await waitForPageReady(page)
 
     const uploadBtn = page.locator('button:has-text("Upload"), input[type="file"]')

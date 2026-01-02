@@ -66,8 +66,8 @@ test.describe('Navigation System - All 69 Features', () => {
       { name: '3D Modeling', url: '/dashboard/3d-modeling' },
       { name: 'Motion Graphics', url: '/dashboard/motion-graphics' },
       { name: 'Canvas', url: '/dashboard/canvas-v2' },
-      { name: 'Gallery', url: '/dashboard/gallery' },
-      { name: 'Collaboration', url: '/dashboard/collaboration' }
+      { name: 'Gallery', url: '/dashboard/gallery-v2' },
+      { name: 'Collaboration', url: '/dashboard/collaboration-v2' }
     ]
 
     // Expand Creative Suite if collapsed

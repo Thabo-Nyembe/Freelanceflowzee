@@ -13,7 +13,7 @@ test.describe('API and Integration Tests', () => {
       
       for (const endpoint of endpoints) {
         try {
-          const response = await request.get(`http://localhost:3000${endpoint}`);
+          const response = await request.get(`http://localhost:9323${endpoint}`);
           // Should either return 200 or 404 (not 500)
           expect(response.status()).toBeLessThan(500);
         } catch (error) {
@@ -26,7 +26,7 @@ test.describe('API and Integration Tests', () => {
     test('should handle malformed API requests', async ({ request }) => {
       // Test with malformed data
       try {
-        const response = await request.post('http://localhost:3000/api/mock/ai-enhance', {
+        const response = await request.post('http://localhost:9323/api/mock/ai-enhance', {
           data: { invalid: 'data' }
         });
         
@@ -44,7 +44,7 @@ test.describe('API and Integration Tests', () => {
           items: new Array(1000).fill({ test: 'data' })
         };
         
-        const response = await request.post('http://localhost:3000/api/mock/ai-enhance', {
+        const response = await request.post('http://localhost:9323/api/mock/ai-enhance', {
           data: largePayload
         });
         
@@ -66,7 +66,7 @@ test.describe('API and Integration Tests', () => {
         });
       });
       
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Should show appropriate error message or fallback
       await page.waitForTimeout(2000);
@@ -83,7 +83,7 @@ test.describe('API and Integration Tests', () => {
         });
       });
       
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Should show empty states
       await page.waitForTimeout(2000);
@@ -93,7 +93,7 @@ test.describe('API and Integration Tests', () => {
   test.describe('Authentication Integration', () => {
     test('should handle authentication flows', async ({ page }) => {
       // Test unauthenticated access
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Should redirect or show login prompt
       await page.waitForTimeout(2000);
@@ -126,7 +126,7 @@ test.describe('API and Integration Tests', () => {
         });
       });
       
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Should handle expired authentication gracefully
       await page.waitForTimeout(2000);
@@ -138,7 +138,7 @@ test.describe('API and Integration Tests', () => {
         localStorage.setItem('auth-token', 'valid-token');
       });
       
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Find and click logout if available
       const logoutElements = [
@@ -176,7 +176,7 @@ test.describe('API and Integration Tests', () => {
         });
       });
       
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       await page.waitForTimeout(3000);
       
       // WebSockets might not be implemented yet
@@ -184,7 +184,7 @@ test.describe('API and Integration Tests', () => {
     });
 
     test('should handle real-time updates', async ({ page }) => {
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Mock real-time update
       await page.evaluate(() => {
@@ -202,7 +202,7 @@ test.describe('API and Integration Tests', () => {
 
   test.describe('File Upload Integration', () => {
     test('should handle file uploads', async ({ page }) => {
-      await page.goto('http://localhost:3000/video-studio');
+      await page.goto('http://localhost:9323/video-studio');
       
       // Look for file input elements
       const fileInputs = page.locator('input[type="file"]');
@@ -222,7 +222,7 @@ test.describe('API and Integration Tests', () => {
     });
 
     test('should handle large file uploads', async ({ page }) => {
-      await page.goto('http://localhost:3000/video-studio');
+      await page.goto('http://localhost:9323/video-studio');
       
       const fileInputs = page.locator('input[type="file"]');
       const inputCount = await fileInputs.count();
@@ -241,7 +241,7 @@ test.describe('API and Integration Tests', () => {
     });
 
     test('should handle invalid file types', async ({ page }) => {
-      await page.goto('http://localhost:3000/video-studio');
+      await page.goto('http://localhost:9323/video-studio');
       
       const fileInputs = page.locator('input[type="file"]');
       const inputCount = await fileInputs.count();
@@ -265,7 +265,7 @@ test.describe('API and Integration Tests', () => {
   test.describe('Payment Integration', () => {
     test('should handle payment form validation', async ({ page }) => {
       // Navigate to a page that might have payment forms
-      await page.goto('http://localhost:3000/pricing');
+      await page.goto('http://localhost:9323/pricing');
       
       // Click on a paid plan
       const paidPlanButton = page.locator('text=Start Free Trial, text=Contact Sales');
@@ -297,7 +297,7 @@ test.describe('API and Integration Tests', () => {
         });
       });
       
-      await page.goto('http://localhost:3000/pricing');
+      await page.goto('http://localhost:9323/pricing');
       
       // Should handle payment errors gracefully
       await page.waitForTimeout(1000);
@@ -306,7 +306,7 @@ test.describe('API and Integration Tests', () => {
 
   test.describe('Search and Filter Integration', () => {
     test('should handle search functionality', async ({ page }) => {
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Look for search inputs
       const searchInputs = page.locator('input[type="search"], input[placeholder*="search" i], [data-testid="search"]');
@@ -324,7 +324,7 @@ test.describe('API and Integration Tests', () => {
     });
 
     test('should handle empty search results', async ({ page }) => {
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Mock empty search results
       await page.route('**/api/search**', async (route) => {
@@ -359,7 +359,7 @@ test.describe('API and Integration Tests', () => {
         await route.fulfill({ status: 503 });
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Should gracefully handle third-party failures
       await expect(page.locator('h1')).toBeVisible();
@@ -372,7 +372,7 @@ test.describe('API and Integration Tests', () => {
         await route.continue();
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Should not block page loading
       await expect(page.locator('h1')).toBeVisible({ timeout: 15000 });
@@ -381,7 +381,7 @@ test.describe('API and Integration Tests', () => {
 
   test.describe('Data Persistence', () => {
     test('should persist user preferences', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Set some preferences
       await page.evaluate(() => {
@@ -403,7 +403,7 @@ test.describe('API and Integration Tests', () => {
     });
 
     test('should handle localStorage limits', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Try to exceed localStorage limits
       await page.evaluate(() => {

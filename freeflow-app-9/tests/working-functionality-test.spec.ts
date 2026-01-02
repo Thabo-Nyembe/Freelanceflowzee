@@ -162,7 +162,7 @@ test.describe('Working Functionality Testing', () => {
     const potentialRoutes = [
       '/dashboard',
       '/app/dashboard',
-      '/dashboard/page',
+      '/dashboard/overview-v2',
       '/admin/dashboard',
       '/user/dashboard',
       '/analytics',

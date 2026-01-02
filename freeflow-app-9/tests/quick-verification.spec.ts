@@ -10,7 +10,7 @@ test.describe('Quick Visual Verification', () => {
   test('Verify My Day Page Content', async ({ page }) => {
     console.log('\n🔍 VERIFYING MY DAY PAGE\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(3000); // Wait for full hydration
 
@@ -107,7 +107,7 @@ test.describe('Quick Visual Verification', () => {
   test('Check for Common Issues', async ({ page }) => {
     console.log('\n🔍 CHECKING FOR COMMON ISSUES\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
     await page.waitForLoadState('domcontentloaded');
 
     // Listen for console errors
@@ -154,7 +154,7 @@ test.describe('Quick Visual Verification', () => {
   test('HTML Dump for Analysis', async ({ page }) => {
     console.log('\n🔍 CAPTURING HTML FOR ANALYSIS\n');
 
-    await page.goto('http://localhost:9323/dashboard/my-day');
+    await page.goto('http://localhost:9323/dashboard/my-day-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(3000);
 

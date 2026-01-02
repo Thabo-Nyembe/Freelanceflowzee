@@ -13,7 +13,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
   test.describe('Core Functionality Across Browsers', () => {
     for (const pagePath of pages) {
       test(`should load ${pagePath} correctly in all browsers`, async ({ page }) => {
-        await page.goto(`http://localhost:3000${pagePath}`);
+        await page.goto(`http://localhost:9323${pagePath}`);
         
         // Basic page load test
         await expect(page.locator('body')).toBeVisible();
@@ -42,7 +42,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
 
   test.describe('CSS and Layout Compatibility', () => {
     test('should maintain consistent layout across browsers', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Test key layout elements
       const layoutElements = [
@@ -70,7 +70,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
     });
 
     test('should handle CSS Grid and Flexbox correctly', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Check that grid layouts work
       const gridElements = page.locator('[class*="grid"]');
@@ -100,7 +100,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
       
       for (const viewport of viewports) {
         await page.setViewportSize(viewport);
-        await page.goto('http://localhost:3000');
+        await page.goto('http://localhost:9323');
         
         // Content should be visible at all viewport sizes
         await expect(page.locator('h1')).toBeVisible();
@@ -122,7 +122,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
 
   test.describe('JavaScript Compatibility', () => {
     test('should handle modern JavaScript features', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Test that modern JS features work
       const modernFeatures = await page.evaluate(() => {
@@ -162,7 +162,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
     });
 
     test('should handle event listeners correctly', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Test click events
       const buttons = page.locator('button, [role="button"], a');
@@ -179,7 +179,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
     });
 
     test('should handle form interactions', async ({ page }) => {
-      await page.goto('http://localhost:3000/contact');
+      await page.goto('http://localhost:9323/contact');
       
       // Test form field interactions
       const inputs = page.locator('input[type="text"], input[type="email"], textarea');
@@ -199,7 +199,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
     test('should load pages within reasonable time', async ({ page }) => {
       const startTime = Date.now();
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       await page.waitForLoadState('networkidle');
       
       const loadTime = Date.now() - startTime;
@@ -221,7 +221,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
         );
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       await page.waitForLoadState('networkidle');
       
       const resources = await Promise.all(resourcePromises);
@@ -234,7 +234,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
 
   test.describe('Accessibility Across Browsers', () => {
     test('should maintain keyboard navigation', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Test tab navigation
       await page.keyboard.press('Tab');
@@ -258,7 +258,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
     });
 
     test('should maintain ARIA attributes', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Check for common ARIA attributes
       const ariaElements = await page.evaluate(() => {
@@ -285,7 +285,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
         }
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       await page.waitForLoadState('networkidle');
       
       // Should not have CSP violations
@@ -293,7 +293,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
     });
 
     test('should prevent inline script execution', async ({ page }) => {
-      await page.goto('http://localhost:3000/contact');
+      await page.goto('http://localhost:9323/contact');
       
       // Try to inject inline script
       await page.fill('input[id="firstName"]', '<img src=x onerror=alert(1)>');
@@ -329,7 +329,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
         delete window.ResizeObserver;
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Page should still function
       await expect(page.locator('h1')).toBeVisible();
@@ -346,7 +346,7 @@ test.describe('Cross-Browser Compatibility Tests', () => {
         document.head.appendChild(style);
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Layout should still work with fallbacks
       await expect(page.locator('h1')).toBeVisible();

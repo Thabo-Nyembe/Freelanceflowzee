@@ -211,9 +211,9 @@ test.describe('Enhanced Navigation Customization', () => {
     // Test key navigation paths
     const testPaths = [
       { category: 'Business Intelligence', subcategory: 'Overview', feature: 'Dashboard', url: '/dashboard' },
-      { category: 'Business Intelligence', subcategory: 'Overview', feature: 'My Day', url: '/dashboard/my-day' },
+      { category: 'Business Intelligence', subcategory: 'Overview', feature: 'My Day', url: '/dashboard/my-day-v2' },
       { category: 'Business Intelligence', subcategory: 'Project Management', feature: 'Projects Hub', url: '/dashboard/projects-hub-v2' },
-      { category: 'Business Intelligence', subcategory: 'White Label & Platform', feature: 'White Label', url: '/dashboard/white-label' },
+      { category: 'Business Intelligence', subcategory: 'White Label & Platform', feature: 'White Label', url: '/dashboard/settings-v2' },
     ]
 
     for (const path of testPaths) {

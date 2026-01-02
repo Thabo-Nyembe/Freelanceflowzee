@@ -56,7 +56,7 @@ test.describe('Dashboard Overview Features', () => {
 // ============================================
 test.describe('My Day Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/my-day`)
+    await page.goto(`${BASE_URL}/dashboard/my-day-v2`)
     await waitForPageReady(page)
   })
 
@@ -196,7 +196,7 @@ test.describe('Clients Features', () => {
 // ============================================
 test.describe('Messages Hub Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/messages-hub`)
+    await page.goto(`${BASE_URL}/dashboard/messages-v2`)
     await waitForPageReady(page)
   })
 
@@ -441,7 +441,7 @@ test.describe('Video Studio Features', () => {
 // ============================================
 test.describe('Gallery Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/gallery`)
+    await page.goto(`${BASE_URL}/dashboard/gallery-v2`)
     await waitForPageReady(page)
   })
 
@@ -636,7 +636,7 @@ test.describe('Reports Features', () => {
 // ============================================
 test.describe('Bookings Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/bookings`)
+    await page.goto(`${BASE_URL}/dashboard/bookings-v2`)
     await waitForPageReady(page)
   })
 

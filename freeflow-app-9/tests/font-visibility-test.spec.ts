@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test'
 test.describe('Font Visibility Test - Light & Dark Modes', () => {
   const testPages = [
     { name: 'Dashboard Overview', path: '/dashboard' },
-    { name: 'My Day', path: '/dashboard/my-day' },
+    { name: 'My Day', path: '/dashboard/my-day-v2' },
     { name: 'Projects Hub', path: '/dashboard/projects-hub-v2' },
     { name: 'Clients', path: '/dashboard/clients-v2' },
     { name: 'Files Hub', path: '/dashboard/files-v2' },

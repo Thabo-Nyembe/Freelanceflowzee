@@ -39,7 +39,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Client Zone and display content', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/client-zone');
+      await page.goto('http://localhost:9323/dashboard/clients-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       // Check if page loaded
@@ -50,7 +50,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should test notification center button', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/client-zone');
+      await page.goto('http://localhost:9323/dashboard/clients-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       page.on('dialog', async dialog => {
@@ -71,7 +71,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should test contact team functionality', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/client-zone');
+      await page.goto('http://localhost:9323/dashboard/clients-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       let alertShown = false;
@@ -92,7 +92,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should test project actions (download, approve)', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/client-zone');
+      await page.goto('http://localhost:9323/dashboard/clients-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       page.on('dialog', async dialog => await dialog.accept());
@@ -120,7 +120,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Gallery and display media', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/gallery');
+      await page.goto('http://localhost:9323/dashboard/gallery-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       await page.waitForTimeout(1000);
@@ -133,7 +133,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should test AI image generation with validation', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/gallery');
+      await page.goto('http://localhost:9323/dashboard/gallery-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       let toastShown = false;
@@ -161,7 +161,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should test AI generation with valid prompt', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/gallery');
+      await page.goto('http://localhost:9323/dashboard/gallery-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       page.on('dialog', async dialog => {
@@ -191,7 +191,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should test view mode toggle', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/gallery');
+      await page.goto('http://localhost:9323/dashboard/gallery-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       // Look for view toggle buttons
@@ -206,7 +206,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should test upload media button', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/gallery');
+      await page.goto('http://localhost:9323/dashboard/gallery-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       page.on('dialog', async dialog => {
@@ -236,7 +236,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Bookings page', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/bookings');
+      await page.goto('http://localhost:9323/dashboard/bookings-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       await page.waitForTimeout(1000);
@@ -248,7 +248,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should test new booking creation', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/bookings');
+      await page.goto('http://localhost:9323/dashboard/bookings-v2');
       await page.waitForLoadState('networkidle', { timeout: 15000 });
 
       page.on('dialog', async dialog => await dialog.accept());
@@ -330,7 +330,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Collaboration', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/collaboration');
+      await page.goto('http://localhost:9323/dashboard/collaboration-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -352,7 +352,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Financial Hub', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/financial');
+      await page.goto('http://localhost:9323/dashboard/financial-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -385,7 +385,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to My Day', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/my-day');
+      await page.goto('http://localhost:9323/dashboard/my-day-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 

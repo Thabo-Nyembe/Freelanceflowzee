@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('Verify Multiple Dashboard Pages Load Content', async ({ page }) => {
   const pages = [
-    { url: '/dashboard/my-day', name: 'My Day', selector: '[data-testid="add-task-header-btn"]' },
+    { url: '/dashboard/my-day-v2', name: 'My Day', selector: '[data-testid="add-task-header-btn"]' },
     { url: '/dashboard/projects-hub-v2', name: 'Projects Hub', selector: 'button:has-text("New Project")' },
     { url: '/dashboard/ai-create-v2', name: 'AI Create', selector: 'button:has-text("Generate Content")' },
     { url: '/dashboard/files-hub-v2', name: 'Files Hub', selector: 'button:has-text("Upload")' },

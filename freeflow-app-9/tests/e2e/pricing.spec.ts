@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Pricing Page Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/pricing');
+    await page.goto('http://localhost:9323/pricing');
   });
 
   test('should load pricing page with correct title', async ({ page }) => {

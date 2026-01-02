@@ -107,7 +107,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n📅 PHASE 3: MY DAY\n')
 
-    await page.goto('http://localhost:9323/dashboard/my-day', {
+    await page.goto('http://localhost:9323/dashboard/my-day-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -215,7 +215,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     console.log('\n📆 PHASE 7: BOOKINGS\n')
 
     // Bookings Overview
-    await page.goto('http://localhost:9323/dashboard/bookings', {
+    await page.goto('http://localhost:9323/dashboard/bookings-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -252,7 +252,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n💰 PHASE 8: INVOICING\n')
 
-    await page.goto('http://localhost:9323/dashboard/invoicing', {
+    await page.goto('http://localhost:9323/dashboard/invoicing-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -274,7 +274,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n👨‍👩‍👧‍👦 PHASE 9: TEAM MANAGEMENT\n')
 
-    await page.goto('http://localhost:9323/dashboard/team-management', {
+    await page.goto('http://localhost:9323/dashboard/team-management-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -363,7 +363,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
       { path: '/dashboard/video-studio-v2', name: 'Video Studio', text: 'Video' },
       { path: '/dashboard/3d-modeling', name: '3D Modeling', text: '3D' },
       { path: '/dashboard/canvas-studio', name: 'Canvas Studio', text: 'Canvas' },
-      { path: '/dashboard/gallery', name: 'Gallery', text: 'Gallery' }
+      { path: '/dashboard/gallery-v2', name: 'Gallery', text: 'Gallery' }
     ]
 
     for (const tool of creativeTools) {
@@ -503,7 +503,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n💾 PHASE 17: STORAGE\n')
 
-    await page.goto('http://localhost:9323/dashboard/storage', {
+    await page.goto('http://localhost:9323/dashboard/cloud-storage-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })

@@ -13,7 +13,7 @@ test.describe.configure({ mode: 'parallel' })
 test.describe('TIER 1: Revenue-Blocking Features (5/5)', () => {
 
   test('Feature #1: Invoicing System - 8 handlers, 12 buttons', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/invoicing')
+    await page.goto('http://localhost:9323/dashboard/invoicing-v2')
 
     // Wait for page load
     await page.waitForSelector('text=Invoicing', { timeout: 10000 })
@@ -34,7 +34,7 @@ test.describe('TIER 1: Revenue-Blocking Features (5/5)', () => {
   })
 
   test('Feature #2: Email Marketing - 8 handlers, 9 buttons', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/email-marketing')
+    await page.goto('http://localhost:9323/dashboard/email-marketing-v2')
 
     await page.waitForSelector('text=Email Marketing', { timeout: 10000 })
 
@@ -62,7 +62,7 @@ test.describe('TIER 1: Revenue-Blocking Features (5/5)', () => {
   })
 
   test('Feature #4: Team Management - 6 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/team-management')
+    await page.goto('http://localhost:9323/dashboard/team-management-v2')
 
     await page.waitForSelector('text=Team Management', { timeout: 10000 })
 
@@ -145,7 +145,7 @@ test.describe('TIER 2: Project Management Features (5/5)', () => {
   })
 
   test('Feature #10: Financial Hub - Reports - 20 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/financial')
+    await page.goto('http://localhost:9323/dashboard/financial-v2')
 
     await page.waitForSelector('text=Financial', { timeout: 10000 })
 
@@ -239,7 +239,7 @@ test.describe('TIER 4: Client Engagement Features (3/3)', () => {
   })
 
   test('Feature #17: Feedback System - 2 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/client-zone')
+    await page.goto('http://localhost:9323/dashboard/clients-v2')
 
     await page.waitForSelector('text=Client Zone', { timeout: 10000 })
 
@@ -275,7 +275,7 @@ test.describe('TIER 5: Advanced Features (3/3)', () => {
   })
 
   test('Feature #19: Integrations - API Management - 8 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/integrations')
+    await page.goto('http://localhost:9323/dashboard/integrations-v2')
 
     await page.waitForSelector('text=Integrations', { timeout: 10000 })
 
@@ -318,7 +318,7 @@ test.describe('Critical User Flows', () => {
 
   test('Button Interaction - Handlers execute without errors', async ({ page }) => {
     // Test a critical feature's button interaction
-    await page.goto('http://localhost:9323/dashboard/invoicing')
+    await page.goto('http://localhost:9323/dashboard/invoicing-v2')
     await page.waitForSelector('button:has-text("Export CSV")', { timeout: 10000 })
 
     // Click button and verify no console errors
@@ -379,7 +379,7 @@ test.describe('Critical User Flows', () => {
   })
 
   test('Toast Notifications - User feedback working', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/invoicing')
+    await page.goto('http://localhost:9323/dashboard/invoicing-v2')
 
     await page.waitForSelector('button:has-text("Export CSV")', { timeout: 10000 })
 
@@ -402,7 +402,7 @@ test.describe('Production Readiness Checks', () => {
   test('Page Load Performance - All critical pages < 5s', async ({ page }) => {
     const pages = [
       '/dashboard',
-      '/dashboard/invoicing',
+      '/dashboard/invoicing-v2',
       '/dashboard/projects-hub-v2',
       '/dashboard/analytics-v2',
       '/dashboard/settings-v2'
@@ -453,7 +453,7 @@ test.describe('Production Readiness Checks', () => {
     await page.goto('http://localhost:9323/dashboard')
     await page.waitForTimeout(2000)
 
-    await page.goto('http://localhost:9323/dashboard/invoicing')
+    await page.goto('http://localhost:9323/dashboard/invoicing-v2')
     await page.waitForTimeout(2000)
 
     await page.goto('http://localhost:9323/dashboard/projects-hub-v2')

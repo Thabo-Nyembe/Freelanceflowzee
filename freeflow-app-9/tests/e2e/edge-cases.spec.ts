@@ -10,14 +10,14 @@ test.describe('Edge Cases and Error Handling Tests', () => {
         await route.continue();
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Page should still load, even if slowly
       await expect(page.locator('text=Welcome to FreeFlowZee')).toBeVisible({ timeout: 15000 });
     });
 
     test('should handle offline scenarios', async ({ page, context }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Go offline
       await context.setOffline(true);
@@ -31,7 +31,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
 
     test('should handle very large viewport sizes', async ({ page }) => {
       await page.setViewportSize({ width: 2560, height: 1440 });
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Content should scale appropriately
       await expect(page.locator('text=Welcome to FreeFlowZee')).toBeVisible();
@@ -40,7 +40,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
 
     test('should handle very small viewport sizes', async ({ page }) => {
       await page.setViewportSize({ width: 320, height: 568 });
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Content should still be accessible
       await expect(page.locator('text=Welcome to FreeFlowZee')).toBeVisible();
@@ -56,7 +56,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
         window.addEventListener = () => {};
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Basic content should still be visible
       await expect(page.locator('h1')).toBeVisible();
@@ -71,14 +71,14 @@ test.describe('Edge Cases and Error Handling Tests', () => {
         delete window.IntersectionObserver;
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       await expect(page.locator('text=Welcome to FreeFlowZee')).toBeVisible();
     });
   });
 
   test.describe('Security Edge Cases', () => {
     test('should prevent XSS attacks in forms', async ({ page }) => {
-      await page.goto('http://localhost:3000/contact');
+      await page.goto('http://localhost:9323/contact');
       
       // Try to inject malicious script
       const maliciousScript = '<script>alert("XSS")</script>';
@@ -97,9 +97,9 @@ test.describe('Edge Cases and Error Handling Tests', () => {
     test('should handle malformed URLs gracefully', async ({ page }) => {
       // Test various malformed URLs
       const malformedUrls = [
-        'http://localhost:3000/../../etc/passwd',
-        'http://localhost:3000/<script>alert(1)</script>',
-        'http://localhost:3000/' + 'a'.repeat(2000), // Very long URL
+        'http://localhost:9323/../../etc/passwd',
+        'http://localhost:9323/<script>alert(1)</script>',
+        'http://localhost:9323/' + 'a'.repeat(2000), // Very long URL
       ];
       
       for (const url of malformedUrls) {
@@ -112,7 +112,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
 
   test.describe('Data Edge Cases', () => {
     test('should handle empty data states', async ({ page }) => {
-      await page.goto('http://localhost:3000/dashboard');
+      await page.goto('http://localhost:9323/dashboard');
       
       // Mock empty state
       await page.addInitScript(() => {
@@ -131,7 +131,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
     });
 
     test('should handle very long text content', async ({ page }) => {
-      await page.goto('http://localhost:3000/contact');
+      await page.goto('http://localhost:9323/contact');
       
       // Fill with very long text
       const longText = 'Lorem ipsum '.repeat(1000);
@@ -143,7 +143,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
     });
 
     test('should handle special characters and unicode', async ({ page }) => {
-      await page.goto('http://localhost:3000/contact');
+      await page.goto('http://localhost:9323/contact');
       
       // Test with various special characters
       const specialText = '🚀 Émilie José François Müller 中文 العربية русский язык';
@@ -158,7 +158,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
 
   test.describe('User Interaction Edge Cases', () => {
     test('should handle rapid clicking', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Rapidly click the same button
       const button = page.locator('text=AI Video Studio').first();
@@ -173,7 +173,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
     });
 
     test('should handle form submission spamming', async ({ page }) => {
-      await page.goto('http://localhost:3000/contact');
+      await page.goto('http://localhost:9323/contact');
       
       await page.fill('input[id="firstName"]', 'Test');
       await page.fill('input[id="email"]', 'test@example.com');
@@ -190,7 +190,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
     });
 
     test('should handle keyboard mashing', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Random keyboard input
       const keys = ['Tab', 'Enter', 'Escape', 'ArrowDown', 'ArrowUp', 'Space'];
@@ -219,14 +219,14 @@ test.describe('Edge Cases and Error Handling Tests', () => {
         document.head.appendChild(style);
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       await expect(page.locator('text=Welcome to FreeFlowZee')).toBeVisible();
       
       await page.screenshot({ path: 'tests/screenshots/high-contrast.png' });
     });
 
     test('should work with zoom levels', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Test various zoom levels
       const zoomLevels = [0.5, 1.5, 2.0];
@@ -255,7 +255,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
         document.head.appendChild(style);
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       await expect(page.locator('text=Welcome to FreeFlowZee')).toBeVisible();
     });
   });
@@ -267,7 +267,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
         errors.push(error.message);
       });
       
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Inject a JS error
       await page.evaluate(() => {
@@ -280,7 +280,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
     });
 
     test('should handle memory pressure', async ({ page }) => {
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Create memory pressure
       await page.evaluate(() => {
@@ -300,7 +300,7 @@ test.describe('Edge Cases and Error Handling Tests', () => {
   test.describe('Edge Case Cleanup', () => {
     test('should clean up properly after tests', async ({ page }) => {
       // Clean up any side effects from edge case tests
-      await page.goto('http://localhost:3000');
+      await page.goto('http://localhost:9323');
       
       // Clear localStorage
       await page.evaluate(() => {

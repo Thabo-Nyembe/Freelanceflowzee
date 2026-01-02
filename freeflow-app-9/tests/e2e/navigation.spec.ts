@@ -22,18 +22,18 @@ test.describe('Navigation System Tests', () => {
       '/dashboard',
       '/dashboard/projects-hub-v2',
       '/dashboard/video-studio-v2',
-      '/dashboard/collaboration',
+      '/dashboard/collaboration-v2',
       '/dashboard/community-v2',
-      '/dashboard/ai-design',
+      '/dashboard/ai-design-v2',
       '/dashboard/ai-create-v2',
-      '/dashboard/my-day',
-      '/dashboard/financial',
+      '/dashboard/my-day-v2',
+      '/dashboard/financial-v2',
       '/dashboard/files-hub-v2',
       '/dashboard/messages-v2',
       '/dashboard/analytics-v2',
-      '/dashboard/client-zone',
+      '/dashboard/clients-v2',
       '/dashboard/calendar-v2',
-      '/dashboard/cv-portfolio',
+      '/dashboard/profile-v2',
       '/dashboard/settings-v2',
       '/dashboard/notifications-v2'
     ];
@@ -73,9 +73,9 @@ test.describe('Navigation System Tests', () => {
 
   test('should have working UI components on each page', async ({ page }) => {
     const pagesToTest = [
-      '/dashboard/ai-design',
+      '/dashboard/ai-design-v2',
       '/dashboard/calendar-v2',
-      '/dashboard/cv-portfolio'
+      '/dashboard/profile-v2'
     ];
 
     for (const pageUrl of pagesToTest) {
@@ -100,9 +100,9 @@ test.describe('Navigation System Tests', () => {
 
   test('should have accessible images with alt attributes', async ({ page }) => {
     const pagesToCheck = [
-      '/dashboard/ai-design',
+      '/dashboard/ai-design-v2',
       '/dashboard/calendar-v2',
-      '/dashboard/cv-portfolio'
+      '/dashboard/profile-v2'
     ];
 
     for (const pageUrl of pagesToCheck) {

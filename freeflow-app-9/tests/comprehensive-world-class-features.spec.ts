@@ -48,7 +48,7 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
   })
 
   test('Universal Pinpoint System (UPS) in Collaboration page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/collaboration`)
+    await page.goto(`${BASE_URL}/dashboard/collaboration-v2`)
 
     // Wait for page load
     await expect(page.locator('h1:has-text("Collaboration")')).toBeVisible({ timeout: 10000 })
@@ -81,7 +81,7 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
   })
 
   test('Financial Hub loads with metrics', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/financial`)
+    await page.goto(`${BASE_URL}/dashboard/financial-v2`)
 
     await expect(page.locator('h1, h2').filter({ hasText: /Financial/i })).toBeVisible({ timeout: 10000 })
   })
@@ -105,7 +105,7 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
   })
 
   test('My Day productivity features', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/my-day`)
+    await page.goto(`${BASE_URL}/dashboard/my-day-v2`)
 
     await expect(page.locator('h1, h2').filter({ hasText: /My Day/i })).toBeVisible({ timeout: 10000 })
   })
@@ -140,7 +140,7 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
     const pages = [
       { path: '/dashboard/ai-create-v2', text: 'AI Create' },
       { path: '/dashboard/projects-hub-v2', text: 'Projects' },
-      { path: '/dashboard/collaboration', text: 'Collaboration' }
+      { path: '/dashboard/collaboration-v2', text: 'Collaboration' }
     ]
 
     for (const pageInfo of pages) {
@@ -284,12 +284,12 @@ test.describe('Critical User Flows', () => {
       '/dashboard',
       '/dashboard/ai-create-v2',
       '/dashboard/projects-hub-v2',
-      '/dashboard/collaboration',
+      '/dashboard/collaboration-v2',
       '/dashboard/video-studio-v2',
-      '/dashboard/financial',
+      '/dashboard/financial-v2',
       '/dashboard/community-v2',
       '/dashboard/analytics-v2',
-      '/dashboard/my-day'
+      '/dashboard/my-day-v2'
     ]
 
     for (const hub of majorHubs) {

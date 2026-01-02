@@ -4,18 +4,18 @@ import { test, expect, Page } from '@playwright/test'
 const DASHBOARD_ROUTES = [
   '/dashboard',
   '/dashboard/ai-create-v2',
-  '/dashboard/ai-design',
+  '/dashboard/ai-design-v2',
   '/dashboard/video-studio-v2',
   '/dashboard/projects-hub-v2',
-  '/dashboard/collaboration',
+  '/dashboard/collaboration-v2',
   '/dashboard/community-v2',
   '/dashboard/files-hub-v2',
-  '/dashboard/my-day',
+  '/dashboard/my-day-v2',
   '/dashboard/analytics-v2',
-  '/dashboard/financial',
+  '/dashboard/financial-v2',
   '/dashboard/messages-v2',
   '/dashboard/calendar-v2',
-  '/dashboard/cv-portfolio',
+  '/dashboard/profile-v2',
   '/dashboard/settings-v2',
   '/dashboard/notifications-v2'
 ]

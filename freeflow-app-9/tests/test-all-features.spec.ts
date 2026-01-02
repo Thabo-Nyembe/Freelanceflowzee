@@ -68,7 +68,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('Collaboration page with UPS system', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/collaboration`)
+    await page.goto(`${BASE_URL}/dashboard/collaboration-v2`)
     await page.waitForLoadState('networkidle')
 
     // Check for collaboration features
@@ -92,7 +92,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('Financial Hub', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/financial`)
+    await page.goto(`${BASE_URL}/dashboard/financial-v2`)
     await page.waitForLoadState('networkidle')
 
     await expect(page.locator('h1, h2').filter({ hasText: /Financial/i })).toBeVisible({ timeout: 10000 })
@@ -124,7 +124,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('My Day page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/my-day`)
+    await page.goto(`${BASE_URL}/dashboard/my-day-v2`)
     await page.waitForLoadState('networkidle')
 
     await expect(page.locator('h1, h2').filter({ hasText: /My Day|Today/i })).toBeVisible({ timeout: 10000 })

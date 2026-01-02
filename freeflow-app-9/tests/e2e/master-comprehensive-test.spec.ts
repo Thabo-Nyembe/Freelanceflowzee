@@ -222,11 +222,11 @@ test.describe('Marketing Pages Tests', () => {
 test.describe('Dashboard Core Tests', () => {
   const dashboardPages = [
     '/dashboard/overview-v2',
-    '/dashboard/my-day',
+    '/dashboard/my-day-v2',
     '/dashboard/projects-hub-v2',
     '/dashboard/files-hub-v2',
     '/dashboard/clients-v2',
-    '/dashboard/messages-hub',
+    '/dashboard/messages-v2',
     '/dashboard/calendar-v2',
     '/dashboard/invoices-v2',
     '/dashboard/settings-v2',
@@ -841,7 +841,7 @@ test.describe('Security Tests', () => {
 // ============================================
 test.describe('Real-time Features Tests', () => {
   test('should connect to realtime', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/messages-hub`)
+    await page.goto(`${BASE_URL}/dashboard/messages-v2`)
     await page.waitForLoadState('networkidle')
 
     // Check for WebSocket connection

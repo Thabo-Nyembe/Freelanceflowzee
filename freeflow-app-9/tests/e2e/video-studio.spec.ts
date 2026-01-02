@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Video Studio Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/video-studio');
+    await page.goto('http://localhost:9323/video-studio');
   });
 
   test('should load video studio page', async ({ page }) => {
@@ -75,7 +75,7 @@ test.describe('Video Studio Tests', () => {
   test('should navigate back to homepage', async ({ page }) => {
     // Assuming there's a navigation back to home
     await page.goBack();
-    await expect(page).toHaveURL('http://localhost:3000/');
+    await expect(page).toHaveURL('http://localhost:9323/');
   });
 
   test('should load without errors', async ({ page }) => {

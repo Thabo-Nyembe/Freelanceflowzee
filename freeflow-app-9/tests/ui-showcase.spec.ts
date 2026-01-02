@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('UI Showcase', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/dashboard/ui-showcase')
+    await page.goto('http://localhost:9323/dashboard/ui-showcase')
   })
 
   test('should load UI showcase page successfully', async ({ page }) => {

@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Contact Page Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000/contact');
+    await page.goto('http://localhost:9323/contact');
   });
 
   test('should load contact page with correct title', async ({ page }) => {

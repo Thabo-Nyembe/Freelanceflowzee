@@ -148,7 +148,7 @@ test.describe('Dashboard', () => {
   })
 
   test('My Day page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/my-day`)
+    await page.goto(`${BASE_URL}/dashboard/my-day-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="my-day"]')
@@ -172,7 +172,7 @@ test.describe('Dashboard', () => {
   })
 
   test('Financial page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/financial`)
+    await page.goto(`${BASE_URL}/dashboard/financial-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="financial"]')
@@ -272,7 +272,7 @@ test.describe('Creative Tools', () => {
 
 test.describe('Business Tools', () => {
   test('Invoicing page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/invoicing`)
+    await page.goto(`${BASE_URL}/dashboard/invoicing-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="invoicing"]')
@@ -280,7 +280,7 @@ test.describe('Business Tools', () => {
   })
 
   test('Bookings page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/bookings`)
+    await page.goto(`${BASE_URL}/dashboard/bookings-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="bookings"]')
@@ -304,7 +304,7 @@ test.describe('Business Tools', () => {
   })
 
   test('Integrations page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/integrations`)
+    await page.goto(`${BASE_URL}/dashboard/integrations-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="integrations"]')

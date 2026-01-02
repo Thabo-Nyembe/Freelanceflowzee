@@ -3,7 +3,7 @@ import { test } from '@playwright/test'
 test('Quick visual check - My Day page', async ({ page }) => {
   console.log('Testing Dark Mode...')
 
-  await page.goto('http://localhost:9323/dashboard/my-day', {
+  await page.goto('http://localhost:9323/dashboard/my-day-v2', {
     waitUntil: 'domcontentloaded',
     timeout: 30000
   })

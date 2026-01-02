@@ -10,7 +10,7 @@ test.describe('Dashboard Navigation - Complete Test Suite', () => {
   test('should navigate to all major dashboard pages', async ({ page }) => {
     const pages = [
       { name: 'Files Hub', url: '/dashboard/files-hub-v2' },
-      { name: 'Client Zone', url: '/dashboard/client-zone' },
+      { name: 'Client Zone', url: '/dashboard/clients-v2' },
       { name: 'Workflow Builder', url: '/dashboard/workflow-builder' },
       { name: 'Video Studio', url: '/dashboard/video-studio-v2' },
       { name: 'AI Create', url: '/dashboard/ai-create-v2' },

@@ -164,7 +164,7 @@ test.describe('API Endpoints Integration', () => {
   });
 
   test('Collaboration endpoints accessible', async ({ page }) => {
-    await page.goto('/dashboard/collaboration');
+    await page.goto('/dashboard/collaboration-v2');
     await page.waitForLoadState('domcontentloaded');
 
     const body = page.locator('body');

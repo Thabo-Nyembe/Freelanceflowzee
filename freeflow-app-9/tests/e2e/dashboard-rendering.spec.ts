@@ -198,7 +198,7 @@ test.describe('Dashboard Navigation Tests', () => {
   });
 
   test('Navigate back to Dashboard from sub-page', async ({ page }) => {
-    await navigateToProtectedRoute(page, '/dashboard/my-day');
+    await navigateToProtectedRoute(page, '/dashboard/my-day-v2');
 
     // Click on Dashboard link in sidebar
     const dashboardLink = page.locator('a:has-text("Dashboard"), [href="/dashboard"]').first();

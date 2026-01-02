@@ -475,7 +475,7 @@ describe('URL Utilities', () => {
 
     it('should validate correct URLs', () => {
       expect(isValidUrl('https://example.com')).toBe(true)
-      expect(isValidUrl('http://localhost:3000')).toBe(true)
+      expect(isValidUrl('http://localhost:9323')).toBe(true)
       expect(isValidUrl('https://example.com/path?query=1')).toBe(true)
     })
 

@@ -8,8 +8,8 @@ const dashboardRoutes = [
   '/dashboard/messages-v2',
   '/dashboard/settings-v2',
   '/dashboard/projects-hub-v2',
-  '/dashboard/my-day',
-  '/dashboard/financial'
+  '/dashboard/my-day-v2',
+  '/dashboard/financial-v2'
 ];
 
 test.describe('Dashboard Routes Status Check', () => {
