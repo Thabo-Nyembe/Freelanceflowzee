@@ -156,7 +156,7 @@ test.describe('Dashboard', () => {
   })
 
   test('Projects Hub page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects-hub`)
+    await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="projects"]')
@@ -164,7 +164,7 @@ test.describe('Dashboard', () => {
   })
 
   test('Clients page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="clients"]')
@@ -180,7 +180,7 @@ test.describe('Dashboard', () => {
   })
 
   test('Messages page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/messages`)
+    await page.goto(`${BASE_URL}/dashboard/messages-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="messages"]')
@@ -188,7 +188,7 @@ test.describe('Dashboard', () => {
   })
 
   test('Files Hub page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="files"]')
@@ -196,7 +196,7 @@ test.describe('Dashboard', () => {
   })
 
   test('Settings page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, form, [data-testid="settings"]')
@@ -204,7 +204,7 @@ test.describe('Dashboard', () => {
   })
 
   test('Profile page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/profile`)
+    await page.goto(`${BASE_URL}/dashboard/profile-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, form, [data-testid="profile"]')
@@ -218,7 +218,7 @@ test.describe('Dashboard', () => {
 
 test.describe('Creative Tools', () => {
   test('AI Create page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`)
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="ai-create"]')
@@ -234,7 +234,7 @@ test.describe('Creative Tools', () => {
   })
 
   test('Video Studio page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/video-studio`)
+    await page.goto(`${BASE_URL}/dashboard/video-studio-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="video-studio"]')
@@ -296,7 +296,7 @@ test.describe('Business Tools', () => {
   })
 
   test('Reports page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/reports`)
+    await page.goto(`${BASE_URL}/dashboard/reports-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="reports"]')
@@ -312,7 +312,7 @@ test.describe('Business Tools', () => {
   })
 
   test('Team Hub page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/team-hub`)
+    await page.goto(`${BASE_URL}/dashboard/team-hub-v2`)
     await waitForPageLoad(page)
 
     const hasContent = await elementExists(page, 'main, h1, [data-testid="team"]')
@@ -580,7 +580,7 @@ test.describe('Error Handling', () => {
 
 test.describe('Security', () => {
   test('Protected routes require authentication', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageLoad(page)
 
     // Should either show login or settings (if auth bypass in dev)

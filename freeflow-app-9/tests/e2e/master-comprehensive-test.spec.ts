@@ -221,16 +221,16 @@ test.describe('Marketing Pages Tests', () => {
 // ============================================
 test.describe('Dashboard Core Tests', () => {
   const dashboardPages = [
-    '/dashboard/overview',
+    '/dashboard/overview-v2',
     '/dashboard/my-day',
-    '/dashboard/projects-hub',
-    '/dashboard/files-hub',
-    '/dashboard/clients',
+    '/dashboard/projects-hub-v2',
+    '/dashboard/files-hub-v2',
+    '/dashboard/clients-v2',
     '/dashboard/messages-hub',
-    '/dashboard/calendar',
-    '/dashboard/invoices',
-    '/dashboard/settings',
-    '/dashboard/analytics',
+    '/dashboard/calendar-v2',
+    '/dashboard/invoices-v2',
+    '/dashboard/settings-v2',
+    '/dashboard/analytics-v2',
   ]
 
   for (const pagePath of dashboardPages) {
@@ -439,7 +439,7 @@ test.describe('Component Tests', () => {
   })
 
   test('should render tables correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await page.waitForLoadState('networkidle')
 
     const tables = page.locator('table, [role="table"], [data-testid="table"]')
@@ -447,7 +447,7 @@ test.describe('Component Tests', () => {
   })
 
   test('should render charts correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
     await page.waitForLoadState('networkidle')
 
     const charts = page.locator('canvas, svg[class*="chart"], [data-testid="chart"]')
@@ -471,7 +471,7 @@ test.describe('Component Tests', () => {
   })
 
   test('should render tabs correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await page.waitForLoadState('networkidle')
 
     const tabs = page.locator('[role="tablist"], .tabs, [data-testid="tabs"]')
@@ -511,7 +511,7 @@ test.describe('Navigation Tests', () => {
   })
 
   test('should have breadcrumbs', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await page.waitForLoadState('networkidle')
 
     const breadcrumbs = page.locator('[aria-label="breadcrumb"], .breadcrumb, nav[class*="breadcrumb"]')
@@ -521,7 +521,7 @@ test.describe('Navigation Tests', () => {
   test('should have back navigation', async ({ page }) => {
     await page.goto(`${BASE_URL}/dashboard/overview`)
     await page.waitForLoadState('networkidle')
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await page.waitForLoadState('networkidle')
 
     await page.goBack()
@@ -680,7 +680,7 @@ test.describe('Performance Tests', () => {
 
     // Navigate multiple times
     for (let i = 0; i < 3; i++) {
-      await page.goto(`${BASE_URL}/dashboard/settings`)
+      await page.goto(`${BASE_URL}/dashboard/settings-v2`)
       await page.waitForLoadState('domcontentloaded')
       await page.waitForTimeout(1000)
       await page.goto(`${BASE_URL}/dashboard/overview`)
@@ -786,7 +786,7 @@ test.describe('Security Tests', () => {
     // Clear any existing auth
     await page.context().clearCookies()
 
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await page.waitForLoadState('networkidle')
 
     // Should redirect to login or show login prompt
@@ -853,7 +853,7 @@ test.describe('Real-time Features Tests', () => {
   })
 
   test('should handle notifications', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/notifications`)
+    await page.goto(`${BASE_URL}/dashboard/notifications-v2`)
     await page.waitForLoadState('networkidle')
 
     // Check for notification elements
@@ -867,7 +867,7 @@ test.describe('Real-time Features Tests', () => {
 // ============================================
 test.describe('File Upload Tests', () => {
   test('should have file upload capability', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await page.waitForLoadState('networkidle')
 
     const fileInput = page.locator('input[type="file"]')
@@ -875,7 +875,7 @@ test.describe('File Upload Tests', () => {
   })
 
   test('should handle drag and drop area', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await page.waitForLoadState('networkidle')
 
     const dropzone = page.locator('[data-testid="dropzone"], .dropzone, [class*="drop"]')
@@ -900,7 +900,7 @@ test.describe('Search Functionality Tests', () => {
   })
 
   test('should filter results', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await page.waitForLoadState('networkidle')
 
     const filterInput = page.locator('input[placeholder*="filter" i], input[placeholder*="search" i]')
@@ -916,7 +916,7 @@ test.describe('Search Functionality Tests', () => {
 // ============================================
 test.describe('Pagination Tests', () => {
   test('should have pagination controls', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await page.waitForLoadState('networkidle')
 
     const pagination = page.locator('[data-testid="pagination"], .pagination, nav[aria-label*="pagination" i]')
@@ -924,7 +924,7 @@ test.describe('Pagination Tests', () => {
   })
 
   test('should handle infinite scroll', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await page.waitForLoadState('domcontentloaded')
     await page.waitForTimeout(2000) // Wait for React hydration
 
@@ -943,7 +943,7 @@ test.describe('Pagination Tests', () => {
 // ============================================
 test.describe('Sorting Tests', () => {
   test('should sort table columns', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await page.waitForLoadState('networkidle')
 
     const sortableHeaders = page.locator('th[class*="sort"], th button, thead th')
@@ -964,7 +964,7 @@ test.describe('Sorting Tests', () => {
 // ============================================
 test.describe('Export Functionality Tests', () => {
   test('should have export options', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/reports`)
+    await page.goto(`${BASE_URL}/dashboard/reports-v2`)
     await page.waitForLoadState('networkidle')
 
     const exportButton = page.locator('button:has-text("Export"), button:has-text("Download"), [data-testid="export"]')

@@ -238,7 +238,7 @@ test.describe('Navigation Customization Feature', () => {
     await page.waitForSelector('text=Files Hub', { timeout: 3000 })
 
     // Verify Files Hub has NewTab badge
-    const filesHub = page.locator('a[href="/dashboard/files-hub"]')
+    const filesHub = page.locator('a[href="/dashboard/files-hub-v2"]')
     await expect(filesHub).toBeVisible()
 
     const badge = filesHub.locator('text=NewTab')
@@ -254,7 +254,7 @@ test.describe('Navigation Customization Feature', () => {
     await page.waitForSelector('text=Notifications', { timeout: 3000 })
 
     // Verify Settings has NewTab badge
-    const settingsLink = page.locator('a[href="/dashboard/settings"]')
+    const settingsLink = page.locator('a[href="/dashboard/settings-v2"]')
     await expect(settingsLink).toBeVisible()
 
     const badge = settingsLink.locator('text=NewTab')

@@ -37,7 +37,7 @@ const allFeatures: FeatureTest[] = [
   // Communication
   { name: 'Messages', path: 'messages', description: 'Communication hub', category: 'communication', expectedElements: ['[data-testid="messages"]', '.message-thread', 'textarea'] },
   { name: 'Collaboration', path: 'collaboration', description: 'Real-time collaboration', category: 'communication', expectedElements: ['[data-testid="collaboration-tools"]', '.collaboration-panel', 'button'] },
-  { name: 'Community Hub', path: 'community-hub', description: 'Professional networking', category: 'communication', expectedElements: ['[data-testid="community"]', '.community-post', 'button'] },
+  { name: 'Community Hub', path: 'community-v2', description: 'Professional networking', category: 'communication', expectedElements: ['[data-testid="community"]', '.community-post', 'button'] },
   { name: 'Client Zone', path: 'client-zone', description: 'Client portal', category: 'communication', expectedElements: ['[data-testid="client-portal"]', '.client-project', 'button'] },
 
   // Storage & Files

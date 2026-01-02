@@ -86,7 +86,7 @@ test.describe('My Day Features', () => {
 // ============================================
 test.describe('Projects Hub Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects-hub`)
+    await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`)
     await waitForPageReady(page)
   })
 
@@ -121,7 +121,7 @@ test.describe('Projects Hub Features', () => {
 // ============================================
 test.describe('Files Hub Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await waitForPageReady(page)
   })
 
@@ -161,7 +161,7 @@ test.describe('Files Hub Features', () => {
 // ============================================
 test.describe('Clients Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await waitForPageReady(page)
   })
 
@@ -231,7 +231,7 @@ test.describe('Messages Hub Features', () => {
 // ============================================
 test.describe('Calendar Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/calendar`)
+    await page.goto(`${BASE_URL}/dashboard/calendar-v2`)
     await waitForPageReady(page)
   })
 
@@ -266,7 +266,7 @@ test.describe('Calendar Features', () => {
 // ============================================
 test.describe('Invoices Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/invoices`)
+    await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
     await waitForPageReady(page)
   })
 
@@ -301,7 +301,7 @@ test.describe('Invoices Features', () => {
 // ============================================
 test.describe('Analytics Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
     await waitForPageReady(page)
   })
 
@@ -336,7 +336,7 @@ test.describe('Analytics Features', () => {
 // ============================================
 test.describe('Settings Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageReady(page)
   })
 
@@ -371,7 +371,7 @@ test.describe('Settings Features', () => {
 // ============================================
 test.describe('AI Create Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`)
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`)
     await waitForPageReady(page)
   })
 
@@ -406,7 +406,7 @@ test.describe('AI Create Features', () => {
 // ============================================
 test.describe('Video Studio Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/video-studio`)
+    await page.goto(`${BASE_URL}/dashboard/video-studio-v2`)
     await waitForPageReady(page)
   })
 
@@ -541,7 +541,7 @@ test.describe('Escrow Features', () => {
 // ============================================
 test.describe('Notifications Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/notifications`)
+    await page.goto(`${BASE_URL}/dashboard/notifications-v2`)
     await waitForPageReady(page)
   })
 
@@ -571,7 +571,7 @@ test.describe('Notifications Features', () => {
 // ============================================
 test.describe('Profile Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/profile`)
+    await page.goto(`${BASE_URL}/dashboard/profile-v2`)
     await waitForPageReady(page)
   })
 
@@ -601,7 +601,7 @@ test.describe('Profile Features', () => {
 // ============================================
 test.describe('Reports Features', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/reports`)
+    await page.goto(`${BASE_URL}/dashboard/reports-v2`)
     await waitForPageReady(page)
   })
 

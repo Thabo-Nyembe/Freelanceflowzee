@@ -50,7 +50,7 @@ test.describe('TIER 1: Revenue-Blocking Features (5/5)', () => {
   })
 
   test('Feature #3: CRM/Lead Management - 5 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/crm')
+    await page.goto('http://localhost:9323/dashboard/crm-v2')
 
     await page.waitForSelector('text=CRM', { timeout: 10000 })
 
@@ -73,7 +73,7 @@ test.describe('TIER 1: Revenue-Blocking Features (5/5)', () => {
   })
 
   test('Feature #5: User Management - 8 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/user-management')
+    await page.goto('http://localhost:9323/dashboard/user-management-v2')
 
     await page.waitForSelector('text=User Management', { timeout: 10000 })
 
@@ -92,7 +92,7 @@ test.describe('TIER 1: Revenue-Blocking Features (5/5)', () => {
 test.describe('TIER 2: Project Management Features (5/5)', () => {
 
   test('Feature #6: Projects Hub - Import - 7 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/projects-hub/import')
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2/import')
 
     await page.waitForSelector('text=Import Projects', { timeout: 10000 })
 
@@ -108,7 +108,7 @@ test.describe('TIER 2: Project Management Features (5/5)', () => {
   })
 
   test('Feature #7: Projects Hub - Templates - 7 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/projects-hub/templates')
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2/templates')
 
     await page.waitForSelector('text=Templates', { timeout: 10000 })
 
@@ -119,7 +119,7 @@ test.describe('TIER 2: Project Management Features (5/5)', () => {
   })
 
   test('Feature #8: Projects Hub - Analytics', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/projects-hub')
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2')
 
     await page.waitForSelector('text=Projects', { timeout: 10000 })
 
@@ -159,7 +159,7 @@ test.describe('TIER 2: Project Management Features (5/5)', () => {
 test.describe('TIER 3: Analytics & Admin Features (4/4)', () => {
 
   test('Feature #11: Analytics - Revenue Dashboard - 11 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/analytics')
+    await page.goto('http://localhost:9323/dashboard/analytics-v2')
 
     await page.waitForSelector('text=Analytics', { timeout: 10000 })
 
@@ -170,7 +170,7 @@ test.describe('TIER 3: Analytics & Admin Features (4/4)', () => {
   })
 
   test('Feature #12: Analytics - Project Performance', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/analytics')
+    await page.goto('http://localhost:9323/dashboard/analytics-v2')
 
     await page.waitForSelector('text=Analytics', { timeout: 10000 })
 
@@ -213,7 +213,7 @@ test.describe('TIER 3: Analytics & Admin Features (4/4)', () => {
 test.describe('TIER 4: Client Engagement Features (3/3)', () => {
 
   test('Feature #15: Notifications - Preferences - 21 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/settings/notifications')
+    await page.goto('http://localhost:9323/dashboard/settings-v2/notifications')
 
     await page.waitForSelector('text=Notifications', { timeout: 10000 })
 
@@ -256,7 +256,7 @@ test.describe('TIER 4: Client Engagement Features (3/3)', () => {
 test.describe('TIER 5: Advanced Features (3/3)', () => {
 
   test('Feature #18: Reports - Custom Report Builder - 10 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/reports')
+    await page.goto('http://localhost:9323/dashboard/reports-v2')
 
     await page.waitForSelector('text=Reports', { timeout: 10000 })
 
@@ -286,7 +286,7 @@ test.describe('TIER 5: Advanced Features (3/3)', () => {
   })
 
   test('Feature #20: Settings - Import/Export - 3 handlers', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/settings')
+    await page.goto('http://localhost:9323/dashboard/settings-v2')
 
     await page.waitForSelector('text=Settings', { timeout: 10000 })
 
@@ -344,7 +344,7 @@ test.describe('Critical User Flows', () => {
   })
 
   test('Real-time Data Loading - Supabase integration', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/crm')
+    await page.goto('http://localhost:9323/dashboard/crm-v2')
 
     await page.waitForSelector('text=CRM', { timeout: 10000 })
 
@@ -358,7 +358,7 @@ test.describe('Critical User Flows', () => {
   })
 
   test('File Download - CSV/JSON export functionality', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/user-management')
+    await page.goto('http://localhost:9323/dashboard/user-management-v2')
 
     await page.waitForSelector('button:has-text("Export")', { timeout: 10000 })
 
@@ -403,9 +403,9 @@ test.describe('Production Readiness Checks', () => {
     const pages = [
       '/dashboard',
       '/dashboard/invoicing',
-      '/dashboard/projects-hub',
-      '/dashboard/analytics',
-      '/dashboard/settings'
+      '/dashboard/projects-hub-v2',
+      '/dashboard/analytics-v2',
+      '/dashboard/settings-v2'
     ]
 
     for (const pagePath of pages) {
@@ -456,7 +456,7 @@ test.describe('Production Readiness Checks', () => {
     await page.goto('http://localhost:9323/dashboard/invoicing')
     await page.waitForTimeout(2000)
 
-    await page.goto('http://localhost:9323/dashboard/projects-hub')
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2')
     await page.waitForTimeout(2000)
 
     console.log(`Critical errors found: ${criticalErrors.length}`)

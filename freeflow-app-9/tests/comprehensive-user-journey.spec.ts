@@ -130,7 +130,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n📂 PHASE 4: PROJECTS HUB\n')
 
-    await page.goto('http://localhost:9323/dashboard/projects-hub', {
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -168,7 +168,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n📁 PHASE 5: FILES HUB\n')
 
-    await page.goto('http://localhost:9323/dashboard/files-hub', {
+    await page.goto('http://localhost:9323/dashboard/files-hub-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -191,7 +191,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n👥 PHASE 6: CLIENTS\n')
 
-    await page.goto('http://localhost:9323/dashboard/clients', {
+    await page.goto('http://localhost:9323/dashboard/clients-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -340,7 +340,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     }
 
     // AI Assistant
-    await page.goto('http://localhost:9323/dashboard/ai-assistant', {
+    await page.goto('http://localhost:9323/dashboard/ai-assistant-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -360,7 +360,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     console.log('\n🎨 PHASE 12: CREATIVE TOOLS\n')
 
     const creativeTools = [
-      { path: '/dashboard/video-studio', name: 'Video Studio', text: 'Video' },
+      { path: '/dashboard/video-studio-v2', name: 'Video Studio', text: 'Video' },
       { path: '/dashboard/3d-modeling', name: '3D Modeling', text: '3D' },
       { path: '/dashboard/canvas-studio', name: 'Canvas Studio', text: 'Canvas' },
       { path: '/dashboard/gallery', name: 'Gallery', text: 'Gallery' }
@@ -392,7 +392,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n📈 PHASE 13: ANALYTICS\n')
 
-    await page.goto('http://localhost:9323/dashboard/analytics', {
+    await page.goto('http://localhost:9323/dashboard/analytics-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -435,7 +435,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     }
 
     // User Management
-    await page.goto('http://localhost:9323/dashboard/user-management', {
+    await page.goto('http://localhost:9323/dashboard/user-management-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })
@@ -480,7 +480,7 @@ test.describe('Comprehensive User Journey - Complete Platform Test', () => {
     // =========================================================================
     console.log('\n⚙️ PHASE 16: SETTINGS\n')
 
-    await page.goto('http://localhost:9323/dashboard/settings', {
+    await page.goto('http://localhost:9323/dashboard/settings-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 30000
     })

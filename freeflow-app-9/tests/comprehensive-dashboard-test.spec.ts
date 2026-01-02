@@ -46,7 +46,7 @@ test.describe('Comprehensive Dashboard Page Tests', () => {
       'collaboration-demo',
       'coming-soon',
       'community',
-      'community-hub',
+      'community-v2',
       'comprehensive-testing',
       'crm',
       'crypto-payments',

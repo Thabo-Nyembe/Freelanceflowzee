@@ -91,11 +91,11 @@ test.describe('Visual Feature Inspection', () => {
 
     // Test key dashboard pages for missing elements
     const pagesToInspect = [
-      { path: '/dashboard/ai-create', name: 'AI Create' },
-      { path: '/dashboard/files-hub', name: 'Files Hub' },
+      { path: '/dashboard/ai-create-v2', name: 'AI Create' },
+      { path: '/dashboard/files-hub-v2', name: 'Files Hub' },
       { path: '/dashboard/my-day', name: 'My Day' },
-      { path: '/dashboard/time-tracking', name: 'Time Tracking' },
-      { path: '/dashboard/calendar', name: 'Calendar' }
+      { path: '/dashboard/time-tracking-v2', name: 'Time Tracking' },
+      { path: '/dashboard/calendar-v2', name: 'Calendar' }
     ]
 
     for (const pageInfo of pagesToInspect) {

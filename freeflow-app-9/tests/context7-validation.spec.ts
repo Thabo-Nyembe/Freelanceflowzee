@@ -129,11 +129,11 @@ test.describe('Context7 2025 UI/UX Validation', () => {
   test('Navigation Routes Functionality', async ({ page }) => {
     // Test key navigation routes
     const routes = [
-      '/dashboard/projects-hub',
-      '/dashboard/ai-create',
-      '/dashboard/files-hub',
-      '/dashboard/analytics',
-      '/dashboard/settings'
+      '/dashboard/projects-hub-v2',
+      '/dashboard/ai-create-v2',
+      '/dashboard/files-hub-v2',
+      '/dashboard/analytics-v2',
+      '/dashboard/settings-v2'
     ]
 
     for (const route of routes) {

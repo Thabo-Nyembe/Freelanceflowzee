@@ -47,7 +47,7 @@ test.describe('Comprehensive Dashboard Tests', () => {
     await page.click('text=Community Hub')
     
     // Should navigate to community hub page
-    await expect(page).toHaveURL(/.*dashboard\/community-hub/)
+    await expect(page).toHaveURL(/.*dashboard\/community-v2/)
     
     // Check for community features
     await expect(page.locator('text=Community Hub')).toBeVisible()

@@ -90,7 +90,7 @@ test.describe('Authentication Tests', () => {
     });
     
     // Try to access protected route
-    await page.goto('/dashboard/settings');
+    await page.goto('/dashboard/settings-v2');
     
     // Should redirect to login or show login form
     await page.waitForTimeout(2000);
@@ -115,7 +115,7 @@ test.describe('Authentication Tests', () => {
     });
     
     // Try to navigate to protected page
-    await page.goto('/dashboard/settings');
+    await page.goto('/dashboard/settings-v2');
     
     // Should handle gracefully (redirect to login or show appropriate message)
     await page.waitForTimeout(2000);

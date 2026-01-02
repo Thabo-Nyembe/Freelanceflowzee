@@ -37,9 +37,9 @@ const TEST_CONFIG = {
   },
   routes: [
     '/dashboard',
-    '/dashboard/projects-hub',
-    '/dashboard/analytics',
-    '/dashboard/ai-assistant',
+    '/dashboard/projects-hub-v2',
+    '/dashboard/analytics-v2',
+    '/dashboard/ai-assistant-v2',
     '/dashboard/financial-hub'
   ],
   selectors: {
@@ -167,7 +167,7 @@ test.describe('Navigation Components Rendering', () => {
 
   test('Breadcrumbs show correct path hierarchy', async ({ page }, testInfo) => {
     // Test on a nested route
-    const route = '/dashboard/projects-hub';
+    const route = '/dashboard/projects-hub-v2';
     await page.goto(`${TEST_CONFIG.baseUrl}${route}`);
     await page.waitForLoadState('networkidle');
     
@@ -602,7 +602,7 @@ test.describe('Search Functionality', () => {
 test.describe('Related Features', () => {
   test('Related features are shown on appropriate pages', async ({ page }, testInfo) => {
     // Test on a page that should have related features
-    await page.goto(`${TEST_CONFIG.baseUrl}/dashboard/projects-hub`);
+    await page.goto(`${TEST_CONFIG.baseUrl}/dashboard/projects-hub-v2`);
     await page.waitForLoadState('networkidle');
     
     // Check if related features section is visible
@@ -623,7 +623,7 @@ test.describe('Related Features', () => {
   });
 
   test('Quick actions are contextual to current page', async ({ page }, testInfo) => {
-    await page.goto(`${TEST_CONFIG.baseUrl}/dashboard/projects-hub`);
+    await page.goto(`${TEST_CONFIG.baseUrl}/dashboard/projects-hub-v2`);
     await page.waitForLoadState('networkidle');
     
     // Check if quick actions section is visible
@@ -657,7 +657,7 @@ test.describe('LocalStorage Persistence', () => {
     await page.waitForTimeout(500);
     
     // Navigate to another page
-    await page.goto(`${TEST_CONFIG.baseUrl}/dashboard/projects-hub`);
+    await page.goto(`${TEST_CONFIG.baseUrl}/dashboard/projects-hub-v2`);
     await page.waitForLoadState('networkidle');
     
     // Check if sidebar state persisted
@@ -671,7 +671,7 @@ test.describe('LocalStorage Persistence', () => {
     await page.waitForLoadState('networkidle');
     
     // Navigate to a specific page
-    const testPage = '/dashboard/projects-hub';
+    const testPage = '/dashboard/projects-hub-v2';
     await page.goto(`${TEST_CONFIG.baseUrl}${testPage}`);
     await page.waitForLoadState('networkidle');
     

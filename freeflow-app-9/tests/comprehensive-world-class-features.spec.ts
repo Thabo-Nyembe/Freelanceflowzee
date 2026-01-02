@@ -23,7 +23,7 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
   })
 
   test('AI Create Studio loads with all 12 models', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`)
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`)
 
     // Wait for page to load
     await expect(page.locator('h1, h2').filter({ hasText: /AI Create/i })).toBeVisible({ timeout: 10000 })
@@ -65,7 +65,7 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
   })
 
   test('Projects Hub loads correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects-hub`)
+    await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`)
 
     await expect(page.locator('h1, h2').filter({ hasText: /Projects?/i })).toBeVisible({ timeout: 10000 })
 
@@ -75,7 +75,7 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
   })
 
   test('Video Studio features accessible', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/video-studio`)
+    await page.goto(`${BASE_URL}/dashboard/video-studio-v2`)
 
     await expect(page.locator('h1, h2').filter({ hasText: /Video/i })).toBeVisible({ timeout: 10000 })
   })
@@ -87,19 +87,19 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
   })
 
   test('Community Hub real-time collaboration', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/community-hub`)
+    await page.goto(`${BASE_URL}/dashboard/community-v2`)
 
     await expect(page.locator('h1, h2').filter({ hasText: /Community/i })).toBeVisible({ timeout: 10000 })
   })
 
   test('Canvas/Collaboration AI-enhanced features', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/canvas`)
+    await page.goto(`${BASE_URL}/dashboard/canvas-v2`)
 
     await expect(page.locator('h1, h2').filter({ hasText: /Canvas/i })).toBeVisible({ timeout: 10000 })
   })
 
   test('Analytics Dashboard loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
 
     await expect(page.locator('h1, h2').filter({ hasText: /Analytics/i })).toBeVisible({ timeout: 10000 })
   })
@@ -138,8 +138,8 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
 
     // Test navigation to different pages
     const pages = [
-      { path: '/dashboard/ai-create', text: 'AI Create' },
-      { path: '/dashboard/projects-hub', text: 'Projects' },
+      { path: '/dashboard/ai-create-v2', text: 'AI Create' },
+      { path: '/dashboard/projects-hub-v2', text: 'Projects' },
       { path: '/dashboard/collaboration', text: 'Collaboration' }
     ]
 
@@ -265,7 +265,7 @@ test.describe('World-Class Features Comprehensive Test Suite', () => {
 
 test.describe('Critical User Flows', () => {
   test('Complete AI content creation flow', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`)
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`)
 
     // Wait for page load
     await page.waitForLoadState('networkidle')
@@ -282,13 +282,13 @@ test.describe('Critical User Flows', () => {
   test('Navigation through all major hubs', async ({ page }) => {
     const majorHubs = [
       '/dashboard',
-      '/dashboard/ai-create',
-      '/dashboard/projects-hub',
+      '/dashboard/ai-create-v2',
+      '/dashboard/projects-hub-v2',
       '/dashboard/collaboration',
-      '/dashboard/video-studio',
+      '/dashboard/video-studio-v2',
       '/dashboard/financial',
-      '/dashboard/community-hub',
-      '/dashboard/analytics',
+      '/dashboard/community-v2',
+      '/dashboard/analytics-v2',
       '/dashboard/my-day'
     ]
 

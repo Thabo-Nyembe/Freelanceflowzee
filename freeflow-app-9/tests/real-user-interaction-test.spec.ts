@@ -119,7 +119,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     // STEP 4: Projects Hub - Create Project
     // ============================================
     console.log('\n📍 STEP 4: Testing Projects Hub');
-    await page.goto('http://localhost:9323/dashboard/projects-hub');
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
@@ -164,7 +164,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     // STEP 5: AI Create - Content Generation
     // ============================================
     console.log('\n📍 STEP 5: Testing AI Create');
-    await page.goto('http://localhost:9323/dashboard/ai-create');
+    await page.goto('http://localhost:9323/dashboard/ai-create-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
@@ -195,7 +195,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     // STEP 6: Files Hub - File Management
     // ============================================
     console.log('\n📍 STEP 6: Testing Files Hub');
-    await page.goto('http://localhost:9323/dashboard/files-hub');
+    await page.goto('http://localhost:9323/dashboard/files-hub-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
@@ -230,7 +230,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     // STEP 7: Settings - User Preferences
     // ============================================
     console.log('\n📍 STEP 7: Testing Settings');
-    await page.goto('http://localhost:9323/dashboard/settings');
+    await page.goto('http://localhost:9323/dashboard/settings-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
@@ -256,7 +256,7 @@ test.describe('Real User Journey - New User Walkthrough', () => {
     // STEP 8: Video Studio
     // ============================================
     console.log('\n📍 STEP 8: Testing Video Studio');
-    await page.goto('http://localhost:9323/dashboard/video-studio');
+    await page.goto('http://localhost:9323/dashboard/video-studio-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(2000);
 
@@ -297,10 +297,10 @@ test.describe('Real User Journey - New User Walkthrough', () => {
 
     const pages = [
       { path: '/dashboard/my-day', name: 'My Day' },
-      { path: '/dashboard/projects-hub', name: 'Projects Hub' },
-      { path: '/dashboard/ai-create', name: 'AI Create' },
-      { path: '/dashboard/files-hub', name: 'Files Hub' },
-      { path: '/dashboard/settings', name: 'Settings' },
+      { path: '/dashboard/projects-hub-v2', name: 'Projects Hub' },
+      { path: '/dashboard/ai-create-v2', name: 'AI Create' },
+      { path: '/dashboard/files-hub-v2', name: 'Files Hub' },
+      { path: '/dashboard/settings-v2', name: 'Settings' },
     ];
 
     const auditResults: any[] = [];

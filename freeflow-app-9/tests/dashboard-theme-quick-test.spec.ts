@@ -27,19 +27,19 @@ const results: ThemeTestResult[] = []
 const dashboardPages = [
   { path: '/dashboard', name: 'Dashboard Overview' },
   { path: '/dashboard/my-day', name: 'My Day' },
-  { path: '/dashboard/projects-hub', name: 'Projects Hub' },
-  { path: '/dashboard/clients', name: 'Clients' },
-  { path: '/dashboard/files', name: 'Files Hub' },
-  { path: '/dashboard/messages', name: 'Messages' },
-  { path: '/dashboard/calendar', name: 'Calendar' },
+  { path: '/dashboard/projects-hub-v2', name: 'Projects Hub' },
+  { path: '/dashboard/clients-v2', name: 'Clients' },
+  { path: '/dashboard/files-v2', name: 'Files Hub' },
+  { path: '/dashboard/messages-v2', name: 'Messages' },
+  { path: '/dashboard/calendar-v2', name: 'Calendar' },
   { path: '/dashboard/bookings', name: 'Bookings' },
   { path: '/dashboard/gallery', name: 'Gallery' },
   { path: '/dashboard/cv-portfolio', name: 'CV Portfolio' },
-  { path: '/dashboard/settings', name: 'Settings' },
+  { path: '/dashboard/settings-v2', name: 'Settings' },
   { path: '/dashboard/financial', name: 'Financial' },
-  { path: '/dashboard/ai-create', name: 'AI Create' },
-  { path: '/dashboard/video-studio', name: 'Video Studio' },
-  { path: '/dashboard/analytics', name: 'Analytics' },
+  { path: '/dashboard/ai-create-v2', name: 'AI Create' },
+  { path: '/dashboard/video-studio-v2', name: 'Video Studio' },
+  { path: '/dashboard/analytics-v2', name: 'Analytics' },
 ]
 
 async function setTheme(page: Page, theme: 'light' | 'dark') {

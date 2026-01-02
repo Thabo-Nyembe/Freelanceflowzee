@@ -44,10 +44,10 @@ test.describe('Final Comprehensive Functionality Test', () => {
       { path: '/features', name: 'Features' },
       { path: '/contact', name: 'Contact' },
       { path: '/dashboard', name: 'Dashboard' },
-      { path: '/dashboard/ai-create', name: 'AI Create' },
-      { path: '/dashboard/video-studio', name: 'Video Studio' },
-      { path: '/dashboard/projects-hub', name: 'Projects Hub' },
-      { path: '/dashboard/analytics', name: 'Analytics' }
+      { path: '/dashboard/ai-create-v2', name: 'AI Create' },
+      { path: '/dashboard/video-studio-v2', name: 'Video Studio' },
+      { path: '/dashboard/projects-hub-v2', name: 'Projects Hub' },
+      { path: '/dashboard/analytics-v2', name: 'Analytics' }
     ]
 
     const routeResults = []

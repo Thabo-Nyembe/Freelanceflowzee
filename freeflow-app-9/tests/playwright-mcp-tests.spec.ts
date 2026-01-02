@@ -87,7 +87,7 @@ test.describe('KAZI Platform - Interactive Features Testing', () => {
       await page.waitForTimeout(1000);
     } else {
       // Try direct navigation
-      await page.goto('http://localhost:9323/dashboard/ai-create');
+      await page.goto('http://localhost:9323/dashboard/ai-create-v2');
     }
     
     // Test AI Create form

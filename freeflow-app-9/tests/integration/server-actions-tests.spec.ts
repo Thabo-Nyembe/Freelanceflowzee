@@ -119,7 +119,7 @@ test.describe('Authentication Actions Tests', () => {
 test.describe('CRUD Operations Tests', () => {
   test.describe('Client Management', () => {
     test('should fetch clients list', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/clients`)
+      await page.goto(`${BASE_URL}/dashboard/clients-v2`)
       await waitForPageReady(page)
 
       // Check for client list or empty state
@@ -131,7 +131,7 @@ test.describe('CRUD Operations Tests', () => {
     })
 
     test('should handle create client action', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/clients`)
+      await page.goto(`${BASE_URL}/dashboard/clients-v2`)
       await waitForPageReady(page)
 
       const addBtn = page.locator('button:has-text("Add Client"), button:has-text("New Client"), button:has-text("Create")')
@@ -148,7 +148,7 @@ test.describe('CRUD Operations Tests', () => {
 
   test.describe('Project Management', () => {
     test('should fetch projects list', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/projects-hub`)
+      await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`)
       await waitForPageReady(page)
 
       // Check for projects content
@@ -157,7 +157,7 @@ test.describe('CRUD Operations Tests', () => {
     })
 
     test('should handle create project action', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/projects-hub`)
+      await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`)
       await waitForPageReady(page)
 
       const addBtn = page.locator('button:has-text("Add Project"), button:has-text("New Project"), button:has-text("Create")')
@@ -172,7 +172,7 @@ test.describe('CRUD Operations Tests', () => {
 
   test.describe('Invoice Management', () => {
     test('should fetch invoices list', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/invoices`)
+      await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
       await waitForPageReady(page)
 
       const invoicesList = page.locator('[data-testid="invoices-list"], table, .invoice-card')
@@ -180,7 +180,7 @@ test.describe('CRUD Operations Tests', () => {
     })
 
     test('should handle create invoice action', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/invoices`)
+      await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
       await waitForPageReady(page)
 
       const addBtn = page.locator('button:has-text("Create Invoice"), button:has-text("New Invoice")')
@@ -199,7 +199,7 @@ test.describe('CRUD Operations Tests', () => {
 // ============================================
 test.describe('File Operations Tests', () => {
   test('should fetch files list', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await waitForPageReady(page)
 
     const filesList = page.locator('[data-testid="files-list"], .file-grid, .file-card')
@@ -207,7 +207,7 @@ test.describe('File Operations Tests', () => {
   })
 
   test('should handle file upload action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await waitForPageReady(page)
 
     const fileInput = page.locator('input[type="file"]')
@@ -218,7 +218,7 @@ test.describe('File Operations Tests', () => {
   })
 
   test('should handle folder creation', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await waitForPageReady(page)
 
     const createFolderBtn = page.locator('button:has-text("New Folder"), button:has-text("Create Folder")')
@@ -264,7 +264,7 @@ test.describe('Messaging Actions Tests', () => {
 // ============================================
 test.describe('Calendar Actions Tests', () => {
   test('should fetch calendar events', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/calendar`)
+    await page.goto(`${BASE_URL}/dashboard/calendar-v2`)
     await waitForPageReady(page)
 
     const calendar = page.locator('[data-testid="calendar"], .calendar, [class*="calendar"]')
@@ -272,7 +272,7 @@ test.describe('Calendar Actions Tests', () => {
   })
 
   test('should handle create event action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/calendar`)
+    await page.goto(`${BASE_URL}/dashboard/calendar-v2`)
     await waitForPageReady(page)
 
     const addBtn = page.locator('button:has-text("Add Event"), button:has-text("New Event"), button:has-text("Create")')
@@ -290,7 +290,7 @@ test.describe('Calendar Actions Tests', () => {
 // ============================================
 test.describe('Analytics Actions Tests', () => {
   test('should fetch analytics data', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
     await waitForPageReady(page)
 
     // Check for charts or stats
@@ -301,7 +301,7 @@ test.describe('Analytics Actions Tests', () => {
   })
 
   test('should handle date range filter', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
     await waitForPageReady(page)
 
     const dateFilter = page.locator('select, [data-testid="date-filter"], button:has-text("Last 30 days")')
@@ -311,7 +311,7 @@ test.describe('Analytics Actions Tests', () => {
   })
 
   test('should handle export analytics action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
     await waitForPageReady(page)
 
     const exportBtn = page.locator('button:has-text("Export"), button:has-text("Download")')
@@ -326,7 +326,7 @@ test.describe('Analytics Actions Tests', () => {
 // ============================================
 test.describe('Settings Actions Tests', () => {
   test('should fetch user settings', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageReady(page)
 
     const settingsForm = page.locator('form, [data-testid="settings-form"]')
@@ -334,7 +334,7 @@ test.describe('Settings Actions Tests', () => {
   })
 
   test('should handle update profile action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageReady(page)
 
     const nameInput = page.locator('input[name="name"], input[placeholder*="name" i]')
@@ -349,7 +349,7 @@ test.describe('Settings Actions Tests', () => {
   })
 
   test('should handle theme change action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageReady(page)
 
     const themeToggle = page.locator('[data-testid="theme-toggle"], button[aria-label*="theme" i]')
@@ -367,7 +367,7 @@ test.describe('Settings Actions Tests', () => {
 // ============================================
 test.describe('Notification Actions Tests', () => {
   test('should fetch notifications', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/notifications`)
+    await page.goto(`${BASE_URL}/dashboard/notifications-v2`)
     await waitForPageReady(page)
 
     const notificationsList = page.locator('[data-testid="notifications-list"], .notifications')
@@ -375,7 +375,7 @@ test.describe('Notification Actions Tests', () => {
   })
 
   test('should handle mark as read action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/notifications`)
+    await page.goto(`${BASE_URL}/dashboard/notifications-v2`)
     await waitForPageReady(page)
 
     const markReadBtn = page.locator('button:has-text("Mark as Read"), button:has-text("Mark all")')
@@ -385,7 +385,7 @@ test.describe('Notification Actions Tests', () => {
   })
 
   test('should handle delete notification action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/notifications`)
+    await page.goto(`${BASE_URL}/dashboard/notifications-v2`)
     await waitForPageReady(page)
 
     const deleteBtn = page.locator('button[aria-label*="delete" i], button:has-text("Delete")')
@@ -414,7 +414,7 @@ test.describe('Search Actions Tests', () => {
   })
 
   test('should handle filter search', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await waitForPageReady(page)
 
     const filterInput = page.locator('input[placeholder*="filter" i], input[placeholder*="search" i]')
@@ -432,7 +432,7 @@ test.describe('Search Actions Tests', () => {
 // ============================================
 test.describe('AI Actions Tests', () => {
   test('should access AI Create', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`)
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`)
     await waitForPageReady(page)
 
     const aiInterface = page.locator('[data-testid="ai-create"], textarea, .ai-input')
@@ -440,7 +440,7 @@ test.describe('AI Actions Tests', () => {
   })
 
   test('should handle AI generation action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`)
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`)
     await waitForPageReady(page)
 
     const promptInput = page.locator('textarea, input[placeholder*="prompt" i], input[placeholder*="describe" i]')
@@ -460,7 +460,7 @@ test.describe('AI Actions Tests', () => {
 // ============================================
 test.describe('Video Studio Actions Tests', () => {
   test('should access Video Studio', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/video-studio`)
+    await page.goto(`${BASE_URL}/dashboard/video-studio-v2`)
     await waitForPageReady(page)
 
     const videoStudio = page.locator('[data-testid="video-studio"], .video-editor')
@@ -468,7 +468,7 @@ test.describe('Video Studio Actions Tests', () => {
   })
 
   test('should handle video upload', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/video-studio`)
+    await page.goto(`${BASE_URL}/dashboard/video-studio-v2`)
     await waitForPageReady(page)
 
     const uploadBtn = page.locator('button:has-text("Upload"), input[type="file"]')
@@ -525,7 +525,7 @@ test.describe('Escrow Actions Tests', () => {
 // ============================================
 test.describe('Reports Actions Tests', () => {
   test('should fetch reports', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/reports`)
+    await page.goto(`${BASE_URL}/dashboard/reports-v2`)
     await waitForPageReady(page)
 
     const reportsList = page.locator('[data-testid="reports-list"], table, .report-card')
@@ -533,7 +533,7 @@ test.describe('Reports Actions Tests', () => {
   })
 
   test('should handle generate report action', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/reports`)
+    await page.goto(`${BASE_URL}/dashboard/reports-v2`)
     await waitForPageReady(page)
 
     const generateBtn = page.locator('button:has-text("Generate"), button:has-text("Create Report")')

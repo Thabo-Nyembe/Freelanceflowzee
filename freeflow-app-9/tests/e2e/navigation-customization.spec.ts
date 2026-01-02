@@ -212,7 +212,7 @@ test.describe('Enhanced Navigation Customization', () => {
     const testPaths = [
       { category: 'Business Intelligence', subcategory: 'Overview', feature: 'Dashboard', url: '/dashboard' },
       { category: 'Business Intelligence', subcategory: 'Overview', feature: 'My Day', url: '/dashboard/my-day' },
-      { category: 'Business Intelligence', subcategory: 'Project Management', feature: 'Projects Hub', url: '/dashboard/projects-hub' },
+      { category: 'Business Intelligence', subcategory: 'Project Management', feature: 'Projects Hub', url: '/dashboard/projects-hub-v2' },
       { category: 'Business Intelligence', subcategory: 'White Label & Platform', feature: 'White Label', url: '/dashboard/white-label' },
     ]
 

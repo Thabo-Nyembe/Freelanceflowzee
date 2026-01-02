@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Chat Feature', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/messages');
+    await page.goto('/dashboard/messages-v2');
     await page.waitForLoadState('networkidle');
   });
 
@@ -88,7 +88,7 @@ test.describe('Chat Feature', () => {
 
     // Navigate to another page and back
     await page.goto('/dashboard');
-    await page.goto('/dashboard/messages');
+    await page.goto('/dashboard/messages-v2');
 
     // Verify message still exists
     await page.getByTestId('chat-item-1').click();

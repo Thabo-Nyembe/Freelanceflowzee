@@ -262,7 +262,7 @@ test.describe('Interactive App Walkthrough', () => {
   test('Projects Hub - Project Management Test', async ({ page }) => {
     console.log('\n=== PROJECTS HUB TEST ===\n');
 
-    await page.goto('http://localhost:9323/dashboard/projects-hub');
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2');
     await waitForHydration(page);
 
     await page.screenshot({ path: 'test-results/projects-hub.png', fullPage: true });
@@ -292,7 +292,7 @@ test.describe('Interactive App Walkthrough', () => {
   test('AI Create - Content Generation Test', async ({ page }) => {
     console.log('\n=== AI CREATE PAGE TEST ===\n');
 
-    await page.goto('http://localhost:9323/dashboard/ai-create');
+    await page.goto('http://localhost:9323/dashboard/ai-create-v2');
     await waitForHydration(page);
 
     await page.screenshot({ path: 'test-results/ai-create.png', fullPage: true });
@@ -338,7 +338,7 @@ test.describe('Interactive App Walkthrough', () => {
   test('Files Hub - File Management Test', async ({ page }) => {
     console.log('\n=== FILES HUB TEST ===\n');
 
-    await page.goto('http://localhost:9323/dashboard/files-hub');
+    await page.goto('http://localhost:9323/dashboard/files-hub-v2');
     await waitForHydration(page);
 
     await page.screenshot({ path: 'test-results/files-hub.png', fullPage: true });
@@ -368,7 +368,7 @@ test.describe('Interactive App Walkthrough', () => {
   test('Settings - Configuration Test', async ({ page }) => {
     console.log('\n=== SETTINGS PAGE TEST ===\n');
 
-    await page.goto('http://localhost:9323/dashboard/settings');
+    await page.goto('http://localhost:9323/dashboard/settings-v2');
     await waitForHydration(page);
 
     await page.screenshot({ path: 'test-results/settings.png', fullPage: true });

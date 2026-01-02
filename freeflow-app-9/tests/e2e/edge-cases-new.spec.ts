@@ -30,13 +30,13 @@ test.describe('Edge Cases & Error Handling', () => {
     });
 
     test('dashboard files-hub redirects when not authenticated', async ({ page }) => {
-      await page.goto('/dashboard/files-hub');
+      await page.goto('/dashboard/files-hub-v2');
       await page.waitForURL(/login/);
       expect(page.url()).toContain('login');
     });
 
     test('dashboard projects-hub redirects when not authenticated', async ({ page }) => {
-      await page.goto('/dashboard/projects-hub');
+      await page.goto('/dashboard/projects-hub-v2');
       await page.waitForURL(/login/);
       expect(page.url()).toContain('login');
     });

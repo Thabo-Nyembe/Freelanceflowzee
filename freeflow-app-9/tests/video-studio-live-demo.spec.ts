@@ -18,7 +18,7 @@ test.describe('Video Studio - Live Production Workflow Demo', () => {
 
     // Navigate to Video Studio
     console.log('🌐 Step 1: Navigating to Video Studio...')
-    await page.goto('http://localhost:9323/dashboard/video-studio')
+    await page.goto('http://localhost:9323/dashboard/video-studio-v2')
     await page.waitForLoadState('networkidle')
     await page.waitForTimeout(2000)
 

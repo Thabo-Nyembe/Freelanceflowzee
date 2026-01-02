@@ -66,7 +66,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('5. AI Create Studio - Page Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const content = await page.content()
@@ -80,7 +80,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('6. AI Create Studio - Model Detection', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const content = await page.content()
@@ -104,7 +104,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('7. Projects Hub - Page Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects-hub`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const hasProjects = await page.getByText(/Project/i).count() > 0
@@ -147,7 +147,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('10. Video Studio - Page Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/video-studio`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/video-studio-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const hasVideo = await page.getByText(/Video/i).count() > 0
@@ -169,7 +169,7 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('12. Canvas Studio - Page Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/canvas`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/canvas-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const hasCanvas = await page.getByText(/Canvas|Design|Draw/i).count() > 0
@@ -180,18 +180,18 @@ test.describe('KAZI Platform - Feature-by-Feature Validation', () => {
   })
 
   test('13. Community Hub - Page Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/community-hub`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/community-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const hasCommunity = await page.getByText(/Community/i).count() > 0
     console.log(`Community Hub loaded: ${hasCommunity}`)
 
-    await page.screenshot({ path: 'test-results/13-community-hub.png', fullPage: true })
+    await page.screenshot({ path: 'test-results/13-community-v2.png', fullPage: true })
     console.log('✅ Community Hub loaded')
   })
 
   test('14. Analytics Dashboard - Page Load', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(8000)
 
     const hasAnalytics = await page.getByText(/Analytics|Dashboard|Chart|Data/i).count() > 0

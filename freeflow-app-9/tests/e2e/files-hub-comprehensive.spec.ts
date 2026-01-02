@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Files Hub Comprehensive Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/files-hub')
+    await page.goto('/dashboard/files-hub-v2')
   })
 
   test('should load Files Hub page', async ({ page }) => {

@@ -61,11 +61,11 @@ test.describe('Navigation System - All 69 Features', () => {
 
   test('should navigate to all newly visible Creative Suite features', async ({ page }) => {
     const features = [
-      { name: 'Video Studio', url: '/dashboard/video-studio' },
-      { name: 'Audio Studio', url: '/dashboard/audio-studio' },
+      { name: 'Video Studio', url: '/dashboard/video-studio-v2' },
+      { name: 'Audio Studio', url: '/dashboard/audio-studio-v2' },
       { name: '3D Modeling', url: '/dashboard/3d-modeling' },
       { name: 'Motion Graphics', url: '/dashboard/motion-graphics' },
-      { name: 'Canvas', url: '/dashboard/canvas' },
+      { name: 'Canvas', url: '/dashboard/canvas-v2' },
       { name: 'Gallery', url: '/dashboard/gallery' },
       { name: 'Collaboration', url: '/dashboard/collaboration' }
     ]
@@ -346,7 +346,7 @@ test.describe('New Features - 3D Modeling', () => {
 
 test.describe('New Features - Audio Studio', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/audio-studio')
+    await page.goto('/dashboard/audio-studio-v2')
     await page.waitForLoadState('networkidle')
   })
 
@@ -388,7 +388,7 @@ test.describe('New Features - Audio Studio', () => {
 
 test.describe('New Features - Team Hub', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/team-hub')
+    await page.goto('/dashboard/team-hub-v2')
     await page.waitForLoadState('networkidle')
   })
 

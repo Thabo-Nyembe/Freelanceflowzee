@@ -105,7 +105,7 @@ test.describe('Rendering Issues Verification', () => {
     });
 
     test('Projects Hub should render without errors', async ({ page }) => {
-      const response = await page.goto(`${BASE_URL}/dashboard/projects-hub`);
+      const response = await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`);
       expect(response?.status()).toBe(200);
 
       await page.waitForLoadState('networkidle');
@@ -115,7 +115,7 @@ test.describe('Rendering Issues Verification', () => {
     });
 
     test('AI Create should render without errors', async ({ page }) => {
-      const response = await page.goto(`${BASE_URL}/dashboard/ai-create`);
+      const response = await page.goto(`${BASE_URL}/dashboard/ai-create-v2`);
       expect(response?.status()).toBe(200);
 
       await page.waitForLoadState('networkidle');
@@ -125,7 +125,7 @@ test.describe('Rendering Issues Verification', () => {
     });
 
     test('Video Studio should render without errors', async ({ page }) => {
-      const response = await page.goto(`${BASE_URL}/dashboard/video-studio`);
+      const response = await page.goto(`${BASE_URL}/dashboard/video-studio-v2`);
       expect(response?.status()).toBe(200);
 
       await page.waitForLoadState('networkidle');
@@ -169,8 +169,8 @@ test.describe('Rendering Issues Verification', () => {
         '/',
         '/dashboard',
         '/dashboard/email-agent/setup',
-        '/dashboard/projects-hub',
-        '/dashboard/ai-create',
+        '/dashboard/projects-hub-v2',
+        '/dashboard/ai-create-v2',
         '/pricing',
         '/features'
       ];

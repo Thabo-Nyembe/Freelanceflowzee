@@ -97,7 +97,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
     console.log('\n=== Testing AI Integration ===')
 
     // Test 1: Messages Hub AI
-    await page.goto('/dashboard/messages')
+    await page.goto('/dashboard/messages-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'ai-messages', 'AI-Enhanced Messages Hub')
 
@@ -108,7 +108,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
     }
 
     // Test 2: AI Create Studio
-    await page.goto('/dashboard/ai-create')
+    await page.goto('/dashboard/ai-create-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'ai-create', 'AI Content Creation Studio')
 
@@ -150,7 +150,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('5️⃣ Projects Management - Core Business Feature', async ({ page }) => {
     console.log('\n=== Testing Projects Hub ===')
 
-    await page.goto('/dashboard/projects-hub')
+    await page.goto('/dashboard/projects-hub-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'projects-hub', 'Projects Management Hub')
 
@@ -172,7 +172,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('6️⃣ Client Management - CRM Features', async ({ page }) => {
     console.log('\n=== Testing Client Management ===')
 
-    await page.goto('/dashboard/clients')
+    await page.goto('/dashboard/clients-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'clients', 'Client Relationship Management')
 
@@ -186,7 +186,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('7️⃣ Invoicing & Financial Management', async ({ page }) => {
     console.log('\n=== Testing Financial Features ===')
 
-    await page.goto('/dashboard/invoices')
+    await page.goto('/dashboard/invoices-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'invoices', 'Invoice Management System')
 
@@ -205,7 +205,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('8️⃣ Analytics & Business Intelligence', async ({ page }) => {
     console.log('\n=== Testing Analytics ===')
 
-    await page.goto('/dashboard/analytics')
+    await page.goto('/dashboard/analytics-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'analytics', 'Business Analytics Dashboard')
 
@@ -222,17 +222,17 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
     console.log('\n=== Testing Collaboration Suite ===')
 
     // Test Messages Hub
-    await page.goto('/dashboard/messages')
+    await page.goto('/dashboard/messages-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'messages', 'Team Messaging System')
 
     // Test Team Hub
-    await page.goto('/dashboard/team-hub')
+    await page.goto('/dashboard/team-hub-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'team-hub', 'Team Management Hub')
 
     // Test Calendar
-    await page.goto('/dashboard/calendar')
+    await page.goto('/dashboard/calendar-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'calendar', 'Calendar & Scheduling')
 
@@ -270,7 +270,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('1️⃣2️⃣ Files & Storage Management', async ({ page }) => {
     console.log('\n=== Testing File Management ===')
 
-    await page.goto('/dashboard/files-hub')
+    await page.goto('/dashboard/files-hub-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'files', 'File Storage & Management')
 
@@ -294,7 +294,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('1️⃣4️⃣ Video Studio - Creative Tools', async ({ page }) => {
     console.log('\n=== Testing Video Studio ===')
 
-    await page.goto('/dashboard/video-studio')
+    await page.goto('/dashboard/video-studio-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'video-studio', 'AI Video Studio')
 
@@ -308,7 +308,7 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
   test('1️⃣5️⃣ Settings & Customization', async ({ page }) => {
     console.log('\n=== Testing Settings ===')
 
-    await page.goto('/dashboard/settings')
+    await page.goto('/dashboard/settings-v2')
     await waitForPageReady(page)
     await captureInvestorScreenshot(page, 'settings', 'Platform Settings')
 
@@ -362,12 +362,12 @@ test.describe('🎯 INVESTOR READINESS - Complete Platform Verification', () => 
     // Simulate investor demo user journey
     const journey = [
       { path: '/dashboard', name: 'Dashboard' },
-      { path: '/dashboard/projects-hub', name: 'Projects' },
-      { path: '/dashboard/clients', name: 'Clients' },
-      { path: '/dashboard/invoices', name: 'Invoices' },
-      { path: '/dashboard/analytics', name: 'Analytics' },
-      { path: '/dashboard/messages', name: 'Messages' },
-      { path: '/dashboard/ai-create', name: 'AI Studio' },
+      { path: '/dashboard/projects-hub-v2', name: 'Projects' },
+      { path: '/dashboard/clients-v2', name: 'Clients' },
+      { path: '/dashboard/invoices-v2', name: 'Invoices' },
+      { path: '/dashboard/analytics-v2', name: 'Analytics' },
+      { path: '/dashboard/messages-v2', name: 'Messages' },
+      { path: '/dashboard/ai-create-v2', name: 'AI Studio' },
     ]
 
     for (const step of journey) {

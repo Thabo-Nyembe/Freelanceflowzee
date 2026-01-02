@@ -21,27 +21,27 @@ test.describe('Complete Page Audit - All Routes Since Inception', () => {
   // Dashboard Core Pages
   const dashboardPages = [
     { path: '/dashboard', name: 'Dashboard Overview', expectedText: ['Dashboard', 'My Day'] },
-    { path: '/dashboard/overview', name: 'Overview', expectedText: ['Overview'] },
+    { path: '/dashboard/overview-v2', name: 'Overview', expectedText: ['Overview'] },
   ]
 
   // Dashboard Feature Pages
   const featurePages = [
-    { path: '/dashboard/ai-create', name: 'AI Create Studio', expectedText: ['AI', 'Create'] },
-    { path: '/dashboard/video-studio', name: 'Video Studio', expectedText: ['Video'] },
-    { path: '/dashboard/audio-studio', name: 'Audio Studio', expectedText: ['Audio'] },
-    { path: '/dashboard/projects-hub', name: 'Projects Hub', expectedText: ['Projects'] },
+    { path: '/dashboard/ai-create-v2', name: 'AI Create Studio', expectedText: ['AI', 'Create'] },
+    { path: '/dashboard/video-studio-v2', name: 'Video Studio', expectedText: ['Video'] },
+    { path: '/dashboard/audio-studio-v2', name: 'Audio Studio', expectedText: ['Audio'] },
+    { path: '/dashboard/projects-hub-v2', name: 'Projects Hub', expectedText: ['Projects'] },
     { path: '/dashboard/collaboration', name: 'Collaboration', expectedText: ['Collaboration'] },
-    { path: '/dashboard/files-hub', name: 'Files Hub', expectedText: ['Files'] },
-    { path: '/dashboard/messages', name: 'Messages', expectedText: ['Messages'] },
-    { path: '/dashboard/clients', name: 'Clients', expectedText: ['Clients'] },
+    { path: '/dashboard/files-hub-v2', name: 'Files Hub', expectedText: ['Files'] },
+    { path: '/dashboard/messages-v2', name: 'Messages', expectedText: ['Messages'] },
+    { path: '/dashboard/clients-v2', name: 'Clients', expectedText: ['Clients'] },
     { path: '/dashboard/cv-portfolio', name: 'CV Portfolio', expectedText: ['Portfolio', 'CV'] },
     { path: '/dashboard/gallery', name: 'Gallery', expectedText: ['Gallery'] },
     { path: '/dashboard/bookings', name: 'Bookings', expectedText: ['Bookings'] },
-    { path: '/dashboard/calendar', name: 'Calendar', expectedText: ['Calendar'] },
+    { path: '/dashboard/calendar-v2', name: 'Calendar', expectedText: ['Calendar'] },
     { path: '/dashboard/my-day', name: 'My Day', expectedText: ['My Day'] },
     { path: '/dashboard/financial-hub', name: 'Financial Hub', expectedText: ['Financial'] },
     { path: '/dashboard/escrow', name: 'Escrow', expectedText: ['Escrow'] },
-    { path: '/dashboard/settings', name: 'Settings', expectedText: ['Settings'] },
+    { path: '/dashboard/settings-v2', name: 'Settings', expectedText: ['Settings'] },
   ]
 
   // Special Pages

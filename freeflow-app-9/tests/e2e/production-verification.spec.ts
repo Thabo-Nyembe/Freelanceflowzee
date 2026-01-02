@@ -90,19 +90,19 @@ test.describe('Production Build Verification - Critical Pages', () => {
   });
 
   test('AI Create page loads and API works', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`);
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`);
     await expect(page.getByRole('heading', { name: /AI Create/i })).toBeVisible({ timeout: 10000 });
     console.log('✅ AI Create page loaded');
   });
 
   test('Video Studio page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/video-studio`);
+    await page.goto(`${BASE_URL}/dashboard/video-studio-v2`);
     await expect(page.getByRole('heading', { name: /KAZI Video Studio/i })).toBeVisible({ timeout: 10000 });
     console.log('✅ Video Studio page loaded');
   });
 
   test('Projects Hub page loads', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects-hub`);
+    await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`);
     await expect(page.getByRole('heading', { name: /Project Hub|Projects/i })).toBeVisible({ timeout: 10000 });
     console.log('✅ Projects Hub page loaded');
   });

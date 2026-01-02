@@ -9,14 +9,14 @@ test.describe('Dashboard Navigation - Complete Test Suite', () => {
 
   test('should navigate to all major dashboard pages', async ({ page }) => {
     const pages = [
-      { name: 'Files Hub', url: '/dashboard/files-hub' },
+      { name: 'Files Hub', url: '/dashboard/files-hub-v2' },
       { name: 'Client Zone', url: '/dashboard/client-zone' },
       { name: 'Workflow Builder', url: '/dashboard/workflow-builder' },
-      { name: 'Video Studio', url: '/dashboard/video-studio' },
-      { name: 'AI Create', url: '/dashboard/ai-create' },
-      { name: 'Analytics', url: '/dashboard/analytics' },
-      { name: 'Projects', url: '/dashboard/projects' },
-      { name: 'Messages', url: '/dashboard/messages' }
+      { name: 'Video Studio', url: '/dashboard/video-studio-v2' },
+      { name: 'AI Create', url: '/dashboard/ai-create-v2' },
+      { name: 'Analytics', url: '/dashboard/analytics-v2' },
+      { name: 'Projects', url: '/dashboard/projects-v2' },
+      { name: 'Messages', url: '/dashboard/messages-v2' }
     ]
 
     for (const dashboardPage of pages) {
@@ -55,11 +55,11 @@ test.describe('Dashboard Navigation - Complete Test Suite', () => {
 
   test('should navigate to admin pages', async ({ page }) => {
     // Navigate to admin
-    await page.goto('/dashboard/admin')
+    await page.goto('/dashboard/admin-v2')
     await page.waitForLoadState('networkidle')
 
     // Should load admin page
-    expect(page.url()).toContain('/dashboard/admin')
+    expect(page.url()).toContain('/dashboard/admin-v2')
 
     // Check for admin content
     await expect(page.getByText(/admin/i).first()).toBeVisible()
@@ -87,11 +87,11 @@ test.describe('Dashboard Navigation - Complete Test Suite', () => {
 
   test('should navigate to analytics sub-pages', async ({ page }) => {
     const analyticsPages = [
-      '/dashboard/analytics',
-      '/dashboard/analytics/clients',
-      '/dashboard/analytics/projects',
-      '/dashboard/analytics/revenue',
-      '/dashboard/analytics/performance'
+      '/dashboard/analytics-v2',
+      '/dashboard/analytics-v2/clients',
+      '/dashboard/analytics-v2/projects',
+      '/dashboard/analytics-v2/revenue',
+      '/dashboard/analytics-v2/performance'
     ]
 
     for (const analyticsPage of analyticsPages) {
@@ -122,7 +122,7 @@ test.describe('Dashboard Navigation - Complete Test Suite', () => {
     await page.getByRole('tab', { name: /Templates/i }).click()
 
     // Navigate away
-    await page.goto('/dashboard/files-hub')
+    await page.goto('/dashboard/files-hub-v2')
     await page.waitForLoadState('networkidle')
 
     // Navigate back
@@ -145,7 +145,7 @@ test.describe('Dashboard Navigation - Complete Test Suite', () => {
 
   test('should have working search/filter on pages', async ({ page }) => {
     // Navigate to files hub
-    await page.goto('/dashboard/files-hub')
+    await page.goto('/dashboard/files-hub-v2')
     await page.waitForLoadState('networkidle')
 
     // Look for search input
@@ -218,7 +218,7 @@ test.describe('Dashboard - Responsive Navigation', () => {
 
 test.describe('Dashboard - Button Functionality', () => {
   test('should have all action buttons working on Files Hub', async ({ page }) => {
-    await page.goto('/dashboard/files-hub')
+    await page.goto('/dashboard/files-hub-v2')
     await page.waitForLoadState('networkidle')
 
     // Look for common action buttons
@@ -237,7 +237,7 @@ test.describe('Dashboard - Button Functionality', () => {
   })
 
   test('should have working buttons on Video Studio', async ({ page }) => {
-    await page.goto('/dashboard/video-studio')
+    await page.goto('/dashboard/video-studio-v2')
     await page.waitForLoadState('networkidle')
 
     // Check for primary action buttons

@@ -2,12 +2,12 @@ import { test, expect } from '@playwright/test';
 
 const dashboardRoutes = [
   '/dashboard',
-  '/dashboard/analytics',
-  '/dashboard/video-studio',
-  '/dashboard/community-hub',
-  '/dashboard/messages',
-  '/dashboard/settings',
-  '/dashboard/projects-hub',
+  '/dashboard/analytics-v2',
+  '/dashboard/video-studio-v2',
+  '/dashboard/community-v2',
+  '/dashboard/messages-v2',
+  '/dashboard/settings-v2',
+  '/dashboard/projects-hub-v2',
   '/dashboard/my-day',
   '/dashboard/financial'
 ];

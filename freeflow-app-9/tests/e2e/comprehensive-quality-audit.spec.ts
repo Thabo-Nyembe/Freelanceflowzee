@@ -23,9 +23,9 @@ const PAGES_TO_AUDIT = [
 
 const DASHBOARD_PAGES = [
   { name: 'Dashboard', path: '/dashboard' },
-  { name: 'Projects', path: '/dashboard/projects' },
-  { name: 'Clients', path: '/dashboard/clients' },
-  { name: 'AI Create', path: '/dashboard/ai-create' },
+  { name: 'Projects', path: '/dashboard/projects-v2' },
+  { name: 'Clients', path: '/dashboard/clients-v2' },
+  { name: 'AI Create', path: '/dashboard/ai-create-v2' },
 ]
 
 // ============================================

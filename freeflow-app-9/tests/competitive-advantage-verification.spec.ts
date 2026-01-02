@@ -23,21 +23,21 @@ test.describe('🎯 COMPETITIVE ADVANTAGE VERIFICATION', () => {
     await page.waitForLoadState('networkidle')
 
     const tools = [
-      { name: 'Projects Management', path: '/dashboard/projects-hub', verified: false },
-      { name: 'Client CRM', path: '/dashboard/clients', verified: false },
-      { name: 'Invoicing', path: '/dashboard/invoices', verified: false },
-      { name: 'Time Tracking', path: '/dashboard/time-tracking', verified: false },
+      { name: 'Projects Management', path: '/dashboard/projects-hub-v2', verified: false },
+      { name: 'Client CRM', path: '/dashboard/clients-v2', verified: false },
+      { name: 'Invoicing', path: '/dashboard/invoices-v2', verified: false },
+      { name: 'Time Tracking', path: '/dashboard/time-tracking-v2', verified: false },
       { name: 'Team Collaboration', path: '/dashboard/collaboration', verified: false },
-      { name: 'File Storage', path: '/dashboard/files-hub', verified: false },
-      { name: 'Calendar', path: '/dashboard/calendar', verified: false },
-      { name: 'Analytics', path: '/dashboard/analytics', verified: false },
-      { name: 'Messages', path: '/dashboard/messages', verified: false },
+      { name: 'File Storage', path: '/dashboard/files-hub-v2', verified: false },
+      { name: 'Calendar', path: '/dashboard/calendar-v2', verified: false },
+      { name: 'Analytics', path: '/dashboard/analytics-v2', verified: false },
+      { name: 'Messages', path: '/dashboard/messages-v2', verified: false },
       { name: 'Bookings', path: '/dashboard/bookings', verified: false },
       { name: 'Gallery', path: '/dashboard/gallery', verified: false },
-      { name: 'Video Studio', path: '/dashboard/video-studio', verified: false },
+      { name: 'Video Studio', path: '/dashboard/video-studio-v2', verified: false },
       { name: 'Email Marketing', path: '/dashboard/email-marketing', verified: false },
-      { name: 'Automation', path: '/dashboard/automation', verified: false },
-      { name: 'Reports', path: '/dashboard/reports', verified: false },
+      { name: 'Automation', path: '/dashboard/automation-v2', verified: false },
+      { name: 'Reports', path: '/dashboard/reports-v2', verified: false },
     ]
 
     // Verify each tool is accessible
@@ -65,32 +65,32 @@ test.describe('🎯 COMPETITIVE ADVANTAGE VERIFICATION', () => {
     const businessFeatures = [
       {
         category: 'Project Management',
-        path: '/dashboard/projects-hub',
+        path: '/dashboard/projects-hub-v2',
         features: ['Create', 'Track', 'Analytics', 'Templates', 'Import']
       },
       {
         category: 'Client Management',
-        path: '/dashboard/clients',
+        path: '/dashboard/clients-v2',
         features: ['CRM', 'History', 'Communication', 'Portal']
       },
       {
         category: 'Financial Management',
-        path: '/dashboard/invoices',
+        path: '/dashboard/invoices-v2',
         features: ['Invoice', 'Payment', 'Revenue', 'Reports']
       },
       {
         category: 'Team Management',
-        path: '/dashboard/team-hub',
+        path: '/dashboard/team-hub-v2',
         features: ['Team', 'Members', 'Roles', 'Collaboration']
       },
       {
         category: 'Analytics & Reporting',
-        path: '/dashboard/analytics',
+        path: '/dashboard/analytics-v2',
         features: ['Analytics', 'Metrics', 'Performance', 'Intelligence']
       },
       {
         category: 'Time & Scheduling',
-        path: '/dashboard/time-tracking',
+        path: '/dashboard/time-tracking-v2',
         features: ['Time', 'Schedule', 'Track', 'Calendar']
       },
       {
@@ -100,7 +100,7 @@ test.describe('🎯 COMPETITIVE ADVANTAGE VERIFICATION', () => {
       },
       {
         category: 'Automation',
-        path: '/dashboard/automation',
+        path: '/dashboard/automation-v2',
         features: ['Automate', 'Workflow', 'Rules', 'Integration']
       }
     ]
@@ -131,25 +131,25 @@ test.describe('🎯 COMPETITIVE ADVANTAGE VERIFICATION', () => {
     const aiFeatures = [
       {
         name: 'AI-Enhanced Messages',
-        path: '/dashboard/messages',
+        path: '/dashboard/messages-v2',
         check: 'AI input component with suggestions',
         verified: false
       },
       {
         name: 'AI Content Creation',
-        path: '/dashboard/ai-create',
+        path: '/dashboard/ai-create-v2',
         check: 'AI studio with generation capabilities',
         verified: false
       },
       {
         name: 'AI Project Descriptions',
-        path: '/dashboard/projects-hub',
+        path: '/dashboard/projects-hub-v2',
         check: 'AI-enhanced project input',
         verified: false
       },
       {
         name: 'AI Assistant',
-        path: '/dashboard/ai-assistant',
+        path: '/dashboard/ai-assistant-v2',
         check: 'Dedicated AI assistant page',
         verified: false
       },
@@ -221,55 +221,55 @@ test.describe('🎯 COMPETITIVE ADVANTAGE VERIFICATION', () => {
       {
         category: '💼 Business Core',
         features: [
-          { name: 'Projects', path: '/dashboard/projects-hub' },
-          { name: 'Clients', path: '/dashboard/clients' },
-          { name: 'Invoices', path: '/dashboard/invoices' },
+          { name: 'Projects', path: '/dashboard/projects-hub-v2' },
+          { name: 'Clients', path: '/dashboard/clients-v2' },
+          { name: 'Invoices', path: '/dashboard/invoices-v2' },
           { name: 'Financial Hub', path: '/dashboard/financial' },
         ]
       },
       {
         category: '👥 Team Collaboration',
         features: [
-          { name: 'Messages', path: '/dashboard/messages' },
-          { name: 'Team Hub', path: '/dashboard/team-hub' },
+          { name: 'Messages', path: '/dashboard/messages-v2' },
+          { name: 'Team Hub', path: '/dashboard/team-hub-v2' },
           { name: 'Collaboration', path: '/dashboard/collaboration' },
-          { name: 'Calendar', path: '/dashboard/calendar' },
+          { name: 'Calendar', path: '/dashboard/calendar-v2' },
         ]
       },
       {
         category: '📊 Analytics & Intelligence',
         features: [
-          { name: 'Analytics', path: '/dashboard/analytics' },
-          { name: 'Reports', path: '/dashboard/reports' },
+          { name: 'Analytics', path: '/dashboard/analytics-v2' },
+          { name: 'Reports', path: '/dashboard/reports-v2' },
           { name: 'ML Insights', path: '/dashboard/ml-insights' },
-          { name: 'Performance', path: '/dashboard/analytics/performance' },
+          { name: 'Performance', path: '/dashboard/analytics-v2/performance' },
         ]
       },
       {
         category: '🎨 Creative Suite',
         features: [
-          { name: 'Video Studio', path: '/dashboard/video-studio' },
+          { name: 'Video Studio', path: '/dashboard/video-studio-v2' },
           { name: 'Gallery', path: '/dashboard/gallery' },
-          { name: 'AI Create', path: '/dashboard/ai-create' },
-          { name: 'Canvas', path: '/dashboard/canvas' },
+          { name: 'AI Create', path: '/dashboard/ai-create-v2' },
+          { name: 'Canvas', path: '/dashboard/canvas-v2' },
         ]
       },
       {
         category: '⚙️ Operations',
         features: [
-          { name: 'Automation', path: '/dashboard/automation' },
+          { name: 'Automation', path: '/dashboard/automation-v2' },
           { name: 'Integrations', path: '/dashboard/integrations' },
           { name: 'Workflow Builder', path: '/dashboard/workflow-builder' },
-          { name: 'Time Tracking', path: '/dashboard/time-tracking' },
+          { name: 'Time Tracking', path: '/dashboard/time-tracking-v2' },
         ]
       },
       {
         category: '📈 Growth & Marketing',
         features: [
           { name: 'Email Marketing', path: '/dashboard/email-marketing' },
-          { name: 'Growth Hub', path: '/dashboard/growth-hub' },
+          { name: 'Growth Hub', path: '/dashboard/growth-hub-v2' },
           { name: 'Lead Generation', path: '/dashboard/lead-generation' },
-          { name: 'CRM', path: '/dashboard/crm' },
+          { name: 'CRM', path: '/dashboard/crm-v2' },
         ]
       },
       {
@@ -284,7 +284,7 @@ test.describe('🎯 COMPETITIVE ADVANTAGE VERIFICATION', () => {
       {
         category: '💾 Storage & Files',
         features: [
-          { name: 'Files Hub', path: '/dashboard/files-hub' },
+          { name: 'Files Hub', path: '/dashboard/files-hub-v2' },
           { name: 'Cloud Storage', path: '/dashboard/cloud-storage' },
           { name: 'Gallery', path: '/dashboard/gallery' },
           { name: 'Resource Library', path: '/dashboard/resource-library' },
@@ -335,7 +335,7 @@ test.describe('🎯 COMPETITIVE ADVANTAGE VERIFICATION', () => {
       },
       {
         name: 'Real-Time Messages',
-        path: '/dashboard/messages',
+        path: '/dashboard/messages-v2',
         check: 'Live messaging with typing indicators',
         indicator: 'text=/Message|Chat/i'
       },

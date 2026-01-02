@@ -24,7 +24,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('AI Create Studio - All 12 AI Models', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/ai-create`)
+    await page.goto(`${BASE_URL}/dashboard/ai-create-v2`)
     await page.waitForLoadState('networkidle')
 
     const content = await page.content()
@@ -60,7 +60,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('Projects Hub with features', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects-hub`)
+    await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`)
     await page.waitForLoadState('networkidle')
 
     await expect(page.locator('h1, h2').filter({ hasText: /Projects/i })).toBeVisible({ timeout: 10000 })
@@ -84,7 +84,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('Video Studio features', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/video-studio`)
+    await page.goto(`${BASE_URL}/dashboard/video-studio-v2`)
     await page.waitForLoadState('networkidle')
 
     await expect(page.locator('h1, h2').filter({ hasText: /Video/i })).toBeVisible({ timeout: 10000 })
@@ -100,7 +100,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('Canvas Studio', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/canvas`)
+    await page.goto(`${BASE_URL}/dashboard/canvas-v2`)
     await page.waitForLoadState('networkidle')
 
     await expect(page.locator('h1, h2, h3').filter({ hasText: /Canvas|Design/i })).toBeVisible({ timeout: 10000 })
@@ -108,7 +108,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('Community Hub', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/community-hub`)
+    await page.goto(`${BASE_URL}/dashboard/community-v2`)
     await page.waitForLoadState('networkidle')
 
     await expect(page.locator('h1, h2').filter({ hasText: /Community/i })).toBeVisible({ timeout: 10000 })
@@ -116,7 +116,7 @@ test.describe('KAZI Platform - Complete Feature Validation', () => {
   })
 
   test('Analytics Dashboard', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
     await page.waitForLoadState('networkidle')
 
     await expect(page.locator('h1, h2').filter({ hasText: /Analytics|Dashboard/i })).toBeVisible({ timeout: 10000 })

@@ -4,12 +4,12 @@ test.describe('Font Visibility Test - Light & Dark Modes', () => {
   const testPages = [
     { name: 'Dashboard Overview', path: '/dashboard' },
     { name: 'My Day', path: '/dashboard/my-day' },
-    { name: 'Projects Hub', path: '/dashboard/projects-hub' },
-    { name: 'Clients', path: '/dashboard/clients' },
-    { name: 'Files Hub', path: '/dashboard/files' },
-    { name: 'Messages', path: '/dashboard/messages' },
-    { name: 'Settings', path: '/dashboard/settings' },
-    { name: 'AI Create', path: '/dashboard/ai-create' },
+    { name: 'Projects Hub', path: '/dashboard/projects-hub-v2' },
+    { name: 'Clients', path: '/dashboard/clients-v2' },
+    { name: 'Files Hub', path: '/dashboard/files-v2' },
+    { name: 'Messages', path: '/dashboard/messages-v2' },
+    { name: 'Settings', path: '/dashboard/settings-v2' },
+    { name: 'AI Create', path: '/dashboard/ai-create-v2' },
   ]
 
   for (const page of testPages) {

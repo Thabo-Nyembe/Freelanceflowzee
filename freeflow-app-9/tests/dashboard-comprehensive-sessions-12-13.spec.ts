@@ -275,7 +275,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Projects Hub', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/projects-hub');
+      await page.goto('http://localhost:9323/dashboard/projects-hub-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -286,7 +286,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Calendar', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/calendar');
+      await page.goto('http://localhost:9323/dashboard/calendar-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -297,7 +297,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Analytics', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/analytics');
+      await page.goto('http://localhost:9323/dashboard/analytics-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -308,7 +308,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Video Studio', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/video-studio');
+      await page.goto('http://localhost:9323/dashboard/video-studio-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -319,7 +319,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to AI Create', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/ai-create');
+      await page.goto('http://localhost:9323/dashboard/ai-create-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -341,12 +341,12 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Community Hub', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/community-hub');
+      await page.goto('http://localhost:9323/dashboard/community-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
       const url = page.url();
-      expect(url).toContain('community-hub');
+      expect(url).toContain('community-v2');
 
       console.log('✅ Community Hub Navigation - PASSED');
     });
@@ -363,7 +363,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Files Hub', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/files-hub');
+      await page.goto('http://localhost:9323/dashboard/files-hub-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -374,7 +374,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Messages', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/messages');
+      await page.goto('http://localhost:9323/dashboard/messages-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 
@@ -396,7 +396,7 @@ test.describe('Dashboard Comprehensive Testing - Sessions 12-13', () => {
     });
 
     test('should navigate to Settings', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/settings');
+      await page.goto('http://localhost:9323/dashboard/settings-v2');
       await page.waitForLoadState('domcontentloaded', { timeout: 15000 });
       await page.waitForTimeout(1500);
 

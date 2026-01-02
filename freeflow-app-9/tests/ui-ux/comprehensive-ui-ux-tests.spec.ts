@@ -382,7 +382,7 @@ test.describe('Animation & Transition Tests', () => {
   })
 
   test('should have loading animations', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
     await waitForPageReady(page)
 
     // Check for loading spinners or skeletons
@@ -686,7 +686,7 @@ test.describe('User Flow Tests', () => {
   })
 
   test('should preserve state during navigation', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageReady(page)
 
     // Navigate away and back
@@ -837,7 +837,7 @@ test.describe('Dark Mode Tests', () => {
 // ============================================
 test.describe('Loading State Tests', () => {
   test('should show loading skeleton', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
 
     // Check for skeleton loaders during load
     const skeletons = page.locator('[class*="skeleton"], .animate-pulse, [class*="loading"]')
@@ -897,7 +897,7 @@ test.describe('Error State Tests', () => {
   })
 
   test('should show empty state styling', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await waitForPageReady(page)
 
     // Check for empty state component

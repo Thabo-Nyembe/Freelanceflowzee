@@ -147,7 +147,7 @@ test.describe('API Endpoints Integration', () => {
 
   test('AI endpoints structure', async ({ page }) => {
     // Navigate to a page that uses AI features
-    await page.goto('/dashboard/ai-assistant');
+    await page.goto('/dashboard/ai-assistant-v2');
     await page.waitForLoadState('domcontentloaded');
 
     // Verify the page loads
@@ -156,7 +156,7 @@ test.describe('API Endpoints Integration', () => {
   });
 
   test('Analytics endpoints accessible', async ({ page }) => {
-    await page.goto('/dashboard/analytics');
+    await page.goto('/dashboard/analytics-v2');
     await page.waitForLoadState('domcontentloaded');
 
     const body = page.locator('body');

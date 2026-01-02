@@ -152,7 +152,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('4. Projects Hub - Project Management', async ({ page }) => {
     console.log('\n🎯 TESTING PROJECTS HUB\n');
 
-    await page.goto('http://localhost:9323/dashboard/projects-hub');
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2');
     await waitForPageLoad(page);
 
     // Test project creation
@@ -187,7 +187,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('5. AI Create - AI Content Generation', async ({ page }) => {
     console.log('\n🤖 TESTING AI CREATE\n');
 
-    await page.goto('http://localhost:9323/dashboard/ai-create');
+    await page.goto('http://localhost:9323/dashboard/ai-create-v2');
     await waitForPageLoad(page);
 
     // Check AI templates
@@ -246,7 +246,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('7. Video Studio - Video Creation', async ({ page }) => {
     console.log('\n🎬 TESTING VIDEO STUDIO\n');
 
-    await page.goto('http://localhost:9323/dashboard/video-studio');
+    await page.goto('http://localhost:9323/dashboard/video-studio-v2');
     await waitForPageLoad(page);
 
     // Check video controls
@@ -270,7 +270,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('8. Audio Studio - Audio Creation', async ({ page }) => {
     console.log('\n🎵 TESTING AUDIO STUDIO\n');
 
-    await page.goto('http://localhost:9323/dashboard/audio-studio');
+    await page.goto('http://localhost:9323/dashboard/audio-studio-v2');
     await waitForPageLoad(page);
 
     // Check audio controls
@@ -331,7 +331,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('11. Files Hub - File Management', async ({ page }) => {
     console.log('\n📁 TESTING FILES HUB\n');
 
-    await page.goto('http://localhost:9323/dashboard/files-hub');
+    await page.goto('http://localhost:9323/dashboard/files-hub-v2');
     await waitForPageLoad(page);
 
     // Test file operations
@@ -378,7 +378,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('13. Analytics - Performance Metrics', async ({ page }) => {
     console.log('\n📈 TESTING ANALYTICS\n');
 
-    await page.goto('http://localhost:9323/dashboard/analytics');
+    await page.goto('http://localhost:9323/dashboard/analytics-v2');
     await waitForPageLoad(page);
 
     // Check for charts
@@ -396,7 +396,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('14. Settings - User Preferences', async ({ page }) => {
     console.log('\n⚙️ TESTING SETTINGS\n');
 
-    await page.goto('http://localhost:9323/dashboard/settings');
+    await page.goto('http://localhost:9323/dashboard/settings-v2');
     await waitForPageLoad(page);
 
     // Check settings sections
@@ -419,7 +419,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('15. Notifications - Notification Center', async ({ page }) => {
     console.log('\n🔔 TESTING NOTIFICATIONS\n');
 
-    await page.goto('http://localhost:9323/dashboard/notifications');
+    await page.goto('http://localhost:9323/dashboard/notifications-v2');
     await waitForPageLoad(page);
 
     // Check notification list
@@ -455,7 +455,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('17. Profile - User Profile', async ({ page }) => {
     console.log('\n👤 TESTING PROFILE\n');
 
-    await page.goto('http://localhost:9323/dashboard/profile');
+    await page.goto('http://localhost:9323/dashboard/profile-v2');
     await waitForPageLoad(page);
 
     // Check profile sections
@@ -474,7 +474,7 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
   test('18. Time Tracking - Time Management', async ({ page }) => {
     console.log('\n⏱️ TESTING TIME TRACKING\n');
 
-    await page.goto('http://localhost:9323/dashboard/time-tracking');
+    await page.goto('http://localhost:9323/dashboard/time-tracking-v2');
     await waitForPageLoad(page);
 
     // Test timer controls
@@ -493,9 +493,9 @@ test.describe('Comprehensive KAZI Platform Walkthrough', () => {
     const pages = [
       '/dashboard',
       '/dashboard/my-day',
-      '/dashboard/projects-hub',
-      '/dashboard/ai-create',
-      '/dashboard/files-hub',
+      '/dashboard/projects-hub-v2',
+      '/dashboard/ai-create-v2',
+      '/dashboard/files-hub-v2',
       '/dashboard/collaboration'
     ];
 

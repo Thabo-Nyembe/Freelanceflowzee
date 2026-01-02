@@ -20,7 +20,7 @@ import { test, expect } from '@playwright/test'
 test.describe('Video Studio - Real Production Workflow', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to Video Studio
-    await page.goto('http://localhost:9323/dashboard/video-studio')
+    await page.goto('http://localhost:9323/dashboard/video-studio-v2')
     await page.waitForLoadState('networkidle')
 
     // Wait for the page to fully load

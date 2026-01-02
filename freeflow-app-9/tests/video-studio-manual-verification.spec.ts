@@ -8,10 +8,10 @@ import { test } from '@playwright/test';
 test('Video Studio - Manual Inspection', async ({ page }) => {
   console.log('🔍 Opening Video Studio for manual inspection...');
 
-  await page.goto('http://localhost:9323/dashboard/video-studio');
+  await page.goto('http://localhost:9323/dashboard/video-studio-v2');
   await page.waitForLoadState('networkidle');
 
-  console.log('✅ Page loaded at: http://localhost:9323/dashboard/video-studio');
+  console.log('✅ Page loaded at: http://localhost:9323/dashboard/video-studio-v2');
   console.log('');
   console.log('🔎 INSPECTION CHECKLIST:');
   console.log('');

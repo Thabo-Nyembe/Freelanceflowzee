@@ -59,7 +59,7 @@ test.describe('Dashboard Features Tests', () => {
   });
 
   test('should have functional Calendar page', async ({ page }) => {
-    await page.goto('/dashboard/calendar');
+    await page.goto('/dashboard/calendar-v2');
     
     // Check main elements
     await expect(page.locator('h1')).toContainText('Calendar');
@@ -98,7 +98,7 @@ test.describe('Dashboard Features Tests', () => {
   });
 
   test('should have working Projects Hub', async ({ page }) => {
-    await page.goto('/dashboard/projects-hub');
+    await page.goto('/dashboard/projects-hub-v2');
     
     // Check main elements
     await expect(page.locator('h1')).toContainText('Projects');
@@ -112,7 +112,7 @@ test.describe('Dashboard Features Tests', () => {
   });
 
   test('should have working Community Hub', async ({ page }) => {
-    await page.goto('/dashboard/community-hub');
+    await page.goto('/dashboard/community-v2');
     
     // Check main elements
     await expect(page.locator('h1')).toContainText('Community');
@@ -122,7 +122,7 @@ test.describe('Dashboard Features Tests', () => {
   });
 
   test('should have working Files Hub', async ({ page }) => {
-    await page.goto('/dashboard/files-hub');
+    await page.goto('/dashboard/files-hub-v2');
     
     // Check main elements
     await expect(page.locator('h1')).toContainText('Files');

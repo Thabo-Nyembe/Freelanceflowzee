@@ -20,22 +20,22 @@ test.describe('Navigation System Tests', () => {
   test('should have no 404 errors on all sidebar routes', async ({ page }) => {
     const routes = [
       '/dashboard',
-      '/dashboard/projects-hub',
-      '/dashboard/video-studio',
+      '/dashboard/projects-hub-v2',
+      '/dashboard/video-studio-v2',
       '/dashboard/collaboration',
-      '/dashboard/community-hub',
+      '/dashboard/community-v2',
       '/dashboard/ai-design',
-      '/dashboard/ai-create',
+      '/dashboard/ai-create-v2',
       '/dashboard/my-day',
       '/dashboard/financial',
-      '/dashboard/files-hub',
-      '/dashboard/messages',
-      '/dashboard/analytics',
+      '/dashboard/files-hub-v2',
+      '/dashboard/messages-v2',
+      '/dashboard/analytics-v2',
       '/dashboard/client-zone',
-      '/dashboard/calendar',
+      '/dashboard/calendar-v2',
       '/dashboard/cv-portfolio',
-      '/dashboard/settings',
-      '/dashboard/notifications'
+      '/dashboard/settings-v2',
+      '/dashboard/notifications-v2'
     ];
 
     for (const route of routes) {
@@ -54,11 +54,11 @@ test.describe('Navigation System Tests', () => {
 
   test('should navigate through sidebar links', async ({ page }) => {
     const sidebarLinks = [
-      { text: 'Projects Hub', url: '/dashboard/projects-hub' },
-      { text: 'AI Create', url: '/dashboard/ai-create' },
-      { text: 'Community Hub', url: '/dashboard/community-hub' },
-      { text: 'Calendar', url: '/dashboard/calendar' },
-      { text: 'Settings', url: '/dashboard/settings' }
+      { text: 'Projects Hub', url: '/dashboard/projects-hub-v2' },
+      { text: 'AI Create', url: '/dashboard/ai-create-v2' },
+      { text: 'Community Hub', url: '/dashboard/community-v2' },
+      { text: 'Calendar', url: '/dashboard/calendar-v2' },
+      { text: 'Settings', url: '/dashboard/settings-v2' }
     ];
 
     for (const link of sidebarLinks) {
@@ -74,7 +74,7 @@ test.describe('Navigation System Tests', () => {
   test('should have working UI components on each page', async ({ page }) => {
     const pagesToTest = [
       '/dashboard/ai-design',
-      '/dashboard/calendar',
+      '/dashboard/calendar-v2',
       '/dashboard/cv-portfolio'
     ];
 
@@ -101,7 +101,7 @@ test.describe('Navigation System Tests', () => {
   test('should have accessible images with alt attributes', async ({ page }) => {
     const pagesToCheck = [
       '/dashboard/ai-design',
-      '/dashboard/calendar',
+      '/dashboard/calendar-v2',
       '/dashboard/cv-portfolio'
     ];
 

@@ -62,7 +62,7 @@ test.describe('Dashboard Pages - Button & Feature Testing', () => {
   test('Projects Hub - Complete Feature Test', async ({ page }) => {
     console.log('\n🔍 Testing: Projects Hub Page\n');
 
-    await page.goto('http://localhost:9323/dashboard/projects-hub');
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2');
 
     // Wait for page to load
     await page.waitForSelector('button:has-text("New Project")', { state: 'visible', timeout: 15000 });
@@ -101,7 +101,7 @@ test.describe('Dashboard Pages - Button & Feature Testing', () => {
   test('Files Hub - Complete Feature Test', async ({ page }) => {
     console.log('\n🔍 Testing: Files Hub Page\n');
 
-    await page.goto('http://localhost:9323/dashboard/files-hub');
+    await page.goto('http://localhost:9323/dashboard/files-hub-v2');
 
     // Check for error first
     const hasError = await page.locator('heading:has-text("Something went wrong")').count() > 0;
@@ -137,7 +137,7 @@ test.describe('Dashboard Pages - Button & Feature Testing', () => {
   test('Settings - Complete Feature Test', async ({ page }) => {
     console.log('\n🔍 Testing: Settings Page\n');
 
-    await page.goto('http://localhost:9323/dashboard/settings');
+    await page.goto('http://localhost:9323/dashboard/settings-v2');
 
     // Check for error first
     const hasError = await page.locator('heading:has-text("Something went wrong")').count() > 0;

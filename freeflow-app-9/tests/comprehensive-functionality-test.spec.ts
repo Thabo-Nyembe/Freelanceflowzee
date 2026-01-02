@@ -3,21 +3,21 @@ import { test, expect, Page } from '@playwright/test'
 // Dashboard routes to test
 const DASHBOARD_ROUTES = [
   '/dashboard',
-  '/dashboard/ai-create',
+  '/dashboard/ai-create-v2',
   '/dashboard/ai-design',
-  '/dashboard/video-studio',
-  '/dashboard/projects-hub',
+  '/dashboard/video-studio-v2',
+  '/dashboard/projects-hub-v2',
   '/dashboard/collaboration',
-  '/dashboard/community-hub',
-  '/dashboard/files-hub',
+  '/dashboard/community-v2',
+  '/dashboard/files-hub-v2',
   '/dashboard/my-day',
-  '/dashboard/analytics',
+  '/dashboard/analytics-v2',
   '/dashboard/financial',
-  '/dashboard/messages',
-  '/dashboard/calendar',
+  '/dashboard/messages-v2',
+  '/dashboard/calendar-v2',
   '/dashboard/cv-portfolio',
-  '/dashboard/settings',
-  '/dashboard/notifications'
+  '/dashboard/settings-v2',
+  '/dashboard/notifications-v2'
 ]
 
 // Test all upload/download/export/view/play/create functions
@@ -60,7 +60,7 @@ test.describe('Comprehensive Functionality Testing', () => {
   })
 
   test('AI Create Studio - Upload/Create/Export Functions', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/ai-create')
+    await page.goto('http://localhost:9323/dashboard/ai-create-v2')
     await page.waitForLoadState('networkidle')
 
     // Test image upload
@@ -93,7 +93,7 @@ test.describe('Comprehensive Functionality Testing', () => {
   })
 
   test('Video Studio - Upload/Play/Export Functions', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/video-studio')
+    await page.goto('http://localhost:9323/dashboard/video-studio-v2')
     await page.waitForLoadState('networkidle')
 
     // Test video upload
@@ -125,7 +125,7 @@ test.describe('Comprehensive Functionality Testing', () => {
   })
 
   test('Files Hub - Upload/Download/View Functions', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/files-hub')
+    await page.goto('http://localhost:9323/dashboard/files-hub-v2')
     await page.waitForLoadState('networkidle')
 
     // Test file upload
@@ -177,7 +177,7 @@ test.describe('Comprehensive Functionality Testing', () => {
   })
 
   test('Projects Hub - Create/Export/View Functions', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/projects-hub')
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2')
     await page.waitForLoadState('networkidle')
 
     // Test create new project
@@ -228,7 +228,7 @@ test.describe('Comprehensive Functionality Testing', () => {
   })
 
   test('Analytics - Export/View Reports Functions', async ({ page }) => {
-    await page.goto('http://localhost:9323/dashboard/analytics')
+    await page.goto('http://localhost:9323/dashboard/analytics-v2')
     await page.waitForLoadState('networkidle')
 
     // Test export report

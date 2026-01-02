@@ -106,7 +106,7 @@ test.describe('Input Boundary Tests', () => {
 
   test.describe('Number Input Boundaries', () => {
     test('should handle zero values', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/invoices`)
+      await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
       await waitForPageReady(page)
 
       const numberInput = page.locator('input[type="number"]')
@@ -118,7 +118,7 @@ test.describe('Input Boundary Tests', () => {
     })
 
     test('should handle negative values', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/invoices`)
+      await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
       await waitForPageReady(page)
 
       const numberInput = page.locator('input[type="number"]')
@@ -131,7 +131,7 @@ test.describe('Input Boundary Tests', () => {
     })
 
     test('should handle decimal values', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/invoices`)
+      await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
       await waitForPageReady(page)
 
       const numberInput = page.locator('input[type="number"]')
@@ -143,7 +143,7 @@ test.describe('Input Boundary Tests', () => {
     })
 
     test('should handle very large numbers', async ({ page }) => {
-      await page.goto(`${BASE_URL}/dashboard/invoices`)
+      await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
       await waitForPageReady(page)
 
       const numberInput = page.locator('input[type="number"]')
@@ -162,7 +162,7 @@ test.describe('Input Boundary Tests', () => {
 // ============================================
 test.describe('URL Manipulation Tests', () => {
   test('should handle invalid route parameters', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects/invalid-uuid-here`)
+    await page.goto(`${BASE_URL}/dashboard/projects-v2/invalid-uuid-here`)
     await waitForPageReady(page)
 
     // Should show error or redirect
@@ -171,7 +171,7 @@ test.describe('URL Manipulation Tests', () => {
   })
 
   test('should handle SQL injection in URL', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients?id=1;DROP TABLE users;--`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2?id=1;DROP TABLE users;--`)
     await waitForPageReady(page)
 
     // Should not crash, should sanitize
@@ -196,14 +196,14 @@ test.describe('URL Manipulation Tests', () => {
   })
 
   test('should handle URL encoding attacks', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients?name=%3Cscript%3Ealert(1)%3C/script%3E`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2?name=%3Cscript%3Ealert(1)%3C/script%3E`)
     await waitForPageReady(page)
 
     await expect(page.locator('body')).toBeVisible()
   })
 
   test('should handle hash fragments', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings#security`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2#security`)
     await waitForPageReady(page)
 
     // Should scroll to section or handle hash
@@ -218,7 +218,7 @@ test.describe('Authentication Edge Cases', () => {
   test('should handle expired session', async ({ page }) => {
     // Clear all storage to simulate expired session
     await page.context().clearCookies()
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageReady(page)
 
     // Should redirect to login
@@ -269,7 +269,7 @@ test.describe('Authentication Edge Cases', () => {
     await page.context().clearCookies()
 
     // Try to navigate
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await waitForPageReady(page)
 
     // Should handle gracefully
@@ -537,7 +537,7 @@ test.describe('Form Submission Edge Cases', () => {
 // ============================================
 test.describe('File Handling Edge Cases', () => {
   test('should handle no file selected', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await waitForPageReady(page)
 
     // File upload without selecting file
@@ -550,7 +550,7 @@ test.describe('File Handling Edge Cases', () => {
   })
 
   test('should handle empty file', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await waitForPageReady(page)
 
     const fileInput = page.locator('input[type="file"]')
@@ -565,7 +565,7 @@ test.describe('File Handling Edge Cases', () => {
   })
 
   test('should handle file with special characters in name', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await waitForPageReady(page)
 
     const fileInput = page.locator('input[type="file"]')
@@ -629,7 +629,7 @@ test.describe('Concurrent Action Edge Cases', () => {
 // ============================================
 test.describe('Data Edge Cases', () => {
   test('should handle empty data response', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await waitForPageReady(page)
 
     // Should show empty state or handle gracefully
@@ -637,7 +637,7 @@ test.describe('Data Edge Cases', () => {
   })
 
   test('should handle malformed date', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/calendar?date=invalid`)
+    await page.goto(`${BASE_URL}/dashboard/calendar-v2?date=invalid`)
     await waitForPageReady(page)
 
     // Should not crash
@@ -645,7 +645,7 @@ test.describe('Data Edge Cases', () => {
   })
 
   test('should handle very long lists', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub?limit=1000`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2?limit=1000`)
     await waitForPageReady(page)
 
     // Should handle large data sets
@@ -653,7 +653,7 @@ test.describe('Data Edge Cases', () => {
   })
 
   test('should handle special characters in data', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients?search=<>&"'`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2?search=<>&"'`)
     await waitForPageReady(page)
 
     // Should escape special characters
@@ -678,7 +678,7 @@ test.describe('Timing Edge Cases', () => {
   test('should handle long-running operations', async ({ page }) => {
     page.setDefaultTimeout(60000)
 
-    await page.goto(`${BASE_URL}/dashboard/analytics`)
+    await page.goto(`${BASE_URL}/dashboard/analytics-v2`)
     await waitForPageReady(page)
 
     // Wait for any charts/heavy content to load

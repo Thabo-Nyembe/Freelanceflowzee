@@ -76,7 +76,7 @@ test.describe('Quick Visual Verification', () => {
   test('Verify AI Create Page Content', async ({ page }) => {
     console.log('\n🔍 VERIFYING AI CREATE PAGE\n');
 
-    await page.goto('http://localhost:9323/dashboard/ai-create');
+    await page.goto('http://localhost:9323/dashboard/ai-create-v2');
     await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(3000);
 

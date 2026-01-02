@@ -61,7 +61,7 @@ test.describe('Button Functionality Tests', () => {
   test('Projects Hub - Project Creation Button', async ({ page }) => {
     console.log('\n🎯 Testing Projects Hub Buttons\n');
 
-    await page.goto('http://localhost:9323/dashboard/projects-hub', {
+    await page.goto('http://localhost:9323/dashboard/projects-hub-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 15000
     });
@@ -95,7 +95,7 @@ test.describe('Button Functionality Tests', () => {
   test('Files Hub - File Upload Button', async ({ page }) => {
     console.log('\n🎯 Testing Files Hub Buttons\n');
 
-    await page.goto('http://localhost:9323/dashboard/files-hub', {
+    await page.goto('http://localhost:9323/dashboard/files-hub-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 15000
     });
@@ -142,7 +142,7 @@ test.describe('Button Functionality Tests', () => {
   test('Settings Page - Settings Forms', async ({ page }) => {
     console.log('\n🎯 Testing Settings Page\n');
 
-    await page.goto('http://localhost:9323/dashboard/settings', {
+    await page.goto('http://localhost:9323/dashboard/settings-v2', {
       waitUntil: 'domcontentloaded',
       timeout: 15000
     });

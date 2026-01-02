@@ -32,10 +32,10 @@ test.describe('Comprehensive Edge Cases Tests', () => {
   test('should handle rapid navigation without crashes', async ({ page }) => {
     const routes = [
       '/dashboard',
-      '/dashboard/projects-hub',
-      '/dashboard/ai-create',
-      '/dashboard/calendar',
-      '/dashboard/settings'
+      '/dashboard/projects-hub-v2',
+      '/dashboard/ai-create-v2',
+      '/dashboard/calendar-v2',
+      '/dashboard/settings-v2'
     ];
 
     // Rapidly navigate between pages
@@ -53,19 +53,19 @@ test.describe('Comprehensive Edge Cases Tests', () => {
 
   test('should handle browser back/forward navigation', async ({ page }) => {
     await page.goto('/dashboard');
-    await page.goto('/dashboard/projects-hub');
-    await page.goto('/dashboard/ai-create');
+    await page.goto('/dashboard/projects-hub-v2');
+    await page.goto('/dashboard/ai-create-v2');
     
     // Test back navigation
     await page.goBack();
-    expect(page.url()).toContain('/dashboard/projects-hub');
+    expect(page.url()).toContain('/dashboard/projects-hub-v2');
     
     await page.goBack();
     expect(page.url()).toContain('/dashboard');
     
     // Test forward navigation
     await page.goForward();
-    expect(page.url()).toContain('/dashboard/projects-hub');
+    expect(page.url()).toContain('/dashboard/projects-hub-v2');
   });
 
   test('should handle missing authentication gracefully', async ({ page }) => {
@@ -96,7 +96,7 @@ test.describe('Comprehensive Edge Cases Tests', () => {
     const pagesToTest = [
       '/dashboard',
       '/dashboard/ai-design',
-      '/dashboard/calendar',
+      '/dashboard/calendar-v2',
       '/dashboard/cv-portfolio'
     ];
 
@@ -134,7 +134,7 @@ test.describe('Comprehensive Edge Cases Tests', () => {
   });
 
   test('should handle window resize without breaking layout', async ({ page }) => {
-    await page.goto('/dashboard/calendar');
+    await page.goto('/dashboard/calendar-v2');
     
     const viewports = [
       { width: 320, height: 568 },   // iPhone 5
@@ -240,8 +240,8 @@ test.describe('Comprehensive Edge Cases Tests', () => {
     // Load different pages simultaneously
     await Promise.all([
       page.goto('/dashboard'),
-      page2.goto('/dashboard/projects-hub'),
-      page3.goto('/dashboard/ai-create')
+      page2.goto('/dashboard/projects-hub-v2'),
+      page3.goto('/dashboard/ai-create-v2')
     ]);
     
     // All should load successfully

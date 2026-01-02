@@ -79,15 +79,15 @@ test.describe('Dashboard Navigation (Authenticated)', () => {
   })
 
   const dashboardPages = [
-    '/dashboard/overview',
+    '/dashboard/overview-v2',
     '/dashboard/my-day',
-    '/dashboard/projects-hub',
-    '/dashboard/files-hub',
-    '/dashboard/clients',
+    '/dashboard/projects-hub-v2',
+    '/dashboard/files-hub-v2',
+    '/dashboard/clients-v2',
     '/dashboard/messages-hub',
-    '/dashboard/calendar',
-    '/dashboard/invoices',
-    '/dashboard/settings',
+    '/dashboard/calendar-v2',
+    '/dashboard/invoices-v2',
+    '/dashboard/settings-v2',
   ]
 
   for (const pagePath of dashboardPages) {
@@ -148,7 +148,7 @@ test.describe('User Profile Tests', () => {
   })
 
   test('should access settings page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/settings`)
+    await page.goto(`${BASE_URL}/dashboard/settings-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const hasContent = await page.locator('body').isVisible()
@@ -156,7 +156,7 @@ test.describe('User Profile Tests', () => {
   })
 
   test('should access profile page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/profile`)
+    await page.goto(`${BASE_URL}/dashboard/profile-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const hasContent = await page.locator('body').isVisible()
@@ -173,7 +173,7 @@ test.describe('Projects Hub Tests', () => {
   })
 
   test('should load projects hub', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects-hub`)
+    await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const hasContent = await page.locator('body').isVisible()
@@ -181,7 +181,7 @@ test.describe('Projects Hub Tests', () => {
   })
 
   test('should have create project button', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/projects-hub`)
+    await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     // Look for create/add button
@@ -200,7 +200,7 @@ test.describe('Files Hub Tests', () => {
   })
 
   test('should load files hub', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const hasContent = await page.locator('body').isVisible()
@@ -208,7 +208,7 @@ test.describe('Files Hub Tests', () => {
   })
 
   test('should have upload functionality', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/files-hub`)
+    await page.goto(`${BASE_URL}/dashboard/files-hub-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     // Look for upload button or dropzone
@@ -227,7 +227,7 @@ test.describe('Clients Page Tests', () => {
   })
 
   test('should load clients page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const hasContent = await page.locator('body').isVisible()
@@ -235,7 +235,7 @@ test.describe('Clients Page Tests', () => {
   })
 
   test('should have add client button', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/clients`)
+    await page.goto(`${BASE_URL}/dashboard/clients-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const addBtn = page.locator('button:has-text("Add"), button:has-text("New"), button:has-text("Create")')
@@ -270,7 +270,7 @@ test.describe('Invoices Page Tests', () => {
   })
 
   test('should load invoices page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/invoices`)
+    await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const hasContent = await page.locator('body').isVisible()
@@ -278,7 +278,7 @@ test.describe('Invoices Page Tests', () => {
   })
 
   test('should have create invoice option', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/invoices`)
+    await page.goto(`${BASE_URL}/dashboard/invoices-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const createBtn = page.locator('button:has-text("Create"), button:has-text("New")')
@@ -296,7 +296,7 @@ test.describe('Calendar Page Tests', () => {
   })
 
   test('should load calendar page', async ({ page }) => {
-    await page.goto(`${BASE_URL}/dashboard/calendar`)
+    await page.goto(`${BASE_URL}/dashboard/calendar-v2`)
     await page.waitForLoadState('domcontentloaded')
 
     const hasContent = await page.locator('body').isVisible()

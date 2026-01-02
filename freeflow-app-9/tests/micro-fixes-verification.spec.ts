@@ -156,7 +156,7 @@ test.describe('Micro-Fixes Verification', () => {
         errors.push(error.message)
       })
 
-      await page.goto('http://localhost:9323/dashboard/clients', {
+      await page.goto('http://localhost:9323/dashboard/clients-v2', {
         waitUntil: 'domcontentloaded',
         timeout: 15000
       })
@@ -180,7 +180,7 @@ test.describe('Micro-Fixes Verification', () => {
         { url: '/dashboard/bookings/services', name: 'Services' },
         { url: '/dashboard/ai-create/studio', name: 'AI Studio' },
         { url: '/dashboard/client-zone/knowledge-base', name: 'Knowledge Base' },
-        { url: '/dashboard/clients', name: 'Clients' }
+        { url: '/dashboard/clients-v2', name: 'Clients' }
       ]
 
       const errors: string[] = []
@@ -207,10 +207,10 @@ test.describe('Micro-Fixes Verification', () => {
       // Test that static pages were generated successfully
       const staticPages = [
         '/dashboard/my-day',
-        '/dashboard/projects-hub',
+        '/dashboard/projects-hub-v2',
         '/dashboard/invoicing',
         '/dashboard/team-management',
-        '/dashboard/analytics'
+        '/dashboard/analytics-v2'
       ]
 
       let successCount = 0
@@ -299,7 +299,7 @@ test.describe('Micro-Fixes Verification', () => {
     })
 
     test('should verify user management feature still works', async ({ page }) => {
-      await page.goto('http://localhost:9323/dashboard/user-management', {
+      await page.goto('http://localhost:9323/dashboard/user-management-v2', {
         waitUntil: 'domcontentloaded',
         timeout: 15000
       })

@@ -334,7 +334,7 @@ test.describe('Advanced Edge Cases - Sessions 1-13', () => {
   test.describe('Dashboard Authentication', () => {
     test('should redirect to login when accessing protected routes', async ({ page }) => {
       // Try to access dashboard without authentication
-      await page.goto('http://localhost:9323/dashboard/projects-hub');
+      await page.goto('http://localhost:9323/dashboard/projects-hub-v2');
       await page.waitForLoadState('networkidle');
 
       await page.waitForTimeout(2000);
@@ -380,15 +380,15 @@ test.describe('Advanced Edge Cases - Sessions 1-13', () => {
       await page.waitForTimeout(3500);
 
       // Navigate to different dashboard pages
-      await page.goto('http://localhost:9323/dashboard/projects-hub');
+      await page.goto('http://localhost:9323/dashboard/projects-hub-v2');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
 
-      await page.goto('http://localhost:9323/dashboard/calendar');
+      await page.goto('http://localhost:9323/dashboard/calendar-v2');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
 
-      await page.goto('http://localhost:9323/dashboard/analytics');
+      await page.goto('http://localhost:9323/dashboard/analytics-v2');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(1000);
 

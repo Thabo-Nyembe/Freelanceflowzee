@@ -12,7 +12,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Video Studio - Comprehensive Testing', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to Video Studio page
-    await page.goto('http://localhost:9323/dashboard/video-studio');
+    await page.goto('http://localhost:9323/dashboard/video-studio-v2');
     await page.waitForLoadState('networkidle');
   });
 
@@ -420,7 +420,7 @@ test.describe('Video Studio - Comprehensive Testing', () => {
     test('should load page within acceptable time', async ({ page }) => {
       const startTime = Date.now();
 
-      await page.goto('http://localhost:9323/dashboard/video-studio');
+      await page.goto('http://localhost:9323/dashboard/video-studio-v2');
       await page.waitForLoadState('networkidle');
 
       const loadTime = Date.now() - startTime;

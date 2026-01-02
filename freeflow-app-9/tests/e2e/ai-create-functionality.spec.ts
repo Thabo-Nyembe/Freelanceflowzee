@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test'
 
 test.describe('AI Create Feature - Full Functionality', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/ai-create')
+    await page.goto('/dashboard/ai-create-v2')
     await expect(page).toHaveURL(/\/dashboard\/ai-create/)
   })
 
@@ -109,7 +109,7 @@ test.describe('AI Create Feature - Full Functionality', () => {
 
 test.describe('AI Create - Asset Generation Flow', () => {
   test('should maintain state when navigating between tabs', async ({ page }) => {
-    await page.goto('/dashboard/ai-create')
+    await page.goto('/dashboard/ai-create-v2')
 
     // If there are tabs, click through them
     const tabs = await page.locator('[role="tab"]').all()
@@ -126,7 +126,7 @@ test.describe('AI Create - Asset Generation Flow', () => {
   })
 
   test('should show console logs when generating (check manually)', async ({ page }) => {
-    await page.goto('/dashboard/ai-create')
+    await page.goto('/dashboard/ai-create-v2')
 
     console.log('📝 Manual Test Required:')
     console.log('1. Select a creative field')
@@ -139,7 +139,7 @@ test.describe('AI Create - Asset Generation Flow', () => {
 
 test.describe('AI Create - UI Elements Verification', () => {
   test('should have all test IDs implemented', async ({ page }) => {
-    await page.goto('/dashboard/ai-create')
+    await page.goto('/dashboard/ai-create-v2')
 
     const requiredTestIds = [
       'generate-assets-btn',
@@ -155,7 +155,7 @@ test.describe('AI Create - UI Elements Verification', () => {
 
   test('should be responsive on mobile viewport', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 })
-    await page.goto('/dashboard/ai-create')
+    await page.goto('/dashboard/ai-create-v2')
 
     await expect(page.getByRole('heading', { name: /ai create/i })).toBeVisible()
     await expect(page.getByTestId('generate-assets-btn')).toBeVisible()
@@ -163,7 +163,7 @@ test.describe('AI Create - UI Elements Verification', () => {
 
   test('should be responsive on tablet viewport', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 })
-    await page.goto('/dashboard/ai-create')
+    await page.goto('/dashboard/ai-create-v2')
 
     await expect(page.getByRole('heading', { name: /ai create/i })).toBeVisible()
     await expect(page.getByTestId('generate-assets-btn')).toBeVisible()

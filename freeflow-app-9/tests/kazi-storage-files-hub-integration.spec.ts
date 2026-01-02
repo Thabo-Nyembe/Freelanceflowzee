@@ -11,7 +11,7 @@ test.describe('Kazi Storage & Files Hub - Secure Upload Integration', () => {
 
   test.beforeEach(async ({ page }) => {
     // Navigate to the main files hub
-    await page.goto('http://localhost:9323/dashboard/files')
+    await page.goto('http://localhost:9323/dashboard/files-v2')
     await page.waitForLoadState('networkidle')
   })
 
@@ -24,7 +24,7 @@ test.describe('Kazi Storage & Files Hub - Secure Upload Integration', () => {
 
     // Check URL is correct
     const currentUrl = page.url()
-    expect(currentUrl).toContain('/dashboard/files')
+    expect(currentUrl).toContain('/dashboard/files-v2')
     console.log('  ✅ URL is correct:', currentUrl)
 
     console.log('\n✅ Main Files Hub loads correctly\n')
@@ -192,7 +192,7 @@ test.describe('Kazi Storage & Files Hub - Secure Upload Integration', () => {
     console.log('  ✅ Step 1: Page loads correctly')
 
     // 2. Check URL
-    expect(page.url()).toContain('/dashboard/files')
+    expect(page.url()).toContain('/dashboard/files-v2')
     console.log('  ✅ Step 2: URL is correct')
 
     // 3. Take initial screenshot
@@ -327,17 +327,17 @@ test.describe('Kazi Files Hub - Component Location Verification', () => {
   test('Verify correct route integration', async ({ page }) => {
     console.log('\n🔍 Verifying component integration location...\n')
 
-    await page.goto('http://localhost:9323/dashboard/files')
+    await page.goto('http://localhost:9323/dashboard/files-v2')
     await page.waitForLoadState('networkidle')
 
     const url = page.url()
 
     console.log('  📍 Current URL:', url)
-    console.log('  ✅ Route: /dashboard/files (MAIN Storage & Files Hub)')
+    console.log('  ✅ Route: /dashboard/files-v2 (MAIN Storage & Files Hub)')
     console.log('  ℹ️  NOT: /dashboard/client-zone/files')
     console.log('\n  This confirms integration into the MAIN files hub as requested.\n')
 
-    expect(url).toContain('/dashboard/files')
+    expect(url).toContain('/dashboard/files-v2')
     expect(url).not.toContain('/client-zone')
   })
 })

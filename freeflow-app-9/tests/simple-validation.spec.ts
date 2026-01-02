@@ -26,7 +26,7 @@ test.describe('KAZI Platform - Simple Validation', () => {
   })
 
   test('AI Create Studio loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/ai-create`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/ai-create-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
 
     await page.waitForTimeout(5000)
@@ -35,7 +35,7 @@ test.describe('KAZI Platform - Simple Validation', () => {
   })
 
   test('Projects Hub loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/projects-hub`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/projects-hub-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
 
     await page.waitForTimeout(5000)
@@ -53,7 +53,7 @@ test.describe('KAZI Platform - Simple Validation', () => {
   })
 
   test('Video Studio loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/video-studio`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/video-studio-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
 
     await page.waitForTimeout(5000)
@@ -67,19 +67,19 @@ test.describe('KAZI Platform - Simple Validation', () => {
   })
 
   test('Canvas Studio loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/canvas`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/canvas-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
     console.log('✅ Canvas Studio loaded')
   })
 
   test('Community Hub loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/community-hub`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/community-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
     console.log('✅ Community Hub loaded')
   })
 
   test('Analytics Dashboard loads', async ({ page }) => {
-    const response = await page.goto(`${BASE_URL}/dashboard/analytics`, { waitUntil: 'domcontentloaded', timeout: 60000 })
+    const response = await page.goto(`${BASE_URL}/dashboard/analytics-v2`, { waitUntil: 'domcontentloaded', timeout: 60000 })
     expect(response?.status()).toBeLessThan(400)
     console.log('✅ Analytics Dashboard loaded')
   })
