@@ -1248,19 +1248,19 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProducts.length}</p>
+                    <p className="text-3xl font-bold">{mockIAPs.length}</p>
                     <p className="text-green-200 text-sm">Products</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">${(stats.revenue / 1000).toFixed(1)}k</p>
+                    <p className="text-3xl font-bold">${(stats?.revenue || 0 / 1000).toFixed(1)}k</p>
                     <p className="text-green-200 text-sm">Revenue</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProducts.filter(p => p.type === 'subscription').length}</p>
+                    <p className="text-3xl font-bold">{mockIAPs.filter(p => p.type === 'subscription').length}</p>
                     <p className="text-green-200 text-sm">Subs</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockProducts.filter(p => p.type === 'consumable').length}</p>
+                    <p className="text-3xl font-bold">{mockIAPs.filter(p => p.type === 'consumable').length}</p>
                     <p className="text-green-200 text-sm">Consumable</p>
                   </div>
                   <div className="text-center">

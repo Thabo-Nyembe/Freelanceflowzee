@@ -57,7 +57,8 @@ import {
   Link,
   Ban,
   Star,
-  Inbox
+  Inbox,
+  Bell
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
