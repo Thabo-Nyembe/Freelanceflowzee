@@ -1225,12 +1225,12 @@ export function PredictiveAnalytics({
                   <div className="flex items-center gap-4 mt-2">
                     <div>
                       <p className="text-xs text-muted-foreground">Current</p>
-                      <p className="text-lg font-semibold">{prediction.currentValue.toLocaleString()}</p>
+                      <p className="text-lg font-semibold">{(prediction.currentValue ?? 0).toLocaleString()}</p>
                     </div>
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Predicted ({prediction.timeframe})</p>
-                      <p className="text-lg font-semibold text-purple-600">{prediction.predictedValue.toLocaleString()}</p>
+                      <p className="text-xs text-muted-foreground">Predicted ({prediction.timeframe || 'N/A'})</p>
+                      <p className="text-lg font-semibold text-purple-600">{(prediction.predictedValue ?? 0).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>

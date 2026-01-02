@@ -1074,11 +1074,11 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{todaysTasks.length}</p>
+                    <p className="text-3xl font-bold">{todayTasks.length}</p>
                     <p className="text-orange-200 text-sm">Today's Tasks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{todaysTasks.filter(t => t.status === 'completed').length}</p>
+                    <p className="text-3xl font-bold">{todayTasks.filter(t => t.status === 'completed').length}</p>
                     <p className="text-orange-200 text-sm">Completed</p>
                   </div>
                 </div>

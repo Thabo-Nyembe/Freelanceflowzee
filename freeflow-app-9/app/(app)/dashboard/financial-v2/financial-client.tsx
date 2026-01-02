@@ -199,19 +199,19 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
   }
 
   // Calculations
-  const totalRevenue = Object.values(profitLossData.revenue).reduce((a, b) => a + b, 0)
-  const totalCostOfSales = Object.values(profitLossData.costOfRevenue || {}).reduce((a, b) => a + b, 0)
+  const totalRevenue = Object.values(profitLossData?.revenue || {}).reduce((a, b) => a + b, 0)
+  const totalCostOfSales = Object.values(profitLossData?.costOfRevenue || {}).reduce((a, b) => a + b, 0)
   const grossProfit = totalRevenue - totalCostOfSales
-  const totalOperatingExpenses = Object.values(profitLossData.operatingExpenses).reduce((a, b) => a + b, 0)
+  const totalOperatingExpenses = Object.values(profitLossData?.operatingExpenses || {}).reduce((a, b) => a + b, 0)
   const netIncome = grossProfit - totalOperatingExpenses
 
-  const totalAssets = mockAccounts.filter(a => a.type === 'asset').reduce((sum, a) => sum + a.balance, 0)
-  const totalLiabilities = mockAccounts.filter(a => a.type === 'liability').reduce((sum, a) => sum + a.balance, 0)
-  const totalEquity = mockAccounts.filter(a => a.type === 'equity').reduce((sum, a) => sum + a.balance, 0)
+  const totalAssets = (mockAccounts || []).filter(a => a.type === 'asset').reduce((sum, a) => sum + a.balance, 0)
+  const totalLiabilities = (mockAccounts || []).filter(a => a.type === 'liability').reduce((sum, a) => sum + a.balance, 0)
+  const totalEquity = (mockAccounts || []).filter(a => a.type === 'equity').reduce((sum, a) => sum + a.balance, 0)
 
-  const operatingCashFlow = Object.values(cashFlowData.operating).reduce((a, b) => a + b, 0)
-  const investingCashFlow = Object.values(cashFlowData.investing).reduce((a, b) => a + b, 0)
-  const financingCashFlow = Object.values(cashFlowData.financing).reduce((a, b) => a + b, 0)
+  const operatingCashFlow = Object.values(cashFlowData?.operating || {}).reduce((a, b) => a + b, 0)
+  const investingCashFlow = Object.values(cashFlowData?.investing || {}).reduce((a, b) => a + b, 0)
+  const financingCashFlow = Object.values(cashFlowData?.financing || {}).reduce((a, b) => a + b, 0)
   const netCashFlow = operatingCashFlow + investingCashFlow + financingCashFlow
 
   const filteredTransactions = useMemo(() => {
@@ -926,7 +926,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                 <div>
                   <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Operating Expenses</h4>
                   <div className="space-y-2">
-                    {Object.entries(profitLossData.operatingExpenses).map(([name, amount]) => (
+                    {Object.entries(profitLossData?.operatingExpenses || {}).map(([name, amount]) => (
                       <div key={name} className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
                         <span className="text-gray-700 dark:text-gray-300">{name}</span>
                         <span className="font-medium text-red-600">({formatCurrency(amount)})</span>
