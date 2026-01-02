@@ -23,9 +23,6 @@ import { cn } from '@/lib/utils'
 export function CommunityAnnouncements() {
   const { content, loading } = useMarketingContent()
 
-  // Filter for announcements or featured content
-  const announcements = content.filter(c => c.is_featured || c.category === 'hero')
-
   if (loading) {
     return (
       <Card className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border-orange-500/20">
@@ -42,6 +39,10 @@ export function CommunityAnnouncements() {
     )
   }
 
+  // Filter for announcements or featured content
+  if (!content || content.length === 0) return null
+
+  const announcements = content.filter(c => c.is_featured || c.category === 'hero')
   if (announcements.length === 0) return null
 
   const featured = announcements[0]
@@ -116,6 +117,8 @@ export function CommunityMetricsBar() {
     return new Intl.NumberFormat('en-US', { notation: 'compact' }).format(value)
   }
 
+  if (!stats || stats.length === 0) return null
+
   return (
     <div className="flex items-center justify-between gap-4 p-4 bg-muted/50 rounded-lg overflow-x-auto">
       {stats.slice(0, 6).map((stat) => {
@@ -158,7 +161,7 @@ export function CommunityTestimonials() {
     )
   }
 
-  if (content.length === 0) return null
+  if (!content || content.length === 0) return null
 
   return (
     <div className="grid md:grid-cols-2 gap-4">
@@ -224,7 +227,11 @@ export function CommunityGrowthMetrics() {
     )
   }
 
-  const publicMetrics = metrics.filter(m => m.is_public)
+  if (!metrics || metrics.length === 0) return null
+
+  const publicMetrics = metrics.filter(m => (m as { is_public?: boolean }).is_public)
+
+  if (publicMetrics.length === 0) return null
 
   const formatValue = (value: number, unit: string) => {
     if (unit === 'currency') {
