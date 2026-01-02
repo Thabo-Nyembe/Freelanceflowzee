@@ -83,23 +83,22 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    forceSwcTransforms: true,
     externalDir: true,
-    // Optimize build performance
-    cpus: Math.max(1, require('os').cpus().length - 1),
     // Faster builds
     parallelServerCompiles: true,
     parallelServerBuildTraces: true,
-    webpackBuildWorker: true,
+  },
+
+  // Turbopack configuration
+  turbopack: {
+    root: '/Users/thabonyembe/Documents/freeflow-app-9',
   },
   
   // A+++ Build optimization
   staticPageGenerationTimeout: 90,
   compress: true,
-  swcMinify: true,
-  
+
   // Advanced optimizations for A+++ grade
-  optimizeFonts: true,
   modularizeImports: {
     'lucide-react': {
       transform: 'lucide-react/dist/esm/icons/{{member}}',
@@ -178,7 +177,20 @@ const nextConfig = {
   // (removing self-reference to fix circular dependency)
   
   images: {
-    domains: ['localhost', 'vercel.app'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.vercel.app',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+      },
+    ],
     formats: ['image/webp'],
   },
   
