@@ -628,11 +628,13 @@ interface CollaborationIndicatorProps {
 }
 
 export function CollaborationIndicator({
-  collaborators,
+  collaborators = [],
   maxVisible = 4,
   showTyping = true,
   className
 }: CollaborationIndicatorProps) {
+  if (!collaborators || collaborators.length === 0) return null
+
   const visibleCollaborators = collaborators.slice(0, maxVisible)
   const remaining = collaborators.length - maxVisible
   const typingUsers = collaborators.filter(c => c.isTyping)
