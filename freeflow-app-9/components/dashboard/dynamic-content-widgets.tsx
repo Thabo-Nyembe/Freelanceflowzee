@@ -77,6 +77,8 @@ export function BusinessMetricsWidget() {
     }).format(value)
   }
 
+  if (!metrics || metrics.length === 0) return null
+
   return (
     <Card>
       <CardHeader>
@@ -163,6 +165,8 @@ export function PlatformStatsWidget() {
     }).format(value)
   }
 
+  if (!stats || stats.length === 0) return null
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {stats.map((stat) => {
@@ -225,6 +229,8 @@ export function ActivityFeedWidget() {
     if (hours < 24) return `${hours}h ago`
     return `${days}d ago`
   }
+
+  if (!activities) return null
 
   return (
     <Card>
