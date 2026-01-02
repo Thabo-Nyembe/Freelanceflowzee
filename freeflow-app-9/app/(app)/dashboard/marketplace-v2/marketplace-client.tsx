@@ -21,7 +21,7 @@ import {
   DollarSign, Search, Filter, Grid, List, Heart, ExternalLink, MoreHorizontal,
   Plus, Settings, Eye, CreditCard, Award, Shield, Zap, Tag, Percent,
   Clock, CheckCircle, XCircle,
-  Layers, BarChart3, MessageSquare, Crown, Sparkles, ThumbsUp, RefreshCw, Mail, MapPin, FileText, Receipt, PieChart, Activity, Target, Megaphone, Wallet, Bell, ThumbsDown, Reply, Edit, Trash2, Copy, Code, Bitcoin
+  Layers, BarChart3, MessageSquare, Crown, Sparkles, ThumbsUp, RefreshCw, Mail, MapPin, FileText, Receipt, PieChart, Activity, Target, Megaphone, Wallet, Bell, ThumbsDown, Reply, Edit, Trash2, Copy, Code, Bitcoin, Send
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

@@ -511,7 +511,7 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
     })) as LogEvent[]
   }, [auditEvents, initialEvents])
 
-  const displayChecks = complianceChecks.length > 0 ? complianceChecks : initialComplianceChecks
+  const displayChecks = (complianceChecks || []).length > 0 ? complianceChecks : initialComplianceChecks
 
   // Stats calculations
   const totalEvents = displayEvents.length

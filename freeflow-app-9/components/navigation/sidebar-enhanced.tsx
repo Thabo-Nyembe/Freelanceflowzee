@@ -85,7 +85,7 @@ import {
   Server,
   Terminal,
   Plug,
-  Link,
+  Link as LinkIcon,
   Globe,
   ClipboardList,
   ListTodo,
@@ -667,7 +667,7 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
           { id: 'connectors', name: 'Connectors', href: '/dashboard/connectors-v2', icon: Plug, description: 'Data connectors', badge: 'New' },
           { id: 'extensions', name: 'Extensions', href: '/dashboard/extensions-v2', icon: Puzzle, description: 'Platform extensions', badge: 'New' },
           { id: 'plugins', name: 'Plugins', href: '/dashboard/plugins-v2', icon: Puzzle, description: 'Plugin management', badge: 'New' },
-          { id: 'third-party-integrations', name: 'Third-Party Integrations', href: '/dashboard/third-party-integrations-v2', icon: Link, description: 'External services', badge: 'New' },
+          { id: 'third-party-integrations', name: 'Third-Party Integrations', href: '/dashboard/third-party-integrations-v2', icon: LinkIcon, description: 'External services', badge: 'New' },
           { id: 'integrations-marketplace', name: 'Integrations Marketplace', href: '/dashboard/integrations-marketplace-v2', icon: Store, description: 'Integration store', badge: 'New' }
         ]
       },

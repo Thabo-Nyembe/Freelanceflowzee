@@ -54,6 +54,7 @@ import {
   ChevronRight,
   MailOpen,
   Link2,
+  Link,
   Ban,
   Star,
   Inbox

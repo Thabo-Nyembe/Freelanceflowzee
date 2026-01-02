@@ -1140,11 +1140,11 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockPushCampaigns.length}</p>
+                    <p className="text-3xl font-bold">{mockCampaigns.length}</p>
                     <p className="text-rose-200 text-sm">Campaigns</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockPushCampaigns.reduce((sum, c) => sum + c.sent, 0).toLocaleString()}</p>
+                    <p className="text-3xl font-bold">{mockCampaigns.reduce((sum, c) => sum + c.sent, 0).toLocaleString()}</p>
                     <p className="text-rose-200 text-sm">Sent</p>
                   </div>
                 </div>
