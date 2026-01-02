@@ -58,7 +58,94 @@ import {
   Trash2,
   Bookmark,
   Star,
-  CheckCircle2
+  CheckCircle2,
+  // Additional icons for new pages
+  Truck,
+  Warehouse,
+  AlertTriangle,
+  Bug,
+  TestTube,
+  Send,
+  Radio,
+  Megaphone,
+  HelpCircle,
+  FileQuestion,
+  Key,
+  Lock,
+  Activity,
+  Heart,
+  Award,
+  Gift,
+  Store,
+  ShoppingCart,
+  CreditCard,
+  PieChart,
+  LineChart,
+  Database,
+  Server,
+  Terminal,
+  Plug,
+  Link,
+  Globe,
+  ClipboardList,
+  ListTodo,
+  Timer,
+  Workflow,
+  Cog,
+  Wrench,
+  Eye,
+  Search,
+  Filter,
+  Grid,
+  LayoutGrid,
+  Component,
+  Puzzle,
+  Lightbulb,
+  GraduationCap,
+  Medal,
+  Building,
+  MapPin,
+  Scan,
+  QrCode,
+  Tag,
+  Tags,
+  Ticket,
+  LifeBuoy,
+  Headphones,
+  MessagesSquare,
+  AtSign,
+  Hash,
+  Folder,
+  Archive,
+  Download,
+  Upload,
+  RefreshCw,
+  Play,
+  Pause,
+  AlertCircle,
+  Info,
+  CircleDot,
+  Pencil,
+  Edit,
+  PenTool,
+  Scissors,
+  Copy,
+  ClipboardCopy,
+  Share2,
+  ExternalLink,
+  ArrowRight,
+  ArrowUpRight,
+  Plus,
+  Minus,
+  X,
+  Check,
+  CheckCircle,
+  XCircle,
+  MinusCircle,
+  PlusCircle,
+  Loader2,
+  MoreHorizontal,
+  MoreVertical
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -486,10 +573,259 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         visible: true,
         items: [
           { id: 'help-center', name: 'Help Center', href: '/dashboard/help-center-v2', icon: BookOpen, description: 'Help documentation', badge: 'New' },
+          { id: 'help-docs', name: 'Help Docs', href: '/dashboard/help-docs-v2', icon: FileQuestion, description: 'Documentation', badge: 'New' },
           { id: 'faq', name: 'FAQ', href: '/dashboard/faq-v2', icon: MessageSquare, description: 'Common questions', badge: 'New' },
           { id: 'tutorials', name: 'Tutorials', href: '/dashboard/tutorials-v2', icon: BookOpen, description: 'How-to guides', badge: 'New' },
           { id: 'changelog', name: 'Changelog', href: '/dashboard/changelog-v2', icon: FileText, description: 'Release notes', badge: 'New' },
-          { id: 'roadmap', name: 'Roadmap', href: '/dashboard/roadmap-v2', icon: Target, description: 'Product roadmap', badge: 'New' }
+          { id: 'roadmap', name: 'Roadmap', href: '/dashboard/roadmap-v2', icon: Target, description: 'Product roadmap', badge: 'New' },
+          { id: 'support', name: 'Support', href: '/dashboard/support-v2', icon: Headphones, description: 'Get help', badge: 'New' },
+          { id: 'customer-support', name: 'Customer Support', href: '/dashboard/customer-support-v2', icon: LifeBuoy, description: 'Support center', badge: 'New' },
+          { id: 'customer-success', name: 'Customer Success', href: '/dashboard/customer-success-v2', icon: Heart, description: 'Success team', badge: 'New' },
+          { id: 'knowledge-base', name: 'Knowledge Base', href: '/dashboard/knowledge-base-v2', icon: BookOpen, description: 'Knowledge center', badge: 'New' },
+          { id: 'knowledge-articles', name: 'Knowledge Articles', href: '/dashboard/knowledge-articles-v2', icon: FileText, description: 'Help articles', badge: 'New' },
+          { id: 'docs', name: 'Docs', href: '/dashboard/docs-v2', icon: FileText, description: 'Documentation', badge: 'New' },
+          { id: 'documentation', name: 'Documentation', href: '/dashboard/documentation-v2', icon: BookOpen, description: 'Full docs', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'commerce-logistics',
+    name: 'Commerce & Logistics',
+    icon: Store,
+    visible: true,
+    subcategories: [
+      {
+        id: 'marketplace',
+        name: 'Marketplace',
+        visible: true,
+        items: [
+          { id: 'marketplace', name: 'Marketplace', href: '/dashboard/marketplace-v2', icon: Store, description: 'App marketplace', badge: 'New' },
+          { id: 'app-store', name: 'App Store', href: '/dashboard/app-store-v2', icon: Store, description: 'Applications', badge: 'New' },
+          { id: 'theme-store', name: 'Theme Store', href: '/dashboard/theme-store-v2', icon: Palette, description: 'Themes & templates', badge: 'New' },
+          { id: 'pricing', name: 'Pricing', href: '/dashboard/pricing-v2', icon: Tag, description: 'Price management', badge: 'New' },
+          { id: 'add-ons', name: 'Add-ons', href: '/dashboard/add-ons-v2', icon: Puzzle, description: 'Extensions', badge: 'New' }
+        ]
+      },
+      {
+        id: 'logistics',
+        name: 'Logistics & Shipping',
+        visible: true,
+        items: [
+          { id: 'shipping', name: 'Shipping', href: '/dashboard/shipping-v2', icon: Truck, description: 'Shipping management', badge: 'New' },
+          { id: 'warehouse', name: 'Warehouse', href: '/dashboard/warehouse-v2', icon: Warehouse, description: 'Warehouse management', badge: 'New' },
+          { id: 'logistics', name: 'Logistics', href: '/dashboard/logistics-v2', icon: Truck, description: 'Logistics hub', badge: 'New' },
+          { id: 'stock', name: 'Stock', href: '/dashboard/stock-v2', icon: Package, description: 'Stock control', badge: 'New' }
+        ]
+      },
+      {
+        id: 'tickets-renewals',
+        name: 'Tickets & Renewals',
+        visible: true,
+        items: [
+          { id: 'tickets', name: 'Tickets', href: '/dashboard/tickets-v2', icon: Ticket, description: 'Ticket system', badge: 'New' },
+          { id: 'renewals', name: 'Renewals', href: '/dashboard/renewals-v2', icon: RefreshCw, description: 'Subscription renewals', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'devops',
+    name: 'DevOps & Development',
+    icon: Terminal,
+    visible: true,
+    subcategories: [
+      {
+        id: 'development',
+        name: 'Development',
+        visible: true,
+        items: [
+          { id: 'api', name: 'API', href: '/dashboard/api-v2', icon: Code, description: 'API management', badge: 'New' },
+          { id: 'bugs', name: 'Bugs', href: '/dashboard/bugs-v2', icon: Bug, description: 'Bug tracking', badge: 'New' },
+          { id: 'qa', name: 'QA', href: '/dashboard/qa-v2', icon: TestTube, description: 'Quality assurance', badge: 'New' },
+          { id: 'testing', name: 'Testing', href: '/dashboard/testing-v2', icon: TestTube, description: 'Test management', badge: 'New' },
+          { id: 'builds', name: 'Builds', href: '/dashboard/builds-v2', icon: Package, description: 'Build management', badge: 'New' },
+          { id: 'releases', name: 'Releases', href: '/dashboard/releases-v2', icon: Rocket, description: 'Release management', badge: 'New' },
+          { id: 'release-notes', name: 'Release Notes', href: '/dashboard/release-notes-v2', icon: FileText, description: 'Version notes', badge: 'New' }
+        ]
+      },
+      {
+        id: 'deployment',
+        name: 'Deployment & CI/CD',
+        visible: true,
+        items: [
+          { id: 'deployments', name: 'Deployments', href: '/dashboard/deployments-v2', icon: Rocket, description: 'Deploy management', badge: 'New' },
+          { id: 'ci-cd', name: 'CI/CD', href: '/dashboard/ci-cd-v2', icon: GitBranch, description: 'CI/CD pipelines', badge: 'New' },
+          { id: 'dependencies', name: 'Dependencies', href: '/dashboard/dependencies-v2', icon: Layers, description: 'Dependency management', badge: 'New' }
+        ]
+      },
+      {
+        id: 'integrations',
+        name: 'Integrations',
+        visible: true,
+        items: [
+          { id: 'connectors', name: 'Connectors', href: '/dashboard/connectors-v2', icon: Plug, description: 'Data connectors', badge: 'New' },
+          { id: 'extensions', name: 'Extensions', href: '/dashboard/extensions-v2', icon: Puzzle, description: 'Platform extensions', badge: 'New' },
+          { id: 'plugins', name: 'Plugins', href: '/dashboard/plugins-v2', icon: Puzzle, description: 'Plugin management', badge: 'New' },
+          { id: 'third-party-integrations', name: 'Third-Party Integrations', href: '/dashboard/third-party-integrations-v2', icon: Link, description: 'External services', badge: 'New' },
+          { id: 'integrations-marketplace', name: 'Integrations Marketplace', href: '/dashboard/integrations-marketplace-v2', icon: Store, description: 'Integration store', badge: 'New' }
+        ]
+      },
+      {
+        id: 'workflows-automation',
+        name: 'Workflows & Automation',
+        visible: true,
+        items: [
+          { id: 'workflows', name: 'Workflows', href: '/dashboard/workflows-v2', icon: Workflow, description: 'Workflow automation', badge: 'New' },
+          { id: 'automations', name: 'Automations', href: '/dashboard/automations-v2', icon: Zap, description: 'Automation rules', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'project-tools',
+    name: 'Project Tools',
+    icon: ClipboardList,
+    visible: true,
+    subcategories: [
+      {
+        id: 'agile',
+        name: 'Agile & Sprints',
+        visible: true,
+        items: [
+          { id: 'sprints', name: 'Sprints', href: '/dashboard/sprints-v2', icon: Timer, description: 'Sprint planning', badge: 'New' },
+          { id: 'milestones', name: 'Milestones', href: '/dashboard/milestones-v2', icon: Target, description: 'Project milestones', badge: 'New' },
+          { id: 'capacity', name: 'Capacity', href: '/dashboard/capacity-v2', icon: Gauge, description: 'Team capacity', badge: 'New' },
+          { id: 'allocation', name: 'Allocation', href: '/dashboard/allocation-v2', icon: PieChart, description: 'Resource allocation', badge: 'New' }
+        ]
+      },
+      {
+        id: 'resources',
+        name: 'Resources',
+        visible: true,
+        items: [
+          { id: 'resources', name: 'Resources', href: '/dashboard/resources-v2', icon: Folder, description: 'Resource management', badge: 'New' },
+          { id: 'forms', name: 'Forms', href: '/dashboard/forms-v2', icon: ClipboardList, description: 'Form builder', badge: 'New' },
+          { id: 'registrations', name: 'Registrations', href: '/dashboard/registrations-v2', icon: UserPlus, description: 'Registration management', badge: 'New' },
+          { id: 'certifications', name: 'Certifications', href: '/dashboard/certifications-v2', icon: Award, description: 'Certifications', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'communication-hub',
+    name: 'Communication Hub',
+    icon: MessagesSquare,
+    visible: true,
+    subcategories: [
+      {
+        id: 'messaging',
+        name: 'Messaging',
+        visible: true,
+        items: [
+          { id: 'messaging', name: 'Messaging', href: '/dashboard/messaging-v2', icon: MessageSquare, description: 'Team messaging', badge: 'New' },
+          { id: 'chat', name: 'Chat', href: '/dashboard/chat-v2', icon: MessagesSquare, description: 'Live chat', badge: 'New' },
+          { id: 'broadcasts', name: 'Broadcasts', href: '/dashboard/broadcasts-v2', icon: Radio, description: 'Broadcast messages', badge: 'New' },
+          { id: 'announcements', name: 'Announcements', href: '/dashboard/announcements-v2', icon: Megaphone, description: 'Company announcements', badge: 'New' },
+          { id: 'community', name: 'Community', href: '/dashboard/community-v2', icon: Users, description: 'Community forum', badge: 'New' },
+          { id: 'polls', name: 'Polls', href: '/dashboard/polls-v2', icon: BarChart2, description: 'Team polls', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'admin-security',
+    name: 'Admin & Security',
+    icon: Shield,
+    visible: true,
+    subcategories: [
+      {
+        id: 'admin-panel',
+        name: 'Admin Panel',
+        visible: true,
+        items: [
+          { id: 'admin', name: 'Admin', href: '/dashboard/admin-v2', icon: Shield, description: 'Admin dashboard', badge: 'New' },
+          { id: 'user-management-v2', name: 'User Management', href: '/dashboard/user-management-v2', icon: Users, description: 'Manage users', badge: 'New' },
+          { id: 'permissions', name: 'Permissions', href: '/dashboard/permissions-v2', icon: Key, description: 'Permission settings', badge: 'New' },
+          { id: 'security', name: 'Security', href: '/dashboard/security-v2', icon: Lock, description: 'Security settings', badge: 'New' }
+        ]
+      },
+      {
+        id: 'monitoring-logs',
+        name: 'Monitoring & Logs',
+        visible: true,
+        items: [
+          { id: 'logs', name: 'Logs', href: '/dashboard/logs-v2', icon: FileText, description: 'System logs', badge: 'New' },
+          { id: 'activity-logs', name: 'Activity Logs', href: '/dashboard/activity-logs-v2', icon: Activity, description: 'Activity tracking', badge: 'New' },
+          { id: 'audit-trail', name: 'Audit Trail', href: '/dashboard/audit-trail', icon: FileText, description: 'Audit history', badge: 'New' },
+          { id: 'audit', name: 'Audit', href: '/dashboard/audit-v2', icon: Shield, description: 'Audit management', badge: 'New' },
+          { id: 'alerts', name: 'Alerts', href: '/dashboard/alerts-v2', icon: AlertTriangle, description: 'System alerts', badge: 'New' },
+          { id: 'maintenance', name: 'Maintenance', href: '/dashboard/maintenance-v2', icon: Wrench, description: 'System maintenance', badge: 'New' },
+          { id: 'health-score', name: 'Health Score', href: '/dashboard/health-score-v2', icon: Activity, description: 'System health', badge: 'New' },
+          { id: 'vulnerability-scan', name: 'Vulnerability Scan', href: '/dashboard/vulnerability-scan-v2', icon: Shield, description: 'Security scanning', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'reports-analytics',
+    name: 'Reports & Analytics',
+    icon: PieChart,
+    visible: true,
+    subcategories: [
+      {
+        id: 'reports-main',
+        name: 'Reports',
+        visible: true,
+        items: [
+          { id: 'reporting', name: 'Reporting', href: '/dashboard/reporting-v2', icon: FileBarChart, description: 'Report generation', badge: 'New' },
+          { id: 'overview', name: 'Overview', href: '/dashboard/overview-v2', icon: BarChart3, description: 'Dashboard overview', badge: 'New' },
+          { id: 'performance', name: 'Performance', href: '/dashboard/performance-v2', icon: Gauge, description: 'Performance reports', badge: 'New' },
+          { id: 'financial-hub', name: 'Financial Hub', href: '/dashboard/financial-hub', icon: DollarSign, description: 'Financial overview', badge: 'New' },
+          { id: 'marketing', name: 'Marketing', href: '/dashboard/marketing-v2', icon: Target, description: 'Marketing analytics', badge: 'New' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'misc',
+    name: 'More Features',
+    icon: Layers,
+    visible: true,
+    subcategories: [
+      {
+        id: 'additional',
+        name: 'Additional Pages',
+        visible: true,
+        items: [
+          { id: 'files', name: 'Files', href: '/dashboard/files', icon: FolderOpen, description: 'File manager', badge: 'New' },
+          { id: 'booking', name: 'Booking', href: '/dashboard/booking', icon: Calendar, description: 'Booking page', badge: 'New' },
+          { id: 'team-page', name: 'Team', href: '/dashboard/team', icon: Users, description: 'Team page', badge: 'New' },
+          { id: 'features', name: 'Features', href: '/dashboard/features-v2', icon: Sparkles, description: 'Feature list', badge: 'New' },
+          { id: 'coming-soon', name: 'Coming Soon', href: '/dashboard/coming-soon', icon: Rocket, description: 'Coming soon', badge: 'New' },
+          { id: 'ai-enhanced', name: 'AI Enhanced', href: '/dashboard/ai-enhanced', icon: Brain, description: 'AI features', badge: 'New' },
+          { id: 'content-studio', name: 'Content Studio', href: '/dashboard/content-studio-v2', icon: Edit, description: 'Content creation', badge: 'New' },
+          { id: 'content', name: 'Content', href: '/dashboard/content-v2', icon: FileText, description: 'Content management', badge: 'New' }
+        ]
+      },
+      {
+        id: 'showcases',
+        name: 'Showcases & Demos',
+        visible: true,
+        items: [
+          { id: 'a-plus-showcase', name: 'A+ Showcase', href: '/dashboard/a-plus-showcase', icon: Star, description: 'Premium showcase', badge: 'Demo' },
+          { id: 'advanced-features-demo', name: 'Advanced Features', href: '/dashboard/advanced-features-demo', icon: Lightbulb, description: 'Feature demo', badge: 'Demo' },
+          { id: 'advanced-micro-features', name: 'Micro Features', href: '/dashboard/advanced-micro-features', icon: Component, description: 'Micro features', badge: 'Demo' },
+          { id: 'collaboration-demo', name: 'Collaboration Demo', href: '/dashboard/collaboration-demo', icon: Users, description: 'Collab demo', badge: 'Demo' },
+          { id: 'component-library', name: 'Component Library', href: '/dashboard/component-library-v2', icon: Component, description: 'UI components', badge: 'Demo' },
+          { id: 'comprehensive-testing', name: 'Comprehensive Testing', href: '/dashboard/comprehensive-testing', icon: TestTube, description: 'Testing suite', badge: 'Demo' },
+          { id: 'example-modern', name: 'Modern Example', href: '/dashboard/example-modern', icon: Sparkles, description: 'Modern dashboard', badge: 'Demo' },
+          { id: 'feature-testing', name: 'Feature Testing', href: '/dashboard/feature-testing', icon: TestTube, description: 'Feature tests', badge: 'Demo' },
+          { id: 'micro-features-showcase', name: 'Micro Features Showcase', href: '/dashboard/micro-features-showcase', icon: Component, description: 'Micro features', badge: 'Demo' },
+          { id: 'shadcn-showcase', name: 'Shadcn Showcase', href: '/dashboard/shadcn-showcase', icon: Palette, description: 'UI showcase', badge: 'Demo' },
+          { id: 'ui-showcase', name: 'UI Showcase', href: '/dashboard/ui-showcase', icon: LayoutGrid, description: 'UI components', badge: 'Demo' },
+          { id: 'upgrades-showcase', name: 'Upgrades Showcase', href: '/dashboard/upgrades-showcase', icon: ArrowUpRight, description: 'Upgrade options', badge: 'Demo' },
+          { id: 'widget-library', name: 'Widget Library', href: '/dashboard/widget-library-v2', icon: Grid, description: 'Widget collection', badge: 'Demo' }
         ]
       }
     ]
