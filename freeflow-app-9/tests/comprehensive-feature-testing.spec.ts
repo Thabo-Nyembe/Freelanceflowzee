@@ -12,41 +12,41 @@ interface FeatureTest {
 // Comprehensive feature list based on dashboard configuration
 const allFeatures: FeatureTest[] = [
   // Core Features
-  { name: 'My Day', path: 'my-day', description: 'AI-powered daily planning', category: 'core', expectedElements: ['[data-testid="my-day-container"]', 'button', 'input'] },
-  { name: 'Projects Hub', path: 'projects-hub', description: 'Project management system', category: 'core', expectedElements: ['[data-testid="projects-container"]', 'button', '.project-card'] },
-  { name: 'Analytics', path: 'analytics', description: 'Business intelligence', category: 'core', expectedElements: ['[data-testid="analytics-dashboard"]', '.chart', '.metric'] },
-  { name: 'Time Tracking', path: 'time-tracking', description: 'Time tracking and metrics', category: 'core', expectedElements: ['[data-testid="time-tracker"]', 'button', '.timer'] },
+  { name: 'My Day', path: 'my-day-v2', description: 'AI-powered daily planning', category: 'core', expectedElements: ['[data-testid="my-day-container"]', 'button', 'input'] },
+  { name: 'Projects Hub', path: 'projects-hub-v2', description: 'Project management system', category: 'core', expectedElements: ['[data-testid="projects-container"]', 'button', '.project-card'] },
+  { name: 'Analytics', path: 'analytics-v2', description: 'Business intelligence', category: 'core', expectedElements: ['[data-testid="analytics-dashboard"]', '.chart', '.metric'] },
+  { name: 'Time Tracking', path: 'time-tracking-v2', description: 'Time tracking and metrics', category: 'core', expectedElements: ['[data-testid="time-tracker"]', 'button', '.timer'] },
 
   // AI Features
-  { name: 'AI Create', path: 'ai-create', description: 'Multi-model AI studio', category: 'ai', expectedElements: ['[data-testid="ai-create-studio"]', 'textarea', 'button'] },
-  { name: 'AI Design', path: 'ai-design', description: 'AI-powered design generation', category: 'ai', expectedElements: ['[data-testid="ai-design-studio"]', 'canvas', 'button'] },
-  { name: 'AI Assistant', path: 'ai-assistant', description: 'Personal AI assistant', category: 'ai', expectedElements: ['[data-testid="ai-assistant"]', 'input', 'button'] },
+  { name: 'AI Create', path: 'ai-create-v2', description: 'Multi-model AI studio', category: 'ai', expectedElements: ['[data-testid="ai-create-studio"]', 'textarea', 'button'] },
+  { name: 'AI Design', path: 'ai-design-v2', description: 'AI-powered design generation', category: 'ai', expectedElements: ['[data-testid="ai-design-studio"]', 'canvas', 'button'] },
+  { name: 'AI Assistant', path: 'ai-assistant-v2', description: 'Personal AI assistant', category: 'ai', expectedElements: ['[data-testid="ai-assistant"]', 'input', 'button'] },
 
   // Creative Suite
-  { name: 'Video Studio', path: 'video-studio', description: 'Video editing with AI transcription', category: 'creative', expectedElements: ['[data-testid="video-studio"]', 'video', 'button'] },
-  { name: 'Canvas', path: 'canvas', description: 'Interactive design canvas', category: 'creative', expectedElements: ['canvas', '[data-testid="canvas-tools"]', 'button'] },
-  { name: 'Gallery', path: 'gallery', description: 'Portfolio showcase', category: 'creative', expectedElements: ['[data-testid="gallery"]', '.gallery-item', 'button'] },
-  { name: 'CV Portfolio', path: 'cv-portfolio', description: 'Portfolio and resume builder', category: 'creative', expectedElements: ['[data-testid="cv-builder"]', 'form', 'button'] },
+  { name: 'Video Studio', path: 'video-studio-v2', description: 'Video editing with AI transcription', category: 'creative', expectedElements: ['[data-testid="video-studio"]', 'video', 'button'] },
+  { name: 'Canvas', path: 'canvas-v2', description: 'Interactive design canvas', category: 'creative', expectedElements: ['canvas', '[data-testid="canvas-tools"]', 'button'] },
+  { name: 'Gallery', path: 'gallery-v2', description: 'Portfolio showcase', category: 'creative', expectedElements: ['[data-testid="gallery"]', '.gallery-item', 'button'] },
+  { name: 'CV Portfolio', path: 'profile-v2', description: 'Portfolio and resume builder', category: 'creative', expectedElements: ['[data-testid="cv-builder"]', 'form', 'button'] },
 
   // Business Tools
-  { name: 'Financial Hub', path: 'financial-hub', description: 'Financial management', category: 'business', expectedElements: ['[data-testid="financial-dashboard"]', '.financial-metric', 'button'] },
-  { name: 'Financial', path: 'financial', description: 'Financial tracking', category: 'business', expectedElements: ['[data-testid="financial-tracker"]', 'table', 'button'] },
-  { name: 'Bookings', path: 'bookings', description: 'Appointment scheduling', category: 'business', expectedElements: ['[data-testid="booking-system"]', 'calendar', 'button'] },
-  { name: 'Calendar', path: 'calendar', description: 'Advanced calendar', category: 'business', expectedElements: ['[data-testid="calendar"]', '.calendar-grid', 'button'] },
+  { name: 'Financial Hub', path: 'financial-v2', description: 'Financial management', category: 'business', expectedElements: ['[data-testid="financial-dashboard"]', '.financial-metric', 'button'] },
+  { name: 'Financial', path: 'financial-v2', description: 'Financial tracking', category: 'business', expectedElements: ['[data-testid="financial-tracker"]', 'table', 'button'] },
+  { name: 'Bookings', path: 'bookings-v2', description: 'Appointment scheduling', category: 'business', expectedElements: ['[data-testid="booking-system"]', 'calendar', 'button'] },
+  { name: 'Calendar', path: 'calendar-v2', description: 'Advanced calendar', category: 'business', expectedElements: ['[data-testid="calendar"]', '.calendar-grid', 'button'] },
 
   // Communication
-  { name: 'Messages', path: 'messages', description: 'Communication hub', category: 'communication', expectedElements: ['[data-testid="messages"]', '.message-thread', 'textarea'] },
-  { name: 'Collaboration', path: 'collaboration', description: 'Real-time collaboration', category: 'communication', expectedElements: ['[data-testid="collaboration-tools"]', '.collaboration-panel', 'button'] },
+  { name: 'Messages', path: 'messages-v2', description: 'Communication hub', category: 'communication', expectedElements: ['[data-testid="messages"]', '.message-thread', 'textarea'] },
+  { name: 'Collaboration', path: 'collaboration-v2', description: 'Real-time collaboration', category: 'communication', expectedElements: ['[data-testid="collaboration-tools"]', '.collaboration-panel', 'button'] },
   { name: 'Community Hub', path: 'community-v2', description: 'Professional networking', category: 'communication', expectedElements: ['[data-testid="community"]', '.community-post', 'button'] },
-  { name: 'Client Zone', path: 'client-zone', description: 'Client portal', category: 'communication', expectedElements: ['[data-testid="client-portal"]', '.client-project', 'button'] },
+  { name: 'Client Zone', path: 'clients-v2', description: 'Client portal', category: 'communication', expectedElements: ['[data-testid="client-portal"]', '.client-project', 'button'] },
 
   // Storage & Files
-  { name: 'Files Hub', path: 'files-hub', description: 'Multi-cloud storage', category: 'storage', expectedElements: ['[data-testid="files-hub"]', '.file-item', 'button'] },
-  { name: 'Files', path: 'files', description: 'File management', category: 'storage', expectedElements: ['[data-testid="file-manager"]', '.file-list', 'button'] },
+  { name: 'Files Hub', path: 'files-hub-v2', description: 'Multi-cloud storage', category: 'storage', expectedElements: ['[data-testid="files-hub"]', '.file-item', 'button'] },
+  { name: 'Files', path: 'files-hub-v2', description: 'File management', category: 'storage', expectedElements: ['[data-testid="file-manager"]', '.file-list', 'button'] },
 
   // Settings
-  { name: 'Settings', path: 'settings', description: 'Platform configuration', category: 'settings', expectedElements: ['[data-testid="settings"]', 'form', 'button'] },
-  { name: 'Notifications', path: 'notifications', description: 'Notification management', category: 'settings', expectedElements: ['[data-testid="notifications"]', '.notification-item', 'button'] }
+  { name: 'Settings', path: 'settings-v2', description: 'Platform configuration', category: 'settings', expectedElements: ['[data-testid="settings"]', 'form', 'button'] },
+  { name: 'Notifications', path: 'notifications-v2', description: 'Notification management', category: 'settings', expectedElements: ['[data-testid="notifications"]', '.notification-item', 'button'] }
 ];
 
 class FeatureTester {
