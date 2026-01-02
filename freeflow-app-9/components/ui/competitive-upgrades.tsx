@@ -1160,11 +1160,13 @@ interface PredictiveAnalyticsProps {
 }
 
 export function PredictiveAnalytics({
-  predictions,
+  predictions = [],
   onRefresh,
   className
 }: PredictiveAnalyticsProps) {
   const [selectedPrediction, setSelectedPrediction] = React.useState<Prediction | null>(null)
+
+  if (!predictions || predictions.length === 0) return null
 
   const getTrendIcon = (trend: Prediction['trend']) => {
     switch (trend) {
