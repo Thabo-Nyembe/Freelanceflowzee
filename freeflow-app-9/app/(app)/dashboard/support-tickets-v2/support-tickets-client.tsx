@@ -380,7 +380,7 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-muted-foreground">Open Tickets</p>
-                  <p className="text-2xl font-bold">{stats.open}</p>
+                  <p className="text-2xl font-bold">{stats?.open || 0}</p>
                 </div>
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <Inbox className="w-5 h-5 text-blue-600" />

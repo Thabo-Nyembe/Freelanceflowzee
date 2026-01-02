@@ -55,7 +55,9 @@ import {
   Target,
   PieChart,
   Bell,
-  Mail
+  Mail,
+  ArrowRightLeft,
+  Upload
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components

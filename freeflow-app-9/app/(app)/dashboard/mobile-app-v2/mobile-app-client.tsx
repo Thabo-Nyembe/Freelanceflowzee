@@ -895,7 +895,7 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
                     <p className="text-amber-200 text-sm">Reviews</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{stats.rating.toFixed(1)}</p>
+                    <p className="text-3xl font-bold">{(stats?.rating || 0).toFixed(1)}</p>
                     <p className="text-amber-200 text-sm">Avg Rating</p>
                   </div>
                 </div>

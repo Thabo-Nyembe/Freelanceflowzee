@@ -378,6 +378,33 @@ const mockCycleCounts: CycleCount[] = [
   { id: '3', count_number: 'CC-2023-089', zone: 'Zone D - Cold Storage', bin_locations: ['D-01-01-01', 'D-01-02-01'], status: 'completed', scheduled_date: '2024-01-10', completed_date: '2024-01-10', total_bins: 12, counted_bins: 12, variance_items: 0, variance_value: 0, assigned_to: 'Tom Wilson', accuracy_percent: 100 }
 ]
 
+// Enhanced Competitive Upgrade Mock Data
+const mockWarehouseAIInsights = [
+  { id: '1', type: 'success' as const, title: 'Inventory Accuracy', description: 'Warehouse inventory accuracy is at 99.2% this month.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Performance' },
+  { id: '2', type: 'warning' as const, title: 'Low Stock Alert', description: '5 items are below reorder point in Zone A.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Alerts' },
+  { id: '3', type: 'info' as const, title: 'Space Optimization', description: 'Moving slow-movers to back racks could free up 15% picking space.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'AI Insights' },
+]
+
+const mockWarehouseCollaborators = [
+  { id: '1', name: 'Warehouse Team', avatar: '', role: 'Team', status: 'online' as const },
+  { id: '2', name: 'Tom Wilson', avatar: '', role: 'Supervisor', status: 'online' as const },
+]
+
+const mockWarehousePredictions = [
+  { id: '1', title: 'Inbound Volume', prediction: 'Expected 25% increase next week', confidence: 82, trend: 'up' as const, timeframe: 'Next 7 days' },
+  { id: '2', title: 'Space Utilization', prediction: 'Zone B approaching 90% capacity', confidence: 78, trend: 'up' as const, timeframe: 'Next 14 days' },
+]
+
+const mockWarehouseActivities = [
+  { id: '1', user: 'System', action: 'Completed', target: '32 pick tasks today', timestamp: new Date().toISOString(), type: 'success' as const },
+  { id: '2', user: 'Tom', action: 'Received', target: 'shipment PO-2024-156', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+]
+
+const mockWarehouseQuickActions = [
+  { id: '1', label: 'Add Inventory', icon: 'plus', action: () => console.log('Add inventory'), variant: 'default' as const },
+  { id: '2', label: 'Cycle Count', icon: 'clipboard', action: () => console.log('Start cycle count'), variant: 'outline' as const },
+]
+
 export default function WarehouseClient() {
   const [activeTab, setActiveTab] = useState('inventory')
   const [searchQuery, setSearchQuery] = useState('')

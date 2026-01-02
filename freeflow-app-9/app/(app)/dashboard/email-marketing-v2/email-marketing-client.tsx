@@ -1036,11 +1036,11 @@ export default function EmailMarketingClient({
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{subscribers.length}</p>
+                    <p className="text-3xl font-bold">{mockSubscribers.length}</p>
                     <p className="text-blue-200 text-sm">Total</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{subscribers.filter(s => s.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{mockSubscribers.filter(s => s.status === 'active').length}</p>
                     <p className="text-blue-200 text-sm">Active</p>
                   </div>
                 </div>

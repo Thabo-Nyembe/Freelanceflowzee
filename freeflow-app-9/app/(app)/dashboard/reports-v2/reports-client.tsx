@@ -722,11 +722,11 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{reports.length}</p>
+                    <p className="text-3xl font-bold">{mockReports.length}</p>
                     <p className="text-purple-200 text-sm">Reports</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{reports.filter(r => r.favorite).length}</p>
+                    <p className="text-3xl font-bold">{mockReports.filter(r => r.favorite).length}</p>
                     <p className="text-purple-200 text-sm">Favorites</p>
                   </div>
                 </div>

@@ -536,11 +536,11 @@ export default function ThirdPartyIntegrationsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{filteredZaps.length}</p>
+                    <p className="text-3xl font-bold">{mockZaps.length}</p>
                     <p className="text-orange-200 text-sm">Zaps</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{zaps.filter(z => z.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{mockZaps.filter(z => z.status === 'active').length}</p>
                     <p className="text-orange-200 text-sm">Active</p>
                   </div>
                 </div>
