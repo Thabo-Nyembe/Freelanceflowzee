@@ -88,7 +88,7 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({
-  activities,
+  activities = [],
   onMarkRead,
   onMarkAllRead,
   onPin,
@@ -99,6 +99,8 @@ export function ActivityFeed({
   const [activeFilter, setActiveFilter] = React.useState('all')
   const [searchQuery, setSearchQuery] = React.useState('')
   const [showUnreadOnly, setShowUnreadOnly] = React.useState(false)
+
+  if (!activities || activities.length === 0) return null
 
   const unreadCount = activities.filter(a => !a.isRead).length
 
@@ -912,11 +914,13 @@ interface QuickActionsToolbarProps {
 }
 
 export function QuickActionsToolbar({
-  actions,
+  actions = [],
   position = 'bottom',
   className
 }: QuickActionsToolbarProps) {
   const [isExpanded, setIsExpanded] = React.useState(false)
+
+  if (!actions || actions.length === 0) return null
 
   const groupedActions = React.useMemo(() => {
     const groups: Record<string, QuickAction[]> = {}
