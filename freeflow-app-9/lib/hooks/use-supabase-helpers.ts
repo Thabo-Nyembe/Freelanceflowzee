@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 // Generic query hook for fetching data from Supabase
 export interface UseSupabaseQueryOptions<T> {
@@ -38,7 +38,7 @@ export function useSupabaseQuery<T = unknown>(
   const [isLoading, setIsLoading] = useState(enabled)
   const [error, setError] = useState<Error | null>(null)
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchData = useCallback(async () => {
     if (!enabled) return
@@ -117,7 +117,7 @@ export function useSupabaseMutation<T = unknown>(
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const mutate = useCallback(async (data: Partial<T>, id?: string): Promise<T | null> => {
     setIsLoading(true)
@@ -213,7 +213,7 @@ export interface UseRealtimeOptions {
 export function useRealtimeSubscription(options: UseRealtimeOptions): void {
   const { table, event = '*', filter, onUpdate, enabled = true } = options
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     if (!enabled || !onUpdate) return

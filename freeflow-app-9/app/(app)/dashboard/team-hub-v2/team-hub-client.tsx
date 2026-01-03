@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -444,7 +444,7 @@ interface DbTeamMember {
 }
 
 export default function TeamHubClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // UI State
   const [members] = useState<TeamMember[]>(mockMembers)

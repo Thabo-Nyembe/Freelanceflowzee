@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { createClient } from '@/lib/supabase/client'
 import {
   shouldShowStorageOnboarding,
@@ -27,7 +27,7 @@ export function useStorageOnboarding(): UseStorageOnboardingReturn {
   const [loading, setLoading] = useState(true)
   const [preferences, setPreferences] = useState<UserPreferences | null>(null)
   const [hasConnections, setHasConnections] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     async function checkOnboardingStatus() {

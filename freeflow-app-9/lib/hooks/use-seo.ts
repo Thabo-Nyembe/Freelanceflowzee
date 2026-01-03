@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -101,7 +101,7 @@ export interface SEOStats {
 }
 
 export function useSEOKeywords() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [keywords, setKeywords] = useState<SEOKeyword[]>([])
   const [loading, setLoading] = useState(true)
@@ -236,7 +236,7 @@ export function useSEOKeywords() {
 }
 
 export function useSEOBacklinks() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [backlinks, setBacklinks] = useState<SEOBacklink[]>([])
   const [loading, setLoading] = useState(true)
@@ -317,7 +317,7 @@ export function useSEOBacklinks() {
 }
 
 export function useSEOPages() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [pages, setPages] = useState<SEOPage[]>([])
   const [loading, setLoading] = useState(true)

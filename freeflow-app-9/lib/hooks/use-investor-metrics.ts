@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface InvestorMetric {
   id: string
@@ -49,7 +49,7 @@ export function useInvestorMetrics(initialMetrics: InvestorMetric[] = [], initia
   const [stats, setStats] = useState<InvestorStats>(initialStats)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const calculateStats = useCallback((mets: InvestorMetric[]): InvestorStats => {
     const totalChange = mets.reduce((sum, m) => sum + m.change_percent, 0)

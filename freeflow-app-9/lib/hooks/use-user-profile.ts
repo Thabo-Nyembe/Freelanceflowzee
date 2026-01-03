@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 
 export interface UserProfile {
@@ -91,7 +91,7 @@ export function useUserProfile(initialProfile: UserProfile | null = null, initia
     avgRating: 0
   })
   const [loading, setLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
 
   const calculateCompleteness = useCallback((p: UserProfile | null): number => {

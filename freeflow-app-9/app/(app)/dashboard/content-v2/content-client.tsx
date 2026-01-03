@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -331,7 +331,7 @@ const mockContentActivities = [
 ]
 
 export default function ContentClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // View and filter state
   const [activeView, setActiveView] = useState<'entries' | 'assets' | 'types' | 'locales' | 'webhooks' | 'settings'>('entries')

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface BusinessReport {
   id: string
@@ -53,7 +53,7 @@ export function useBusinessReports(initialReports: BusinessReport[] = [], initia
   const [stats, setStats] = useState<ReportStats>(initialStats)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Calculate stats from reports
   const calculateStats = useCallback((reps: BusinessReport[]): ReportStats => {

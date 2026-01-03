@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -72,7 +72,7 @@ export interface AuditStats {
 }
 
 export function useSecurityAudits() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [audits, setAudits] = useState<SecurityAudit[]>([])
   const [loading, setLoading] = useState(true)
@@ -244,7 +244,7 @@ export function useSecurityAudits() {
 
 // Hook for audit findings
 export function useAuditFindings(auditId: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [findings, setFindings] = useState<AuditFinding[]>([])
   const [loading, setLoading] = useState(true)

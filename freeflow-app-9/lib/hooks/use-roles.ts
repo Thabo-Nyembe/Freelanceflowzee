@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -67,7 +67,7 @@ export interface RoleStats {
 }
 
 export function useRoles() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [roles, setRoles] = useState<UserRole[]>([])
   const [loading, setLoading] = useState(true)
@@ -340,7 +340,7 @@ export function useRoles() {
 
 // Hook for role assignments
 export function useRoleAssignments(roleId: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [assignments, setAssignments] = useState<RoleAssignment[]>([])
   const [loading, setLoading] = useState(true)
@@ -498,7 +498,7 @@ export function useRoleAssignments(roleId: string) {
 
 // Hook for role permissions
 export function useRolePermissions() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [permissions, setPermissions] = useState<RolePermission[]>([])
   const [loading, setLoading] = useState(true)

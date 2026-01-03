@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface PricingPlan {
   id: string
@@ -56,7 +56,7 @@ export function usePricingPlans(initialPlans: PricingPlan[] = [], initialStats: 
   const [stats, setStats] = useState<PricingStats>(initialStats)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const calculateStats = useCallback((pls: PricingPlan[]): PricingStats => {
     const totalSubs = pls.reduce((sum, p) => sum + p.subscribers_count, 0)

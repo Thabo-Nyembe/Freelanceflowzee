@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import {
   DollarSign,
   CreditCard,
@@ -367,7 +367,7 @@ const mockTransactionsQuickActions = [
 ]
 
 export default function TransactionsClient({ initialTransactions }: { initialTransactions: Transaction[] }) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('overview')
   const [selectedPeriod, setSelectedPeriod] = useState('last-7-days')
   const [searchQuery, setSearchQuery] = useState('')

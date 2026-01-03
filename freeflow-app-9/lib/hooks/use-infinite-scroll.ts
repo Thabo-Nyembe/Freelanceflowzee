@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useCallback, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 interface UseInfiniteScrollOptions {
   threshold?: number // Distance from bottom to trigger load (in pixels)
@@ -23,7 +23,7 @@ export function useInfiniteScroll(
   const ref = useRef<HTMLDivElement>(null)
   const [isLoading, setIsLoading] = useState(false)
   const loadingRef = useRef(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Realtime subscription for data updates (triggers reload when new items are added)
   useEffect(() => {

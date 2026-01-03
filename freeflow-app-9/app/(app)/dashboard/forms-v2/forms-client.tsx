@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useForms, type Form, type FormStatus, type FormType } from '@/lib/hooks/use-forms'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -279,7 +279,7 @@ const mockFormsQuickActions = [
 // ============================================================================
 
 export default function FormsClient({ initialForms }: { initialForms: Form[] }) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('dashboard')
   const [settingsTab, setSettingsTab] = useState('general')
   const [statusFilter, setStatusFilter] = useState<FormStatus | 'all'>('all')

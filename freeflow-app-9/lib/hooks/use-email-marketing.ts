@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -114,7 +114,7 @@ export interface EmailMarketingStats {
 }
 
 export function useEmailCampaigns() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [campaigns, setCampaigns] = useState<EmailCampaign[]>([])
   const [loading, setLoading] = useState(true)
@@ -265,7 +265,7 @@ export function useEmailCampaigns() {
 }
 
 export function useEmailSubscribers() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [subscribers, setSubscribers] = useState<EmailSubscriber[]>([])
   const [loading, setLoading] = useState(true)
@@ -339,7 +339,7 @@ export function useEmailSubscribers() {
 }
 
 export function useEmailLists() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [lists, setLists] = useState<EmailList[]>([])
   const [loading, setLoading] = useState(true)
@@ -394,7 +394,7 @@ export function useEmailLists() {
 }
 
 export function useEmailTemplates() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [templates, setTemplates] = useState<EmailTemplate[]>([])
   const [loading, setLoading] = useState(true)

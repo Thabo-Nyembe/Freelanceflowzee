@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -366,7 +366,7 @@ const mockAIDesignQuickActions = [
 ]
 
 export default function AIDesignClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const [activeTab, setActiveTab] = useState('generate')
   const [searchQuery, setSearchQuery] = useState('')

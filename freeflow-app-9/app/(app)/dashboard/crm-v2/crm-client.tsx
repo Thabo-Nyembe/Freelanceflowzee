@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -166,7 +166,7 @@ const mockCrmActivitiesFeed = crmActivities
 const mockCrmQuickActions = crmQuickActions
 
 export default function CrmClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Supabase queries
   const { data: dbContacts, isLoading: contactsLoading, refetch: refetchContacts } = useSupabaseQuery<any>({

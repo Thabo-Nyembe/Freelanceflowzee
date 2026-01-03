@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { useQATestCases, useQAMutations, QATestCase } from '@/lib/hooks/use-qa'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import {
   Target,
   CheckCircle2,
@@ -321,7 +321,7 @@ const mockQAQuickActions = [
 ]
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('cases')
   const [settingsTab, setSettingsTab] = useState('general')
   const [status, setStatus] = useState<TestStatus | 'all'>('all')

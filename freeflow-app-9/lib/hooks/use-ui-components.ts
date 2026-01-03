@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface UIComponent {
   id: string
@@ -42,7 +42,7 @@ export interface UIComponentStats {
 export function useUIComponents(initialComponents: UIComponent[] = [], initialStats?: UIComponentStats) {
   const [components, setComponents] = useState<UIComponent[]>(initialComponents)
   const [loading, setLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const defaultStats: UIComponentStats = {
     total: 0,

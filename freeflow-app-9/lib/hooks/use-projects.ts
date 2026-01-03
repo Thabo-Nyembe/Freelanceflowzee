@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 
@@ -57,7 +57,7 @@ export function useProjects(initialProjects: Project[] = []) {
   const [projects, setProjects] = useState<Project[]>(initialProjects)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { data: session } = useSession()
 
   // Get auth.users compatible ID (same pattern as useSupabaseMutation)
@@ -209,7 +209,7 @@ export function useProjects(initialProjects: Project[] = []) {
 export function useProjectTasks(projectId: string, initialTasks: ProjectTask[] = []) {
   const [tasks, setTasks] = useState<ProjectTask[]>(initialTasks)
   const [isLoading, setIsLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { data: session } = useSession()
 
   // Get auth.users compatible ID

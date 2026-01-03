@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface ApiKey {
   id: string
@@ -60,7 +60,7 @@ export function useApiKeys(initialKeys: ApiKey[] = [], options: UseApiKeysOption
   const [keys, setKeys] = useState<ApiKey[]>(initialKeys)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const now = new Date()
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)

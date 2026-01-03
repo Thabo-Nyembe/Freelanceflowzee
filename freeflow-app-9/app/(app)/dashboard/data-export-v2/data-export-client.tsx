@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -441,7 +441,7 @@ interface DataExport {
 }
 
 export default function DataExportClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('pipelines')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedSource, setSelectedSource] = useState<DataSource | null>(null)

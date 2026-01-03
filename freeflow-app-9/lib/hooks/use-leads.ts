@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface Lead {
   id: string
@@ -55,7 +55,7 @@ export function useLeads(initialLeads: Lead[] = [], initialStats: LeadStats) {
   const [stats, setStats] = useState<LeadStats>(initialStats)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const calculateStats = useCallback((lds: Lead[]): LeadStats => {
     const converted = lds.filter(l => l.status === 'converted').length

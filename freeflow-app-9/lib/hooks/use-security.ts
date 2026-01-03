@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 // =====================================================
 // TYPES
@@ -90,7 +90,7 @@ export function useSecuritySettings(initialSettings?: SecuritySettings) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Fetch settings
   const fetchSettings = useCallback(async () => {
@@ -288,7 +288,7 @@ export function useSecurityEvents(initialEvents: SecurityEvent[] = [], initialSt
     criticalEvents: 0
   })
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Calculate stats
   const calculateStats = useCallback((eventsList: SecurityEvent[]): Partial<SecurityStats> => {
@@ -455,7 +455,7 @@ export function useUserSessions(initialSessions: UserSession[] = []) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Fetch sessions
   const fetchSessions = useCallback(async () => {

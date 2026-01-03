@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useBroadcasts, type Broadcast, type BroadcastType, type BroadcastStatus } from '@/lib/hooks/use-broadcasts'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -406,7 +406,7 @@ const mockEvents: EventTracking[] = [
 ]
 
 export default function BroadcastsClient({ initialBroadcasts }: { initialBroadcasts: Broadcast[] }) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('campaigns')
   const [broadcastTypeFilter, setBroadcastTypeFilter] = useState<BroadcastType | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<BroadcastStatus | 'all'>('all')

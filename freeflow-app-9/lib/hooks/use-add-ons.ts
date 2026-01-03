@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface AddOn {
   id: string
@@ -63,7 +63,7 @@ export function useAddOns(initialAddOns: AddOn[] = [], options: UseAddOnsOptions
   const [addOns, setAddOns] = useState<AddOn[]>(initialAddOns)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const stats: AddOnStats = {
     total: addOns.length,

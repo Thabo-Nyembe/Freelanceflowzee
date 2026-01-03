@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -771,7 +771,7 @@ const formatTime = (dateString: string) => {
 // ============================================================================
 
 export default function ShippingClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('shipments')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null)

@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -284,7 +284,7 @@ interface DbSystemSettings {
 }
 
 export default function SystemInsightsClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('overview')
   const [timeRange, setTimeRange] = useState('1h')
   const [logLevel, setLogLevel] = useState<string>('all')

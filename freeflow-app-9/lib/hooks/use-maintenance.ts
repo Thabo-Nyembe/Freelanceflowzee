@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -68,7 +68,7 @@ export interface MaintenanceStats {
 }
 
 export function useMaintenance() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [windows, setWindows] = useState<MaintenanceWindow[]>([])
   const [loading, setLoading] = useState(true)
@@ -336,7 +336,7 @@ export function useMaintenance() {
 
 // Hook for maintenance tasks
 export function useMaintenanceTasks(windowId: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [tasks, setTasks] = useState<MaintenanceTask[]>([])
   const [loading, setLoading] = useState(true)

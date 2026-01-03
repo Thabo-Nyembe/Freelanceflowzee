@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from './use-auth-user-id'
 import { toast } from 'sonner'
 
@@ -36,7 +36,7 @@ export function useClients(initialClients: Client[] = []) {
   const [clients, setClients] = useState<Client[]>(initialClients)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { getUserId } = useAuthUserId()
 
   const fetchClients = useCallback(async () => {

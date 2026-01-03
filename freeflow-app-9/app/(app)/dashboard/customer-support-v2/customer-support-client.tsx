@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -272,7 +272,7 @@ const mockSupportQuickActions = [
 ]
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const [activeTab, setActiveTab] = useState('tickets')
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null)

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface StoreApp {
   id: string
@@ -62,7 +62,7 @@ export function useStoreApps(initialApps: StoreApp[] = [], options: UseStoreApps
   const [apps, setApps] = useState<StoreApp[]>(initialApps)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const stats: StoreAppStats = {
     total: apps.length,

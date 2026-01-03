@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { User, Session } from '@supabase/supabase-js'
 
 interface UseAuthReturn {
@@ -18,7 +18,7 @@ export function useAuth(): UseAuthReturn {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Initial session fetch
   useEffect(() => {

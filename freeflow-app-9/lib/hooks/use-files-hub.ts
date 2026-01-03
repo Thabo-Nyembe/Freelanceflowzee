@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface FileItem {
   id: string
@@ -47,7 +47,7 @@ export function useFiles(folderId?: string | null, initialFiles: FileItem[] = []
   const [files, setFiles] = useState<FileItem[]>(initialFiles)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchFiles = useCallback(async () => {
     setIsLoading(true)
@@ -157,7 +157,7 @@ export function useFiles(folderId?: string | null, initialFiles: FileItem[] = []
 export function useFolders(initialFolders: Folder[] = []) {
   const [folders, setFolders] = useState<Folder[]>(initialFolders)
   const [isLoading, setIsLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchFolders = useCallback(async () => {
     setIsLoading(true)

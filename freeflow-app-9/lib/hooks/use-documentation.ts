@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 export type DocStatus = 'published' | 'draft' | 'review' | 'archived'
@@ -75,7 +75,7 @@ export function useDocumentationCRUD(options: UseDocumentationCRUDOptions = {}) 
   const [loading, setLoading] = useState(true)
   const [mutating, setMutating] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const { status, doc_type, category, limit } = options
 
@@ -344,7 +344,7 @@ export function useDocumentationCRUD(options: UseDocumentationCRUDOptions = {}) 
 export function useDocumentation(initialDocs: Documentation[], initialStats: DocumentationStats) {
   const [docs, setDocs] = useState<Documentation[]>(initialDocs)
   const [stats, setStats] = useState<DocumentationStats>(initialStats)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     const channel = supabase

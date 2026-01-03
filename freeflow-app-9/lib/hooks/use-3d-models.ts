@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useSupabaseQuery } from './use-supabase-query'
 import { useSupabaseMutation } from './use-supabase-mutation'
 
@@ -43,7 +43,7 @@ interface ThreeDModelFilters {
 }
 
 export function use3DModels(initialModels: ThreeDModel[] = [], filters: ThreeDModelFilters = {}) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [models, setModels] = useState<ThreeDModel[]>(initialModels)
   const [isLoading, setIsLoading] = useState(false)
 

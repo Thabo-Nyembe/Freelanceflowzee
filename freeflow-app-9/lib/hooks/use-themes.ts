@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface Theme {
   id: string
@@ -44,7 +44,7 @@ export interface ThemesStats {
 export function useThemes(initialThemes: Theme[], initialStats: ThemesStats) {
   const [themes, setThemes] = useState<Theme[]>(initialThemes)
   const [stats, setStats] = useState<ThemesStats>(initialStats)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     const channel = supabase

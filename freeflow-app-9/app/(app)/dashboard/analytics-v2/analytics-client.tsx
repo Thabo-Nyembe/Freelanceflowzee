@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -138,7 +138,7 @@ const mockActivities = analyticsActivities
 const mockQuickActions = analyticsQuickActions
 
 export default function AnalyticsClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')

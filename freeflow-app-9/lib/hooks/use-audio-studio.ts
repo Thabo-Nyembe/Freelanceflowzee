@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface AudioTrack {
   id: string
@@ -77,7 +77,7 @@ export function useAudioStudio(initialTracks: AudioTrack[] = [], options: UseAud
   const [projects, setProjects] = useState<AudioProject[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const stats: AudioStudioStats = {
     totalTracks: tracks.length,

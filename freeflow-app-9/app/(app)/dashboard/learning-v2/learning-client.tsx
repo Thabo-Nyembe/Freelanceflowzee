@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useLearning, useCourses, useUserProgress, useCollections } from '@/lib/hooks/use-learning'
 import {
@@ -551,7 +551,7 @@ const mockLearningQuickActions = [
 // ============================================================================
 
 export default function LearningClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('my-learning')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string | 'all'>('all')

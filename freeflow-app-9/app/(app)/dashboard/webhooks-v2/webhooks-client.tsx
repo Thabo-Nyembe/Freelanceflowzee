@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useWebhooks, Webhook, WebhookEventType } from '@/lib/hooks/use-webhooks'
 import {
   Webhook as WebhookIcon,
@@ -384,7 +384,7 @@ export default function WebhooksClient({
   initialStats
 }: WebhooksClientProps) {
   // Supabase client
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Use the webhooks hook for CRUD operations
   const {

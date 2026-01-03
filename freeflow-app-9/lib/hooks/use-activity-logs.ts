@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface ActivityLog {
   id: string
@@ -37,7 +37,7 @@ interface ActivityLogFilters {
 }
 
 export function useActivityLogs(initialLogs: ActivityLog[] = [], filters: ActivityLogFilters = {}) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [logs, setLogs] = useState<ActivityLog[]>(initialLogs)
   const [isLoading, setIsLoading] = useState(false)
 

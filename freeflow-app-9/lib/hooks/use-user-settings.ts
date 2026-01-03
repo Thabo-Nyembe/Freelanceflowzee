@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface UserSettings {
   id: string
@@ -36,7 +36,7 @@ export function useUserSettings(initialSettings: UserSettings | null = null) {
   const [settings, setSettings] = useState<UserSettings | null>(initialSettings)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchSettings = useCallback(async () => {
     setIsLoading(true)

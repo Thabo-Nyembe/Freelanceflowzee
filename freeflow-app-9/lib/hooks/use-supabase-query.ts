@@ -2,7 +2,7 @@
 // Created: December 14, 2024
 
 import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 interface UseSupabaseQueryOptions<T> {
   table: string
@@ -26,7 +26,7 @@ export function useSupabaseQuery<T>({
   const [data, setData] = useState<T[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     async function fetchData() {
@@ -150,7 +150,7 @@ export function useSupabaseMutation<T = unknown>({
 }: UseSupabaseMutationOptions) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const mutate = async (data: Partial<T>, id?: string): Promise<T | null> => {
     setLoading(true)

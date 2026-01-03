@@ -30,7 +30,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTeamManagement, type Team, type TeamType, type TeamStatus } from '@/lib/hooks/use-team-management'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   teamManagementAIInsights,
@@ -112,7 +112,7 @@ export default function TeamManagementClient({ initialTeams }: { initialTeams: T
 
   const { teams, loading, error, createTeam, updateTeam, deleteTeam, refetch } = useTeamManagement({ teamType: typeFilter, status: statusFilter })
   const displayTeams = teams.length > 0 ? teams : initialTeams
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Form state for new team member
   const [showAddMemberModal, setShowAddMemberModal] = useState(false)

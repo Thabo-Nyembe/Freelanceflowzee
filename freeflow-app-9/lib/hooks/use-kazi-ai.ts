@@ -6,7 +6,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { createFeatureLogger } from '@/lib/logger'
 
 const logger = createFeatureLogger('useKaziAI')
@@ -46,7 +46,7 @@ export interface UseKaziAIReturn {
 export function useKaziAI(userId?: string): UseKaziAIReturn {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Realtime subscription for AI chat history updates
   useEffect(() => {

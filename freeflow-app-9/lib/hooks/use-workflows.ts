@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 // =====================================================
 // TYPES
@@ -87,7 +87,7 @@ export function useWorkflows(initialWorkflows: Workflow[] = [], initialStats?: W
     completedSteps: 0
   })
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Calculate stats from workflows
   const calculateStats = useCallback((workflowsList: Workflow[]): WorkflowStats => {
@@ -326,7 +326,7 @@ export function useWorkflowSteps(workflowId: string, initialSteps: WorkflowStep[
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Fetch steps
   const fetchSteps = useCallback(async () => {

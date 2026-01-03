@@ -32,7 +32,7 @@ import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useUserManagement, type ManagedUser, type UserRole, type UserStatus } from '@/lib/hooks/use-user-management'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 interface Role {
   id: string
@@ -123,7 +123,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
 
   const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUserManagement({ role: roleFilter, status: statusFilter })
   const displayUsers = users.length > 0 ? users : initialUsers
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Form state for inviting new user
   const [inviteForm, setInviteForm] = useState({

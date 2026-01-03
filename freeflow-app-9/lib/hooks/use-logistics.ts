@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -120,7 +120,7 @@ export interface LogisticsStats {
 }
 
 export function useLogisticsRoutes() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [routes, setRoutes] = useState<LogisticsRoute[]>([])
   const [loading, setLoading] = useState(true)
@@ -315,7 +315,7 @@ export function useLogisticsRoutes() {
 
 // Hook for route stops
 export function useRouteStops(routeId: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [stops, setStops] = useState<RouteStop[]>([])
   const [loading, setLoading] = useState(true)
@@ -441,7 +441,7 @@ export function useRouteStops(routeId: string) {
 
 // Hook for fleet vehicles
 export function useFleetVehicles() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [vehicles, setVehicles] = useState<FleetVehicle[]>([])
   const [loading, setLoading] = useState(true)

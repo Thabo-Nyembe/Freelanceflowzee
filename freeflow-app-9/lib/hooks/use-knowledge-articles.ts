@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface KnowledgeArticle {
   id: string
@@ -58,7 +58,7 @@ export function useKnowledgeArticles(initialArticles: KnowledgeArticle[] = [], i
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const calculateStats = useCallback((articlesList: KnowledgeArticle[]) => {
     const totalViews = articlesList.reduce((sum, a) => sum + (a.views_count || 0), 0)

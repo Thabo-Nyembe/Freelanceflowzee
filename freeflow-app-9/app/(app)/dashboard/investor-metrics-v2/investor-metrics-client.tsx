@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -357,7 +357,7 @@ const mockInvestorMetricsQuickActions = [
 ]
 
 export default function InvestorMetricsClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedRound, setSelectedRound] = useState<FundingRound | null>(null)

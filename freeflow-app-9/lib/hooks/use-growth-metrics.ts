@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface GrowthMetric {
   id: string
@@ -52,7 +52,7 @@ export function useGrowthMetrics(initialMetrics: GrowthMetric[] = [], initialSta
   const [stats, setStats] = useState<GrowthStats>(initialStats)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Calculate stats from metrics
   const calculateStats = useCallback((mets: GrowthMetric[]): GrowthStats => {

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -514,7 +514,7 @@ interface MotionGraphicsClientProps {
 export default function MotionGraphicsClient({
   initialAnimations = mockAnimations
 }: MotionGraphicsClientProps) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const [activeTab, setActiveTab] = useState('projects')
   const [searchQuery, setSearchQuery] = useState('')

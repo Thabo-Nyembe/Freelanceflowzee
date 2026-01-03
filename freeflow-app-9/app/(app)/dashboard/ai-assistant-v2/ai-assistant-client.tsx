@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import {
   Bot,
   Send,
@@ -445,7 +445,7 @@ const mockAIAssistantQuickActions = [
 ]
 
 export default function AIAssistantClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Use the AI Assistant hook for real Supabase operations
   const {

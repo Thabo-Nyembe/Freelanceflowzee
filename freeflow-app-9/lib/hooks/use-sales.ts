@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -84,7 +84,7 @@ export interface SalesStats {
 }
 
 export function useSalesDeals() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [deals, setDeals] = useState<SalesDeal[]>([])
   const [loading, setLoading] = useState(true)
@@ -282,7 +282,7 @@ export function useSalesDeals() {
 }
 
 export function useSalesActivities(dealId: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activities, setActivities] = useState<SalesActivity[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -313,7 +313,7 @@ export function useSalesActivities(dealId: string) {
 }
 
 export function usePipelineStages() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [stages, setStages] = useState<PipelineStage[]>([])
   const [loading, setLoading] = useState(true)

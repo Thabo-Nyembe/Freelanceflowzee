@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface MobileAppFeature {
   id: string
@@ -74,7 +74,7 @@ export function useMobileApp(
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const calculateStats = useCallback((featuresList: MobileAppFeature[], versionsList: MobileAppVersion[]) => {
     const totalDownloads = featuresList.reduce((sum, f) => sum + (f.downloads_count || 0), 0)

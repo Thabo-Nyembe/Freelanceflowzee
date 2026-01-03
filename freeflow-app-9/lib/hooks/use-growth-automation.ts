@@ -7,7 +7,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import type {
   Lead,
   LeadScore,
@@ -48,7 +48,7 @@ export function useGrowthAutomation(): UseGrowthAutomationReturn {
   const [actionPlan, setActionPlan] = useState<GrowthActionPlan | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Realtime subscription for growth automation updates
   useEffect(() => {

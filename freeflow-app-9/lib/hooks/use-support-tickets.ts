@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -60,7 +60,7 @@ export interface SupportStats {
 }
 
 export function useSupportTickets() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [tickets, setTickets] = useState<SupportTicket[]>([])
   const [loading, setLoading] = useState(true)
@@ -296,7 +296,7 @@ export function useSupportTickets() {
 
 // Hook for ticket replies
 export function useTicketReplies(ticketId: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [replies, setReplies] = useState<TicketReply[]>([])
   const [loading, setLoading] = useState(true)

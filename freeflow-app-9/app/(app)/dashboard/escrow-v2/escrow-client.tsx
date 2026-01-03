@@ -56,7 +56,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useEscrow, type EscrowDeposit } from '@/lib/hooks/use-escrow'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 // Types
 type TransactionType = 'payment' | 'payout' | 'transfer' | 'refund' | 'fee'
@@ -646,7 +646,7 @@ export default function EscrowClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -831,7 +831,7 @@ export default function EscrowClient() {
     try {
       // In a real app, this would call a payouts API
       // For now, we'll simulate the payout creation
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -878,7 +878,7 @@ export default function EscrowClient() {
     try {
       // In a real app, this would send an invitation email
       // For now, we'll simulate the invitation
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {

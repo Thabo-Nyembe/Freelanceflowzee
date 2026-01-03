@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -524,7 +524,7 @@ const mockLogsQuickActions = [
 // ============== MAIN COMPONENT ==============
 
 export default function LogsClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('explorer')

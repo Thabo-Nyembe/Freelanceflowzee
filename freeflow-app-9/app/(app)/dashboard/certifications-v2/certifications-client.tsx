@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useCertifications, type Certification, type CertificationType, type CertificationStatus } from '@/lib/hooks/use-certifications'
 
 // Enhanced & Competitive Upgrade Components
@@ -674,7 +674,7 @@ export default function CertificationsClient() {
   const [certToEdit, setCertToEdit] = useState<Certification | null>(null)
 
   // Supabase client and hooks
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const {
     certifications: dbCertifications,
     loading: certificationsLoading,

@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -122,7 +122,7 @@ export interface ShippingStats {
 }
 
 export function useShipments() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [shipments, setShipments] = useState<Shipment[]>([])
   const [loading, setLoading] = useState(true)
@@ -373,7 +373,7 @@ export function useShipments() {
 
 // Hook for shipment tracking
 export function useShipmentTracking(shipmentId: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [tracking, setTracking] = useState<ShipmentTracking[]>([])
   const [loading, setLoading] = useState(true)
@@ -446,7 +446,7 @@ export function useShipmentTracking(shipmentId: string) {
 
 // Hook for shipping carriers
 export function useShippingCarriers() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [carriers, setCarriers] = useState<ShippingCarrier[]>([])
   const [loading, setLoading] = useState(true)

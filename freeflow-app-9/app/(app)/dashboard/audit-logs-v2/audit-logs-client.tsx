@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -673,7 +673,7 @@ const mockAuditQuickActions = [
 // ============================================================================
 
 export default function AuditLogsClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // UI State
   const [activeTab, setActiveTab] = useState('events')

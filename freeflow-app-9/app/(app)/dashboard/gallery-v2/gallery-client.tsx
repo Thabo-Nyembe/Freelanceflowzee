@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import {
   useGalleryItems,
   useGalleryCollections,
@@ -427,7 +427,7 @@ const mockGalleryQuickActions = [
 ]
 
 export default function GalleryClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Hooks for Supabase data
   const {

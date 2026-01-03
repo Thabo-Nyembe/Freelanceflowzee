@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -473,7 +473,7 @@ const mockPricingQuickActions = [
 export default function PricingClient({
   initialPlans = mockPlans
 }: PricingClientProps) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Core UI state
   const [activeTab, setActiveTab] = useState('plans')

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface Tutorial {
   id: string
@@ -43,7 +43,7 @@ export interface TutorialStats {
 export function useTutorials(initialTutorials: Tutorial[] = [], initialStats?: TutorialStats) {
   const [tutorials, setTutorials] = useState<Tutorial[]>(initialTutorials)
   const [loading, setLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const defaultStats: TutorialStats = {
     total: 0,

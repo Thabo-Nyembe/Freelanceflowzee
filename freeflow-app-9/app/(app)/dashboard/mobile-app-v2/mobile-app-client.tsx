@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -198,7 +198,7 @@ const mockMobileAppQuickActions = [
 ]
 
 export default function MobileAppClient({ initialFeatures, initialVersions, initialStats }: MobileAppClientProps) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)

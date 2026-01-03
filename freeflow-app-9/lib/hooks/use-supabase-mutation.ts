@@ -4,7 +4,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 
@@ -25,7 +25,7 @@ export function useSupabaseMutation({
 }: UseSupabaseMutationOptions) {
   const [loading, setLoading] = useState(false)
   const [lastMutation, setLastMutation] = useState<{ type: string; id?: string; timestamp: number } | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { data: session } = useSession()
 
   // Get user ID from NextAuth session or Supabase auth

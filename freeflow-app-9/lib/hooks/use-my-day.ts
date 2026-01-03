@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface MyDayTask {
   id: string
@@ -38,7 +38,7 @@ export function useMyDayTasks(initialTasks: MyDayTask[] = []) {
   const [tasks, setTasks] = useState<MyDayTask[]>(initialTasks)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchTasks = useCallback(async (date?: string) => {
     setIsLoading(true)
@@ -142,7 +142,7 @@ export function useFocusSessions(initialSessions: FocusSession[] = []) {
   const [sessions, setSessions] = useState<FocusSession[]>(initialSessions)
   const [activeSession, setActiveSession] = useState<FocusSession | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const startSession = async (taskId?: string, type: FocusSession['session_type'] = 'focus') => {
     const { data, error } = await supabase

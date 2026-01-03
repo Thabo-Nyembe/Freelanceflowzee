@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useSupabaseQuery, useSupabaseMutation } from '@/lib/hooks/use-supabase-helpers'
 import { type Dependency } from '@/lib/hooks/use-dependencies'
 import {
@@ -361,7 +361,7 @@ const mockDependenciesQuickActions = [
 ]
 
 export default function DependenciesClient({ initialDependencies }: { initialDependencies: Dependency[] }) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Supabase queries for dependencies
   const { data: dbDependencies, isLoading: dependenciesLoading, refetch: refetchDependencies } = useSupabaseQuery<any>({

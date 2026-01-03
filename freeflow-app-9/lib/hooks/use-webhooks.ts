@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 // =====================================================
 // TYPES
@@ -101,7 +101,7 @@ export function useWebhooks(initialWebhooks: Webhook[] = [], initialStats?: Webh
     avgResponseTime: 0
   })
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Calculate stats from webhooks
   const calculateStats = useCallback((webhooksList: Webhook[]): WebhookStats => {
@@ -352,7 +352,7 @@ export function useWebhookDeliveries(webhookId: string, initialDeliveries: Webho
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Fetch deliveries
   const fetchDeliveries = useCallback(async () => {
@@ -446,7 +446,7 @@ export function useWebhookEventTypes(initialEventTypes: WebhookEventType[] = [])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Fetch event types
   const fetchEventTypes = useCallback(async () => {

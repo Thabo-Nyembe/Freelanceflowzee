@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface Widget {
   id: string
@@ -45,7 +45,7 @@ export function useWidgets(initialWidgets: Widget[] = [], initialStats: WidgetSt
   const [widgets, setWidgets] = useState<Widget[]>(initialWidgets)
   const [stats, setStats] = useState<WidgetStats>(initialStats)
   const [loading, setLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const calculateStats = useCallback((widgetList: Widget[]) => {
     const totalRatings = widgetList.reduce((sum, w) => sum + (w.rating * w.total_ratings), 0)

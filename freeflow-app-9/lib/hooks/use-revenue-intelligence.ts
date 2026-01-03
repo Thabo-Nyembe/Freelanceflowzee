@@ -7,7 +7,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import type {
   RevenueData,
   RevenueIntelligenceReport,
@@ -32,7 +32,7 @@ export function useRevenueIntelligence(): UseRevenueIntelligenceReturn {
   const [forecast, setForecast] = useState<RevenueForecast | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Realtime subscription for revenue data updates
   useEffect(() => {

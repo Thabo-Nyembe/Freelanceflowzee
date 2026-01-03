@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface AIDesign {
   id: string
@@ -63,7 +63,7 @@ export function useAIDesigns(initialDesigns: AIDesign[] = [], options: UseAIDesi
   const [isLoading, setIsLoading] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const completedDesigns = designs.filter(d => d.status === 'completed')
 

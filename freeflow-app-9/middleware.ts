@@ -34,7 +34,10 @@ const publicRoutes = [
   '/enhanced-collaboration-demo',
   '/verify-email',
   '/forgot-password',
-  '/reset-password'
+  '/reset-password',
+  // Dashboard routes for showcase/demo mode
+  '/dashboard',
+  '/about'
 ]
 
 // API routes that don't require authentication
@@ -55,9 +58,8 @@ function isPublicApiRoute(pathname: string): boolean {
 }
 
 // Protected routes that require authentication
-const isDashboardRoute = (pathname: string) => pathname.startsWith('/dashboard')
+// Note: /dashboard is now in publicRoutes for showcase mode
 const isProtectedRoute = (pathname: string) =>
-  isDashboardRoute(pathname) ||
   pathname.startsWith('/app') ||
   pathname.startsWith('/projects') ||
   pathname.startsWith('/analytics')

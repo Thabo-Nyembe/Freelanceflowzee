@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface Extension {
   id: string
@@ -57,7 +57,7 @@ export function useExtensions(initialExtensions: Extension[] = [], initialStats?
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const calculateStats = useCallback((extensionsList: Extension[]) => {
     const totalRating = extensionsList.reduce((sum, e) => sum + (e.rating || 0), 0)

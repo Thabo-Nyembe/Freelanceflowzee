@@ -18,7 +18,7 @@ import {
   Upload, Download, Trash2, Copy, AlertOctagon, RefreshCw, Zap, Link2,
   MessageSquare, CheckCircle, Eye, Edit, Plus, Loader2
 } from 'lucide-react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useCourses as useCoursesExtended } from '@/lib/hooks/use-courses-extended'
 import { useCreateCourse, useUpdateCourse, useDeleteCourse, type CourseStatus as DBCourseStatus, type CourseLevel as DBCourseLevel, type CourseCategory as DBCourseCategory } from '@/lib/hooks/use-courses'
 
@@ -746,7 +746,7 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -993,7 +993,7 @@ export default function CoursesClient() {
   const handleEnrollCourse = async (course: Course) => {
     setIsSubmitting(true)
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1027,7 +1027,7 @@ export default function CoursesClient() {
 
   const handleStartLesson = async (lecture: Lecture) => {
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1056,7 +1056,7 @@ export default function CoursesClient() {
   const handleCompleteCourse = async (course: Course) => {
     setIsSubmitting(true)
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1088,7 +1088,7 @@ export default function CoursesClient() {
 
   const handleDownloadCertificate = async (course: Course) => {
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
       const { data: { user } } = await supabase.auth.getUser()
 
       if (!user) {
@@ -1115,7 +1115,7 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
 
       const { error } = await supabase.from('course_modules').insert({
         course_id: selectedCourse.id,
@@ -1149,7 +1149,7 @@ export default function CoursesClient() {
 
     setIsSubmitting(true)
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
 
       const { error } = await supabase.from('course_lessons').insert({
         module_id: sectionId,
@@ -1180,7 +1180,7 @@ export default function CoursesClient() {
   const handleRespondToReview = async (reviewId: string, response: string) => {
     setIsSubmitting(true)
     try {
-      const supabase = createClientComponentClient()
+      const supabase = createClient()
 
       const { error } = await supabase
         .from('course_reviews')

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface Alert {
   id: string
@@ -63,7 +63,7 @@ export function useAlerts(initialAlerts: Alert[] = [], options: UseAlertsOptions
   const [alerts, setAlerts] = useState<Alert[]>(initialAlerts)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const stats: AlertStats = {
     total: alerts.length,

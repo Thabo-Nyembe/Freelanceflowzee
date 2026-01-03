@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { EnhancedAIService } from '@/lib/ai/enhanced-ai-service'
 import { toast } from '@/components/ui/use-toast'
 
@@ -54,7 +54,7 @@ export function useAIOperations() {
   const [isLoading, setIsLoading] = useState<any>(false)
   const [error, setError] = useState<string | null>(null)
   const [aiData, setAIData] = useState<AIData>({})
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Realtime subscription for AI operations updates
   useEffect(() => {

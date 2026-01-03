@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface LibraryWidget {
   id: string
@@ -103,7 +103,7 @@ export function useWidgetLibrary() {
   const [settings, setSettings] = useState<WidgetLibrarySettings | null>(null)
   const [loading, setLoading] = useState(true)
   const [operationLoading, setOperationLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Calculate stats from widgets
   const stats: WidgetLibraryStats = {

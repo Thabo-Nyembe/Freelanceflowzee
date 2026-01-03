@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useCreateCoupon, useCoupons } from '@/lib/hooks/use-coupon-extended'
 import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -342,7 +342,7 @@ const mockMarketplaceQuickActions = [
 ]
 
 export default function MarketplaceClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const [activeTab, setActiveTab] = useState('browse')
   const [searchQuery, setSearchQuery] = useState('')

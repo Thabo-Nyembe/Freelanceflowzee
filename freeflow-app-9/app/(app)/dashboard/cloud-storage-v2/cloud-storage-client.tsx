@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useCloudStorage } from '@/lib/hooks/use-cloud-storage'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -475,7 +475,7 @@ const mockStorageQuickActions = [
 
 export default function CloudStorageClient() {
   // Initialize Supabase client and hook
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { files: dbFiles, loading: filesLoading, addFile, updateFile, deleteFile, toggleStarred, refetch } = useCloudStorage()
   const fileInputRef = useRef<HTMLInputElement>(null)
 

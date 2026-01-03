@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { StorageFile, StorageConnection } from '@/lib/storage/providers'
 import { getStorageConnections, getAllFiles, getTotalStorageQuota } from '@/lib/storage/storage-queries'
 import { createClient } from '@/lib/supabase/client'
@@ -32,7 +32,7 @@ export function useStorageData() {
     loading: true,
     error: null
   })
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const loadStorageData = useCallback(async () => {
     try {

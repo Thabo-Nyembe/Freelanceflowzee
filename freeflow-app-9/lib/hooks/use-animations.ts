@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface Animation {
   id: string
@@ -56,7 +56,7 @@ export function useAnimations(initialAnimations: Animation[] = [], initialStats:
   const [stats, setStats] = useState<AnimationStats>(initialStats)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Calculate stats from animations
   const calculateStats = useCallback((anims: Animation[]): AnimationStats => {

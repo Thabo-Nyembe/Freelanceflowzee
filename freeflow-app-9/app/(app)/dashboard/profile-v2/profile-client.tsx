@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useAuth } from '@/lib/hooks/use-auth'
 import {
@@ -678,7 +678,7 @@ interface ProfileSettings {
 }
 
 export default function ProfileClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { user } = useAuth()
 
   // UI State

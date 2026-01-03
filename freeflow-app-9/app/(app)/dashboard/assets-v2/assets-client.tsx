@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -713,7 +713,7 @@ const defaultCollectionForm: CollectionFormData = {
 }
 
 export default function AssetsClient({ initialAssets, initialCollections }: AssetsClientProps) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Supabase hooks
   const { data: dbAssets, loading: assetsLoading, refetch: refetchAssets } = useAssets()

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useNotifications, type NotificationStatus, type NotificationType, type NotificationPriority } from '@/lib/hooks/use-notifications'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -296,7 +296,7 @@ const mockABTests: ABTest[] = [
 // ============================================================================
 
 export default function NotificationsClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { notifications: dbNotifications, loading, createNotification, updateNotification, deleteNotification, refetch } = useNotifications()
 
   const [activeTab, setActiveTab] = useState('inbox')

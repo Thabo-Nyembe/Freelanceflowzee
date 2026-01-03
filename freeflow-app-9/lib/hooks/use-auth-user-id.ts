@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useSession } from 'next-auth/react'
 
 /**
@@ -15,7 +15,7 @@ import { useSession } from 'next-auth/react'
  * 3. Falling back to session user.id as last resort
  */
 export function useAuthUserId() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { data: session } = useSession()
 
   const getUserId = useCallback(async (): Promise<string | null> => {

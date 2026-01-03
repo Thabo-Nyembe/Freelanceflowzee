@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface HelpDoc {
   id: string
@@ -36,7 +36,7 @@ export interface HelpDocsStats {
 export function useHelpDocs(initialDocs: HelpDoc[], initialStats: HelpDocsStats) {
   const [docs, setDocs] = useState<HelpDoc[]>(initialDocs)
   const [stats, setStats] = useState<HelpDocsStats>(initialStats)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   useEffect(() => {
     const channel = supabase

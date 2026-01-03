@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -101,7 +101,7 @@ export interface SocialMediaStats {
 }
 
 export function useSocialPosts() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [posts, setPosts] = useState<SocialPost[]>([])
   const [loading, setLoading] = useState(true)
@@ -248,7 +248,7 @@ export function useSocialPosts() {
 }
 
 export function useSocialAccounts() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [accounts, setAccounts] = useState<SocialAccount[]>([])
   const [loading, setLoading] = useState(true)
@@ -323,7 +323,7 @@ export function useSocialAccounts() {
 }
 
 export function useSocialAnalytics(accountId?: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [analytics, setAnalytics] = useState<SocialAnalytics[]>([])
   const [loading, setLoading] = useState(true)
 

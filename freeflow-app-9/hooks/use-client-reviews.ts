@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { ClientReview, ReviewStage, ReviewApproval } from '@/components/video/client-review-panel';
 
@@ -33,7 +33,7 @@ export function useClientReviews() {
   const [reviews, setReviews] = useState<ClientReview[]>([]);
   const [loading, setLoading] = useState<any>(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const { toast } = useToast();
 
   const fetchReviews = useCallback(async () => {
@@ -284,7 +284,7 @@ export function useClientReviews() {
 export function useReviewApprovals(reviewId: string, videoId: string) {
   const [loading, setLoading] = useState<any>(false);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
   const { toast } = useToast();
 
   const submitApproval = useCallback(async (
@@ -375,7 +375,7 @@ export function useReviewTemplates() {
   const [templates, setTemplates] = useState<any[]>([]);
   const [loading, setLoading] = useState<any>(true);
   const [error, setError] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   const fetchTemplates = useCallback(async () => {
     try {
@@ -421,7 +421,7 @@ export function useReviewTemplates() {
 // Real-time subscription hook for review updates
 export function useReviewSubscription(reviewId?: string) {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const supabase = createClientComponentClient();
+  const supabase = createClient();
 
   useEffect(() => {
     if (!reviewId) return;

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Settings,
@@ -308,7 +308,7 @@ const mockAdminQuickActions = [
 ]
 
 export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const [activeTab, setActiveTab] = useState('overview')
   const [searchQuery, setSearchQuery] = useState('')

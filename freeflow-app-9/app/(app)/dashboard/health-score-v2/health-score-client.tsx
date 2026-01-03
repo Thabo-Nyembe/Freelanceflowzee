@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Activity,
@@ -653,7 +653,7 @@ const mockHealthScoreQuickActions = [
 ]
 
 export default function HealthScoreClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // UI State
   const [activeTab, setActiveTab] = useState('overview')

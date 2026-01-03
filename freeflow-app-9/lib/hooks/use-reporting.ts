@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 // Types
@@ -83,7 +83,7 @@ export function useDashboards() {
   const [dashboards, setDashboards] = useState<Dashboard[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchDashboards = useCallback(async () => {
     try {
@@ -248,7 +248,7 @@ export function useWorksheets() {
   const [worksheets, setWorksheets] = useState<Worksheet[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchWorksheets = useCallback(async () => {
     try {
@@ -366,7 +366,7 @@ export function useReportDataSources() {
   const [dataSources, setDataSources] = useState<ReportDataSource[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchDataSources = useCallback(async () => {
     try {
@@ -511,7 +511,7 @@ export function useScheduledReports() {
   const [scheduledReports, setScheduledReports] = useState<ScheduledReport[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchScheduledReports = useCallback(async () => {
     try {

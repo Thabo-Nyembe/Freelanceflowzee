@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/use-toast'
 
 export interface VideoProject {
@@ -50,7 +50,7 @@ export function useVideoProjects(initialProjects: VideoProject[] = [], initialSt
     avgDuration: 0
   })
   const [loading, setLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
 
   const calculateStats = useCallback((projectsList: VideoProject[]): VideoStats => {

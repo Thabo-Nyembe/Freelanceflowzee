@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -754,7 +754,7 @@ const mockRegistrationsQuickActions = [
 // ============================================================================
 
 export default function RegistrationsClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // UI State
   const [activeTab, setActiveTab] = useState('registrations')

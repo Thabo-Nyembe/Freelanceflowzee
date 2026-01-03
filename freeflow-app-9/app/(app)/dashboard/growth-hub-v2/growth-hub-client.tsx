@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useAuthUserId } from '@/lib/hooks/use-auth-user-id'
 import { useGrowthExperiments, useGrowthMetrics, useGrowthPlaybooks } from '@/lib/hooks/use-growth-extended'
 import { useCohorts } from '@/lib/hooks/use-cohort-extended'
@@ -577,7 +577,7 @@ const mockGrowthQuickActions = [
 // ============================================================================
 
 export default function GrowthHubClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { getUserId } = useAuthUserId()
   const [userId, setUserId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('overview')

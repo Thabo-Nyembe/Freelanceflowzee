@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -76,7 +76,7 @@ export interface MarketingStats {
 }
 
 export function useMarketingCampaigns() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [campaigns, setCampaigns] = useState<MarketingCampaign[]>([])
   const [loading, setLoading] = useState(true)
@@ -233,7 +233,7 @@ export function useMarketingCampaigns() {
 }
 
 export function useMarketingChannels() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [channels, setChannels] = useState<MarketingChannel[]>([])
   const [loading, setLoading] = useState(true)

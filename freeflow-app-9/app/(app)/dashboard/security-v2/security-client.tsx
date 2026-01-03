@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useSecurity, SecuritySettings } from '@/lib/hooks/use-security'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -517,7 +517,7 @@ const mockSecurityQuickActions = [
 // ============================================================================
 
 export default function SecurityClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Use security hook for real CRUD operations
   const {

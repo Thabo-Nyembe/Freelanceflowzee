@@ -1,7 +1,7 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useCanvas, type Canvas, type CanvasType, type CanvasStatus } from '@/lib/hooks/use-canvas'
 import {
   Layout, Square, Circle, Minus, Type, Image, StickyNote,
@@ -167,7 +167,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
 
   const { canvases, loading, error, createCanvas, updateCanvas, refetch } = useCanvas({ canvasType: 'all', status: 'all' })
   const displayCanvases = canvases.length > 0 ? canvases : initialCanvases
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Form state for new canvas
   const [newCanvasForm, setNewCanvasForm] = useState({

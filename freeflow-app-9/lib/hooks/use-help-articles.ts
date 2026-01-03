@@ -1,6 +1,6 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useCallback } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 
@@ -74,7 +74,7 @@ export interface HelpStats {
 }
 
 export function useHelpArticles() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [articles, setArticles] = useState<HelpArticle[]>([])
   const [loading, setLoading] = useState(true)
@@ -304,7 +304,7 @@ export function useHelpArticles() {
 
 // Hook for help categories
 export function useHelpCategories() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [categories, setCategories] = useState<HelpCategory[]>([])
   const [loading, setLoading] = useState(true)
@@ -419,7 +419,7 @@ export function useHelpCategories() {
 
 // Hook for article feedback
 export function useArticleFeedback(articleId: string) {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const { toast } = useToast()
   const [feedback, setFeedback] = useState<ArticleFeedback[]>([])
   const [loading, setLoading] = useState(true)

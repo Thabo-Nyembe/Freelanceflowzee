@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface GalleryItem {
   id: string
@@ -51,7 +51,7 @@ export function useGalleryItems(collectionId?: string | null, initialItems: Gall
   const [items, setItems] = useState<GalleryItem[]>(initialItems)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchItems = useCallback(async () => {
     setIsLoading(true)
@@ -163,7 +163,7 @@ export function useGalleryItems(collectionId?: string | null, initialItems: Gall
 export function useGalleryCollections(initialCollections: GalleryCollection[] = []) {
   const [collections, setCollections] = useState<GalleryCollection[]>(initialCollections)
   const [isLoading, setIsLoading] = useState(false)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchCollections = useCallback(async () => {
     setIsLoading(true)

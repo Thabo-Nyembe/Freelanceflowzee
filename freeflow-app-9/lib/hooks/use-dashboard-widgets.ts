@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface DashboardWidget {
   id: string
@@ -21,7 +21,7 @@ export function useDashboardWidgets(initialWidgets: DashboardWidget[] = []) {
   const [widgets, setWidgets] = useState<DashboardWidget[]>(initialWidgets)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const fetchWidgets = useCallback(async () => {
     setIsLoading(true)

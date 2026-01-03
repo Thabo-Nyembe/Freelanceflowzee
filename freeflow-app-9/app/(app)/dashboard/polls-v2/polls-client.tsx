@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import {
   ClipboardList,
   Plus,
@@ -545,7 +545,7 @@ interface DbPoll {
 // ============================================================================
 
 export default function PollsClient() {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [activeTab, setActiveTab] = useState('forms')
   const [forms, setForms] = useState<Form[]>(mockForms)
   const [templates] = useState<FormTemplate[]>(mockTemplates)

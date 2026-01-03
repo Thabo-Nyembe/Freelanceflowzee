@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 import {
   MessageSquare,
   Send,
@@ -338,7 +338,7 @@ const quickReactions = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉'
 
 export default function MessagingClient() {
   // Supabase client
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Supabase hooks for real data
   const { conversations, loading: conversationsLoading, refetch: refetchConversations } = useConversations({ type: 'channel' })

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/client'
 
 export interface ThirdPartyIntegration {
   id: string
@@ -52,7 +52,7 @@ export function useThirdPartyIntegrations(initialIntegrations: ThirdPartyIntegra
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const calculateStats = useCallback((list: ThirdPartyIntegration[]) => {
     const totalApiCalls = list.reduce((sum, i) => sum + (i.api_calls_count || 0), 0)
