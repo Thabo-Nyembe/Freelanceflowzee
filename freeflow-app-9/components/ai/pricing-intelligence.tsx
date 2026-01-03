@@ -31,13 +31,69 @@ export function PricingIntelligence() {
 
     try {
       const skillsArray = userData.skills.split(',').map(s => s.trim())
-      const result = await generatePricingIntelligence({
-        userId: `user-${Date.now()}`,
-        skills: skillsArray,
-        experience: parseInt(userData.experience),
-        market: userData.market,
-        currentRate: userData.currentRate ? parseFloat(userData.currentRate) : undefined
-      })
+      const experience = parseInt(userData.experience) || 3
+      const currentRate = userData.currentRate ? parseFloat(userData.currentRate) : 75
+
+      // Demo mode - generate mock pricing when AI API unavailable
+      const generateDemoPricing = () => {
+        const baseRate = currentRate || 75
+        const expMultiplier = 1 + (experience * 0.1)
+
+        return {
+          recommendations: [
+            {
+              tier: 'basic',
+              price: Math.round(baseRate * expMultiplier * 0.8),
+              description: 'Essential services for budget-conscious clients',
+              reasoning: 'Entry-level pricing to build client base and portfolio',
+              targetClient: 'Startups and small businesses'
+            },
+            {
+              tier: 'standard',
+              price: Math.round(baseRate * expMultiplier),
+              description: 'Comprehensive solution with full support',
+              reasoning: `Based on ${experience} years experience and market rates`,
+              targetClient: 'Growing businesses and mid-size companies'
+            },
+            {
+              tier: 'premium',
+              price: Math.round(baseRate * expMultiplier * 1.5),
+              description: 'Premium service with priority support and extras',
+              reasoning: 'Value-based pricing for high-demand skills',
+              targetClient: 'Enterprise and high-value clients'
+            }
+          ],
+          marketAnalysis: {
+            averageRate: Math.round(baseRate * expMultiplier),
+            marketPosition: 'competitive',
+            demandLevel: 'high'
+          },
+          optimizations: [
+            'Consider value-based pricing for complex projects',
+            'Offer retainer packages for recurring work',
+            `Your ${experience}+ years experience justifies premium rates`
+          ]
+        }
+      }
+
+      let result
+      try {
+        // Try AI analysis first (may fail in browser environment)
+        result = await generatePricingIntelligence({
+          userId: `user-${Date.now()}`,
+          skills: skillsArray,
+          experience: experience,
+          market: userData.market,
+          currentRate: currentRate
+        })
+      } catch (aiError) {
+        // Fall back to demo mode if AI fails (browser environment)
+        console.log('AI API unavailable, using demo pricing')
+        result = generateDemoPricing()
+        toast.info('Demo Mode', {
+          description: 'Using intelligent estimates. AI pricing requires server-side processing.'
+        })
+      }
 
       setPricing(result)
 

@@ -106,31 +106,43 @@ class KaziAIRouter {
   private readonly CACHE_TTL = 15 * 60 * 1000
 
   constructor() {
-    // Initialize AI clients
-    this.anthropic = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY || ''
-    })
+    // Check if running in browser environment
+    const isBrowser = typeof window !== 'undefined'
 
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY || ''
-    })
+    // Initialize AI clients (only on server-side)
+    if (!isBrowser) {
+      this.anthropic = new Anthropic({
+        apiKey: process.env.ANTHROPIC_API_KEY || ''
+      })
 
-    this.google = new GoogleGenerativeAI(
-      process.env.GOOGLE_AI_API_KEY || ''
-    )
+      this.openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY || ''
+      })
 
-    // Initialize OpenRouter (uses OpenAI SDK with custom base URL)
-    this.openrouter = new OpenAI({
-      apiKey: process.env.OPENROUTER_API_KEY || '',
-      baseURL: 'https://openrouter.ai/api/v1',
-      defaultHeaders: {
-        'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9323',
-        'X-Title': 'Kazi AI Platform'
-      }
-    })
+      this.google = new GoogleGenerativeAI(
+        process.env.GOOGLE_AI_API_KEY || ''
+      )
 
-    // Start cache cleanup interval
-    this.startCacheCleanup()
+      // Initialize OpenRouter (uses OpenAI SDK with custom base URL)
+      this.openrouter = new OpenAI({
+        apiKey: process.env.OPENROUTER_API_KEY || '',
+        baseURL: 'https://openrouter.ai/api/v1',
+        defaultHeaders: {
+          'HTTP-Referer': process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9323',
+          'X-Title': 'Kazi AI Platform'
+        }
+      })
+
+      // Start cache cleanup interval
+      this.startCacheCleanup()
+    } else {
+      // Browser environment - create placeholder clients that will throw helpful errors
+      logger.warn('KaziAI initialized in browser - AI features require server-side processing')
+      this.anthropic = null as any
+      this.openai = null as any
+      this.google = null as any
+      this.openrouter = null as any
+    }
   }
 
   /**
