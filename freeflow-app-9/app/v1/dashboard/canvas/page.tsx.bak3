@@ -1,0 +1,1681 @@
+'use client'
+
+import { useState, useEffect, useReducer, useMemo } from 'react'
+import { PageHeader } from '@/components/ui/page-header'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
+} from '@/components/ui/dropdown-menu'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Checkbox } from '@/components/ui/checkbox'
+import { toast } from 'sonner'
+import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
+import { TextShimmer } from '@/components/ui/text-shimmer'
+import { ScrollReveal } from '@/components/ui/scroll-reveal'
+import { NumberFlow } from '@/components/ui/number-flow'
+import { motion, AnimatePresence } from 'framer-motion'
+
+// ============================================================================
+// A+++ UTILITIES
+// ============================================================================
+import { CardSkeleton, ListSkeleton } from '@/components/ui/loading-skeleton'
+import { NoDataEmptyState, ErrorEmptyState } from '@/components/ui/empty-state'
+import { useAnnouncer } from '@/lib/accessibility'
+import { createFeatureLogger } from '@/lib/logger'
+import {
+  Monitor,
+  Palette,
+  Users,
+  Layers,
+  MousePointer,
+  Grid,
+  Share2,
+  Download,
+  Trash2,
+  Copy,
+  Eye,
+  Edit,
+  Lock,
+  Unlock,
+  Star,
+  MoreVertical,
+  Plus,
+  Search,
+  FileImage,
+  Layout,
+  Type,
+  Circle,
+  Square,
+  Triangle,
+  Image as ImageIcon,
+  Zap,
+  Settings,
+  Upload,
+  FolderPlus,
+  Archive,
+  Clock,
+  UserPlus,
+  Link,
+  FileDown,
+  X,
+  Check,
+  ChevronDown,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  RefreshCw,
+  Award,
+  TrendingUp
+} from 'lucide-react'
+
+const logger = createFeatureLogger('Canvas')
+
+// ============================================================================
+// A++++ TYPES
+// ============================================================================
+
+type CanvasStatus = 'in-progress' | 'completed' | 'archived' | 'shared'
+type CanvasTemplate = 'blank' | 'ui-design' | 'wireframe' | 'illustration' | 'presentation' | 'infographic' | 'social-media' | 'logo-design'
+type ExportFormat = 'png' | 'svg' | 'pdf' | 'figma' | 'sketch' | 'jpg' | 'webp'
+type CollaboratorRole = 'owner' | 'editor' | 'viewer' | 'commenter'
+type LayerType = 'shape' | 'text' | 'image' | 'group' | 'frame' | 'vector'
+type ViewMode = 'grid' | 'list'
+
+interface CanvasCollaborator {
+  id: string
+  name: string
+  email: string
+  avatar: string
+  role: CollaboratorRole
+  color: string
+  lastSeen: string
+  isOnline: boolean
+}
+
+interface CanvasLayer {
+  id: string
+  name: string
+  type: LayerType
+  visible: boolean
+  locked: boolean
+  opacity: number
+  blendMode: string
+}
+
+interface CanvasArtboard {
+  id: string
+  name: string
+  width: number
+  height: number
+  backgroundColor: string
+  layers: CanvasLayer[]
+}
+
+interface CanvasProject {
+  id: string
+  name: string
+  description: string
+  thumbnail: string
+  template: CanvasTemplate
+  status: CanvasStatus
+  artboards: CanvasArtboard[]
+  collaborators: CanvasCollaborator[]
+  totalLayers: number
+  size: number // in MB
+  version: number
+  isStarred: boolean
+  isShared: boolean
+  createdAt: string
+  updatedAt: string
+  lastModifiedBy: string
+  tags: string[]
+}
+
+interface CanvasState {
+  canvases: CanvasProject[]
+  selectedCanvas: CanvasProject | null
+  searchTerm: string
+  filterStatus: 'all' | CanvasStatus
+  filterTemplate: 'all' | CanvasTemplate
+  sortBy: 'recent' | 'name' | 'size' | 'artboards' | 'layers' | 'collaborators'
+  viewMode: ViewMode
+  selectedCanvases: string[]
+}
+
+type CanvasAction =
+  | { type: 'SET_CANVASES'; canvases: CanvasProject[] }
+  | { type: 'ADD_CANVAS'; canvas: CanvasProject }
+  | { type: 'UPDATE_CANVAS'; canvas: CanvasProject }
+  | { type: 'DELETE_CANVAS'; canvasId: string }
+  | { type: 'SELECT_CANVAS'; canvas: CanvasProject | null }
+  | { type: 'SET_SEARCH'; searchTerm: string }
+  | { type: 'SET_FILTER_STATUS'; filterStatus: 'all' | CanvasStatus }
+  | { type: 'SET_FILTER_TEMPLATE'; filterTemplate: 'all' | CanvasTemplate }
+  | { type: 'SET_SORT'; sortBy: CanvasState['sortBy'] }
+  | { type: 'SET_VIEW_MODE'; viewMode: ViewMode }
+  | { type: 'TOGGLE_SELECT_CANVAS'; canvasId: string }
+  | { type: 'CLEAR_SELECTED_CANVASES' }
+  | { type: 'TOGGLE_STAR'; canvasId: string }
+  | { type: 'DUPLICATE_CANVAS'; canvasId: string }
+
+// ============================================================================
+// A++++ REDUCER
+// ============================================================================
+
+function canvasReducer(state: CanvasState, action: CanvasAction): CanvasState {
+  logger.debug('Reducer action', { type: action.type })
+
+  switch (action.type) {
+    case 'SET_CANVASES':
+      logger.info('Setting canvases', { count: action.canvases.length })
+      return { ...state, canvases: action.canvases }
+
+    case 'ADD_CANVAS':
+      logger.info('Canvas added', {
+        canvasId: action.canvas.id,
+        name: action.canvas.name,
+        template: action.canvas.template
+      })
+      return { ...state, canvases: [action.canvas, ...state.canvases] }
+
+    case 'UPDATE_CANVAS':
+      logger.info('Canvas updated', { canvasId: action.canvas.id })
+      return {
+        ...state,
+        canvases: state.canvases.map(c => c.id === action.canvas.id ? action.canvas : c),
+        selectedCanvas: state.selectedCanvas?.id === action.canvas.id ? action.canvas : state.selectedCanvas
+      }
+
+    case 'DELETE_CANVAS':
+      logger.info('Canvas deleted', { canvasId: action.canvasId })
+      return {
+        ...state,
+        canvases: state.canvases.filter(c => c.id !== action.canvasId),
+        selectedCanvas: state.selectedCanvas?.id === action.canvasId ? null : state.selectedCanvas
+      }
+
+    case 'SELECT_CANVAS':
+      logger.debug('Canvas selected', { canvasId: action.canvas?.id })
+      return { ...state, selectedCanvas: action.canvas }
+
+    case 'SET_SEARCH':
+      logger.debug('Search term changed', { searchTerm: action.searchTerm })
+      return { ...state, searchTerm: action.searchTerm }
+
+    case 'SET_FILTER_STATUS':
+      logger.debug('Filter status changed', { filterStatus: action.filterStatus })
+      return { ...state, filterStatus: action.filterStatus }
+
+    case 'SET_FILTER_TEMPLATE':
+      logger.debug('Filter template changed', { filterTemplate: action.filterTemplate })
+      return { ...state, filterTemplate: action.filterTemplate }
+
+    case 'SET_SORT':
+      logger.debug('Sort order changed', { sortBy: action.sortBy })
+      return { ...state, sortBy: action.sortBy }
+
+    case 'SET_VIEW_MODE':
+      logger.debug('View mode changed', { viewMode: action.viewMode })
+      return { ...state, viewMode: action.viewMode }
+
+    case 'TOGGLE_SELECT_CANVAS':
+      logger.debug('Toggle select canvas', { canvasId: action.canvasId })
+      return {
+        ...state,
+        selectedCanvases: state.selectedCanvases.includes(action.canvasId)
+          ? state.selectedCanvases.filter(id => id !== action.canvasId)
+          : [...state.selectedCanvases, action.canvasId]
+      }
+
+    case 'CLEAR_SELECTED_CANVASES':
+      logger.debug('Clearing selected canvases')
+      return { ...state, selectedCanvases: [] }
+
+    case 'TOGGLE_STAR':
+      logger.info('Toggle star', { canvasId: action.canvasId })
+      return {
+        ...state,
+        canvases: state.canvases.map(c =>
+          c.id === action.canvasId ? { ...c, isStarred: !c.isStarred } : c
+        )
+      }
+
+    case 'DUPLICATE_CANVAS':
+      logger.info('Duplicating canvas', { canvasId: action.canvasId })
+      const originalCanvas = state.canvases.find(c => c.id === action.canvasId)
+      if (!originalCanvas) return state
+
+      const duplicatedCanvas: CanvasProject = {
+        ...originalCanvas,
+        id: `CVS-${Date.now()}`,
+        name: `${originalCanvas.name} (Copy)`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        version: 1
+      }
+
+      logger.info('Canvas duplicated', {
+        originalId: action.canvasId,
+        duplicateId: duplicatedCanvas.id,
+        name: duplicatedCanvas.name
+      })
+
+      return { ...state, canvases: [duplicatedCanvas, ...state.canvases] }
+
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// A++++ MOCK DATA
+// ============================================================================
+
+function generateMockCanvases(): CanvasProject[] {
+  logger.debug('Generating mock canvases')
+
+  const templates: CanvasTemplate[] = ['ui-design', 'wireframe', 'illustration', 'presentation', 'infographic', 'social-media', 'logo-design', 'blank']
+  const statuses: CanvasStatus[] = ['in-progress', 'completed', 'archived', 'shared']
+
+  const canvasNames = [
+    'Mobile App Redesign', 'Website Landing Page', 'Dashboard UI', 'Marketing Campaign',
+    'Brand Identity', 'Social Media Posts', 'Wireframe Collection', 'Product Mockups',
+    'Presentation Deck', 'Infographic Design', 'Logo Concepts', 'User Flow Diagram',
+    'Icon Set Design', 'Email Templates', 'Mobile Onboarding', 'Web Dashboard',
+    'Marketing Materials', 'UI Component Library', 'App Prototype', 'Brand Guidelines',
+    'Social Graphics Pack', 'Product Illustrations', 'Website Redesign', 'Mobile App UI',
+    'Landing Page Design', 'E-commerce UI', 'SaaS Dashboard', 'Portfolio Website',
+    'Blog Design', 'Admin Panel', 'Presentation Templates', 'Marketing Banners',
+    'App Icons', 'Web Components', 'Mobile Screens', 'User Interface Kit',
+    'Design System', 'Wireframe Kit', 'Product Cards', 'Hero Sections',
+    'Feature Illustrations', 'Pricing Tables', 'Testimonial Cards', 'Footer Designs',
+    'Navigation Menus', 'Form Designs', 'Button Library', 'Card Components',
+    'Modal Designs', 'Alert Components', 'Badge Designs', 'Avatar Components'
+  ]
+
+  const collaborators: CanvasCollaborator[] = [
+    {
+      id: 'COL-001',
+      name: 'Sarah Johnson',
+      email: 'sarah@example.com',
+      avatar: '👩‍💼',
+      role: 'editor',
+      color: '#3B82F6',
+      lastSeen: '2 min ago',
+      isOnline: true
+    },
+    {
+      id: 'COL-002',
+      name: 'Michael Chen',
+      email: 'michael@example.com',
+      avatar: '👨‍💻',
+      role: 'editor',
+      color: '#10B981',
+      lastSeen: '5 min ago',
+      isOnline: true
+    },
+    {
+      id: 'COL-003',
+      name: 'Emma Davis',
+      email: 'emma@example.com',
+      avatar: '👩‍🎨',
+      role: 'viewer',
+      color: '#8B5CF6',
+      lastSeen: '1 hour ago',
+      isOnline: false
+    },
+    {
+      id: 'COL-004',
+      name: 'Alex Rodriguez',
+      email: 'alex@example.com',
+      avatar: '👨‍🎨',
+      role: 'commenter',
+      color: '#F59E0B',
+      lastSeen: '30 min ago',
+      isOnline: false
+    }
+  ]
+
+  const tags = ['UI/UX', 'Web', 'Mobile', 'Branding', 'Marketing', 'Illustration', 'Design System', 'Prototype']
+
+  const canvases: CanvasProject[] = canvasNames.map((name, index) => {
+    const template = templates[index % templates.length]
+    const status = statuses[index % statuses.length]
+    const artboardCount = Math.floor(Math.random() * 10) + 1
+    const layerCount = Math.floor(Math.random() * 50) + 10
+    const collaboratorCount = Math.floor(Math.random() * 3) + 1
+    const selectedCollaborators = collaborators.slice(0, collaboratorCount)
+
+    const artboards: CanvasArtboard[] = Array.from({ length: artboardCount }, (_, i) => ({
+      id: `AB-${index}-${i}`,
+      name: `Artboard ${i + 1}`,
+      width: [1920, 1440, 1024, 768, 375][Math.floor(Math.random() * 5)],
+      height: [1080, 900, 768, 1024, 812][Math.floor(Math.random() * 5)],
+      backgroundColor: ['#FFFFFF', '#F3F4F6', '#1F2937', '#111827'][Math.floor(Math.random() * 4)],
+      layers: Array.from({ length: Math.floor(Math.random() * 15) + 5 }, (_, j) => ({
+        id: `L-${index}-${i}-${j}`,
+        name: `Layer ${j + 1}`,
+        type: (['shape', 'text', 'image', 'group', 'frame', 'vector'] as LayerType[])[Math.floor(Math.random() * 6)],
+        visible: Math.random() > 0.2,
+        locked: Math.random() > 0.9,
+        opacity: Math.floor(Math.random() * 100),
+        blendMode: 'normal'
+      }))
+    }))
+
+    return {
+      id: `CVS-${String(index + 1).padStart(3, '0')}`,
+      name,
+      description: `Professional ${template.replace('-', ' ')} project with multiple artboards and layers`,
+      thumbnail: `https://picsum.photos/seed/${index}/800/600`,
+      template,
+      status,
+      artboards,
+      collaborators: selectedCollaborators,
+      totalLayers: layerCount,
+      size: parseFloat((Math.random() * 50 + 1).toFixed(2)),
+      version: Math.floor(Math.random() * 10) + 1,
+      isStarred: Math.random() > 0.7,
+      isShared: collaboratorCount > 1,
+      createdAt: new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+      lastModifiedBy: selectedCollaborators[0].name,
+      tags: tags.slice(0, Math.floor(Math.random() * 3) + 1)
+    }
+  })
+
+  logger.info('Mock canvases generated', { count: canvases.length })
+  return canvases
+}
+
+// ============================================================================
+// A++++ TEMPLATES
+// ============================================================================
+
+interface CanvasTemplateOption {
+  id: CanvasTemplate
+  name: string
+  description: string
+  icon: any
+  defaultSize: { width: number; height: number }
+  color: string
+}
+
+const canvasTemplates: CanvasTemplateOption[] = [
+  {
+    id: 'blank',
+    name: 'Blank Canvas',
+    description: 'Start from scratch with a blank artboard',
+    icon: Layout,
+    defaultSize: { width: 1920, height: 1080 },
+    color: 'gray'
+  },
+  {
+    id: 'ui-design',
+    name: 'UI Design',
+    description: 'Modern interface design with component library',
+    icon: Monitor,
+    defaultSize: { width: 1440, height: 900 },
+    color: 'blue'
+  },
+  {
+    id: 'wireframe',
+    name: 'Wireframe',
+    description: 'Low-fidelity wireframe for quick prototyping',
+    icon: Grid,
+    defaultSize: { width: 1024, height: 768 },
+    color: 'slate'
+  },
+  {
+    id: 'illustration',
+    name: 'Illustration',
+    description: 'Artistic illustration and vector graphics',
+    icon: Palette,
+    defaultSize: { width: 2000, height: 2000 },
+    color: 'purple'
+  },
+  {
+    id: 'presentation',
+    name: 'Presentation',
+    description: 'Slides and presentation deck',
+    icon: Maximize2,
+    defaultSize: { width: 1920, height: 1080 },
+    color: 'orange'
+  },
+  {
+    id: 'infographic',
+    name: 'Infographic',
+    description: 'Data visualization and infographic design',
+    icon: TrendingUp,
+    defaultSize: { width: 1200, height: 3000 },
+    color: 'green'
+  },
+  {
+    id: 'social-media',
+    name: 'Social Media',
+    description: 'Posts for Instagram, Facebook, Twitter',
+    icon: Share2,
+    defaultSize: { width: 1080, height: 1080 },
+    color: 'pink'
+  },
+  {
+    id: 'logo-design',
+    name: 'Logo Design',
+    description: 'Brand identity and logo creation',
+    icon: Award,
+    defaultSize: { width: 1000, height: 1000 },
+    color: 'amber'
+  }
+]
+
+// ============================================================================
+// A++++ MAIN COMPONENT
+// ============================================================================
+
+export default function CanvasPage() {
+  logger.debug('Component mounting')
+
+  // ============================================================================
+  // A++++ STATE MANAGEMENT
+  // ============================================================================
+  const [state, dispatch] = useReducer(canvasReducer, {
+    canvases: [],
+    selectedCanvas: null,
+    searchTerm: '',
+    filterStatus: 'all',
+    filterTemplate: 'all',
+    sortBy: 'recent',
+    viewMode: 'grid',
+    selectedCanvases: []
+  })
+
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { announce } = useAnnouncer()
+
+  // Modal states
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+  const [showSettingsModal, setShowSettingsModal] = useState(false)
+
+  // Form states
+  const [canvasName, setCanvasName] = useState('')
+  const [canvasDescription, setCanvasDescription] = useState('')
+  const [selectedTemplate, setSelectedTemplate] = useState<CanvasTemplate>('blank')
+  const [customWidth, setCustomWidth] = useState('1920')
+  const [customHeight, setCustomHeight] = useState('1080')
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('png')
+  const [exportQuality, setExportQuality] = useState('high')
+  const [shareEmail, setShareEmail] = useState('')
+  const [shareRole, setShareRole] = useState<CollaboratorRole>('viewer')
+
+  // ============================================================================
+  // A++++ LOAD DATA
+  // ============================================================================
+  useEffect(() => {
+    const loadCanvases = async () => {
+      logger.info('Loading canvases')
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        // Note: Using mock data - in production, this would fetch from /api/canvases
+        const mockCanvases = generateMockCanvases()
+        dispatch({ type: 'SET_CANVASES', canvases: mockCanvases })
+
+        logger.info('Canvases loaded', { count: mockCanvases.length })
+        setIsLoading(false)
+        announce('Canvases loaded successfully', 'polite')
+      } catch (err) {
+        logger.error('Load error', { error: err })
+        setError(err instanceof Error ? err.message : 'Failed to load canvases')
+        setIsLoading(false)
+        announce('Error loading canvases', 'assertive')
+      }
+    }
+
+    loadCanvases()
+  }, [announce])
+
+  // ============================================================================
+  // A++++ COMPUTED VALUES
+  // ============================================================================
+  const stats = useMemo(() => {
+    logger.debug('Computing stats')
+    const total = state.canvases.length
+    const inProgress = state.canvases.filter(c => c.status === 'in-progress').length
+    const completed = state.canvases.filter(c => c.status === 'completed').length
+    const shared = state.canvases.filter(c => c.isShared).length
+    const totalArtboards = state.canvases.reduce((sum, c) => sum + c.artboards.length, 0)
+    const totalLayers = state.canvases.reduce((sum, c) => sum + c.totalLayers, 0)
+    const totalCollaborators = new Set(
+      state.canvases.flatMap(c => c.collaborators.map(col => col.id))
+    ).size
+    const totalSize = state.canvases.reduce((sum, c) => sum + c.size, 0)
+
+    const computedStats = {
+      total,
+      inProgress,
+      completed,
+      shared,
+      totalArtboards,
+      totalLayers,
+      totalCollaborators,
+      totalSize
+    }
+
+    logger.debug('Stats computed', computedStats)
+    return computedStats
+  }, [state.canvases])
+
+  const filteredAndSortedCanvases = useMemo(() => {
+    logger.debug('Filtering and sorting canvases')
+    let filtered = state.canvases
+
+    // Search
+    if (state.searchTerm) {
+      filtered = filtered.filter(canvas =>
+        canvas.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        canvas.description.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        canvas.tags.some(tag => tag.toLowerCase().includes(state.searchTerm.toLowerCase()))
+      )
+      logger.debug('Search filtered', { count: filtered.length })
+    }
+
+    // Filter by status
+    if (state.filterStatus !== 'all') {
+      filtered = filtered.filter(canvas => canvas.status === state.filterStatus)
+      logger.debug('Status filtered', { count: filtered.length })
+    }
+
+    // Filter by template
+    if (state.filterTemplate !== 'all') {
+      filtered = filtered.filter(canvas => canvas.template === state.filterTemplate)
+      logger.debug('Template filtered', { count: filtered.length })
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (state.sortBy) {
+        case 'name':
+          return a.name.localeCompare(b.name)
+        case 'recent':
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        case 'size':
+          return b.size - a.size
+        case 'artboards':
+          return b.artboards.length - a.artboards.length
+        case 'layers':
+          return b.totalLayers - a.totalLayers
+        case 'collaborators':
+          return b.collaborators.length - a.collaborators.length
+        default:
+          return 0
+      }
+    })
+
+    logger.debug('Sorted canvases', { sortBy: state.sortBy, count: sorted.length })
+    return sorted
+  }, [state.canvases, state.searchTerm, state.filterStatus, state.filterTemplate, state.sortBy])
+
+  // ============================================================================
+  // A++++ HANDLERS
+  // ============================================================================
+
+  const handleCreateCanvas = async () => {
+    logger.info('Creating canvas', { name: canvasName, template: selectedTemplate })
+    
+    
+
+    if (!canvasName.trim()) {
+      logger.warn('Canvas validation failed', { reason: 'Name required' })
+      toast.error('Canvas name is required')
+      return
+    }
+
+    try {
+      const template = canvasTemplates.find(t => t.id === selectedTemplate)
+      const size = template?.defaultSize || { width: parseInt(customWidth), height: parseInt(customHeight) }
+
+      const newCanvas: CanvasProject = {
+        id: `CVS-${Date.now()}`,
+        name: canvasName,
+        description: canvasDescription,
+        thumbnail: `https://picsum.photos/seed/${Date.now()}/800/600`,
+        template: selectedTemplate,
+        status: 'in-progress',
+        artboards: [{
+          id: `AB-${Date.now()}`,
+          name: 'Artboard 1',
+          width: size.width,
+          height: size.height,
+          backgroundColor: '#FFFFFF',
+          layers: []
+        }],
+        collaborators: [],
+        totalLayers: 0,
+        size: 0.1,
+        version: 1,
+        isStarred: false,
+        isShared: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastModifiedBy: 'You',
+        tags: []
+      }
+
+      logger.info('Canvas created', { canvasId: newCanvas.id, name: newCanvas.name, template: newCanvas.template })
+      dispatch({ type: 'ADD_CANVAS', canvas: newCanvas })
+
+      setShowCreateModal(false)
+      setCanvasName('')
+      setCanvasDescription('')
+      setSelectedTemplate('blank')
+
+      toast.success('Canvas created successfully')
+      announce('New canvas created', 'polite')
+    } catch (err) {
+      logger.error('Canvas creation failed', { error: err })
+      toast.error('Failed to create canvas')
+    }
+  }
+
+  const handleViewCanvas = (canvas: CanvasProject) => {
+    console.log('👁️ CANVAS: Opening canvas view - ID:', canvas.id)
+    console.log('📊 CANVAS: Canvas details:', {
+      name: canvas.name,
+      artboards: canvas.artboards.length,
+      layers: canvas.totalLayers,
+      collaborators: canvas.collaborators.length
+    })
+
+    dispatch({ type: 'SELECT_CANVAS', canvas })
+    setShowViewModal(true)
+  }
+
+  const handleDeleteCanvas = async (canvasId: string) => {
+    console.log('🗑️ CANVAS: Deleting canvas - ID:', canvasId)
+    const canvas = state.canvases.find(c => c.id === canvasId)
+
+    if (!canvas) {
+      console.log('❌ CANVAS: Canvas not found')
+      return
+    }
+
+    console.log('🗑️ CANVAS: Canvas to delete:', canvas.name)
+
+    if (confirm(`Delete "${canvas.name}"?`)) {
+      console.log('✅ CANVAS: User confirmed deletion')
+      dispatch({ type: 'DELETE_CANVAS', canvasId })
+      toast.success('Canvas deleted successfully')
+      announce('Canvas deleted', 'polite')
+    } else {
+      console.log('❌ CANVAS: User cancelled deletion')
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    console.log('🗑️ CANVAS: Bulk delete initiated - Count:', state.selectedCanvases.length)
+
+    if (state.selectedCanvases.length === 0) {
+      console.log('⚠️ CANVAS: No canvases selected')
+      toast.error('No canvases selected')
+      return
+    }
+
+    if (confirm(`Delete ${state.selectedCanvases.length} canvas(es)?`)) {
+      console.log('✅ CANVAS: User confirmed bulk deletion')
+      state.selectedCanvases.forEach(canvasId => {
+        dispatch({ type: 'DELETE_CANVAS', canvasId })
+      })
+      dispatch({ type: 'CLEAR_SELECTED_CANVASES' })
+      toast.success(`${state.selectedCanvases.length} canvas(es) deleted`)
+      announce('Selected canvases deleted', 'polite')
+    } else {
+      console.log('❌ CANVAS: User cancelled bulk deletion')
+    }
+  }
+
+  const handleDuplicateCanvas = (canvasId: string) => {
+    console.log('📋 CANVAS: Duplicating canvas - ID:', canvasId)
+    const canvas = state.canvases.find(c => c.id === canvasId)
+
+    if (canvas) {
+      console.log('📋 CANVAS: Canvas to duplicate:', canvas.name)
+      dispatch({ type: 'DUPLICATE_CANVAS', canvasId })
+      toast.success(`"${canvas.name}" duplicated successfully`)
+      announce('Canvas duplicated', 'polite')
+    }
+  }
+
+  const handleToggleStar = (canvasId: string) => {
+    console.log('⭐ CANVAS: Toggling star - ID:', canvasId)
+    const canvas = state.canvases.find(c => c.id === canvasId)
+
+    if (canvas) {
+      console.log('⭐ CANVAS: Current starred state:', canvas.isStarred)
+      dispatch({ type: 'TOGGLE_STAR', canvasId })
+      toast.success(canvas.isStarred ? 'Removed from favorites' : 'Added to favorites')
+    }
+  }
+
+  const handleExportCanvas = async () => {
+    console.log('📥 CANVAS: Exporting canvas...')
+    console.log('📥 CANVAS: Format:', exportFormat)
+    console.log('📥 CANVAS: Quality:', exportQuality)
+
+    if (!state.selectedCanvas) {
+      console.log('⚠️ CANVAS: No canvas selected')
+      toast.error('No canvas selected')
+      return
+    }
+
+    console.log('📥 CANVAS: Exporting (local state):', state.selectedCanvas.name)
+    toast.info(`📥 Exporting as ${exportFormat.toUpperCase()}...`, {
+      description: 'Preparing canvas for download'
+    })
+
+    // Note: Using local state - in production, this would POST to /api/canvases/export
+    console.log('✅ CANVAS: Export completed successfully')
+    setShowExportModal(false)
+    toast.success('🎨 Canvas exported', {
+      description: `${state.selectedCanvas.name} ready for download`
+    })
+    announce('Canvas exported', 'polite')
+  }
+
+  const handleShareCanvas = async () => {
+    console.log('🔗 CANVAS: Sharing canvas...')
+    console.log('📧 CANVAS: Email:', shareEmail)
+    console.log('👤 CANVAS: Role:', shareRole)
+
+    if (!state.selectedCanvas) {
+      console.log('⚠️ CANVAS: No canvas selected')
+      toast.error('No canvas selected')
+      return
+    }
+
+    if (!shareEmail.trim()) {
+      console.log('⚠️ CANVAS: Email required')
+      toast.error('Email address is required')
+      return
+    }
+
+    console.log('🔗 CANVAS: Sharing:', state.selectedCanvas.name, 'with', shareEmail)
+
+    const newCollaborator: CanvasCollaborator = {
+      id: `COL-${Date.now()}`,
+      name: shareEmail.split('@')[0],
+      email: shareEmail,
+      avatar: '👤',
+      role: shareRole,
+      color: '#' + Math.floor(Math.random()*16777215).toString(16),
+      lastSeen: 'Just now',
+      isOnline: true
+    }
+
+    const updatedCanvas = {
+      ...state.selectedCanvas,
+      collaborators: [...state.selectedCanvas.collaborators, newCollaborator],
+      isShared: true
+    }
+
+    dispatch({ type: 'UPDATE_CANVAS', canvas: updatedCanvas })
+
+    console.log('✅ CANVAS: Canvas shared successfully')
+    setShowShareModal(false)
+    setShareEmail('')
+    setShareRole('viewer')
+    toast.success('Canvas shared successfully')
+    announce('Canvas shared with collaborator', 'polite')
+  }
+
+  // ============================================================================
+  // A++++ LOADING STATE
+  // ============================================================================
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6 min-h-screen relative">
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+        <div className="max-w-[1920px] mx-auto space-y-6">
+          <CardSkeleton />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // A++++ ERROR STATE
+  // ============================================================================
+  if (error) {
+    return (
+      <div className="p-6 space-y-6 min-h-screen relative">
+        <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+        <div className="max-w-[1920px] mx-auto">
+          <ErrorEmptyState
+            error={error}
+            action={{
+              label: 'Retry',
+              onClick: () => window.location.reload()
+            }}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // ============================================================================
+  // A++++ MAIN RENDER
+  // ============================================================================
+  return (
+    <div className="p-6 space-y-6 min-h-screen relative">
+      {/* Background */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-slate-900 to-slate-950 -z-10 dark:opacity-100 opacity-0" />
+      <div className="absolute top-1/4 -left-4 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-violet-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse dark:opacity-100 opacity-0"></div>
+      <div className="absolute top-1/3 -right-4 w-96 h-96 bg-gradient-to-r from-violet-500/20 to-purple-500/20 rounded-full mix-blend-multiply filter blur-3xl animate-pulse delay-1000 dark:opacity-100 opacity-0"></div>
+
+      <PageHeader
+        title="Canvas Collaboration"
+        description="Professional design and prototyping workspace with real-time collaboration"
+        icon={Monitor}
+        breadcrumbs={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Canvas Collaboration' }
+        ]}
+      />
+
+      {/* Stats Cards */}
+      <ScrollReveal>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Total Canvases</p>
+                  <NumberFlow value={stats.total} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="blue" size="sm">
+                  <div className="p-3 bg-blue-500/20 rounded-xl">
+                    <Layout className="h-6 w-6 text-blue-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Active Projects</p>
+                  <NumberFlow value={stats.inProgress} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="green" size="sm">
+                  <div className="p-3 bg-green-500/20 rounded-xl">
+                    <Zap className="h-6 w-6 text-green-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Total Artboards</p>
+                  <NumberFlow value={stats.totalArtboards} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="purple" size="sm">
+                  <div className="p-3 bg-purple-500/20 rounded-xl">
+                    <Grid className="h-6 w-6 text-purple-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Total Layers</p>
+                  <NumberFlow value={stats.totalLayers} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="amber" size="sm">
+                  <div className="p-3 bg-amber-500/20 rounded-xl">
+                    <Layers className="h-6 w-6 text-amber-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Collaborators</p>
+                  <NumberFlow value={stats.totalCollaborators} className="text-2xl font-bold text-white" />
+                </div>
+                <FloatingParticle color="cyan" size="sm">
+                  <div className="p-3 bg-cyan-500/20 rounded-xl">
+                    <Users className="h-6 w-6 text-cyan-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+
+          <LiquidGlassCard>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-gray-400">Total Size</p>
+                  <div className="text-2xl font-bold text-white">
+                    {stats.totalSize.toFixed(1)} MB
+                  </div>
+                </div>
+                <FloatingParticle color="pink" size="sm">
+                  <div className="p-3 bg-pink-500/20 rounded-xl">
+                    <FileImage className="h-6 w-6 text-pink-400" />
+                  </div>
+                </FloatingParticle>
+              </div>
+            </CardContent>
+          </LiquidGlassCard>
+        </div>
+      </ScrollReveal>
+
+      {/* Actions Bar */}
+      <ScrollReveal delay={0.1}>
+        <LiquidGlassCard>
+          <CardContent className="p-4">
+            <div className="flex flex-col lg:flex-row gap-4">
+              {/* Search */}
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search canvases..."
+                    value={state.searchTerm}
+                    onChange={(e) => dispatch({ type: 'SET_SEARCH', searchTerm: e.target.value })}
+                    className="pl-10 bg-slate-900/50 border-slate-700"
+                  />
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="flex gap-2 flex-wrap">
+                <Select
+                  value={state.filterStatus}
+                  onValueChange={(value) => dispatch({ type: 'SET_FILTER_STATUS', filterStatus: value as any })}
+                >
+                  <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="in-progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="archived">Archived</SelectItem>
+                    <SelectItem value="shared">Shared</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={state.filterTemplate}
+                  onValueChange={(value) => dispatch({ type: 'SET_FILTER_TEMPLATE', filterTemplate: value as any })}
+                >
+                  <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Templates</SelectItem>
+                    {canvasTemplates.map(template => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                <Select
+                  value={state.sortBy}
+                  onValueChange={(value) => dispatch({ type: 'SET_SORT', sortBy: value as any })}
+                >
+                  <SelectTrigger className="w-[140px] bg-slate-900/50 border-slate-700">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Recent</SelectItem>
+                    <SelectItem value="name">Name</SelectItem>
+                    <SelectItem value="size">Size</SelectItem>
+                    <SelectItem value="artboards">Artboards</SelectItem>
+                    <SelectItem value="layers">Layers</SelectItem>
+                    <SelectItem value="collaborators">Collaborators</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Button
+                  onClick={() => setShowCreateModal(true)}
+                  className="bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New Canvas
+                </Button>
+              </div>
+            </div>
+
+            {state.selectedCanvases.length > 0 && (
+              <div className="mt-4 flex items-center gap-2">
+                <span className="text-sm text-gray-400">
+                  {state.selectedCanvases.length} selected
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleBulkDelete}
+                  className="text-red-400 hover:text-red-300"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => dispatch({ type: 'CLEAR_SELECTED_CANVASES' })}
+                >
+                  Clear Selection
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </LiquidGlassCard>
+      </ScrollReveal>
+
+      {/* Canvas Grid */}
+      <ScrollReveal delay={0.2}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <AnimatePresence mode="popLayout">
+            {filteredAndSortedCanvases.map((canvas, index) => (
+              <motion.div
+                key={canvas.id}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: index * 0.02 }}
+              >
+                <LiquidGlassCard className="group cursor-pointer hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-0">
+                    {/* Thumbnail */}
+                    <div
+                      className="relative h-48 bg-slate-800 rounded-t-xl overflow-hidden"
+                      onClick={() => handleViewCanvas(canvas)}
+                    >
+                      <img
+                        src={canvas.thumbnail}
+                        alt={canvas.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      <div className="absolute top-2 left-2 flex gap-1">
+                        {canvas.isStarred && (
+                          <Badge className="bg-amber-500/90 text-white">
+                            <Star className="h-3 w-3 mr-1 fill-current" />
+                            Starred
+                          </Badge>
+                        )}
+                        {canvas.isShared && (
+                          <Badge className="bg-blue-500/90 text-white">
+                            <Users className="h-3 w-3 mr-1" />
+                            Shared
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="absolute top-2 right-2">
+                        <Checkbox
+                          checked={state.selectedCanvases.includes(canvas.id)}
+                          onCheckedChange={() => dispatch({ type: 'TOGGLE_SELECT_CANVAS', canvasId: canvas.id })}
+                          className="bg-white/20 border-white/40"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-white truncate">{canvas.name}</h3>
+                          <p className="text-xs text-gray-400 line-clamp-2">{canvas.description}</p>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="icon" variant="ghost" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleViewCanvas(canvas)}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleToggleStar(canvas.id)}>
+                              <Star className="h-4 w-4 mr-2" />
+                              {canvas.isStarred ? 'Unstar' : 'Star'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDuplicateCanvas(canvas.id)}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                dispatch({ type: 'SELECT_CANVAS', canvas })
+                                setShowShareModal(true)
+                              }}
+                            >
+                              <Share2 className="h-4 w-4 mr-2" />
+                              Share
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                dispatch({ type: 'SELECT_CANVAS', canvas })
+                                setShowExportModal(true)
+                              }}
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Export
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => handleDeleteCanvas(canvas.id)}
+                              className="text-red-400"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-xs text-gray-400">
+                        <div className="flex items-center gap-1">
+                          <Grid className="h-3 w-3" />
+                          {canvas.artboards.length}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Layers className="h-3 w-3" />
+                          {canvas.totalLayers}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Users className="h-3 w-3" />
+                          {canvas.collaborators.length}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <FileImage className="h-3 w-3" />
+                          {canvas.size.toFixed(1)}MB
+                        </div>
+                      </div>
+
+                      {canvas.tags.length > 0 && (
+                        <div className="flex gap-1 flex-wrap">
+                          {canvas.tags.slice(0, 3).map((tag, i) => (
+                            <Badge key={i} variant="outline" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-700/50">
+                        <div className="flex items-center gap-2">
+                          <PulsingDot
+                            color={
+                              canvas.status === 'in-progress' ? 'blue' :
+                              canvas.status === 'completed' ? 'green' :
+                              canvas.status === 'shared' ? 'purple' : 'gray'
+                            }
+                          />
+                          <span className="text-xs text-gray-400 capitalize">
+                            {canvas.status.replace('-', ' ')}
+                          </span>
+                        </div>
+                        <span className="text-xs text-gray-500">
+                          v{canvas.version}
+                        </span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </LiquidGlassCard>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+
+        {filteredAndSortedCanvases.length === 0 && (
+          <NoDataEmptyState
+            message="No canvases found"
+            action={{
+              label: 'Create Canvas',
+              onClick: () => setShowCreateModal(true)
+            }}
+          />
+        )}
+      </ScrollReveal>
+
+      {/* Create Canvas Modal */}
+      <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Canvas</DialogTitle>
+            <DialogDescription>
+              Choose a template or create a custom canvas
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <Label>Canvas Name</Label>
+              <Input
+                placeholder="Enter canvas name..."
+                value={canvasName}
+                onChange={(e) => setCanvasName(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Description (Optional)</Label>
+              <Textarea
+                placeholder="Describe your canvas..."
+                value={canvasDescription}
+                onChange={(e) => setCanvasDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Template</Label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {canvasTemplates.map((template) => {
+                  const Icon = template.icon
+                  return (
+                    <button
+                      key={template.id}
+                      onClick={() => setSelectedTemplate(template.id)}
+                      className={`p-4 rounded-lg border-2 transition-all ${
+                        selectedTemplate === template.id
+                          ? 'border-indigo-500 bg-indigo-500/10'
+                          : 'border-slate-700 hover:border-slate-600'
+                      }`}
+                    >
+                      <Icon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm font-medium text-center">{template.name}</p>
+                      <p className="text-xs text-gray-500 text-center mt-1">
+                        {template.defaultSize.width}×{template.defaultSize.height}
+                      </p>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {selectedTemplate === 'blank' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Width (px)</Label>
+                  <Input
+                    type="number"
+                    value={customWidth}
+                    onChange={(e) => setCustomWidth(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Height (px)</Label>
+                  <Input
+                    type="number"
+                    value={customHeight}
+                    onChange={(e) => setCustomHeight(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateCanvas}
+              className="bg-gradient-to-r from-indigo-500 to-violet-600"
+            >
+              Create Canvas
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Canvas Modal */}
+      <Dialog open={showViewModal} onOpenChange={setShowViewModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{state.selectedCanvas?.name}</DialogTitle>
+            <DialogDescription>
+              View canvas details, artboards, and collaborators
+            </DialogDescription>
+          </DialogHeader>
+
+          {state.selectedCanvas && (
+            <Tabs defaultValue="overview" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="artboards">Artboards & Layers</TabsTrigger>
+                <TabsTrigger value="collaborators">Collaborators</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="overview" className="space-y-4">
+                <div className="rounded-lg overflow-hidden">
+                  <img
+                    src={state.selectedCanvas.thumbnail}
+                    alt={state.selectedCanvas.name}
+                    className="w-full h-64 object-cover"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-gray-400">Template</Label>
+                    <p className="text-white capitalize">
+                      {state.selectedCanvas.template.replace('-', ' ')}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Status</Label>
+                    <p className="text-white capitalize">
+                      {state.selectedCanvas.status.replace('-', ' ')}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Artboards</Label>
+                    <p className="text-white">{state.selectedCanvas.artboards.length}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Total Layers</Label>
+                    <p className="text-white">{state.selectedCanvas.totalLayers}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Size</Label>
+                    <p className="text-white">{state.selectedCanvas.size.toFixed(2)} MB</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Version</Label>
+                    <p className="text-white">v{state.selectedCanvas.version}</p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Created</Label>
+                    <p className="text-white">
+                      {new Date(state.selectedCanvas.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-gray-400">Last Modified</Label>
+                    <p className="text-white">
+                      {new Date(state.selectedCanvas.updatedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+
+                {state.selectedCanvas.description && (
+                  <div>
+                    <Label className="text-gray-400">Description</Label>
+                    <p className="text-white mt-1">{state.selectedCanvas.description}</p>
+                  </div>
+                )}
+
+                {state.selectedCanvas.tags.length > 0 && (
+                  <div>
+                    <Label className="text-gray-400">Tags</Label>
+                    <div className="flex gap-2 flex-wrap mt-2">
+                      {state.selectedCanvas.tags.map((tag, i) => (
+                        <Badge key={i} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="artboards" className="space-y-4">
+                {state.selectedCanvas.artboards.map((artboard) => (
+                  <div key={artboard.id} className="border border-slate-700 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-white">{artboard.name}</h4>
+                      <Badge variant="outline">
+                        {artboard.width}×{artboard.height}
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {artboard.layers.length} layers
+                    </div>
+                    <div className="space-y-1">
+                      {artboard.layers.slice(0, 5).map((layer) => (
+                        <div
+                          key={layer.id}
+                          className="flex items-center justify-between text-sm p-2 bg-slate-800/50 rounded"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Layers className="h-4 w-4 text-gray-400" />
+                            <span className="text-white">{layer.name}</span>
+                            <Badge variant="outline" className="text-xs">
+                              {layer.type}
+                            </Badge>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {layer.visible ? (
+                              <Eye className="h-4 w-4 text-green-400" />
+                            ) : (
+                              <Eye className="h-4 w-4 text-gray-600" />
+                            )}
+                            {layer.locked && (
+                              <Lock className="h-4 w-4 text-amber-400" />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {artboard.layers.length > 5 && (
+                        <p className="text-xs text-gray-500 text-center py-1">
+                          +{artboard.layers.length - 5} more layers
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </TabsContent>
+
+              <TabsContent value="collaborators" className="space-y-4">
+                {state.selectedCanvas.collaborators.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">
+                    No collaborators yet
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {state.selectedCanvas.collaborators.map((collaborator) => (
+                      <div
+                        key={collaborator.id}
+                        className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="text-2xl">{collaborator.avatar}</div>
+                          <div>
+                            <p className="font-medium text-white">{collaborator.name}</p>
+                            <p className="text-sm text-gray-400">{collaborator.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <Badge
+                            style={{ backgroundColor: collaborator.color + '20', color: collaborator.color }}
+                          >
+                            {collaborator.role}
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            {collaborator.lastSeen}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Canvas Modal */}
+      <Dialog open={showExportModal} onOpenChange={setShowExportModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Canvas</DialogTitle>
+            <DialogDescription>
+              Export "{state.selectedCanvas?.name}" in your preferred format
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select value={exportFormat} onValueChange={(v) => setExportFormat(v as ExportFormat)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="png">PNG</SelectItem>
+                  <SelectItem value="jpg">JPG</SelectItem>
+                  <SelectItem value="svg">SVG</SelectItem>
+                  <SelectItem value="pdf">PDF</SelectItem>
+                  <SelectItem value="figma">Figma</SelectItem>
+                  <SelectItem value="sketch">Sketch</SelectItem>
+                  <SelectItem value="webp">WebP</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Quality</Label>
+              <Select value={exportQuality} onValueChange={setExportQuality}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low (Faster)</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="ultra">Ultra (Best Quality)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleExportCanvas}
+              className="bg-gradient-to-r from-indigo-500 to-violet-600"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Canvas Modal */}
+      <Dialog open={showShareModal} onOpenChange={setShowShareModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Canvas</DialogTitle>
+            <DialogDescription>
+              Invite collaborators to "{state.selectedCanvas?.name}"
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                placeholder="colleague@example.com"
+                value={shareEmail}
+                onChange={(e) => setShareEmail(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select value={shareRole} onValueChange={(v) => setShareRole(v as CollaboratorRole)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="viewer">Viewer (Can view only)</SelectItem>
+                  <SelectItem value="commenter">Commenter (Can comment)</SelectItem>
+                  <SelectItem value="editor">Editor (Can edit)</SelectItem>
+                  <SelectItem value="owner">Owner (Full access)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowShareModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleShareCanvas}
+              className="bg-gradient-to-r from-indigo-500 to-violet-600"
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
