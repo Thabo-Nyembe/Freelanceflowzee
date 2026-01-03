@@ -21,7 +21,7 @@ export function useSupabaseQuery<T>({
   orderBy,
   limit,
   realtime = true,
-  softDelete = true
+  softDelete = false // Default to false since most tables don't have deleted_at column
 }: UseSupabaseQueryOptions<T>) {
   const [data, setData] = useState<T[]>([])
   const [loading, setLoading] = useState(true)

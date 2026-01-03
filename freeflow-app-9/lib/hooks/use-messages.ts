@@ -76,7 +76,8 @@ export function useMessages(options: UseMessagesOptions = {}) {
     table: 'messages',
     filters,
     orderBy: { column: 'created_at', ascending: false },
-    realtime: true
+    realtime: true,
+    softDelete: false // messages table doesn't have deleted_at column
   }
   if (limit !== undefined) queryOptions.limit = limit
 
