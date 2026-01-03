@@ -98,13 +98,7 @@ const nextConfig = {
   staticPageGenerationTimeout: 90,
   compress: true,
 
-  // Advanced optimizations for A+++ grade
-  modularizeImports: {
-    'lucide-react': {
-      transform: 'lucide-react/dist/esm/icons/{{member}}',
-      skipDefaultConversion: true,
-    },
-  },
+  // Note: modularizeImports for lucide-react removed - new version uses different import paths
   
   // Advanced Webpack configuration for A+++ grade
   webpack: (config, { isServer, dev, webpack }) => {
