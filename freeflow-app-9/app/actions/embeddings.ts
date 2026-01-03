@@ -6,7 +6,7 @@
  * Supabase 2025 Feature: Vector Buckets with pgvector
  */
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
 import { createFeatureLogger } from '@/lib/logger'
@@ -38,7 +38,7 @@ export interface SearchInput {
 // ============================================
 
 export async function createDocumentEmbedding(input: Omit<EmbeddingInput, 'userId'>): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -80,7 +80,7 @@ export async function createDocumentEmbedding(input: Omit<EmbeddingInput, 'userI
 }
 
 export async function deleteDocumentEmbedding(id: string): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -104,7 +104,7 @@ export async function deleteDocumentEmbedding(id: string): Promise<ActionResult>
 }
 
 export async function deleteEmbeddingsBySource(sourceType: string, sourceId: string): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -129,7 +129,7 @@ export async function deleteEmbeddingsBySource(sourceType: string, sourceId: str
 }
 
 export async function getDocumentEmbeddings(limit = 50): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -162,7 +162,7 @@ export async function createMessageEmbedding(
   chatId: string | null,
   contentPreview: string
 ): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -191,7 +191,7 @@ export async function createMessageEmbedding(
 }
 
 export async function getMessageEmbeddingsByChat(chatId: string): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -224,7 +224,7 @@ export async function createProjectEmbedding(
   projectType?: string,
   tags?: string[]
 ): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -255,7 +255,7 @@ export async function createProjectEmbedding(
 }
 
 export async function getProjectEmbedding(projectId: string): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -288,7 +288,7 @@ export async function createAIContentEmbedding(
   contentId: string,
   styleTags?: string[]
 ): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -319,7 +319,7 @@ export async function createAIContentEmbedding(
 }
 
 export async function getAIContentEmbeddingsByType(contentType: string): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -355,7 +355,7 @@ export async function logSemanticSearch(
   durationMs: number,
   filters?: Record<string, unknown>
 ): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()
@@ -383,7 +383,7 @@ export async function logSemanticSearch(
 }
 
 export async function getSearchHistory(limit = 20): Promise<ActionResult> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const { data: { user } } = await supabase.auth.getUser()

@@ -3,7 +3,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -42,7 +42,7 @@ interface UpdateFeedbackData extends Partial<CreateFeedbackData> {
 // Create new feedback
 export async function createFeedback(data: CreateFeedbackData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -73,7 +73,7 @@ export async function createFeedback(data: CreateFeedbackData): Promise<ActionRe
 // Update existing feedback
 export async function updateFeedback({ id, ...data }: UpdateFeedbackData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -103,7 +103,7 @@ export async function updateFeedback({ id, ...data }: UpdateFeedbackData): Promi
 // Delete feedback (soft delete)
 export async function deleteFeedback(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -131,7 +131,7 @@ export async function deleteFeedback(id: string): Promise<ActionResult<void>> {
 // Update feedback status
 export async function updateFeedbackStatus(id: string, status: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -161,7 +161,7 @@ export async function updateFeedbackStatus(id: string, status: string): Promise<
 // Assign feedback to user
 export async function assignFeedback(id: string, assignedTo: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -194,7 +194,7 @@ export async function assignFeedback(id: string, assignedTo: string): Promise<Ac
 // Respond to feedback
 export async function respondToFeedback(id: string, responseText: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -229,7 +229,7 @@ export async function respondToFeedback(id: string, responseText: string): Promi
 // Mark feedback as spam
 export async function markFeedbackAsSpam(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -257,7 +257,7 @@ export async function markFeedbackAsSpam(id: string): Promise<ActionResult<void>
 // Get feedback statistics
 export async function getFeedbackStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

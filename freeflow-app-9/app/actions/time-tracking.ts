@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, type ActionResult } from '@/lib/api/response'
@@ -23,7 +23,7 @@ export async function createTimeEntry(data: Partial<TimeEntry>): Promise<ActionR
       return actionError('Time entry title is required', 400)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -56,7 +56,7 @@ export async function updateTimeEntry(id: string, data: Partial<TimeEntry>): Pro
       return actionError('Invalid time entry ID format', 400)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -91,7 +91,7 @@ export async function deleteTimeEntry(id: string): Promise<ActionResult<{ succes
       return actionError('Invalid time entry ID format', 400)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -130,7 +130,7 @@ export async function startTimer(data: StartTimerInput): Promise<ActionResult<Ti
       }
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -172,7 +172,7 @@ export async function stopTimer(id: string): Promise<ActionResult<TimeEntry>> {
       return actionError('Invalid timer ID format', 400)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -232,7 +232,7 @@ export async function submitTimeEntry(id: string): Promise<ActionResult<TimeEntr
       return actionError('Invalid time entry ID format', 400)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -271,7 +271,7 @@ export async function approveTimeEntry(id: string): Promise<ActionResult<TimeEnt
       return actionError('Invalid time entry ID format', 400)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -15,7 +15,7 @@ const logger = createFeatureLogger('security-actions')
 
 export async function updateSecuritySettings(formData: FormData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -109,7 +109,7 @@ export async function updateSecuritySettings(formData: FormData): Promise<Action
 
 export async function enable2FA(method: 'app' | 'sms' | 'email'): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -137,7 +137,7 @@ export async function enable2FA(method: 'app' | 'sms' | 'email'): Promise<Action
 
 export async function disable2FA(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -165,7 +165,7 @@ export async function disable2FA(): Promise<ActionResult<any>> {
 
 export async function enableBiometric(type: 'fingerprint' | 'face_id'): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -192,7 +192,7 @@ export async function enableBiometric(type: 'fingerprint' | 'face_id'): Promise<
 
 export async function disableBiometric(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -219,7 +219,7 @@ export async function disableBiometric(): Promise<ActionResult<any>> {
 
 export async function addToIPBlacklist(ip: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -255,7 +255,7 @@ export async function addToIPBlacklist(ip: string): Promise<ActionResult<any>> {
 
 export async function removeFromIPBlacklist(ip: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -292,7 +292,7 @@ export async function removeFromIPBlacklist(ip: string): Promise<ActionResult<an
 
 export async function resolveSecurityEvent(id: string, notes?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -322,7 +322,7 @@ export async function resolveSecurityEvent(id: string, notes?: string): Promise<
 
 export async function blockIPFromEvent(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -364,7 +364,7 @@ export async function blockIPFromEvent(id: string): Promise<ActionResult<any>> {
 
 export async function terminateSession(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -387,7 +387,7 @@ export async function terminateSession(id: string): Promise<ActionResult<void>> 
 
 export async function terminateAllOtherSessions(): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -414,7 +414,7 @@ export async function terminateAllOtherSessions(): Promise<ActionResult<void>> {
 
 export async function initializeSecuritySettings(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

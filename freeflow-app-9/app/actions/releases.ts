@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -28,7 +28,7 @@ export async function createRelease(data: {
   metadata?: Record<string, any>
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -87,7 +87,7 @@ export async function updateRelease(releaseId: string, data: Partial<{
   metadata: Record<string, any>
 }>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -117,7 +117,7 @@ export async function updateRelease(releaseId: string, data: Partial<{
 // Deploy Release
 export async function deployRelease(releaseId: string, environment: Environment = 'production'): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -170,7 +170,7 @@ export async function deployRelease(releaseId: string, environment: Environment 
 // Complete Deployment
 export async function completeDeployment(deploymentId: string, success: boolean = true, errorMessage?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -240,7 +240,7 @@ export async function completeDeployment(deploymentId: string, success: boolean 
 // Rollback Release
 export async function rollbackRelease(releaseId: string, reason?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -282,7 +282,7 @@ export async function rollbackRelease(releaseId: string, reason?: string): Promi
 // Pause Rolling Deployment
 export async function pauseRollingDeployment(releaseId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -322,7 +322,7 @@ export async function pauseRollingDeployment(releaseId: string): Promise<ActionR
 // Delete Release (soft delete)
 export async function deleteRelease(releaseId: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -350,7 +350,7 @@ export async function deleteRelease(releaseId: string): Promise<ActionResult<{ s
 // Get Release Stats
 export async function getReleaseStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

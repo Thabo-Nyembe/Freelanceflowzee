@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -30,7 +30,7 @@ export interface UserSettingsInput {
 
 export async function getUserSettings(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -71,7 +71,7 @@ export async function getUserSettings(): Promise<ActionResult<any>> {
 
 export async function updateUserSettings(updates: UserSettingsInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -132,7 +132,7 @@ export async function updateAppearanceSettings(appearance: {
 
 export async function generateApiKey(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -164,7 +164,7 @@ export async function generateApiKey(): Promise<ActionResult<any>> {
 
 export async function revokeApiKey(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 

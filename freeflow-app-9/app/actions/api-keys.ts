@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -110,7 +110,7 @@ export async function getApiKeys(
   options?: GetApiKeysOptions
 ): Promise<ActionResult<ApiKey[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -165,7 +165,7 @@ export async function createApiKey(
       return actionError('API key name is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -239,7 +239,7 @@ export async function updateApiKey(
       return actionError('Invalid API key ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -287,7 +287,7 @@ export async function revokeApiKey(
       return actionError('Invalid API key ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -335,7 +335,7 @@ export async function activateApiKey(keyId: string): Promise<ActionResult<ApiKey
       return actionError('Invalid API key ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -383,7 +383,7 @@ export async function deactivateApiKey(keyId: string): Promise<ActionResult<ApiK
       return actionError('Invalid API key ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -430,7 +430,7 @@ export async function regenerateApiKey(
       return actionError('Invalid API key ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -498,7 +498,7 @@ export async function deleteApiKey(
       return actionError('Invalid API key ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -532,7 +532,7 @@ export async function deleteApiKey(
  */
 export async function getApiKeyStats(): Promise<ActionResult<ApiKeyStats>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -613,7 +613,7 @@ export async function recordApiKeyUsage(
       return actionError('Invalid API key ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: key } = await supabase
       .from('api_keys')

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -29,7 +29,7 @@ export interface PluginInput {
 
 export async function createPlugin(input: PluginInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -61,7 +61,7 @@ export async function createPlugin(input: PluginInput): Promise<ActionResult<any
 
 export async function updatePlugin(id: string, input: Partial<PluginInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -94,7 +94,7 @@ export async function updatePlugin(id: string, input: Partial<PluginInput>): Pro
 
 export async function deletePlugin(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -122,7 +122,7 @@ export async function deletePlugin(id: string): Promise<ActionResult<{ success: 
 
 export async function activatePlugin(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -155,7 +155,7 @@ export async function activatePlugin(id: string): Promise<ActionResult<any>> {
 
 export async function deactivatePlugin(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -188,7 +188,7 @@ export async function deactivatePlugin(id: string): Promise<ActionResult<any>> {
 
 export async function updatePluginVersion(id: string, newVersion: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -233,7 +233,7 @@ export async function updatePluginVersion(id: string, newVersion: string): Promi
 
 export async function installPlugin(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -278,7 +278,7 @@ export async function installPlugin(id: string): Promise<ActionResult<any>> {
 
 export async function uninstallPlugin(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -312,7 +312,7 @@ export async function uninstallPlugin(id: string): Promise<ActionResult<any>> {
 
 export async function ratePlugin(id: string, rating: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -359,7 +359,7 @@ export async function ratePlugin(id: string, rating: number): Promise<ActionResu
 
 export async function incrementApiCalls(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: plugin } = await supabase
       .from('plugins')
@@ -394,7 +394,7 @@ export async function incrementApiCalls(id: string): Promise<ActionResult<any>> 
 
 export async function getPlugins(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

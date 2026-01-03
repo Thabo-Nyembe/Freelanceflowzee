@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -54,7 +54,7 @@ export interface UpdateBugInput {
 
 export async function createBug(input: CreateBugInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -104,7 +104,7 @@ export async function createBug(input: CreateBugInput): Promise<ActionResult<any
 
 export async function updateBug(id: string, input: UpdateBugInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -143,7 +143,7 @@ export async function updateBug(id: string, input: UpdateBugInput): Promise<Acti
 
 export async function deleteBug(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -170,7 +170,7 @@ export async function deleteBug(id: string): Promise<ActionResult<{ success: boo
 
 export async function resolveBug(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -203,7 +203,7 @@ export async function resolveBug(id: string): Promise<ActionResult<any>> {
 
 export async function reopenBug(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -242,7 +242,7 @@ export async function addBugComment(bugId: string, input: {
   attachments?: unknown[]
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -277,7 +277,7 @@ export async function addBugComment(bugId: string, input: {
 
 export async function voteBug(id: string, increment: boolean = true): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -319,7 +319,7 @@ export async function voteBug(id: string, increment: boolean = true): Promise<Ac
 
 export async function watchBug(id: string, watch: boolean = true): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -366,7 +366,7 @@ export async function getBugs(filters?: {
   category?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -408,7 +408,7 @@ export async function getBugs(filters?: {
 
 export async function getBugComments(bugId: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

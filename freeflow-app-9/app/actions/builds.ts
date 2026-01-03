@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -51,7 +51,7 @@ export interface UpdateBuildInput {
 // Pipeline Actions
 export async function createPipeline(input: CreatePipelineInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -81,7 +81,7 @@ export async function createPipeline(input: CreatePipelineInput): Promise<Action
 
 export async function updatePipeline(input: UpdatePipelineInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -112,7 +112,7 @@ export async function updatePipeline(input: UpdatePipelineInput): Promise<Action
 
 export async function deletePipeline(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -139,7 +139,7 @@ export async function deletePipeline(id: string): Promise<ActionResult<{ success
 
 export async function togglePipeline(id: string, isActive: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -169,7 +169,7 @@ export async function togglePipeline(id: string, isActive: boolean): Promise<Act
 // Build Actions
 export async function triggerBuild(input: TriggerBuildInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -213,7 +213,7 @@ export async function triggerBuild(input: TriggerBuildInput): Promise<ActionResu
 
 export async function updateBuild(input: UpdateBuildInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -244,7 +244,7 @@ export async function updateBuild(input: UpdateBuildInput): Promise<ActionResult
 
 export async function cancelBuild(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -276,7 +276,7 @@ export async function cancelBuild(id: string): Promise<ActionResult<any>> {
 
 export async function retryBuild(buildId: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -339,7 +339,7 @@ export async function retryBuild(buildId: string): Promise<ActionResult<any>> {
 
 export async function getBuildStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -395,7 +395,7 @@ export async function createArtifact(input: {
   expires_at?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -433,7 +433,7 @@ export async function createArtifact(input: {
 
 export async function downloadArtifact(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

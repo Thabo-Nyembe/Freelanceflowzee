@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -41,7 +41,7 @@ export interface CreateAlertInput {
 // Server Actions
 export async function createServer(input: CreateServerInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -76,7 +76,7 @@ export async function createServer(input: CreateServerInput): Promise<ActionResu
 
 export async function updateServer(input: UpdateServerInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -111,7 +111,7 @@ export async function updateServer(input: UpdateServerInput): Promise<ActionResu
 
 export async function deleteServer(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -148,7 +148,7 @@ export async function updateServerMetrics(serverId: string, metrics: {
   network_throughput: number
 }): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -202,7 +202,7 @@ export async function updateServerMetrics(serverId: string, metrics: {
 // Alert Actions
 export async function createAlert(input: CreateAlertInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -237,7 +237,7 @@ export async function createAlert(input: CreateAlertInput): Promise<ActionResult
 
 export async function acknowledgeAlert(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -275,7 +275,7 @@ export async function acknowledgeAlert(id: string): Promise<ActionResult<any>> {
 
 export async function resolveAlert(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -313,7 +313,7 @@ export async function resolveAlert(id: string): Promise<ActionResult<any>> {
 
 export async function getServerStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

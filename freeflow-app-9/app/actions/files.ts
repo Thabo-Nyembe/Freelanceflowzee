@@ -11,7 +11,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -64,7 +64,7 @@ interface File {
 export async function createFile(
   data: CreateFile
 ): Promise<ActionResult<File>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -123,7 +123,7 @@ export async function updateFile(
   id: string,
   data: UpdateFile
 ): Promise<ActionResult<File>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -181,7 +181,7 @@ export async function updateFile(
 export async function deleteFile(
   id: string
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -226,7 +226,7 @@ export async function moveFileToFolder(
   id: string,
   folderId: string | null
 ): Promise<ActionResult<File>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -284,7 +284,7 @@ export async function attachFileToProject(
   id: string,
   projectId: string | null
 ): Promise<ActionResult<File>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -342,7 +342,7 @@ export async function attachFileToProject(
 export async function bulkDeleteFiles(
   ids: string[]
 ): Promise<ActionResult<{ success: boolean; count: number }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate IDs
@@ -392,7 +392,7 @@ export async function bulkDeleteFiles(
 export async function getFilesByFolder(
   folderId: string
 ): Promise<ActionResult<File[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -436,7 +436,7 @@ export async function getFilesByFolder(
 export async function getFilesByProject(
   projectId: string
 ): Promise<ActionResult<File[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -481,7 +481,7 @@ export async function searchFiles(
   query: string,
   options?: { type?: string; folderId?: string; projectId?: string }
 ): Promise<ActionResult<File[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate query

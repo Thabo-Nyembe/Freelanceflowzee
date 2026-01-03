@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -99,7 +99,7 @@ interface ReportStats {
 
 export async function getReports(): Promise<ActionResult<Report[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -133,7 +133,7 @@ export async function getReport(id: string): Promise<ActionResult<Report>> {
       return actionError('Invalid report ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -168,7 +168,7 @@ export async function getReport(id: string): Promise<ActionResult<Report>> {
 
 export async function createReport(input: ReportInput): Promise<ActionResult<Report>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -233,7 +233,7 @@ export async function updateReport(
       return actionError('Invalid report ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -279,7 +279,7 @@ export async function deleteReport(id: string): Promise<ActionResult<{ success: 
       return actionError('Invalid report ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -315,7 +315,7 @@ export async function generateReport(id: string): Promise<ActionResult<Report>> 
       return actionError('Invalid report ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -419,7 +419,7 @@ export async function getRevenueEntries(
   dateTo?: string
 ): Promise<ActionResult<RevenueEntry[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -461,7 +461,7 @@ export async function createRevenueEntry(
   input: RevenueEntryInput
 ): Promise<ActionResult<RevenueEntry>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -509,7 +509,7 @@ export async function deleteRevenueEntry(
       return actionError('Invalid revenue entry ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -540,7 +540,7 @@ export async function deleteRevenueEntry(
 
 export async function getReportStats(): Promise<ActionResult<ReportStats>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

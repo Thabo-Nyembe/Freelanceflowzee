@@ -3,7 +3,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -36,7 +36,7 @@ export interface CreateEventData {
 
 export async function createEvent(data: CreateEventData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -66,7 +66,7 @@ export async function createEvent(data: CreateEventData): Promise<ActionResult<a
 
 export async function updateEvent(id: string, data: Partial<CreateEventData>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -95,7 +95,7 @@ export async function updateEvent(id: string, data: Partial<CreateEventData>): P
 
 export async function deleteEvent(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -123,7 +123,7 @@ export async function deleteEvent(id: string): Promise<ActionResult<{ success: b
 
 export async function getEventStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -166,7 +166,7 @@ export async function getEventStats(): Promise<ActionResult<any>> {
 
 export async function updateEventStatus(id: string, status: EventStatus): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

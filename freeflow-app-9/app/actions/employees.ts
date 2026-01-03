@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -42,7 +42,7 @@ export async function createEmployee(
       return actionError('Salary must be a positive number', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -101,7 +101,7 @@ export async function updateEmployeePerformance(
       return actionError('Performance score must be between 0 and 100', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -165,7 +165,7 @@ export async function assignProjects(
       return actionError('Projects count must be a non-negative integer', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -231,7 +231,7 @@ export async function recordTimeOff(
       return actionError('Time off type must be either "pto" or "sick"', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -305,7 +305,7 @@ export async function updateSalary(
       return actionError('Salary must be a positive number', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -371,7 +371,7 @@ export async function promoteEmployee(
       return actionError('Salary must be a positive number', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -439,7 +439,7 @@ export async function terminateEmployee(
       return actionError('Termination date is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -499,7 +499,7 @@ export async function updateOnboarding(
       return actionError('Progress must be between 0 and 100', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

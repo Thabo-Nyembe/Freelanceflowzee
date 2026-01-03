@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -30,7 +30,7 @@ export interface LogAccessInput {
 
 export async function logAccess(input: LogAccessInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -74,7 +74,7 @@ export async function logAccess(input: LogAccessInput): Promise<ActionResult<any
 
 export async function flagSuspicious(id: string, reason: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -114,7 +114,7 @@ export async function getAccessLogs(filters?: {
   endDate?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -160,7 +160,7 @@ export async function getAccessLogs(filters?: {
 
 export async function getAccessStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -198,7 +198,7 @@ export async function getAccessStats(): Promise<ActionResult<any>> {
 
 export async function blockIP(ipAddress: string, reason: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

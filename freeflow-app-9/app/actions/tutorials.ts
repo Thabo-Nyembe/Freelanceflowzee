@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -26,7 +26,7 @@ export interface TutorialInput {
 
 export async function createTutorial(input: TutorialInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -53,7 +53,7 @@ export async function createTutorial(input: TutorialInput): Promise<ActionResult
 
 export async function updateTutorial(id: string, input: Partial<TutorialInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -82,7 +82,7 @@ export async function updateTutorial(id: string, input: Partial<TutorialInput>):
 
 export async function deleteTutorial(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -121,7 +121,7 @@ export async function archiveTutorial(id: string) {
 
 export async function enrollInTutorial(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -159,7 +159,7 @@ export async function enrollInTutorial(id: string): Promise<ActionResult<any>> {
 
 export async function completeTutorial(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -197,7 +197,7 @@ export async function completeTutorial(id: string): Promise<ActionResult<any>> {
 
 export async function rateTutorial(id: string, rating: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -91,7 +91,7 @@ interface VersionData {
 
 export async function createDocument(data: CreateDocumentInput): Promise<ActionResult<Document>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -138,7 +138,7 @@ export async function updateDocumentStatus(
       return actionError('Invalid document ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -203,7 +203,7 @@ export async function recordDocumentView(
       return actionError('Invalid document ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -261,7 +261,7 @@ export async function recordDocumentDownload(id: string): Promise<ActionResult<D
       return actionError('Invalid document ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -322,7 +322,7 @@ export async function shareDocument(
       return actionError('Invalid shared_with format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -384,7 +384,7 @@ export async function uploadDocument(
       return actionError('Invalid file data', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -440,7 +440,7 @@ export async function createNewVersion(
       return actionError('Invalid document ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

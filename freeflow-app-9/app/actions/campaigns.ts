@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -11,7 +11,7 @@ const logger = createFeatureLogger('campaigns-actions')
 
 export async function createCampaign(data: Partial<Campaign>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -38,7 +38,7 @@ export async function createCampaign(data: Partial<Campaign>): Promise<ActionRes
 
 export async function updateCampaign(id: string, data: Partial<Campaign>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -67,7 +67,7 @@ export async function updateCampaign(id: string, data: Partial<Campaign>): Promi
 
 export async function deleteCampaign(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -94,7 +94,7 @@ export async function deleteCampaign(id: string): Promise<ActionResult<{ success
 
 export async function launchCampaign(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -128,7 +128,7 @@ export async function launchCampaign(id: string): Promise<ActionResult<any>> {
 
 export async function pauseCampaign(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -160,7 +160,7 @@ export async function pauseCampaign(id: string): Promise<ActionResult<any>> {
 
 export async function completeCampaign(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -194,7 +194,7 @@ export async function completeCampaign(id: string): Promise<ActionResult<any>> {
 
 export async function updateCampaignMetrics(id: string, metrics: Partial<Pick<Campaign, 'impressions' | 'clicks' | 'conversions' | 'revenue_generated'>>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -234,7 +234,7 @@ export async function updateCampaignMetrics(id: string, metrics: Partial<Pick<Ca
 
 export async function approveCampaign(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

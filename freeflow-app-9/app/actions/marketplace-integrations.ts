@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -28,7 +28,7 @@ export interface MarketplaceIntegrationInput {
 
 export async function createMarketplaceIntegration(input: MarketplaceIntegrationInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -60,7 +60,7 @@ export async function createMarketplaceIntegration(input: MarketplaceIntegration
 
 export async function updateMarketplaceIntegration(id: string, input: Partial<MarketplaceIntegrationInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -94,7 +94,7 @@ export async function updateMarketplaceIntegration(id: string, input: Partial<Ma
 
 export async function deleteMarketplaceIntegration(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -126,7 +126,7 @@ export async function deleteMarketplaceIntegration(id: string): Promise<ActionRe
 
 export async function connectIntegration(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -171,7 +171,7 @@ export async function connectIntegration(id: string): Promise<ActionResult<any>>
 
 export async function disconnectIntegration(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -208,7 +208,7 @@ export async function disconnectIntegration(id: string): Promise<ActionResult<an
 
 export async function rateIntegration(id: string, rating: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -260,7 +260,7 @@ export async function rateIntegration(id: string, rating: number): Promise<Actio
 
 export async function getMarketplaceIntegrations(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

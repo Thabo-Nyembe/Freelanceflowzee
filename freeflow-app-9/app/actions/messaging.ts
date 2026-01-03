@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import type { ConversationType, MessageContentType } from '@/lib/hooks/use-messaging'
@@ -20,7 +20,7 @@ export async function createConversation(data: {
   participant_emails?: string[]
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -66,7 +66,7 @@ export async function updateConversation(id: string, updates: {
   notification_enabled?: boolean
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -99,7 +99,7 @@ export async function updateConversation(id: string, updates: {
 }
 
 export async function archiveConversation(id: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -117,7 +117,7 @@ export async function archiveConversation(id: string) {
 }
 
 export async function unarchiveConversation(id: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -135,7 +135,7 @@ export async function unarchiveConversation(id: string) {
 }
 
 export async function starConversation(id: string, starred: boolean) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -153,7 +153,7 @@ export async function starConversation(id: string, starred: boolean) {
 }
 
 export async function pinConversation(id: string, pinned: boolean) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -171,7 +171,7 @@ export async function pinConversation(id: string, pinned: boolean) {
 }
 
 export async function markConversationAsRead(id: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -193,7 +193,7 @@ export async function markConversationAsRead(id: string) {
 
 export async function deleteConversation(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -237,7 +237,7 @@ export async function sendMessage(data: {
   reply_to_id?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -295,7 +295,7 @@ export async function sendMessage(data: {
 }
 
 export async function editMessage(id: string, content: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -317,7 +317,7 @@ export async function editMessage(id: string, content: string) {
 }
 
 export async function markMessageAsRead(id: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -338,7 +338,7 @@ export async function markMessageAsRead(id: string) {
 }
 
 export async function addReaction(messageId: string, reaction: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -375,7 +375,7 @@ export async function addReaction(messageId: string, reaction: string) {
 }
 
 export async function removeReaction(messageId: string, reaction: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
@@ -412,7 +412,7 @@ export async function removeReaction(messageId: string, reaction: string) {
 
 export async function deleteMessage(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -448,7 +448,7 @@ export async function deleteMessage(id: string): Promise<ActionResult<{ success:
 
 export async function getMessagingStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -494,7 +494,7 @@ export async function getMessagingStats(): Promise<ActionResult<any>> {
 
 export async function searchMessages(query: string, conversationId?: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

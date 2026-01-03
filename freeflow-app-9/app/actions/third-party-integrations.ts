@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -27,7 +27,7 @@ export interface ThirdPartyIntegrationInput {
 
 export async function createThirdPartyIntegration(input: ThirdPartyIntegrationInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -54,7 +54,7 @@ export async function createThirdPartyIntegration(input: ThirdPartyIntegrationIn
 
 export async function updateThirdPartyIntegration(id: string, input: Partial<ThirdPartyIntegrationInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -83,7 +83,7 @@ export async function updateThirdPartyIntegration(id: string, input: Partial<Thi
 
 export async function deleteThirdPartyIntegration(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -118,7 +118,7 @@ export async function deactivateIntegration(id: string) {
 
 export async function syncIntegration(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -161,7 +161,7 @@ export async function testIntegration(id: string) {
 
 export async function getThirdPartyIntegrations(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

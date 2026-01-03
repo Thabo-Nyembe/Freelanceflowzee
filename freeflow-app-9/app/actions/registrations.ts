@@ -3,7 +3,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -33,7 +33,7 @@ export interface CreateRegistrationData {
 
 export async function createRegistration(data: CreateRegistrationData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -85,7 +85,7 @@ export async function createRegistration(data: CreateRegistrationData): Promise<
 
 export async function updateRegistration(id: string, data: Partial<CreateRegistrationData>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -114,7 +114,7 @@ export async function updateRegistration(id: string, data: Partial<CreateRegistr
 
 export async function deleteRegistration(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -157,7 +157,7 @@ export async function deleteRegistration(id: string): Promise<ActionResult<{ suc
 
 export async function checkInRegistration(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -189,7 +189,7 @@ export async function checkInRegistration(id: string): Promise<ActionResult<any>
 
 export async function getRegistrationStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

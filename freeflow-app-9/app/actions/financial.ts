@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -10,7 +10,7 @@ const logger = createFeatureLogger('financial-actions')
 
 export async function createFinancialRecord(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -36,7 +36,7 @@ export async function createFinancialRecord(data: any): Promise<ActionResult<any
 
 export async function updateFinancialRecord(id: string, data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -64,7 +64,7 @@ export async function updateFinancialRecord(id: string, data: any): Promise<Acti
 
 export async function deleteFinancialRecord(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -90,7 +90,7 @@ export async function deleteFinancialRecord(id: string): Promise<ActionResult<vo
 
 export async function approveFinancialRecord(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -122,7 +122,7 @@ export async function approveFinancialRecord(id: string): Promise<ActionResult<a
 
 export async function processFinancialRecord(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 

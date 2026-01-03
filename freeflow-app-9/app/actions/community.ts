@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -28,7 +28,7 @@ export async function createCommunity(data: {
   enable_comments?: boolean
 }): Promise<ActionResult<Community>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -55,7 +55,7 @@ export async function createCommunity(data: {
 
 export async function updateCommunity(id: string, data: any): Promise<ActionResult<Community>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -84,7 +84,7 @@ export async function updateCommunity(id: string, data: any): Promise<ActionResu
 
 export async function deleteCommunity(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -111,7 +111,7 @@ export async function deleteCommunity(id: string): Promise<ActionResult<void>> {
 
 export async function joinCommunity(id: string): Promise<ActionResult<Community>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -159,7 +159,7 @@ export async function joinCommunity(id: string): Promise<ActionResult<Community>
 
 export async function leaveCommunity(id: string): Promise<ActionResult<Community>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -206,7 +206,7 @@ export async function leaveCommunity(id: string): Promise<ActionResult<Community
 
 export async function createPost(id: string): Promise<ActionResult<Community>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -255,7 +255,7 @@ export async function createPost(id: string): Promise<ActionResult<Community>> {
 
 export async function updateEngagement(id: string, engagement: { likes?: number, shares?: number, reactions?: number }): Promise<ActionResult<Community>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -313,7 +313,7 @@ export async function updateEngagement(id: string, engagement: { likes?: number,
 
 export async function moderateContent(id: string, action: 'flag' | 'remove'): Promise<ActionResult<Community>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -367,7 +367,7 @@ export async function moderateContent(id: string, action: 'flag' | 'remove'): Pr
 
 export async function verifyCommunity(id: string): Promise<ActionResult<Community>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -95,7 +95,7 @@ export async function createWebhook(
   formData: FormData
 ): Promise<ActionResult<Webhook>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -177,7 +177,7 @@ export async function updateWebhook(
       return actionError('Invalid webhook ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -253,7 +253,7 @@ export async function deleteWebhook(
       return actionError('Invalid webhook ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -300,7 +300,7 @@ export async function toggleWebhookStatus(
       return actionError('Invalid status value', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -353,7 +353,7 @@ export async function testWebhook(
       return actionError('Invalid webhook ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -406,7 +406,7 @@ export async function retryDelivery(
       return actionError('Invalid delivery ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -450,7 +450,7 @@ export async function createEventType(
   formData: FormData
 ): Promise<ActionResult<WebhookEventType>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -510,7 +510,7 @@ export async function toggleEventType(
       return actionError('Invalid event type ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

@@ -11,7 +11,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import {
@@ -56,7 +56,7 @@ interface Comment {
 export async function createComment(
   data: CreateComment
 ): Promise<ActionResult<Comment>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -117,7 +117,7 @@ export async function updateComment(
   id: string,
   content: string
 ): Promise<ActionResult<Comment>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -178,7 +178,7 @@ export async function updateComment(
 export async function deleteComment(
   id: string
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -237,7 +237,7 @@ export async function getCommentsByEntity(
   entityType: string,
   entityId: string
 ): Promise<ActionResult<Comment[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate entity ID
@@ -296,7 +296,7 @@ export async function getCommentsByEntity(
 export async function getCommentReplies(
   parentId: string
 ): Promise<ActionResult<Comment[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate parent ID
@@ -345,7 +345,7 @@ export async function getCommentReplies(
  * Get user's comments
  */
 export async function getUserComments(): Promise<ActionResult<Comment[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -382,7 +382,7 @@ export async function getUserComments(): Promise<ActionResult<Comment[]>> {
 export async function bulkDeleteComments(
   ids: string[]
 ): Promise<ActionResult<{ success: boolean; count: number }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate IDs
@@ -436,7 +436,7 @@ export async function pinComment(
   id: string,
   pinned: boolean
 ): Promise<ActionResult<Comment>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID

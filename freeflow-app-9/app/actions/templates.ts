@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, type ActionResult, ErrorCode } from '@/lib/api/response'
@@ -61,7 +61,7 @@ export interface Template {
  */
 export async function createTemplate(input: CreateTemplateInput): Promise<ActionResult<Template>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -116,7 +116,7 @@ export async function updateTemplate(id: string, input: UpdateTemplateInput): Pr
       return actionError('Invalid template ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -157,7 +157,7 @@ export async function publishTemplate(id: string): Promise<ActionResult<Template
       return actionError('Invalid template ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -198,7 +198,7 @@ export async function archiveTemplate(id: string): Promise<ActionResult<Template
       return actionError('Invalid template ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -239,7 +239,7 @@ export async function deleteTemplate(id: string): Promise<ActionResult<{ success
       return actionError('Invalid template ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -282,7 +282,7 @@ export async function useTemplate(
       return actionError('Invalid template ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -346,7 +346,7 @@ export async function downloadTemplate(templateId: string): Promise<ActionResult
       return actionError('Invalid template ID format', ErrorCode.VALIDATION_ERROR)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -405,7 +405,7 @@ export async function getTemplates(filters?: {
   accessLevel?: string
 }): Promise<ActionResult<Template[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

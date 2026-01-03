@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -11,7 +11,7 @@ const logger = createFeatureLogger('automations-actions')
 
 export async function createWorkflow(data: Partial<AutomationWorkflow>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -38,7 +38,7 @@ export async function createWorkflow(data: Partial<AutomationWorkflow>): Promise
 
 export async function updateWorkflow(id: string, data: Partial<AutomationWorkflow>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -67,7 +67,7 @@ export async function updateWorkflow(id: string, data: Partial<AutomationWorkflo
 
 export async function deleteWorkflow(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -94,7 +94,7 @@ export async function deleteWorkflow(id: string): Promise<ActionResult<{ success
 
 export async function publishWorkflow(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -141,7 +141,7 @@ export async function publishWorkflow(id: string): Promise<ActionResult<any>> {
 
 export async function executeWorkflow(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -202,7 +202,7 @@ export async function executeWorkflow(id: string): Promise<ActionResult<any>> {
 
 export async function toggleWorkflow(id: string, enabled: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -235,7 +235,7 @@ export async function toggleWorkflow(id: string, enabled: boolean): Promise<Acti
 
 export async function approveWorkflow(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

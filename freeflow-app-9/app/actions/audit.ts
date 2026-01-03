@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -10,7 +10,7 @@ const logger = createFeatureLogger('audit-actions')
 
 export async function createAuditEvent(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -42,7 +42,7 @@ export async function createAuditEvent(data: any): Promise<ActionResult<any>> {
 
 export async function getAuditEvent(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -68,7 +68,7 @@ export async function getAuditEvent(id: string): Promise<ActionResult<any>> {
 
 export async function createComplianceCheck(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -97,7 +97,7 @@ export async function createComplianceCheck(data: any): Promise<ActionResult<any
 
 export async function updateComplianceCheck(id: string, data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -128,7 +128,7 @@ export async function updateComplianceCheck(id: string, data: any): Promise<Acti
 
 export async function runComplianceCheck(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -172,7 +172,7 @@ export async function runComplianceCheck(id: string): Promise<ActionResult<any>>
 
 export async function getAuditStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -208,7 +208,7 @@ export async function getAuditStats(): Promise<ActionResult<any>> {
 
 export async function exportAuditTrail(startDate: string, endDate: string, format: 'json' | 'csv' = 'json'): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -255,7 +255,7 @@ export async function searchAuditEvents(query: string, options?: {
   endDate?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 

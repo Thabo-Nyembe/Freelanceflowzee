@@ -3,7 +3,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -143,7 +143,7 @@ export async function createSubscription(
     // Validate input
     const validatedData = createSubscriptionSchema.parse(data)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -198,7 +198,7 @@ export async function updateSubscription(
     uuidSchema.parse(subscriptionId)
     const validatedData = updateSubscriptionSchema.parse(data)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -276,7 +276,7 @@ export async function cancelSubscription(
     uuidSchema.parse(subscriptionId)
     const validatedData = data ? cancelSubscriptionSchema.parse(data) : { reason: 'user_requested' as CancellationReason }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -332,7 +332,7 @@ export async function pauseSubscription(subscriptionId: string): Promise<ActionR
     // Validate ID
     uuidSchema.parse(subscriptionId)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -395,7 +395,7 @@ export async function resumeSubscription(subscriptionId: string): Promise<Action
     // Validate ID
     uuidSchema.parse(subscriptionId)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -458,7 +458,7 @@ export async function renewSubscription(subscriptionId: string): Promise<ActionR
     // Validate ID
     uuidSchema.parse(subscriptionId)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -523,7 +523,7 @@ export async function deleteSubscription(subscriptionId: string): Promise<Action
     // Validate ID
     uuidSchema.parse(subscriptionId)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -564,7 +564,7 @@ export async function deleteSubscription(subscriptionId: string): Promise<Action
  */
 export async function getSubscriptionStats(): Promise<ActionResult<SubscriptionStats>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -614,7 +614,7 @@ export async function getSubscriptionStats(): Promise<ActionResult<SubscriptionS
  */
 export async function getActiveSubscriptions(): Promise<ActionResult<Subscription[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -648,7 +648,7 @@ export async function getActiveSubscriptions(): Promise<ActionResult<Subscriptio
  */
 export async function getExpiringSubscriptions(daysThreshold = 7): Promise<ActionResult<Subscription[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

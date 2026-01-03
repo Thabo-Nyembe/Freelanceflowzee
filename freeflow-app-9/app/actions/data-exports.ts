@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { hasPermission, canAccessResource } from '@/lib/auth/permissions'
@@ -71,7 +71,7 @@ export async function createDataExport(
   exportData: CreateDataExportInput
 ): Promise<ActionResult<DataExport>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -126,7 +126,7 @@ export async function startExport(id: string): Promise<ActionResult<DataExport>>
       return actionError('Invalid export ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -197,7 +197,7 @@ export async function updateExportProgress(
       return actionError('Processed records must be non-negative', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -278,7 +278,7 @@ export async function completeExport(
       return actionError('Download URL is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -371,7 +371,7 @@ export async function failExport(
       return actionError('Error message is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -436,7 +436,7 @@ export async function scheduleExport(
       return actionError('Scheduled date is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -506,7 +506,7 @@ export async function cancelExport(id: string): Promise<ActionResult<DataExport>
       return actionError('Invalid export ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

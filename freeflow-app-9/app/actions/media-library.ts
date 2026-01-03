@@ -11,7 +11,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -146,7 +146,7 @@ interface MediaFolder {
 export async function createMediaFile(
   data: z.infer<typeof createMediaFileSchema>
 ): Promise<ActionResult<MediaFile>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -216,7 +216,7 @@ export async function updateMediaFile(
   id: string,
   updates: z.infer<typeof updateMediaFileSchema>
 ): Promise<ActionResult<MediaFile>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -320,7 +320,7 @@ export async function setFilePublic(
 export async function incrementFileView(
   id: string
 ): Promise<ActionResult<{ success: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -363,7 +363,7 @@ export async function incrementFileView(
 export async function incrementFileDownload(
   id: string
 ): Promise<ActionResult<{ success: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -406,7 +406,7 @@ export async function incrementFileDownload(
 export async function archiveFile(
   id: string
 ): Promise<ActionResult<MediaFile>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -454,7 +454,7 @@ export async function archiveFile(
 export async function deleteMediaFile(
   id: string
 ): Promise<ActionResult<{ success: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -508,7 +508,7 @@ export async function deleteMediaFile(
 export async function bulkDeleteFiles(
   ids: string[]
 ): Promise<ActionResult<{ success: boolean; count: number }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate IDs
@@ -572,7 +572,7 @@ export async function bulkDeleteFiles(
 export async function createMediaFolder(
   data: z.infer<typeof createMediaFolderSchema>
 ): Promise<ActionResult<MediaFolder>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -645,7 +645,7 @@ export async function updateMediaFolder(
   id: string,
   updates: z.infer<typeof updateMediaFolderSchema>
 ): Promise<ActionResult<MediaFolder>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -713,7 +713,7 @@ export async function moveFolder(
   id: string,
   parentId: string | null
 ): Promise<ActionResult<MediaFolder>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -802,7 +802,7 @@ export async function moveFolder(
 export async function deleteMediaFolder(
   id: string
 ): Promise<ActionResult<{ success: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -858,7 +858,7 @@ export async function deleteMediaFolder(
  * Internal function to update folder statistics
  */
 async function updateFolderStatsInternal(folderId: string): Promise<void> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Get file count and total size
@@ -907,7 +907,7 @@ export async function getMediaStats(): Promise<ActionResult<{
   totalDownloads: number
   byType: Record<string, number>
 }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -967,7 +967,7 @@ export async function searchMedia(
   query: string,
   options?: { fileType?: FileType; folderId?: string }
 ): Promise<ActionResult<MediaFile[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate input

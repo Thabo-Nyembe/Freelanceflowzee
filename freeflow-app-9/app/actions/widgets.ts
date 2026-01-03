@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -59,7 +59,7 @@ interface WidgetStats {
  */
 export async function getWidgets(): Promise<ActionResult<Widget[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -96,7 +96,7 @@ export async function createWidget(input: WidgetInput): Promise<ActionResult<Wid
       return actionError('Widget name is required', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -145,7 +145,7 @@ export async function updateWidget(
       return actionError('Invalid widget ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -195,7 +195,7 @@ export async function deleteWidget(id: string): Promise<ActionResult<void>> {
       return actionError('Invalid widget ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -235,7 +235,7 @@ export async function installWidget(id: string): Promise<ActionResult<Widget>> {
       return actionError('Invalid widget ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
@@ -291,7 +291,7 @@ export async function installWidget(id: string): Promise<ActionResult<Widget>> {
  */
 export async function getWidgetStats(): Promise<ActionResult<WidgetStats>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

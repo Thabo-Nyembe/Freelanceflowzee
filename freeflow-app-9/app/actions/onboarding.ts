@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -72,7 +72,7 @@ export interface UpdateTaskInput {
 
 export async function createOnboardingProgram(input: CreateProgramInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -121,7 +121,7 @@ export async function createOnboardingProgram(input: CreateProgramInput): Promis
 
 export async function updateOnboardingProgram(id: string, input: UpdateProgramInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -151,7 +151,7 @@ export async function updateOnboardingProgram(id: string, input: UpdateProgramIn
 
 export async function startOnboardingProgram(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -184,7 +184,7 @@ export async function startOnboardingProgram(id: string): Promise<ActionResult<a
 
 export async function completeOnboardingProgram(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -219,7 +219,7 @@ export async function completeOnboardingProgram(id: string): Promise<ActionResul
 
 export async function deleteOnboardingProgram(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -247,7 +247,7 @@ export async function deleteOnboardingProgram(id: string): Promise<ActionResult<
 
 export async function sendWelcomeEmail(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -280,7 +280,7 @@ export async function sendWelcomeEmail(id: string): Promise<ActionResult<any>> {
 
 export async function markEquipmentProvided(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -312,7 +312,7 @@ export async function markEquipmentProvided(id: string): Promise<ActionResult<an
 
 export async function grantSystemAccess(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -344,7 +344,7 @@ export async function grantSystemAccess(id: string): Promise<ActionResult<any>> 
 
 export async function createOnboardingTask(input: CreateTaskInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -390,7 +390,7 @@ export async function createOnboardingTask(input: CreateTaskInput): Promise<Acti
 
 export async function updateOnboardingTask(id: string, input: UpdateTaskInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -425,7 +425,7 @@ export async function updateOnboardingTask(id: string, input: UpdateTaskInput): 
 
 export async function completeOnboardingTask(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -463,7 +463,7 @@ export async function completeOnboardingTask(id: string): Promise<ActionResult<a
 
 export async function deleteOnboardingTask(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -502,7 +502,7 @@ export async function deleteOnboardingTask(id: string): Promise<ActionResult<{ s
 }
 
 async function updateProgramTaskCounts(programId: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   // Get task counts
   const { data: tasks } = await supabase
@@ -532,7 +532,7 @@ export async function getOnboardingPrograms(filters?: {
   employeeType?: string
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
@@ -572,7 +572,7 @@ export async function getOnboardingPrograms(filters?: {
 
 export async function getOnboardingTasks(programId: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -15,7 +15,7 @@ export async function createDesktopApp(data: {
   build_number?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -49,7 +49,7 @@ export async function createDesktopApp(data: {
 
 export async function recordInstall(id: string, platform: 'windows' | 'macos' | 'linux'): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -100,7 +100,7 @@ export async function recordInstall(id: string, platform: 'windows' | 'macos' | 
 
 export async function updateBuildStatus(id: string, status: string, releaseNotes?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -146,7 +146,7 @@ export async function updatePerformanceMetrics(id: string, metrics: {
   crash_rate?: number
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -195,7 +195,7 @@ export async function updatePerformanceMetrics(id: string, metrics: {
 
 export async function updateUserRating(id: string, rating: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -240,7 +240,7 @@ export async function updateUserRating(id: string, rating: number): Promise<Acti
 
 export async function reportIssue(id: string, isCritical: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -287,7 +287,7 @@ export async function reportIssue(id: string, isCritical: boolean): Promise<Acti
 
 export async function trackActiveUsers(id: string, dailyActive: number, monthlyActive: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

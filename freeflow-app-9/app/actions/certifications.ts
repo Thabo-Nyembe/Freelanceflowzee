@@ -1,5 +1,5 @@
 'use server'
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -10,7 +10,7 @@ const logger = createFeatureLogger('certifications-actions')
 
 export async function createCertification(data: Partial<Certification>): Promise<ActionResult<Certification>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -40,7 +40,7 @@ export async function createCertification(data: Partial<Certification>): Promise
 
 export async function updateCertification(id: string, data: Partial<Certification>): Promise<ActionResult<Certification>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -69,7 +69,7 @@ export async function updateCertification(id: string, data: Partial<Certificatio
 
 export async function deleteCertification(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -96,7 +96,7 @@ export async function deleteCertification(id: string): Promise<ActionResult<void
 
 export async function verifyCertification(id: string, verificationCode: string): Promise<ActionResult<Certification>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -130,7 +130,7 @@ export async function verifyCertification(id: string, verificationCode: string):
 
 export async function renewCertification(id: string, newExpiryDate: string): Promise<ActionResult<Certification>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -166,7 +166,7 @@ export async function renewCertification(id: string, newExpiryDate: string): Pro
 
 export async function markExpired(id: string): Promise<ActionResult<Certification>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -199,7 +199,7 @@ export async function markExpired(id: string): Promise<ActionResult<Certificatio
 
 export async function updateCEHours(id: string, hours: number): Promise<ActionResult<Certification>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

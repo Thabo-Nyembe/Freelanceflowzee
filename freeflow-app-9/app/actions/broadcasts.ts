@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -39,7 +39,7 @@ export interface CreateBroadcastData {
 
 export async function createBroadcast(data: CreateBroadcastData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -66,7 +66,7 @@ export async function createBroadcast(data: CreateBroadcastData): Promise<Action
 
 export async function updateBroadcast(id: string, data: Partial<CreateBroadcastData>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -95,7 +95,7 @@ export async function updateBroadcast(id: string, data: Partial<CreateBroadcastD
 
 export async function deleteBroadcast(id: string, hardDelete: boolean = false): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -135,7 +135,7 @@ export async function deleteBroadcast(id: string, hardDelete: boolean = false): 
 
 export async function sendBroadcast(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -177,7 +177,7 @@ export async function sendBroadcast(id: string): Promise<ActionResult<any>> {
 
 export async function pauseBroadcast(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -206,7 +206,7 @@ export async function pauseBroadcast(id: string): Promise<ActionResult<any>> {
 
 export async function resumeBroadcast(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -235,7 +235,7 @@ export async function resumeBroadcast(id: string): Promise<ActionResult<any>> {
 
 export async function getBroadcastStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

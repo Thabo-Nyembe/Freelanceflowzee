@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -16,7 +16,7 @@ export async function createDoc(data: {
   summary?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -56,7 +56,7 @@ export async function createDoc(data: {
 
 export async function publishDoc(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -90,7 +90,7 @@ export async function publishDoc(id: string): Promise<ActionResult<any>> {
 
 export async function recordView(id: string, isUnique: boolean = false): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -139,7 +139,7 @@ export async function recordView(id: string, isUnique: boolean = false): Promise
 
 export async function recordFeedback(id: string, isHelpful: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -194,7 +194,7 @@ export async function recordFeedback(id: string, isHelpful: boolean): Promise<Ac
 
 export async function recordCodeCopy(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -234,7 +234,7 @@ export async function recordCodeCopy(id: string): Promise<ActionResult<any>> {
 
 export async function updateAPIMetrics(id: string, requestCount: number, avgResponseTime: number, successRate: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -274,7 +274,7 @@ export async function updateReadingMetrics(id: string, metrics: {
   scroll_depth_percent: number
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -310,7 +310,7 @@ export async function updateReadingMetrics(id: string, metrics: {
 
 export async function markAsOutdated(id: string, needsReview: boolean = true): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

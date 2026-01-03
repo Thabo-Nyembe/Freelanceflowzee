@@ -4,7 +4,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -122,7 +122,7 @@ export async function createMessage(
       return actionValidationError(validation.error.errors)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -182,7 +182,7 @@ export async function updateMessage(
       return actionValidationError(validation.error.errors)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -228,7 +228,7 @@ export async function deleteMessage(id: string): Promise<ActionResult<{ deleted:
       return actionError('Invalid message ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -275,7 +275,7 @@ export async function markMessageAsRead(id: string): Promise<ActionResult<Messag
       return actionError('Invalid message ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -325,7 +325,7 @@ export async function toggleStarMessage(id: string): Promise<ActionResult<Messag
       return actionError('Invalid message ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -384,7 +384,7 @@ export async function archiveMessage(id: string): Promise<ActionResult<MessageDa
       return actionError('Invalid message ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -433,7 +433,7 @@ export async function sendScheduledMessage(id: string): Promise<ActionResult<Mes
       return actionError('Invalid message ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -477,7 +477,7 @@ export async function sendScheduledMessage(id: string): Promise<ActionResult<Mes
  */
 export async function getMessageStats(): Promise<ActionResult<MessageStats>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

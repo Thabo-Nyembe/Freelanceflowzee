@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -91,7 +91,7 @@ export async function getGenerations(
   options?: GenerationFilters
 ): Promise<ActionResult<unknown[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -138,7 +138,7 @@ export async function getGeneration(generationId: string): Promise<ActionResult<
       return actionError('Invalid generation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -170,7 +170,7 @@ export async function createGeneration(
   generationData: GenerationData
 ): Promise<ActionResult<unknown>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -219,7 +219,7 @@ export async function updateGeneration(
       return actionError('Invalid generation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -265,7 +265,7 @@ export async function completeGeneration(
       return actionError('Invalid generation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -318,7 +318,7 @@ export async function failGeneration(
       return actionError('Invalid generation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -359,7 +359,7 @@ export async function regenerate(generationId: string): Promise<ActionResult<unk
       return actionError('Invalid generation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -417,7 +417,7 @@ export async function deleteGeneration(generationId: string): Promise<ActionResu
       return actionError('Invalid generation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -447,7 +447,7 @@ export async function deleteGeneration(generationId: string): Promise<ActionResu
 
 export async function getGenerationStats(): Promise<ActionResult<GenerationStats | null>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

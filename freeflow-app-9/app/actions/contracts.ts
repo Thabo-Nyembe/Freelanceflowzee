@@ -10,7 +10,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -47,7 +47,7 @@ type SignatureData = z.infer<typeof signatureSchema>
 export async function createContract(
   data: CreateContract
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -103,7 +103,7 @@ export async function updateContract(
   id: string,
   data: UpdateContract
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -169,7 +169,7 @@ export async function updateContract(
 export async function deleteContract(
   id: string
 ): Promise<ActionResult<{ deleted: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -225,7 +225,7 @@ export async function signContract(
   id: string,
   signatureData: SignatureData
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -301,7 +301,7 @@ export async function terminateContract(
   id: string,
   reason?: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -367,7 +367,7 @@ export async function terminateContract(
 export async function completeContract(
   id: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID

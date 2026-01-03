@@ -1,5 +1,5 @@
 'use server'
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -10,7 +10,7 @@ const logger = createFeatureLogger('changelog-actions')
 
 export async function createChange(data: Partial<Changelog>): Promise<ActionResult<Changelog>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -40,7 +40,7 @@ export async function createChange(data: Partial<Changelog>): Promise<ActionResu
 
 export async function updateChange(id: string, data: Partial<Changelog>): Promise<ActionResult<Changelog>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -69,7 +69,7 @@ export async function updateChange(id: string, data: Partial<Changelog>): Promis
 
 export async function deleteChange(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -96,7 +96,7 @@ export async function deleteChange(id: string): Promise<ActionResult<void>> {
 
 export async function publishChange(id: string): Promise<ActionResult<Changelog>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -129,7 +129,7 @@ export async function publishChange(id: string): Promise<ActionResult<Changelog>
 
 export async function scheduleChange(id: string, scheduledFor: string): Promise<ActionResult<Changelog>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -161,7 +161,7 @@ export async function scheduleChange(id: string, scheduledFor: string): Promise<
 
 export async function incrementViews(id: string): Promise<ActionResult<Changelog>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -191,7 +191,7 @@ export async function incrementViews(id: string): Promise<ActionResult<Changelog
 
 export async function updateEngagement(id: string, engagement: { likes?: number, comments?: number }): Promise<ActionResult<Changelog>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -223,7 +223,7 @@ export async function updateEngagement(id: string, engagement: { likes?: number,
 
 export async function deprecateChange(id: string, reason: string, alternative?: string): Promise<ActionResult<Changelog>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

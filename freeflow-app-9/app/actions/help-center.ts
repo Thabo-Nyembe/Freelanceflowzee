@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -59,7 +59,7 @@ export interface HelpCategory {
 // Fetch all articles
 export async function fetchArticles(): Promise<ActionResult<HelpArticle[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -89,7 +89,7 @@ export async function fetchArticles(): Promise<ActionResult<HelpArticle[]>> {
 // Create article
 export async function createArticle(article: Partial<HelpArticle>): Promise<ActionResult<HelpArticle>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -119,7 +119,7 @@ export async function createArticle(article: Partial<HelpArticle>): Promise<Acti
 // Update article
 export async function updateArticle(id: string, updates: Partial<HelpArticle>): Promise<ActionResult<HelpArticle>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -150,7 +150,7 @@ export async function updateArticle(id: string, updates: Partial<HelpArticle>): 
 // Delete article (soft delete)
 export async function deleteArticle(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -179,7 +179,7 @@ export async function deleteArticle(id: string): Promise<ActionResult<{ success:
 // Publish article
 export async function publishArticle(id: string): Promise<ActionResult<HelpArticle>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -213,7 +213,7 @@ export async function publishArticle(id: string): Promise<ActionResult<HelpArtic
 // Unpublish article
 export async function unpublishArticle(id: string): Promise<ActionResult<HelpArticle>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -244,7 +244,7 @@ export async function unpublishArticle(id: string): Promise<ActionResult<HelpArt
 // Archive article
 export async function archiveArticle(id: string): Promise<ActionResult<HelpArticle>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -275,7 +275,7 @@ export async function archiveArticle(id: string): Promise<ActionResult<HelpArtic
 // Increment view count
 export async function incrementArticleViewCount(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: article } = await supabase
       .from('help_articles')
@@ -301,7 +301,7 @@ export async function incrementArticleViewCount(id: string): Promise<ActionResul
 // Fetch all categories
 export async function fetchCategories(): Promise<ActionResult<HelpCategory[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -331,7 +331,7 @@ export async function fetchCategories(): Promise<ActionResult<HelpCategory[]>> {
 // Create category
 export async function createCategory(category: Partial<HelpCategory>): Promise<ActionResult<HelpCategory>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -361,7 +361,7 @@ export async function createCategory(category: Partial<HelpCategory>): Promise<A
 // Update category
 export async function updateCategory(id: string, updates: Partial<HelpCategory>): Promise<ActionResult<HelpCategory>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -392,7 +392,7 @@ export async function updateCategory(id: string, updates: Partial<HelpCategory>)
 // Delete category (soft delete)
 export async function deleteCategory(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -426,7 +426,7 @@ export async function submitArticleFeedback(
   rating?: number
 ): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     const { data, error } = await supabase
@@ -458,7 +458,7 @@ export async function submitArticleFeedback(
 // Fetch article feedback
 export async function fetchArticleFeedback(articleId: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data, error } = await supabase
       .from('help_article_feedback')

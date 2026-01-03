@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -10,7 +10,7 @@ const logger = createFeatureLogger('inventory-actions')
 
 export async function createInventoryItem(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -43,7 +43,7 @@ export async function createInventoryItem(data: any): Promise<ActionResult<any>>
 
 export async function updateInventoryItem(id: string, data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -77,7 +77,7 @@ export async function updateInventoryItem(id: string, data: any): Promise<Action
 
 export async function deleteInventoryItem(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -108,7 +108,7 @@ export async function deleteInventoryItem(id: string): Promise<ActionResult<any>
 
 export async function adjustStock(id: string, quantityChange: number, reason: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -181,7 +181,7 @@ export async function adjustStock(id: string, quantityChange: number, reason: st
 
 export async function reserveStock(id: string, quantity: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -234,7 +234,7 @@ export async function reserveStock(id: string, quantity: number): Promise<Action
 
 export async function updatePricing(id: string, unitPrice: number, costPrice?: number, sellingPrice?: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -284,7 +284,7 @@ export async function updatePricing(id: string, unitPrice: number, costPrice?: n
 
 export async function checkReorderAlerts(id: string): Promise<ActionResult<{ needsReorder: boolean; item: any }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -337,7 +337,7 @@ export async function checkReorderAlerts(id: string): Promise<ActionResult<{ nee
 
 export async function recordSale(id: string, quantitySold: number, saleAmount: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -391,7 +391,7 @@ export async function recordSale(id: string, quantitySold: number, saleAmount: n
 
 export async function updateTurnoverRate(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

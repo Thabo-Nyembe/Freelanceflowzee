@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -17,7 +17,7 @@ export async function createDeployment(deploymentData: {
   commit_message?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -51,7 +51,7 @@ export async function createDeployment(deploymentData: {
 
 export async function startDeployment(id: string, serverCount: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -88,7 +88,7 @@ export async function startDeployment(id: string, serverCount: number): Promise<
 
 export async function completeDeployment(id: string, success: boolean, healthCheckPassed?: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -145,7 +145,7 @@ export async function completeDeployment(id: string, success: boolean, healthChe
 
 export async function rollbackDeployment(id: string, reason: string, rollbackToVersion: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -187,7 +187,7 @@ export async function updateDeploymentMetrics(id: string, metrics: {
   memoryUsage?: number
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -245,7 +245,7 @@ export async function updateDeploymentMetrics(id: string, metrics: {
 
 export async function approveDeployment(id: string, approverName: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

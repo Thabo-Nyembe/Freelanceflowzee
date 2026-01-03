@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -21,7 +21,7 @@ export interface ReportInput {
 
 export async function createReport(input: ReportInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -58,7 +58,7 @@ export async function createReport(input: ReportInput): Promise<ActionResult<any
 
 export async function updateReport(id: string, updates: Partial<ReportInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -90,7 +90,7 @@ export async function updateReport(id: string, updates: Partial<ReportInput>): P
 
 export async function deleteReport(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -117,7 +117,7 @@ export async function deleteReport(id: string): Promise<ActionResult<{ success: 
 
 export async function generateReport(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -167,7 +167,7 @@ export async function generateReport(id: string): Promise<ActionResult<any>> {
 
 export async function viewReport(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: report, error: fetchError } = await supabase
       .from('business_reports')
@@ -206,7 +206,7 @@ export async function viewReport(id: string): Promise<ActionResult<any>> {
 
 export async function downloadReport(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: report, error: fetchError } = await supabase
       .from('business_reports')
@@ -245,7 +245,7 @@ export async function downloadReport(id: string): Promise<ActionResult<any>> {
 
 export async function shareReport(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: report, error: fetchError } = await supabase
       .from('business_reports')
@@ -284,7 +284,7 @@ export async function shareReport(id: string): Promise<ActionResult<any>> {
 
 export async function scheduleReport(id: string, schedule: string, nextScheduledAt?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -317,7 +317,7 @@ export async function scheduleReport(id: string, schedule: string, nextScheduled
 
 export async function getReports(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

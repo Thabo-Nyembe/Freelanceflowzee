@@ -9,7 +9,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -48,7 +48,7 @@ type PaymentData = z.infer<typeof paymentDataSchema>
 export async function createInvoice(
   data: CreateInvoice
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -133,7 +133,7 @@ export async function updateInvoice(
   id: string,
   data: UpdateInvoice
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -220,7 +220,7 @@ export async function updateInvoice(
 export async function deleteInvoice(
   id: string
 ): Promise<ActionResult<{ deleted: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -275,7 +275,7 @@ export async function deleteInvoice(
 export async function markInvoiceAsSent(
   id: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -325,7 +325,7 @@ export async function markInvoiceAsPaid(
   id: string,
   paymentData?: PaymentData
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -389,7 +389,7 @@ export async function markInvoiceAsPaid(
 export async function markInvoiceAsOverdue(
   id: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(id)
@@ -430,7 +430,7 @@ export async function markInvoiceAsOverdue(
 export async function duplicateInvoice(
   id: string
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     const idValidation = uuidSchema.safeParse(id)

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -25,7 +25,7 @@ export interface KnowledgeArticleInput {
 
 export async function createKnowledgeArticle(input: KnowledgeArticleInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -56,7 +56,7 @@ export async function createKnowledgeArticle(input: KnowledgeArticleInput): Prom
 
 export async function updateKnowledgeArticle(id: string, input: Partial<KnowledgeArticleInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -88,7 +88,7 @@ export async function updateKnowledgeArticle(id: string, input: Partial<Knowledg
 
 export async function deleteKnowledgeArticle(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -115,7 +115,7 @@ export async function deleteKnowledgeArticle(id: string): Promise<ActionResult<{
 
 export async function publishKnowledgeArticle(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -148,7 +148,7 @@ export async function publishKnowledgeArticle(id: string): Promise<ActionResult<
 
 export async function archiveKnowledgeArticle(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -180,7 +180,7 @@ export async function archiveKnowledgeArticle(id: string): Promise<ActionResult<
 
 export async function submitForReview(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -212,7 +212,7 @@ export async function submitForReview(id: string): Promise<ActionResult<any>> {
 
 export async function scheduleArticle(id: string, scheduledAt: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -245,7 +245,7 @@ export async function scheduleArticle(id: string, scheduledAt: string): Promise<
 
 export async function incrementArticleViews(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: article } = await supabase
       .from('knowledge_articles')
@@ -280,7 +280,7 @@ export async function incrementArticleViews(id: string): Promise<ActionResult<an
 
 export async function rateArticle(id: string, rating: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -326,7 +326,7 @@ export async function rateArticle(id: string, rating: number): Promise<ActionRes
 
 export async function getKnowledgeArticles(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

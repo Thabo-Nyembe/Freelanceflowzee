@@ -4,7 +4,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -128,7 +128,7 @@ export async function createProduct(
     // Validate input
     const validatedData = createProductSchema.parse(data)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -179,7 +179,7 @@ export async function updateProduct(
     uuidSchema.parse(productId)
     const validatedData = updateProductSchema.parse(data)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -253,7 +253,7 @@ export async function deleteProduct(productId: string): Promise<ActionResult<{ s
     // Validate ID
     uuidSchema.parse(productId)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -297,7 +297,7 @@ export async function updateProductMetrics(
     uuidSchema.parse(productId)
     const validatedMetrics = updateMetricsSchema.parse(metrics)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -345,7 +345,7 @@ export async function updateProductMetrics(
  */
 export async function getProductStats(): Promise<ActionResult<ProductStats>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -398,7 +398,7 @@ export async function createProductVariant(
     uuidSchema.parse(productId)
     const validatedData = createVariantSchema.parse(data)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -450,7 +450,7 @@ export async function updateProductVariant(
     uuidSchema.parse(variantId)
     const validatedData = updateVariantSchema.parse(data)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -501,7 +501,7 @@ export async function deleteProductVariant(variantId: string): Promise<ActionRes
     // Validate ID
     uuidSchema.parse(variantId)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

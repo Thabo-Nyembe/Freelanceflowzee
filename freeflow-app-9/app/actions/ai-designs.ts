@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -67,7 +67,7 @@ export async function getDesigns(
   options?: DesignFilters
 ): Promise<ActionResult<unknown[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -111,7 +111,7 @@ export async function createDesign(
   designData: DesignData
 ): Promise<ActionResult<unknown>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -159,7 +159,7 @@ export async function updateDesign(
       return actionError('Invalid design ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -202,7 +202,7 @@ export async function completeDesign(
       return actionError('Invalid design ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -249,7 +249,7 @@ export async function likeDesign(designId: string): Promise<ActionResult<unknown
       return actionError('Invalid design ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -299,7 +299,7 @@ export async function incrementViews(designId: string): Promise<ActionResult<boo
       return actionError('Invalid design ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: design } = await supabase
       .from('ai_designs')
@@ -337,7 +337,7 @@ export async function incrementDownloads(designId: string): Promise<ActionResult
       return actionError('Invalid design ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: design } = await supabase
       .from('ai_designs')
@@ -379,7 +379,7 @@ export async function deleteDesign(designId: string): Promise<ActionResult<boole
       return actionError('Invalid design ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -409,7 +409,7 @@ export async function deleteDesign(designId: string): Promise<ActionResult<boole
 
 export async function getDesignStats(): Promise<ActionResult<DesignStats | null>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

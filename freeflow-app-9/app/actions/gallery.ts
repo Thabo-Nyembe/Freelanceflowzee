@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -39,7 +39,7 @@ export interface CollectionInput {
 
 export async function createGalleryItem(input: GalleryItemInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -65,7 +65,7 @@ export async function createGalleryItem(input: GalleryItemInput): Promise<Action
 
 export async function updateGalleryItem(id: string, updates: Partial<GalleryItemInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -93,7 +93,7 @@ export async function updateGalleryItem(id: string, updates: Partial<GalleryItem
 
 export async function toggleGalleryItemFeatured(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -127,7 +127,7 @@ export async function toggleGalleryItemFeatured(id: string): Promise<ActionResul
 
 export async function toggleGalleryItemPortfolio(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -161,7 +161,7 @@ export async function toggleGalleryItemPortfolio(id: string): Promise<ActionResu
 
 export async function deleteGalleryItem(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -187,7 +187,7 @@ export async function deleteGalleryItem(id: string): Promise<ActionResult<{ succ
 
 export async function getGalleryItems(collectionId?: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -219,7 +219,7 @@ export async function getGalleryItems(collectionId?: string): Promise<ActionResu
 // Collection actions
 export async function createCollection(input: CollectionInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -245,7 +245,7 @@ export async function createCollection(input: CollectionInput): Promise<ActionRe
 
 export async function updateCollection(id: string, updates: Partial<CollectionInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -273,7 +273,7 @@ export async function updateCollection(id: string, updates: Partial<CollectionIn
 
 export async function deleteCollection(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 
@@ -299,7 +299,7 @@ export async function deleteCollection(id: string): Promise<ActionResult<{ succe
 
 export async function getCollections(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
 

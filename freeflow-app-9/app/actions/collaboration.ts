@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -33,7 +33,7 @@ export async function createSession(data: {
   audio_enabled?: boolean
 }): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -70,7 +70,7 @@ export async function createSession(data: {
 
 export async function updateSession(id: string, data: any): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -99,7 +99,7 @@ export async function updateSession(id: string, data: any): Promise<ActionResult
 
 export async function deleteSession(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -126,7 +126,7 @@ export async function deleteSession(id: string): Promise<ActionResult<void>> {
 
 export async function joinSession(id: string, userId: string, role: string = 'viewer'): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -192,7 +192,7 @@ export async function joinSession(id: string, userId: string, role: string = 'vi
 
 export async function leaveSession(id: string, userId: string): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -253,7 +253,7 @@ export async function sendMessage(id: string, message: {
   sender_name: string
 }): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -313,7 +313,7 @@ export async function addComment(id: string, comment: {
   position?: any
 }): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -369,7 +369,7 @@ export async function addComment(id: string, comment: {
 
 export async function startSession(id: string): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -402,7 +402,7 @@ export async function startSession(id: string): Promise<ActionResult<Collaborati
 
 export async function endSession(id: string): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -457,7 +457,7 @@ export async function endSession(id: string): Promise<ActionResult<Collaboration
 
 export async function startRecording(id: string): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -488,7 +488,7 @@ export async function startRecording(id: string): Promise<ActionResult<Collabora
 
 export async function stopRecording(id: string, recordingUrl: string, recordingSize: number): Promise<ActionResult<CollaborationSession>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

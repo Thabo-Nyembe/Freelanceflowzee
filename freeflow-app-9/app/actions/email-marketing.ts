@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -54,7 +54,7 @@ export interface EmailListInput {
 // Campaign Actions
 export async function createEmailCampaign(input: EmailCampaignInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -98,7 +98,7 @@ export async function createEmailCampaign(input: EmailCampaignInput): Promise<Ac
 
 export async function updateEmailCampaign(id: string, updates: Partial<EmailCampaignInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -127,7 +127,7 @@ export async function updateEmailCampaign(id: string, updates: Partial<EmailCamp
 
 export async function deleteEmailCampaign(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -154,7 +154,7 @@ export async function deleteEmailCampaign(id: string): Promise<ActionResult<{ su
 
 export async function scheduleCampaign(id: string, scheduledAt: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -187,7 +187,7 @@ export async function scheduleCampaign(id: string, scheduledAt: string): Promise
 
 export async function sendCampaign(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -220,7 +220,7 @@ export async function sendCampaign(id: string): Promise<ActionResult<any>> {
 
 export async function getEmailCampaigns(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -247,7 +247,7 @@ export async function getEmailCampaigns(): Promise<ActionResult<any[]>> {
 // Subscriber Actions
 export async function createEmailSubscriber(input: EmailSubscriberInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -280,7 +280,7 @@ export async function createEmailSubscriber(input: EmailSubscriberInput): Promis
 
 export async function unsubscribeEmail(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -313,7 +313,7 @@ export async function unsubscribeEmail(id: string): Promise<ActionResult<any>> {
 
 export async function getEmailSubscribers(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -339,7 +339,7 @@ export async function getEmailSubscribers(): Promise<ActionResult<any[]>> {
 // List Actions
 export async function createEmailList(input: EmailListInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -372,7 +372,7 @@ export async function createEmailList(input: EmailListInput): Promise<ActionResu
 
 export async function getEmailLists(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -398,7 +398,7 @@ export async function getEmailLists(): Promise<ActionResult<any[]>> {
 // Template Actions
 export async function getEmailTemplates(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

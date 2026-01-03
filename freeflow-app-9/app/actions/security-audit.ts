@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -41,7 +41,7 @@ export interface AuditFindingInput {
 // Security Audit Actions
 export async function createSecurityAudit(input: SecurityAuditInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -82,7 +82,7 @@ export async function createSecurityAudit(input: SecurityAuditInput): Promise<Ac
 
 export async function updateSecurityAudit(id: string, updates: Partial<SecurityAuditInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -114,7 +114,7 @@ export async function updateSecurityAudit(id: string, updates: Partial<SecurityA
 
 export async function deleteSecurityAudit(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -144,7 +144,7 @@ export async function deleteSecurityAudit(id: string): Promise<ActionResult<{ su
 
 export async function startSecurityAudit(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -184,7 +184,7 @@ export async function completeSecurityAudit(
   score?: number
 ): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -232,7 +232,7 @@ export async function completeSecurityAudit(
 
 export async function cancelSecurityAudit(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -267,7 +267,7 @@ export async function cancelSecurityAudit(id: string): Promise<ActionResult<any>
 
 export async function getSecurityAudits(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -297,7 +297,7 @@ export async function getSecurityAudits(): Promise<ActionResult<any[]>> {
 
 export async function getSecurityAudit(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -328,7 +328,7 @@ export async function getSecurityAudit(id: string): Promise<ActionResult<any>> {
 // Audit Finding Actions
 export async function createAuditFinding(input: AuditFindingInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -368,7 +368,7 @@ export async function createAuditFinding(input: AuditFindingInput): Promise<Acti
 
 export async function updateAuditFinding(id: string, updates: Partial<AuditFindingInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data, error } = await supabase
       .from('audit_findings')
@@ -393,7 +393,7 @@ export async function updateAuditFinding(id: string, updates: Partial<AuditFindi
 
 export async function remediateFinding(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -429,7 +429,7 @@ export async function remediateFinding(id: string): Promise<ActionResult<any>> {
 
 export async function acceptFinding(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data, error } = await supabase
       .from('audit_findings')
@@ -457,7 +457,7 @@ export async function acceptFinding(id: string): Promise<ActionResult<any>> {
 
 export async function markFalsePositive(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data, error } = await supabase
       .from('audit_findings')
@@ -485,7 +485,7 @@ export async function markFalsePositive(id: string): Promise<ActionResult<any>> 
 
 export async function getAuditFindings(auditId: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data, error } = await supabase
       .from('audit_findings')

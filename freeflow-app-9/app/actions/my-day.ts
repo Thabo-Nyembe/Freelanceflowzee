@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -23,7 +23,7 @@ export interface MyDayTaskInput {
 
 export async function createMyDayTask(input: MyDayTaskInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -60,7 +60,7 @@ export async function createMyDayTask(input: MyDayTaskInput): Promise<ActionResu
 
 export async function updateMyDayTask(id: string, updates: Partial<MyDayTaskInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -94,7 +94,7 @@ export async function updateMyDayTask(id: string, updates: Partial<MyDayTaskInpu
 
 export async function completeMyDayTask(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -132,7 +132,7 @@ export async function completeMyDayTask(id: string): Promise<ActionResult<any>> 
 
 export async function deleteMyDayTask(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -164,7 +164,7 @@ export async function deleteMyDayTask(id: string): Promise<ActionResult<{ succes
 
 export async function getMyDayTasks(date?: string): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -203,7 +203,7 @@ export async function getMyDayTasks(date?: string): Promise<ActionResult<any[]>>
 // Focus Session Actions
 export async function startFocusSession(taskId?: string, type: 'focus' | 'break' | 'meeting' = 'focus'): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -240,7 +240,7 @@ export async function startFocusSession(taskId?: string, type: 'focus' | 'break'
 
 export async function endFocusSession(id: string, notes?: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -294,7 +294,7 @@ export async function endFocusSession(id: string, notes?: string): Promise<Actio
 
 export async function getTodayFocusSessions(): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

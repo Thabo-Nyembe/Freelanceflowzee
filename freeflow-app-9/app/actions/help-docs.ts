@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -21,7 +21,7 @@ export interface HelpDocInput {
 
 export async function createHelpDoc(input: HelpDocInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -50,7 +50,7 @@ export async function createHelpDoc(input: HelpDocInput): Promise<ActionResult<a
 
 export async function updateHelpDoc(id: string, input: Partial<HelpDocInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -81,7 +81,7 @@ export async function updateHelpDoc(id: string, input: Partial<HelpDocInput>): P
 
 export async function deleteHelpDoc(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -122,7 +122,7 @@ export async function submitForReview(id: string) {
 
 export async function markHelpful(id: string, helpful: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -166,7 +166,7 @@ export async function markHelpful(id: string, helpful: boolean): Promise<ActionR
 
 export async function incrementViewCount(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: doc } = await supabase
       .from('help_docs')

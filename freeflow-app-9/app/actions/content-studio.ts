@@ -1,5 +1,5 @@
 'use server'
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import type { ContentStudio } from '@/lib/hooks/use-content-studio'
@@ -10,7 +10,7 @@ const logger = createFeatureLogger('content-studio-actions')
 
 export async function createProject(data: Partial<ContentStudio>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -41,7 +41,7 @@ export async function createProject(data: Partial<ContentStudio>): Promise<Actio
 
 export async function updateProject(id: string, data: Partial<ContentStudio>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -70,7 +70,7 @@ export async function updateProject(id: string, data: Partial<ContentStudio>): P
 
 export async function deleteProject(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -97,7 +97,7 @@ export async function deleteProject(id: string): Promise<ActionResult<void>> {
 
 export async function autoSaveProject(id: string, canvasState: any, editorState: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -128,7 +128,7 @@ export async function autoSaveProject(id: string, canvasState: any, editorState:
 
 export async function exportProject(id: string, format: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -174,7 +174,7 @@ export async function exportProject(id: string, format: string): Promise<ActionR
 
 export async function publishProject(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -206,7 +206,7 @@ export async function publishProject(id: string): Promise<ActionResult<any>> {
 
 export async function updateProjectProgress(id: string, percentage: number): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -242,7 +242,7 @@ export async function updateProjectProgress(id: string, percentage: number): Pro
 
 export async function addCollaborator(id: string, collaboratorEmail: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

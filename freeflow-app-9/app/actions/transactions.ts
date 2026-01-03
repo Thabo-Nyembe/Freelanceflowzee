@@ -10,7 +10,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
@@ -61,7 +61,7 @@ type FlagData = z.infer<typeof flagSchema>
 export async function createTransaction(
   data: CreateTransaction
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -122,7 +122,7 @@ export async function updateTransaction(
   id: string,
   data: UpdateTransaction
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -188,7 +188,7 @@ export async function updateTransaction(
 export async function deleteTransaction(
   id: string
 ): Promise<ActionResult<{ deleted: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -244,7 +244,7 @@ export async function refundTransaction(
   id: string,
   refundData?: RefundData
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -320,7 +320,7 @@ export async function reconcileTransaction(
   id: string,
   reconciliationData?: ReconciliationData
 ): Promise<ActionResult<{ reconciled: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -390,7 +390,7 @@ export async function flagTransaction(
   id: string,
   flagData: FlagData
 ): Promise<ActionResult<{ flagged: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -463,7 +463,7 @@ export async function flagTransaction(
 export async function unflagTransaction(
   id: string
 ): Promise<ActionResult<{ unflagged: boolean }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -524,7 +524,7 @@ export async function unflagTransaction(
 export async function completeTransaction(
   id: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -586,7 +586,7 @@ export async function failTransaction(
   id: string,
   failureReason?: string
 ): Promise<ActionResult<{ status: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID

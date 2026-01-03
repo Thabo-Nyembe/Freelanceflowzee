@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -67,7 +67,7 @@ interface IntegrationStats {
 
 export async function getIntegrations(): Promise<ActionResult<Integration[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -105,7 +105,7 @@ export async function getIntegration(id: string): Promise<ActionResult<Integrati
       return actionError('Invalid integration ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -146,7 +146,7 @@ export async function createIntegration(
   input: IntegrationInput
 ): Promise<ActionResult<Integration>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -195,7 +195,7 @@ export async function updateIntegration(
       return actionError('Invalid integration ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -247,7 +247,7 @@ export async function deleteIntegration(
       return actionError('Invalid integration ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -294,7 +294,7 @@ export async function connectIntegration(
       return actionError('Invalid integration ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -351,7 +351,7 @@ export async function disconnectIntegration(id: string): Promise<ActionResult<In
       return actionError('Invalid integration ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -412,7 +412,7 @@ export async function syncIntegration(id: string): Promise<ActionResult<Integrat
       return actionError('Invalid integration ID format', 'VALIDATION_ERROR')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -495,7 +495,7 @@ export async function syncIntegration(id: string): Promise<ActionResult<Integrat
 
 export async function getIntegrationStats(): Promise<ActionResult<IntegrationStats>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

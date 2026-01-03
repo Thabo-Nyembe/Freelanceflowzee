@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -67,7 +67,7 @@ export async function getConversations(
   options?: ConversationFilters
 ): Promise<ActionResult<unknown[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -114,7 +114,7 @@ export async function getConversation(conversationId: string): Promise<ActionRes
       return actionError('Invalid conversation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -146,7 +146,7 @@ export async function createConversation(
   conversationData: ConversationData
 ): Promise<ActionResult<unknown>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -191,7 +191,7 @@ export async function updateConversation(
       return actionError('Invalid conversation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -231,7 +231,7 @@ export async function deleteConversation(conversationId: string): Promise<Action
       return actionError('Invalid conversation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -266,7 +266,7 @@ export async function getMessages(conversationId: string): Promise<ActionResult<
       return actionError('Invalid conversation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -301,7 +301,7 @@ export async function sendMessage(messageData: MessageData): Promise<ActionResul
       return actionError('Invalid conversation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -348,7 +348,7 @@ export async function toggleStar(conversationId: string): Promise<ActionResult<u
       return actionError('Invalid conversation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -400,7 +400,7 @@ export async function toggleArchive(conversationId: string): Promise<ActionResul
       return actionError('Invalid conversation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -447,7 +447,7 @@ export async function toggleArchive(conversationId: string): Promise<ActionResul
 
 export async function getConversationStats(): Promise<ActionResult<ConversationStats | null>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -498,7 +498,7 @@ export async function clearConversation(conversationId: string): Promise<ActionR
       return actionError('Invalid conversation ID format')
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -30,7 +30,7 @@ export async function createPipeline(data: {
   deployment_environment?: string
 }): Promise<ActionResult<Pipeline>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -57,7 +57,7 @@ export async function createPipeline(data: {
 
 export async function updatePipeline(id: string, data: any): Promise<ActionResult<Pipeline>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -86,7 +86,7 @@ export async function updatePipeline(id: string, data: any): Promise<ActionResul
 
 export async function deletePipeline(id: string): Promise<ActionResult<void>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -113,7 +113,7 @@ export async function deletePipeline(id: string): Promise<ActionResult<void>> {
 
 export async function runPipeline(id: string): Promise<ActionResult<Pipeline>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -148,7 +148,7 @@ export async function runPipeline(id: string): Promise<ActionResult<Pipeline>> {
 
 export async function completePipeline(id: string, success: boolean, duration: number): Promise<ActionResult<Pipeline>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -213,7 +213,7 @@ export async function updateTestResults(id: string, results: {
   test_coverage?: number
 }): Promise<ActionResult<Pipeline>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -252,7 +252,7 @@ export async function updateTestResults(id: string, results: {
 
 export async function updateQualityGates(id: string, qualityScore: number, passed: boolean): Promise<ActionResult<Pipeline>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -284,7 +284,7 @@ export async function updateQualityGates(id: string, qualityScore: number, passe
 
 export async function pausePipeline(id: string): Promise<ActionResult<Pipeline>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -313,7 +313,7 @@ export async function pausePipeline(id: string): Promise<ActionResult<Pipeline>>
 
 export async function resumePipeline(id: string): Promise<ActionResult<Pipeline>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

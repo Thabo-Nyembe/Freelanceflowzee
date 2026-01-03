@@ -3,7 +3,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -52,7 +52,7 @@ interface UpdatePollData extends Partial<CreatePollData> {
 // Create new poll
 export async function createPoll(data: CreatePollData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -83,7 +83,7 @@ export async function createPoll(data: CreatePollData): Promise<ActionResult<any
 // Update existing poll
 export async function updatePoll({ id, ...data }: UpdatePollData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -113,7 +113,7 @@ export async function updatePoll({ id, ...data }: UpdatePollData): Promise<Actio
 // Delete poll (soft delete)
 export async function deletePoll(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -141,7 +141,7 @@ export async function deletePoll(id: string): Promise<ActionResult<{ success: bo
 // Activate poll
 export async function activatePoll(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -174,7 +174,7 @@ export async function activatePoll(id: string): Promise<ActionResult<any>> {
 // Pause poll
 export async function pausePoll(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -204,7 +204,7 @@ export async function pausePoll(id: string): Promise<ActionResult<any>> {
 // Close poll
 export async function closePoll(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -237,7 +237,7 @@ export async function closePoll(id: string): Promise<ActionResult<any>> {
 // Duplicate poll
 export async function duplicatePoll(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -291,7 +291,7 @@ export async function duplicatePoll(id: string): Promise<ActionResult<any>> {
 // Increment poll views
 export async function incrementPollViews(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { error } = await supabase.rpc('increment_poll_views', { poll_id: id })
 
@@ -327,7 +327,7 @@ export async function incrementPollViews(id: string): Promise<ActionResult<{ suc
 // Get poll statistics
 export async function getPollStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

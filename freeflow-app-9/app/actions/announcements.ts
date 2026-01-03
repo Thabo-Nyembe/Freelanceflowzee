@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -36,7 +36,7 @@ export interface CreateAnnouncementData {
 
 export async function createAnnouncement(data: CreateAnnouncementData): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -63,7 +63,7 @@ export async function createAnnouncement(data: CreateAnnouncementData): Promise<
 
 export async function updateAnnouncement(id: string, data: Partial<CreateAnnouncementData>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -92,7 +92,7 @@ export async function updateAnnouncement(id: string, data: Partial<CreateAnnounc
 
 export async function deleteAnnouncement(id: string, hardDelete: boolean = false): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -132,7 +132,7 @@ export async function deleteAnnouncement(id: string, hardDelete: boolean = false
 
 export async function publishAnnouncement(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -164,7 +164,7 @@ export async function publishAnnouncement(id: string): Promise<ActionResult<any>
 
 export async function pinAnnouncement(id: string, isPinned: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -193,7 +193,7 @@ export async function pinAnnouncement(id: string, isPinned: boolean): Promise<Ac
 
 export async function incrementAnnouncementViews(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { error } = await supabase.rpc('increment_announcement_views', { announcement_id: id })
 
@@ -211,7 +211,7 @@ export async function incrementAnnouncementViews(id: string): Promise<ActionResu
 
 export async function getAnnouncementStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')

@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import type { AppCategory, PricingModel } from '@/lib/hooks/use-marketplace'
@@ -26,7 +26,7 @@ export async function createMarketplaceApp(data: {
   tags?: string[]
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -84,7 +84,7 @@ export async function updateMarketplaceApp(id: string, updates: {
   version?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -118,7 +118,7 @@ export async function updateMarketplaceApp(id: string, updates: {
 
 export async function publishApp(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -155,7 +155,7 @@ export async function publishApp(id: string): Promise<ActionResult<any>> {
 
 export async function featureApp(id: string, featured: boolean): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -188,7 +188,7 @@ export async function featureApp(id: string, featured: boolean): Promise<ActionR
 
 export async function installApp(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -239,7 +239,7 @@ export async function installApp(id: string): Promise<ActionResult<{ success: bo
 
 export async function deleteMarketplaceApp(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -280,7 +280,7 @@ export async function createReview(data: {
   content?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -327,7 +327,7 @@ export async function updateReview(id: string, updates: {
   content?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -366,7 +366,7 @@ export async function updateReview(id: string, updates: {
 
 export async function markReviewHelpful(id: string, helpful: boolean): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -410,7 +410,7 @@ export async function markReviewHelpful(id: string, helpful: boolean): Promise<A
 
 export async function respondToReview(id: string, response: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -446,7 +446,7 @@ export async function respondToReview(id: string, response: string): Promise<Act
 
 export async function deleteReview(id: string): Promise<ActionResult<{ success: boolean }>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -493,7 +493,7 @@ export async function deleteReview(id: string): Promise<ActionResult<{ success: 
 // =============================================
 
 async function updateAppRating(appId: string) {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   const { data: reviews } = await supabase
     .from('marketplace_reviews')
@@ -522,7 +522,7 @@ async function updateAppRating(appId: string) {
 
 export async function getMarketplaceStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -566,7 +566,7 @@ export async function searchApps(query: string, options?: {
   minRating?: number
 }): Promise<ActionResult<any[]>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     logger.info('Searching apps', { query, options })
 

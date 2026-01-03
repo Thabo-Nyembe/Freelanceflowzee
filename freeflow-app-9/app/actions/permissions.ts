@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -11,7 +11,7 @@ const logger = createFeatureLogger('permissions-actions')
 
 export async function createRole(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -48,7 +48,7 @@ export async function createRole(data: any): Promise<ActionResult<any>> {
 
 export async function updateRole(id: string, data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -82,7 +82,7 @@ export async function updateRole(id: string, data: any): Promise<ActionResult<an
 
 export async function deleteRole(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -124,7 +124,7 @@ export async function deleteRole(id: string): Promise<ActionResult<any>> {
 
 export async function createPermission(data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -155,7 +155,7 @@ export async function createPermission(data: any): Promise<ActionResult<any>> {
 
 export async function updatePermission(id: string, data: any): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -192,7 +192,7 @@ export async function assignRole(roleId: string, assignedUserId: string, assigne
   reason?: string
 }): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -234,7 +234,7 @@ export async function assignRole(roleId: string, assignedUserId: string, assigne
 
 export async function revokeRole(assignmentId: string, reason: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -275,7 +275,7 @@ export async function revokeRole(assignmentId: string, reason: string): Promise<
 
 export async function addPermissionToRole(roleId: string, permissionKey: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -326,7 +326,7 @@ export async function addPermissionToRole(roleId: string, permissionKey: string)
 
 export async function removePermissionFromRole(roleId: string, permissionKey: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -375,7 +375,7 @@ export async function removePermissionFromRole(roleId: string, permissionKey: st
 
 export async function getPermissionStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {

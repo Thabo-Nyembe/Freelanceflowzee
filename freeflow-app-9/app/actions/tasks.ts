@@ -11,7 +11,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import {
@@ -65,7 +65,7 @@ interface Task {
 export async function createTask(
   data: CreateTask
 ): Promise<ActionResult<Task>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Auth check
@@ -125,7 +125,7 @@ export async function updateTask(
   id: string,
   data: UpdateTask
 ): Promise<ActionResult<Task>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -188,7 +188,7 @@ export async function updateTask(
 export async function deleteTask(
   id: string
 ): Promise<ActionResult<{ id: string }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -233,7 +233,7 @@ export async function assignTask(
   id: string,
   assigneeId: string
 ): Promise<ActionResult<Task>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -290,7 +290,7 @@ export async function updateTaskStatus(
   id: string,
   status: 'todo' | 'in_progress' | 'in_review' | 'blocked' | 'completed' | 'cancelled'
 ): Promise<ActionResult<Task>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -348,7 +348,7 @@ export async function updateTaskPriority(
   id: string,
   priority: 'low' | 'medium' | 'high' | 'urgent'
 ): Promise<ActionResult<Task>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -398,7 +398,7 @@ export async function updateTaskPriority(
 export async function bulkDeleteTasks(
   ids: string[]
 ): Promise<ActionResult<{ success: boolean; count: number }>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate IDs
@@ -448,7 +448,7 @@ export async function bulkDeleteTasks(
 export async function getTasksByProject(
   projectId: string
 ): Promise<ActionResult<Task[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID
@@ -492,7 +492,7 @@ export async function getTasksByProject(
 export async function getTasksByAssignee(
   assigneeId: string
 ): Promise<ActionResult<Task[]>> {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = createClient()
 
   try {
     // Validate ID

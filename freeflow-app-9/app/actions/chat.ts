@@ -4,7 +4,7 @@
 
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -105,7 +105,7 @@ export async function sendChatMessage(
     // Validate input
     const validatedData = sendChatMessageSchema.parse(data)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -156,7 +156,7 @@ export async function updateChatMessage(
     // Validate ID
     uuidSchema.parse(id)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -207,7 +207,7 @@ export async function deleteChatMessage(id: string): Promise<ActionResult<{ succ
     // Validate ID
     uuidSchema.parse(id)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -251,7 +251,7 @@ export async function markChatMessageAsRead(id: string): Promise<ActionResult<Ch
     // Validate ID
     uuidSchema.parse(id)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -301,7 +301,7 @@ export async function markRoomMessagesAsRead(roomId: string): Promise<ActionResu
     // Validate ID
     uuidSchema.parse(roomId)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -350,7 +350,7 @@ export async function addReactionToChatMessage(
     uuidSchema.parse(messageId)
     z.string().min(1).max(50).parse(reaction)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -425,7 +425,7 @@ export async function togglePinChatMessage(id: string): Promise<ActionResult<Cha
     // Validate ID
     uuidSchema.parse(id)
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -480,7 +480,7 @@ export async function getChatStats(roomId?: string): Promise<ActionResult<ChatSt
       uuidSchema.parse(roomId)
     }
 
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {

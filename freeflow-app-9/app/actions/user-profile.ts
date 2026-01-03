@@ -1,6 +1,6 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { actionSuccess, actionError, ActionResult } from '@/lib/api/response'
@@ -68,7 +68,7 @@ export interface UserProfileInput {
 
 export async function getUserProfile(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -96,7 +96,7 @@ export async function getUserProfile(): Promise<ActionResult<any>> {
 
 export async function createUserProfile(input: UserProfileInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -147,7 +147,7 @@ export async function createUserProfile(input: UserProfileInput): Promise<Action
 
 export async function updateUserProfile(input: Partial<UserProfileInput>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -180,7 +180,7 @@ export async function updateUserProfile(input: Partial<UserProfileInput>): Promi
 
 export async function upsertUserProfile(input: UserProfileInput): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -223,7 +223,7 @@ export async function upsertUserProfile(input: UserProfileInput): Promise<Action
 
 export async function addSkill(skill: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) {
@@ -270,7 +270,7 @@ export async function addSkill(skill: string): Promise<ActionResult<any>> {
 
 export async function removeSkill(skill: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -304,7 +304,7 @@ export async function removeSkill(skill: string): Promise<ActionResult<any>> {
 
 export async function addExperience(experience: Omit<ExperienceItem, 'id'>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -339,7 +339,7 @@ export async function addExperience(experience: Omit<ExperienceItem, 'id'>): Pro
 
 export async function removeExperience(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -373,7 +373,7 @@ export async function removeExperience(id: string): Promise<ActionResult<any>> {
 
 export async function addPortfolioItem(item: Omit<PortfolioItem, 'id'>): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -408,7 +408,7 @@ export async function addPortfolioItem(item: Omit<PortfolioItem, 'id'>): Promise
 
 export async function removePortfolioItem(id: string): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
@@ -450,7 +450,7 @@ export async function setAvailability(availability: 'available' | 'busy' | 'away
 
 export async function getProfileStats(): Promise<ActionResult<any>> {
   try {
-    const supabase = createServerActionClient({ cookies })
+    const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return actionError('Not authenticated', 'UNAUTHORIZED')
