@@ -33,7 +33,18 @@ export default async function ModernDashboardPage() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      {/* Hero Section with Priority Image */}
+      
+        {/* V2 Competitive Upgrade Components */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <AIInsightsPanel insights={exampleModernAIInsights} />
+          <PredictiveAnalytics predictions={exampleModernPredictions} />
+          <CollaborationIndicator collaborators={exampleModernCollaborators} />
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <QuickActionsToolbar actions={exampleModernQuickActions} />
+          <ActivityFeed activities={exampleModernActivities} />
+        </div>
+{/* Hero Section with Priority Image */}
       <section className="relative rounded-lg overflow-hidden">
         <HeroImage
           src="/hero-dashboard.jpg"

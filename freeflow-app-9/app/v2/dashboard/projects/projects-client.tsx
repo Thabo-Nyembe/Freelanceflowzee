@@ -1,24 +1,43 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Textarea } from '@/components/ui/textarea'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  Download,
-  Edit,
-  CheckCircle,
-  MessageSquare,
-  FolderOpen,
-  ArrowLeft,
-  AlertCircle,
-  Loader2
+  Download, Edit, CheckCircle, MessageSquare, FolderOpen, ArrowLeft, AlertCircle, Loader2,
+  Plus, Search, Filter, BarChart3, TrendingUp, Users, Calendar, Clock, Target, Zap,
+  Settings, RefreshCw, Eye, Copy, Trash2, MoreHorizontal, Star, Share2, FileText, Activity
 } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+
+// Enhanced & Competitive Upgrade Components
+import {
+  AIInsightsPanel,
+  CollaborationIndicator,
+  PredictiveAnalytics,
+} from '@/components/ui/competitive-upgrades'
+
+import {
+  ActivityFeed,
+  QuickActionsToolbar,
+} from '@/components/ui/competitive-upgrades-extended'
 
 // A+++ UTILITIES
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
@@ -35,7 +54,46 @@ import {
   formatCurrency
 } from '@/lib/client-zone-utils'
 
-const logger = createFeatureLogger('ClientZoneProjects')
+const logger = createFeatureLogger('ProjectsV2')
+
+// ============================================================================
+// V2 COMPETITIVE MOCK DATA - Projects Context
+// ============================================================================
+
+const projectsAIInsights = [
+  { id: '1', type: 'warning' as const, title: 'At-Risk Project', description: 'Website Redesign is 15% behind schedule. Consider reallocating resources.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Risk Management' },
+  { id: '2', type: 'success' as const, title: 'Budget Efficiency', description: 'Mobile App project is 20% under budget with 85% completion. Excellent resource management!', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Budget' },
+  { id: '3', type: 'info' as const, title: 'Resource Optimization', description: 'AI suggests moving 2 designers to Brand Identity project to meet deadline.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Resources' },
+  { id: '4', type: 'success' as const, title: 'Client Satisfaction', description: 'Average approval rate increased to 94% this month. Keep up the great work!', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Quality' },
+]
+
+const projectsCollaborators = [
+  { id: '1', name: 'Alexandra Chen', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Project Manager', lastActive: 'Now' },
+  { id: '2', name: 'Marcus Johnson', avatar: '/avatars/marcus.jpg', status: 'online' as const, role: 'Lead Developer', lastActive: '2m ago' },
+  { id: '3', name: 'Sarah Williams', avatar: '/avatars/sarah.jpg', status: 'away' as const, role: 'Designer', lastActive: '15m ago' },
+  { id: '4', name: 'David Kim', avatar: '/avatars/david.jpg', status: 'offline' as const, role: 'QA Engineer', lastActive: '1h ago' },
+]
+
+const projectsPredictions = [
+  { id: '1', label: 'On-Time Delivery', current: 78, target: 95, predicted: 88, confidence: 85, trend: 'up' as const },
+  { id: '2', label: 'Budget Adherence', current: 92, target: 100, predicted: 96, confidence: 90, trend: 'up' as const },
+  { id: '3', label: 'Client Satisfaction', current: 4.6, target: 5.0, predicted: 4.8, confidence: 82, trend: 'up' as const },
+]
+
+const projectsActivities = [
+  { id: '1', user: 'Marcus Johnson', action: 'completed', target: 'API Integration milestone', timestamp: '10m ago', type: 'success' as const },
+  { id: '2', user: 'Sarah Williams', action: 'uploaded', target: '12 design assets to Brand Kit', timestamp: '25m ago', type: 'info' as const },
+  { id: '3', user: 'Alexandra Chen', action: 'approved', target: 'Mobile App Phase 2 budget', timestamp: '1h ago', type: 'success' as const },
+  { id: '4', user: 'David Kim', action: 'flagged', target: '3 bugs in Website Redesign', timestamp: '2h ago', type: 'warning' as const },
+  { id: '5', user: 'Client', action: 'requested', target: 'revision on homepage design', timestamp: '3h ago', type: 'info' as const },
+]
+
+const projectsQuickActions = [
+  { id: '1', label: 'New Project', icon: 'Plus', shortcut: 'N', action: () => console.log('New project') },
+  { id: '2', label: 'Quick Report', icon: 'FileText', shortcut: 'R', action: () => console.log('Generate report') },
+  { id: '3', label: 'Team Meeting', icon: 'Users', shortcut: 'M', action: () => console.log('Schedule meeting') },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
+]
 
 // ============================================================================
 // MAIN COMPONENT
@@ -43,8 +101,6 @@ const logger = createFeatureLogger('ClientZoneProjects')
 
 export default function ProjectsClient() {
   const router = useRouter()
-
-  // A+++ UTILITIES
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -52,11 +108,16 @@ export default function ProjectsClient() {
   const [projects, setProjects] = useState<Project[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [actionLoading, setActionLoading] = useState<{
-    [key: string]: boolean
-  }>({})
+  const [actionLoading, setActionLoading] = useState<{ [key: string]: boolean }>({})
 
-  // Revision request modal state
+  // V2 Enhanced State
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [activeTab, setActiveTab] = useState('all')
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [selectedProjects, setSelectedProjects] = useState<number[]>([])
+
+  // Revision modal state
   const [revisionModalOpen, setRevisionModalOpen] = useState(false)
   const [revisionProjectId, setRevisionProjectId] = useState<number | null>(null)
   const [revisionNotes, setRevisionNotes] = useState('')
@@ -73,27 +134,19 @@ export default function ProjectsClient() {
     try {
       setIsLoading(true)
       setError(null)
-
-      logger.info('Fetching client projects')
+      logger.info('Fetching projects')
 
       const response = await fetch('/api/client-zone/projects', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       })
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch projects: ${response.statusText}`)
-      }
+      if (!response.ok) throw new Error(`Failed to fetch projects: ${response.statusText}`)
 
       const data = await response.json()
-
       if (data.success) {
         setProjects(data.projects || [])
-        logger.info('Projects loaded successfully', {
-          count: data.projects?.length || 0
-        })
+        logger.info('Projects loaded', { count: data.projects?.length || 0 })
       } else {
         throw new Error(data.error || 'Failed to load projects')
       }
@@ -101,314 +154,155 @@ export default function ProjectsClient() {
       const errorMessage = err.message || 'Failed to load projects'
       setError(errorMessage)
       logger.error('Failed to fetch projects', { error: err })
-      toast.error('Failed to load projects', {
-        description: errorMessage
-      })
+      toast.error('Failed to load projects', { description: errorMessage })
     } finally {
       setIsLoading(false)
     }
   }
 
   // ============================================================================
-  // BUTTON HANDLERS - FULLY WIRED
+  // FILTERED & COMPUTED DATA
   // ============================================================================
 
-  /**
-   * Handler 1: Request Revision
-   * Opens modal for user to provide detailed revision feedback
-   */
-  const handleRequestRevision = (projectId: number) => {
-    const project = projects.find((p) => p.id === projectId)
-
-    logger.info('Revision request modal opened', {
-      projectId,
-      projectName: project?.name
+  const filteredProjects = useMemo(() => {
+    return projects.filter(project => {
+      const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = statusFilter === 'all' || project.status === statusFilter
+      const matchesTab = activeTab === 'all' ||
+        (activeTab === 'active' && ['in-progress', 'review'].includes(project.status)) ||
+        (activeTab === 'completed' && project.status === 'completed') ||
+        (activeTab === 'pending' && project.status === 'pending')
+      return matchesSearch && matchesStatus && matchesTab
     })
+  }, [projects, searchQuery, statusFilter, activeTab])
 
+  const projectStats = useMemo(() => ({
+    total: projects.length,
+    active: projects.filter(p => ['in-progress', 'review'].includes(p.status)).length,
+    completed: projects.filter(p => p.status === 'completed').length,
+    pending: projects.filter(p => p.status === 'pending').length,
+    totalBudget: projects.reduce((sum, p) => sum + (p.budget || 0), 0),
+    totalSpent: projects.reduce((sum, p) => sum + (p.spent || 0), 0),
+    avgProgress: projects.length > 0 ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length) : 0,
+  }), [projects])
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleRequestRevision = (projectId: number) => {
+    const project = projects.find(p => p.id === projectId)
+    logger.info('Revision modal opened', { projectId, projectName: project?.name })
     setRevisionProjectId(projectId)
     setRevisionModalOpen(true)
     setRevisionNotes('')
   }
 
-  /**
-   * Submit revision request with detailed feedback
-   */
   const submitRevisionRequest = async () => {
     if (!revisionProjectId || !revisionNotes.trim()) {
-      toast.error('Please provide revision details', {
-        description: 'Describe what changes you need'
-      })
-      logger.warn('Revision request validation failed', {
-        reason: 'Empty notes'
-      })
+      toast.error('Please provide revision details')
       return
     }
 
-    const project = projects.find((p) => p.id === revisionProjectId)
+    const project = projects.find(p => p.id === revisionProjectId)
     const actionKey = `revision-${revisionProjectId}`
 
     try {
-      setActionLoading((prev) => ({ ...prev, [actionKey]: true }))
-
-      logger.info('Submitting revision request', {
-        projectId: revisionProjectId,
-        projectName: project?.name,
-        notesLength: revisionNotes.length
-      })
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      logger.info('Submitting revision', { projectId: revisionProjectId })
 
       const response = await fetch('/api/client-zone/projects/revision', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          projectId: revisionProjectId,
-          projectName: project?.name,
-          revisionNotes: revisionNotes,
-          timestamp: new Date().toISOString()
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId: revisionProjectId, revisionNotes, timestamp: new Date().toISOString() })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to submit revision request')
-      }
+      if (!response.ok) throw new Error('Failed to submit revision')
 
       const result = await response.json()
-
       if (result.success) {
-        logger.info('Revision request submitted successfully', {
-          projectId: revisionProjectId,
-          projectName: project?.name
-        })
-
-        toast.success(`Revision request submitted for "${project?.name}"`, {
-          description: 'Your team will review and respond within 24 hours'
-        })
-
-        // Close modal and reset state
+        toast.success(`Revision submitted for "${project?.name}"`)
         setRevisionModalOpen(false)
         setRevisionProjectId(null)
         setRevisionNotes('')
-
-        // Refresh projects to get updated status
         await fetchProjects()
       } else {
         throw new Error(result.error || 'Failed to submit revision')
       }
     } catch (err: any) {
-      logger.error('Failed to submit revision request', {
-        error: err,
-        projectId: revisionProjectId
-      })
-
-      toast.error('Failed to submit revision request', {
-        description: err.message || 'Please try again later'
-      })
+      logger.error('Revision failed', { error: err })
+      toast.error('Failed to submit revision', { description: err.message })
     } finally {
-      setActionLoading((prev) => ({ ...prev, [actionKey]: false }))
+      setActionLoading(prev => ({ ...prev, [actionKey]: false }))
     }
   }
 
-  /**
-   * Handler 2: Approve Deliverable
-   * Approves project deliverable and triggers milestone payment release
-   */
   const handleApproveDeliverable = async (projectId: number) => {
-    const project = projects.find((p) => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     const actionKey = `approve-${projectId}`
-
-    if (!project) {
-      logger.error('Project not found', { projectId })
-      return
-    }
+    if (!project) return
 
     try {
-      setActionLoading((prev) => ({ ...prev, [actionKey]: true }))
-
-      logger.info('Deliverable approval initiated', {
-        projectId,
-        projectName: project.name,
-        currentStatus: project.status,
-        progress: project.progress
-      })
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      logger.info('Approving deliverable', { projectId })
 
       const response = await fetch('/api/client-zone/projects/approve', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          projectId,
-          projectName: project.name,
-          currentStatus: project.status,
-          deliverables: project.deliverables,
-          timestamp: new Date().toISOString()
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, timestamp: new Date().toISOString() })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to approve deliverable')
-      }
+      if (!response.ok) throw new Error('Failed to approve')
 
       const result = await response.json()
-
       if (result.success) {
-        logger.info('Deliverable approved successfully', {
-          projectId,
-          projectName: project.name,
-          newStatus: result.newStatus
-        })
-
-        toast.success(`"${project.name}" approved!`, {
-          description: 'Milestone payment will be released from escrow automatically'
-        })
-
-        // Update local state with new status
-        setProjects((prevProjects) =>
-          prevProjects.map((p) =>
-            p.id === projectId
-              ? { ...p, status: result.newStatus || 'completed' }
-              : p
-          )
-        )
-
-        // Refresh to get server state
+        toast.success(`"${project.name}" approved!`, { description: 'Payment will be released from escrow' })
         await fetchProjects()
       } else {
         throw new Error(result.error || 'Failed to approve')
       }
     } catch (err: any) {
-      logger.error('Failed to approve deliverable', {
-        error: err,
-        projectId,
-        projectName: project.name
-      })
-
-      toast.error('Failed to approve deliverable', {
-        description: err.message || 'Please try again later'
-      })
+      logger.error('Approval failed', { error: err })
+      toast.error('Failed to approve', { description: err.message })
     } finally {
-      setActionLoading((prev) => ({ ...prev, [actionKey]: false }))
+      setActionLoading(prev => ({ ...prev, [actionKey]: false }))
     }
   }
 
-  /**
-   * Handler 3: Download Files
-   * Downloads project files as ZIP archive with real Blob handling
-   */
   const handleDownloadFiles = async (projectId: number) => {
-    const project = projects.find((p) => p.id === projectId)
+    const project = projects.find(p => p.id === projectId)
     const actionKey = `download-${projectId}`
-
-    if (!project) {
-      logger.error('Project not found for download', { projectId })
-      return
-    }
+    if (!project) return
 
     try {
-      setActionLoading((prev) => ({ ...prev, [actionKey]: true }))
-
-      logger.info('File download initiated', {
-        projectId,
-        projectName: project.name,
-        deliverablesCount: project.deliverables.length
-      })
-
-      toast.info('Preparing download...', {
-        description: `Packaging files for "${project.name}"`
-      })
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      toast.info(`Preparing download for "${project.name}"...`)
 
       const response = await fetch('/api/client-zone/projects/download', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          projectId,
-          projectName: project.name
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to download files')
-      }
+      if (!response.ok) throw new Error('Download failed')
 
-      // Get the blob data
       const blob = await response.blob()
-      const contentDisposition = response.headers.get('Content-Disposition')
-      const filenameMatch = contentDisposition?.match(/filename="(.+)"/)
-      const filename =
-        filenameMatch?.[1] || `${project.name.replace(/\s+/g, '_')}_files.zip`
-
-      // Create download link
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = filename
+      a.download = `${project.name.replace(/\s+/g, '_')}_files.zip`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
       window.URL.revokeObjectURL(url)
 
-      logger.info('Files downloaded successfully', {
-        projectId,
-        projectName: project.name,
-        filename,
-        size: blob.size
-      })
-
-      toast.success(`Files downloaded for "${project.name}"`, {
-        description: `${filename} (${(blob.size / 1024 / 1024).toFixed(2)} MB)`
-      })
+      toast.success(`Files downloaded for "${project.name}"`)
     } catch (err: any) {
-      logger.error('Failed to download files', {
-        error: err,
-        projectId,
-        projectName: project.name
-      })
-
-      toast.error('Failed to download files', {
-        description: err.message || 'Please try again later'
-      })
+      toast.error('Download failed', { description: err.message })
     } finally {
-      setActionLoading((prev) => ({ ...prev, [actionKey]: false }))
+      setActionLoading(prev => ({ ...prev, [actionKey]: false }))
     }
-  }
-
-  /**
-   * Handler 4: View Details / Navigate
-   * Navigate to detailed project view page
-   */
-  const handleViewDetails = (projectId: number) => {
-    const project = projects.find((p) => p.id === projectId)
-
-    logger.info('Viewing project details', {
-      projectId,
-      projectName: project?.name
-    })
-
-    router.push(`/dashboard/client-zone/projects/${projectId}`)
-
-    toast.info(`Opening "${project?.name}" details...`)
-  }
-
-  /**
-   * Handler 5: Discuss Project / Contact Team
-   * Navigate to messages tab with project context
-   */
-  const handleDiscussProject = (projectId: number) => {
-    const project = projects.find((p) => p.id === projectId)
-
-    logger.info('Project discussion initiated', {
-      projectId,
-      projectName: project?.name
-    })
-
-    router.push(`/dashboard/client-zone?tab=messages&project=${projectId}`)
-
-    toast.info('Opening team chat...', {
-      description: `Discuss "${project?.name}" with your team`
-    })
   }
 
   // ============================================================================
@@ -442,314 +336,377 @@ export default function ProjectsClient() {
   }
 
   // ============================================================================
-  // EMPTY STATE
-  // ============================================================================
-
-  if (projects.length === 0) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900 p-6">
-        <div className="container mx-auto">
-          <NoDataEmptyState
-            title="No projects found"
-            description="You don't have any active projects yet. Contact your team to get started."
-            action={{
-              label: 'Contact Team',
-              onClick: () => router.push('/dashboard/client-zone?tab=messages')
-            }}
-          />
-        </div>
-      </div>
-    )
-  }
-
-  // ============================================================================
   // MAIN RENDER
   // ============================================================================
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 dark:bg-none dark:bg-gray-900">
-      <div className="container mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => router.push('/dashboard/client-zone')}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Client Zone
-            </Button>
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent">
-                My Projects
-              </h1>
-              <p className="text-gray-600 mt-2 text-lg">
-                Track progress, approve deliverables, and manage project files
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Badge variant="outline" className="text-lg px-4 py-2">
-              <FolderOpen className="h-4 w-4 mr-2" />
-              {projects.length} {projects.length === 1 ? 'Project' : 'Projects'}
-            </Badge>
-          </div>
-        </div>
+      <div className="container mx-auto p-6 space-y-6">
 
-        {/* Projects List */}
-        <div className="grid grid-cols-1 gap-6">
-          {projects.map((project, index) => (
-            <motion.div
-              key={project.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-            >
-              <Card className="bg-white/70 backdrop-blur-sm border-white/40 shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <CardTitle className="text-xl">{project.name}</CardTitle>
-                        <Badge className={getStatusColor(project.status)}>
-                          {getStatusIcon(project.status)}
-                          <span className="ml-1 capitalize">
-                            {project.status.replace('-', ' ')}
-                          </span>
-                        </Badge>
-                      </div>
-                      <p className="text-gray-600 mb-4">{project.description}</p>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-600">Current Phase</p>
-                          <p className="font-semibold">{project.phase}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Due Date</p>
-                          <p className="font-semibold">
-                            {new Date(project.dueDate).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Team</p>
-                          <p className="font-semibold">{project.team.join(', ')}</p>
-                        </div>
-                        <div>
-                          <p className="text-gray-600">Budget</p>
-                          <p className="font-semibold">
-                            {formatCurrency(project.spent)} / {formatCurrency(project.budget)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {/* Progress */}
-                  <div>
-                    <div className="flex justify-between text-sm mb-2">
-                      <span className="font-medium">Overall Progress</span>
-                      <span className="font-bold text-blue-600">{project.progress}%</span>
-                    </div>
-                    <Progress value={project.progress} className="h-3" />
-                  </div>
-
-                  {/* Deliverables */}
-                  <div>
-                    <h4 className="font-semibold mb-3 flex items-center gap-2">
-                      Deliverables
-                      <Badge variant="outline" className="text-xs">
-                        {project.deliverables.length} items
-                      </Badge>
-                    </h4>
-                    <div className="space-y-2">
-                      {project.deliverables.map((deliverable, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
-                        >
-                          <div className="flex items-center gap-3">
-                            {getStatusIcon(deliverable.status)}
-                            <div>
-                              <p className="font-medium">{deliverable.name}</p>
-                              <p className="text-sm text-gray-600">
-                                Due: {new Date(deliverable.dueDate).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </div>
-                          <Badge
-                            className={getStatusColor(deliverable.status)}
-                            variant="outline"
-                          >
-                            {deliverable.status.replace('-', ' ')}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex items-center justify-between pt-4 border-t">
-                    <div className="flex items-center flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleDownloadFiles(project.id)}
-                        disabled={actionLoading[`download-${project.id}`]}
-                      >
-                        {actionLoading[`download-${project.id}`] ? (
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                        ) : (
-                          <Download className="h-3 w-3 mr-1" />
-                        )}
-                        Download Files
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleRequestRevision(project.id)}
-                        disabled={actionLoading[`revision-${project.id}`]}
-                      >
-                        <Edit className="h-3 w-3 mr-1" />
-                        Request Revision
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleViewDetails(project.id)}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                    <div className="flex items-center flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white"
-                        onClick={() => handleApproveDeliverable(project.id)}
-                        disabled={actionLoading[`approve-${project.id}`]}
-                      >
-                        {actionLoading[`approve-${project.id}`] ? (
-                          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                        ) : (
-                          <CheckCircle className="h-3 w-3 mr-1" />
-                        )}
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                        onClick={() => handleDiscussProject(project.id)}
-                      >
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        Discuss
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Revision Request Modal */}
-      {revisionModalOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-6"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-2xl font-bold">Request Revision</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setRevisionModalOpen(false)
-                  setRevisionProjectId(null)
-                  setRevisionNotes('')
-                }}
-              >
-                ✕
-              </Button>
-            </div>
-
-            <div className="space-y-4">
+        {/* ================================================================
+            HEADER WITH STATS
+            ================================================================ */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
+                <FolderOpen className="h-8 w-8" />
+              </div>
               <div>
-                <p className="text-gray-600 mb-2">
-                  Project:{' '}
-                  <span className="font-semibold">
-                    {projects.find((p) => p.id === revisionProjectId)?.name}
-                  </span>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-indigo-900 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
+                  Projects
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Manage projects, track progress, and collaborate with your team
                 </p>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-start gap-2">
-                    <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-blue-900">
-                      <p className="font-medium mb-1">Revision Request Guidelines</p>
-                      <ul className="list-disc list-inside space-y-1 text-blue-800">
-                        <li>Be specific about what needs to change</li>
-                        <li>Include reference materials if possible</li>
-                        <li>Team will respond within 24 hours</li>
-                      </ul>
-                    </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={fetchProjects}>
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+            <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white" onClick={() => setShowCreateModal(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              New Project
+            </Button>
+          </div>
+        </div>
+
+        {/* ================================================================
+            STATS CARDS
+            ================================================================ */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/50">
+                  <FolderOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{projectStats.total}</p>
+                  <p className="text-xs text-gray-500">Total</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/50">
+                  <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{projectStats.active}</p>
+                  <p className="text-xs text-gray-500">Active</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/50">
+                  <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{projectStats.completed}</p>
+                  <p className="text-xs text-gray-500">Completed</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/50">
+                  <TrendingUp className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{projectStats.avgProgress}%</p>
+                  <p className="text-xs text-gray-500">Avg Progress</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50">
+                  <Target className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{formatCurrency(projectStats.totalBudget)}</p>
+                  <p className="text-xs text-gray-500">Total Budget</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-rose-100 dark:bg-rose-900/50">
+                  <BarChart3 className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+                </div>
+                <div>
+                  <p className="text-2xl font-bold">{formatCurrency(projectStats.totalSpent)}</p>
+                  <p className="text-xs text-gray-500">Spent</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* ================================================================
+            V2 COMPETITIVE UPGRADE COMPONENTS
+            ================================================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <AIInsightsPanel insights={projectsAIInsights} />
+          <PredictiveAnalytics predictions={projectsPredictions} />
+          <CollaborationIndicator collaborators={projectsCollaborators} />
+        </div>
+
+        {/* ================================================================
+            QUICK ACTIONS & ACTIVITY
+            ================================================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <QuickActionsToolbar actions={projectsQuickActions} />
+          <ActivityFeed activities={projectsActivities} />
+        </div>
+
+        {/* ================================================================
+            MAIN CONTENT WITH TABS
+            ================================================================ */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <TabsList className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm">
+              <TabsTrigger value="all">All Projects</TabsTrigger>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+            </TabsList>
+
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search projects..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 w-64 bg-white/70 dark:bg-gray-800/70"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-40 bg-white/70 dark:bg-gray-800/70">
+                  <Filter className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="in-progress">In Progress</SelectItem>
+                  <SelectItem value="review">Review</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <TabsContent value={activeTab} className="space-y-4">
+            {filteredProjects.length === 0 ? (
+              <NoDataEmptyState
+                title="No projects found"
+                description={searchQuery ? "Try adjusting your search or filters" : "Create your first project to get started"}
+                action={{ label: 'New Project', onClick: () => setShowCreateModal(true) }}
+              />
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {filteredProjects.map((project, index) => (
+                  <motion.div
+                    key={project.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                  >
+                    <Card className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm border-white/40 dark:border-gray-700/40 hover:shadow-lg transition-all">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <CardTitle className="text-lg">{project.name}</CardTitle>
+                              <Badge className={getStatusColor(project.status)}>
+                                {project.status.replace('-', ' ')}
+                              </Badge>
+                            </div>
+                            <CardDescription>{project.description}</CardDescription>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => router.push(`/dashboard/projects/${project.id}`)}>
+                                <Eye className="h-4 w-4 mr-2" /> View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDownloadFiles(project.id)}>
+                                <Download className="h-4 w-4 mr-2" /> Download Files
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleRequestRevision(project.id)}>
+                                <Edit className="h-4 w-4 mr-2" /> Request Revision
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(project.id.toString())}>
+                                <Copy className="h-4 w-4 mr-2" /> Copy ID
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Share2 className="h-4 w-4 mr-2" /> Share
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-4">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Phase</p>
+                            <p className="font-medium">{project.phase}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Due Date</p>
+                            <p className="font-medium">{new Date(project.dueDate).toLocaleDateString()}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Team</p>
+                            <p className="font-medium">{project.team?.join(', ') || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 dark:text-gray-400">Budget</p>
+                            <p className="font-medium">{formatCurrency(project.spent || 0)} / {formatCurrency(project.budget || 0)}</p>
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="flex justify-between text-sm mb-2">
+                            <span className="text-gray-500 dark:text-gray-400">Progress</span>
+                            <span className="font-bold text-blue-600 dark:text-blue-400">{project.progress}%</span>
+                          </div>
+                          <Progress value={project.progress} className="h-2" />
+                        </div>
+
+                        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline" onClick={() => handleDownloadFiles(project.id)} disabled={actionLoading[`download-${project.id}`]}>
+                              {actionLoading[`download-${project.id}`] ? <Loader2 className="h-3 w-3 animate-spin" /> : <Download className="h-3 w-3" />}
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/messages?project=${project.id}`)}>
+                              <MessageSquare className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button size="sm" variant="outline" onClick={() => handleRequestRevision(project.id)}>
+                              <Edit className="h-3 w-3 mr-1" /> Revision
+                            </Button>
+                            <Button size="sm" className="bg-gradient-to-r from-green-600 to-emerald-600 text-white" onClick={() => handleApproveDeliverable(project.id)} disabled={actionLoading[`approve-${project.id}`]}>
+                              {actionLoading[`approve-${project.id}`] ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
+                              Approve
+                            </Button>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* ================================================================
+            REVISION MODAL
+            ================================================================ */}
+        <Dialog open={revisionModalOpen} onOpenChange={setRevisionModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Request Revision</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Project: <span className="font-semibold">{projects.find(p => p.id === revisionProjectId)?.name}</span>
+              </p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-blue-900 dark:text-blue-100">Guidelines</p>
+                    <ul className="list-disc list-inside text-blue-800 dark:text-blue-200 mt-1">
+                      <li>Be specific about changes needed</li>
+                      <li>Include references if possible</li>
+                      <li>Team responds within 24 hours</li>
+                    </ul>
                   </div>
                 </div>
               </div>
-
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  Revision Details *
-                </label>
+                <label className="block text-sm font-medium mb-2">Revision Details *</label>
                 <Textarea
-                  placeholder="Describe the changes you need in detail..."
+                  placeholder="Describe the changes you need..."
                   value={revisionNotes}
                   onChange={(e) => setRevisionNotes(e.target.value)}
-                  className="min-h-[150px]"
+                  className="min-h-[120px]"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  {revisionNotes.length} characters
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-4 border-t">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setRevisionModalOpen(false)
-                    setRevisionProjectId(null)
-                    setRevisionNotes('')
-                  }}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
-                  onClick={submitRevisionRequest}
-                  disabled={
-                    !revisionNotes.trim() ||
-                    actionLoading[`revision-${revisionProjectId}`]
-                  }
-                >
-                  {actionLoading[`revision-${revisionProjectId}`] ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Submitting...
-                    </>
-                  ) : (
-                    <>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Submit Revision Request
-                    </>
-                  )}
-                </Button>
               </div>
             </div>
-          </motion.div>
-        </div>
-      )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setRevisionModalOpen(false)}>Cancel</Button>
+              <Button onClick={submitRevisionRequest} disabled={!revisionNotes.trim() || actionLoading[`revision-${revisionProjectId}`]} className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                {actionLoading[`revision-${revisionProjectId}`] ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+                Submit Request
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ================================================================
+            CREATE PROJECT MODAL
+            ================================================================ */}
+        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Create New Project</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Project Name *</label>
+                <Input placeholder="Enter project name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <Textarea placeholder="Describe the project..." className="min-h-[100px]" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Due Date</label>
+                  <Input type="date" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Budget</label>
+                  <Input type="number" placeholder="0.00" />
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+                <Plus className="h-4 w-4 mr-2" /> Create Project
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   )
 }
