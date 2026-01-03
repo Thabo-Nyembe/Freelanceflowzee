@@ -58,7 +58,8 @@ import {
   Ban,
   Star,
   Inbox,
-  Bell
+  Bell,
+  Download
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
