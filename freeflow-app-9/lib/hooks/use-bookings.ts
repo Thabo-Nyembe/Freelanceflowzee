@@ -100,7 +100,8 @@ export function useBookings(options: UseBookingsOptions = {}) {
     filters,
     orderBy: { column: 'start_time', ascending: false },
     limit: limit || 50,
-    realtime: true
+    realtime: true,
+    softDelete: false // bookings table doesn't have deleted_at column
   }
 
   const { data, loading, error, refetch } = useSupabaseQuery<Booking>(queryOptions)
