@@ -74,7 +74,8 @@ export function useInvoices(options: UseInvoicesOptions = {}) {
     table: 'invoices',
     filters,
     orderBy: { column: 'created_at', ascending: false },
-    realtime: true
+    realtime: true,
+    softDelete: false // invoices table doesn't have deleted_at column
   }
   if (limit !== undefined) queryOptions.limit = limit
 

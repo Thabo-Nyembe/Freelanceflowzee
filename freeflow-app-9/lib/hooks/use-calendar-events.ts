@@ -75,7 +75,7 @@ export function useCalendarEvents(options: UseCalendarEventsOptions = {}) {
   const { eventType, status, limit } = options
 
   const filters: Record<string, any> = {}
-  if (eventType && eventType !== 'all') filters.event_type = eventType
+  // Note: event_type column doesn't exist in the table, only filter by status
   if (status && status !== 'all') filters.status = status
 
   const queryOptions: any = {
@@ -83,7 +83,8 @@ export function useCalendarEvents(options: UseCalendarEventsOptions = {}) {
     filters,
     orderBy: { column: 'start_time', ascending: true },
     limit: limit || 50,
-    realtime: true
+    realtime: true,
+    softDelete: false // calendar_events table doesn't have deleted_at column
   }
 
   const { data, loading, error, refetch } = useSupabaseQuery<CalendarEvent>(queryOptions)
