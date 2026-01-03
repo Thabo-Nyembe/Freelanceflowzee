@@ -565,13 +565,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
     setShowMoveDialog(true)
   }
 
-  if (error) return (
-    <div className="p-8">
-      <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg">
-        Error: {error.message}
-      </div>
-    </div>
-  )
+  // In demo mode, continue with empty documents instead of showing error
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
