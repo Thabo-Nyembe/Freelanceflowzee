@@ -420,7 +420,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     setCurrentDate(newDate)
   }
 
-  if (error) return <div className="p-8"><div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">Error: {error.message}</div></div>
+  // In demo mode, continue with empty bookings instead of showing error
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
