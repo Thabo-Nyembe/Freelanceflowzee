@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createAnonClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import ReviewManagementDashboard from '@/components/video/review-management-dashboard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,7 +24,7 @@ type Review = {
 };
 
 async function getReviewData(userId: string) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = createAnonClient();
   
   try {
     // Get user&apos;s reviews
@@ -158,7 +157,7 @@ function calculateReviewStats(reviews: Review[]) {
 }
 
 export default async function ReviewsPage() {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = createAnonClient();
   
   const {
     data: { user },

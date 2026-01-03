@@ -84,9 +84,6 @@ const nextConfig = {
   },
   experimental: {
     externalDir: true,
-    // Faster builds
-    parallelServerCompiles: true,
-    parallelServerBuildTraces: true,
   },
 
   // Turbopack configuration
