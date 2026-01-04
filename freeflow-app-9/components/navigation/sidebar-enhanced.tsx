@@ -676,6 +676,8 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         name: 'Workflows & Automation',
         visible: true,
         items: [
+          { id: 'kazi-workflows', name: 'Kazi Workflows', href: '/dashboard/kazi-workflows-v2', icon: Workflow, description: 'Visual workflow automation', badge: 'Hot' },
+          { id: 'kazi-automations', name: 'Kazi Automations', href: '/dashboard/kazi-automations-v2', icon: Zap, description: 'Business automation rules', badge: 'Hot' },
           { id: 'workflows', name: 'Workflows', href: '/dashboard/workflows-v2', icon: Workflow, description: 'Workflow automation', badge: 'New' },
           { id: 'automations', name: 'Automations', href: '/dashboard/automations-v2', icon: Zap, description: 'Automation rules', badge: 'New' }
         ]

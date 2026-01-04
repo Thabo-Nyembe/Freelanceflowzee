@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { StorageFile, StorageConnection } from '@/lib/storage/providers'
 import { getStorageConnections, getAllFiles, getTotalStorageQuota } from '@/lib/storage/storage-queries'
-import { createClient } from '@/lib/supabase/client'
 
 interface StorageData {
   files: StorageFile[]

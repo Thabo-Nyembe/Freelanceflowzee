@@ -21,7 +21,8 @@ import {
   DollarSign,
   Zap,
   Plug,
-  Key
+  Key,
+  Workflow
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -137,6 +138,20 @@ const sidebarItems: SidebarItem[] = [
     icon: Plug,
     description: 'Connect third-party services',
     badge: 'New'
+  },
+  {
+    name: 'Kazi Workflows',
+    href: '/dashboard/kazi-workflows-v2',
+    icon: Workflow,
+    description: 'Visual workflow automation',
+    badge: 'Hot'
+  },
+  {
+    name: 'Kazi Automations',
+    href: '/dashboard/kazi-automations-v2',
+    icon: Zap,
+    description: 'Business automation rules',
+    badge: 'Hot'
   },
   {
     name: 'API Keys',
