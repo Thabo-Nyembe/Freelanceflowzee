@@ -1,0 +1,134 @@
+import { createClient } from '@/lib/supabase/server'
+import { NextRequest, NextResponse } from 'next/server'
+
+export async function GET(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const searchParams = request.nextUrl.searchParams
+    const status = searchParams.get('status')
+    const category = searchParams.get('category')
+    const limit = parseInt(searchParams.get('limit') || '50')
+    const offset = parseInt(searchParams.get('offset') || '0')
+
+    let query = supabase
+      .from('workflows')
+      .select(`
+        *,
+        workflow_actions (id, action_type, position, config)
+      `)
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (status) {
+      query = query.eq('status', status)
+    }
+
+    if (category) {
+      query = query.eq('category', category)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error('Error fetching workflows:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    return NextResponse.json({ data })
+  } catch (error) {
+    console.error('Error in GET /api/kazi/workflows:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body = await request.json()
+    const {
+      name,
+      description,
+      trigger_type = 'manual',
+      trigger_config = {},
+      actions = [],
+      category = null,
+      tags = [],
+      status = 'draft'
+    } = body
+
+    if (!name) {
+      return NextResponse.json({ error: 'Name is required' }, { status: 400 })
+    }
+
+    // Create workflow
+    const { data: workflow, error: workflowError } = await supabase
+      .from('workflows')
+      .insert({
+        user_id: user.id,
+        name,
+        description,
+        trigger_type,
+        trigger_config,
+        category,
+        tags,
+        status
+      })
+      .select()
+      .single()
+
+    if (workflowError || !workflow) {
+      console.error('Error creating workflow:', workflowError)
+      return NextResponse.json({ error: workflowError?.message || 'Failed to create workflow' }, { status: 500 })
+    }
+
+    // Create workflow actions
+    if (actions.length > 0) {
+      const actionRecords = actions.map((action: { action_type: string; config: Record<string, unknown>; conditions?: Record<string, unknown>[] }, index: number) => ({
+        workflow_id: workflow.id,
+        action_type: action.action_type,
+        position: index,
+        config: action.config || {},
+        conditions: action.conditions || []
+      }))
+
+      const { error: actionsError } = await supabase
+        .from('workflow_actions')
+        .insert(actionRecords)
+
+      if (actionsError) {
+        console.error('Error creating workflow actions:', actionsError)
+        // Rollback workflow creation
+        await supabase.from('workflows').delete().eq('id', workflow.id)
+        return NextResponse.json({ error: 'Failed to create workflow actions' }, { status: 500 })
+      }
+    }
+
+    // Fetch complete workflow with actions
+    const { data: completeWorkflow } = await supabase
+      .from('workflows')
+      .select(`
+        *,
+        workflow_actions (id, action_type, position, config)
+      `)
+      .eq('id', workflow.id)
+      .single()
+
+    return NextResponse.json({ data: completeWorkflow }, { status: 201 })
+  } catch (error) {
+    console.error('Error in POST /api/kazi/workflows:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}

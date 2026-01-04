@@ -1,0 +1,105 @@
+import { createClient } from '@/lib/supabase/server'
+import { NextResponse } from 'next/server'
+
+export async function GET() {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Get workflow metrics
+    const { data: workflows } = await supabase
+      .from('workflows')
+      .select('id, status, run_count, success_count, error_count')
+      .eq('user_id', user.id)
+
+    // Get automation metrics
+    const { data: automations } = await supabase
+      .from('automations')
+      .select('id, status, run_count, success_count, error_count, time_saved')
+      .eq('user_id', user.id)
+
+    // Calculate workflow metrics
+    const workflowMetrics = {
+      total: workflows?.length || 0,
+      active: workflows?.filter(w => w.status === 'active').length || 0,
+      totalRuns: workflows?.reduce((sum, w) => sum + (w.run_count || 0), 0) || 0,
+      successRate: 0,
+      errorCount: workflows?.reduce((sum, w) => sum + (w.error_count || 0), 0) || 0
+    }
+
+    const workflowTotalSuccess = workflows?.reduce((sum, w) => sum + (w.success_count || 0), 0) || 0
+    workflowMetrics.successRate = workflowMetrics.totalRuns > 0
+      ? Math.round((workflowTotalSuccess / workflowMetrics.totalRuns) * 100)
+      : 0
+
+    // Calculate automation metrics
+    const automationMetrics = {
+      total: automations?.length || 0,
+      active: automations?.filter(a => a.status === 'active').length || 0,
+      totalRuns: automations?.reduce((sum, a) => sum + (a.run_count || 0), 0) || 0,
+      successRate: 0,
+      errorCount: automations?.reduce((sum, a) => sum + (a.error_count || 0), 0) || 0,
+      timeSaved: automations?.reduce((sum, a) => sum + (a.time_saved || 0), 0) || 0
+    }
+
+    const automationTotalSuccess = automations?.reduce((sum, a) => sum + (a.success_count || 0), 0) || 0
+    automationMetrics.successRate = automationMetrics.totalRuns > 0
+      ? Math.round((automationTotalSuccess / automationMetrics.totalRuns) * 100)
+      : 0
+
+    // Get recent executions
+    const { data: recentWorkflowExecutions } = await supabase
+      .from('workflow_executions')
+      .select(`
+        id,
+        workflow_id,
+        status,
+        started_at,
+        duration_ms,
+        workflows!inner (name)
+      `)
+      .eq('workflows.user_id', user.id)
+      .order('started_at', { ascending: false })
+      .limit(5)
+
+    const { data: recentAutomationExecutions } = await supabase
+      .from('automation_executions')
+      .select(`
+        id,
+        automation_id,
+        status,
+        started_at,
+        duration_ms,
+        automations!inner (name)
+      `)
+      .eq('automations.user_id', user.id)
+      .order('started_at', { ascending: false })
+      .limit(5)
+
+    return NextResponse.json({
+      workflows: workflowMetrics,
+      automations: automationMetrics,
+      combined: {
+        totalWorkflowsAndAutomations: workflowMetrics.total + automationMetrics.total,
+        totalActive: workflowMetrics.active + automationMetrics.active,
+        totalRuns: workflowMetrics.totalRuns + automationMetrics.totalRuns,
+        overallSuccessRate: Math.round(
+          ((workflowTotalSuccess + automationTotalSuccess) /
+            Math.max(workflowMetrics.totalRuns + automationMetrics.totalRuns, 1)) * 100
+        ),
+        totalTimeSaved: automationMetrics.timeSaved
+      },
+      recentExecutions: {
+        workflows: recentWorkflowExecutions || [],
+        automations: recentAutomationExecutions || []
+      }
+    })
+  } catch (error) {
+    console.error('Error in GET /api/kazi/metrics:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}

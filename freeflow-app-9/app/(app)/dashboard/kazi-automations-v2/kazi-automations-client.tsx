@@ -7,9 +7,9 @@
  * managing, and monitoring automated business rules and triggers.
  */
 
-import React, { useState, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import React, { useState, useCallback, useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
@@ -17,11 +17,10 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Switch } from '@/components/ui/switch'
-import { Progress } from '@/components/ui/progress'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
+import { useKaziAutomations, Automation } from '@/hooks/use-kazi-automations'
 import {
   Zap,
   Plus,
@@ -32,32 +31,19 @@ import {
   Copy,
   Clock,
   Webhook,
-  Calendar,
   CheckCircle2,
   XCircle,
-  TrendingUp,
   Settings,
-  RefreshCw,
   History,
   PlayCircle,
   Activity,
   Sparkles,
   ArrowRight,
-  Database,
   Mail,
-  Bell,
   GitBranch,
   Loader2,
-  Filter,
-  FolderOpen,
-  Target,
-  Globe,
-  FileText,
   Users,
   DollarSign,
-  AlertTriangle,
-  Cpu,
-  Layers,
   Timer,
   Shield,
   Rocket,
@@ -73,124 +59,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-// Types
-interface Automation {
-  id: string
-  name: string
-  description: string
-  trigger: {
-    type: 'event' | 'schedule' | 'condition' | 'webhook'
-    event?: string
-    schedule?: string
-    condition?: string
-  }
-  actions: {
-    type: string
-    name: string
-    config: any
-  }[]
-  is_active: boolean
-  run_count: number
-  last_triggered_at?: string
-  category: string
-  created_at: string
-}
-
-interface AutomationStats {
+// Extended stats interface for display
+interface DisplayStats {
   totalAutomations: number
   activeAutomations: number
   triggersToday: number
   successRate: number
   timeSaved: string
   topAutomation: string
-}
-
-// Mock data
-const mockAutomations: Automation[] = [
-  {
-    id: '1',
-    name: 'Auto-assign new tasks',
-    description: 'Automatically assign tasks to team members based on workload',
-    trigger: { type: 'event', event: 'task.created' },
-    actions: [
-      { type: 'condition', name: 'Check workload', config: {} },
-      { type: 'assign-task', name: 'Assign to available member', config: {} }
-    ],
-    is_active: true,
-    run_count: 234,
-    last_triggered_at: new Date(Date.now() - 1800000).toISOString(),
-    category: 'productivity',
-    created_at: new Date(Date.now() - 86400000 * 30).toISOString()
-  },
-  {
-    id: '2',
-    name: 'Send invoice on project completion',
-    description: 'Generate and send invoice when a project is marked complete',
-    trigger: { type: 'event', event: 'project.completed' },
-    actions: [
-      { type: 'create-invoice', name: 'Generate invoice', config: {} },
-      { type: 'email', name: 'Send to client', config: {} }
-    ],
-    is_active: true,
-    run_count: 45,
-    last_triggered_at: new Date(Date.now() - 86400000).toISOString(),
-    category: 'finance',
-    created_at: new Date(Date.now() - 86400000 * 60).toISOString()
-  },
-  {
-    id: '3',
-    name: 'Daily standup reminder',
-    description: 'Send reminder to team 15 minutes before daily standup',
-    trigger: { type: 'schedule', schedule: '0 9 45 * * 1-5' },
-    actions: [
-      { type: 'notification', name: 'Send reminder', config: {} }
-    ],
-    is_active: true,
-    run_count: 120,
-    last_triggered_at: new Date(Date.now() - 3600000).toISOString(),
-    category: 'communication',
-    created_at: new Date(Date.now() - 86400000 * 90).toISOString()
-  },
-  {
-    id: '4',
-    name: 'Client health score alert',
-    description: 'Alert when client health score drops below threshold',
-    trigger: { type: 'condition', condition: 'client.health_score < 50' },
-    actions: [
-      { type: 'notification', name: 'Alert account manager', config: {} },
-      { type: 'create-task', name: 'Create follow-up task', config: {} }
-    ],
-    is_active: true,
-    run_count: 12,
-    last_triggered_at: new Date(Date.now() - 259200000).toISOString(),
-    category: 'sales',
-    created_at: new Date(Date.now() - 86400000 * 45).toISOString()
-  },
-  {
-    id: '5',
-    name: 'Overdue task escalation',
-    description: 'Escalate tasks that are overdue by more than 2 days',
-    trigger: { type: 'schedule', schedule: '0 0 8 * * *' },
-    actions: [
-      { type: 'condition', name: 'Find overdue tasks', config: {} },
-      { type: 'notification', name: 'Notify manager', config: {} },
-      { type: 'update-record', name: 'Mark as escalated', config: {} }
-    ],
-    is_active: false,
-    run_count: 67,
-    last_triggered_at: new Date(Date.now() - 604800000).toISOString(),
-    category: 'productivity',
-    created_at: new Date(Date.now() - 86400000 * 120).toISOString()
-  }
-]
-
-const mockStats: AutomationStats = {
-  totalAutomations: 42,
-  activeAutomations: 38,
-  triggersToday: 156,
-  successRate: 98.4,
-  timeSaved: '23 hours this week',
-  topAutomation: 'Auto-assign new tasks'
 }
 
 // Trigger type configs
@@ -243,8 +119,19 @@ const quickAutomations = [
 ]
 
 export default function KaziAutomationsClient() {
-  const [automations, setAutomations] = useState<Automation[]>(mockAutomations)
-  const [stats] = useState<AutomationStats>(mockStats)
+  // Use the Kazi Automations hook with mock data fallback
+  const {
+    automations,
+    stats: apiStats,
+    runningAutomations,
+    runAutomation: executeAutomation,
+    toggleAutomation: toggleAutomationStatus,
+    deleteAutomation: removeAutomation,
+    duplicateAutomation,
+    createAutomation,
+    updateAutomation
+  } = useKaziAutomations({ useMockData: true })
+
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -252,35 +139,30 @@ export default function KaziAutomationsClient() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
   const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null)
-  const [runningAutomations, setRunningAutomations] = useState<Set<string>>(new Set())
+  const [newAutomation, setNewAutomation] = useState({
+    name: '',
+    description: '',
+    trigger_type: 'event' as const,
+    category: 'productivity'
+  })
   const { toast } = useToast()
+
+  // Compute display stats from API stats
+  const stats: DisplayStats = useMemo(() => ({
+    totalAutomations: apiStats.totalAutomations,
+    activeAutomations: apiStats.activeAutomations,
+    triggersToday: apiStats.totalRuns, // This would need real-time data for "today"
+    successRate: apiStats.successRate,
+    timeSaved: `${Math.round(apiStats.timeSaved / 60)} hours saved`,
+    topAutomation: automations.length > 0
+      ? automations.reduce((top, a) => a.run_count > top.run_count ? a : top, automations[0]).name
+      : 'None yet'
+  }), [apiStats, automations])
 
   // Run automation
   const runAutomation = useCallback((id: string) => {
-    setRunningAutomations(prev => new Set(prev).add(id))
-    toast({
-      title: 'Automation Started',
-      description: 'Running automation...'
-    })
-
-    // Simulate execution
-    setTimeout(() => {
-      setRunningAutomations(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(id)
-        return newSet
-      })
-      setAutomations(prev => prev.map(a =>
-        a.id === id
-          ? { ...a, run_count: a.run_count + 1, last_triggered_at: new Date().toISOString() }
-          : a
-      ))
-      toast({
-        title: 'Automation Completed',
-        description: 'Automation executed successfully.'
-      })
-    }, 2000)
-  }, [toast])
+    executeAutomation(id)
+  }, [executeAutomation])
 
   // Open settings
   const openSettings = useCallback((automation: Automation) => {
@@ -291,34 +173,49 @@ export default function KaziAutomationsClient() {
   // Filter automations
   const filteredAutomations = automations.filter(automation => {
     const matchesSearch = automation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      automation.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (automation.description || '').toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = filterCategory === 'all' || automation.category === filterCategory
     const matchesStatus = filterStatus === 'all' ||
-      (filterStatus === 'active' && automation.is_active) ||
-      (filterStatus === 'inactive' && !automation.is_active)
+      (filterStatus === 'active' && automation.status === 'active') ||
+      (filterStatus === 'inactive' && automation.status !== 'active')
 
     return matchesSearch && matchesCategory && matchesStatus
   })
 
   // Toggle automation
   const toggleAutomation = useCallback((id: string) => {
-    setAutomations(prev => prev.map(a =>
-      a.id === id ? { ...a, is_active: !a.is_active } : a
-    ))
-    toast({
-      title: 'Automation Updated',
-      description: 'Automation status has been changed.'
-    })
-  }, [toast])
+    toggleAutomationStatus(id)
+  }, [toggleAutomationStatus])
 
   // Delete automation
   const deleteAutomation = useCallback((id: string) => {
-    setAutomations(prev => prev.filter(a => a.id !== id))
-    toast({
-      title: 'Automation Deleted',
-      description: 'The automation has been removed.'
+    removeAutomation(id)
+  }, [removeAutomation])
+
+  // Handle create automation
+  const handleCreateAutomation = useCallback(async () => {
+    if (!newAutomation.name) {
+      toast({ title: 'Error', description: 'Name is required', variant: 'destructive' })
+      return
+    }
+    await createAutomation({
+      name: newAutomation.name,
+      description: newAutomation.description,
+      trigger_type: newAutomation.trigger_type,
+      category: newAutomation.category,
+      actions: [],
+      status: 'draft'
     })
-  }, [toast])
+    setIsCreateDialogOpen(false)
+    setNewAutomation({ name: '', description: '', trigger_type: 'event', category: 'productivity' })
+  }, [newAutomation, createAutomation, toast])
+
+  // Handle save settings
+  const handleSaveSettings = useCallback(async () => {
+    if (!selectedAutomation) return
+    await updateAutomation(selectedAutomation.id, selectedAutomation)
+    setIsSettingsDialogOpen(false)
+  }, [selectedAutomation, updateAutomation])
 
   // Format time
   const formatTimeAgo = (dateString?: string) => {
@@ -583,9 +480,9 @@ export default function KaziAutomationsClient() {
                             {/* Trigger Icon */}
                             <div className={cn(
                               "p-3 rounded-xl text-white",
-                              triggerTypes[automation.trigger.type].color
+                              triggerTypes[automation.trigger_type as keyof typeof triggerTypes]?.color || 'bg-amber-500'
                             )}>
-                              {triggerTypes[automation.trigger.type].icon}
+                              {triggerTypes[automation.trigger_type as keyof typeof triggerTypes]?.icon || <Zap className="h-4 w-4" />}
                             </div>
 
                             <div className="space-y-1">
@@ -596,13 +493,13 @@ export default function KaziAutomationsClient() {
                                 <Badge className={categories[automation.category as keyof typeof categories]?.color || 'bg-gray-100'}>
                                   {categories[automation.category as keyof typeof categories]?.label || automation.category}
                                 </Badge>
-                                {automation.is_active ? (
+                                {automation.status === 'active' ? (
                                   <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                     Active
                                   </Badge>
                                 ) : (
                                   <Badge className="bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400">
-                                    Inactive
+                                    {automation.status === 'paused' ? 'Paused' : automation.status === 'error' ? 'Error' : 'Draft'}
                                   </Badge>
                                 )}
                               </div>
@@ -613,18 +510,18 @@ export default function KaziAutomationsClient() {
                               {/* Trigger Info */}
                               <div className="flex items-center gap-4 mt-2">
                                 <div className="flex items-center gap-1 text-xs text-gray-500">
-                                  {triggerTypes[automation.trigger.type].icon}
-                                  <span className="capitalize">{automation.trigger.type}</span>
-                                  {automation.trigger.event && (
-                                    <span className="text-gray-400">: {automation.trigger.event}</span>
+                                  {triggerTypes[automation.trigger_type as keyof typeof triggerTypes]?.icon || <Zap className="h-3 w-3" />}
+                                  <span className="capitalize">{automation.trigger_type}</span>
+                                  {automation.trigger_config?.event && (
+                                    <span className="text-gray-400">: {String(automation.trigger_config.event)}</span>
                                   )}
-                                  {automation.trigger.schedule && (
-                                    <span className="text-gray-400">: Daily</span>
+                                  {automation.trigger_config?.cron && (
+                                    <span className="text-gray-400">: Scheduled</span>
                                   )}
                                 </div>
                                 <span className="text-gray-300">|</span>
                                 <span className="text-xs text-gray-500">
-                                  {automation.actions.length} action{automation.actions.length !== 1 ? 's' : ''}
+                                  {automation.actions?.length || 0} action{(automation.actions?.length || 0) !== 1 ? 's' : ''}
                                 </span>
                               </div>
                             </div>
@@ -649,7 +546,7 @@ export default function KaziAutomationsClient() {
 
                             <div className="flex items-center gap-2">
                               <Switch
-                                checked={automation.is_active}
+                                checked={automation.status === 'active'}
                                 onCheckedChange={() => toggleAutomation(automation.id)}
                               />
 
@@ -687,11 +584,7 @@ export default function KaziAutomationsClient() {
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => {
-                                    const newAutomation = { ...automation, id: `copy-${automation.id}`, name: `${automation.name} (Copy)` }
-                                    setAutomations(prev => [...prev, newAutomation])
-                                    toast({ title: 'Duplicated', description: 'Automation duplicated successfully.' })
-                                  }}>
+                                  <DropdownMenuItem onClick={() => duplicateAutomation(automation.id)}>
                                     <Copy className="h-4 w-4 mr-2" />
                                     Duplicate
                                   </DropdownMenuItem>
@@ -780,7 +673,7 @@ export default function KaziAutomationsClient() {
                         </div>
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white">
-                            {mockAutomations[i % mockAutomations.length].name}
+                            {automations.length > 0 ? automations[i % automations.length].name : `Automation ${i + 1}`}
                           </p>
                           <p className="text-sm text-gray-500">
                             {formatTimeAgo(new Date(Date.now() - i * 1800000).toISOString())}
@@ -811,25 +704,37 @@ export default function KaziAutomationsClient() {
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Name</Label>
-                <Input placeholder="e.g., Send welcome email to new clients" />
+                <Input
+                  placeholder="e.g., Send welcome email to new clients"
+                  value={newAutomation.name}
+                  onChange={(e) => setNewAutomation(prev => ({ ...prev, name: e.target.value }))}
+                />
               </div>
 
               <div className="space-y-2">
                 <Label>Description</Label>
-                <Textarea placeholder="What does this automation do?" rows={2} />
+                <Textarea
+                  placeholder="What does this automation do?"
+                  rows={2}
+                  value={newAutomation.description}
+                  onChange={(e) => setNewAutomation(prev => ({ ...prev, description: e.target.value }))}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Trigger Type</Label>
-                  <Select>
+                  <Select
+                    value={newAutomation.trigger_type}
+                    onValueChange={(value) => setNewAutomation(prev => ({ ...prev, trigger_type: value as 'event' | 'schedule' | 'webhook' | 'manual' }))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select trigger" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="event">Event</SelectItem>
                       <SelectItem value="schedule">Schedule</SelectItem>
-                      <SelectItem value="condition">Condition</SelectItem>
+                      <SelectItem value="manual">Manual</SelectItem>
                       <SelectItem value="webhook">Webhook</SelectItem>
                     </SelectContent>
                   </Select>
@@ -837,7 +742,10 @@ export default function KaziAutomationsClient() {
 
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <Select>
+                  <Select
+                    value={newAutomation.category}
+                    onValueChange={(value) => setNewAutomation(prev => ({ ...prev, category: value }))}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -856,13 +764,7 @@ export default function KaziAutomationsClient() {
                 Cancel
               </Button>
               <Button
-                onClick={() => {
-                  setIsCreateDialogOpen(false)
-                  toast({
-                    title: 'Automation Created',
-                    description: 'Your new automation has been set up.'
-                  })
-                }}
+                onClick={handleCreateAutomation}
                 className="bg-gradient-to-r from-amber-500 to-orange-600"
               >
                 Create Automation
@@ -888,25 +790,35 @@ export default function KaziAutomationsClient() {
               <div className="space-y-6 py-4">
                 <div className="space-y-2">
                   <Label>Automation Name</Label>
-                  <Input defaultValue={selectedAutomation.name} />
+                  <Input
+                    value={selectedAutomation.name}
+                    onChange={(e) => setSelectedAutomation(prev => prev ? { ...prev, name: e.target.value } : null)}
+                  />
                 </div>
 
                 <div className="space-y-2">
                   <Label>Description</Label>
-                  <Textarea defaultValue={selectedAutomation.description} rows={2} />
+                  <Textarea
+                    value={selectedAutomation.description || ''}
+                    onChange={(e) => setSelectedAutomation(prev => prev ? { ...prev, description: e.target.value } : null)}
+                    rows={2}
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Trigger Type</Label>
-                    <Select defaultValue={selectedAutomation.trigger.type}>
+                    <Select
+                      value={selectedAutomation.trigger_type}
+                      onValueChange={(value) => setSelectedAutomation(prev => prev ? { ...prev, trigger_type: value as Automation['trigger_type'] } : null)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="event">Event Trigger</SelectItem>
                         <SelectItem value="schedule">Schedule</SelectItem>
-                        <SelectItem value="condition">Condition</SelectItem>
+                        <SelectItem value="manual">Manual</SelectItem>
                         <SelectItem value="webhook">Webhook</SelectItem>
                       </SelectContent>
                     </Select>
@@ -914,7 +826,10 @@ export default function KaziAutomationsClient() {
 
                   <div className="space-y-2">
                     <Label>Category</Label>
-                    <Select defaultValue={selectedAutomation.category}>
+                    <Select
+                      value={selectedAutomation.category}
+                      onValueChange={(value) => setSelectedAutomation(prev => prev ? { ...prev, category: value } : null)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -927,10 +842,16 @@ export default function KaziAutomationsClient() {
                   </div>
                 </div>
 
-                {selectedAutomation.trigger.type === 'event' && (
+                {selectedAutomation.trigger_type === 'event' && (
                   <div className="space-y-2">
                     <Label>Event Type</Label>
-                    <Select defaultValue={selectedAutomation.trigger.event}>
+                    <Select
+                      value={String(selectedAutomation.trigger_config?.event || '')}
+                      onValueChange={(value) => setSelectedAutomation(prev => prev ? {
+                        ...prev,
+                        trigger_config: { ...prev.trigger_config, event: value }
+                      } : null)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select event" />
                       </SelectTrigger>
@@ -947,7 +868,7 @@ export default function KaziAutomationsClient() {
                   </div>
                 )}
 
-                {selectedAutomation.trigger.type === 'schedule' && (
+                {selectedAutomation.trigger_type === 'schedule' && (
                   <div className="space-y-2">
                     <Label>Schedule</Label>
                     <Select defaultValue="daily">
@@ -965,15 +886,15 @@ export default function KaziAutomationsClient() {
                 )}
 
                 <div className="space-y-2">
-                  <Label>Actions ({selectedAutomation.actions.length})</Label>
+                  <Label>Actions ({selectedAutomation.actions?.length || 0})</Label>
                   <div className="space-y-2">
-                    {selectedAutomation.actions.map((action, i) => (
+                    {(selectedAutomation.actions || []).map((action, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                         <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
                           <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-sm text-gray-900 dark:text-white">{action.name}</p>
+                          <p className="font-medium text-sm text-gray-900 dark:text-white capitalize">{action.type.replace(/-/g, ' ')}</p>
                           <p className="text-xs text-gray-500">{action.type}</p>
                         </div>
                         <Button size="sm" variant="ghost">
@@ -994,12 +915,28 @@ export default function KaziAutomationsClient() {
                     <p className="text-sm text-gray-500">Enable or disable this automation</p>
                   </div>
                   <Switch
-                    checked={selectedAutomation.is_active}
+                    checked={selectedAutomation.status === 'active'}
                     onCheckedChange={() => {
-                      toggleAutomation(selectedAutomation.id)
-                      setSelectedAutomation(prev => prev ? { ...prev, is_active: !prev.is_active } : null)
+                      const newStatus = selectedAutomation.status === 'active' ? 'paused' : 'active'
+                      setSelectedAutomation(prev => prev ? { ...prev, status: newStatus } : null)
                     }}
                   />
+                </div>
+
+                {/* Stats display */}
+                <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedAutomation.run_count}</p>
+                    <p className="text-xs text-gray-500">Total Runs</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">{selectedAutomation.success_rate}%</p>
+                    <p className="text-xs text-gray-500">Success Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{selectedAutomation.time_saved}m</p>
+                    <p className="text-xs text-gray-500">Time Saved</p>
+                  </div>
                 </div>
               </div>
             )}
@@ -1009,13 +946,7 @@ export default function KaziAutomationsClient() {
                 Cancel
               </Button>
               <Button
-                onClick={() => {
-                  setIsSettingsDialogOpen(false)
-                  toast({
-                    title: 'Settings Saved',
-                    description: 'Automation settings have been updated.'
-                  })
-                }}
+                onClick={handleSaveSettings}
                 className="bg-gradient-to-r from-amber-500 to-orange-600"
               >
                 <Save className="h-4 w-4 mr-2" />

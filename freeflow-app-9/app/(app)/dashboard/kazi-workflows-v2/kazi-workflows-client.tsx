@@ -7,30 +7,25 @@
  * managing, and monitoring automated business processes.
  */
 
-import React, { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
+import React, { useState, useCallback, useMemo } from 'react'
+import { motion } from 'framer-motion'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
-import { Progress } from '@/components/ui/progress'
 import { Textarea } from '@/components/ui/textarea'
 import { useToast } from '@/hooks/use-toast'
+import { useKaziWorkflows, Workflow as KaziWorkflow } from '@/hooks/use-kazi-workflows'
 import {
-  Workflow,
+  Workflow as WorkflowIcon,
   Play,
-  Pause,
   Plus,
   Search,
-  Filter,
   MoreVertical,
   Edit,
   Trash2,
@@ -39,28 +34,18 @@ import {
   Clock,
   Zap,
   Webhook,
-  Calendar,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
-  TrendingUp,
-  BarChart3,
   Settings,
-  RefreshCw,
   Download,
   Upload,
   History,
   PlayCircle,
-  PauseCircle,
-  StopCircle,
   Timer,
   Activity,
   Target,
   Sparkles,
   ArrowRight,
-  ChevronRight,
-  Database,
-  Mail,
   Bell,
   GitBranch,
   Loader2,
@@ -81,24 +66,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-// Types
-interface KaziWorkflow {
-  id: string
-  name: string
-  description: string
-  trigger_type: 'manual' | 'schedule' | 'webhook' | 'event'
-  trigger_config: any
-  actions: any[]
-  is_active: boolean
-  run_count: number
-  success_rate: number
-  last_run_at?: string
-  next_run_at?: string
-  category: string
-  tags: string[]
-  created_at: string
-  updated_at: string
-}
+// Types - KaziWorkflow is imported from the hook
 
 interface WorkflowExecution {
   id: string
@@ -299,9 +267,21 @@ const categoryColors: Record<string, string> = {
 }
 
 export default function KaziWorkflowsClient() {
-  const [workflows, setWorkflows] = useState<KaziWorkflow[]>(mockWorkflows)
+  // Use the Kazi Workflows hook with mock data fallback
+  const {
+    workflows,
+    stats: apiStats,
+    isLoading,
+    runningWorkflows,
+    runWorkflow: executeWorkflow,
+    toggleWorkflow: toggleWorkflowStatus,
+    deleteWorkflow: removeWorkflow,
+    duplicateWorkflow,
+    createWorkflow,
+    updateWorkflow
+  } = useKaziWorkflows({ useMockData: true })
+
   const [templates] = useState<WorkflowTemplate[]>(mockTemplates)
-  const [stats] = useState<WorkflowStats>(mockStats)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
@@ -309,9 +289,23 @@ export default function KaziWorkflowsClient() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<KaziWorkflow | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [runningWorkflows, setRunningWorkflows] = useState<Set<string>>(new Set())
+  const [newWorkflow, setNewWorkflow] = useState({
+    name: '',
+    description: '',
+    trigger_type: 'manual' as const,
+    category: 'operations'
+  })
   const { toast } = useToast()
+
+  // Compute display stats
+  const stats: WorkflowStats = useMemo(() => ({
+    totalWorkflows: apiStats.totalWorkflows,
+    activeWorkflows: apiStats.activeWorkflows,
+    totalExecutions: apiStats.totalRuns,
+    successRate: apiStats.successRate,
+    avgExecutionTime: 2.4, // Would come from real metrics
+    timeSaved: `${Math.round(apiStats.totalRuns * 5 / 60)} hours`
+  }), [apiStats])
 
   // Open settings
   const openSettings = useCallback((workflow: KaziWorkflow) => {
@@ -322,61 +316,48 @@ export default function KaziWorkflowsClient() {
   // Filter workflows
   const filteredWorkflows = workflows.filter(workflow => {
     const matchesSearch = workflow.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      workflow.description.toLowerCase().includes(searchQuery.toLowerCase())
+      (workflow.description || '').toLowerCase().includes(searchQuery.toLowerCase())
     const matchesCategory = filterCategory === 'all' || workflow.category === filterCategory
     const matchesStatus = filterStatus === 'all' ||
-      (filterStatus === 'active' && workflow.is_active) ||
-      (filterStatus === 'inactive' && !workflow.is_active)
+      (filterStatus === 'active' && workflow.status === 'active') ||
+      (filterStatus === 'inactive' && workflow.status !== 'active')
 
     return matchesSearch && matchesCategory && matchesStatus
   })
 
-  // Toggle workflow status
-  const toggleWorkflowStatus = useCallback(async (workflowId: string) => {
-    setWorkflows(prev => prev.map(w =>
-      w.id === workflowId ? { ...w, is_active: !w.is_active } : w
-    ))
-    toast({
-      title: 'Workflow Updated',
-      description: 'Workflow status has been updated successfully.'
-    })
-  }, [toast])
+  // Run workflow wrapper
+  const runWorkflow = useCallback((id: string) => {
+    executeWorkflow(id)
+  }, [executeWorkflow])
 
-  // Run workflow
-  const runWorkflow = useCallback(async (workflowId: string) => {
-    setRunningWorkflows(prev => new Set(prev).add(workflowId))
-    toast({
-      title: 'Workflow Started',
-      description: 'The workflow is now running...'
-    })
+  // Delete workflow wrapper
+  const deleteWorkflow = useCallback((id: string) => {
+    removeWorkflow(id)
+  }, [removeWorkflow])
 
-    // Simulate execution
-    setTimeout(() => {
-      setRunningWorkflows(prev => {
-        const newSet = new Set(prev)
-        newSet.delete(workflowId)
-        return newSet
-      })
-      setWorkflows(prev => prev.map(w =>
-        w.id === workflowId
-          ? { ...w, run_count: w.run_count + 1, last_run_at: new Date().toISOString() }
-          : w
-      ))
-      toast({
-        title: 'Workflow Completed',
-        description: 'The workflow executed successfully.'
-      })
-    }, 2000)
-  }, [toast])
-
-  // Delete workflow
-  const deleteWorkflow = useCallback(async (workflowId: string) => {
-    setWorkflows(prev => prev.filter(w => w.id !== workflowId))
-    toast({
-      title: 'Workflow Deleted',
-      description: 'The workflow has been deleted.'
+  // Handle create workflow
+  const handleCreateWorkflow = useCallback(async () => {
+    if (!newWorkflow.name) {
+      toast({ title: 'Error', description: 'Name is required', variant: 'destructive' })
+      return
+    }
+    await createWorkflow({
+      name: newWorkflow.name,
+      description: newWorkflow.description,
+      trigger_type: newWorkflow.trigger_type,
+      category: newWorkflow.category,
+      status: 'draft'
     })
-  }, [toast])
+    setIsCreateDialogOpen(false)
+    setNewWorkflow({ name: '', description: '', trigger_type: 'manual', category: 'operations' })
+  }, [newWorkflow, createWorkflow, toast])
+
+  // Handle save settings
+  const handleSaveSettings = useCallback(async () => {
+    if (!selectedWorkflow) return
+    await updateWorkflow(selectedWorkflow.id, selectedWorkflow)
+    setIsSettingsDialogOpen(false)
+  }, [selectedWorkflow, updateWorkflow])
 
   // Format time ago
   const formatTimeAgo = (dateString?: string) => {
@@ -402,7 +383,7 @@ export default function KaziWorkflowsClient() {
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl text-white">
-                <Workflow className="h-6 w-6" />
+                <WorkflowIcon className="h-6 w-6" />
               </div>
               Kazi Workflows
             </h1>
@@ -432,7 +413,7 @@ export default function KaziWorkflowsClient() {
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                  <Workflow className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+                  <WorkflowIcon className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalWorkflows}</p>
@@ -518,7 +499,7 @@ export default function KaziWorkflowsClient() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <TabsList className="bg-white dark:bg-gray-800 p-1 shadow-sm">
               <TabsTrigger value="workflows" className="gap-2">
-                <Workflow className="h-4 w-4" />
+                <WorkflowIcon className="h-4 w-4" />
                 My Workflows
               </TabsTrigger>
               <TabsTrigger value="templates" className="gap-2">
@@ -575,7 +556,7 @@ export default function KaziWorkflowsClient() {
               <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm">
                 <CardContent className="flex flex-col items-center justify-center py-12">
                   <div className="p-4 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
-                    <Workflow className="h-8 w-8 text-gray-400" />
+                    <WorkflowIcon className="h-8 w-8 text-gray-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">No workflows found</h3>
                   <p className="text-gray-500 text-center max-w-md mb-6">
@@ -623,7 +604,7 @@ export default function KaziWorkflowsClient() {
                                 <Badge className={cn("text-xs", categoryColors[workflow.category])}>
                                   {workflow.category}
                                 </Badge>
-                                {workflow.is_active ? (
+                                {workflow.status === "active" ? (
                                   <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                                     Active
                                   </Badge>
@@ -691,7 +672,7 @@ export default function KaziWorkflowsClient() {
                             {/* Actions */}
                             <div className="flex items-center gap-2">
                               <Switch
-                                checked={workflow.is_active}
+                                checked={workflow.status === "active"}
                                 onCheckedChange={() => toggleWorkflowStatus(workflow.id)}
                               />
 
@@ -1097,7 +1078,7 @@ export default function KaziWorkflowsClient() {
                     {selectedWorkflow.actions.map((action, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
                         <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                          <Workflow className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                          <WorkflowIcon className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                         </div>
                         <div className="flex-1">
                           <p className="font-medium text-sm text-gray-900 dark:text-white">{action.name}</p>
@@ -1121,10 +1102,10 @@ export default function KaziWorkflowsClient() {
                     <p className="text-sm text-gray-500">Enable or disable this workflow</p>
                   </div>
                   <Switch
-                    checked={selectedWorkflow.is_active}
+                    checked={selectedWorkflow.status === "active"}
                     onCheckedChange={() => {
                       toggleWorkflowStatus(selectedWorkflow.id)
-                      setSelectedWorkflow(prev => prev ? { ...prev, is_active: !prev.is_active } : null)
+                      setSelectedWorkflow(prev => prev ? { ...prev, status: prev.status === "active" ? "paused" : "active" } : null)
                     }}
                   />
                 </div>
