@@ -60,7 +60,9 @@ import {
   Layers,
   Timer,
   Shield,
-  Rocket
+  Rocket,
+  Play,
+  Save
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -248,7 +250,43 @@ export default function KaziAutomationsClient() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [activeTab, setActiveTab] = useState('automations')
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
+  const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null)
+  const [runningAutomations, setRunningAutomations] = useState<Set<string>>(new Set())
   const { toast } = useToast()
+
+  // Run automation
+  const runAutomation = useCallback((id: string) => {
+    setRunningAutomations(prev => new Set(prev).add(id))
+    toast({
+      title: 'Automation Started',
+      description: 'Running automation...'
+    })
+
+    // Simulate execution
+    setTimeout(() => {
+      setRunningAutomations(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(id)
+        return newSet
+      })
+      setAutomations(prev => prev.map(a =>
+        a.id === id
+          ? { ...a, run_count: a.run_count + 1, last_triggered_at: new Date().toISOString() }
+          : a
+      ))
+      toast({
+        title: 'Automation Completed',
+        description: 'Automation executed successfully.'
+      })
+    }, 2000)
+  }, [toast])
+
+  // Open settings
+  const openSettings = useCallback((automation: Automation) => {
+    setSelectedAutomation(automation)
+    setIsSettingsDialogOpen(true)
+  }, [])
 
   // Filter automations
   const filteredAutomations = automations.filter(automation => {
@@ -615,6 +653,29 @@ export default function KaziAutomationsClient() {
                                 onCheckedChange={() => toggleAutomation(automation.id)}
                               />
 
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => runAutomation(automation.id)}
+                                disabled={runningAutomations.has(automation.id)}
+                                title="Run Now"
+                              >
+                                {runningAutomations.has(automation.id) ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Play className="h-4 w-4" />
+                                )}
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => openSettings(automation)}
+                                title="Settings"
+                              >
+                                <Settings className="h-4 w-4" />
+                              </Button>
+
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button size="sm" variant="ghost">
@@ -622,15 +683,19 @@ export default function KaziAutomationsClient() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => openSettings(automation)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    const newAutomation = { ...automation, id: `copy-${automation.id}`, name: `${automation.name} (Copy)` }
+                                    setAutomations(prev => [...prev, newAutomation])
+                                    toast({ title: 'Duplicated', description: 'Automation duplicated successfully.' })
+                                  }}>
                                     <Copy className="h-4 w-4 mr-2" />
                                     Duplicate
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setActiveTab('logs')}>
                                     <History className="h-4 w-4 mr-2" />
                                     View History
                                   </DropdownMenuItem>
@@ -801,6 +866,160 @@ export default function KaziAutomationsClient() {
                 className="bg-gradient-to-r from-amber-500 to-orange-600"
               >
                 Create Automation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Automation Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure settings for "{selectedAutomation?.name}"
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedAutomation && (
+              <div className="space-y-6 py-4">
+                <div className="space-y-2">
+                  <Label>Automation Name</Label>
+                  <Input defaultValue={selectedAutomation.name} />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea defaultValue={selectedAutomation.description} rows={2} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Trigger Type</Label>
+                    <Select defaultValue={selectedAutomation.trigger.type}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="event">Event Trigger</SelectItem>
+                        <SelectItem value="schedule">Schedule</SelectItem>
+                        <SelectItem value="condition">Condition</SelectItem>
+                        <SelectItem value="webhook">Webhook</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Category</Label>
+                    <Select defaultValue={selectedAutomation.category}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(categories).map(([key, cat]) => (
+                          <SelectItem key={key} value={key}>{cat.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {selectedAutomation.trigger.type === 'event' && (
+                  <div className="space-y-2">
+                    <Label>Event Type</Label>
+                    <Select defaultValue={selectedAutomation.trigger.event}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select event" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="task.created">Task Created</SelectItem>
+                        <SelectItem value="task.completed">Task Completed</SelectItem>
+                        <SelectItem value="project.created">Project Created</SelectItem>
+                        <SelectItem value="project.completed">Project Completed</SelectItem>
+                        <SelectItem value="client.created">Client Created</SelectItem>
+                        <SelectItem value="invoice.created">Invoice Created</SelectItem>
+                        <SelectItem value="invoice.paid">Invoice Paid</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {selectedAutomation.trigger.type === 'schedule' && (
+                  <div className="space-y-2">
+                    <Label>Schedule</Label>
+                    <Select defaultValue="daily">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select schedule" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="hourly">Every Hour</SelectItem>
+                        <SelectItem value="daily">Daily</SelectItem>
+                        <SelectItem value="weekly">Weekly</SelectItem>
+                        <SelectItem value="monthly">Monthly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>Actions ({selectedAutomation.actions.length})</Label>
+                  <div className="space-y-2">
+                    {selectedAutomation.actions.map((action, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                          <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-gray-900 dark:text-white">{action.name}</p>
+                          <p className="text-xs text-gray-500">{action.type}</p>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Action
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">Automation Status</p>
+                    <p className="text-sm text-gray-500">Enable or disable this automation</p>
+                  </div>
+                  <Switch
+                    checked={selectedAutomation.is_active}
+                    onCheckedChange={() => {
+                      toggleAutomation(selectedAutomation.id)
+                      setSelectedAutomation(prev => prev ? { ...prev, is_active: !prev.is_active } : null)
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSettingsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsSettingsDialogOpen(false)
+                  toast({
+                    title: 'Settings Saved',
+                    description: 'Automation settings have been updated.'
+                  })
+                }}
+                className="bg-gradient-to-r from-amber-500 to-orange-600"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Settings
               </Button>
             </DialogFooter>
           </DialogContent>

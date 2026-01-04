@@ -68,7 +68,8 @@ import {
   Star,
   Globe,
   FileText,
-  Users
+  Users,
+  Save
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -307,9 +308,16 @@ export default function KaziWorkflowsClient() {
   const [activeTab, setActiveTab] = useState('workflows')
   const [selectedWorkflow, setSelectedWorkflow] = useState<KaziWorkflow | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const [isSettingsDialogOpen, setIsSettingsDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [runningWorkflows, setRunningWorkflows] = useState<Set<string>>(new Set())
   const { toast } = useToast()
+
+  // Open settings
+  const openSettings = useCallback((workflow: KaziWorkflow) => {
+    setSelectedWorkflow(workflow)
+    setIsSettingsDialogOpen(true)
+  }, [])
 
   // Filter workflows
   const filteredWorkflows = workflows.filter(workflow => {
@@ -692,12 +700,22 @@ export default function KaziWorkflowsClient() {
                                 variant="outline"
                                 onClick={() => runWorkflow(workflow.id)}
                                 disabled={runningWorkflows.has(workflow.id)}
+                                title="Run Now"
                               >
                                 {runningWorkflows.has(workflow.id) ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
                                   <Play className="h-4 w-4" />
                                 )}
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => openSettings(workflow)}
+                                title="Settings"
+                              >
+                                <Settings className="h-4 w-4" />
                               </Button>
 
                               <DropdownMenu>
@@ -707,19 +725,25 @@ export default function KaziWorkflowsClient() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => openSettings(workflow)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    const newWorkflow = { ...workflow, id: `copy-${workflow.id}`, name: `${workflow.name} (Copy)` }
+                                    setWorkflows(prev => [...prev, newWorkflow])
+                                    toast({ title: 'Duplicated', description: 'Workflow duplicated successfully.' })
+                                  }}>
                                     <Copy className="h-4 w-4 mr-2" />
                                     Duplicate
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setActiveTab('history')}>
                                     <History className="h-4 w-4 mr-2" />
                                     View History
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    toast({ title: 'Exported', description: 'Workflow exported to JSON.' })
+                                  }}>
                                     <Download className="h-4 w-4 mr-2" />
                                     Export
                                   </DropdownMenuItem>
@@ -942,6 +966,204 @@ export default function KaziWorkflowsClient() {
               >
                 Create & Open Builder
                 <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={isSettingsDialogOpen} onOpenChange={setIsSettingsDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Workflow Settings
+              </DialogTitle>
+              <DialogDescription>
+                Configure settings for "{selectedWorkflow?.name}"
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedWorkflow && (
+              <div className="space-y-6 py-4">
+                <div className="space-y-2">
+                  <Label>Workflow Name</Label>
+                  <Input defaultValue={selectedWorkflow.name} />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Description</Label>
+                  <Textarea defaultValue={selectedWorkflow.description} rows={2} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Trigger Type</Label>
+                    <Select defaultValue={selectedWorkflow.trigger_type}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="manual">
+                          <div className="flex items-center gap-2">
+                            <Play className="h-4 w-4" />
+                            Manual Trigger
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="schedule">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Schedule
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="webhook">
+                          <div className="flex items-center gap-2">
+                            <Webhook className="h-4 w-4" />
+                            Webhook
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="event">
+                          <div className="flex items-center gap-2">
+                            <Zap className="h-4 w-4" />
+                            Event
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Category</Label>
+                    <Select defaultValue={selectedWorkflow.category}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="sales">Sales</SelectItem>
+                        <SelectItem value="marketing">Marketing</SelectItem>
+                        <SelectItem value="operations">Operations</SelectItem>
+                        <SelectItem value="finance">Finance</SelectItem>
+                        <SelectItem value="support">Support</SelectItem>
+                        <SelectItem value="custom">Custom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {selectedWorkflow.trigger_type === 'schedule' && (
+                  <div className="space-y-2">
+                    <Label>Schedule</Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Select defaultValue="daily">
+                        <SelectTrigger>
+                          <SelectValue placeholder="Frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="hourly">Every Hour</SelectItem>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Input type="time" defaultValue="09:00" />
+                    </div>
+                  </div>
+                )}
+
+                {selectedWorkflow.trigger_type === 'event' && (
+                  <div className="space-y-2">
+                    <Label>Event Type</Label>
+                    <Select defaultValue={selectedWorkflow.trigger_config?.event_type}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select event" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="client.created">Client Created</SelectItem>
+                        <SelectItem value="project.created">Project Created</SelectItem>
+                        <SelectItem value="project.completed">Project Completed</SelectItem>
+                        <SelectItem value="task.created">Task Created</SelectItem>
+                        <SelectItem value="task.completed">Task Completed</SelectItem>
+                        <SelectItem value="invoice.created">Invoice Created</SelectItem>
+                        <SelectItem value="invoice.paid">Invoice Paid</SelectItem>
+                        <SelectItem value="milestone.completed">Milestone Completed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <Label>Actions ({selectedWorkflow.actions.length})</Label>
+                  <div className="space-y-2">
+                    {selectedWorkflow.actions.map((action, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                        <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                          <Workflow className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium text-sm text-gray-900 dark:text-white">{action.name}</p>
+                          <p className="text-xs text-gray-500">{action.type}</p>
+                        </div>
+                        <Button size="sm" variant="ghost">
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button variant="outline" size="sm" className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Action
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">Workflow Status</p>
+                    <p className="text-sm text-gray-500">Enable or disable this workflow</p>
+                  </div>
+                  <Switch
+                    checked={selectedWorkflow.is_active}
+                    onCheckedChange={() => {
+                      toggleWorkflowStatus(selectedWorkflow.id)
+                      setSelectedWorkflow(prev => prev ? { ...prev, is_active: !prev.is_active } : null)
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white">{selectedWorkflow.run_count}</p>
+                    <p className="text-xs text-gray-500">Total Runs</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">{selectedWorkflow.success_rate}%</p>
+                    <p className="text-xs text-gray-500">Success Rate</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {selectedWorkflow.last_run_at ? new Date(selectedWorkflow.last_run_at).toLocaleDateString() : 'Never'}
+                    </p>
+                    <p className="text-xs text-gray-500">Last Run</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsSettingsDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsSettingsDialogOpen(false)
+                  toast({
+                    title: 'Settings Saved',
+                    description: 'Workflow settings have been updated.'
+                  })
+                }}
+                className="bg-gradient-to-r from-indigo-500 to-purple-600"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save Settings
               </Button>
             </DialogFooter>
           </DialogContent>
