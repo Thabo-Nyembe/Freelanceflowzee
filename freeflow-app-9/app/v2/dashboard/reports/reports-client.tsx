@@ -885,7 +885,7 @@ export default function ReportsClient() {
                     <p className="text-amber-200 text-sm">Connected</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{datasources.filter(d => d.status === 'connected').length}</p>
+                    <p className="text-3xl font-bold">{mockDataSources.filter(d => d.status === 'connected').length}</p>
                     <p className="text-amber-200 text-sm">Active</p>
                   </div>
                 </div>
@@ -969,11 +969,11 @@ export default function ReportsClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{scheduledReports.length}</p>
+                    <p className="text-3xl font-bold">{mockScheduledReports.length}</p>
                     <p className="text-pink-200 text-sm">Scheduled</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{scheduledReports.filter(s => s.status === 'active').length}</p>
+                    <p className="text-3xl font-bold">{mockScheduledReports.filter(s => s.status === 'active').length}</p>
                     <p className="text-pink-200 text-sm">Active</p>
                   </div>
                 </div>

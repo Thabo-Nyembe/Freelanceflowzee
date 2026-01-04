@@ -58,7 +58,7 @@ export function useClients(initialClients: Client[] = []) {
     }
   }, [supabase])
 
-  const createClient = async (client: Partial<Client>) => {
+  const addClient = async (client: Partial<Client>) => {
     try {
       const userId = await getUserId()
       if (!userId) {
@@ -159,7 +159,8 @@ export function useClients(initialClients: Client[] = []) {
     isLoading,
     error,
     fetchClients,
-    createClient,
+    addClient,
+    createClient: addClient, // Alias for backward compatibility
     updateClient,
     archiveClient,
     deleteClient
