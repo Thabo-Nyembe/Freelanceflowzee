@@ -86,7 +86,6 @@ async function getProjectStats(userId: string, supabase: ReturnType<typeof creat
       .eq('user_id', userId)
 
     if (error) {
-      logger.warn('Projects query failed, using defaults', { error: error.message })
       return { total: 0, active: 0, completed: 0, onHold: 0 }
     }
 
@@ -109,7 +108,6 @@ async function getClientStats(userId: string, supabase: ReturnType<typeof create
       .eq('user_id', userId)
 
     if (error) {
-      logger.warn('Clients query failed, using defaults', { error: error.message })
       return { total: 0, active: 0, new: 0 }
     }
 
@@ -135,7 +133,6 @@ async function getRevenueStats(userId: string, supabase: ReturnType<typeof creat
       .eq('user_id', userId)
 
     if (error) {
-      logger.warn('Invoices query failed, using defaults', { error: error.message })
       return { total: 0, pending: 0, thisMonth: 0, lastMonth: 0, growth: 0 }
     }
 
@@ -173,7 +170,6 @@ async function getTaskStats(userId: string, supabase: ReturnType<typeof createCl
       .eq('user_id', userId)
 
     if (error) {
-      logger.warn('Tasks query failed, using defaults', { error: error.message })
       return { total: 0, completed: 0, inProgress: 0, overdue: 0 }
     }
 
@@ -201,7 +197,6 @@ async function getFileStats(userId: string, supabase: ReturnType<typeof createCl
       .eq('user_id', userId)
 
     if (error) {
-      logger.warn('Files query failed, using defaults', { error: error.message })
       return { total: 0, size: 0 }
     }
 
@@ -222,7 +217,6 @@ async function getTeamStats(userId: string, supabase: ReturnType<typeof createCl
       .eq('team_owner_id', userId)
 
     if (error) {
-      logger.warn('Team members query failed, using defaults', { error: error.message })
       return { total: 0, active: 0 }
     }
 
