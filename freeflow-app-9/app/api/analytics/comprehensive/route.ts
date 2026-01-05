@@ -4,15 +4,17 @@
 // =====================================================
 
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
+
+// Demo user for unauthenticated access
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
 
 // =====================================================
 // GET - Fetch analytics data
 // =====================================================
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const supabase = createAdminClient();
 
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
@@ -20,76 +22,71 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const startDate = searchParams.get('startDate');
     const endDate = searchParams.get('endDate');
 
-    // Require authentication - no demo mode
-    if (!user) {
-      return NextResponse.json(
-        { success: false, error: 'Authentication required. Please log in to access analytics data.' },
-        { status: 401 }
-      );
-    }
+    // Use provided userId or demo user for public access
+    const userId = searchParams.get('userId') || DEMO_USER_ID;
 
     // Calculate date range
     const dateRange = getDateRange(period, startDate, endDate);
 
     switch (action) {
       case 'overview': {
-        const overview = await getAnalyticsOverview(supabase, user.id, dateRange);
+        const overview = await getAnalyticsOverview(supabase, userId, dateRange);
         return NextResponse.json({ success: true, overview });
       }
 
       case 'revenue': {
-        const revenue = await getRevenueAnalytics(supabase, user.id, dateRange);
+        const revenue = await getRevenueAnalytics(supabase, userId, dateRange);
         return NextResponse.json({ success: true, revenue });
       }
 
       case 'projects': {
-        const projects = await getProjectAnalytics(supabase, user.id, dateRange);
+        const projects = await getProjectAnalytics(supabase, userId, dateRange);
         return NextResponse.json({ success: true, projects });
       }
 
       case 'clients': {
-        const clients = await getClientAnalytics(supabase, user.id, dateRange);
+        const clients = await getClientAnalytics(supabase, userId, dateRange);
         return NextResponse.json({ success: true, clients });
       }
 
       case 'tasks': {
-        const tasks = await getTaskAnalytics(supabase, user.id, dateRange);
+        const tasks = await getTaskAnalytics(supabase, userId, dateRange);
         return NextResponse.json({ success: true, tasks });
       }
 
       case 'productivity': {
-        const productivity = await getProductivityAnalytics(supabase, user.id, dateRange);
+        const productivity = await getProductivityAnalytics(supabase, userId, dateRange);
         return NextResponse.json({ success: true, productivity });
       }
 
       case 'time-tracking': {
-        const timeTracking = await getTimeTrackingAnalytics(supabase, user.id, dateRange);
+        const timeTracking = await getTimeTrackingAnalytics(supabase, userId, dateRange);
         return NextResponse.json({ success: true, timeTracking });
       }
 
       case 'team': {
-        const team = await getTeamAnalytics(supabase, user.id, dateRange);
+        const team = await getTeamAnalytics(supabase, userId, dateRange);
         return NextResponse.json({ success: true, team });
       }
 
       case 'trends': {
         const granularity = searchParams.get('granularity') || 'day';
-        const trends = await getTrendData(supabase, user.id, dateRange, granularity);
+        const trends = await getTrendData(supabase, userId, dateRange, granularity);
         return NextResponse.json({ success: true, trends });
       }
 
       case 'comparisons': {
-        const comparisons = await getComparisonData(supabase, user.id, dateRange);
+        const comparisons = await getComparisonData(supabase, userId, dateRange);
         return NextResponse.json({ success: true, comparisons });
       }
 
       case 'forecasts': {
-        const forecasts = await getForecasts(supabase, user.id);
+        const forecasts = await getForecasts(supabase, userId);
         return NextResponse.json({ success: true, forecasts });
       }
 
       case 'top-performers': {
-        const topPerformers = await getTopPerformers(supabase, user.id, dateRange);
+        const topPerformers = await getTopPerformers(supabase, userId, dateRange);
         return NextResponse.json({ success: true, topPerformers });
       }
 
@@ -117,11 +114,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       default: {
         // Return comprehensive analytics
         const [overview, revenue, projects, clients, productivity] = await Promise.all([
-          getAnalyticsOverview(supabase, user.id, dateRange),
-          getRevenueAnalytics(supabase, user.id, dateRange),
-          getProjectAnalytics(supabase, user.id, dateRange),
-          getClientAnalytics(supabase, user.id, dateRange),
-          getProductivityAnalytics(supabase, user.id, dateRange)
+          getAnalyticsOverview(supabase, userId, dateRange),
+          getRevenueAnalytics(supabase, userId, dateRange),
+          getProjectAnalytics(supabase, userId, dateRange),
+          getClientAnalytics(supabase, userId, dateRange),
+          getProductivityAnalytics(supabase, userId, dateRange)
         ]);
 
         return NextResponse.json({

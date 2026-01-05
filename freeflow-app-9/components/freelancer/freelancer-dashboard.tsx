@@ -50,7 +50,7 @@ export const FreelancerDashboard = () => {
         <Card className="p-6">
           <div className="flex flex-col">
             <span className="text-sm text-gray-500">Total Earnings</span>
-            <span className="text-2xl font-bold">${stats.totalEarnings.toFixed(2)}</span>
+            <span className="text-2xl font-bold">${(stats?.totalEarnings ?? 0).toFixed(2)}</span>
           </div>
         </Card>
         <Card className="p-6">

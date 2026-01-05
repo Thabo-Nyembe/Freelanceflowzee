@@ -194,7 +194,7 @@ INVESTMENT SUMMARY
 Total Investment,$${metrics.totalInvestment.toLocaleString()}
 Deliverable Value,$${metrics.deliverableValue.toLocaleString()}
 Net ROI,$${roi.netValue.toLocaleString()}
-ROI Percentage,${roi.roiPercentage.toFixed(1)}%
+ROI Percentage,${(roi?.roiPercentage ?? 0).toFixed(1)}%
 
 TIME SAVINGS
 Total Hours Saved,${metrics.timeSaved}
@@ -204,7 +204,7 @@ QUALITY METRICS
 Quality Score,${metrics.qualityScore}%
 First-time Approval Rate,${metrics.firstTimeApproval}%
 On-time Delivery,${metrics.onTimeDelivery}%
-Average Revisions per Project,${(metrics.revisionCount / metrics.projectsCompleted).toFixed(1)}
+Average Revisions per Project,${(metrics.projectsCompleted > 0 ? metrics.revisionCount / metrics.projectsCompleted : 0).toFixed(1)}
 
 PROJECT PERFORMANCE
 Projects Completed,${metrics.projectsCompleted}
@@ -339,7 +339,7 @@ Avg Response Time,${metrics.avgResponseTime} hours
                     <div>
                       <p className="text-sm text-muted-foreground">ROI</p>
                       <p className="text-2xl font-bold text-green-500">
-                        {customROI.roiPercentage.toFixed(1)}%
+                        {(customROI?.roiPercentage ?? 0).toFixed(1)}%
                       </p>
                     </div>
                   </div>
@@ -365,7 +365,7 @@ Avg Response Time,${metrics.avgResponseTime} hours
           title="Deliverable Value"
           value={metrics.deliverableValue}
           prefix="$"
-          trend={`${roi.roiPercentage.toFixed(0)}% ROI`}
+          trend={`${(roi?.roiPercentage ?? 0).toFixed(0)}% ROI`}
           trendUp={true}
           icon={TrendingUp}
           description="Estimated market value of all deliverables received"
@@ -431,7 +431,7 @@ Avg Response Time,${metrics.avgResponseTime} hours
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold">ROI Percentage</span>
                     <span className="text-2xl font-bold text-green-500">
-                      {roi.roiPercentage.toFixed(1)}%
+                      {(roi?.roiPercentage ?? 0).toFixed(1)}%
                     </span>
                   </div>
                 </div>
@@ -440,15 +440,15 @@ Avg Response Time,${metrics.avgResponseTime} hours
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm">Value Multiplier</span>
                     <span className="text-sm font-semibold">
-                      {(metrics.deliverableValue / metrics.totalInvestment).toFixed(2)}x
+                      {(metrics.totalInvestment > 0 ? metrics.deliverableValue / metrics.totalInvestment : 0).toFixed(2)}x
                     </span>
                   </div>
                   <Progress
-                    value={(metrics.deliverableValue / metrics.totalInvestment) * 50}
+                    value={metrics.totalInvestment > 0 ? (metrics.deliverableValue / metrics.totalInvestment) * 50 : 0}
                     className="h-2"
                   />
                   <p className="text-xs text-muted-foreground mt-2">
-                    Every $1 invested returns ${(metrics.deliverableValue / metrics.totalInvestment).toFixed(2)} in value
+                    Every $1 invested returns ${(metrics.totalInvestment > 0 ? metrics.deliverableValue / metrics.totalInvestment : 0).toFixed(2)} in value
                   </p>
                 </div>
               </CardContent>
@@ -655,7 +655,7 @@ Avg Response Time,${metrics.avgResponseTime} hours
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Avg Revisions per Project</span>
                     <span className="font-semibold">
-                      {(metrics.revisionCount / metrics.projectsCompleted).toFixed(1)}
+                      {(metrics.projectsCompleted > 0 ? metrics.revisionCount / metrics.projectsCompleted : 0).toFixed(1)}
                     </span>
                   </div>
 
@@ -694,7 +694,7 @@ Avg Response Time,${metrics.avgResponseTime} hours
                           Industry Avg: {item.avg}%
                         </span>
                         <span className="text-sm font-semibold">
-                          You: {item.your.toFixed(0)}%
+                          You: {(item?.your ?? 0).toFixed(0)}%
                         </span>
                       </div>
                     </div>

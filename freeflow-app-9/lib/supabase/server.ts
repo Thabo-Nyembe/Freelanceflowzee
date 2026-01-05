@@ -9,8 +9,8 @@ import { cookies } from 'next/headers'
  * - Improved schema cache loading
  * - Full admin access with service role key
  */
-export function createClient() {
-  const cookieStore = cookies()
+export async function createClient() {
+  const cookieStore = await cookies()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -57,8 +57,8 @@ export function createClient() {
 /**
  * Create Supabase server client with anon key (for user-context operations)
  */
-export function createAnonClient() {
-  const cookieStore = cookies()
+export async function createAnonClient() {
+  const cookieStore = await cookies()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -111,4 +111,4 @@ export function createAdminClient() {
       },
     }
   )
-} 
+}

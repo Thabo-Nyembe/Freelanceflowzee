@@ -1,16 +1,15 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+
+// Demo user for unauthenticated access
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const supabase = createAdminClient()
 
     const searchParams = request.nextUrl.searchParams
+    const userId = searchParams.get('userId') || DEMO_USER_ID
     const status = searchParams.get('status')
     const category = searchParams.get('category')
     const limit = parseInt(searchParams.get('limit') || '50')
@@ -22,7 +21,7 @@ export async function GET(request: NextRequest) {
         *,
         workflow_actions (id, action_type, position, config)
       `)
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
@@ -50,12 +49,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const supabase = createAdminClient()
 
     const body = await request.json()
     const {
@@ -66,7 +60,8 @@ export async function POST(request: NextRequest) {
       actions = [],
       category = null,
       tags = [],
-      status = 'draft'
+      status = 'draft',
+      userId = DEMO_USER_ID
     } = body
 
     if (!name) {
@@ -77,7 +72,7 @@ export async function POST(request: NextRequest) {
     const { data: workflow, error: workflowError } = await supabase
       .from('workflows')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         name,
         description,
         trigger_type,

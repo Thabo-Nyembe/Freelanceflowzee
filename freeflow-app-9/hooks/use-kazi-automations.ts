@@ -40,7 +40,6 @@ export interface AutomationStats {
 interface UseKaziAutomationsOptions {
   status?: string
   category?: string
-  useMockData?: boolean
 }
 
 // Mock data for demo/fallback
@@ -186,7 +185,6 @@ export function useKaziAutomations(options: UseKaziAutomationsOptions = {}) {
   const [error, setError] = useState<string | null>(null)
   const [runningAutomations, setRunningAutomations] = useState<Set<string>>(new Set())
   const { toast } = useToast()
-  const { useMockData = false } = options
 
   // Fetch automations
   const fetchAutomations = useCallback(async () => {
@@ -209,25 +207,19 @@ export function useKaziAutomations(options: UseKaziAutomationsOptions = {}) {
       if (data && data.length > 0) {
         setAutomations(data)
         calculateStats(data)
-      } else if (useMockData) {
-        // Use mock data if no real data
-        setAutomations(mockAutomations)
-        calculateStats(mockAutomations)
       } else {
         setAutomations([])
+        calculateStats([])
       }
     } catch (err) {
       console.error('Error fetching automations:', err)
-      // Fallback to mock data on error
-      if (useMockData) {
-        setAutomations(mockAutomations)
-        calculateStats(mockAutomations)
-      }
       setError(err instanceof Error ? err.message : 'Unknown error')
+      setAutomations([])
+      calculateStats([])
     } finally {
       setIsLoading(false)
     }
-  }, [options.status, options.category, useMockData])
+  }, [options.status, options.category])
 
   // Calculate stats from automations
   const calculateStats = (data: Automation[]) => {

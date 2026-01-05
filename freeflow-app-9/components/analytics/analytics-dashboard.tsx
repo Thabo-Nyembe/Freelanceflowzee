@@ -177,12 +177,12 @@ export default function AnalyticsDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data?.summary.totalUsers.toLocaleString()}</div>
+            <div className="text-2xl font-bold">{(data?.summary?.totalUsers ?? 0).toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">
-              +{((data?.summary.activeUsers / data?.summary.totalUsers) * 100).toFixed(1)}% from last {timeRange}
+              +{(data?.summary?.totalUsers ? ((data.summary.activeUsers ?? 0) / data.summary.totalUsers) * 100 : 0).toFixed(1)}% from last {timeRange}
             </p>
-            <Progress 
-              value={((data?.summary.activeUsers / data?.summary.totalUsers) * 100)} 
+            <Progress
+              value={data?.summary?.totalUsers ? ((data.summary.activeUsers ?? 0) / data.summary.totalUsers) * 100 : 0}
               className="mt-2"
             />
           </CardContent>

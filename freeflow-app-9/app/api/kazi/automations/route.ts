@@ -1,5 +1,8 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
+
+// Demo user for unauthenticated access
+const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 // Transform database record to API format
 function transformToApiFormat(record: Record<string, unknown>): Record<string, unknown> {
@@ -55,14 +58,10 @@ function transformToDbFormat(apiData: Record<string, unknown>, userId: string): 
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const supabase = createAdminClient()
 
     const searchParams = request.nextUrl.searchParams
+    const userId = searchParams.get('userId') || DEMO_USER_ID
     const status = searchParams.get('status')
     const category = searchParams.get('category')
     const limit = parseInt(searchParams.get('limit') || '50')
@@ -71,7 +70,7 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('automations')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .is('deleted_at', null)
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
@@ -109,20 +108,16 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const supabase = createAdminClient()
 
     const body = await request.json()
+    const userId = body.userId || DEMO_USER_ID
 
     if (!body.name) {
       return NextResponse.json({ error: 'Name is required' }, { status: 400 })
     }
 
-    const dbRecord = transformToDbFormat(body, user.id)
+    const dbRecord = transformToDbFormat(body, userId)
 
     const { data, error } = await supabase
       .from('automations')

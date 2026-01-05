@@ -22,7 +22,8 @@ import {
   Zap,
   Plug,
   Key,
-  Workflow
+  Workflow,
+  Crown
 } from 'lucide-react'
 
 interface SidebarItem {
@@ -113,6 +114,13 @@ const sidebarItems: SidebarItem[] = [
     href: '/dashboard/analytics-v2',
     icon: TrendingUp,
     description: 'Performance insights and metrics'
+  },
+  {
+    name: 'Business Intelligence',
+    href: '/dashboard/business-intelligence',
+    icon: Crown,
+    description: 'Maximize your business potential',
+    badge: 'Pro'
   },
   {
     name: 'Client Zone',

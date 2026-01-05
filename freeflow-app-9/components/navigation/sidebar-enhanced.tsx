@@ -321,6 +321,7 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         name: 'Analytics & Reports',
         visible: true,
         items: [
+          { id: 'business-intelligence', name: 'Business Intelligence', href: '/dashboard/business-intelligence-v2', icon: Crown, description: 'Maximize your business', badge: 'Pro' },
           { id: 'analytics', name: 'Analytics', href: '/dashboard/analytics-v2', icon: TrendingUp, description: 'Performance insights' },
           { id: 'custom-reports', name: 'Custom Reports', href: '/dashboard/custom-reports', icon: FileBarChart, description: 'Custom reporting', badge: 'New' },
           { id: 'performance', name: 'Performance', href: '/dashboard/performance-analytics-v2', icon: Gauge, description: 'Performance metrics', badge: 'New' },

@@ -43,7 +43,6 @@ export interface WorkflowStats {
 interface UseKaziWorkflowsOptions {
   status?: string
   category?: string
-  useMockData?: boolean
 }
 
 // Mock data for demo/fallback
@@ -188,7 +187,6 @@ export function useKaziWorkflows(options: UseKaziWorkflowsOptions = {}) {
   const [error, setError] = useState<string | null>(null)
   const [runningWorkflows, setRunningWorkflows] = useState<Set<string>>(new Set())
   const { toast } = useToast()
-  const { useMockData = false } = options
 
   // Fetch workflows
   const fetchWorkflows = useCallback(async () => {
@@ -211,23 +209,19 @@ export function useKaziWorkflows(options: UseKaziWorkflowsOptions = {}) {
       if (data && data.length > 0) {
         setWorkflows(data)
         calculateStats(data)
-      } else if (useMockData) {
-        setWorkflows(mockWorkflows)
-        calculateStats(mockWorkflows)
       } else {
         setWorkflows([])
+        calculateStats([])
       }
     } catch (err) {
       console.error('Error fetching workflows:', err)
-      if (useMockData) {
-        setWorkflows(mockWorkflows)
-        calculateStats(mockWorkflows)
-      }
       setError(err instanceof Error ? err.message : 'Unknown error')
+      setWorkflows([])
+      calculateStats([])
     } finally {
       setIsLoading(false)
     }
-  }, [options.status, options.category, useMockData])
+  }, [options.status, options.category])
 
   // Calculate stats
   const calculateStats = (data: Workflow[]) => {
