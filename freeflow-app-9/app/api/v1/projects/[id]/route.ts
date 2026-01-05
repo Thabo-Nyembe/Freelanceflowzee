@@ -8,9 +8,10 @@ import { validateApiKey, hasPermission, withRateLimitHeaders, logApiRequest } fr
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const startTime = Date.now()
+  const { id } = await params
 
   const { context, error } = await validateApiKey(request)
   if (error) return error
@@ -26,7 +27,7 @@ export async function GET(
     const { data, error: queryError } = await supabase
       .from('projects')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', context.userId)
       .single()
 
@@ -57,9 +58,10 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const startTime = Date.now()
+  const { id } = await params
 
   const { context, error } = await validateApiKey(request)
   if (error) return error
@@ -85,7 +87,7 @@ export async function PATCH(
         ...body,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', context.userId)
       .select()
       .single()
@@ -117,9 +119,10 @@ export async function PATCH(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const startTime = Date.now()
+  const { id } = await params
 
   const { context, error } = await validateApiKey(request)
   if (error) return error
@@ -139,7 +142,7 @@ export async function DELETE(
         archived_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('user_id', context.userId)
       .select()
       .single()

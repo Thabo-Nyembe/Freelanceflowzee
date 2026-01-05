@@ -12,9 +12,10 @@ const logger = createFeatureLogger('API-VideoProject')
 // GET a specific video project
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -24,8 +25,6 @@ export async function GET(
         { status: 401 }
       )
     }
-
-    const { id } = params
 
     const { data: project, error } = await supabase
       .from('video_projects')
@@ -74,9 +73,10 @@ export async function GET(
 // PATCH update a video project
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -86,8 +86,6 @@ export async function PATCH(
         { status: 401 }
       )
     }
-
-    const { id } = params
     const body = await request.json()
 
     // Only allow certain fields to be updated
@@ -167,9 +165,10 @@ export async function PATCH(
 // DELETE a video project
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -179,8 +178,6 @@ export async function DELETE(
         { status: 401 }
       )
     }
-
-    const { id } = params
 
     // Delete related data first (cascade delete)
     await supabase.from('video_assets').delete().eq('project_id', id)

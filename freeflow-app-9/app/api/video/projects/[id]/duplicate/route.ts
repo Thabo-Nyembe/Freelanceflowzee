@@ -11,9 +11,10 @@ const logger = createFeatureLogger('API-VideoDuplicate')
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: projectId } = await params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -23,8 +24,6 @@ export async function POST(
         { status: 401 }
       )
     }
-
-    const { id: projectId } = params
 
     // Fetch original project
     const { data: original, error: fetchError } = await supabase

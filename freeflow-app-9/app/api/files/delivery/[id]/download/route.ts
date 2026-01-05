@@ -42,10 +42,10 @@ export interface DownloadResponse {
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const deliveryId = params.id
+    const { id: deliveryId } = await params
     const body: DownloadRequest = await request.json()
     const { password, accessToken } = body
 
@@ -260,10 +260,10 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const deliveryId = params.id
+    const { id: deliveryId } = await params
     const supabase = await createClient()
 
     const { data: delivery, error } = await supabase

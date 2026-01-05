@@ -11,9 +11,10 @@ const logger = createFeatureLogger('API-VideoPublish')
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: projectId } = await params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -23,8 +24,6 @@ export async function POST(
         { status: 401 }
       )
     }
-
-    const { id: projectId } = params
     const body = await request.json()
     const { platform, metadata } = body
 
@@ -139,9 +138,10 @@ export async function POST(
 // GET published video info
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: projectId } = await params
     const supabase = await createClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
@@ -151,8 +151,6 @@ export async function GET(
         { status: 401 }
       )
     }
-
-    const { id: projectId } = params
 
     // Get analytics for published video
     const { data: analytics, error: analyticsError } = await supabase

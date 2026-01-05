@@ -5,10 +5,10 @@ const logger = createFeatureLogger('FilesAPI')
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { fileId: string } }
+  { params }: { params: Promise<{ fileId: string }> }
 ) {
   try {
-    const { fileId } = params
+    const { fileId } = await params
 
     logger.info('File download request', { fileId })
 
@@ -27,7 +27,7 @@ export async function GET(
       message: 'Download prepared'
     })
   } catch (error: any) {
-    logger.error('File download failed', { error: error.message, fileId: params.fileId })
+    logger.error('File download failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to download file' },
       { status: 500 }

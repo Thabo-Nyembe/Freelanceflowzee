@@ -5,10 +5,10 @@ const logger = createFeatureLogger('FilesAPI')
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { fileId: string } }
+  { params }: { params: Promise<{ fileId: string }> }
 ) {
   try {
-    const { fileId } = params
+    const { fileId } = await params
     const { emails, permission = 'view' } = await req.json()
 
     logger.info('File share request', {
@@ -39,7 +39,7 @@ export async function POST(
       message: 'File shared successfully'
     })
   } catch (error: any) {
-    logger.error('File share failed', { error: error.message, fileId: params.fileId })
+    logger.error('File share failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to share file' },
       { status: 500 }

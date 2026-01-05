@@ -12,10 +12,10 @@ const userAPIKeys: any[] = []
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { keyId: string } }
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
   try {
-    const { keyId } = params
+    const { keyId } = await params
     const userId = 'user_123' // From auth in production
 
     logger.info('Deleting API key', { userId, keyId })
@@ -57,10 +57,10 @@ export async function DELETE(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { keyId: string } }
+  { params }: { params: Promise<{ keyId: string }> }
 ) {
   try {
-    const { keyId } = params
+    const { keyId } = await params
     const userId = 'user_123'
 
     const key = userAPIKeys.find(

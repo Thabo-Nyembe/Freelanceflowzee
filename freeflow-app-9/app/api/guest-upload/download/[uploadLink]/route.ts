@@ -11,10 +11,10 @@ const logger = createFeatureLogger('GuestUpload:Download')
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { uploadLink: string } }
+  { params }: { params: Promise<{ uploadLink: string }> }
 ) {
   try {
-    const { uploadLink } = params
+    const { uploadLink } = await params
 
     if (!uploadLink) {
       return NextResponse.json(
@@ -127,7 +127,7 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { uploadLink: string } }
+  { params }: { params: Promise<{ uploadLink: string }> }
 ) {
   // Reuse GET logic
   return GET(request, { params })

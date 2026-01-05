@@ -5,10 +5,10 @@ const logger = createFeatureLogger('FilesAPI')
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { fileId: string } }
+  { params }: { params: Promise<{ fileId: string }> }
 ) {
   try {
-    const { fileId } = params
+    const { fileId } = await params
     const { folderId } = await req.json()
 
     logger.info('File move request', {
@@ -37,7 +37,7 @@ export async function PUT(
       message: 'File moved successfully'
     })
   } catch (error: any) {
-    logger.error('File move failed', { error: error.message, fileId: params.fileId })
+    logger.error('File move failed', { error: error.message })
     return NextResponse.json(
       { error: 'Failed to move file' },
       { status: 500 }
