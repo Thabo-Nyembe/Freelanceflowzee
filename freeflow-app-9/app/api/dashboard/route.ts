@@ -285,16 +285,18 @@ async function getDashboardStats(supabase: any, userId: string) {
 async function getProjectStats(supabase: any, userId: string) {
   const { data, error } = await supabase
     .from('projects')
-    .select('id, status')
+    .select('id, progress, end_date')
     .eq('user_id', userId);
 
   if (error) throw error;
 
+  // Derive status from progress and end_date since there's no status column
+  const now = new Date();
   return {
     total: data?.length || 0,
-    active: data?.filter((p: any) => p.status === 'active').length || 0,
-    completed: data?.filter((p: any) => p.status === 'completed').length || 0,
-    onHold: data?.filter((p: any) => p.status === 'on_hold').length || 0
+    active: data?.filter((p: any) => (p.progress || 0) < 100 && (!p.end_date || new Date(p.end_date) >= now)).length || 0,
+    completed: data?.filter((p: any) => (p.progress || 0) >= 100).length || 0,
+    onHold: data?.filter((p: any) => p.end_date && new Date(p.end_date) < now && (p.progress || 0) < 100).length || 0
   };
 }
 
@@ -317,30 +319,36 @@ async function getClientStats(supabase: any, userId: string) {
 }
 
 async function getRevenueStats(supabase: any, userId: string) {
+  // Use client_invoices table for user-created invoices
   const { data, error } = await supabase
-    .from('invoices')
-    .select('total, status, created_at')
-    .eq('user_id', userId);
+    .from('client_invoices')
+    .select('total_amount, subtotal, tax_amount, status, paid_date, created_at')
+    .eq('freelancer_id', userId);
 
-  if (error) throw error;
+  if (error) {
+    // Return empty stats if table doesn't exist or has different schema
+    console.error('Error fetching client_invoices:', error);
+    return { total: 0, pending: 0, thisMonth: 0, lastMonth: 0, growth: 0 };
+  }
 
   const now = new Date();
   const firstDayThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const firstDayLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-  const total = data?.reduce((sum: number, inv: any) => sum + (inv.total || 0), 0) || 0;
-  const pending = data?.filter((inv: any) => inv.status === 'pending')
-    .reduce((sum: number, inv: any) => sum + (inv.total || 0), 0) || 0;
+  const total = data?.reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0;
+  const pending = data?.filter((inv: any) => inv.status === 'pending' || inv.status === 'sent')
+    .reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0;
 
   const thisMonth = data?.filter((inv: any) =>
-    new Date(inv.created_at) >= firstDayThisMonth && inv.status === 'paid'
-  ).reduce((sum: number, inv: any) => sum + (inv.total || 0), 0) || 0;
+    inv.paid_date && new Date(inv.paid_date) >= firstDayThisMonth && inv.status === 'paid'
+  ).reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0;
 
   const lastMonth = data?.filter((inv: any) =>
-    new Date(inv.created_at) >= firstDayLastMonth &&
-    new Date(inv.created_at) < firstDayThisMonth &&
+    inv.paid_date &&
+    new Date(inv.paid_date) >= firstDayLastMonth &&
+    new Date(inv.paid_date) < firstDayThisMonth &&
     inv.status === 'paid'
-  ).reduce((sum: number, inv: any) => sum + (inv.total || 0), 0) || 0;
+  ).reduce((sum: number, inv: any) => sum + (inv.total_amount || 0), 0) || 0;
 
   const growth = lastMonth > 0 ? ((thisMonth - lastMonth) / lastMonth) * 100 : 0;
 
@@ -399,7 +407,7 @@ async function getRecentActivity(supabase: any, userId: string, limit: number) {
   const [projects, tasks, files, invoices] = await Promise.all([
     supabase
       .from('projects')
-      .select('id, name, status, created_at, updated_at')
+      .select('id, title, progress, created_at, updated_at')
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
       .limit(limit),
@@ -416,9 +424,9 @@ async function getRecentActivity(supabase: any, userId: string, limit: number) {
       .order('updated_at', { ascending: false })
       .limit(limit),
     supabase
-      .from('invoices')
-      .select('id, invoice_number, status, total, created_at, updated_at')
-      .eq('user_id', userId)
+      .from('client_invoices')
+      .select('id, invoice_number, status, total_amount, created_at, updated_at')
+      .eq('freelancer_id', userId)
       .order('updated_at', { ascending: false })
       .limit(limit)
   ]);
@@ -427,8 +435,8 @@ async function getRecentActivity(supabase: any, userId: string, limit: number) {
     ...(projects.data || []).map((p: any) => ({
       id: p.id,
       type: 'project',
-      title: p.name,
-      status: p.status,
+      title: p.title,
+      status: (p.progress || 0) >= 100 ? 'completed' : 'active',
       timestamp: p.updated_at,
       icon: 'folder'
     })),
@@ -452,8 +460,8 @@ async function getRecentActivity(supabase: any, userId: string, limit: number) {
       type: 'invoice',
       title: `Invoice ${i.invoice_number || i.id.slice(0, 8)}`,
       status: i.status,
-      amount: i.total,
-      timestamp: i.updated_at,
+      amount: i.total_amount || 0,
+      timestamp: i.updated_at || i.created_at,
       icon: 'receipt'
     }))
   ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
@@ -467,15 +475,13 @@ async function getRecentProjects(supabase: any, userId: string, limit: number) {
     .from('projects')
     .select(`
       id,
-      name,
-      status,
+      title,
       budget,
-      deadline,
+      end_date,
       progress,
-      priority,
-      category,
       client_id,
-      clients (id, name)
+      client_name,
+      metadata
     `)
     .eq('user_id', userId)
     .order('updated_at', { ascending: false })
@@ -485,14 +491,14 @@ async function getRecentProjects(supabase: any, userId: string, limit: number) {
 
   return (data || []).map((project: any) => ({
     id: project.id,
-    name: project.name,
-    client: project.clients?.name || 'No Client',
+    name: project.title,
+    client: project.client_name || 'No Client',
     progress: project.progress || 0,
-    status: project.status || 'active',
+    status: (project.progress || 0) >= 100 ? 'completed' : 'active',
     value: project.budget || 0,
-    priority: project.priority || 'medium',
-    deadline: project.deadline,
-    category: project.category || 'general'
+    priority: project.metadata?.priority || 'medium',
+    deadline: project.end_date,
+    category: project.metadata?.category || 'general'
   }));
 }
 
@@ -520,10 +526,10 @@ async function getQuickStats(supabase: any, userId: string) {
 
   // Pending invoices
   const { data: pendingInvoices } = await supabase
-    .from('invoices')
-    .select('id, total')
-    .eq('user_id', userId)
-    .eq('status', 'pending');
+    .from('client_invoices')
+    .select('id, total_amount')
+    .eq('freelancer_id', userId)
+    .or('status.eq.pending,status.eq.sent');
 
   // Unread messages
   const { data: unreadMessages } = await supabase
@@ -536,7 +542,7 @@ async function getQuickStats(supabase: any, userId: string) {
     tasksCompletedToday: todayTasks?.length || 0,
     tasksCompletedThisWeek: weekTasks?.length || 0,
     pendingInvoicesCount: pendingInvoices?.length || 0,
-    pendingInvoicesTotal: pendingInvoices?.reduce((sum: number, i: any) => sum + (i.total || 0), 0) || 0,
+    pendingInvoicesTotal: pendingInvoices?.reduce((sum: number, i: any) => sum + (i.total_amount || 0), 0) || 0,
     unreadMessages: unreadMessages?.length || 0
   };
 }
@@ -610,12 +616,12 @@ async function getUpcomingDeadlines(supabase: any, userId: string, days: number)
   const [projects, tasks] = await Promise.all([
     supabase
       .from('projects')
-      .select('id, name, deadline, status')
+      .select('id, title, end_date, progress')
       .eq('user_id', userId)
-      .neq('status', 'completed')
-      .gte('deadline', now.toISOString())
-      .lte('deadline', futureDate.toISOString())
-      .order('deadline', { ascending: true }),
+      .lt('progress', 100)
+      .gte('end_date', now.toISOString())
+      .lte('end_date', futureDate.toISOString())
+      .order('end_date', { ascending: true }),
     supabase
       .from('tasks')
       .select('id, title, due_date, status, priority')
@@ -630,9 +636,9 @@ async function getUpcomingDeadlines(supabase: any, userId: string, days: number)
     ...(projects.data || []).map((p: any) => ({
       id: p.id,
       type: 'project',
-      title: p.name,
-      deadline: p.deadline,
-      status: p.status
+      title: p.title,
+      deadline: p.end_date,
+      status: (p.progress || 0) >= 100 ? 'completed' : 'active'
     })),
     ...(tasks.data || []).map((t: any) => ({
       id: t.id,
@@ -671,31 +677,34 @@ async function getRevenueSummary(supabase: any, userId: string, period: string) 
   }
 
   const { data: invoices } = await supabase
-    .from('invoices')
-    .select('total, status, created_at')
-    .eq('user_id', userId)
+    .from('client_invoices')
+    .select('total_amount, status, paid_date, due_date, created_at')
+    .eq('freelancer_id', userId)
     .gte('created_at', startDate.toISOString());
 
   const paid = (invoices || []).filter((i: any) => i.status === 'paid');
-  const pending = (invoices || []).filter((i: any) => i.status === 'pending');
-  const overdue = (invoices || []).filter((i: any) => i.status === 'overdue');
+  const pending = (invoices || []).filter((i: any) => i.status === 'pending' || i.status === 'sent');
+  const overdue = (invoices || []).filter((i: any) =>
+    (i.status === 'pending' || i.status === 'sent') &&
+    i.due_date && new Date(i.due_date) < now
+  );
 
   return {
     period,
     startDate: startDate.toISOString(),
     endDate: now.toISOString(),
-    total: invoices?.reduce((sum: number, i: any) => sum + (i.total || 0), 0) || 0,
+    total: invoices?.reduce((sum: number, i: any) => sum + (i.total_amount || 0), 0) || 0,
     paid: {
       count: paid.length,
-      amount: paid.reduce((sum: number, i: any) => sum + (i.total || 0), 0)
+      amount: paid.reduce((sum: number, i: any) => sum + (i.total_amount || 0), 0)
     },
     pending: {
       count: pending.length,
-      amount: pending.reduce((sum: number, i: any) => sum + (i.total || 0), 0)
+      amount: pending.reduce((sum: number, i: any) => sum + (i.total_amount || 0), 0)
     },
     overdue: {
       count: overdue.length,
-      amount: overdue.reduce((sum: number, i: any) => sum + (i.total || 0), 0)
+      amount: overdue.reduce((sum: number, i: any) => sum + (i.total_amount || 0), 0)
     }
   };
 }
@@ -776,11 +785,10 @@ async function quickCreateProject(supabase: any, userId: string, data: any) {
     .from('projects')
     .insert({
       user_id: userId,
-      name: data.name,
+      title: data.name,
       client_id: data.clientId,
       budget: data.budget,
-      deadline: data.deadline,
-      status: 'active',
+      end_date: data.deadline,
       progress: 0
     })
     .select()
@@ -810,13 +818,17 @@ async function quickCreateTask(supabase: any, userId: string, data: any) {
 
 async function quickCreateInvoice(supabase: any, userId: string, data: any) {
   const { data: invoice, error } = await supabase
-    .from('invoices')
+    .from('client_invoices')
     .insert({
-      user_id: userId,
+      freelancer_id: userId,
       client_id: data.clientId,
-      total: data.amount,
+      subtotal: data.amount || 0,
+      tax_rate: 0,
+      tax_amount: 0,
+      total_amount: data.amount || 0,
       description: data.description,
       due_date: data.dueDate,
+      issue_date: new Date().toISOString(),
       status: 'draft'
     })
     .select()
