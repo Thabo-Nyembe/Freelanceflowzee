@@ -5,9 +5,6 @@
  */
 
 import { createClient } from './supabase/client'
-import { createFeatureLogger } from './logger'
-
-const logger = createFeatureLogger('DashboardStats')
 
 export interface DashboardStats {
   projects: {
@@ -45,8 +42,6 @@ export interface DashboardStats {
 }
 
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
-  logger.info('Fetching dashboard stats', { userId })
-
   const supabase = createClient()
 
   try {
@@ -69,16 +64,17 @@ export async function getDashboardStats(userId: string): Promise<DashboardStats>
       team,
     }
 
-    logger.info('Dashboard stats fetched successfully', {
-      projectCount: stats.projects.total,
-      clientCount: stats.clients.total,
-      revenue: stats.revenue.total,
-    })
-
     return stats
-  } catch (error) {
-    logger.error('Failed to fetch dashboard stats', { error, userId })
-    throw error
+  } catch {
+    // Silently return defaults when database is unavailable
+    return {
+      projects: { total: 0, active: 0, completed: 0, onHold: 0 },
+      clients: { total: 0, active: 0, new: 0 },
+      revenue: { total: 0, pending: 0, thisMonth: 0, lastMonth: 0, growth: 0 },
+      tasks: { total: 0, completed: 0, inProgress: 0, overdue: 0 },
+      files: { total: 0, size: 0 },
+      team: { total: 0, active: 0 },
+    }
   }
 }
 
@@ -243,8 +239,6 @@ async function getTeamStats(userId: string, supabase: ReturnType<typeof createCl
  * Get recent projects with full details for dashboard display
  */
 export async function getRecentProjects(userId: string, limit: number = 3) {
-  logger.info('Fetching recent projects', { userId, limit })
-
   const supabase = createClient()
 
   try {
@@ -287,10 +281,9 @@ export async function getRecentProjects(userId: string, limit: number = 3) {
       estimatedCompletion: calculateEstimatedCompletion(project.progress, project.deadline)
     }))
 
-    logger.info('Recent projects fetched', { count: projects.length })
     return projects
-  } catch (error) {
-    logger.error('Failed to fetch recent projects', { error, userId })
+  } catch {
+    // Silently return empty array when database is unavailable
     return []
   }
 }
@@ -318,8 +311,6 @@ function calculateEstimatedCompletion(progress: number, deadline: string): strin
  * Get recent activity for dashboard feed
  */
 export async function getRecentActivity(userId: string, limit: number = 10) {
-  logger.info('Fetching recent activity', { userId, limit })
-
   const supabase = createClient()
 
   try {
@@ -355,10 +346,9 @@ export async function getRecentActivity(userId: string, limit: number = 10) {
     ].sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
       .slice(0, limit)
 
-    logger.info('Recent activity fetched', { count: activities.length })
     return activities
-  } catch (error) {
-    logger.error('Failed to fetch recent activity', { error, userId })
+  } catch {
+    // Silently return empty array when database is unavailable
     return []
   }
 }

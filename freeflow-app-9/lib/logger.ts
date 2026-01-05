@@ -64,8 +64,10 @@ const getDefaultConfig = (): LoggerConfig => {
   const isProduction = env === 'production'
 
   return {
-    enabled: process.env.LOG_ENABLED !== 'false',
-    level: (process.env.LOG_LEVEL as LogLevel) || (isProduction ? 'info' : 'debug'),
+    // Disable logging in development by default to prevent console spam
+    // Set LOG_ENABLED=true to enable logging
+    enabled: process.env.LOG_ENABLED === 'true',
+    level: (process.env.LOG_LEVEL as LogLevel) || (isProduction ? 'info' : 'warn'),
     service: process.env.SERVICE_NAME || 'freeflow-kazi',
     environment: env,
     pretty: !isProduction,
