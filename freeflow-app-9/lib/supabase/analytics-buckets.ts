@@ -55,7 +55,6 @@ export async function trackUserActivity(data: UserActivityData) {
     }
   )
 
-  if (error) console.error('Error tracking user activity:', error)
   return { success: !error }
 }
 
@@ -122,7 +121,6 @@ export async function trackFeatureUsage(data: FeatureUsageData) {
     }
   )
 
-  if (error) console.error('Error tracking feature usage:', error)
   return { success: !error }
 }
 
@@ -160,7 +158,6 @@ export async function trackFunnelStep(data: FunnelStepData) {
     }
   )
 
-  if (error) console.error('Error tracking funnel step:', error)
   return { success: !error }
 }
 
@@ -207,7 +204,6 @@ export async function trackAIUsage(data: AIUsageData) {
     }
   )
 
-  if (error) console.error('Error tracking AI usage:', error)
   return { success: !error }
 }
 
@@ -234,7 +230,6 @@ export async function pushRealtimeMetric(
     expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24h TTL
   })
 
-  if (error) console.error('Error pushing realtime metric:', error)
   return { success: !error }
 }
 

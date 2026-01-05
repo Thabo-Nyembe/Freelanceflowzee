@@ -1000,8 +1000,8 @@ export function SidebarEnhanced() {
       try {
         const parsed = JSON.parse(saved)
         setCategories(parsed)
-      } catch (e) {
-        console.error('Failed to load navigation config:', e)
+      } catch {
+        // Silently ignore invalid localStorage data
       }
     }
 
@@ -1009,8 +1009,8 @@ export function SidebarEnhanced() {
       try {
         const parsedPresets = JSON.parse(presets)
         setSavedPresets(parsedPresets)
-      } catch (e) {
-        console.error('Failed to load presets:', e)
+      } catch {
+        // Silently ignore invalid localStorage data
       }
     }
 
