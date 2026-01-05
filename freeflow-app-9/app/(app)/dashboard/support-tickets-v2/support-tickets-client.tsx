@@ -98,7 +98,19 @@ interface CustomerProfile {
 
 interface SupportTicketsClientProps {
   initialTickets: SupportTicket[]
-  initialStats: SupportStats
+  initialStats?: SupportStats
+}
+
+// Default stats fallback
+const defaultStats: SupportStats = {
+  total: 0,
+  open: 0,
+  inProgress: 0,
+  pending: 0,
+  resolved: 0,
+  urgent: 0,
+  avgResponseTime: 0,
+  satisfactionRate: 0,
 }
 
 // Mock data
@@ -200,7 +212,7 @@ const mockSupportTicketsQuickActions = [
 export default function SupportTicketsClient({ initialTickets, initialStats }: SupportTicketsClientProps) {
   const { tickets, loading, getStats } = useSupportTickets()
   const displayTickets = tickets.length > 0 ? tickets : initialTickets
-  const stats = tickets.length > 0 ? getStats() : initialStats
+  const stats = tickets.length > 0 ? getStats() : (initialStats || defaultStats)
 
   const [activeTab, setActiveTab] = useState('inbox')
   const [activeView, setActiveView] = useState<'unassigned' | 'mine' | 'pending' | 'solved' | 'all'>('all')
