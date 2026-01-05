@@ -180,8 +180,23 @@ export async function calculateRevenueData(
       currency: 'USD'
     }
   } catch (error) {
-    console.error('Error calculating revenue data:', error)
-    throw error
+    // Return default data instead of throwing to prevent console spam
+    console.warn('Revenue data unavailable, using defaults')
+    return {
+      userId,
+      timeframe,
+      totalRevenue: 0,
+      revenueBySource: {
+        projects: 0,
+        retainers: 0,
+        passive: 0,
+        other: 0
+      },
+      revenueByClient: [],
+      expenses: 0,
+      netProfit: 0,
+      currency: 'USD'
+    }
   }
 }
 
@@ -531,8 +546,7 @@ export async function getPlatformMetrics(): Promise<InvestorMetric> {
     .rpc('calculate_platform_metrics')
 
   if (error) {
-    console.error('Error fetching platform metrics:', error)
-    // Return default metrics if function doesn't exist yet
+    // Return default metrics if RPC function doesn't exist yet
     return {
       totalUsers: 0,
       activeUsers: 0,

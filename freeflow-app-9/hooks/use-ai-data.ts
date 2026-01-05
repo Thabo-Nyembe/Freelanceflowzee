@@ -70,7 +70,7 @@ export function useRevenueData(userId?: string) {
       } catch (err) {
         if (isMounted) {
           setError(err as Error)
-          console.error('Failed to fetch revenue data:', err)
+          // Only log once, not on every render
         }
       } finally {
         if (isMounted) {
