@@ -276,7 +276,7 @@ export function useBusinessIntelligence(options: UseBusinessIntelligenceOptions 
     setError(null)
 
     try {
-      const response = await fetch(`/api/business-intelligence?type=${businessType}&timeFrame=${timeFrame}`)
+      const response = await fetch(`/api/business-intelligence?type=overview&businessType=${businessType}&period=${timeFrame}`)
       const result = await response.json()
 
       if (response.ok) {
