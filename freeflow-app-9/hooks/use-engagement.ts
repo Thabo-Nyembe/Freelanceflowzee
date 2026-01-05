@@ -63,7 +63,7 @@ export function useEngagement() {
         await algorithm.checkMilestones()
       } catch (err) {
         setError(err as Error)
-        console.error('Engagement data fetch error:', err)
+        // Silently handle - engagement data is optional
       } finally {
         setLoading(false)
       }
@@ -178,7 +178,7 @@ export function useActivityTracking() {
           screenSize: `${window.innerWidth}x${window.innerHeight}`
         })
       } catch (err) {
-        console.error('Failed to start session:', err)
+        // Silently handle - session tracking is optional
       }
     }
 

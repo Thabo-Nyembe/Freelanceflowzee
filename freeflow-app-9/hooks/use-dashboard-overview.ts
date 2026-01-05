@@ -298,7 +298,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       setMetrics(transformed.length > 0 ? transformed : mockMetrics)
       return transformed
     } catch (err) {
-      console.error('Error fetching metrics:', err)
       setMetrics(null)
       return []
     }
@@ -325,7 +324,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       setStats(transformed)
       return transformed
     } catch (err) {
-      console.error('Error fetching stats:', err)
       setStats(null)
       return []
     }
@@ -354,7 +352,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       setNotifications(transformed.length > 0 ? transformed : mockNotifications)
       return transformed
     } catch (err) {
-      console.error('Error fetching notifications:', err)
       setNotifications([])
       return []
     }
@@ -390,7 +387,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
 
       return data
     } catch (err) {
-      console.error('Error fetching from API:', err)
       // Use mock data as fallback
       setQuickStats(mockQuickStats)
       setAiInsights(mockAIInsights)
@@ -415,7 +411,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       setAiInsights(mockAIInsights)
       return []
     } catch (err) {
-      console.error('Error fetching AI insights:', err)
       setAiInsights(mockAIInsights)
       return []
     }
@@ -455,7 +450,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       setNotifications(prev => prev.filter(n => n.id !== notificationId))
       return true
     } catch (err) {
-      console.error('Error marking notification read:', err)
       return false
     }
   }, [supabase])
@@ -479,7 +473,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       const result = await response.json()
       return result.success
     } catch (err) {
-      console.error('Error logging activity:', err)
       return false
     }
   }, [])
@@ -504,7 +497,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       }
       return result
     } catch (err) {
-      console.error('Error creating project:', err)
       return { success: false, error: 'Failed to create project' }
     }
   }, [refresh])
@@ -528,7 +520,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       }
       return result
     } catch (err) {
-      console.error('Error creating task:', err)
       return { success: false, error: 'Failed to create task' }
     }
   }, [refresh])
@@ -552,7 +543,6 @@ export function useDashboardOverview(options: UseDashboardOverviewOptions = {}) 
       }
       return result
     } catch (err) {
-      console.error('Error creating invoice:', err)
       return { success: false, error: 'Failed to create invoice' }
     }
   }, [refresh])

@@ -172,7 +172,6 @@ export function useLeadsData(userId?: string) {
       } catch (err) {
         if (isMounted) {
           setError(err as Error)
-          console.error('Failed to fetch leads data:', err)
         }
       } finally {
         if (isMounted) {
@@ -258,7 +257,6 @@ export function useAIRecommendations(userId?: string, status?: 'pending' | 'acce
       } catch (err) {
         if (isMounted) {
           setError(err as Error)
-          console.error('Failed to fetch AI recommendations:', err)
         }
       } finally {
         if (isMounted) {
@@ -342,7 +340,6 @@ export function useGrowthPlaybook(userId?: string) {
       } catch (err) {
         if (isMounted) {
           setError(err as Error)
-          console.error('Failed to fetch growth playbook:', err)
         }
       } finally {
         if (isMounted) {
@@ -423,7 +420,6 @@ export function useUserMetrics(userId?: string) {
       } catch (err) {
         if (isMounted) {
           setError(err as Error)
-          console.error('Failed to fetch user metrics:', err)
         }
       } finally {
         if (isMounted) {
