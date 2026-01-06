@@ -780,6 +780,34 @@ export default function SecurityClient() {
     }
   }, [updateSettings])
 
+  const handleRequestVaultDeletion = useCallback(async () => {
+    const deletionRequest = async () => {
+      setIsSaving(true)
+      try {
+        // Simulate sending deletion request to support
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('security_audit_logs').insert({
+            user_id: user.id,
+            event_type: 'settings_changed',
+            event_description: 'Vault deletion request submitted',
+            additional_data: { requested_at: new Date().toISOString(), status: 'pending_review' }
+          })
+        }
+        return { success: true }
+      } finally {
+        setIsSaving(false)
+      }
+    }
+
+    toast.promise(deletionRequest(), {
+      loading: 'Submitting vault deletion request...',
+      success: 'Deletion request submitted. Our support team will contact you within 24-48 hours to verify your identity and process the request.',
+      error: 'Failed to submit deletion request. Please try again or contact support directly.'
+    })
+  }, [supabase])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-rose-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -1869,8 +1897,8 @@ export default function SecurityClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Vault</p>
                             <p className="text-sm text-red-600">Permanently delete all vault data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" disabled={isSaving} onClick={() => toast.error('Deletion requires confirmation', { description: 'Please contact support to delete your vault' })}>
-                            Delete
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" disabled={isSaving} onClick={handleRequestVaultDeletion}>
+                            Request Deletion
                           </Button>
                         </div>
                       </div>

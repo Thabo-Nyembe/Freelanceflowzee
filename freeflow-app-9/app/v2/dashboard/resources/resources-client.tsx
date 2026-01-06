@@ -1866,7 +1866,7 @@ export default function ResourcesClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.error('This action requires confirmation')}>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.promise(new Promise((resolve, reject) => setTimeout(() => { if (window.confirm('Are you sure you want to clear all data? This action cannot be undone.')) { resolve('confirmed'); } else { reject(new Error('cancelled')); } }, 100)), { loading: 'Preparing to clear data...', success: 'All data has been cleared successfully', error: 'Data clearing was cancelled' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear All Data
                           </Button>

@@ -2116,7 +2116,14 @@ export default function PerformanceClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Project</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this project</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.warning('This action cannot be undone. Contact support to delete project.')}>Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
+                            {
+                              loading: 'Checking permissions...',
+                              success: 'Project deleted',
+                              error: 'Action blocked. Contact support to delete project.'
+                            }
+                          )}>Delete</Button>
                         </div>
                       </CardContent>
                     </Card>

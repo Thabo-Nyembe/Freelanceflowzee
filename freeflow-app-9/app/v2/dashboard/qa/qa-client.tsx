@@ -2306,13 +2306,28 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     {isExecutingTest ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
                     Execute Test
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit mode', { description: 'Test case editing coming soon' })}>
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 500)),
+                      {
+                        loading: 'Preparing edit mode...',
+                        success: 'Edit mode - Test case editing coming soon',
+                        error: 'Failed to enter edit mode'
+                      }
+                    )
+                  }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>
                   <Button variant="outline" onClick={() => {
-                    navigator.clipboard.writeText(selectedTestCase?.id || '')
-                    toast.success('Copied', { description: 'Test case ID copied to clipboard' })
+                    toast.promise(
+                      navigator.clipboard.writeText(selectedTestCase?.id || ''),
+                      {
+                        loading: 'Copying test case ID...',
+                        success: 'Test case ID copied to clipboard',
+                        error: 'Failed to copy to clipboard'
+                      }
+                    )
                   }}>
                     <Copy className="w-4 h-4" />
                   </Button>

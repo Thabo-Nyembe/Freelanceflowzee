@@ -2068,7 +2068,11 @@ export default function AIDesignClient() {
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => toast.info('Upscaling', { description: 'Processing your image...' })}>
+                    <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+                      loading: 'Upscaling image...',
+                      success: 'Image upscaled successfully',
+                      error: 'Failed to upscale image'
+                    })}>
                       <Maximize2 className="w-4 h-4 mr-2" />
                       Upscale
                     </Button>

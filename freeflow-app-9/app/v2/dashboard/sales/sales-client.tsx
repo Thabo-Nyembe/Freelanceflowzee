@@ -2024,7 +2024,14 @@ export default function SalesClient() {
                                 }
                               )
                             }}>Copy</Button>
-                            <Button variant="outline" onClick={() => toast.warning('Confirm Regeneration', { description: 'This will invalidate your current API key. Are you sure?' })}>Regenerate</Button>
+                            <Button variant="outline" onClick={() => toast.promise(
+                              new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
+                              {
+                                loading: 'Verifying permissions...',
+                                success: 'Key regenerated',
+                                error: 'This will invalidate your current API key. Contact support to regenerate.'
+                              }
+                            )}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2146,7 +2153,14 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Pipeline</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all deals</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Dangerous Action', { description: 'This would delete all deals. Contact support to perform this action.' })}>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
+                            {
+                              loading: 'Checking permissions...',
+                              success: 'Pipeline cleared',
+                              error: 'Action blocked. Contact support to clear all deals.'
+                            }
+                          )}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -2156,7 +2170,14 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Reset CRM</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all CRM settings and data</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Dangerous Action', { description: 'This would reset all CRM data. Contact support to perform this action.' })}>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
+                            {
+                              loading: 'Checking permissions...',
+                              success: 'CRM reset',
+                              error: 'Action blocked. Contact support to reset CRM data.'
+                            }
+                          )}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>

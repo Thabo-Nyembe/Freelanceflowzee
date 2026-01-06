@@ -1844,11 +1844,11 @@ export default function PluginsClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.error('Remove All Plugins', { description: 'This action requires confirmation. Please use the confirmation dialog.' })}>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Preparing to remove all plugins...', success: 'Please confirm plugin removal in the dialog', error: 'Failed to prepare removal' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Remove All Plugins
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.error('Reset to Defaults', { description: 'This action requires confirmation. Please use the confirmation dialog.' })}>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Preparing to reset plugins...', success: 'Please confirm reset in the dialog', error: 'Failed to prepare reset' })}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>

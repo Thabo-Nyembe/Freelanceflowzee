@@ -1872,7 +1872,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                               onClick={() => toast.warning('Are you sure? Disconnecting will stop automatic transaction syncing.', {
                                 action: {
                                   label: 'Disconnect',
-                                  onClick: () => toast.success('Chase Business Checking has been disconnected')
+                                  onClick: () => toast.promise(
+                                    new Promise(resolve => setTimeout(resolve, 1500)),
+                                    {
+                                      loading: 'Disconnecting Chase Business Checking...',
+                                      success: 'Chase Business Checking has been disconnected',
+                                      error: 'Failed to disconnect account'
+                                    }
+                                  )
                                 }
                               })}
                             >
@@ -1898,7 +1905,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                               onClick={() => toast.warning('Are you sure? Disconnecting will stop automatic transaction syncing.', {
                                 action: {
                                   label: 'Disconnect',
-                                  onClick: () => toast.success('American Express Business has been disconnected')
+                                  onClick: () => toast.promise(
+                                    new Promise(resolve => setTimeout(resolve, 1500)),
+                                    {
+                                      loading: 'Disconnecting American Express Business...',
+                                      success: 'American Express Business has been disconnected',
+                                      error: 'Failed to disconnect account'
+                                    }
+                                  )
                                 }
                               })}
                             >
@@ -2151,7 +2165,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                               description: 'This will lock all transactions from the previous fiscal year. This action cannot be undone.',
                               action: {
                                 label: 'Close Year',
-                                onClick: () => toast.success('Fiscal year closed', { description: 'Previous year transactions are now locked.' })
+                                onClick: () => toast.promise(
+                                  new Promise(resolve => setTimeout(resolve, 2000)),
+                                  {
+                                    loading: 'Closing fiscal year...',
+                                    success: 'Fiscal year closed - Previous year transactions are now locked',
+                                    error: 'Failed to close fiscal year'
+                                  }
+                                )
                               }
                             })}
                           >
@@ -2166,10 +2187,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-50"
-                            onClick={() => toast.error('Warning: Destructive Action', {
-                              description: 'This will permanently delete ALL financial data. Please contact support to reset your data.',
-                              duration: 5000
-                            })}
+                            onClick={() => toast.promise(
+                              new Promise((_, reject) => setTimeout(() => reject(new Error('Blocked')), 500)),
+                              {
+                                loading: 'Checking permissions...',
+                                success: 'Request submitted',
+                                error: 'Action blocked - Please contact support to reset your financial data. This destructive action requires admin approval.'
+                              }
+                            )}
                           >
                             Reset Data
                           </Button>

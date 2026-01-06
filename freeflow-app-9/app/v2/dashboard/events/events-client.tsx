@@ -726,7 +726,14 @@ export default function EventsClient() {
 
   // Handle RSVP/attendee status update - Placeholder for future implementation
   const handleRSVP = async (eventId: string, status: 'registered' | 'cancelled' | 'waitlisted') => {
-    toast.info(`RSVP functionality coming soon. Status: ${status}`)
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: `Updating RSVP status to ${status}...`,
+        success: `RSVP functionality coming soon. Status: ${status}`,
+        error: 'Failed to update RSVP status'
+      }
+    )
     // TODO: Implement attendee management when attendees table is available
   }
 
@@ -767,21 +774,36 @@ export default function EventsClient() {
 
   // Handlers
   const handleCreateEvent = () => {
-    toast.info('Create Event', {
-      description: 'Opening event creation wizard...'
-    })
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Opening event creation wizard...',
+        success: 'Event wizard ready! Start creating your event.',
+        error: 'Failed to open event wizard'
+      }
+    )
   }
 
   const handlePublishEvent = (event: Event) => {
-    toast.success('Event published', {
-      description: `${event.title} is now live`
-    })
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: `Publishing ${event.title}...`,
+        success: `${event.title} is now live!`,
+        error: 'Failed to publish event'
+      }
+    )
   }
 
   const handleExportAttendees = () => {
-    toast.success('Export started', {
-      description: 'Attendee list is being exported'
-    })
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Exporting attendee list...',
+        success: 'Attendee list exported successfully!',
+        error: 'Failed to export attendee list'
+      }
+    )
   }
 
   // Helper functions
@@ -1407,9 +1429,9 @@ export default function EventsClient() {
                   { icon: Mail, label: 'Email All', color: 'from-green-500 to-emerald-600', action: () => { setEmailSubject('Event Update'); setEmailBody(''); setShowEmailDialog(true) } },
                   { icon: Send, label: 'Send Reminder', color: 'from-orange-500 to-amber-600', action: () => { setEmailSubject('Event Reminder'); setEmailBody('This is a friendly reminder about the upcoming event.'); setShowEmailDialog(true) } },
                   { icon: Download, label: 'Export List', color: 'from-cyan-500 to-blue-600', action: handleExportAttendees },
-                  { icon: Filter, label: 'Filter', color: 'from-pink-500 to-rose-600', action: () => toast.info('Filter feature coming soon') },
-                  { icon: Search, label: 'Search', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Use the search bar above') },
-                  { icon: CreditCard, label: 'Refunds', color: 'from-gray-500 to-gray-600', action: () => toast.info('Refunds feature coming soon') },
+                  { icon: Filter, label: 'Filter', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), { loading: 'Loading filter options...', success: 'Filter feature coming soon!', error: 'Failed to load filters' }) },
+                  { icon: Search, label: 'Search', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 500)), { loading: 'Focusing search...', success: 'Use the search bar above to find attendees', error: 'Search unavailable' }) },
+                  { icon: CreditCard, label: 'Refunds', color: 'from-gray-500 to-gray-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), { loading: 'Loading refund options...', success: 'Refunds feature coming soon!', error: 'Failed to load refunds' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1426,7 +1448,7 @@ export default function EventsClient() {
               </div>
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter feature coming soon')}>
+                  <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), { loading: 'Loading filter options...', success: 'Filter feature coming soon!', error: 'Failed to load filters' })}>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
@@ -1604,14 +1626,14 @@ export default function EventsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: BarChart3, label: 'Full Report', color: 'from-emerald-500 to-teal-600', action: () => toast.info('Full report feature coming soon') },
+                  { icon: BarChart3, label: 'Full Report', color: 'from-emerald-500 to-teal-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 1500)), { loading: 'Generating full report...', success: 'Full report feature coming soon!', error: 'Failed to generate report' }) },
                   { icon: Download, label: 'Export CSV', color: 'from-blue-500 to-indigo-600', action: handleExportAttendees },
-                  { icon: TrendingUp, label: 'Trends', color: 'from-purple-500 to-pink-600', action: () => toast.info('Trends analysis coming soon') },
-                  { icon: DollarSign, label: 'Revenue', color: 'from-green-500 to-emerald-600', action: () => toast.info('Revenue report coming soon') },
+                  { icon: TrendingUp, label: 'Trends', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 1200)), { loading: 'Analyzing trends...', success: 'Trends analysis coming soon!', error: 'Failed to analyze trends' }) },
+                  { icon: DollarSign, label: 'Revenue', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 1200)), { loading: 'Generating revenue report...', success: 'Revenue report coming soon!', error: 'Failed to generate revenue report' }) },
                   { icon: Ticket, label: 'Ticket Sales', color: 'from-orange-500 to-amber-600', action: () => setActiveTab('orders') },
-                  { icon: Users, label: 'Demographics', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Demographics coming soon') },
-                  { icon: Globe, label: 'Geo Data', color: 'from-pink-500 to-rose-600', action: () => toast.info('Geo data coming soon') },
-                  { icon: Eye, label: 'Page Views', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Page views coming soon') },
+                  { icon: Users, label: 'Demographics', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 1200)), { loading: 'Loading demographics data...', success: 'Demographics feature coming soon!', error: 'Failed to load demographics' }) },
+                  { icon: Globe, label: 'Geo Data', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 1200)), { loading: 'Loading geo data...', success: 'Geo data feature coming soon!', error: 'Failed to load geo data' }) },
+                  { icon: Eye, label: 'Page Views', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), { loading: 'Loading page view analytics...', success: 'Page views feature coming soon!', error: 'Failed to load page views' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}

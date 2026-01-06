@@ -621,11 +621,31 @@ export default function BackupsClient() {
   }
 
   // Handlers
-  const handleCreateBackup = () => toast.info('Creating', { description: 'Backup started...' })
-  const handleRestoreBackup = (n: string) => toast.info('Restoring', { description: `Restoring "${n}"...` })
-  const handleDeleteBackup = (n: string) => toast.info('Deleted', { description: `"${n}" removed` })
-  const handleDownloadBackup = (n: string) => toast.success('Downloading', { description: `"${n}" downloading...` })
-  const handleScheduleBackup = () => toast.success('Scheduled', { description: 'Auto backup configured' })
+  const handleCreateBackup = () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Creating backup...',
+    success: 'Backup created successfully',
+    error: 'Failed to create backup'
+  })
+  const handleRestoreBackup = (n: string) => toast.promise(new Promise(r => setTimeout(r, 2000)), {
+    loading: `Restoring "${n}"...`,
+    success: `"${n}" restored successfully`,
+    error: `Failed to restore "${n}"`
+  })
+  const handleDeleteBackup = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: `Deleting "${n}"...`,
+    success: `"${n}" deleted successfully`,
+    error: `Failed to delete "${n}"`
+  })
+  const handleDownloadBackup = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: `Downloading "${n}"...`,
+    success: `"${n}" downloaded successfully`,
+    error: `Failed to download "${n}"`
+  })
+  const handleScheduleBackup = () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Scheduling backup...',
+    success: 'Auto backup scheduled successfully',
+    error: 'Failed to schedule backup'
+  })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">
@@ -903,7 +923,11 @@ export default function BackupsClient() {
                       <Download className="h-6 w-6 mb-2 text-blue-600" />
                       Restore Data
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col" onClick={() => toast.info('Verifying Backups', { description: 'Backup verification started...' })}>
+                    <Button variant="outline" className="h-20 flex-col" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), {
+                      loading: 'Verifying backups...',
+                      success: 'All backups verified successfully',
+                      error: 'Backup verification failed'
+                    })}>
                       <ShieldCheck className="h-6 w-6 mb-2 text-purple-600" />
                       Verify Backups
                     </Button>
@@ -1006,7 +1030,11 @@ export default function BackupsClient() {
                         {job.verified && <ShieldCheck className="h-4 w-4 text-blue-600" />}
                         {job.crossRegionEnabled && <Globe className="h-4 w-4 text-purple-600" />}
                       </div>
-                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.info('Job Options', { description: `Options for "${job.name}"` }) }}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), {
+                        loading: 'Loading options...',
+                        success: `Options loaded for "${job.name}"`,
+                        error: 'Failed to load options'
+                      }) }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -1101,13 +1129,13 @@ export default function BackupsClient() {
             {/* Vaults Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Vault', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('Creating Vault', { description: 'New vault creation started...' }) },
-                { icon: Lock, label: 'Lock Vault', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.info('Locking Vault', { description: 'Vault lock initiated...' }) },
+                { icon: Plus, label: 'New Vault', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating vault...', success: 'Vault created successfully', error: 'Failed to create vault' }) },
+                { icon: Lock, label: 'Lock Vault', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Locking vault...', success: 'Vault locked successfully', error: 'Failed to lock vault' }) },
                 { icon: Shield, label: 'Compliance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setActiveTab('compliance') },
-                { icon: Key, label: 'Access', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('Access Control', { description: 'Managing vault access...' }) },
-                { icon: Copy, label: 'Replicate', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Replicating', { description: 'Vault replication started...' }) },
-                { icon: Archive, label: 'Archive', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Archiving', { description: 'Moving to archive storage...' }) },
-                { icon: Eye, label: 'Audit', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Audit Log', { description: 'Viewing audit trail...' }) },
+                { icon: Key, label: 'Access', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading access controls...', success: 'Access controls loaded', error: 'Failed to load access controls' }) },
+                { icon: Copy, label: 'Replicate', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Replicating vault...', success: 'Vault replicated successfully', error: 'Failed to replicate vault' }) },
+                { icon: Archive, label: 'Archive', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Archiving...', success: 'Moved to archive successfully', error: 'Failed to archive' }) },
+                { icon: Eye, label: 'Audit', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading audit log...', success: 'Audit log loaded', error: 'Failed to load audit log' }) },
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1356,12 +1384,12 @@ export default function BackupsClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => toast.info('General', { description: 'General settings...' }) },
-                { icon: HardDrive, label: 'Storage', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.info('Storage', { description: 'Storage settings...' }) },
-                { icon: Bell, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('Alerts', { description: 'Alert settings...' }) },
-                { icon: Webhook, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.info('Integrations', { description: 'Integration settings...' }) },
-                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.info('Security', { description: 'Security settings...' }) },
-                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.info('Advanced', { description: 'Advanced settings...' }) },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading general settings...', success: 'General settings loaded', error: 'Failed to load settings' }) },
+                { icon: HardDrive, label: 'Storage', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading storage settings...', success: 'Storage settings loaded', error: 'Failed to load settings' }) },
+                { icon: Bell, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading alert settings...', success: 'Alert settings loaded', error: 'Failed to load settings' }) },
+                { icon: Webhook, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading integrations...', success: 'Integrations loaded', error: 'Failed to load integrations' }) },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading security settings...', success: 'Security settings loaded', error: 'Failed to load settings' }) },
+                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading advanced settings...', success: 'Advanced settings loaded', error: 'Failed to load settings' }) },
                 { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleDownloadBackup('Backup Config') },
                 { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => handleDeleteBackup('All Settings') },
               ].map((action, idx) => (
@@ -1708,7 +1736,7 @@ export default function BackupsClient() {
                   <div className="flex gap-3">
                     <Button className="bg-green-600 hover:bg-green-700" onClick={handleCreateBackup}><Play className="h-4 w-4 mr-2" />Run Now</Button>
                     <Button variant="outline" onClick={() => handleRestoreBackup(selectedJob.name)}><Download className="h-4 w-4 mr-2" />Restore</Button>
-                    <Button variant="outline" onClick={() => toast.info('Verifying', { description: 'Backup verification started...' })}><ShieldCheck className="h-4 w-4 mr-2" />Verify</Button>
+                    <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Verifying backup...', success: 'Backup verified successfully', error: 'Verification failed' })}><ShieldCheck className="h-4 w-4 mr-2" />Verify</Button>
                     <Button variant="outline" onClick={() => setShowLegalHoldDialog(true)}><Gavel className="h-4 w-4 mr-2" />Legal Hold</Button>
                   </div>
                 </div>

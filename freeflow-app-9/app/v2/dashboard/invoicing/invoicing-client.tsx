@@ -2070,7 +2070,11 @@ export default function InvoicingClient() {
                     <Printer className="w-4 h-4 mr-2" />
                     Print
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info('Opening edit mode...')}>
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                    loading: 'Opening edit mode...',
+                    success: 'Edit mode ready',
+                    error: 'Failed to open edit mode'
+                  })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

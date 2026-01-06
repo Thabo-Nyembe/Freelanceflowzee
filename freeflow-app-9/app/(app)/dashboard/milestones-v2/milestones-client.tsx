@@ -1926,7 +1926,11 @@ export default function MilestonesClient() {
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => toast.info('Archiving old milestones...')}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+                              loading: 'Archiving old milestones...',
+                              success: 'Old milestones archived successfully',
+                              error: 'Failed to archive milestones'
+                            })}>
                             <Archive className="w-5 h-5" />
                             <span>Archive Old</span>
                           </Button>
@@ -1934,7 +1938,11 @@ export default function MilestonesClient() {
                             <RefreshCw className="w-5 h-5" />
                             <span>Reset Stats</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => toast.warning('This will delete all completed milestones')}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), {
+                              loading: 'Purging completed milestones...',
+                              success: 'Completed milestones purged successfully',
+                              error: 'Failed to purge milestones'
+                            })}>
                             <Trash2 className="w-5 h-5" />
                             <span>Purge Completed</span>
                           </Button>

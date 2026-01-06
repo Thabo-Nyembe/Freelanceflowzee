@@ -1202,7 +1202,16 @@ export default function PayrollClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.info('Select a pay run to approve')}
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => setTimeout(resolve, 800)),
+                    {
+                      loading: 'Loading approval queue...',
+                      success: 'Select a pay run to approve from the list below',
+                      error: 'Failed to load approval queue'
+                    }
+                  )
+                }}
               >
                 <CheckCircle className="w-5 h-5" />
                 <span className="text-xs font-medium">Approve</span>
@@ -1226,7 +1235,19 @@ export default function PayrollClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => { setActiveTab('analytics'); toast.success('Viewing payroll analytics') }}
+                onClick={() => {
+                  toast.promise(
+                    new Promise((resolve) => {
+                      setActiveTab('analytics')
+                      setTimeout(resolve, 600)
+                    }),
+                    {
+                      loading: 'Loading payroll analytics...',
+                      success: 'Payroll analytics loaded',
+                      error: 'Failed to load analytics'
+                    }
+                  )
+                }}
               >
                 <BarChart3 className="w-5 h-5" />
                 <span className="text-xs font-medium">Analytics</span>

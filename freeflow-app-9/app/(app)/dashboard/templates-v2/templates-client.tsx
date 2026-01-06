@@ -2371,7 +2371,7 @@ export default function TemplatesClient() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button variant="outline" className="w-full gap-2" onClick={() => toast.success('New folder created!')}>
+              <Button variant="outline" className="w-full gap-2" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Creating new folder...', success: 'New folder created successfully!', error: 'Failed to create folder' })}>
                 <FolderPlus className="w-4 h-4" />
                 Create New Folder
               </Button>

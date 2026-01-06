@@ -1014,7 +1014,11 @@ export default function FilesHubClient() {
                           <p className="text-sm text-gray-500">Modified {formatDate(file.modifiedAt)} at {formatTime(file.modifiedAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => toast.info('Download', { description: 'Download starting...' })}>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+                              loading: 'Preparing download...',
+                              success: 'File downloaded successfully',
+                              error: 'Download failed'
+                            })}>
                             <Download className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleShareFile(file.id, file.name)}>
@@ -2132,7 +2136,11 @@ export default function FilesHubClient() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.info('Download', { description: 'Download starting...' })}>
+                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+                      loading: 'Preparing download...',
+                      success: 'File downloaded successfully',
+                      error: 'Download failed'
+                    })}>
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>

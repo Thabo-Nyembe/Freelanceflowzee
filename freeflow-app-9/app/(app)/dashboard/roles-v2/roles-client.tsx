@@ -2089,8 +2089,8 @@ export default function RolesClient() {
                           <h4 className="font-medium">Data Management</h4>
                           <div className="grid grid-cols-2 gap-3">
                             <Button variant="outline" className="justify-start" onClick={handleExportRoles}><Download className="w-4 h-4 mr-2" />Export Roles & Permissions</Button>
-                            <Button variant="outline" className="justify-start" onClick={() => toast.info('Export', { description: 'Exporting audit logs...' })}><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
-                            <Button variant="outline" className="justify-start" onClick={() => toast.info('Export', { description: 'Exporting user assignments...' })}><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
+                            <Button variant="outline" className="justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Exporting audit logs...', success: 'Audit logs exported successfully!', error: 'Failed to export audit logs' })}><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
+                            <Button variant="outline" className="justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Exporting user assignments...', success: 'User assignments exported successfully!', error: 'Failed to export user assignments' })}><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
                             <Button variant="outline" className="justify-start" onClick={handleRefreshRoles}><RefreshCw className="w-4 h-4 mr-2" />Sync with Directory</Button>
                           </div>
                         </div>

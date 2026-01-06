@@ -1543,7 +1543,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.success('Copied', { description: 'API key copied to clipboard' })}>Copy</Button>
+                            <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText('STRIPE_KEY_PLACEHOLDER'), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>Copy</Button>
                             <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating new API key...', success: 'New API key generated! Copy it now', error: 'Failed to generate' })}>Regenerate</Button>
                           </div>
                         </div>
@@ -1663,7 +1663,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium text-red-700 dark:text-red-400">Delete All Tickets</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all tickets and data</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.error('Delete All', { description: 'This action requires confirmation' })}>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Verifying delete permissions...', success: 'This action requires confirmation. Please use the confirmation dialog.', error: 'Permission verification failed' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete All
                           </Button>
@@ -1673,7 +1673,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium text-red-700 dark:text-red-400">Reset Helpdesk</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all settings to default</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.error('Reset Helpdesk', { description: 'This action requires confirmation' })}>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Preparing helpdesk reset...', success: 'This action requires confirmation. Please use the confirmation dialog.', error: 'Reset preparation failed' })}>
                             <RotateCcw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -1785,7 +1785,7 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           onChange={(e) => setReplyContent(e.target.value)}
                           className="flex-1"
                         />
-                        <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => { if (selectedTicket) { toast.success('Reply Sent', { description: `Reply sent for ticket #${selectedTicket.code}` }); setReplyContent(''); } }}>
+                        <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => { if (selectedTicket) { toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Sending reply...', success: `Reply sent for ticket #${selectedTicket.code}!`, error: 'Failed to send reply' }); setReplyContent(''); } }}>
                           <Send className="w-4 h-4 mr-2" />
                           Send
                         </Button>

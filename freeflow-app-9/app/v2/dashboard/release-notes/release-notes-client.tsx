@@ -1088,7 +1088,14 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     <Flag className="w-5 h-5" />
                     Feature Flags
                   </CardTitle>
-                  <Button size="sm" className="bg-orange-600" onClick={() => toast.info('Feature Flags', { description: 'Feature flag management coming soon' })}>
+                  <Button size="sm" className="bg-orange-600" onClick={() => toast.promise(
+                      new Promise((resolve) => setTimeout(resolve, 1500)),
+                      {
+                        loading: 'Preparing feature flag configuration...',
+                        success: 'Feature flag management coming soon! We are working on this feature.',
+                        error: 'Failed to load feature flag configuration'
+                      }
+                    )}>
                     <Plus className="w-4 h-4 mr-1" />
                     New Flag
                   </Button>

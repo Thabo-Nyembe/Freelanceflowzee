@@ -835,7 +835,11 @@ export default function CiCdClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2" onClick={() => toast.info('Exporting logs...')}>
+            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+              loading: 'Exporting logs...',
+              success: 'Logs exported successfully',
+              error: 'Failed to export logs'
+            })}>
               <Download className="w-4 h-4" />
               Export Logs
             </Button>

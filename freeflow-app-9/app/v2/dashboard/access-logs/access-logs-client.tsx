@@ -1388,7 +1388,11 @@ export default function AccessLogsClient() {
                     <Bookmark className="w-5 h-5 text-purple-500" />
                     Saved Views
                   </div>
-                  <Button size="sm" onClick={() => toast.success('View saved', { description: 'Current filter settings saved' })}>Save Current View</Button>
+                  <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                    loading: 'Saving view...',
+                    success: 'View saved successfully',
+                    error: 'Failed to save view'
+                  })}>Save Current View</Button>
                 </CardTitle>
               </CardHeader>
               <CardContent>

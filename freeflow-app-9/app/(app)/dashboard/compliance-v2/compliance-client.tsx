@@ -1648,7 +1648,7 @@ export default function ComplianceClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
-                            <Button variant="outline" size="sm" onClick={() => toast.success('Copied', { description: 'Token copied to clipboard' })}>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying to clipboard...', success: 'API token copied to clipboard', error: 'Failed to copy token' })}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>

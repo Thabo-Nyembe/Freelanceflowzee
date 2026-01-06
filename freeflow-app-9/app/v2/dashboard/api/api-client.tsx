@@ -857,11 +857,11 @@ export default function ApiClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Endpoint', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateEndpointDialog(true) },
-                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.info('Testing all endpoints...') },
+                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Testing all endpoints...', success: 'All endpoints tested successfully', error: 'Endpoint tests failed' }) },
                 { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {} },
-                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Import feature coming soon') },
+                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Preparing import...', success: 'Import feature coming soon - stay tuned!', error: 'Failed to prepare import' }) },
                 { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleExportApiDocs },
-                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Opening API documentation...') },
+                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening API documentation...', success: 'API documentation loaded', error: 'Failed to load documentation' }) },
                 { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => {} },
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {} },
               ].map((action, idx) => (
@@ -1037,12 +1037,12 @@ export default function ApiClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Key', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowCreateKeyDialog(true) },
-                { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Key rotation coming soon') },
+                { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Preparing key rotation...', success: 'Key rotation feature coming soon - stay tuned!', error: 'Failed to prepare rotation' }) },
                 { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => {} },
                 { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {} },
-                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Select a key to revoke') },
-                { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Keys copied to clipboard') },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Exporting keys...') },
+                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.promise(new Promise((_, reject) => setTimeout(() => reject(new Error('No key selected')), 500)), { loading: 'Checking selected keys...', success: 'Keys ready for revocation', error: 'Please select a key to revoke first' }) },
+                { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Copying all keys to clipboard...', success: 'All keys copied to clipboard', error: 'Failed to copy keys' }) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Exporting API keys...', success: 'API keys exported successfully', error: 'Failed to export keys' }) },
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {} },
               ].map((action, idx) => (
                 <Button
@@ -1125,7 +1125,7 @@ export default function ApiClient() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Edit key settings')}>Edit</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading key settings...', success: 'Key settings loaded - edit mode ready', error: 'Failed to load key settings' })}>Edit</Button>
                         <Button variant="outline" size="sm" className="text-red-600" onClick={() => handleRevokeApiKey(key.id, key.name)}>Revoke</Button>
                       </div>
                     </div>

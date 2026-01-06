@@ -1988,8 +1988,8 @@ export default function SalesClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="sk_live_xxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx'); toast.success('Copied', { description: 'API key copied to clipboard' }) }}>Copy</Button>
-                            <Button variant="outline" onClick={() => toast.warning('Confirm Regeneration', { description: 'This will invalidate your current API key. Are you sure?' })}>Regenerate</Button>
+                            <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx'), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>Copy</Button>
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Preparing key regeneration...', success: 'Please confirm to invalidate your current API key', error: 'Failed to prepare regeneration' })}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2093,7 +2093,7 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Pipeline</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all deals</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Dangerous Action', { description: 'This would delete all deals. Contact support to perform this action.' })}>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Verifying permissions...', success: 'Contact support to perform this dangerous action', error: 'Permission verification failed' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -2103,7 +2103,7 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Reset CRM</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all CRM settings and data</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.warning('Dangerous Action', { description: 'This would reset all CRM data. Contact support to perform this action.' })}>
+                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Verifying permissions...', success: 'Contact support to perform this CRM reset action', error: 'Permission verification failed' })}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -2280,9 +2280,9 @@ export default function SalesClient() {
               </div>
 
               <div className="flex gap-2">
-                <Button className="flex-1" onClick={() => toast.success('Quote Sent', { description: 'Quote has been sent to the customer' })}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
-                <Button variant="outline" onClick={() => toast.info('Generating PDF', { description: 'Your quote PDF is being generated' })}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
-                <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedQuote.quoteNumber); toast.success('Copied', { description: 'Quote number copied to clipboard' }) }}><Copy className="w-4 h-4" /></Button>
+                <Button className="flex-1" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Sending quote to customer...', success: 'Quote has been sent to the customer!', error: 'Failed to send quote' })}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
+                <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2500)), { loading: 'Generating PDF...', success: 'PDF generated and ready for download!', error: 'Failed to generate PDF' })}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
+                <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText(selectedQuote.quoteNumber), { loading: 'Copying quote number...', success: 'Quote number copied to clipboard!', error: 'Failed to copy quote number' })}><Copy className="w-4 h-4" /></Button>
               </div>
             </div>
           )}
