@@ -761,12 +761,36 @@ const mockActivities = [
 ]
 
 const mockQuickActions = [
-  { id: '1', label: 'New Campaign', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => {}, category: 'Create' },
-  { id: '2', label: 'Add Lead', icon: <Users className="h-5 w-5" />, shortcut: '⌘L', action: () => {}, category: 'Create' },
-  { id: '3', label: 'AI Insights', icon: <Brain className="h-5 w-5" />, shortcut: '⌘I', action: () => {}, category: 'AI' },
-  { id: '4', label: 'Send Email', icon: <Mail className="h-5 w-5" />, shortcut: '⌘E', action: () => {}, category: 'Actions' },
-  { id: '5', label: 'View Reports', icon: <BarChart3 className="h-5 w-5" />, shortcut: '⌘R', action: () => {}, category: 'Navigate' },
-  { id: '6', label: 'Schedule Post', icon: <Calendar className="h-5 w-5" />, shortcut: '⌘S', action: () => {}, category: 'Create' },
+  { id: '1', label: 'New Campaign', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Creating new campaign...',
+    success: 'Campaign created successfully',
+    error: 'Failed to create campaign'
+  }), category: 'Create' },
+  { id: '2', label: 'Add Lead', icon: <Users className="h-5 w-5" />, shortcut: '⌘L', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Adding new lead...',
+    success: 'Lead added successfully',
+    error: 'Failed to add lead'
+  }), category: 'Create' },
+  { id: '3', label: 'AI Insights', icon: <Brain className="h-5 w-5" />, shortcut: '⌘I', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Generating AI insights...',
+    success: 'AI insights ready',
+    error: 'Failed to generate insights'
+  }), category: 'AI' },
+  { id: '4', label: 'Send Email', icon: <Mail className="h-5 w-5" />, shortcut: '⌘E', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Sending email...',
+    success: 'Email sent successfully',
+    error: 'Failed to send email'
+  }), category: 'Actions' },
+  { id: '5', label: 'View Reports', icon: <BarChart3 className="h-5 w-5" />, shortcut: '⌘R', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Loading reports...',
+    success: 'Reports loaded',
+    error: 'Failed to load reports'
+  }), category: 'Navigate' },
+  { id: '6', label: 'Schedule Post', icon: <Calendar className="h-5 w-5" />, shortcut: '⌘S', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Scheduling post...',
+    success: 'Post scheduled successfully',
+    error: 'Failed to schedule post'
+  }), category: 'Create' },
 ]
 
 // Sparkline data for campaigns
