@@ -619,16 +619,15 @@ export default function EscrowPage() {
           notes: ''
         })
 
-        // Show success toast
-        if (result.achievement) {
-          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`, {
-            description: `Payment link: ${result.paymentUrl}`
-          })
-        } else {
-          toast.success(result.message, {
-            description: `Payment link: ${result.paymentUrl}`
-          })
-        }
+        // Show success toast with loading state
+        const successMessage = result.achievement
+          ? `${result.message} ${result.achievement.message} +${result.achievement.points} points!`
+          : result.message
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Processing escrow creation...',
+          success: `${successMessage} - Payment link: ${result.paymentUrl}`,
+          error: 'Failed to create escrow deposit'
+        })
 
         // Show next steps notification
         if (result.nextSteps && result.nextSteps.length > 0) {
@@ -636,10 +635,12 @@ export default function EscrowPage() {
             logger.debug('Next steps available', {
               steps: result.nextSteps
             })
-            toast.info('Next Steps Available', {
-              description: result.nextSteps.join(' • ')
+            toast.promise(new Promise(r => setTimeout(r, 600)), {
+              loading: 'Loading next steps...',
+              success: `Next Steps Available - ${result.nextSteps.join(' • ')}`,
+              error: 'Failed to load next steps'
             })
-          }, 500)
+          }, 1000)
         }
 
         logger.info('Escrow deposit created successfully', {
@@ -696,12 +697,15 @@ export default function EscrowPage() {
         setShowPasswordForm(null)
         setReleasePassword('')
 
-        // Show success toast
-        if (result.achievement) {
-          toast.success(`${result.message} ${result.achievement.message} +${result.achievement.points} points!`)
-        } else {
-          toast.success(result.message)
-        }
+        // Show success toast with loading state
+        const releaseMessage = result.achievement
+          ? `${result.message} ${result.achievement.message} +${result.achievement.points} points!`
+          : result.message
+        toast.promise(new Promise(r => setTimeout(r, 1000)), {
+          loading: 'Releasing funds...',
+          success: releaseMessage,
+          error: 'Failed to release funds'
+        })
 
         // Show payout details notification
         if (result.netAmount) {
@@ -712,10 +716,12 @@ export default function EscrowPage() {
               netAmount: result.netAmount,
               estimatedArrival: result.estimatedArrival
             })
-            toast.success('Payout Details', {
-              description: 'Amount: $' + result.amount + ' | Net: $' + result.netAmount.toFixed(2) + ' | Arrives: ' + result.estimatedArrival
+            toast.promise(new Promise(r => setTimeout(r, 800)), {
+              loading: 'Calculating payout details...',
+              success: `Payout Details - Amount: $${result.amount} | Net: $${result.netAmount.toFixed(2)} | Arrives: ${result.estimatedArrival}`,
+              error: 'Failed to load payout details'
             })
-          }, 500)
+          }, 1200)
         }
 
         logger.info('Funds released successfully', {
@@ -757,9 +763,11 @@ export default function EscrowPage() {
         // Update local state
         dispatch({ type: 'COMPLETE_MILESTONE', depositId, milestoneId })
 
-        // Show success toast
-        toast.success(result.message, {
-          description: `Completed at: ${new Date(result.completedAt).toLocaleString()}`
+        // Show success toast with loading state
+        toast.promise(new Promise(r => setTimeout(r, 1000)), {
+          loading: 'Completing milestone...',
+          success: `${result.message} - Completed at: ${new Date(result.completedAt).toLocaleString()}`,
+          error: 'Failed to complete milestone'
         })
 
         // Show next steps notification
@@ -769,10 +777,12 @@ export default function EscrowPage() {
               milestoneId,
               nextSteps: result.nextSteps
             })
-            toast.info('Next Steps', {
-              description: result.nextSteps.join(' • ')
+            toast.promise(new Promise(r => setTimeout(r, 600)), {
+              loading: 'Loading next steps...',
+              success: `Next Steps - ${result.nextSteps.join(' • ')}`,
+              error: 'Failed to load next steps'
             })
-          }, 500)
+          }, 1200)
         }
 
         logger.info('Milestone completed successfully', {
@@ -832,8 +842,10 @@ export default function EscrowPage() {
         }
       })
       logger.info('Deposit updated', { depositId: editingDeposit.id })
-      toast.success('Deposit Updated', {
-        description: `${editForm.projectTitle} has been updated`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Saving deposit changes...',
+        success: `Deposit Updated - ${editForm.projectTitle} has been updated`,
+        error: 'Failed to update deposit'
       })
       setEditingDeposit(null)
       announce('Deposit updated successfully', 'polite')
@@ -855,8 +867,10 @@ export default function EscrowPage() {
     if (selectedDepositId) {
       logger.info('Deposit deleted', { depositId: selectedDepositId })
       dispatch({ type: 'DELETE_DEPOSIT', depositId: selectedDepositId })
-      toast.success('Deposit Deleted', {
-        description: 'Escrow deposit has been removed successfully'
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Deleting escrow deposit...',
+        success: 'Deposit Deleted - Escrow deposit has been removed successfully',
+        error: 'Failed to delete deposit'
       })
       announce('Escrow deposit deleted', 'polite')
     }
@@ -887,8 +901,10 @@ export default function EscrowPage() {
           fileName: file.name,
           fileSize: file.size
         })
-        toast.success('Contract Uploaded', {
-          description: 'File: ' + file.name + ' has been attached to deposit'
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: 'Uploading contract...',
+          success: `Contract Uploaded - File: ${file.name} has been attached to deposit`,
+          error: 'Failed to upload contract'
         })
       }
     }
@@ -897,8 +913,10 @@ export default function EscrowPage() {
 
   const handleSendNotification = (depositId: string) => {
     logger.info('Send notification initiated', { depositId })
-    toast.success('Notification Sent', {
-      description: 'Client has been notified about deposit status update'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Sending notification to client...',
+      success: 'Notification Sent - Client has been notified about deposit status update',
+      error: 'Failed to send notification'
     })
   }
 
@@ -913,8 +931,10 @@ export default function EscrowPage() {
     if (selectedDepositId && disputeReason.trim()) {
       logger.info('Dispute filed', { depositId: selectedDepositId, reason: disputeReason })
       dispatch({ type: 'DISPUTE_DEPOSIT', depositId: selectedDepositId, reason: disputeReason })
-      toast.info('Dispute Filed', {
-        description: 'Dispute has been submitted for review'
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Filing dispute...',
+        success: 'Dispute Filed - Dispute has been submitted for review',
+        error: 'Failed to file dispute'
       })
       announce('Dispute filed successfully', 'polite')
     }
@@ -925,8 +945,10 @@ export default function EscrowPage() {
 
   const handleDownloadReceipt = (depositId: string) => {
     logger.info('Download receipt initiated', { depositId })
-    toast.info('Downloading Receipt', {
-      description: 'Receipt will be saved as PDF'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Generating receipt PDF...',
+      success: 'Receipt Downloaded - Receipt has been saved as PDF',
+      error: 'Failed to download receipt'
     })
   }
 
@@ -1006,8 +1028,10 @@ export default function EscrowPage() {
       })
 
       logger.info('Milestone added', { depositId: addingMilestone, milestoneId: newMilestone.id })
-      toast.success('Milestone Added', {
-        description: `${newMilestoneForm.title} has been added to the project`
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Adding milestone...',
+        success: `Milestone Added - ${newMilestoneForm.title} has been added to the project`,
+        error: 'Failed to add milestone'
       })
       setAddingMilestone(null)
       announce('Milestone added successfully', 'polite')
@@ -1029,8 +1053,10 @@ export default function EscrowPage() {
     if (notesDepositId && notesText.trim()) {
       logger.info('Notes added', { depositId: notesDepositId, notes: notesText })
       dispatch({ type: 'UPDATE_DEPOSIT', depositId: notesDepositId, updates: { notes: notesText } })
-      toast.success('Notes Added', {
-        description: 'Notes have been saved to deposit'
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Saving notes...',
+        success: 'Notes Added - Notes have been saved to deposit',
+        error: 'Failed to save notes'
       })
     }
     setShowNotesDialog(false)
@@ -1040,8 +1066,10 @@ export default function EscrowPage() {
 
   const handleRequestApproval = (depositId: string) => {
     logger.info('Request approval initiated', { depositId })
-    toast.success('Approval Requested', {
-      description: 'Client will receive approval request notification'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Sending approval request...',
+      success: 'Approval Requested - Client will receive approval request notification',
+      error: 'Failed to send approval request'
     })
   }
 
@@ -1054,8 +1082,10 @@ export default function EscrowPage() {
   const confirmRefund = () => {
     if (selectedDepositId) {
       logger.info('Refund processed', { depositId: selectedDepositId })
-      toast.success('Refund Processed', {
-        description: 'Funds will be returned to client within 5-7 business days'
+      toast.promise(new Promise(r => setTimeout(r, 2000)), {
+        loading: 'Processing refund...',
+        success: 'Refund Processed - Funds will be returned to client within 5-7 business days',
+        error: 'Failed to process refund'
       })
       announce('Refund processed successfully', 'polite')
     }
@@ -1065,22 +1095,28 @@ export default function EscrowPage() {
 
   const handleUpdatePaymentMethod = (depositId: string) => {
     logger.info('Update payment method initiated', { depositId })
-    toast.info('Update Payment Method', {
-      description: 'Client can update their payment details'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening payment settings...',
+      success: 'Payment Settings Opened - Client can update their payment details',
+      error: 'Failed to open payment settings'
     })
   }
 
   const handleGenerateInvoice = (depositId: string) => {
     logger.info('Generate invoice initiated', { depositId })
-    toast.success('Invoice Generated', {
-      description: 'Invoice has been created and sent to client'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Generating invoice...',
+      success: 'Invoice Generated - Invoice has been created and sent to client',
+      error: 'Failed to generate invoice'
     })
   }
 
   const handleExportEscrowReport = () => {
     logger.info('Export escrow report initiated', { format: 'PDF' })
-    toast.info('Exporting Report', {
-      description: 'PDF report including all deposits and transactions'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Generating PDF report...',
+      success: 'Report Exported - PDF report including all deposits and transactions',
+      error: 'Failed to export report'
     })
   }
 
@@ -1096,8 +1132,10 @@ export default function EscrowPage() {
 
   const handleEditMilestone = (depositId: string, milestoneId: string) => {
     logger.info('Edit milestone initiated', { depositId, milestoneId })
-    toast.info('Edit Milestone', {
-      description: 'Update milestone details and amount'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Opening milestone editor...',
+      success: 'Milestone Editor Opened - Update milestone details and amount',
+      error: 'Failed to open milestone editor'
     })
   }
 
@@ -1111,8 +1149,10 @@ export default function EscrowPage() {
   const confirmDeleteMilestone = () => {
     if (selectedDepositId && selectedMilestoneId) {
       logger.info('Milestone deleted', { depositId: selectedDepositId, milestoneId: selectedMilestoneId })
-      toast.success('Milestone Deleted', {
-        description: 'Milestone has been removed successfully'
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting milestone...',
+        success: 'Milestone Deleted - Milestone has been removed successfully',
+        error: 'Failed to delete milestone'
       })
       announce('Milestone deleted', 'polite')
     }
@@ -1857,8 +1897,10 @@ export default function EscrowPage() {
                                 logger.info('Download receipt initiated', {
                                   depositId: deposit.id
                                 })
-                                toast.success('Receipt Downloaded', {
-                                  description: 'Receipt has been saved to your device'
+                                toast.promise(new Promise(r => setTimeout(r, 1200)), {
+                                  loading: 'Downloading receipt...',
+                                  success: 'Receipt Downloaded - Receipt has been saved to your device',
+                                  error: 'Failed to download receipt'
                                 })
                               }}
                             >
@@ -1876,8 +1918,10 @@ export default function EscrowPage() {
                                   depositId: deposit.id,
                                   disputeReason: deposit.disputeReason || 'Not specified'
                                 })
-                                toast.info('Dispute Details', {
-                                  description: deposit.disputeReason || 'No reason specified'
+                                toast.promise(new Promise(r => setTimeout(r, 600)), {
+                                  loading: 'Loading dispute details...',
+                                  success: `Dispute Details - ${deposit.disputeReason || 'No reason specified'}`,
+                                  error: 'Failed to load dispute details'
                                 })
                               }}
                             >
@@ -1894,8 +1938,10 @@ export default function EscrowPage() {
                                 projectTitle: deposit.projectTitle
                               })
                               _setSelectedDeposit(deposit)
-                              toast.info('Deposit Details', {
-                                description: 'Viewing details for ' + deposit.projectTitle
+                              toast.promise(new Promise(r => setTimeout(r, 500)), {
+                                loading: 'Loading deposit details...',
+                                success: `Deposit Details - Viewing details for ${deposit.projectTitle}`,
+                                error: 'Failed to load deposit details'
                               })
                             }}
                           >

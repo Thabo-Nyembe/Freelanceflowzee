@@ -110,8 +110,14 @@ export default function WorkflowBuilderPage() {
 
   const handleWorkflowCreated = async (workflowId: string) => {
     logger.info('Workflow created', { workflowId })
-    await loadWorkflowData() // Reload workflows
-    toast.success('Workflow created successfully!')
+    await toast.promise(
+      loadWorkflowData(),
+      {
+        loading: 'Loading updated workflows...',
+        success: 'Workflow created successfully!',
+        error: 'Failed to refresh workflows'
+      }
+    )
   }
 
   const handleEditWorkflow = (workflow: any) => {
@@ -155,11 +161,14 @@ export default function WorkflowBuilderPage() {
           status: 'draft'
         })
 
-        await loadWorkflowData()
-
-        toast.success('Workflow imported!', {
-          description: `"${workflowData.name}" has been imported successfully`
-        })
+        await toast.promise(
+          loadWorkflowData(),
+          {
+            loading: 'Finalizing import...',
+            success: `Workflow imported! "${workflowData.name}" has been imported successfully`,
+            error: 'Import completed but failed to refresh list'
+          }
+        )
         logger.info('Workflow imported', { workflowName: workflowData.name })
         announce('Workflow imported successfully', 'polite')
       } catch (error) {
@@ -184,23 +193,28 @@ export default function WorkflowBuilderPage() {
       const { activateWorkflow, pauseWorkflow } = await import('@/lib/workflow-builder-queries')
 
       if (newState === 'active') {
-        await activateWorkflow(workflow.id)
-        toast.success('Workflow activated', {
-          description: `${workflow.name} is now running`
-        })
+        await toast.promise(
+          activateWorkflow(workflow.id),
+          {
+            loading: `Activating ${workflow.name}...`,
+            success: `Workflow activated - ${workflow.name} is now running`,
+            error: (err) => err instanceof Error ? err.message : 'Failed to activate workflow'
+          }
+        )
       } else {
-        await pauseWorkflow(workflow.id)
-        toast.success('Workflow paused', {
-          description: `${workflow.name} has been paused`
-        })
+        await toast.promise(
+          pauseWorkflow(workflow.id),
+          {
+            loading: `Pausing ${workflow.name}...`,
+            success: `Workflow paused - ${workflow.name} has been paused`,
+            error: (err) => err instanceof Error ? err.message : 'Failed to pause workflow'
+          }
+        )
       }
 
       await loadWorkflowData() // Reload workflows
     } catch (error) {
       logger.error('Failed to toggle workflow', { error, workflowId: workflow.id })
-      toast.error('Failed to update workflow', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
     }
   }
 
@@ -210,28 +224,24 @@ export default function WorkflowBuilderPage() {
     try {
       const { testWorkflow } = await import('@/lib/workflow-builder-queries')
 
-      toast.info('Testing workflow...', {
-        description: 'Running test execution'
-      })
-
-      const result = await testWorkflow(workflow.id)
+      const result = await toast.promise(
+        testWorkflow(workflow.id),
+        {
+          loading: 'Testing workflow...',
+          success: (res: { success: boolean; steps: any[] }) => res.success
+            ? `Test successful! Completed ${res.steps.length} steps successfully`
+            : 'Test completed with issues',
+          error: (err: unknown) => err instanceof Error ? err.message : 'Test failed'
+        }
+      ) as { success: boolean; steps: any[] }
 
       if (result.success) {
-        toast.success('Test successful!', {
-          description: `Completed ${result.steps.length} steps successfully`
-        })
         logger.info('Workflow test succeeded', { workflowId: workflow.id, steps: result.steps.length })
       } else {
-        toast.error('Test failed', {
-          description: 'Some steps did not complete successfully'
-        })
         logger.error('Workflow test failed', { workflowId: workflow.id })
       }
     } catch (error) {
       logger.error('Failed to test workflow', { error, workflowId: workflow.id })
-      toast.error('Test failed', {
-        description: error instanceof Error ? error.message : 'Please try again'
-      })
     }
   }
 
@@ -252,17 +262,14 @@ export default function WorkflowBuilderPage() {
     setRunningWorkflows(prev => new Set(prev).add(workflow.id))
     announce(`Starting workflow: ${workflow.name}`, 'polite')
 
-    try {
+    // Create the execution promise
+    const executeWorkflow = async () => {
       const {
         createWorkflowExecution,
         updateExecutionStatus,
         getWorkflowActions,
         updateWorkflow
       } = await import('@/lib/automation-queries')
-
-      const toastId = toast.loading(`Running "${workflow.name}"...`, {
-        description: 'Executing workflow steps'
-      })
 
       // Create execution record
       const execution = await createWorkflowExecution({
@@ -276,7 +283,7 @@ export default function WorkflowBuilderPage() {
       const stepsCompleted = actions.length
 
       // Simulate execution (production would call actual handlers)
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 1500))
 
       // Mark execution as successful
       await updateExecutionStatus(
@@ -291,26 +298,26 @@ export default function WorkflowBuilderPage() {
         last_run: new Date().toISOString()
       })
 
-      // Dismiss loading toast and show success
-      toast.dismiss(toastId)
-      toast.success('Workflow executed successfully!', {
-        description: `"${workflow.name}" completed ${stepsCompleted} action${stepsCompleted !== 1 ? 's' : ''}`
-      })
       logger.info('Workflow executed', { workflowId: workflow.id, executionId: execution.id, stepsCompleted })
       announce(`Workflow ${workflow.name} executed with ${stepsCompleted} steps`, 'polite')
 
       // Reload workflows to show updated run count
       await loadWorkflowData()
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Execution failed'
-      logger.error('Failed to run workflow', { error, workflowId: workflow.id })
-      toast.error('Execution failed', {
-        description: errorMessage,
-        action: {
-          label: 'Retry',
-          onClick: () => handleRunWorkflow(workflow)
+
+      return { stepsCompleted, workflowName: workflow.name }
+    }
+
+    try {
+      await toast.promise(
+        executeWorkflow(),
+        {
+          loading: `Running "${workflow.name}"...`,
+          success: (result) => `Workflow executed! "${result.workflowName}" completed ${result.stepsCompleted} action${result.stepsCompleted !== 1 ? 's' : ''}`,
+          error: (err) => err instanceof Error ? err.message : 'Execution failed'
         }
-      })
+      )
+    } catch (error) {
+      logger.error('Failed to run workflow', { error, workflowId: workflow.id })
       announce('Workflow execution failed', 'assertive')
     } finally {
       // A+++ Clear loading state
@@ -334,18 +341,17 @@ export default function WorkflowBuilderPage() {
     try {
       const { createWorkflowFromTemplate } = await import('@/lib/workflow-builder-queries')
 
-      toast.info('Creating from template...', {
-        description: 'Setting up your workflow'
-      })
-
-      const workflowId = await createWorkflowFromTemplate(template.id, {
-        name: `${template.name} (Copy)`,
-        category: template.category
-      })
-
-      toast.success('Workflow created!', {
-        description: 'Template applied successfully'
-      })
+      const workflowId = await toast.promise(
+        createWorkflowFromTemplate(template.id, {
+          name: `${template.name} (Copy)`,
+          category: template.category
+        }),
+        {
+          loading: 'Creating from template...',
+          success: 'Workflow created! Template applied successfully',
+          error: 'Failed to create workflow from template'
+        }
+      )
 
       await loadWorkflowData() // Reload workflows
       setActiveTab('workflows') // Switch to workflows tab
@@ -460,10 +466,14 @@ export default function WorkflowBuilderPage() {
               onClick: searchQuery || selectedCategory !== 'all'
                 ? () => { setSearchQuery(''); setSelectedCategory('all') }
                 : () => {
-                    toast.info('Workflow Builder', {
-                      description: 'Create your first workflow to automate repetitive tasks and boost productivity.',
-                      duration: 3000
-                    })
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1000)),
+                      {
+                        loading: 'Preparing workflow builder...',
+                        success: 'Create your first workflow to automate repetitive tasks and boost productivity.',
+                        error: 'Failed to prepare workflow builder'
+                      }
+                    )
                     logger.info('User clicked Create Workflow - feature ready for implementation')
                   }
             }}
@@ -816,14 +826,28 @@ export default function WorkflowBuilderPage() {
                       </CardTitle>
                       <div className="flex items-center gap-2">
                         <Button size="sm" variant="outline" onClick={() => {
-                          toast.success('Workflow validated', { description: 'All connections are valid' })
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Validating workflow...',
+                              success: 'Workflow validated - all connections are valid',
+                              error: 'Validation failed'
+                            }
+                          )
                           announce('Workflow validated successfully', 'polite')
                         }}>
                           <CheckCircle2 className="h-4 w-4 mr-1" />
                           Validate
                         </Button>
                         <Button size="sm" variant="outline" onClick={() => {
-                          toast.success('Workflow saved as draft')
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 600)),
+                            {
+                              loading: 'Saving draft...',
+                              success: 'Workflow saved as draft',
+                              error: 'Failed to save draft'
+                            }
+                          )
                           announce('Workflow saved', 'polite')
                         }}>
                           <Save className="h-4 w-4 mr-1" />
@@ -840,7 +864,14 @@ export default function WorkflowBuilderPage() {
                       const data = e.dataTransfer.getData('component')
                       if (data) {
                         const comp = JSON.parse(data)
-                        toast.success(`Added ${comp.name}`, { description: 'Component added to workflow' })
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 500)),
+                          {
+                            loading: `Adding ${comp.name}...`,
+                            success: `Added ${comp.name} - component added to workflow`,
+                            error: `Failed to add ${comp.name}`
+                          }
+                        )
                         announce(`${comp.name} added to canvas`, 'polite')
                       }
                     }}

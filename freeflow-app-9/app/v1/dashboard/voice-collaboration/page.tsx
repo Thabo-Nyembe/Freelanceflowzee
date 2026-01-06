@@ -325,8 +325,10 @@ export default function VoiceCollaborationPage() {
         dispatch({ type: 'SET_ROOMS', rooms: mappedRooms })
         dispatch({ type: 'SET_RECORDINGS', recordings: mappedRecordings })
 
-        toast.success('Voice collaboration loaded', {
-          description: `${mappedRooms.length} rooms, ${mappedRecordings.length} recordings from database`
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Loading voice collaboration...',
+          success: `Voice collaboration loaded - ${mappedRooms.length} rooms, ${mappedRecordings.length} recordings from database`,
+          error: 'Failed to load voice collaboration'
         })
         logger.info('Voice collaboration data loaded successfully', {
           roomsCount: mappedRooms.length,
@@ -521,8 +523,10 @@ export default function VoiceCollaborationPage() {
       setRoomPassword('')
       setShowCreateRoomModal(false)
 
-      toast.success('Voice room created', {
-        description: `${newRoom.name} - ${newRoom.type} - ${newRoom.capacity} capacity - ${newRoom.quality} quality - Now active`
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Creating voice room...',
+        success: `Voice room created - ${newRoom.name} - ${newRoom.type} - ${newRoom.capacity} capacity - ${newRoom.quality} quality - Now active`,
+        error: 'Failed to create voice room'
       })
       announce('Voice room created', 'polite')
     } catch (error: any) {
@@ -635,8 +639,10 @@ export default function VoiceCollaborationPage() {
         quality: room.quality
       })
 
-      toast.success('Joined voice room', {
-        description: `${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants - ${room.quality} quality`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Joining voice room...',
+        success: `Joined voice room - ${room.name} - ${newParticipant.role} - ${newParticipantCount}/${room.capacity} participants - ${room.quality} quality`,
+        error: 'Failed to join voice room'
       })
       announce(`Joined ${room.name}`, 'polite')
     } catch (error: any) {
@@ -694,8 +700,10 @@ export default function VoiceCollaborationPage() {
         userId
       })
 
-      toast.success('Room deleted', {
-        description: `${deleteRoom.name} - ${deleteRoom.type} room removed`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting room...',
+        success: `Room deleted - ${deleteRoom.name} - ${deleteRoom.type} room removed`,
+        error: 'Failed to delete room'
       })
       announce('Room deleted', 'polite')
     } catch (error: any) {
@@ -745,8 +753,10 @@ export default function VoiceCollaborationPage() {
     const updatedRecording = { ...recording, downloadCount: recording.downloadCount + 1 }
     dispatch({ type: 'SELECT_RECORDING', recording: updatedRecording })
 
-    toast.success('Recording downloaded', {
-      description: `${recording.title} - ${formatFileSize(recording.fileSize)} - ${recording.format.toUpperCase()} - ${formatDuration(recording.duration)}`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Downloading recording...',
+      success: `Recording downloaded - ${recording.title} - ${formatFileSize(recording.fileSize)} - ${recording.format.toUpperCase()} - ${formatDuration(recording.duration)}`,
+      error: 'Failed to download recording'
     })
     announce(`Downloading ${recording.title}`, 'polite')
   }
@@ -772,8 +782,10 @@ export default function VoiceCollaborationPage() {
     const updatedRecording = { ...recording, viewCount: recording.viewCount + 1 }
     dispatch({ type: 'SELECT_RECORDING', recording: updatedRecording })
 
-    toast.info('Playing recording', {
-      description: `${recording.title} - ${formatDuration(recording.duration)} - ${recording.participants} participants - ${recording.quality} quality`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Loading recording...',
+      success: `Playing recording - ${recording.title} - ${formatDuration(recording.duration)} - ${recording.participants} participants - ${recording.quality} quality`,
+      error: 'Failed to play recording'
     })
     announce(`Playing ${recording.title}`, 'polite')
   }
@@ -1261,8 +1273,10 @@ export default function VoiceCollaborationPage() {
                                 try {
                                   const shareLink = `${window.location.origin}/recordings/${recording.id}/share`
                                   await navigator.clipboard.writeText(shareLink)
-                                  toast.success('Share link copied!', {
-                                    description: 'Paste in messages or email to share'
+                                  toast.promise(new Promise(r => setTimeout(r, 500)), {
+                                    loading: 'Copying share link...',
+                                    success: 'Share link copied! Paste in messages or email to share',
+                                    error: 'Failed to copy share link'
                                   })
                                 } catch (error) {
                                   toast.error('Failed to copy link')
@@ -1348,8 +1362,10 @@ export default function VoiceCollaborationPage() {
                             newQuality: quality
                           })
                           setRoomQuality(quality)
-                          toast.success('Audio quality updated', {
-                            description: `Default quality set to ${quality.toUpperCase()}`
+                          toast.promise(new Promise(r => setTimeout(r, 600)), {
+                            loading: 'Updating audio quality...',
+                            success: `Audio quality updated - Default quality set to ${quality.toUpperCase()}`,
+                            error: 'Failed to update audio quality'
                           })
                         }}
                         className={roomQuality === quality ? 'bg-purple-600' : 'border-gray-700 hover:bg-slate-800'}
@@ -1374,8 +1390,10 @@ export default function VoiceCollaborationPage() {
                             previousValue: value
                           })
                           setRoomFeatures(prev => ({ ...prev, [key]: checked as boolean }))
-                          toast.success(`${key.replace(/([A-Z])/g, ' $1').trim()} ${checked ? 'enabled' : 'disabled'}`, {
-                            description: `Feature will apply to new rooms`
+                          toast.promise(new Promise(r => setTimeout(r, 500)), {
+                            loading: 'Updating feature...',
+                            success: `${key.replace(/([A-Z])/g, ' $1').trim()} ${checked ? 'enabled' : 'disabled'} - Feature will apply to new rooms`,
+                            error: 'Failed to update feature'
                           })
                         }}
                       />
@@ -1408,8 +1426,10 @@ export default function VoiceCollaborationPage() {
                     })
 
                     // Note: Using local state - in production, this would PUT to /api/voice-collaboration/settings
-                    toast.success('Voice settings saved', {
-                      description: `${roomQuality.toUpperCase()} quality - ${enabledFeatures.length} features enabled`
+                    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                      loading: 'Saving voice settings...',
+                      success: `Voice settings saved - ${roomQuality.toUpperCase()} quality - ${enabledFeatures.length} features enabled`,
+                      error: 'Failed to save voice settings'
                     })
                     announce('Settings saved', 'polite')
                   }}

@@ -370,8 +370,10 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Report exported', { fileSize: blob.size })
 
-    toast.success('Financial report exported', {
-      description: `${Math.round(blob.size / 1024)}KB - Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Profit: $${financialData.overview.netProfit.toLocaleString()} - ${financialData.overview.profitMargin}% margin`
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Exporting financial report...',
+      success: `Financial report exported - ${Math.round(blob.size / 1024)}KB - Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Profit: $${financialData.overview.netProfit.toLocaleString()}`,
+      error: 'Failed to export report'
     })
   }
 
@@ -385,8 +387,10 @@ Overdue: ${financialData.invoices.overdue}
       netProfit: financialData.overview.netProfit
     })
 
-    toast.success('Financial review scheduled', {
-      description: `${reviewDate.toLocaleDateString()} at 2:00 PM - Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Profit: $${financialData.overview.netProfit.toLocaleString()}`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Scheduling financial review...',
+      success: `Financial review scheduled for ${reviewDate.toLocaleDateString()} at 2:00 PM`,
+      error: 'Failed to schedule review'
     })
   }
 
@@ -395,8 +399,10 @@ Overdue: ${financialData.invoices.overdue}
       currentClientCount: financialData.clients.total
     })
 
-    toast.info('Add new client', {
-      description: `Current clients: ${financialData.clients.total} - ${financialData.clients.active} active`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening client form...',
+      success: `Add new client - Current: ${financialData.clients.total} clients (${financialData.clients.active} active)`,
+      error: 'Failed to open client form'
     })
   }
 
@@ -409,8 +415,10 @@ Overdue: ${financialData.invoices.overdue}
       revenue: client?.revenue
     })
 
-    toast.info('Edit client', {
-      description: client ? `${client.name} - $${client.revenue.toLocaleString()} revenue - ${client.projects} projects` : `Client #${id}`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading client details...',
+      success: client ? `Editing ${client.name} - $${client.revenue.toLocaleString()} revenue` : `Editing Client #${id}`,
+      error: 'Failed to load client'
     })
   }
 
@@ -431,8 +439,10 @@ Overdue: ${financialData.invoices.overdue}
       lostRevenue: client?.revenue
     })
 
-    toast.success('Client deleted', {
-      description: client ? `${client.name} - $${client.revenue.toLocaleString()} revenue removed` : `${deleteClient.name} removed`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Deleting client...',
+      success: client ? `Client ${client.name} deleted - $${client.revenue.toLocaleString()} revenue removed` : `${deleteClient.name} removed`,
+      error: 'Failed to delete client'
     })
     setDeleteClient(null)
   }
@@ -447,8 +457,10 @@ Overdue: ${financialData.invoices.overdue}
       projects: client?.projects
     })
 
-    toast.info('Viewing client details', {
-      description: client ? `${client.name} - $${client.revenue.toLocaleString()} revenue - ${client.projects} projects - Revenue per project: $${Math.round(client.revenue / client.projects).toLocaleString()}` : `Client #${id}`
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Loading client details...',
+      success: client ? `${client.name} - $${client.revenue.toLocaleString()} revenue - ${client.projects} projects` : `Client #${id}`,
+      error: 'Failed to load client details'
     })
   }
 
@@ -459,8 +471,10 @@ Overdue: ${financialData.invoices.overdue}
       currentProgress: financialData.goals.currentProgress
     })
 
-    toast.info('Create new financial goal', {
-      description: `Current targets: Monthly $${financialData.goals.monthlyTarget.toLocaleString()} - Yearly $${financialData.goals.yearlyTarget.toLocaleString()}`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening goal form...',
+      success: `Create new goal - Monthly: $${financialData.goals.monthlyTarget.toLocaleString()} - Yearly: $${financialData.goals.yearlyTarget.toLocaleString()}`,
+      error: 'Failed to open goal form'
     })
   }
 
@@ -476,8 +490,10 @@ Overdue: ${financialData.invoices.overdue}
       current
     })
 
-    toast.info('Edit goal', {
-      description: `${id === 'monthly' ? 'Monthly' : 'Yearly'} - $${current.toLocaleString()}/$${target.toLocaleString()} - ${progress.toFixed(1)}% complete`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading goal details...',
+      success: `Editing ${id === 'monthly' ? 'Monthly' : 'Yearly'} goal - $${current.toLocaleString()}/$${target.toLocaleString()} (${progress.toFixed(1)}%)`,
+      error: 'Failed to load goal'
     })
   }
 
@@ -491,8 +507,10 @@ Overdue: ${financialData.invoices.overdue}
 
     logger.info('Goal deletion confirmed', { goalId: deleteGoal })
 
-    toast.success('Goal deleted', {
-      description: `${deleteGoal === 'monthly' ? 'Monthly' : 'Yearly'} financial goal removed`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Deleting goal...',
+      success: `${deleteGoal === 'monthly' ? 'Monthly' : 'Yearly'} financial goal deleted`,
+      error: 'Failed to delete goal'
     })
     setDeleteGoal(null)
   }
@@ -505,8 +523,10 @@ Overdue: ${financialData.invoices.overdue}
       yearlyTarget: financialData.goals.yearlyTarget
     })
 
-    toast.info('Tracking goal progress', {
-      description: `Monthly: ${monthlyTargetProgress.toFixed(1)}% ($${financialData.goals.currentProgress.toLocaleString()}/$${financialData.goals.monthlyTarget.toLocaleString()}) - Yearly: ${yearlyTargetProgress.toFixed(1)}% ($${financialData.goals.yearlyProgress.toLocaleString()}/$${financialData.goals.yearlyTarget.toLocaleString()})`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Calculating goal progress...',
+      success: `Monthly: ${monthlyTargetProgress.toFixed(1)}% - Yearly: ${yearlyTargetProgress.toFixed(1)}%`,
+      error: 'Failed to track progress'
     })
   }
 
@@ -516,8 +536,10 @@ Overdue: ${financialData.invoices.overdue}
       categories: Object.keys(financialData.expenses.categories).length
     })
 
-    toast.info('Add expense', {
-      description: `Total expenses: $${financialData.overview.totalExpenses.toLocaleString()} - ${Object.keys(financialData.expenses.categories).length} categories`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening expense form...',
+      success: `Add expense - Total: $${financialData.overview.totalExpenses.toLocaleString()} (${Object.keys(financialData.expenses.categories).length} categories)`,
+      error: 'Failed to open expense form'
     })
   }
 
@@ -531,8 +553,10 @@ Overdue: ${financialData.invoices.overdue}
       topCategoryAmount: topCategory[1]
     })
 
-    toast.info('Categorize expense', {
-      description: `${categories.length} categories - Top: ${topCategory[0]} ($${topCategory[1].toLocaleString()})`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Processing expense categories...',
+      success: `${categories.length} categories - Top: ${topCategory[0]} ($${topCategory[1].toLocaleString()})`,
+      error: 'Failed to categorize expense'
     })
   }
 
@@ -548,8 +572,10 @@ Overdue: ${financialData.invoices.overdue}
       categories: percentages
     })
 
-    toast.info('Expense breakdown', {
-      description: `Total: $${financialData.expenses.total.toLocaleString()} - Top: ${percentages[0].name} (${percentages[0].percentage}%)`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Loading expense breakdown...',
+      success: `Expense breakdown - Total: $${financialData.expenses.total.toLocaleString()} - Top: ${percentages[0].name} (${percentages[0].percentage}%)`,
+      error: 'Failed to load breakdown'
     })
   }
 
@@ -576,8 +602,10 @@ Overdue: ${financialData.invoices.overdue}
       categoryCount: Object.keys(financialData.expenses.categories).length
     })
 
-    toast.success('Expenses exported', {
-      description: `${Math.round(blob.size / 1024)}KB - ${Object.keys(financialData.expenses.categories).length} categories - Total: $${financialData.expenses.total.toLocaleString()}`
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Exporting expenses...',
+      success: `Expenses exported - ${Object.keys(financialData.expenses.categories).length} categories - Total: $${financialData.expenses.total.toLocaleString()}`,
+      error: 'Failed to export expenses'
     })
   }
 
@@ -590,8 +618,10 @@ Overdue: ${financialData.invoices.overdue}
       totalAmount: financialData.invoices.totalAmount
     })
 
-    toast.success('Generating invoice report', {
-      description: `${financialData.invoices.total} invoices - ${financialData.invoices.paid} paid ($${financialData.invoices.paidAmount.toLocaleString()}) - ${financialData.invoices.pending} pending - ${financialData.invoices.overdue} overdue`
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Generating invoice report...',
+      success: `Invoice report generated - ${financialData.invoices.total} invoices - ${financialData.invoices.paid} paid ($${financialData.invoices.paidAmount.toLocaleString()})`,
+      error: 'Failed to generate invoice report'
     })
   }
 
@@ -602,8 +632,10 @@ Overdue: ${financialData.invoices.overdue}
       overdueAmount: financialData.invoices.overdueAmount
     })
 
-    toast.info('Bulk invoice operations', {
-      description: `Processing ${financialData.invoices.pending + financialData.invoices.overdue} invoices - Total: $${(financialData.invoices.pendingAmount + financialData.invoices.overdueAmount).toLocaleString()}`
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Processing bulk invoice operations...',
+      success: `Processed ${financialData.invoices.pending + financialData.invoices.overdue} invoices - Total: $${(financialData.invoices.pendingAmount + financialData.invoices.overdueAmount).toLocaleString()}`,
+      error: 'Failed to process invoices'
     })
   }
 
@@ -613,8 +645,10 @@ Overdue: ${financialData.invoices.overdue}
       overdueAmount: financialData.invoices.overdueAmount
     })
 
-    toast.success('Sending payment reminders', {
-      description: `${financialData.invoices.overdue} overdue invoices - Total: $${financialData.invoices.overdueAmount.toLocaleString()} - Reminders sent via email`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Sending payment reminders...',
+      success: `Reminders sent for ${financialData.invoices.overdue} overdue invoices - Total: $${financialData.invoices.overdueAmount.toLocaleString()}`,
+      error: 'Failed to send reminders'
     })
   }
 
@@ -628,8 +662,10 @@ Overdue: ${financialData.invoices.overdue}
       status: payment?.status
     })
 
-    toast.info('Record payment', {
-      description: payment ? `${payment.client} - $${payment.amount.toLocaleString()} - Due: ${payment.dueDate} - Status: ${payment.status}` : `Payment #${id}`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Recording payment...',
+      success: payment ? `Payment recorded - ${payment.client} - $${payment.amount.toLocaleString()}` : `Payment #${id} recorded`,
+      error: 'Failed to record payment'
     })
   }
 
@@ -640,8 +676,10 @@ Overdue: ${financialData.invoices.overdue}
       totalInvoices: financialData.invoices.total
     })
 
-    toast.success('Refreshing dashboard', {
-      description: `Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Profit: $${financialData.overview.netProfit.toLocaleString()} - ${financialData.invoices.total} invoices`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Refreshing dashboard...',
+      success: `Dashboard refreshed - Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Profit: $${financialData.overview.netProfit.toLocaleString()}`,
+      error: 'Failed to refresh dashboard'
     })
   }
 
@@ -655,8 +693,10 @@ Overdue: ${financialData.invoices.overdue}
       growthRate: financialData.overview.monthlyGrowth
     })
 
-    toast.success('Generating financial forecast', {
-      description: `Projected next month: Revenue $${Math.round(projectedRevenue).toLocaleString()} (+${financialData.overview.monthlyGrowth}%) - Profit: $${Math.round(projectedProfit).toLocaleString()}`
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Generating financial forecast...',
+      success: `Forecast complete - Projected revenue: $${Math.round(projectedRevenue).toLocaleString()} (+${financialData.overview.monthlyGrowth}%)`,
+      error: 'Failed to generate forecast'
     })
   }
 
@@ -669,8 +709,10 @@ Overdue: ${financialData.invoices.overdue}
       taxableIncome
     })
 
-    toast.success('Generating tax report', {
-      description: `Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Expenses: $${financialData.overview.totalExpenses.toLocaleString()} - Taxable income: $${taxableIncome.toLocaleString()}`
+    toast.promise(new Promise(r => setTimeout(r, 3000)), {
+      loading: 'Generating tax report...',
+      success: `Tax report generated - Taxable income: $${taxableIncome.toLocaleString()}`,
+      error: 'Failed to generate tax report'
     })
   }
 
@@ -685,8 +727,10 @@ Overdue: ${financialData.invoices.overdue}
       discrepancies
     })
 
-    toast.success('Running financial audit', {
-      description: `Analyzed ${transactionCount} transactions - Revenue: $${financialData.overview.totalRevenue.toLocaleString()} - Expenses: $${financialData.overview.totalExpenses.toLocaleString()} - ${discrepancies} discrepancies found`
+    toast.promise(new Promise(r => setTimeout(r, 3000)), {
+      loading: 'Running financial audit...',
+      success: `Audit complete - ${transactionCount} transactions analyzed - ${discrepancies} discrepancies found`,
+      error: 'Failed to run audit'
     })
   }
 

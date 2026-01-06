@@ -1115,9 +1115,14 @@ export default function TeamHubPage() {
                 activeProjects: teamStats.activeProjects,
                 onlineMembers: teamStats.onlineMembers
               })
-              toast.info('Team Settings', {
-                description: 'Configure team preferences and permissions'
-              })
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                {
+                  loading: 'Loading team settings...',
+                  success: 'Team Settings - Configure team preferences and permissions',
+                  error: 'Failed to load settings'
+                }
+              )
             }}
           >
             <Settings className="h-4 w-4 mr-2" />
@@ -1270,9 +1275,14 @@ export default function TeamHubPage() {
                         onlineMembers: teamStats.onlineMembers,
                         totalMembers: teamStats.totalMembers
                       })
-                      toast.success('Opening Team Chat', {
-                        description: `${teamStats.onlineMembers} members online`
-                      })
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 700)),
+                        {
+                          loading: 'Opening team chat...',
+                          success: `Opening Team Chat - ${teamStats.onlineMembers} members online`,
+                          error: 'Failed to open chat'
+                        }
+                      )
                       router.push('/dashboard/messages?channel=team-general')
                     }}
                   >
@@ -1288,9 +1298,14 @@ export default function TeamHubPage() {
                         activeProjects: teamStats.activeProjects,
                         membersScheduled: teamStats.totalMembers
                       })
-                      toast.info('Opening Team Calendar', {
-                        description: `View availability for ${teamStats.totalMembers} team members`
-                      })
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1000)),
+                        {
+                          loading: 'Loading team calendar...',
+                          success: `Opening Team Calendar - View availability for ${teamStats.totalMembers} team members`,
+                          error: 'Failed to load calendar'
+                        }
+                      )
                       router.push('/dashboard/calendar?view=team')
                     }}
                   >
@@ -1306,9 +1321,14 @@ export default function TeamHubPage() {
                         availableParticipants: teamStats.onlineMembers,
                         totalMembers: teamStats.totalMembers
                       })
-                      toast.success('Starting Video Meeting', {
-                        description: `Connecting with ${teamStats.onlineMembers} online members`
-                      })
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1500)),
+                        {
+                          loading: 'Starting video meeting...',
+                          success: `Starting Video Meeting - Connecting with ${teamStats.onlineMembers} online members`,
+                          error: 'Failed to start meeting'
+                        }
+                      )
                       router.push('/dashboard/collaboration/meetings?action=new')
                     }}
                   >
@@ -1324,9 +1344,14 @@ export default function TeamHubPage() {
                         membersAnalyzed: teamStats.totalMembers,
                         activeProjects: teamStats.activeProjects
                       })
-                      toast.success('Opening Team Reports', {
-                        description: 'Team analytics and performance metrics'
-                      })
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 1200)),
+                        {
+                          loading: 'Loading team reports...',
+                          success: 'Opening Team Reports - Team analytics and performance metrics',
+                          error: 'Failed to load reports'
+                        }
+                      )
                       router.push('/dashboard/analytics?filter=team')
                     }}
                   >
@@ -1363,9 +1388,14 @@ export default function TeamHubPage() {
                     totalMembers: teamMembers.length,
                     currentFilters: { status: filterStatus, department: filterDepartment }
                   })
-                  toast.info('Filter Options', {
-                    description: 'Filter by status, department, or role'
-                  })
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 500)),
+                    {
+                      loading: 'Loading filter options...',
+                      success: 'Filter Options - Filter by status, department, or role',
+                      error: 'Failed to load filters'
+                    }
+                  )
                 }}
               >
                 <Filter className="h-4 w-4 mr-2" />
@@ -1432,9 +1462,14 @@ export default function TeamHubPage() {
                           department: member.department,
                           status: member.status
                         })
-                        toast.success('Opening Chat', {
-                          description: `Starting conversation with ${member.name}`
-                        })
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 700)),
+                          {
+                            loading: 'Opening chat...',
+                            success: `Opening Chat - Starting conversation with ${member.name}`,
+                            error: 'Failed to open chat'
+                          }
+                        )
                         router.push(`/dashboard/messages?dm=${member.id}&name=${encodeURIComponent(member.name)}`)
                       }}
                     >
@@ -1916,7 +1951,14 @@ export default function TeamHubPage() {
               ))}
             </div>
             <Button className="w-full" variant="outline" onClick={() => {
-              toast.success('Training Schedule', { description: 'Training module coming soon' })
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 1000)),
+                {
+                  loading: 'Scheduling training session...',
+                  success: 'Training Schedule - Training module coming soon',
+                  error: 'Failed to schedule training'
+                }
+              )
             }}>
               Schedule Training Session
             </Button>
@@ -2248,7 +2290,14 @@ export default function TeamHubPage() {
               </div>
             </div>
             <Button className="w-full" variant="outline" onClick={() => {
-              toast.info('Files Hub', { description: 'Opening Files Hub...' })
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                {
+                  loading: 'Opening Files Hub...',
+                  success: 'Files Hub - Team shared files and documents loaded',
+                  error: 'Failed to open Files Hub'
+                }
+              )
             }}>
               Open Files Hub
             </Button>

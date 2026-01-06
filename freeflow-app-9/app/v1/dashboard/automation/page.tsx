@@ -156,8 +156,10 @@ export default function AutomationPage() {
         userId
       })
 
-      toast.success('Workflow Created', {
-        description: 'New workflow has been created as draft'
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Creating workflow...',
+        success: 'Workflow Created - New workflow has been created as draft',
+        error: 'Failed to create workflow'
       })
       logger.info('Workflow created', { success: true, workflowId: newWorkflowId })
       announce('Workflow created successfully', 'polite')
@@ -190,8 +192,10 @@ export default function AutomationPage() {
         description: 'Updated workflow configuration'
       })
 
-      toast.success('Workflow Updated', {
-        description: 'Workflow configuration has been updated successfully'
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Updating workflow...',
+        success: 'Workflow Updated - Configuration has been updated successfully',
+        error: 'Failed to update workflow'
       })
       logger.info('Workflow edited', { success: true, workflowId })
       announce('Workflow updated successfully', 'polite')
@@ -226,8 +230,10 @@ export default function AutomationPage() {
       const { deleteWorkflow: deleteWorkflowQuery } = await import('@/lib/automation-queries')
       await deleteWorkflowQuery(deleteWorkflow.id)
 
-      toast.success('Workflow Deleted', {
-        description: `"${deleteWorkflow.name}" has been permanently removed`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Deleting workflow...',
+        success: `Workflow Deleted - "${deleteWorkflow.name}" has been permanently removed`,
+        error: 'Failed to delete workflow'
       })
       logger.info('Workflow deleted', { success: true, workflowId: deleteWorkflow.id })
       announce('Workflow deleted successfully', 'polite')
@@ -260,8 +266,10 @@ export default function AutomationPage() {
 
       await updateWorkflow(workflowId, { status: 'active' })
 
-      toast.success('Workflow Enabled', {
-        description: `"${workflowName}" is now active and will run automatically`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Enabling workflow...',
+        success: `Workflow Enabled - "${workflowName}" is now active and will run automatically`,
+        error: 'Failed to enable workflow'
       })
       logger.info('Workflow enabled', { success: true, workflowId })
       announce('Workflow enabled successfully', 'polite')
@@ -291,8 +299,10 @@ export default function AutomationPage() {
 
       await updateWorkflow(workflowId, { status: 'paused' })
 
-      toast.success('Workflow Disabled', {
-        description: `"${workflowName}" has been paused and will not run`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Disabling workflow...',
+        success: `Workflow Disabled - "${workflowName}" has been paused and will not run`,
+        error: 'Failed to disable workflow'
       })
       logger.info('Workflow disabled', { success: true, workflowId })
       announce('Workflow disabled successfully', 'polite')

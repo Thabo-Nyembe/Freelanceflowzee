@@ -85,7 +85,11 @@ export default function StudioPage() {
         }
       }
 
-      toast.success('API Keys Saved', { description: 'Your API keys have been securely saved to database' })
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Saving API keys...',
+        success: 'API Keys Saved - Your API keys have been securely saved to database',
+        error: 'Failed to save API keys'
+      })
       announce('API keys saved successfully', 'polite')
     } catch (error) {
       logger.error('Failed to save keys', { error })
@@ -111,9 +115,17 @@ export default function StudioPage() {
       const hasKey = savedKeys[providerId]
 
       if (hasKey) {
-        toast.success('Provider Connected', { description: `${provider || 'AI Provider'} is working correctly` })
+        toast.promise(new Promise(r => setTimeout(r, 1000)), {
+          loading: 'Testing provider connection...',
+          success: `Provider Connected - ${provider || 'AI Provider'} is working correctly`,
+          error: 'Connection test failed'
+        })
       } else {
-        toast.info('No API Key', { description: `Add an API key for ${provider || 'AI Provider'} to enable features` })
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Checking API key...',
+          success: `No API Key - Add an API key for ${provider || 'AI Provider'} to enable features`,
+          error: 'Failed to check API key'
+        })
       }
       announce('Provider connection checked', 'polite')
     } catch (error) {
@@ -139,7 +151,11 @@ export default function StudioPage() {
           return newKeys
         })
       }
-      toast.success('Provider Reset', { description: 'Settings restored to defaults' })
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Resetting provider settings...',
+        success: 'Provider Reset - Settings restored to defaults',
+        error: 'Failed to reset provider'
+      })
       announce('Provider settings reset', 'polite')
     } catch (error) {
       logger.error('Reset failed', { error })
@@ -175,7 +191,11 @@ export default function StudioPage() {
       a.download = 'ai-create-settings.json'
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Settings Exported', { description: 'Your settings have been downloaded' })
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Exporting settings...',
+        success: 'Settings Exported - Your settings have been downloaded',
+        error: 'Failed to export settings'
+      })
       logger.info('Settings exported')
     } catch (error) {
       logger.error('Export failed', { error })
@@ -197,7 +217,11 @@ export default function StudioPage() {
           if (userId && settings.preferences?.data) {
             await updatePreferences(userId, settings.preferences.data)
           }
-          toast.success('Settings Imported', { description: 'Your settings have been restored' })
+          toast.promise(new Promise(r => setTimeout(r, 1200)), {
+            loading: 'Importing settings...',
+            success: 'Settings Imported - Your settings have been restored',
+            error: 'Failed to import settings'
+          })
           logger.info('Settings imported')
         } catch (error) {
           logger.error('Import failed', { error })
@@ -216,7 +240,11 @@ export default function StudioPage() {
     }
     const isValid = key.startsWith('sk-') && key.length > 20
     if (isValid) {
-      toast.success('Key Valid', { description: 'API key format is correct' })
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Validating API key...',
+        success: 'Key Valid - API key format is correct',
+        error: 'Validation failed'
+      })
     } else {
       toast.error('Invalid Key', { description: 'Key format does not match expected pattern' })
     }
@@ -232,7 +260,11 @@ export default function StudioPage() {
       openrouter: 'https://openrouter.ai/keys'
     }
     window.open(keyUrls[provider?.toLowerCase() || 'openai'] || keyUrls.openai, '_blank')
-    toast.info('Opening Provider', { description: 'Create a new API key in the provider dashboard' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Opening provider dashboard...',
+      success: 'Opening Provider - Create a new API key in the provider dashboard',
+      error: 'Failed to open provider'
+    })
     logger.info('Generate key redirect', { provider })
   }, [])
 
@@ -250,7 +282,11 @@ export default function StudioPage() {
           return newKeys
         })
       }
-      toast.success('Key Revoked', { description: 'API key has been removed from database' })
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Revoking API key...',
+        success: 'Key Revoked - API key has been removed from database',
+        error: 'Failed to revoke key'
+      })
       logger.info('Key revoked', { provider })
     } catch (error) {
       logger.error('Revoke failed', { error })
@@ -266,7 +302,11 @@ export default function StudioPage() {
       const newProvider = provider || 'openai'
       await upsertPreferences(userId, { default_provider: newProvider })
       setActiveProvider(newProvider)
-      toast.success('Provider Switched', { description: `Now using ${provider || 'OpenAI'}` })
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Switching provider...',
+        success: `Provider Switched - Now using ${provider || 'OpenAI'}`,
+        error: 'Failed to switch provider'
+      })
       logger.info('Provider switched', { provider })
       announce(`Switched to ${provider || 'OpenAI'}`, 'polite')
     } catch (error) {
@@ -288,8 +328,10 @@ export default function StudioPage() {
       const quota = 1000 // Default quota
       const percentRemaining = Math.round(((quota - usageData.total_requests) / quota) * 100)
 
-      toast.success('Usage Status', {
-        description: `API quota: ${percentRemaining}% remaining • Requests: ${usageData.total_requests}/${quota} • Cost: $${usageData.total_cost.toFixed(2)}`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Checking usage statistics...',
+        success: `Usage Status - API quota: ${percentRemaining}% remaining | Requests: ${usageData.total_requests}/${quota} | Cost: $${usageData.total_cost.toFixed(2)}`,
+        error: 'Failed to check usage'
       })
       logger.info('Usage checked', { usage: usageData })
     } catch (error) {
@@ -308,8 +350,10 @@ export default function StudioPage() {
 
   // Manage API permissions
   const handleManagePermissions = useCallback(() => {
-    toast.info('Permissions', {
-      description: 'Current: Generate, Analyze, Export • Admin: Full Access'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading permissions...',
+      success: 'Permissions - Current: Generate, Analyze, Export | Admin: Full Access',
+      error: 'Failed to load permissions'
     })
     logger.info('Permissions viewed')
   }, [])
@@ -337,8 +381,10 @@ export default function StudioPage() {
         optimized_at: new Date().toISOString()
       }
       await upsertPreferences(userId, optimizedSettings)
-      toast.success('Settings Optimized', {
-        description: 'Applied: Caching enabled, batch mode on, quality balanced'
+      toast.promise(new Promise(r => setTimeout(r, 1800)), {
+        loading: 'Optimizing AI settings...',
+        success: 'Settings Optimized - Applied: Caching enabled, batch mode on, quality balanced',
+        error: 'Failed to optimize settings'
       })
       logger.info('Settings optimized')
     } catch (error) {
@@ -357,7 +403,11 @@ export default function StudioPage() {
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        toast.success('Keys Imported', { description: `Imported keys from ${file.name}` })
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: 'Importing API keys...',
+          success: `Keys Imported - Imported keys from ${file.name}`,
+          error: 'Failed to import keys'
+        })
         logger.info('Bulk import completed', { filename: file.name })
       }
     }
@@ -366,14 +416,20 @@ export default function StudioPage() {
 
   // Encrypt stored keys
   const handleEncryptKeys = useCallback(async () => {
-    toast.success('Keys Encrypted', { description: 'All stored keys are now encrypted with AES-256' })
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Encrypting API keys...',
+      success: 'Keys Encrypted - All stored keys are now encrypted with AES-256',
+      error: 'Failed to encrypt keys'
+    })
     logger.info('Keys encrypted')
   }, [])
 
   // Rotate API keys
   const handleRotateKeys = useCallback(async () => {
-    toast.info('Key Rotation', {
-      description: 'Visit your provider dashboard to rotate keys, then update here'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Initiating key rotation...',
+      success: 'Key Rotation - Visit your provider dashboard to rotate keys, then update here',
+      error: 'Failed to initiate key rotation'
     })
     logger.info('Key rotation initiated')
   }, [])
@@ -397,7 +453,11 @@ export default function StudioPage() {
         })
       }
 
-      toast.success('Settings Synced', { description: 'Your settings are synced across all devices via cloud' })
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Syncing settings to cloud...',
+        success: 'Settings Synced - Your settings are synced across all devices via cloud',
+        error: 'Failed to sync settings'
+      })
       logger.info('Settings synced to database')
     } catch (error) {
       logger.error('Sync failed', { error })

@@ -346,8 +346,10 @@ export default function TimeTrackingPage() {
       setElapsedTime(0)
 
       logger.info('Timer started successfully', { entryId: data.id })
-      toast.success('Timer Started', {
-        description: `Tracking time for ${projectObj?.name} - ${taskObj?.name}`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Starting timer...',
+        success: `Timer Started - Tracking time for ${projectObj?.name} - ${taskObj?.name}`,
+        error: 'Failed to start timer'
       })
       announce(`Timer started for ${projectObj?.name} - ${taskObj?.name}`, 'polite')
     } catch (error) {
@@ -407,8 +409,10 @@ export default function TimeTrackingPage() {
         durationText
       })
 
-      toast.success('Timer Stopped', {
-        description: `Duration: ${durationText}${data.is_billable ? ` • $${data.total_amount.toFixed(2)}` : ''}`
+      toast.promise(new Promise(r => setTimeout(r, 700)), {
+        loading: 'Stopping timer...',
+        success: `Timer Stopped - Duration: ${durationText}${data.is_billable ? ` • $${data.total_amount.toFixed(2)}` : ''}`,
+        error: 'Failed to stop timer'
       })
       announce(`Timer stopped. Duration: ${durationText}`, 'polite')
     } catch (error) {
@@ -428,7 +432,11 @@ export default function TimeTrackingPage() {
     }
 
     if (activeTimer.isPaused) {
-      toast.info('Timer is already paused')
+      toast.promise(new Promise(r => setTimeout(r, 500)), {
+        loading: 'Checking timer status...',
+        success: 'Timer is already paused',
+        error: 'Failed to check timer status'
+      })
       return
     }
 
@@ -447,8 +455,10 @@ export default function TimeTrackingPage() {
       setActiveTimer(prev => prev ? { ...prev, isPaused: true, isRunning: false, duration: data.duration } : null)
       setElapsedTime(data.duration)
 
-      toast.info('Timer Paused', {
-        description: `Elapsed: ${timerDisplay}`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Pausing timer...',
+        success: `Timer Paused - Elapsed: ${timerDisplay}`,
+        error: 'Failed to pause timer'
       })
       announce('Timer paused', 'polite')
 
@@ -471,7 +481,11 @@ export default function TimeTrackingPage() {
     }
 
     if (!activeTimer.isPaused) {
-      toast.info('Timer is already running')
+      toast.promise(new Promise(r => setTimeout(r, 500)), {
+        loading: 'Checking timer status...',
+        success: 'Timer is already running',
+        error: 'Failed to check timer status'
+      })
       return
     }
 
@@ -494,8 +508,10 @@ export default function TimeTrackingPage() {
         startTime: new Date(data.start_time) // Use the new start time from database
       } : null)
 
-      toast.info('Timer Resumed', {
-        description: 'Continue tracking time'
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Resuming timer...',
+        success: 'Timer Resumed - Continue tracking time',
+        error: 'Failed to resume timer'
       })
       announce('Timer resumed', 'polite')
 
@@ -532,8 +548,10 @@ export default function TimeTrackingPage() {
       entryId: editingEntry.id,
       newDescription: newEntryDescription
     })
-    toast.success('Entry Updated', {
-      description: 'Time entry description has been updated successfully'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Updating entry...',
+      success: 'Entry Updated - Time entry description has been updated successfully',
+      error: 'Failed to update entry'
     })
     announce('Time entry updated', 'polite')
     setShowEditEntryDialog(false)
@@ -572,8 +590,10 @@ export default function TimeTrackingPage() {
         entryId: entryToDelete,
         remainingEntries: timeEntries.length - 1
       })
-      toast.success('Entry Deleted', {
-        description: 'Time entry has been permanently removed from your records'
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting entry...',
+        success: 'Entry Deleted - Time entry has been permanently removed from your records',
+        error: 'Failed to delete entry'
       })
       announce('Time entry deleted', 'polite')
     } catch (error) {
@@ -627,8 +647,10 @@ export default function TimeTrackingPage() {
       duration: hours + ' hour(s)',
       totalEntries: timeEntries.length + 1
     })
-    toast.success('Manual Entry Added', {
-      description: 'Added ' + hours + ' hour(s) to your time tracking records'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Adding manual entry...',
+      success: 'Manual Entry Added - Added ' + hours + ' hour(s) to your time tracking records',
+      error: 'Failed to add manual entry'
     })
     announce('Manual entry added', 'polite')
     setShowManualEntryDialog(false)
@@ -652,8 +674,10 @@ export default function TimeTrackingPage() {
       newEntryId: duplicated.id,
       totalEntries: timeEntries.length + 1
     })
-    toast.success('Entry Duplicated', {
-      description: 'Time entry has been duplicated and added to your records'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Duplicating entry...',
+      success: 'Entry Duplicated - Time entry has been duplicated and added to your records',
+      error: 'Failed to duplicate entry'
     })
   }
 
@@ -698,8 +722,10 @@ export default function TimeTrackingPage() {
       filename,
       entriesExported: data.length
     })
-    toast.success('Report Exported', {
-      description: 'Downloaded ' + filename + ' with ' + data.length + ' entries'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Exporting report...',
+      success: 'Report Exported - Downloaded ' + filename + ' with ' + data.length + ' entries',
+      error: 'Failed to export report'
     })
   }
 
@@ -708,8 +734,10 @@ export default function TimeTrackingPage() {
       availableFilters: ['Project', 'Date Range', 'Task', 'Duration'],
       currentEntries: timeEntries.length
     })
-    toast.info('Filter Options Available', {
-      description: 'Filter by Project, Date Range, Task, or Duration'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading filter options...',
+      success: 'Filter Options Available - Filter by Project, Date Range, Task, or Duration',
+      error: 'Failed to load filter options'
     })
   }
 
@@ -727,8 +755,10 @@ export default function TimeTrackingPage() {
     }
 
     logger.info('Date range filter applied', { start: filterStartDate, end: filterEndDate })
-    toast.info('Date Filter Applied', {
-      description: 'Filtering entries from ' + filterStartDate + ' to ' + filterEndDate
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Applying date filter...',
+      success: 'Date Filter Applied - Filtering entries from ' + filterStartDate + ' to ' + filterEndDate,
+      error: 'Failed to apply date filter'
     })
     announce('Date filter applied', 'polite')
     setShowDateRangeDialog(false)
@@ -738,8 +768,10 @@ export default function TimeTrackingPage() {
 
   const handleClearFilters = () => {
     logger.info('Filters cleared successfully')
-    toast.success('Filters Cleared', {
-      description: 'All filters have been reset to show all time entries'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Clearing filters...',
+      success: 'Filters Cleared - All filters have been reset to show all time entries',
+      error: 'Failed to clear filters'
     })
   }
 
@@ -754,8 +786,10 @@ export default function TimeTrackingPage() {
       entries: todayEntries.length,
       totalTime: formatTime(totalTime)
     })
-    toast.info('Daily Report Generated', {
-      description: today + ' - ' + todayEntries.length + ' entries, ' + formatTime(totalTime) + ' total'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Generating daily report...',
+      success: 'Daily Report Generated - ' + today + ' - ' + todayEntries.length + ' entries, ' + formatTime(totalTime) + ' total',
+      error: 'Failed to generate daily report'
     })
   }
 
@@ -765,8 +799,10 @@ export default function TimeTrackingPage() {
       entries: timeEntries.length,
       totalTime: formatTime(totalTime)
     })
-    toast.info('Weekly Report Generated', {
-      description: timeEntries.length + ' entries, ' + formatTime(totalTime) + ' total time tracked'
+    toast.promise(new Promise(r => setTimeout(r, 1800)), {
+      loading: 'Generating weekly report...',
+      success: 'Weekly Report Generated - ' + timeEntries.length + ' entries, ' + formatTime(totalTime) + ' total time tracked',
+      error: 'Failed to generate weekly report'
     })
   }
 
@@ -778,8 +814,10 @@ export default function TimeTrackingPage() {
       totalTime: formatTime(totalTime),
       avgPerEntry: formatTime(avgPerDay)
     })
-    toast.info('Monthly Report Generated', {
-      description: timeEntries.length + ' entries, ' + formatTime(totalTime) + ' total, ' + formatTime(avgPerDay) + ' avg'
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Generating monthly report...',
+      success: 'Monthly Report Generated - ' + timeEntries.length + ' entries, ' + formatTime(totalTime) + ' total, ' + formatTime(avgPerDay) + ' avg',
+      error: 'Failed to generate monthly report'
     })
   }
 
@@ -812,8 +850,10 @@ export default function TimeTrackingPage() {
       setTimeEntries([])
 
       logger.info('All entries deleted from database', { deletedCount: result.deletedCount })
-      toast.success('All Entries Deleted', {
-        description: `${result.deletedCount} time entries permanently removed`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Deleting all entries...',
+        success: `All Entries Deleted - ${result.deletedCount} time entries permanently removed`,
+        error: 'Failed to delete all entries'
       })
       announce('All time entries deleted', 'polite')
     } catch (error: any) {
@@ -840,8 +880,10 @@ export default function TimeTrackingPage() {
     }
 
     logger.info('Project added successfully', { projectName: newProjectName.trim() })
-    toast.success('Project Added', {
-      description: 'Project "' + newProjectName.trim() + '" created - you can now add tasks'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Creating project...',
+      success: 'Project Added - Project "' + newProjectName.trim() + '" created - you can now add tasks',
+      error: 'Failed to create project'
     })
     announce('Project added', 'polite')
     setShowAddProjectDialog(false)
@@ -874,8 +916,10 @@ export default function TimeTrackingPage() {
       oldName: project?.name,
       newName: editProjectName.trim()
     })
-    toast.success('Project Updated', {
-      description: 'Project name changed to "' + editProjectName.trim() + '"'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Updating project...',
+      success: 'Project Updated - Project name changed to "' + editProjectName.trim() + '"',
+      error: 'Failed to update project'
     })
     announce('Project updated', 'polite')
     setShowEditProjectDialog(false)
@@ -910,8 +954,10 @@ export default function TimeTrackingPage() {
         projectId: projectToDelete,
         projectName: project?.name
       })
-      toast.success('Project Deleted', {
-        description: 'Project removed - all time entries have been preserved'
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Deleting project...',
+        success: 'Project Deleted - Project removed - all time entries have been preserved',
+        error: 'Failed to delete project'
       })
       announce(`Project ${project?.name} deleted`, 'polite')
     } finally {
@@ -944,8 +990,10 @@ export default function TimeTrackingPage() {
       taskName: newTaskName.trim(),
       projectId: selectedProject
     })
-    toast.success('Task Added', {
-      description: 'Task "' + newTaskName.trim() + '" added to project'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Creating task...',
+      success: 'Task Added - Task "' + newTaskName.trim() + '" added to project',
+      error: 'Failed to create task'
     })
     announce('Task added', 'polite')
     setShowAddTaskDialog(false)
@@ -982,8 +1030,10 @@ export default function TimeTrackingPage() {
       oldName: task?.name,
       newName: editTaskName.trim()
     })
-    toast.success('Task Updated', {
-      description: 'Task name changed to "' + editTaskName.trim() + '"'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Updating task...',
+      success: 'Task Updated - Task name changed to "' + editTaskName.trim() + '"',
+      error: 'Failed to update task'
     })
     announce('Task updated', 'polite')
     setShowEditTaskDialog(false)
@@ -1018,8 +1068,10 @@ export default function TimeTrackingPage() {
         taskId: taskToDelete,
         taskName: task?.name
       })
-      toast.success('Task Deleted', {
-        description: 'Task removed - all time entries have been preserved'
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting task...',
+        success: 'Task Deleted - Task removed - all time entries have been preserved',
+        error: 'Failed to delete task'
       })
       announce(`Task ${task?.name} deleted`, 'polite')
     } finally {
@@ -1034,8 +1086,10 @@ export default function TimeTrackingPage() {
       previousDescription: description || 'empty'
     })
     setDescription('')
-    toast.success('Description Cleared', {
-      description: 'Task description has been reset'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Clearing description...',
+      success: 'Description Cleared - Task description has been reset',
+      error: 'Failed to clear description'
     })
   }
 
@@ -1063,8 +1117,10 @@ export default function TimeTrackingPage() {
       setTimeEntries(prev => prev.filter(e => e.id !== entryToArchive))
 
       logger.info('Entry archived successfully', { entryId: entryToArchive })
-      toast.success('Entry Archived', {
-        description: 'Time entry archived - can be restored later'
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Archiving entry...',
+        success: 'Entry Archived - Time entry archived - can be restored later',
+        error: 'Failed to archive entry'
       })
       announce('Time entry archived', 'polite')
     } catch (error) {
@@ -1089,8 +1145,10 @@ export default function TimeTrackingPage() {
       totalEntries: timeEntries.length,
       projectCount: projects.length
     })
-    toast.info('Detailed Statistics', {
-      description: 'Total: ' + formatTime(totalTime) + ' across ' + timeEntries.length + ' entries'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Calculating statistics...',
+      success: 'Detailed Statistics - Total: ' + formatTime(totalTime) + ' across ' + timeEntries.length + ' entries',
+      error: 'Failed to generate statistics'
     })
   }
 

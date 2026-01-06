@@ -153,16 +153,16 @@ export default function OperationsPage() {
       return
     }
 
-    try {
-      logger.info('Inviting new user', { userId })
+    const newUser = {
+      email: 'newuser@company.com',
+      role: 'member' as UserRole,
+      department: 'General'
+    }
 
-      const newUser = {
-        email: 'newuser@company.com',
-        role: 'member' as UserRole,
-        department: 'General'
-      }
+    logger.info('Inviting new user', { userId })
 
-      const { sendInvitation } = await import('@/lib/user-management-queries')
+    const inviteOperation = async () => {
+      const { sendInvitation, getAllUsers } = await import('@/lib/user-management-queries')
       await sendInvitation({
         email: newUser.email,
         role: newUser.role,
@@ -170,22 +170,25 @@ export default function OperationsPage() {
         invited_by: userId
       })
 
-      toast.success('Invitation Sent', {
-        description: `Invitation email sent to ${newUser.email} successfully`
-      })
       logger.info('User invited', { success: true, email: newUser.email })
       announce('User invitation sent', 'polite')
 
       // Reload team members
-      const { getAllUsers } = await import('@/lib/user-management-queries')
       const users = await getAllUsers()
       setTeamMembers(users || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Invite failed'
-      toast.error('Invite Failed', { description: message })
-      logger.error('Invite user failed', { error })
-      announce('Failed to send invitation', 'assertive')
+      return newUser.email
     }
+
+    toast.promise(inviteOperation(), {
+      loading: 'Sending invitation...',
+      success: `Invitation sent to ${newUser.email}`,
+      error: (err) => {
+        const message = err instanceof Error ? err.message : 'Invite failed'
+        logger.error('Invite user failed', { error: err })
+        announce('Failed to send invitation', 'assertive')
+        return message
+      }
+    })
   }
 
   // Button 2: Edit User

@@ -199,17 +199,19 @@ export default function GalleryPage() {
       fileSize: item.fileSize
     })
 
-    toast.success('Preparing download...', {
-      description: `Downloading ${item.name}`
-    })
-
-    // Simulate download
-    setTimeout(() => {
-      logger.info('Gallery item downloaded successfully', { itemId: item.id })
-      toast.success('Download started', {
-        description: `${item.name} is downloading to your device`
-      })
-    }, 1000)
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Gallery item downloaded successfully', { itemId: item.id })
+          resolve(true)
+        }, 1500)
+      }),
+      {
+        loading: `Preparing download for ${item.name}...`,
+        success: `${item.name} is downloading to your device`,
+        error: `Failed to download ${item.name}`
+      }
+    )
   }
 
   // Handle Share
@@ -219,7 +221,7 @@ export default function GalleryPage() {
       itemName: item.name
     })
 
-    try {
+    const sharePromise = async () => {
       const response = await fetch('/api/gallery/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -235,15 +237,14 @@ export default function GalleryPage() {
       }
 
       logger.info('Gallery item share link generated', { itemId: item.id })
-      toast.success('Share link generated!', {
-        description: 'Link copied to clipboard'
-      })
-    } catch (error: any) {
-      logger.error('Failed to share gallery item', { error, itemId: item.id })
-      toast.error('Failed to generate share link', {
-        description: error.message || 'Please try again later'
-      })
+      return true
     }
+
+    toast.promise(sharePromise(), {
+      loading: `Generating share link for ${item.name}...`,
+      success: 'Share link generated! Link copied to clipboard',
+      error: 'Failed to generate share link. Please try again later'
+    })
   }
 
   // Handle Delete
@@ -262,30 +263,30 @@ export default function GalleryPage() {
   const handleConfirmDelete = async () => {
     if (!deleteItem) return
 
-    try {
+    const itemToDelete = deleteItem
+    setDeleteItem(null)
+
+    const deletePromise = async () => {
       const response = await fetch('/api/gallery/items', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ itemId: deleteItem.id })
+        body: JSON.stringify({ itemId: itemToDelete.id })
       })
 
       if (!response.ok) {
         throw new Error('Failed to delete item')
       }
 
-      setGalleryItems(galleryItems.filter(i => i.id !== deleteItem.id))
-      logger.info('Gallery item deleted successfully', { itemId: deleteItem.id })
-      toast.success('Item deleted', {
-        description: `${deleteItem.name} has been removed from gallery`
-      })
-    } catch (error: any) {
-      logger.error('Failed to delete gallery item', { error, itemId: deleteItem.id })
-      toast.error('Failed to delete item', {
-        description: error.message || 'Please try again later'
-      })
-    } finally {
-      setDeleteItem(null)
+      setGalleryItems(galleryItems.filter(i => i.id !== itemToDelete.id))
+      logger.info('Gallery item deleted successfully', { itemId: itemToDelete.id })
+      return true
     }
+
+    toast.promise(deletePromise(), {
+      loading: `Deleting ${itemToDelete.name}...`,
+      success: `${itemToDelete.name} has been removed from gallery`,
+      error: 'Failed to delete item. Please try again later'
+    })
   }
 
   // Handle Bulk Download
@@ -297,11 +298,10 @@ export default function GalleryPage() {
       return
     }
 
-    logger.info('Bulk download initiated', {
-      itemCount: selectedItems.length
-    })
+    const itemCount = selectedItems.length
+    logger.info('Bulk download initiated', { itemCount })
 
-    try {
+    const bulkDownloadPromise = async () => {
       const response = await fetch('/api/gallery/bulk-download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -312,18 +312,16 @@ export default function GalleryPage() {
         throw new Error('Failed to prepare download')
       }
 
-      logger.info('Bulk download prepared', { itemCount: selectedItems.length })
-      toast.success('Download starting...', {
-        description: `Downloading ${selectedItems.length} items as ZIP`
-      })
-
+      logger.info('Bulk download prepared', { itemCount })
       setSelectedItems([])
-    } catch (error: any) {
-      logger.error('Failed to bulk download', { error })
-      toast.error('Failed to prepare download', {
-        description: error.message || 'Please try again later'
-      })
+      return true
     }
+
+    toast.promise(bulkDownloadPromise(), {
+      loading: `Preparing ${itemCount} items for download...`,
+      success: `Downloading ${itemCount} items as ZIP`,
+      error: 'Failed to prepare download. Please try again later'
+    })
   }
 
   // Loading State
@@ -542,7 +540,14 @@ export default function GalleryPage() {
                               logger.info('Gallery item preview opened', {
                                 itemId: item.id
                               })
-                              toast.info('Opening preview...')
+                              toast.promise(
+                                new Promise((resolve) => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Opening preview...',
+                                  success: `Preview loaded for ${item.name}`,
+                                  error: 'Failed to open preview'
+                                }
+                              )
                             }}
                           >
                             <Eye className="h-4 w-4" />

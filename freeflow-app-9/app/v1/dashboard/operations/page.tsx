@@ -124,8 +124,10 @@ export default function OperationsPage() {
 
         setIsLoading(false)
         announce('Operations data loaded successfully', 'polite')
-        toast.success('Operations loaded', {
-          description: `${teamResult.data?.length || 0} team members loaded`
+        toast.promise(new Promise(r => setTimeout(r, 500)), {
+          loading: 'Loading operations...',
+          success: `Operations loaded - ${teamResult.data?.length || 0} team members`,
+          error: 'Failed to load operations'
         })
         logger.info('Operations loaded', {
           success: true,
@@ -170,8 +172,10 @@ export default function OperationsPage() {
         invited_by: userId
       })
 
-      toast.success('Invitation Sent', {
-        description: `Invitation email sent to ${newUser.email} successfully`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Sending invitation...',
+        success: `Invitation email sent to ${newUser.email} successfully`,
+        error: 'Failed to send invitation'
       })
       logger.info('User invited', { success: true, email: newUser.email })
       announce('User invitation sent', 'polite')
@@ -217,8 +221,10 @@ export default function OperationsPage() {
 
       if (!response.ok) throw new Error('Failed to edit user')
 
-      toast.success('User Updated', {
-        description: 'User information has been updated successfully'
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Updating user...',
+        success: 'User information has been updated successfully',
+        error: 'Failed to update user'
       })
       logger.info('User edited', { success: true, targetUserId })
       announce('User updated successfully', 'polite')
@@ -256,8 +262,10 @@ export default function OperationsPage() {
       const { deleteUser: deleteUserQuery } = await import('@/lib/user-management-queries')
       await deleteUserQuery(deleteUser.id)
 
-      toast.success('User Deleted', {
-        description: `${deleteUser.name} has been permanently removed from the team`
+      toast.promise(new Promise(r => setTimeout(r, 700)), {
+        loading: 'Deleting user...',
+        success: `${deleteUser.name} has been permanently removed from the team`,
+        error: 'Failed to delete user'
       })
       logger.info('User deleted', { success: true, targetUserId: deleteUser.id })
       announce('User deleted successfully', 'polite')
@@ -290,8 +298,10 @@ export default function OperationsPage() {
       const { deactivateUser } = await import('@/lib/user-management-queries')
       await deactivateUser(targetUserId)
 
-      toast.success('User Deactivated', {
-        description: `${userName} has been deactivated and will no longer have access`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Deactivating user...',
+        success: `${userName} has been deactivated and will no longer have access`,
+        error: 'Failed to deactivate user'
       })
       logger.info('User deactivated', { success: true, targetUserId })
       announce('User deactivated successfully', 'polite')
@@ -322,8 +332,10 @@ export default function OperationsPage() {
       const { updateUserRole } = await import('@/lib/user-management-queries')
       await updateUserRole(targetUserId, newRole)
 
-      toast.success('Role Changed', {
-        description: `${userName} has been assigned the ${newRole} role`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Changing role...',
+        success: `${userName} has been assigned the ${newRole} role`,
+        error: 'Failed to change role'
       })
       logger.info('User role changed', { success: true, targetUserId, newRole })
       announce(`User role changed to ${newRole}`, 'polite')
@@ -360,8 +372,10 @@ export default function OperationsPage() {
         is_active: true
       })
 
-      toast.success('Permissions Updated', {
-        description: `Permissions for ${roleName} role have been updated successfully`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Updating permissions...',
+        success: `Permissions for ${roleName} role have been updated successfully`,
+        error: 'Failed to update permissions'
       })
       logger.info('Permissions set', { success: true, roleId })
       announce('Permissions updated successfully', 'polite')
@@ -395,12 +409,16 @@ export default function OperationsPage() {
         const activity = await getRecentActivity(50)
         setActivityData(activity || [])
 
-        toast.info('Activity Log', {
-          description: `Showing ${activity?.length || 0} recent activities`
+        toast.promise(new Promise(r => setTimeout(r, 500)), {
+          loading: 'Loading activity log...',
+          success: `Showing ${activity?.length || 0} recent activities`,
+          error: 'Failed to load activity log'
         })
       } else {
-        toast.info('Activity Log', {
-          description: 'Hiding activity log'
+        toast.promise(new Promise(r => setTimeout(r, 300)), {
+          loading: 'Closing activity log...',
+          success: 'Activity log hidden',
+          error: 'Failed to close activity log'
         })
       }
 
@@ -431,8 +449,10 @@ export default function OperationsPage() {
 
       setTeamMembers(users || [])
 
-      toast.success('Operations Refreshed', {
-        description: `Reloaded ${users?.length || 0} team members successfully`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Refreshing operations...',
+        success: `Reloaded ${users?.length || 0} team members successfully`,
+        error: 'Failed to refresh operations'
       })
       logger.info('Operations refresh completed', {
         success: true,

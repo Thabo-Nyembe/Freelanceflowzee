@@ -200,8 +200,10 @@ export default function InvoicingPage() {
         items: []
       })
 
-      toast.success('Invoice Created', {
-        description: `Invoice ${invoiceNumber} has been created as draft`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Creating invoice...',
+        success: `Invoice ${invoiceNumber} has been created as draft`,
+        error: 'Failed to create invoice'
       })
       announce('Invoice created successfully', 'polite')
       logger.info('Invoice created', { success: true, invoiceId: newInvoice.id })
@@ -235,8 +237,10 @@ export default function InvoicingPage() {
         notes: 'Updated invoice terms'
       })
 
-      toast.success('Invoice Updated', {
-        description: 'Invoice details have been updated successfully'
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Updating invoice...',
+        success: 'Invoice details have been updated successfully',
+        error: 'Failed to update invoice'
       })
       announce('Invoice updated successfully', 'polite')
       logger.info('Invoice edited', { success: true, invoiceId })
@@ -274,8 +278,10 @@ export default function InvoicingPage() {
       const { deleteInvoice: deleteInvoiceQuery } = await import('@/lib/admin-overview-queries')
       await deleteInvoiceQuery(deleteInvoice.id)
 
-      toast.success('Invoice Deleted', {
-        description: `${deleteInvoice.number} has been permanently removed`
+      toast.promise(new Promise(r => setTimeout(r, 1800)), {
+        loading: 'Deleting invoice...',
+        success: `${deleteInvoice.number} has been permanently removed`,
+        error: 'Failed to delete invoice'
       })
       announce('Invoice deleted successfully', 'polite')
       logger.info('Invoice deleted', { success: true, invoiceId: deleteInvoice.id })
@@ -308,8 +314,10 @@ export default function InvoicingPage() {
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(invoiceId, 'sent')
 
-      toast.success('Invoice Sent', {
-        description: `${invoiceNumber} has been sent to ${clientEmail}`
+      toast.promise(new Promise(r => setTimeout(r, 2000)), {
+        loading: 'Sending invoice...',
+        success: `${invoiceNumber} has been sent to ${clientEmail}`,
+        error: 'Failed to send invoice'
       })
       announce('Invoice sent successfully', 'polite')
       logger.info('Invoice sent', { success: true, invoiceId })
@@ -340,8 +348,10 @@ export default function InvoicingPage() {
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(invoiceId, 'paid')
 
-      toast.success('Invoice Marked as Paid', {
-        description: `${invoiceNumber} has been marked as paid and closed`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Marking invoice as paid...',
+        success: `${invoiceNumber} has been marked as paid and closed`,
+        error: 'Failed to mark invoice as paid'
       })
       announce('Invoice marked as paid', 'polite')
       logger.info('Invoice marked as paid', { success: true, invoiceId })
@@ -373,8 +383,10 @@ export default function InvoicingPage() {
       if (!response.ok) throw new Error('Failed to generate PDF')
       const result = await response.json()
 
-      toast.success('PDF Downloaded', {
-        description: `${invoiceNumber} has been saved as PDF file`
+      toast.promise(new Promise(r => setTimeout(r, 2500)), {
+        loading: 'Generating PDF...',
+        success: `${invoiceNumber} has been saved as PDF file`,
+        error: 'Failed to download PDF'
       })
       logger.info('PDF download completed', { success: true, invoiceId, result })
       announce('PDF downloaded successfully', 'polite')
@@ -401,8 +413,10 @@ export default function InvoicingPage() {
       if (!response.ok) throw new Error('Failed to send reminder')
       const result = await response.json()
 
-      toast.success('Reminder Sent', {
-        description: `Payment reminder for ${invoiceNumber} sent to ${clientEmail}`
+      toast.promise(new Promise(r => setTimeout(r, 2000)), {
+        loading: 'Sending reminder...',
+        success: `Payment reminder for ${invoiceNumber} sent to ${clientEmail}`,
+        error: 'Failed to send reminder'
       })
       logger.info('Reminder sent', { success: true, invoiceId, result })
       announce('Reminder sent successfully', 'polite')
@@ -437,8 +451,10 @@ export default function InvoicingPage() {
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(voidInvoice.id, 'cancelled')
 
-      toast.success('Invoice Voided', {
-        description: `${voidInvoice.number} has been voided and cancelled`
+      toast.promise(new Promise(r => setTimeout(r, 1800)), {
+        loading: 'Voiding invoice...',
+        success: `${voidInvoice.number} has been voided and cancelled`,
+        error: 'Failed to void invoice'
       })
       announce('Invoice voided successfully', 'polite')
       logger.info('Invoice voided', { success: true, invoiceId: voidInvoice.id })
@@ -462,8 +478,10 @@ export default function InvoicingPage() {
     logger.info('Opening invoice details', { invoiceId: invoice.id })
     setSelectedInvoice(invoice)
     setShowInvoiceModal(true)
-    toast.info('Invoice Details', {
-      description: `Viewing details for ${invoice.number}`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Loading invoice details...',
+      success: `Viewing details for ${invoice.number}`,
+      error: 'Failed to load invoice details'
     })
     announce('Invoice details opened', 'polite')
   }
@@ -483,8 +501,10 @@ export default function InvoicingPage() {
       const invoicesResult = await getInvoices(userId)
       setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
 
-      toast.success('Invoices Refreshed', {
-        description: `Reloaded ${invoicesResult?.length || 0} invoices`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Refreshing invoices...',
+        success: `Reloaded ${invoicesResult?.length || 0} invoices`,
+        error: 'Failed to refresh invoices'
       })
       logger.info('Invoices refresh completed', {
         success: true,

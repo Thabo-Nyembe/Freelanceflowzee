@@ -797,8 +797,10 @@ export default function CommunityHubPage() {
       currentComments: post?.comments
     })
 
-    toast.info('Add comment', {
-      description: `${post?.type} post - ${post?.comments || 0} comments - ${post?.likes || 0} likes`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening comment dialog...',
+      success: `Add comment - ${post?.type} post - ${post?.comments || 0} comments - ${post?.likes || 0} likes`,
+      error: 'Failed to open comments'
     })
   }
 
@@ -962,8 +964,10 @@ export default function CommunityHubPage() {
       currentFollowers: member?.followers
     })
 
-    toast.success('Unfollowed', {
-      description: `${member?.name} - ${member?.title} - ${(member?.followers || 0) - 1} followers remaining`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Unfollowing member...',
+      success: `Unfollowed - ${member?.name} - ${member?.title} - ${(member?.followers || 0) - 1} followers remaining`,
+      error: 'Failed to unfollow member'
     })
   }
 
@@ -1034,8 +1038,10 @@ export default function CommunityHubPage() {
       isOnline: member?.isOnline
     })
 
-    toast.info('Opening chat...', {
-      description: `${member?.name} - ${member?.title} - ${member?.isOnline ? 'Online' : `Last seen: ${member?.lastSeen}`}`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Opening chat...',
+      success: `Chat opened - ${member?.name} - ${member?.title} - ${member?.isOnline ? 'Online' : `Last seen: ${member?.lastSeen}`}`,
+      error: 'Failed to open chat'
     })
   }
 
@@ -1060,16 +1066,20 @@ export default function CommunityHubPage() {
       }
     }
 
-    toast.success('Registered for event!', {
-      description: `${event?.title} - ${event?.date} - ${event?.location} - ${(event?.attendees?.length || 0) + 1} attendees`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Registering for event...',
+      success: `Registered for event! - ${event?.title} - ${event?.date} - ${event?.location} - ${(event?.attendees?.length || 0) + 1} attendees`,
+      error: 'Failed to register for event'
     })
   }
 
   const handleCreateEvent = () => {
     logger.info('Opening event creation form')
 
-    toast.info('Create community event', {
-      description: 'Online, offline, or hybrid - Set date, location, and attendee limit'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Opening event creator...',
+      success: 'Create community event - Online, offline, or hybrid - Set date, location, and attendee limit',
+      error: 'Failed to open event creator'
     })
   }
 
@@ -1093,24 +1103,30 @@ export default function CommunityHubPage() {
       }
     }
 
-    toast.success('Joined group!', {
-      description: `${group?.name} - ${group?.category} - ${(group?.members?.length || 0) + 1} members - ${group?.posts} posts`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Joining group...',
+      success: `Joined group! - ${group?.name} - ${group?.category} - ${(group?.members?.length || 0) + 1} members - ${group?.posts} posts`,
+      error: 'Failed to join group'
     })
   }
 
   const handleCreateGroup = () => {
     logger.info('Opening group creation form')
 
-    toast.info('Create new group', {
-      description: 'Public, private, or secret - Set category, rules, and member permissions'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Opening group creator...',
+      success: 'Create new group - Public, private, or secret - Set category, rules, and member permissions',
+      error: 'Failed to open group creator'
     })
   }
 
   const handlePostJob = () => {
     logger.info('Opening job posting form')
 
-    toast.info('Post job opportunity', {
-      description: 'Fixed or hourly - Set budget, deadline, and required skills'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Opening job posting form...',
+      success: 'Post job opportunity - Fixed or hourly - Set budget, deadline, and required skills',
+      error: 'Failed to open job posting form'
     })
   }
 
@@ -1125,8 +1141,10 @@ export default function CommunityHubPage() {
       deadline: job?.deadline
     })
 
-    toast.success('Application submitted!', {
-      description: `${job?.title} - ${job?.currency}${job?.budget} - Deadline: ${job?.deadline} - ${(job?.applicants || 0) + 1} applicants`
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Submitting application...',
+      success: `Application submitted! - ${job?.title} - ${job?.currency}${job?.budget} - Deadline: ${job?.deadline} - ${(job?.applicants || 0) + 1} applicants`,
+      error: 'Failed to submit application'
     })
   }
 
@@ -1147,8 +1165,10 @@ export default function CommunityHubPage() {
       resultCount: results.length
     })
 
-    toast.info(`Searching: ${query}`, {
-      description: `${results.length} members found - ${results.filter(m => m.isOnline).length} online`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: `Searching: ${query}...`,
+      success: `Search complete - ${results.length} members found - ${results.filter(m => m.isOnline).length} online`,
+      error: 'Search failed'
     })
   }
   const handleFilterBySkill = (skill: string) => {
@@ -1161,8 +1181,10 @@ export default function CommunityHubPage() {
       resultCount: matchingMembers.length
     })
 
-    toast.info(`Filter by: ${skill}`, {
-      description: `${matchingMembers.length} members - ${matchingMembers.filter(m => m.availability === 'available').length} available`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: `Filtering by: ${skill}...`,
+      success: `Filter applied - ${matchingMembers.length} members - ${matchingMembers.filter(m => m.availability === 'available').length} available`,
+      error: 'Filter failed'
     })
   }
 
@@ -1175,16 +1197,20 @@ export default function CommunityHubPage() {
       category: member?.category
     })
 
-    toast.info('Viewing profile', {
-      description: `${member?.name} - ${member?.title} - ${member?.rating}★ rating - ${member?.totalProjects} projects completed`
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Loading profile...',
+      success: `Viewing profile - ${member?.name} - ${member?.title} - ${member?.rating} rating - ${member?.totalProjects} projects completed`,
+      error: 'Failed to load profile'
     })
   }
 
   const handleEditProfile = () => {
     logger.info('Opening profile editor')
 
-    toast.info('Edit your profile', {
-      description: 'Update skills, bio, portfolio, rates, and availability'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening profile editor...',
+      success: 'Edit your profile - Update skills, bio, portfolio, rates, and availability',
+      error: 'Failed to open profile editor'
     })
   }
 
@@ -1197,8 +1223,10 @@ export default function CommunityHubPage() {
       currentEndorsements: member?.endorsements
     })
 
-    toast.success('Endorsement sent!', {
-      description: `${member?.name} - ${member?.title} - ${(member?.endorsements || 0) + 1} endorsements - ${member?.rating}★ rating`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Sending endorsement...',
+      success: `Endorsement sent! - ${member?.name} - ${member?.title} - ${(member?.endorsements || 0) + 1} endorsements - ${member?.rating} rating`,
+      error: 'Failed to send endorsement'
     })
   }
 
@@ -1208,8 +1236,10 @@ export default function CommunityHubPage() {
       reportedBy: 'user-1'
     })
 
-    toast.success('Content reported', {
-      description: 'Our team will review this content within 24 hours - Thank you for keeping the community safe'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Submitting report...',
+      success: 'Content reported - Our team will review this content within 24 hours - Thank you for keeping the community safe',
+      error: 'Failed to submit report'
     })
   }
 
@@ -1232,8 +1262,10 @@ export default function CommunityHubPage() {
       userName: blockUser.name
     })
 
-    toast.success('User blocked', {
-      description: `${blockUser.name} - Blocked successfully - You can unblock from Settings`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Blocking user...',
+      success: `User blocked - ${blockUser.name} - Blocked successfully - You can unblock from Settings`,
+      error: 'Failed to block user'
     })
     setBlockUser(null)
   }
@@ -2102,10 +2134,18 @@ export default function CommunityHubPage() {
         dispatch({ type: 'SHARE_POST', payload: postId })
         break
       case 'comment':
-        toast.info('💬 Opening comments for post ' + postId)
+        toast.promise(new Promise(r => setTimeout(r, 600)), {
+          loading: 'Opening comments...',
+          success: 'Comments opened for post ' + postId,
+          error: 'Failed to open comments'
+        })
         break
       case 'report':
-        toast.info('⚠️ Reporting post ' + postId)
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: 'Submitting report...',
+          success: 'Report submitted for post ' + postId,
+          error: 'Failed to submit report'
+        })
         break
       default:
         break
@@ -2133,10 +2173,18 @@ export default function CommunityHubPage() {
         dispatch({ type: 'UNBLOCK_MEMBER', payload: memberId })
         break
       case 'message':
-        toast.info('💬 Opening chat with ' + memberId)
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Opening chat...',
+          success: 'Chat opened with member ' + memberId,
+          error: 'Failed to open chat'
+        })
         break
       case 'hire':
-        toast.info('💼 Hiring ' + memberId)
+        toast.promise(new Promise(r => setTimeout(r, 1000)), {
+          loading: 'Initiating hire process...',
+          success: 'Hire process started for member ' + memberId,
+          error: 'Failed to start hire process'
+        })
         break
       default:
         break

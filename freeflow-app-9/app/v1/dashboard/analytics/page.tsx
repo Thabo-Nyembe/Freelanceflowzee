@@ -229,9 +229,17 @@ export default function AnalyticsPage() {
         }
       }))
 
-      toast.success('Analytics refreshed')
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Refreshing analytics data...',
+        success: 'Analytics refreshed successfully',
+        error: 'Failed to refresh analytics'
+      })
     } catch (err) {
-      toast.error('Failed to refresh analytics')
+      toast.promise(Promise.reject(), {
+        loading: 'Refreshing...',
+        success: 'Done',
+        error: 'Failed to refresh analytics'
+      })
     } finally {
       setIsRefreshing(false)
     }

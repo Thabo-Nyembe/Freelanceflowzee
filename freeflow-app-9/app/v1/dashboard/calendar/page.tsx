@@ -220,9 +220,14 @@ export default function CalendarPage() {
       }
 
       logger.info('Meeting join recorded', { meetingId: meeting.id })
-      toast.success('Opening meeting...', {
-        description: `Joining ${meeting.title}`
-      })
+      toast.promise(
+        new Promise(r => setTimeout(r, 1500)),
+        {
+          loading: `Connecting to ${meeting.title}...`,
+          success: `Joining ${meeting.title}`,
+          error: 'Failed to join meeting'
+        }
+      )
 
       // Open meeting URL
       window.open(meeting.meetingUrl, '_blank')
@@ -254,9 +259,14 @@ export default function CalendarPage() {
       }
 
       logger.info('Meeting scheduling form opened')
-      toast.success('Opening meeting scheduler...', {
-        description: 'Select date, time, and attendees'
-      })
+      toast.promise(
+        new Promise(r => setTimeout(r, 1000)),
+        {
+          loading: 'Opening meeting scheduler...',
+          success: 'Select date, time, and attendees',
+          error: 'Failed to open scheduler'
+        }
+      )
       setShowScheduleDialog(true)
     } catch (error: any) {
       logger.error('Failed to schedule meeting', { error })
@@ -292,9 +302,14 @@ export default function CalendarPage() {
       }
 
       logger.info('Meeting rescheduled', { meetingId })
-      toast.success('Meeting rescheduled', {
-        description: `${meeting.title} has been updated`
-      })
+      toast.promise(
+        new Promise(r => setTimeout(r, 1200)),
+        {
+          loading: `Rescheduling ${meeting.title}...`,
+          success: `${meeting.title} has been updated`,
+          error: 'Failed to reschedule meeting'
+        }
+      )
     } catch (error: any) {
       logger.error('Failed to reschedule meeting', { error, meetingId })
       toast.error('Failed to reschedule', {
@@ -336,9 +351,14 @@ export default function CalendarPage() {
         )
       )
       logger.info('Meeting cancelled', { meetingId: cancelMeeting.id })
-      toast.success('Meeting cancelled', {
-        description: `${cancelMeeting.title} has been cancelled`
-      })
+      toast.promise(
+        new Promise(r => setTimeout(r, 1000)),
+        {
+          loading: `Cancelling ${cancelMeeting.title}...`,
+          success: `${cancelMeeting.title} has been cancelled`,
+          error: 'Failed to cancel meeting'
+        }
+      )
     } catch (error: any) {
       logger.error('Failed to cancel meeting', { error, meetingId: cancelMeeting.id })
       toast.error('Failed to cancel meeting', {
@@ -375,9 +395,14 @@ export default function CalendarPage() {
       }
 
       logger.info('Meeting reminder set', { meetingId })
-      toast.success('Reminder set', {
-        description: 'You will be notified 15 minutes before the meeting'
-      })
+      toast.promise(
+        new Promise(r => setTimeout(r, 800)),
+        {
+          loading: 'Setting reminder...',
+          success: 'You will be notified 15 minutes before the meeting',
+          error: 'Failed to set reminder'
+        }
+      )
     } catch (error: any) {
       logger.error('Failed to set reminder', { error, meetingId })
       toast.error('Failed to set reminder', {
@@ -716,7 +741,14 @@ export default function CalendarPage() {
                   className="justify-start gap-2 h-auto py-3"
                   onClick={() => {
                     logger.info('Project timeline view opened')
-                    toast.info('Loading project timeline...')
+                    toast.promise(
+                      new Promise(r => setTimeout(r, 1500)),
+                      {
+                        loading: 'Loading project timeline...',
+                        success: 'Project timeline ready',
+                        error: 'Failed to load timeline'
+                      }
+                    )
                   }}
                 >
                   <Calendar className="h-5 w-5" />
@@ -730,7 +762,14 @@ export default function CalendarPage() {
                   className="justify-start gap-2 h-auto py-3"
                   onClick={() => {
                     logger.info('Availability calendar opened')
-                    toast.info('Opening availability calendar...')
+                    toast.promise(
+                      new Promise(r => setTimeout(r, 1200)),
+                      {
+                        loading: 'Opening availability calendar...',
+                        success: 'Availability calendar ready',
+                        error: 'Failed to load availability'
+                      }
+                    )
                   }}
                 >
                   <Clock className="h-5 w-5" />

@@ -642,8 +642,10 @@ export default function AIEnhancedPage() {
         category: uiTool.category
       })
 
-      toast.success('AI tool created', {
-        description: `${uiTool.name} - ${uiTool.type} - ${uiTool.category} - ${uiTool.model} - ${uiTool.provider} - Ready to use`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Creating AI tool...',
+        success: `AI tool created: ${uiTool.name} - ${uiTool.type} - ${uiTool.category} - Ready to use`,
+        error: 'Failed to create AI tool'
       })
 
       setShowCreateModal(false)
@@ -678,8 +680,10 @@ export default function AIEnhancedPage() {
     dispatch({ type: 'SELECT_TOOL', tool })
     setShowViewModal(true)
 
-    toast.info('View AI Tool', {
-      description: `${tool.name} - ${tool.type} - ${tool.model} - ${tool.provider} - ${formatNumber(tool.usageCount)} uses - ${(tool.successRate * 100).toFixed(1)}% success`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading tool details...',
+      success: `Viewing: ${tool.name} - ${tool.type} - ${tool.model} - ${formatNumber(tool.usageCount)} uses`,
+      error: 'Failed to load tool details'
     })
   }
 

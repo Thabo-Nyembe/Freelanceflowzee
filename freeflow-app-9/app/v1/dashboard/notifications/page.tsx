@@ -275,7 +275,7 @@ export default function NotificationsPage() {
   // Handlers
   const handleRefresh = () => { logger.info('Refreshing notifications'); dispatch({ type: 'SET_LOADING', payload: true }); window.location.reload() }
   const handleSettings = () => { logger.info('Opening notification settings'); setActiveTab('settings') }
-  const handleViewNotification = (id: string) => { logger.info('Viewing notification', { notificationId: id }); dispatch({ type: 'MARK_AS_READ', payload: id }); toast.info('Viewing notification: ' + id) }
+  const handleViewNotification = (id: string) => { logger.info('Viewing notification', { notificationId: id }); dispatch({ type: 'MARK_AS_READ', payload: id }); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading notification...', success: 'Viewing notification: ' + id, error: 'Failed to load notification' }) }
   const handleMarkRead = (id: string) => { logger.info('Marking notification as read', { notificationId: id }); dispatch({ type: 'MARK_AS_READ', payload: id }) }
   const handleMarkAllRead = async () => {
     const unreadCount = state.notifications.filter(n => !n.read).length
@@ -310,14 +310,18 @@ export default function NotificationsPage() {
         logger.info('All notifications marked as read', { count: result.count || unreadCount })
 
         // Show success message
-        toast.success(`${result.count || unreadCount} notifications marked as read`, {
-          description: `${state.filter} filter - All caught up!`
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Marking notifications as read...',
+          success: `${result.count || unreadCount} notifications marked as read`,
+          error: 'Failed to mark notifications as read'
         })
 
         // Show achievement if present
         if (result.achievement) {
-          toast.success(`${result.achievement.message} +${result.achievement.points} points!`, {
-            description: result.achievement.badge
+          toast.promise(new Promise(r => setTimeout(r, 500)), {
+            loading: 'Unlocking achievement...',
+            success: `${result.achievement.message} +${result.achievement.points} points!`,
+            error: 'Failed to unlock achievement'
           })
         }
       }
@@ -361,8 +365,10 @@ export default function NotificationsPage() {
         logger.info('Notification archived successfully', { notificationId: id })
 
         // Show success message
-        toast.success(`${notification?.title || 'Notification'} archived`, {
-          description: `${notification?.type} - Moved to archive`
+        toast.promise(new Promise(r => setTimeout(r, 700)), {
+          loading: 'Archiving notification...',
+          success: `${notification?.title || 'Notification'} archived`,
+          error: 'Failed to archive notification'
         })
       }
     } catch (error: any) {
@@ -391,7 +397,11 @@ export default function NotificationsPage() {
     }
 
     state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id }))
-    toast.success('All notifications archived')
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Archiving all notifications...',
+      success: 'All notifications archived',
+      error: 'Failed to archive all notifications'
+    })
   }
   const handleDelete = async (id: string) => {
     const notification = state.notifications.find(n => n.id === id)
@@ -428,8 +438,10 @@ export default function NotificationsPage() {
         logger.info('Notification deleted successfully', { notificationId: id })
 
         // Show success message
-        toast.success(`${notification?.title || 'Notification'} deleted`, {
-          description: `${notification?.type} - Removed from inbox`
+        toast.promise(new Promise(r => setTimeout(r, 700)), {
+          loading: 'Deleting notification...',
+          success: `${notification?.title || 'Notification'} deleted`,
+          error: 'Failed to delete notification'
         })
       }
     } catch (error: any) {
@@ -460,9 +472,13 @@ export default function NotificationsPage() {
 
     state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id }))
     setShowDeleteAllConfirm(false)
-    toast.success('All notifications deleted')
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Deleting all notifications...',
+      success: 'All notifications deleted',
+      error: 'Failed to delete all notifications'
+    })
   }
-  const handleUnarchive = (id: string) => { logger.info('Unarchiving notification', { notificationId: id }); toast.success('Notification unarchived') }
+  const handleUnarchive = (id: string) => { logger.info('Unarchiving notification', { notificationId: id }); toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Unarchiving notification...', success: 'Notification unarchived', error: 'Failed to unarchive notification' }) }
   const handleFilterAll = () => { logger.debug('Filtering all notifications'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
   const handleFilterUnread = () => { logger.debug('Filtering unread notifications'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
   const handleFilterRead = () => { logger.debug('Filtering read notifications'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }

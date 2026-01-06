@@ -688,9 +688,14 @@ export default function ReportsPage() {
 
       dispatch({ type: 'UPDATE_REPORT', report: updatedReport })
 
-      toast.info('Generating report...', {
-        description: `${report?.name} - ${report?.type} - Processing data...`
-      })
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 2500)),
+        {
+          loading: `Generating ${report?.name}...`,
+          success: `Report ${report?.name} generation started`,
+          error: 'Failed to start report generation'
+        }
+      )
 
       const response = await fetch('/api/reports', {
         method: 'POST',
@@ -914,30 +919,39 @@ export default function ReportsPage() {
   }
 
   const handleExportFinancialData = async () => {
-    try {
-      logger.info('Exporting financial report data')
-      announce('Exporting financial data', 'polite')
+    logger.info('Exporting financial report data')
+    announce('Exporting financial data', 'polite')
 
-      const csvContent = `Financial Report - ${new Date().toLocaleDateString()}\nMetric,Value\nCurrent Month Revenue,$${financialData.revenueData.currentMonth}\nYear to Date,$${financialData.revenueData.yearToDate}\nClient Retention,${financialData.insights.clientRetention}%\nAvg Project Value,$${financialData.revenueData.averageProjectValue}\nCash Runway,${financialData.cashFlow.runway} months`
+    toast.promise(
+      new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            const csvContent = `Financial Report - ${new Date().toLocaleDateString()}\nMetric,Value\nCurrent Month Revenue,$${financialData?.revenueData.currentMonth}\nYear to Date,$${financialData?.revenueData.yearly.revenue}\nClient Retention,${financialData?.insights.clientRetention}%\nAvg Project Value,$${financialData?.revenueData.averageProjectValue}\nCash Runway,${financialData?.cashFlow.runway} months`
 
-      const blob = new Blob([csvContent], { type: 'text/csv' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `financial-report-${new Date().toISOString().split('T')[0]}.csv`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+            const blob = new Blob([csvContent], { type: 'text/csv' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `financial-report-${new Date().toISOString().split('T')[0]}.csv`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
 
-      toast.success('Financial data exported', {
-        description: 'CSV file downloaded successfully'
-      })
-      announce('Financial data exported successfully', 'polite')
-    } catch (err: any) {
-      logger.error('Export failed', { error: err.message })
-      toast.error('Failed to export data')
-    }
+            announce('Financial data exported successfully', 'polite')
+            resolve()
+          } catch (err: any) {
+            logger.error('Export failed', { error: err.message })
+            reject(err)
+          }
+        }, 1200)
+      }),
+      {
+        loading: 'Exporting financial data...',
+        success: 'Financial data exported - CSV file downloaded',
+        error: 'Failed to export data'
+      }
+    )
   }
 
   const handleDeleteSelected = async () => {
@@ -946,29 +960,36 @@ export default function ReportsPage() {
       return
     }
 
-    try {
-      logger.info('Deleting selected reports', {
-        count: state.selectedReports.length,
-        reportIds: state.selectedReports.map(r => r.id)
-      })
+    const selectedCount = state.selectedReports.length
+    logger.info('Deleting selected reports', {
+      count: selectedCount,
+      reportIds: state.selectedReports.map(r => r.id)
+    })
 
-      const { deleteReport } = await import('@/lib/reports-queries')
+    toast.promise(
+      new Promise<void>(async (resolve, reject) => {
+        try {
+          const { deleteReport } = await import('@/lib/reports-queries')
 
-      // Delete all selected reports
-      await Promise.all(
-        state.selectedReports.map(report => deleteReport(report.id, 'user-id'))
-      )
+          // Delete all selected reports
+          await Promise.all(
+            state.selectedReports.map(report => deleteReport(report.id, 'user-id'))
+          )
 
-      dispatch({ type: 'DELETE_SELECTED_REPORTS' })
-
-      toast.success(`${state.selectedReports.length} reports deleted`, {
-        description: 'Reports removed successfully'
-      })
-      announce(`${state.selectedReports.length} reports deleted`, 'polite')
-    } catch (err: any) {
-      logger.error('Bulk delete failed', { error: err.message })
-      toast.error('Failed to delete reports')
-    }
+          dispatch({ type: 'DELETE_SELECTED_REPORTS' })
+          announce(`${selectedCount} reports deleted`, 'polite')
+          resolve()
+        } catch (err: any) {
+          logger.error('Bulk delete failed', { error: err.message })
+          reject(err)
+        }
+      }),
+      {
+        loading: `Deleting ${selectedCount} report${selectedCount > 1 ? 's' : ''}...`,
+        success: `${selectedCount} report${selectedCount > 1 ? 's' : ''} deleted successfully`,
+        error: 'Failed to delete reports'
+      }
+    )
   }
 
   const handleEditReport = async (report: Report) => {
@@ -982,9 +1003,14 @@ export default function ReportsPage() {
       dispatch({ type: 'SELECT_REPORT', report })
       setIsCreateModalOpen(true)
 
-      toast.info('Opening report editor', {
-        description: `Editing ${report.name}`
-      })
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 600)),
+        {
+          loading: 'Opening editor...',
+          success: `Editing ${report.name}`,
+          error: 'Failed to open editor'
+        }
+      )
     } catch (err: any) {
       logger.error('Failed to open editor', { error: err.message })
     }
@@ -1010,58 +1036,78 @@ export default function ReportsPage() {
       return
     }
 
-    try {
-      setIsSaving(true)
-      logger.info('Sending share', {
-        reportId: shareReport.id,
-        recipients: shareRecipients.split(',').map(e => e.trim())
-      })
+    const reportName = shareReport.name
+    const recipientList = shareRecipients.split(',').map(e => e.trim())
 
-      // Open email client to share report
-      const recipients = shareRecipients.split(',').map(e => e.trim())
-      const subject = encodeURIComponent(`Report: ${shareReport.name}`)
-      const body = encodeURIComponent(`Please find the attached report "${shareReport.name}".\n\nReport URL: ${window.location.origin}/reports/${shareReport.id}`)
-      window.open(`mailto:${recipients.join(',')}?subject=${subject}&body=${body}`, '_blank')
+    setIsSaving(true)
+    logger.info('Sending share', {
+      reportId: shareReport.id,
+      recipients: recipientList
+    })
 
-      toast.success('Report shared', {
-        description: `"${shareReport.name}" shared with ${recipients.length} recipient(s)`
-      })
-      announce('Report shared successfully', 'polite')
-      setIsShareModalOpen(false)
-      setShareReport(null)
-    } catch (err: any) {
-      logger.error('Share failed', { error: err.message })
-      toast.error('Failed to share report')
-    } finally {
-      setIsSaving(false)
-    }
+    toast.promise(
+      new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            // Open email client to share report
+            const subject = encodeURIComponent(`Report: ${reportName}`)
+            const body = encodeURIComponent(`Please find the attached report "${reportName}".\n\nReport URL: ${window.location.origin}/reports/${shareReport.id}`)
+            window.open(`mailto:${recipientList.join(',')}?subject=${subject}&body=${body}`, '_blank')
+
+            announce('Report shared successfully', 'polite')
+            setIsShareModalOpen(false)
+            setShareReport(null)
+            setIsSaving(false)
+            resolve()
+          } catch (err: any) {
+            logger.error('Share failed', { error: err.message })
+            setIsSaving(false)
+            reject(err)
+          }
+        }, 800)
+      }),
+      {
+        loading: `Sharing "${reportName}"...`,
+        success: `"${reportName}" shared with ${recipientList.length} recipient(s)`,
+        error: 'Failed to share report'
+      }
+    )
   }
 
   const handleDuplicateReport = async (report: Report) => {
-    try {
-      logger.info('Duplicating report', {
-        reportId: report.id,
-        name: report.name
-      })
+    logger.info('Duplicating report', {
+      reportId: report.id,
+      name: report.name
+    })
 
-      const { createReport } = await import('@/lib/reports-queries')
+    toast.promise(
+      new Promise<void>((resolve, reject) => {
+        setTimeout(async () => {
+          try {
+            const { createReport } = await import('@/lib/reports-queries')
 
-      const duplicatedReport = {
-        ...report,
-        name: `${report.name} (Copy)`,
-        status: 'draft' as ReportStatus
+            const duplicatedReport = {
+              ...report,
+              name: `${report.name} (Copy)`,
+              status: 'draft' as ReportStatus
+            }
+
+            // await createReport('user-id', duplicatedReport)
+
+            announce('Report duplicated successfully', 'polite')
+            resolve()
+          } catch (err: any) {
+            logger.error('Duplication failed', { error: err.message })
+            reject(err)
+          }
+        }, 1000)
+      }),
+      {
+        loading: `Duplicating "${report.name}"...`,
+        success: `Created copy of "${report.name}"`,
+        error: 'Failed to duplicate report'
       }
-
-      // await createReport('user-id', duplicatedReport)
-
-      toast.success('Report duplicated', {
-        description: `Created copy of "${report.name}"`
-      })
-      announce('Report duplicated successfully', 'polite')
-    } catch (err: any) {
-      logger.error('Duplication failed', { error: err.message })
-      toast.error('Failed to duplicate report')
-    }
+    )
   }
 
   // ============================================================================

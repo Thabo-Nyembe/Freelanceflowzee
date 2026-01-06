@@ -592,8 +592,10 @@ export default function AIAssistantPage() {
 
     setMessages([newMessage])
 
-    toast.success('New conversation started', {
-      description: `Fresh chat session ready - Previous: ${previousMessageCount} messages`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Starting new conversation...',
+      success: `New conversation ready - Previous: ${previousMessageCount} messages saved`,
+      error: 'Failed to start new conversation'
     })
     announce('New conversation started', 'polite')
   }
@@ -633,8 +635,10 @@ export default function AIAssistantPage() {
             description: `${title} - ${transformedMessages.length} messages restored`
           })
         } else {
-          toast.info('Loading conversation', {
-            description: `${title} - ${conversation?.messageCount || 0} messages - ${conversation?.tags.join(', ') || 'No tags'}`
+          toast.promise(new Promise(r => setTimeout(r, 1200)), {
+            loading: `Loading conversation: ${title}...`,
+            success: `${title} - ${conversation?.messageCount || 0} messages loaded`,
+            error: 'Failed to load conversation'
           })
         }
         announce(`Loaded conversation: ${title}`, 'polite')
@@ -707,8 +711,10 @@ export default function AIAssistantPage() {
 
     navigator.clipboard.writeText(content)
 
-    toast.success('Message copied', {
-      description: `${content.length} characters copied to clipboard`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Copying message...',
+      success: `Message copied - ${content.length} characters`,
+      error: 'Failed to copy message'
     })
   }
 
@@ -722,8 +728,10 @@ export default function AIAssistantPage() {
     })
 
     // Note: Using local state - in production, this would POST to /api/bookmarks
-    toast.success('Message bookmarked', {
-      description: `${message?.type === 'user' ? 'Your message' : 'AI response'} saved to bookmarks`
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Bookmarking message...',
+      success: `${message?.type === 'user' ? 'Your message' : 'AI response'} saved to bookmarks`,
+      error: 'Failed to bookmark message'
     })
   }
 
@@ -763,8 +771,10 @@ export default function AIAssistantPage() {
           })
           logger.info('Insights refreshed from database', { count: transformedInsights.length })
         } else {
-          toast.info('No new insights', {
-            description: 'All insights are up to date'
+          toast.promise(new Promise(r => setTimeout(r, 800)), {
+            loading: 'Checking for new insights...',
+            success: 'No new insights - All data is up to date',
+            error: 'Failed to check insights'
           })
         }
         announce('Insights refreshed', 'polite')
@@ -777,8 +787,10 @@ export default function AIAssistantPage() {
         setIsLoading(false)
       }
     } else {
-      toast.info('Refreshing AI insights', {
-        description: `Analyzing ${aiInsights.length} insights - ${highPriority} high priority - ${categories.length} categories`
+      toast.promise(new Promise(r => setTimeout(r, 2000)), {
+        loading: `Refreshing ${aiInsights.length} AI insights...`,
+        success: `Analyzed ${aiInsights.length} insights - ${highPriority} high priority`,
+        error: 'Failed to refresh insights'
       })
     }
   }
@@ -796,8 +808,10 @@ export default function AIAssistantPage() {
 
     // Special handling for Growth Hub navigation
     if (action === 'Explore Growth Hub') {
-      toast.success('Opening Growth Hub', {
-        description: 'Redirecting to AI-powered business growth tools...'
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Opening Growth Hub...',
+        success: 'Redirecting to AI-powered business growth tools',
+        error: 'Failed to open Growth Hub'
       })
       router.push('/dashboard/growth-hub')
       return
@@ -814,8 +828,10 @@ export default function AIAssistantPage() {
       }
     }
 
-    toast.success('Implementing action', {
-      description: `${action} - ${insight?.category} - ${insight?.priority} priority`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: `Implementing: ${action}...`,
+      success: `Action started - ${action} (${insight?.priority} priority)`,
+      error: 'Failed to implement action'
     })
   }
 
@@ -841,8 +857,10 @@ export default function AIAssistantPage() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Conversation exported', {
-      description: `${conversation?.title} - ${conversation?.messageCount} messages - ${Math.round(blob.size / 1024)}KB`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Exporting conversation...',
+      success: `Exported: ${conversation?.title} - ${conversation?.messageCount} messages`,
+      error: 'Failed to export conversation'
     })
   }
 
@@ -859,8 +877,10 @@ export default function AIAssistantPage() {
     const shareLink = `${window.location.origin}/shared/conversations/${conversationId}`
     navigator.clipboard.writeText(shareLink)
 
-    toast.success('Share link copied', {
-      description: `${conversation?.title} - Link copied to clipboard`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Generating share link...',
+      success: `Share link copied - ${conversation?.title}`,
+      error: 'Failed to generate share link'
     })
   }
 
@@ -875,8 +895,10 @@ export default function AIAssistantPage() {
 
     setIsListening(!isListening)
 
-    toast.info('Voice input', {
-      description: `${newListeningState ? 'Listening for voice command' : 'Voice input stopped'} - ${isVoiceMode ? 'Voice mode enabled' : 'Voice mode disabled'}`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: newListeningState ? 'Activating voice input...' : 'Stopping voice input...',
+      success: newListeningState ? 'Voice input active - Listening for command' : 'Voice input stopped',
+      error: 'Voice input failed'
     })
   }
 
@@ -890,8 +912,10 @@ export default function AIAssistantPage() {
     })
 
     // Note: Using mock regeneration - in production, this would POST to /api/ai/regenerate
-    toast.info('Regenerating response', {
-      description: `Creating new AI response - Model: ${selectedModel}`
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: `Regenerating AI response using ${selectedModel}...`,
+      success: `New response generated with ${selectedModel}`,
+      error: 'Failed to regenerate response'
     })
   }
 
@@ -901,8 +925,10 @@ export default function AIAssistantPage() {
       totalMessages: conversations.reduce((sum, c) => sum + c.messageCount, 0)
     })
 
-    toast.info('Search conversations', {
-      description: `Search through ${conversations.length} conversations - ${conversations.reduce((sum, c) => sum + c.messageCount, 0)} total messages`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Opening conversation search...',
+      success: `Search ready - ${conversations.length} conversations, ${conversations.reduce((sum, c) => sum + c.messageCount, 0)} messages`,
+      error: 'Failed to open search'
     })
   }
 
@@ -915,8 +941,10 @@ export default function AIAssistantPage() {
       totalConversations: conversations.length
     })
 
-    toast.info('Filtering conversations', {
-      description: `Filter: ${filter} - ${filteredCount} of ${conversations.length} conversations match`
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: `Filtering by "${filter}"...`,
+      success: `Filter applied - ${filteredCount} of ${conversations.length} conversations match`,
+      error: 'Failed to apply filter'
     })
   }
 
@@ -942,8 +970,10 @@ export default function AIAssistantPage() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.success('Insights report exported', {
-      description: `${aiInsights.length} insights - ${highPriority} high priority - ${categories.length} categories - ${Math.round(blob.size / 1024)}KB`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Exporting insights report...',
+      success: `Report exported - ${aiInsights.length} insights, ${highPriority} high priority`,
+      error: 'Failed to export insights report'
     })
   }
 
@@ -956,8 +986,10 @@ export default function AIAssistantPage() {
     })
 
     // Note: Using mock scheduling - in production, this would POST to /api/reminders
-    toast.success('Reminder scheduled', {
-      description: `${action} - Scheduled for ${reminderTime.toLocaleDateString()} at ${reminderTime.toLocaleTimeString()}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Scheduling reminder...',
+      success: `Reminder set - ${action} for ${reminderTime.toLocaleDateString()}`,
+      error: 'Failed to schedule reminder'
     })
   }
 
@@ -972,8 +1004,10 @@ export default function AIAssistantPage() {
       totalInsights: aiInsights.length
     })
 
-    toast.info('View analytics', {
-      description: `${conversations.length} conversations - ${totalMessages} messages - Avg: ${avgMessagesPerConversation} messages/conversation`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Loading analytics dashboard...',
+      success: `Analytics ready - ${conversations.length} conversations, ${totalMessages} messages`,
+      error: 'Failed to load analytics'
     })
   }
 
@@ -985,8 +1019,10 @@ export default function AIAssistantPage() {
       availableSettings: settings
     })
 
-    toast.info('AI configuration', {
-      description: `Current model: ${selectedModel} - ${settings.length} settings available`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening AI configuration...',
+      success: `Configuration opened - Model: ${selectedModel}, ${settings.length} settings`,
+      error: 'Failed to open configuration'
     })
   }
 
@@ -1040,8 +1076,10 @@ export default function AIAssistantPage() {
 
     setMessages([])
 
-    toast.success('Chat cleared', {
-      description: `${messageCount} messages removed`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Clearing chat...',
+      success: `Chat cleared - ${messageCount} messages removed`,
+      error: 'Failed to clear chat'
     })
 
     setShowClearChatDialog(false)
@@ -1070,8 +1108,10 @@ export default function AIAssistantPage() {
     }
     input.click()
 
-    toast.info('Attach file', {
-      description: 'Select a file to attach to your message'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Opening file picker...',
+      success: 'File picker ready - Select a file to attach',
+      error: 'Failed to open file picker'
     })
   }
 

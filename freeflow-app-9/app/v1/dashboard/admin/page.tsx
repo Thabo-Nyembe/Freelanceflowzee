@@ -128,33 +128,89 @@ export default function AdminPage() {
   // Handlers
   const handleManageUser = useCallback((action: string, user?: any) => {
     if (action === 'edit' && user) {
-      toast.info(`Editing ${user.name}`)
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 800)),
+        {
+          loading: `Loading ${user.name}'s profile...`,
+          success: `Editing ${user.name}`,
+          error: 'Failed to load user profile'
+        }
+      )
       announce(`Editing user ${user.name}`, 'polite')
     } else if (action === 'delete' && user) {
-      toast.warning(`Removing ${user.name}`, { description: 'User will be deactivated' })
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1200)),
+        {
+          loading: `Removing ${user.name}...`,
+          success: `${user.name} has been deactivated`,
+          error: 'Failed to remove user'
+        }
+      )
       announce(`Removing user ${user.name}`, 'polite')
     } else if (action === 'add') {
-      toast.success('User invitation sent')
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1000)),
+        {
+          loading: 'Sending invitation...',
+          success: 'User invitation sent',
+          error: 'Failed to send invitation'
+        }
+      )
       announce('User invitation sent', 'polite')
     }
   }, [announce])
 
   const handleSecurityAction = useCallback((action: string) => {
     if (action === 'block') {
-      toast.success('IP blocked successfully')
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1500)),
+        {
+          loading: 'Blocking IP address...',
+          success: 'IP blocked successfully',
+          error: 'Failed to block IP address'
+        }
+      )
     } else if (action === 'audit') {
-      toast.info('Generating audit report...')
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 2500)),
+        {
+          loading: 'Generating audit report...',
+          success: 'Audit report generated successfully',
+          error: 'Failed to generate audit report'
+        }
+      )
     } else if (action === '2fa') {
-      toast.success('2FA enforcement enabled')
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1200)),
+        {
+          loading: 'Enabling 2FA enforcement...',
+          success: '2FA enforcement enabled',
+          error: 'Failed to enable 2FA enforcement'
+        }
+      )
     }
     announce(`Security action: ${action}`, 'polite')
   }, [announce])
 
   const handleBillingAction = useCallback((action: string) => {
     if (action === 'export') {
-      toast.success('Exporting billing data...', { description: 'Download will start shortly' })
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 2000)),
+        {
+          loading: 'Exporting billing data...',
+          success: 'Billing data exported - download starting',
+          error: 'Failed to export billing data'
+        }
+      )
     } else if (action === 'refund') {
-      toast.info('Refund request processed')
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1500)),
+        {
+          loading: 'Processing refund request...',
+          success: 'Refund request processed',
+          error: 'Failed to process refund'
+        }
+      )
     }
     announce(`Billing action: ${action}`, 'polite')
   }, [announce])
@@ -1051,13 +1107,27 @@ export default function AdminPage() {
 
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => {
-                toast.success('Exporting analytics report...')
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 2000)),
+                  {
+                    loading: 'Exporting analytics report...',
+                    success: 'Analytics report exported successfully',
+                    error: 'Failed to export analytics report'
+                  }
+                )
               }}>
                 <Download className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
               <Button variant="outline" onClick={() => {
-                toast.info('Generating detailed report...')
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 3000)),
+                  {
+                    loading: 'Generating detailed report...',
+                    success: 'Full report generated successfully',
+                    error: 'Failed to generate full report'
+                  }
+                )
               }}>
                 <FileText className="h-4 w-4 mr-2" />
                 Full Report

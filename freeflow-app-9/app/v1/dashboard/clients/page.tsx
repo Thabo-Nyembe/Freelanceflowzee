@@ -873,15 +873,21 @@ export default function ClientsPage() {
     // Navigate to messages page with client pre-selected
     router.push(`/dashboard/messages?client=${encodeURIComponent(client.name)}&email=${encodeURIComponent(client.email)}`)
 
-    toast.success('💬 Opening message composer', {
-      description: `Starting conversation with ${client.name}`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Opening message composer...',
+      success: `Message composer ready for ${client.name}`,
+      error: 'Failed to open message composer'
     })
   }
 
   const handleSendEmail = (client: Client) => {
     logger.info('Send email to client', { clientId: client.id, email: client.email })
     window.location.href = `mailto:${client.email}`
-    toast.success('📧 Email client opened')
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening email client...',
+      success: 'Email client opened',
+      error: 'Failed to open email client'
+    })
   }
 
   const handleCallClient = (client: Client) => {
@@ -891,8 +897,10 @@ export default function ClientsPage() {
       // Use tel: protocol to initiate call
       window.location.href = `tel:${client.phone}`
 
-      toast.success('📞 Initiating call', {
-        description: `Calling ${client.name} at ${client.phone}`
+      toast.promise(new Promise(r => setTimeout(r, 700)), {
+        loading: 'Initiating call...',
+        success: `Calling ${client.name} at ${client.phone}`,
+        error: 'Failed to initiate call'
       })
     } else {
       toast.error('No phone number available', {
@@ -907,8 +915,10 @@ export default function ClientsPage() {
     // Navigate to bookings/calendar with client pre-filled
     router.push(`/dashboard/bookings?client=${encodeURIComponent(client.name)}&clientId=${client.id}`)
 
-    toast.success('📅 Opening calendar', {
-      description: `Scheduling meeting with ${client.name}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Opening calendar...',
+      success: `Calendar ready for scheduling with ${client.name}`,
+      error: 'Failed to open calendar'
     })
   }
 
@@ -936,8 +946,10 @@ export default function ClientsPage() {
       a.click()
 
       logger.info('Clients exported successfully', { count: state.clients.length })
-      toast.success('💾 Export complete', {
-        description: `${state.clients.length} clients exported`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Preparing export...',
+        success: `${state.clients.length} clients exported successfully`,
+        error: 'Failed to export clients'
       })
 
       setIsExportModalOpen(false)

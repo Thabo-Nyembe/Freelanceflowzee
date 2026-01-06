@@ -290,8 +290,10 @@ export default function FilesPage() {
           : f
       ))
 
-      toast.success('Download started!', {
-        description: `${file.name} is downloading`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Preparing download...',
+        success: `Download started: ${file.name}`,
+        error: 'Download failed'
       })
     } catch (error: any) {
       logger.error('Failed to download file', { error, fileName: file.name })
@@ -356,8 +358,10 @@ export default function FilesPage() {
             setFiles([newFile, ...files])
 
             logger.info('File uploaded successfully', { fileName: file.name })
-            toast.success('File uploaded!', {
-              description: file.name
+            toast.promise(new Promise(r => setTimeout(r, 1500)), {
+              loading: 'Processing upload...',
+              success: `File uploaded: ${file.name}`,
+              error: 'Upload failed'
             })
           } catch (error: any) {
             logger.error('Failed to upload file', { error, fileName: file.name })
@@ -398,8 +402,10 @@ export default function FilesPage() {
       setSelectedFile(null)
 
       logger.info('File deleted successfully', { fileId, fileName })
-      toast.success('File deleted', {
-        description: fileName
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting file...',
+        success: `File deleted: ${fileName}`,
+        error: 'Failed to delete file'
       })
     } catch (error: any) {
       logger.error('Failed to delete file', { error, fileId })

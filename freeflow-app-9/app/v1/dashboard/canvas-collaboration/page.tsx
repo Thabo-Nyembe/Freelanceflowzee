@@ -493,8 +493,10 @@ export default function CanvasCollaboration() {
           totalProjects: recentProjects.length + 1
         })
 
-        toast.success('Canvas Created!', {
-          description: `${name} (${size}) - Ready to start designing`
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: 'Creating canvas...',
+          success: `Canvas created - ${name} (${size}) - Ready to start designing`,
+          error: 'Failed to create canvas'
         })
         announce('Canvas created successfully', 'polite')
       }
@@ -523,8 +525,10 @@ export default function CanvasCollaboration() {
         collaborators: project.collaborators.length
       })
 
-      toast.info('Opening Canvas', {
-        description: `Loading ${project.name} (${project.size})`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Opening canvas...',
+        success: `Canvas ${project.name} (${project.size}) loaded successfully`,
+        error: 'Failed to open canvas'
       })
     }
   }
@@ -574,8 +578,10 @@ export default function CanvasCollaboration() {
       dataSize: Math.round(imageData.length / 1024) + 'KB'
     })
 
-    toast.success('Canvas Saved', {
-      description: `${canvasName} - ${layers.length} layers, synced with ${collaborators.filter(c => c.isActive).length} active collaborators`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Saving canvas...',
+      success: `Canvas saved - ${canvasName} - ${layers.length} layers, synced with ${collaborators.filter(c => c.isActive).length} active collaborators`,
+      error: 'Failed to save canvas'
     })
     announce('Canvas saved', 'polite')
   }
@@ -629,8 +635,10 @@ export default function CanvasCollaboration() {
       fileSize: Math.round(blob.size / 1024) + 'KB'
     })
 
-    toast.success('Export Complete!', {
-      description: `${canvasName}.${extension} (${Math.round(blob.size / 1024)}KB) - Format: ${format}`
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Exporting canvas...',
+      success: `Export complete - ${canvasName}.${extension} (${Math.round(blob.size / 1024)}KB) - Format: ${format}`,
+      error: 'Failed to export canvas'
     })
   }
 
@@ -649,8 +657,10 @@ export default function CanvasCollaboration() {
       layers: layers.length
     })
 
-    toast.success('Share Link Generated!', {
-      description: `Link copied to clipboard - ${collaborators.length} collaborators can access`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Generating share link...',
+      success: `Share link generated - Link copied to clipboard - ${collaborators.length} collaborators can access`,
+      error: 'Failed to generate share link'
     })
   }
 
@@ -712,8 +722,10 @@ export default function CanvasCollaboration() {
       totalCollaborators: collaborators.length + 1
     })
 
-    toast.success('Invitation Sent!', {
-      description: `Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Sending invitation...',
+      success: `Invitation sent - Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`,
+      error: 'Failed to send invitation'
     })
     announce('Collaborator invited successfully', 'polite')
     setShowInviteDialog(false)
@@ -758,8 +770,10 @@ export default function CanvasCollaboration() {
       remainingCollaborators: collaborators.length - 1
     })
 
-    toast.success('Collaborator Removed', {
-      description: `${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Removing collaborator...',
+      success: `Collaborator removed - ${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`,
+      error: 'Failed to remove collaborator'
     })
     announce('Collaborator removed', 'polite')
     setRemoveCollaborator(null)
@@ -808,8 +822,10 @@ export default function CanvasCollaboration() {
       activeCollaborators: collaborators.filter(c => c.isActive).length
     })
 
-    toast.success('Comment Added!', {
-      description: `"${comment.slice(0, 50)}${comment.length > 50 ? '...' : ''}" - Click canvas to place annotation`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Adding comment...',
+      success: `Comment added - "${comment.slice(0, 50)}${comment.length > 50 ? '...' : ''}" - Click canvas to place annotation`,
+      error: 'Failed to add comment'
     })
     announce('Comment added successfully', 'polite')
     setShowCommentDialog(false)
@@ -823,8 +839,10 @@ export default function CanvasCollaboration() {
       resolvedBy: 'You'
     })
 
-    toast.success('Comment Resolved', {
-      description: `Comment #${id} marked as resolved`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Resolving comment...',
+      success: `Comment resolved - Comment #${id} marked as resolved`,
+      error: 'Failed to resolve comment'
     })
   }
 
@@ -838,8 +856,10 @@ export default function CanvasCollaboration() {
       stepsRemaining: historyStep
     })
 
-    toast.info('Action Undone', {
-      description: `Reverted to step ${historyStep}/${canvasHistory.length - 1}`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Undoing action...',
+      success: `Action undone - Reverted to step ${historyStep}/${canvasHistory.length - 1}`,
+      error: 'Failed to undo action'
     })
   }
 
@@ -853,8 +873,10 @@ export default function CanvasCollaboration() {
       stepsRemaining: canvasHistory.length - 1 - historyStep
     })
 
-    toast.info('Action Redone', {
-      description: `Advanced to step ${historyStep}/${canvasHistory.length - 1}`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Redoing action...',
+      success: `Action redone - Advanced to step ${historyStep}/${canvasHistory.length - 1}`,
+      error: 'Failed to redo action'
     })
   }
 
@@ -879,8 +901,10 @@ export default function CanvasCollaboration() {
       canvasName
     })
 
-    toast.success('Element Copied', {
-      description: `${selectedElements.length} element(s) copied - Ready to paste`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Copying element...',
+      success: `Element copied - ${selectedElements.length} element(s) copied - Ready to paste`,
+      error: 'Failed to copy element'
     })
   }
 
@@ -896,8 +920,10 @@ export default function CanvasCollaboration() {
       clipboardAge: Date.now() - clipboard.timestamp + 'ms'
     })
 
-    toast.success('Element Pasted', {
-      description: `${clipboard.type} element pasted onto canvas`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Pasting element...',
+      success: `Element pasted - ${clipboard.type} element pasted onto canvas`,
+      error: 'Failed to paste element'
     })
   }
 
@@ -916,8 +942,10 @@ export default function CanvasCollaboration() {
       remainingLayers: layers.length
     })
 
-    toast.success('Elements Deleted', {
-      description: `${count} element(s) removed from canvas`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Deleting elements...',
+      success: `Elements deleted - ${count} element(s) removed from canvas`,
+      error: 'Failed to delete elements'
     })
   }
 
@@ -934,8 +962,10 @@ export default function CanvasCollaboration() {
       canvasName
     })
 
-    toast.success('Elements Duplicated', {
-      description: `${count} duplicate(s) created and placed on canvas`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Duplicating elements...',
+      success: `Elements duplicated - ${count} duplicate(s) created and placed on canvas`,
+      error: 'Failed to duplicate elements'
     })
   }
 
@@ -954,8 +984,10 @@ export default function CanvasCollaboration() {
       totalLayers: layers.length
     })
 
-    toast.success('Elements Grouped', {
-      description: `${count} elements grouped together as one unit`
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Grouping elements...',
+      success: `Elements grouped - ${count} elements grouped together as one unit`,
+      error: 'Failed to group elements'
     })
   }
 
@@ -965,8 +997,10 @@ export default function CanvasCollaboration() {
       totalLayers: layers.length
     })
 
-    toast.success('Group Ungrouped', {
-      description: 'Elements separated and can now be edited individually'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Ungrouping elements...',
+      success: 'Group ungrouped - Elements separated and can now be edited individually',
+      error: 'Failed to ungroup elements'
     })
   }
 
@@ -982,8 +1016,10 @@ export default function CanvasCollaboration() {
       canvasName
     })
 
-    toast.success('Elements Aligned', {
-      description: `${selectedElements.length} elements aligned: ${align}`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Aligning elements...',
+      success: `Elements aligned - ${selectedElements.length} elements aligned: ${align}`,
+      error: 'Failed to align elements'
     })
   }
 
@@ -999,8 +1035,10 @@ export default function CanvasCollaboration() {
       canvasName
     })
 
-    toast.success('Elements Distributed', {
-      description: `${selectedElements.length} elements distributed evenly: ${direction}`
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Distributing elements...',
+      success: `Elements distributed - ${selectedElements.length} elements distributed evenly: ${direction}`,
+      error: 'Failed to distribute elements'
     })
   }
 
@@ -1016,8 +1054,10 @@ export default function CanvasCollaboration() {
       totalLayers: layers.length
     })
 
-    toast.success('Brought to Front', {
-      description: `${selectedElements.length} element(s) moved to top layer`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Moving to front...',
+      success: `Brought to front - ${selectedElements.length} element(s) moved to top layer`,
+      error: 'Failed to bring to front'
     })
   }
 
@@ -1033,8 +1073,10 @@ export default function CanvasCollaboration() {
       totalLayers: layers.length
     })
 
-    toast.success('Sent to Back', {
-      description: `${selectedElements.length} element(s) moved to bottom layer`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Moving to back...',
+      success: `Sent to back - ${selectedElements.length} element(s) moved to bottom layer`,
+      error: 'Failed to send to back'
     })
   }
 
@@ -1049,8 +1091,10 @@ export default function CanvasCollaboration() {
       canvasName
     })
 
-    toast.success('Elements Locked', {
-      description: `${selectedElements.length} element(s) locked and protected from changes`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Locking elements...',
+      success: `Elements locked - ${selectedElements.length} element(s) locked and protected from changes`,
+      error: 'Failed to lock elements'
     })
   }
 
@@ -1065,8 +1109,10 @@ export default function CanvasCollaboration() {
       canvasName
     })
 
-    toast.success('Elements Unlocked', {
-      description: `${selectedElements.length} element(s) unlocked and can be edited`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Unlocking elements...',
+      success: `Elements unlocked - ${selectedElements.length} element(s) unlocked and can be edited`,
+      error: 'Failed to unlock elements'
     })
   }
 
@@ -1081,8 +1127,10 @@ export default function CanvasCollaboration() {
       ideaGenerated: randomIdea
     })
 
-    toast.success('AI Generating Ideas', {
-      description: `Creative suggestion: Try experimenting with ${randomIdea} variations`
+    toast.promise(new Promise(r => setTimeout(r, 1800)), {
+      loading: 'AI generating creative ideas...',
+      success: `AI ideas generated - Creative suggestion: Try experimenting with ${randomIdea} variations`,
+      error: 'Failed to generate AI ideas'
     })
   }
 
@@ -1098,8 +1146,10 @@ export default function CanvasCollaboration() {
       suggestedColors
     })
 
-    toast.success('AI Color Suggestions', {
-      description: `${randomScheme} scheme recommended: ${suggestedColors}`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'AI analyzing color palette...',
+      success: `AI color suggestions - ${randomScheme} scheme recommended: ${suggestedColors}`,
+      error: 'Failed to generate color suggestions'
     })
   }
 
@@ -1118,8 +1168,10 @@ export default function CanvasCollaboration() {
       suggestion: randomSuggestion
     })
 
-    toast.success('AI Layout Suggestions', {
-      description: `Recommendation: ${randomSuggestion}`
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'AI analyzing layout...',
+      success: `AI layout suggestions - Recommendation: ${randomSuggestion}`,
+      error: 'Failed to analyze layout'
     })
   }
 

@@ -380,9 +380,14 @@ export default function TeamPage() {
       completedTasks: member.completedTasks
     })
 
-    toast.info(`${member.name} Profile`, {
-      description: `${member.role} • ${member.projects} projects • ${member.completedTasks} tasks • ${member.rating}⭐`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: `Loading ${member.name}'s profile...`,
+        success: `${member.name} Profile - ${member.role} • ${member.projects} projects • ${member.completedTasks} tasks • ${member.rating} rating`,
+        error: 'Failed to load profile'
+      }
+    )
   }
 
   const handleEditMember = (id: number) => {
@@ -395,9 +400,14 @@ export default function TeamPage() {
       currentRole: member.role
     })
 
-    toast.info('Edit Team Member', {
-      description: `Editing ${member.name} - ${member.role}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening editor...',
+        success: `Edit Team Member - Editing ${member.name} - ${member.role}`,
+        error: 'Failed to open editor'
+      }
+    )
   }
 
   const handleRemoveMember = (id: number) => {
@@ -498,9 +508,14 @@ export default function TeamPage() {
       role: member.role
     })
 
-    toast.info('Set Permissions', {
-      description: `Configure ${permissions.length} permission levels for ${member.name}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Loading permission settings...',
+        success: `Set Permissions - Configure ${permissions.length} permission levels for ${member.name}`,
+        error: 'Failed to load permissions'
+      }
+    )
   }
 
   const handleSendMessage = (id: number) => {
@@ -514,9 +529,14 @@ export default function TeamPage() {
       status: member.status
     })
 
-    toast.info('Send Message', {
-      description: `Composing message to ${member.name} (${member.email})`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 700)),
+      {
+        loading: 'Opening message composer...',
+        success: `Send Message - Composing message to ${member.name} (${member.email})`,
+        error: 'Failed to open composer'
+      }
+    )
   }
 
   const handleViewActivity = (id: number) => {
@@ -531,9 +551,14 @@ export default function TeamPage() {
       rating: member.rating
     })
 
-    toast.info(`${member.name} Activity`, {
-      description: `${member.completedTasks} tasks completed • ${member.projects} active projects • ${member.rating}⭐ rating`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: `Loading ${member.name}'s activity...`,
+        success: `${member.name} Activity - ${member.completedTasks} tasks completed • ${member.projects} active projects • ${member.rating} rating`,
+        error: 'Failed to load activity'
+      }
+    )
   }
 
   const handleAssignProject = (id: number) => {
@@ -584,9 +609,14 @@ export default function TeamPage() {
       activeProjects: member.projects
     })
 
-    toast.info(`${member.name}'s Projects`, {
-      description: `${member.projects} active projects • ${member.completedTasks} tasks completed`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: `Loading ${member.name}'s projects...`,
+        success: `${member.name}'s Projects - ${member.projects} active projects • ${member.completedTasks} tasks completed`,
+        error: 'Failed to load projects'
+      }
+    )
   }
 
   const handleTeamAnalytics = () => {
@@ -599,9 +629,14 @@ export default function TeamPage() {
 
     logger.info('Team analytics accessed', stats)
 
-    toast.info('Team Analytics', {
-      description: `${stats.totalMembers} members • ${stats.online} online • ${stats.projects} projects • ${stats.tasks} tasks`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Loading team analytics...',
+        success: `Team Analytics - ${stats.totalMembers} members • ${stats.online} online • ${stats.projects} projects • ${stats.tasks} tasks`,
+        error: 'Failed to load analytics'
+      }
+    )
   }
 
   const handleTeamSettings = () => {
@@ -609,9 +644,14 @@ export default function TeamPage() {
       totalMembers: teamMembers.length
     })
 
-    toast.info('Team Settings', {
-      description: 'Configure team preferences, roles, and permissions'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Loading team settings...',
+        success: 'Team Settings - Configure team preferences, roles, and permissions',
+        error: 'Failed to load settings'
+      }
+    )
   }
 
   const handleExportTeam = () => {
@@ -688,9 +728,14 @@ export default function TeamPage() {
       onlineMembers
     })
 
-    toast.info('Team Chat', {
-      description: `${onlineMembers}/${teamMembers.length} members online`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 700)),
+      {
+        loading: 'Opening team chat...',
+        success: `Team Chat - ${onlineMembers}/${teamMembers.length} members online`,
+        error: 'Failed to open chat'
+      }
+    )
   }
 
   const handleScheduleMeeting = () => {
@@ -701,9 +746,14 @@ export default function TeamPage() {
       availableMembers
     })
 
-    toast.info('Schedule Meeting', {
-      description: `${availableMembers}/${teamMembers.length} members available`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Opening meeting scheduler...',
+        success: `Schedule Meeting - ${availableMembers}/${teamMembers.length} members available`,
+        error: 'Failed to open scheduler'
+      }
+    )
   }
 
   const handleViewCalendar = () => {
@@ -711,9 +761,14 @@ export default function TeamPage() {
       totalMembers: teamMembers.length
     })
 
-    toast.info('Team Calendar', {
-      description: `View schedules for ${teamMembers.length} team members`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: 'Loading team calendar...',
+        success: `Team Calendar - View schedules for ${teamMembers.length} team members`,
+        error: 'Failed to load calendar'
+      }
+    )
   }
 
   const handlePerformanceReview = (id: number) => {
@@ -727,9 +782,14 @@ export default function TeamPage() {
       completedTasks: member.completedTasks
     })
 
-    toast.info(`Review ${member.name}`, {
-      description: `Current rating: ${member.rating}⭐ • ${member.completedTasks} tasks completed`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Loading ${member.name}'s performance review...`,
+        success: `Review ${member.name} - Current rating: ${member.rating} • ${member.completedTasks} tasks completed`,
+        error: 'Failed to load review'
+      }
+    )
   }
 
   const handleTimeTracking = (id: number) => {
@@ -744,9 +804,14 @@ export default function TeamPage() {
       hoursWorked
     })
 
-    toast.info(`${member.name} Time Tracking`, {
-      description: `${hoursWorked} hours this month • ${member.workHours}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: `Loading ${member.name}'s time tracking...`,
+        success: `${member.name} Time Tracking - ${hoursWorked} hours this month • ${member.workHours}`,
+        error: 'Failed to load time tracking'
+      }
+    )
   }
 
   const handleFilter = (filter: string) => {
@@ -755,9 +820,14 @@ export default function TeamPage() {
       totalMembers: teamMembers.length
     })
 
-    toast.success('Filter Applied', {
-      description: `Filtering team by: ${filter}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Applying filter...',
+        success: `Filter Applied - Filtering team by: ${filter}`,
+        error: 'Failed to apply filter'
+      }
+    )
   }
 
   const roles = [

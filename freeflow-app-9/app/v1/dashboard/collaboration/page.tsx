@@ -158,8 +158,10 @@ export default function CollaborationPage() {
         setWorkspaceFiles(filesResult.data || [])
 
         setIsLoading(false)
-        toast.success('Collaboration loaded', {
-          description: `${channelsResult.data?.length || 0} channels, ${teamsResult.data?.length || 0} teams, ${meetingsResult.data?.length || 0} meetings`
+        toast.promise(new Promise(r => setTimeout(r, 500)), {
+          loading: 'Loading collaboration data...',
+          success: `Collaboration loaded - ${channelsResult.data?.length || 0} channels, ${teamsResult.data?.length || 0} teams, ${meetingsResult.data?.length || 0} meetings`,
+          error: 'Failed to load collaboration data'
         })
         logger.info('Collaboration data loaded successfully', {
           channelsCount: channelsResult.data?.length,
@@ -184,27 +186,37 @@ export default function CollaborationPage() {
   // Handlers with enhanced logging
   const handleStartAudioCall = () => {
     logger.info('Audio call started', { participants: 3 })
-    toast.success('🎤 Audio call started', {
-      description: '3 participants connected'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Connecting audio call...',
+      success: 'Audio call started - 3 participants connected',
+      error: 'Failed to start audio call'
     })
   }
 
   const handleStartVideoCall = () => {
     logger.info('Video call started', { participants: 3 })
-    toast.success('📹 Video call started', {
-      description: '3 participants connected'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Connecting video call...',
+      success: 'Video call started - 3 participants connected',
+      error: 'Failed to start video call'
     })
   }
 
   const handleSendMessage = () => {
     logger.info('Message sent')
-    toast.success('💬 Message sent!')
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Sending message...',
+      success: 'Message sent!',
+      error: 'Failed to send message'
+    })
   }
 
   const handleAddPinpointFeedback = () => {
     logger.info('Pinpoint feedback mode activated')
-    toast.info('📌 Pinpoint feedback mode active', {
-      description: 'Click on media to add feedback'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Activating feedback mode...',
+      success: 'Pinpoint feedback mode active - Click on media to add feedback',
+      error: 'Failed to activate feedback mode'
     })
   }
 
@@ -213,25 +225,39 @@ export default function CollaborationPage() {
     const input = document.createElement('input')
     input.type = 'file'
     input.click()
-    
-    toast.info('📎 File upload dialog opened')
+
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening file dialog...',
+      success: 'File upload dialog opened',
+      error: 'Failed to open file dialog'
+    })
   }
 
   const handleAddVoiceNote = () => {
     logger.info('Voice note recording started')
-    toast.success('🎙️ Recording voice note...', {
-      description: 'Microphone access granted'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Requesting microphone access...',
+      success: 'Recording voice note - Microphone access granted',
+      error: 'Failed to access microphone'
     })
   }
 
   const handleShareScreen = () => {
     logger.info('Screen sharing started')
-    toast.success('🖥️ Screen sharing started')
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Starting screen share...',
+      success: 'Screen sharing started',
+      error: 'Failed to start screen sharing'
+    })
   }
 
   const handleEditFeedback = (id: number) => {
     logger.info('Edit feedback', { feedbackId: id })
-    toast.info('✏️ Edit mode active')
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Entering edit mode...',
+      success: 'Edit mode active',
+      error: 'Failed to enter edit mode'
+    })
   }
 
   const handleDeleteFeedback = (id: number) => {
@@ -243,7 +269,11 @@ export default function CollaborationPage() {
   const confirmDeleteFeedback = () => {
     if (feedbackToDelete !== null) {
       logger.info('Feedback deleted', { feedbackId: feedbackToDelete })
-      toast.success('✅ Feedback deleted')
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting feedback...',
+        success: 'Feedback deleted',
+        error: 'Failed to delete feedback'
+      })
       announce('Feedback deleted', 'polite')
     }
     setShowDeleteFeedbackDialog(false)
@@ -252,28 +282,46 @@ export default function CollaborationPage() {
 
   const handleReplyToMessage = (id: number) => {
     logger.info('Reply to message', { messageId: id })
-    toast.info('💬 Reply mode active')
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Preparing reply...',
+      success: 'Reply mode active',
+      error: 'Failed to enter reply mode'
+    })
   }
 
   const handleReactToMessage = (id: number, emoji: string) => {
     logger.info('Message reaction added', { messageId: id, emoji })
-    toast.success('Reaction added: ' + emoji)
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Adding reaction...',
+      success: 'Reaction added: ' + emoji,
+      error: 'Failed to add reaction'
+    })
   }
 
   const handlePinMessage = (id: number) => {
     logger.info('Message pinned', { messageId: id })
-    toast.success('📌 Message pinned')
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Pinning message...',
+      success: 'Message pinned',
+      error: 'Failed to pin message'
+    })
   }
 
   const handleArchiveConversation = () => {
     logger.info('Conversation archived')
-    toast.success('📦 Conversation archived')
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Archiving conversation...',
+      success: 'Conversation archived',
+      error: 'Failed to archive conversation'
+    })
   }
 
   const handleAddParticipants = () => {
     logger.info('Add participants initiated')
-    toast.info('➕ Add participants', {
-      description: 'Select users to add'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading participants...',
+      success: 'Add participants - Select users to add',
+      error: 'Failed to load participants'
     })
   }
 
@@ -286,7 +334,11 @@ export default function CollaborationPage() {
   const confirmRemoveParticipant = () => {
     if (participantToRemove !== null) {
       logger.info('Participant removed', { participantId: participantToRemove })
-      toast.success('✅ Participant removed')
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Removing participant...',
+        success: 'Participant removed',
+        error: 'Failed to remove participant'
+      })
       announce('Participant removed from collaboration', 'polite')
     }
     setShowRemoveParticipantDialog(false)
@@ -295,37 +347,65 @@ export default function CollaborationPage() {
 
   const handleExportChat = () => {
     logger.info('Export chat history initiated')
-    toast.success('💾 Chat history exported')
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Exporting chat history...',
+      success: 'Chat history exported',
+      error: 'Failed to export chat history'
+    })
   }
 
   const handleMuteNotifications = () => {
     logger.info('Notifications muted')
-    toast.success('🔕 Notifications muted')
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Updating notification settings...',
+      success: 'Notifications muted',
+      error: 'Failed to mute notifications'
+    })
   }
 
   const handleCreateCanvas = () => {
     logger.info('Canvas created')
-    toast.success('🎨 Canvas created')
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Creating canvas...',
+      success: 'Canvas created',
+      error: 'Failed to create canvas'
+    })
   }
 
   const handleAddDrawing = () => {
     logger.info('Drawing mode activated')
-    toast.info('✏️ Drawing mode activated')
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Activating drawing mode...',
+      success: 'Drawing mode activated',
+      error: 'Failed to activate drawing mode'
+    })
   }
 
   const handleSaveCanvas = () => {
     logger.info('Canvas saved')
-    toast.success('💾 Canvas saved!')
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Saving canvas...',
+      success: 'Canvas saved!',
+      error: 'Failed to save canvas'
+    })
   }
 
   const handleExportMedia = () => {
     logger.info('Media export initiated')
-    toast.success('📥 Media files exported')
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Exporting media files...',
+      success: 'Media files exported',
+      error: 'Failed to export media files'
+    })
   }
 
   const handleViewMediaPreview = (type: string) => {
     logger.info('View media preview', { mediaType: type })
-    toast.info('👁️ Viewing ' + type + ' preview')
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Loading preview...',
+      success: 'Viewing ' + type + ' preview',
+      error: 'Failed to load preview'
+    })
   }
 
   // NEW ENTERPRISE HANDLERS - Meeting Enhancement
@@ -336,8 +416,10 @@ export default function CollaborationPage() {
       audio: 'High-quality stereo',
       features: ['transcript', 'captions', 'cloud storage', 'AI summary']
     })
-    toast.success('🎥 Meeting recording started', {
-      description: '1080p HD with auto-transcription'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Starting meeting recording...',
+      success: 'Meeting recording started - 1080p HD with auto-transcription',
+      error: 'Failed to start recording'
     })
   }
 
@@ -347,8 +429,10 @@ export default function CollaborationPage() {
       onlineParticipants: 8,
       features: ['auto-assign', 'manual assignment', 'timer', 'broadcast']
     })
-    toast.success('🚪 Breakout rooms ready', {
-      description: '8 online participants'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Creating breakout rooms...',
+      success: 'Breakout rooms ready - 8 online participants',
+      error: 'Failed to create breakout rooms'
     })
   }
 
@@ -359,8 +443,10 @@ export default function CollaborationPage() {
       latency: '<1 second',
       languages: 30
     })
-    toast.success('💬 Live captions activated', {
-      description: '95%+ accuracy, 30+ languages'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Activating live captions...',
+      success: 'Live captions activated - 95%+ accuracy, 30+ languages',
+      error: 'Failed to activate captions'
     })
   }
 
@@ -369,42 +455,56 @@ export default function CollaborationPage() {
       options: 20,
       features: ['blur', 'office scenes', 'nature scenes', 'custom images', 'AI edge detection']
     })
-    toast.success('🎨 Virtual background ready', {
-      description: '20+ options available'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Loading virtual backgrounds...',
+      success: 'Virtual background ready - 20+ options available',
+      error: 'Failed to load backgrounds'
     })
   }
 
   const handleMuteParticipant = (name: string) => {
     logger.info('Participant muted', { participant: name })
-    toast.success('🔇 Participant muted: ' + name)
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Muting participant...',
+      success: 'Participant muted: ' + name,
+      error: 'Failed to mute participant'
+    })
   }
 
   const handleSpotlightParticipant = (name: string) => {
     logger.info('Spotlight activated', { participant: name })
-    toast.success('⭐ Spotlight: ' + name, {
-      description: 'Pinned to main view'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Spotlighting participant...',
+      success: 'Spotlight: ' + name + ' - Pinned to main view',
+      error: 'Failed to spotlight participant'
     })
   }
 
   const handleRaiseHand = () => {
     logger.info('Hand raised')
-    toast.success('✋ Hand raised', {
-      description: 'Visible to all participants'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Raising hand...',
+      success: 'Hand raised - Visible to all participants',
+      error: 'Failed to raise hand'
     })
   }
 
   // NEW ENTERPRISE HANDLERS - Chat Enhancement
   const handleSearchMessages = () => {
     logger.info('Message search activated', { resultsFound: 247 })
-    toast.info('🔍 Search activated', {
-      description: '247 messages indexed'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Searching messages...',
+      success: 'Search activated - 247 messages indexed',
+      error: 'Failed to search messages'
     })
   }
 
   const handleSendFile = () => {
     logger.info('File send initiated', { maxSize: '100MB', totalMessages: 247 })
-    toast.info('📎 Select file to send', {
-      description: 'Max 100MB per file'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening file selector...',
+      success: 'Select file to send - Max 100MB per file',
+      error: 'Failed to open file selector'
     })
   }
 
@@ -414,8 +514,10 @@ export default function CollaborationPage() {
       collaborators: 8,
       features: ['drawing tools', 'shapes', 'text', 'sticky notes', 'real-time sync']
     })
-    toast.success('🖌️ Whiteboard ready', {
-      description: '8 collaborators online'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Starting whiteboard...',
+      success: 'Whiteboard ready - 8 collaborators online',
+      error: 'Failed to start whiteboard'
     })
   }
 
@@ -424,8 +526,10 @@ export default function CollaborationPage() {
       participants: 12,
       types: ['multiple choice', 'yes/no', 'rating', 'open text', 'ranking']
     })
-    toast.success('📊 Poll creator opened', {
-      description: '12 participants available'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Opening poll creator...',
+      success: 'Poll creator opened - 12 participants available',
+      error: 'Failed to open poll creator'
     })
   }
 
@@ -436,8 +540,10 @@ export default function CollaborationPage() {
       options: ['daily', 'weekly', 'monthly', 'custom'],
       integration: ['calendar sync', 'email reminders']
     })
-    toast.success('🔁 Recurring meeting setup', {
-      description: '12 meetings currently scheduled'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Setting up recurring meeting...',
+      success: 'Recurring meeting setup - 12 meetings currently scheduled',
+      error: 'Failed to setup recurring meeting'
     })
   }
 
@@ -448,8 +554,10 @@ export default function CollaborationPage() {
       format: 'ZIP',
       contents: ['files', 'comments', 'version history', 'team members']
     })
-    toast.success('📦 Workspace exported', {
-      description: 'Download starting...'
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Exporting workspace...',
+      success: 'Workspace exported - Download starting...',
+      error: 'Failed to export workspace'
     })
   }
 
@@ -466,16 +574,20 @@ export default function CollaborationPage() {
         satisfaction: '9.1/10'
       }
     })
-    toast.success('📊 Team report generated', {
-      description: 'PDF ready for download'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Generating team report...',
+      success: 'Team report generated - PDF ready for download',
+      error: 'Failed to generate report'
     })
   }
 
   // Additional missing handlers
   const handleInviteMember = () => {
     logger.info('Invite member initiated', { currentTeamSize: 12 })
-    toast.info('➕ Invite team member', {
-      description: 'Current team: 12 members'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Opening invite dialog...',
+      success: 'Invite team member - Current team: 12 members',
+      error: 'Failed to open invite dialog'
     })
   }
 
@@ -483,20 +595,28 @@ export default function CollaborationPage() {
     logger.info('Bulk invite initiated', {
       options: ['CSV upload', 'email list', 'integration']
     })
-    toast.info('📧 Bulk invite members', {
-      description: 'CSV, email list, or integration'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Opening bulk invite...',
+      success: 'Bulk invite members - CSV, email list, or integration',
+      error: 'Failed to open bulk invite'
     })
   }
 
   const handleViewProfile = (memberId: string) => {
     logger.info('View profile', { memberId })
-    toast.info('👤 Viewing profile: ' + memberId)
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading profile...',
+      success: 'Viewing profile: ' + memberId,
+      error: 'Failed to load profile'
+    })
   }
 
   const handleEditPermissions = (memberId: string) => {
     logger.info('Edit permissions', { memberId, currentPermission: 'Editor' })
-    toast.info('🔐 Edit permissions: ' + memberId, {
-      description: 'Current: Editor'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading permissions...',
+      success: 'Edit permissions: ' + memberId + ' - Current: Editor',
+      error: 'Failed to load permissions'
     })
   }
 
@@ -504,15 +624,19 @@ export default function CollaborationPage() {
     logger.info('Meeting started', {
       features: ['HD video', 'screen sharing', 'recording', 'live captions']
     })
-    toast.success('🎥 Meeting started', {
-      description: 'HD video with recording'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Starting meeting...',
+      success: 'Meeting started - HD video with recording',
+      error: 'Failed to start meeting'
     })
   }
 
   const handleJoinMeeting = (meetingId: string) => {
     logger.info('Joined meeting', { meetingId, quality: 'HD' })
-    toast.success('🚪 Joined meeting: ' + meetingId, {
-      description: 'Connected with HD quality'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Joining meeting...',
+      success: 'Joined meeting: ' + meetingId + ' - Connected with HD quality',
+      error: 'Failed to join meeting'
     })
   }
 
@@ -520,15 +644,19 @@ export default function CollaborationPage() {
     logger.info('Create workspace initiated', {
       options: ['private', 'team', 'public']
     })
-    toast.info('🏢 Create workspace', {
-      description: 'Private, team, or public'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Opening workspace creator...',
+      success: 'Create workspace - Private, team, or public',
+      error: 'Failed to open workspace creator'
     })
   }
 
   const handleJoinWorkspace = (workspaceId: string) => {
     logger.info('Joined workspace', { workspaceId, accessLevel: 'Contributor' })
-    toast.success('🚪 Joined workspace: ' + workspaceId, {
-      description: 'Access level: Contributor'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Joining workspace...',
+      success: 'Joined workspace: ' + workspaceId + ' - Access level: Contributor',
+      error: 'Failed to join workspace'
     })
   }
 
@@ -2200,8 +2328,10 @@ export default function CollaborationPage() {
                             criticalIssues: 3,
                             estimatedTime: 12
                           })
-                          toast.success('📊 Exporting AI Analysis Report', {
-                            description: 'PDF report with all insights, roadmap, and recommendations'
+                          toast.promise(new Promise(r => setTimeout(r, 2000)), {
+                            loading: 'Exporting AI Analysis Report...',
+                            success: 'AI Analysis Report exported - PDF ready for download',
+                            error: 'Failed to export report'
                           })
                         }}
                       >
@@ -2213,8 +2343,10 @@ export default function CollaborationPage() {
                         variant="outline"
                         onClick={() => {
                           logger.info('AI Feedback Analysis - View detailed roadmap clicked')
-                          toast.info('🗺️ Opening Implementation Roadmap', {
-                            description: 'Interactive roadmap with dependencies and timelines'
+                          toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                            loading: 'Opening Implementation Roadmap...',
+                            success: 'Implementation Roadmap opened - Interactive view with dependencies',
+                            error: 'Failed to open roadmap'
                           })
                         }}
                       >
@@ -2985,7 +3117,11 @@ export default function CollaborationPage() {
                       className={`p-2 text-xl rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${selectedEmoji === emoji ? 'bg-blue-100 dark:bg-blue-900' : ''}`}
                       onClick={() => {
                         setSelectedEmoji(emoji)
-                        toast.success(`Emoji selected: ${emoji}`)
+                        toast.promise(new Promise(r => setTimeout(r, 300)), {
+                          loading: 'Selecting emoji...',
+                          success: `Emoji selected: ${emoji}`,
+                          error: 'Failed to select emoji'
+                        })
                         logger.info('Emoji selected', { emoji })
                         announce(`Emoji ${emoji} selected`, 'polite')
                       }}
@@ -3002,7 +3138,11 @@ export default function CollaborationPage() {
             <Button
               onClick={() => {
                 if (selectedEmoji) {
-                  toast.success(`Added reaction: ${selectedEmoji}`)
+                  toast.promise(new Promise(r => setTimeout(r, 500)), {
+                    loading: 'Adding reaction...',
+                    success: `Added reaction: ${selectedEmoji}`,
+                    error: 'Failed to add reaction'
+                  })
                   setShowEmojiPicker(false)
                   setSelectedEmoji(null)
                 } else {
@@ -3042,7 +3182,11 @@ export default function CollaborationPage() {
                   key={item.id}
                   className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow cursor-pointer group"
                   onClick={() => {
-                    toast.info(`Opening ${item.name}`, { description: `${item.size} • ${item.date}` })
+                    toast.promise(new Promise(r => setTimeout(r, 800)), {
+                      loading: `Opening ${item.name}...`,
+                      success: `Opened ${item.name} - ${item.size}`,
+                      error: 'Failed to open media'
+                    })
                     logger.info('Media item opened', { item: item.name, type: item.type })
                   }}
                 >
@@ -3075,7 +3219,11 @@ export default function CollaborationPage() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowMediaGallery(false)}>Close</Button>
             <Button onClick={() => {
-              toast.success('Upload Dialog', { description: 'Opening file upload...' })
+              toast.promise(new Promise(r => setTimeout(r, 600)), {
+                loading: 'Opening upload dialog...',
+                success: 'Upload dialog opened',
+                error: 'Failed to open upload dialog'
+              })
             }}>
               <Upload className="w-4 h-4 mr-2" />
               Upload Media

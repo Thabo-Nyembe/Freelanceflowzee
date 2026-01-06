@@ -664,8 +664,10 @@ export default function ModelingStudioPage() {
                           scene: { camera: cameraPosition, settings: { renderQuality: renderQuality[0] } }
                         }
                         navigator.clipboard.writeText(JSON.stringify(modelData, null, 2))
-                        toast.success('Model copied to clipboard', {
-                          description: `${objects.length} objects • ${materials.length} materials • Ready to share`
+                        toast.promise(new Promise(resolve => setTimeout(resolve, 800)), {
+                          loading: 'Copying model to clipboard...',
+                          success: `Model copied to clipboard - ${objects.length} objects, ${materials.length} materials`,
+                          error: 'Failed to copy model'
                         })
                       }}
                       data-testid="share-model-btn"
@@ -696,8 +698,10 @@ export default function ModelingStudioPage() {
                             previousTool: selectedTool
                           })
                           setSelectedTool(tool.id as any)
-                          toast.info(`Tool: ${tool.label}`, {
-                            description: `${tool.label} tool activated - 3D modeling studio`
+                          toast.promise(new Promise(resolve => setTimeout(resolve, 500)), {
+                            loading: `Activating ${tool.label} tool...`,
+                            success: `${tool.label} tool activated`,
+                            error: 'Failed to activate tool'
                           })
                         }}
                         className="gap-2"
@@ -856,8 +860,10 @@ export default function ModelingStudioPage() {
                                 objectsCount: objects.length + 1
                               })
                               addObject(primitive.id)
-                              toast.success(`Added: ${primitive.name}`, {
-                                description: `${primitive.name} object added to scene - ${objects.length + 1} total objects`
+                              toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
+                                loading: `Adding ${primitive.name} to scene...`,
+                                success: `${primitive.name} added - ${objects.length + 1} total objects`,
+                                error: `Failed to add ${primitive.name}`
                               })
                             }}
                             className="gap-2"
@@ -902,8 +908,10 @@ export default function ModelingStudioPage() {
                                     newVisibility: !obj.visible
                                   })
                                   updateObjectProperty(obj.id, 'visible', !obj.visible)
-                                  toast.info(`${obj.name}: ${!obj.visible ? 'Visible' : 'Hidden'}`, {
-                                    description: `Object visibility ${!obj.visible ? 'enabled' : 'disabled'} - ${obj.type}`
+                                  toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+                                    loading: `${!obj.visible ? 'Showing' : 'Hiding'} ${obj.name}...`,
+                                    success: `${obj.name} ${!obj.visible ? 'visible' : 'hidden'}`,
+                                    error: 'Failed to toggle visibility'
                                   })
                                 }}
                                 data-testid={`toggle-visibility-${obj.id}-btn`}
@@ -922,8 +930,10 @@ export default function ModelingStudioPage() {
                                     objectsCount: objects.length + 1
                                   })
                                   duplicateObject(obj.id)
-                                  toast.success(`Duplicated: ${obj.name}`, {
-                                    description: `${obj.name} Copy created - ${obj.type} - ${objects.length + 1} total objects`
+                                  toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), {
+                                    loading: `Duplicating ${obj.name}...`,
+                                    success: `${obj.name} duplicated - ${objects.length + 1} total objects`,
+                                    error: `Failed to duplicate ${obj.name}`
                                   })
                                 }}
                                 data-testid={`duplicate-${obj.id}-btn`}
@@ -942,8 +952,10 @@ export default function ModelingStudioPage() {
                                     remainingObjects: objects.length - 1
                                   })
                                   deleteObject(obj.id)
-                                  toast.success(`Deleted: ${obj.name}`, {
-                                    description: `${obj.type} removed from scene - ${objects.length - 1} remaining objects`
+                                  toast.promise(new Promise(resolve => setTimeout(resolve, 800)), {
+                                    loading: `Deleting ${obj.name}...`,
+                                    success: `${obj.name} deleted - ${objects.length - 1} remaining`,
+                                    error: `Failed to delete ${obj.name}`
                                   })
                                 }}
                                 data-testid={`delete-${obj.id}-btn`}
@@ -1005,8 +1017,10 @@ export default function ModelingStudioPage() {
                             materialsCount: materials.length + 1
                           })
                           setMaterials([...materials, newMaterial])
-                          toast.success('Material added', {
-                            description: `${newMaterial.name} - ${materials.length + 1} total materials`
+                          toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), {
+                            loading: 'Creating new material...',
+                            success: `${newMaterial.name} created - ${materials.length + 1} total materials`,
+                            error: 'Failed to create material'
                           })
                         }}
                         data-testid="add-material-btn"
@@ -1083,8 +1097,10 @@ export default function ModelingStudioPage() {
                             lightsCount: lights.length + 1
                           })
                           setLights([...lights, newLight])
-                          toast.success('Light added', {
-                            description: `${newLight.name} (${newLight.type}) - ${lights.length + 1} total lights`
+                          toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), {
+                            loading: 'Adding light to scene...',
+                            success: `${newLight.name} (${newLight.type}) added - ${lights.length + 1} total lights`,
+                            error: 'Failed to add light'
                           })
                         }}
                         data-testid="add-light-btn"

@@ -177,23 +177,26 @@ export default function AnalyticsPage() {
       return
     }
 
-    try {
-      logger.info('Refreshing analytics data', { dateRange, userId })
+    logger.info('Refreshing analytics data', { dateRange, userId })
 
-      const result = await reloadAnalyticsData()
-
-      toast.success('Analytics Refreshed', {
-        description: `Analytics data updated successfully for ${dateRange} period (${result.insightsCount} insights)`
-      })
-      logger.info('Analytics refresh completed', { success: true, ...result })
-      announce('Analytics refreshed successfully', 'polite')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Refresh failed'
-      toast.error('Refresh Failed', { description: message })
-      logger.error('Analytics refresh failed', { error: message })
-      announce('Analytics refresh failed', 'assertive')
-      setIsLoading(false)
-    }
+    toast.promise(
+      reloadAnalyticsData().then(result => {
+        logger.info('Analytics refresh completed', { success: true, ...result })
+        announce('Analytics refreshed successfully', 'polite')
+        return result
+      }).catch(error => {
+        const message = error instanceof Error ? error.message : 'Refresh failed'
+        logger.error('Analytics refresh failed', { error: message })
+        announce('Analytics refresh failed', 'assertive')
+        setIsLoading(false)
+        throw error
+      }),
+      {
+        loading: 'Refreshing analytics data...',
+        success: 'Analytics refreshed successfully',
+        error: 'Failed to refresh analytics'
+      }
+    )
   }
 
   // Button 2: Export CSV
@@ -421,6 +424,19 @@ export default function AnalyticsPage() {
   }
 
   // Button 8: View Detailed Revenue
+  const handleViewDetailedRevenue = () => {
+    logger.info('Opening detailed revenue view')
+    const willShow = !showRevenueDetails
+    setShowRevenueDetails(willShow)
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: willShow ? 'Loading revenue details...' : 'Hiding revenue details...',
+      success: willShow ? 'Revenue details displayed' : 'Revenue details hidden',
+      error: 'Failed to toggle revenue details'
+    })
+    announce(willShow ? 'Revenue details shown' : 'Revenue details hidden', 'polite')
+  }
+
+  // PLACEHOLDER_DELETE_ME
   const handleViewDetailedRevenue = () => {
     logger.info('Opening detailed revenue view')
     setShowRevenueDetails(!showRevenueDetails)

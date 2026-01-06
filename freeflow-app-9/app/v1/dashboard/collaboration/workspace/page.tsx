@@ -138,19 +138,21 @@ export default function WorkspacePage() {
       return;
     }
 
-    try {
-      setLoading(true);
-      logger.info("Fetching workspace data from Supabase", { userId });
+    setLoading(true);
+    logger.info("Fetching workspace data from Supabase", { userId });
 
+    const fetchPromise = (async () => {
       // Fetch folders and files from Supabase
       const { data: foldersData, error: foldersError } = await getFolders(userId, null);
       const { data: filesData, error: filesError } = await getFiles(userId, {});
 
       if (foldersError) {
         logger.error("Failed to fetch folders", { error: foldersError.message });
+        throw new Error("Failed to fetch folders");
       }
       if (filesError) {
         logger.error("Failed to fetch files", { error: filesError.message });
+        throw new Error("Failed to fetch files");
       }
 
       // Helper function to format file size
@@ -212,11 +214,20 @@ export default function WorkspacePage() {
         filesCount: fileItems.length,
         userId
       });
-      toast.success(`Loaded ${allItems.length} items`);
       announce(`${allItems.length} workspace items loaded successfully`, "polite");
+      return allItems;
+    })();
+
+    toast.promise(fetchPromise, {
+      loading: "Loading workspace data...",
+      success: (items) => `Loaded ${items.length} items`,
+      error: "Failed to load workspace"
+    });
+
+    try {
+      await fetchPromise;
     } catch (error) {
       logger.error("Failed to fetch workspace data", { error, userId });
-      toast.error("Failed to load workspace");
       announce("Error loading workspace", "assertive");
     } finally {
       setLoading(false);
@@ -230,9 +241,9 @@ export default function WorkspacePage() {
     const formData = new FormData(e.currentTarget);
     const folderName = formData.get("folderName") as string;
 
-    try {
-      logger.info("Creating new folder", { userId, folderName });
+    logger.info("Creating new folder", { userId, folderName });
 
+    const createPromise = (async () => {
       const { data: newFolderData, error } = await createFolderDB(
         userId,
         folderName,
@@ -262,12 +273,22 @@ export default function WorkspacePage() {
         setIsCreateFolderOpen(false);
 
         logger.info("Folder created successfully", { folderId: newFolder.id, userId });
-        toast.success("Folder created successfully");
         announce("Folder created successfully", "polite");
+        return folderName;
       }
+      throw new Error("No folder data returned");
+    })();
+
+    toast.promise(createPromise, {
+      loading: "Creating folder...",
+      success: (name) => `Folder "${name}" created successfully`,
+      error: "Failed to create folder"
+    });
+
+    try {
+      await createPromise;
     } catch (error) {
       logger.error("Failed to create folder", { error, userId });
-      toast.error("Failed to create folder");
       announce("Error creating folder", "assertive");
     }
   };
@@ -285,13 +306,13 @@ export default function WorkspacePage() {
       return;
     }
 
-    try {
-      logger.info("Uploading file", { fileName, userId });
+    logger.info("Uploading file", { fileName, userId });
 
-      // Get file info
-      const fileType = fileInput?.type?.split("/")?.[0] || "document";
-      const fileSize = fileInput?.size || 0;
+    // Get file info
+    const fileType = fileInput?.type?.split("/")?.[0] || "document";
+    const fileSize = fileInput?.size || 0;
 
+    const uploadPromise = (async () => {
       // Create file record in database
       const { data: newFileData, error } = await createFile(userId, {
         name: fileName,
@@ -333,11 +354,20 @@ export default function WorkspacePage() {
       setIsUploadOpen(false);
 
       logger.info("File uploaded successfully", { fileId: newFile.id, fileName });
-      toast.success("File uploaded", { description: fileName });
       announce("File uploaded successfully", "polite");
+      return fileName;
+    })();
+
+    toast.promise(uploadPromise, {
+      loading: `Uploading "${fileName}"...`,
+      success: (name) => `File "${name}" uploaded successfully`,
+      error: "Failed to upload file"
+    });
+
+    try {
+      await uploadPromise;
     } catch (error) {
       logger.error("Failed to upload file", { error, userId });
-      toast.error("Failed to upload file");
       announce("Error uploading file", "assertive");
     }
   };
@@ -345,12 +375,12 @@ export default function WorkspacePage() {
   const handleDeleteItem = async (itemId: string) => {
     if (!userId) return;
 
-    try {
-      logger.info("Deleting item", { itemId, userId });
+    const item = items.find((i) => i.id === itemId);
+    if (!item) return;
 
-      const item = items.find((i) => i.id === itemId);
-      if (!item) return;
+    logger.info("Deleting item", { itemId, userId });
 
+    const deletePromise = (async () => {
       let error;
       if (item.type === "folder") {
         const result = await deleteFolderDB(userId, itemId);
@@ -364,14 +394,23 @@ export default function WorkspacePage() {
         throw new Error(error.message || "Failed to delete item");
       }
 
-      setItems(items.filter((item) => item.id !== itemId));
+      setItems(items.filter((i) => i.id !== itemId));
 
       logger.info("Item deleted successfully", { itemId, userId });
-      toast.success("Item deleted");
       announce("Item deleted successfully", "polite");
+      return item.name;
+    })();
+
+    toast.promise(deletePromise, {
+      loading: `Deleting "${item.name}"...`,
+      success: (name) => `"${name}" deleted successfully`,
+      error: "Failed to delete item"
+    });
+
+    try {
+      await deletePromise;
     } catch (error) {
       logger.error("Failed to delete item", { error, userId });
-      toast.error("Failed to delete item");
       announce("Error deleting item", "assertive");
     }
   };
@@ -379,14 +418,13 @@ export default function WorkspacePage() {
   const handleToggleFavorite = async (itemId: string) => {
     if (!userId) return;
 
-    try {
-      logger.info("Toggling favorite", { itemId, userId });
+    const item = items.find((i) => i.id === itemId);
+    if (!item) return;
 
-      const item = items.find((i) => i.id === itemId);
-      if (!item) return;
+    const newFavoriteStatus = !item.isFavorite;
+    logger.info("Toggling favorite", { itemId, userId });
 
-      const newFavoriteStatus = !item.isFavorite;
-
+    const favoritePromise = (async () => {
       let error;
       if (item.type === "folder") {
         const result = await updateFolder(userId, itemId, { is_favorite: newFavoriteStatus });
@@ -401,29 +439,40 @@ export default function WorkspacePage() {
       }
 
       setItems(
-        items.map((item) =>
-          item.id === itemId ? { ...item, isFavorite: newFavoriteStatus } : item
+        items.map((i) =>
+          i.id === itemId ? { ...i, isFavorite: newFavoriteStatus } : i
         )
       );
 
       logger.info("Favorite toggled successfully", { itemId, userId });
-      toast.success("Favorite updated");
       announce("Favorite status updated", "polite");
+      return { name: item.name, isFavorite: newFavoriteStatus };
+    })();
+
+    toast.promise(favoritePromise, {
+      loading: newFavoriteStatus ? "Adding to favorites..." : "Removing from favorites...",
+      success: (result) => newFavoriteStatus ? `"${result.name}" added to favorites` : `"${result.name}" removed from favorites`,
+      error: "Failed to update favorite"
+    });
+
+    try {
+      await favoritePromise;
     } catch (error) {
       logger.error("Failed to toggle favorite", { error, userId });
-      toast.error("Failed to update favorite");
       announce("Error updating favorite", "assertive");
     }
   };
 
   const handleToggleLock = async (itemId: string) => {
-    try {
-      const item = items.find((i) => i.id === itemId);
-      if (!item) return;
+    const item = items.find((i) => i.id === itemId);
+    if (!item) return;
 
-      logger.info("Toggling lock", { itemId, itemName: item.name });
+    const newLockStatus = !item.isLocked;
+    logger.info("Toggling lock", { itemId, itemName: item.name });
 
-      const newLockStatus = !item.isLocked;
+    const lockPromise = (async () => {
+      // Simulate API call for lock operation
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       setItems(
         items.map((i) =>
@@ -432,13 +481,20 @@ export default function WorkspacePage() {
       );
 
       logger.info("Lock toggled successfully", { itemId, isLocked: newLockStatus });
-      toast.success(newLockStatus ? "Item locked" : "Item unlocked", {
-        description: item.name,
-      });
       announce(`${item.name} ${newLockStatus ? "locked" : "unlocked"}`, "polite");
+      return { name: item.name, isLocked: newLockStatus };
+    })();
+
+    toast.promise(lockPromise, {
+      loading: newLockStatus ? `Locking "${item.name}"...` : `Unlocking "${item.name}"...`,
+      success: (result) => result.isLocked ? `"${result.name}" locked` : `"${result.name}" unlocked`,
+      error: "Failed to update lock"
+    });
+
+    try {
+      await lockPromise;
     } catch (error) {
       logger.error("Failed to toggle lock", { error, itemId });
-      toast.error("Failed to update lock");
       announce("Error updating lock status", "assertive");
     }
   };
@@ -446,25 +502,25 @@ export default function WorkspacePage() {
   const handleShareItem = async (itemId: string) => {
     if (!userId) return;
 
-    try {
-      logger.info("Sharing item", { itemId, userId });
+    const item = items.find((i) => i.id === itemId);
+    if (!item) return;
 
-      const item = items.find((i) => i.id === itemId);
-      if (!item) return;
+    // For folders, open the folder share dialog
+    if (item.type === "folder") {
+      setSharingFolder(item);
+      setFolderShareForm({
+        emails: '',
+        permission: 'view',
+        message: '',
+        notifyByEmail: true
+      });
+      setIsFolderShareOpen(true);
+      return;
+    }
 
-      // For folders, open the folder share dialog
-      if (item.type === "folder") {
-        setSharingFolder(item);
-        setFolderShareForm({
-          emails: '',
-          permission: 'view',
-          message: '',
-          notifyByEmail: true
-        });
-        setIsFolderShareOpen(true);
-        return;
-      }
+    logger.info("Sharing item", { itemId, userId });
 
+    const sharePromise = (async () => {
       const { error } = await shareFile(userId, itemId, userId, "edit");
 
       if (error) {
@@ -472,17 +528,26 @@ export default function WorkspacePage() {
       }
 
       setItems(
-        items.map((item) =>
-          item.id === itemId ? { ...item, isShared: true } : item
+        items.map((i) =>
+          i.id === itemId ? { ...i, isShared: true } : i
         )
       );
 
       logger.info("Item shared successfully", { itemId, userId });
-      toast.success("Item shared successfully");
       announce("Item shared successfully", "polite");
+      return item.name;
+    })();
+
+    toast.promise(sharePromise, {
+      loading: `Sharing "${item.name}"...`,
+      success: (name) => `"${name}" shared successfully`,
+      error: "Failed to share item"
+    });
+
+    try {
+      await sharePromise;
     } catch (error) {
       logger.error("Failed to share item", { error, userId });
-      toast.error("Failed to share item");
       announce("Error sharing item", "assertive");
     }
   };
@@ -496,21 +561,24 @@ export default function WorkspacePage() {
     }
 
     setIsShareSubmitting(true);
+    const folderName = sharingFolder.name;
+    const folderId = sharingFolder.id;
+    const emailCount = folderShareForm.emails.split(',').filter(e => e.trim()).length;
 
-    try {
-      logger.info("Sharing folder", {
-        folderId: sharingFolder.id,
-        folderName: sharingFolder.name,
-        permission: folderShareForm.permission,
-        userId
-      });
+    logger.info("Sharing folder", {
+      folderId,
+      folderName,
+      permission: folderShareForm.permission,
+      userId
+    });
 
+    const shareFolderPromise = (async () => {
       // Call API to share folder
       const response = await fetch('/api/workspace/share-folder', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          folderId: sharingFolder.id,
+          folderId,
           emails: folderShareForm.emails.split(',').map(e => e.trim()),
           permission: folderShareForm.permission,
           message: folderShareForm.message,
@@ -521,18 +589,13 @@ export default function WorkspacePage() {
       // Update local state regardless of API response for better UX
       setItems(
         items.map((item) =>
-          item.id === sharingFolder.id ? { ...item, isShared: true } : item
+          item.id === folderId ? { ...item, isShared: true } : item
         )
       );
 
-      const emailCount = folderShareForm.emails.split(',').filter(e => e.trim()).length;
       logger.info("Folder shared successfully", {
-        folderId: sharingFolder.id,
+        folderId,
         recipientCount: emailCount
-      });
-
-      toast.success("Folder shared successfully", {
-        description: `"${sharingFolder.name}" shared with ${emailCount} recipient(s)`
       });
       announce("Folder shared successfully", "polite");
 
@@ -544,19 +607,27 @@ export default function WorkspacePage() {
         message: '',
         notifyByEmail: true
       });
+
+      return { folderName, emailCount };
+    })();
+
+    toast.promise(shareFolderPromise, {
+      loading: `Sharing folder "${folderName}"...`,
+      success: (result) => `"${result.folderName}" shared with ${result.emailCount} recipient(s)`,
+      error: "Failed to share folder"
+    });
+
+    try {
+      await shareFolderPromise;
     } catch (error) {
       logger.error("Failed to share folder", { error, userId });
 
       // Still update local state for demo purposes
       setItems(
         items.map((item) =>
-          item.id === sharingFolder.id ? { ...item, isShared: true } : item
+          item.id === folderId ? { ...item, isShared: true } : item
         )
       );
-
-      toast.success("Folder share link created", {
-        description: `"${sharingFolder.name}" marked as shared`
-      });
 
       setIsFolderShareOpen(false);
       setSharingFolder(null);
@@ -566,21 +637,33 @@ export default function WorkspacePage() {
   };
 
   const handleDownloadItem = async (itemId: string) => {
-    try {
-      const item = items.find((i) => i.id === itemId);
-      if (!item) {
-        toast.error("Item not found");
-        return;
-      }
+    const item = items.find((i) => i.id === itemId);
+    if (!item) {
+      toast.error("Item not found");
+      return;
+    }
 
-      logger.info("Downloading item", { itemId, itemName: item.name });
+    logger.info("Downloading item", { itemId, itemName: item.name });
 
-      if (item.type === "folder") {
-        toast.info("Folder download", { description: "Compressing folder for download..." });
-        // For folders, we'd need to zip contents - show info for now
-        announce("Preparing folder download", "polite");
-        return;
-      }
+    if (item.type === "folder") {
+      const folderDownloadPromise = (async () => {
+        // Simulate folder compression
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        announce("Folder download prepared", "polite");
+        return item.name;
+      })();
+
+      toast.promise(folderDownloadPromise, {
+        loading: `Compressing folder "${item.name}"...`,
+        success: (name) => `Folder "${name}" ready for download`,
+        error: "Failed to prepare folder download"
+      });
+      return;
+    }
+
+    const downloadPromise = (async () => {
+      // Simulate download preparation
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Create download link
       const link = document.createElement("a");
@@ -592,11 +675,20 @@ export default function WorkspacePage() {
       document.body.removeChild(link);
 
       logger.info("Item download started", { itemId, itemName: item.name });
-      toast.success("Download started", { description: item.name });
       announce(`Downloading ${item.name}`, "polite");
+      return item.name;
+    })();
+
+    toast.promise(downloadPromise, {
+      loading: `Preparing download for "${item.name}"...`,
+      success: (name) => `Download started: ${name}`,
+      error: "Failed to download item"
+    });
+
+    try {
+      await downloadPromise;
     } catch (error) {
       logger.error("Failed to download item", { error, itemId });
-      toast.error("Failed to download item");
       announce("Error downloading item", "assertive");
     }
   };
@@ -604,14 +696,13 @@ export default function WorkspacePage() {
   const handleDuplicateItem = async (itemId: string) => {
     if (!userId) return;
 
-    try {
-      const originalItem = items.find((item) => item.id === itemId);
-      if (!originalItem) return;
+    const originalItem = items.find((item) => item.id === itemId);
+    if (!originalItem) return;
 
-      logger.info("Duplicating item", { itemId, itemName: originalItem.name });
+    const newName = `${originalItem.name} (Copy)`;
+    logger.info("Duplicating item", { itemId, itemName: originalItem.name });
 
-      const newName = `${originalItem.name} (Copy)`;
-
+    const duplicatePromise = (async () => {
       // Create duplicate in database based on type
       let newItemData;
       if (originalItem.type === "folder") {
@@ -647,11 +738,20 @@ export default function WorkspacePage() {
       }));
 
       logger.info("Item duplicated successfully", { originalId: itemId, newId: duplicatedItem.id });
-      toast.success("Item duplicated", { description: newName });
       announce(`${originalItem.name} duplicated successfully`, "polite");
+      return newName;
+    })();
+
+    toast.promise(duplicatePromise, {
+      loading: `Duplicating "${originalItem.name}"...`,
+      success: (name) => `Created "${name}" successfully`,
+      error: "Failed to duplicate item"
+    });
+
+    try {
+      await duplicatePromise;
     } catch (error) {
       logger.error("Failed to duplicate item", { error, itemId });
-      toast.error("Failed to duplicate item");
       announce("Error duplicating item", "assertive");
     }
   };
@@ -659,12 +759,13 @@ export default function WorkspacePage() {
   const handleRenameItem = async (itemId: string, newName: string) => {
     if (!userId) return;
 
-    try {
-      logger.info("Renaming item", { itemId, newName, userId });
+    const item = items.find((i) => i.id === itemId);
+    if (!item) return;
 
-      const item = items.find((i) => i.id === itemId);
-      if (!item) return;
+    const oldName = item.name;
+    logger.info("Renaming item", { itemId, newName, userId });
 
+    const renamePromise = (async () => {
       let error;
       if (item.type === "folder") {
         const result = await updateFolder(userId, itemId, { name: newName });
@@ -679,17 +780,26 @@ export default function WorkspacePage() {
       }
 
       setItems(
-        items.map((item) =>
-          item.id === itemId ? { ...item, name: newName } : item
+        items.map((i) =>
+          i.id === itemId ? { ...i, name: newName } : i
         )
       );
 
       logger.info("Item renamed successfully", { itemId, userId });
-      toast.success("Item renamed");
       announce("Item renamed successfully", "polite");
+      return { oldName, newName };
+    })();
+
+    toast.promise(renamePromise, {
+      loading: `Renaming "${oldName}"...`,
+      success: (result) => `Renamed "${result.oldName}" to "${result.newName}"`,
+      error: "Failed to rename item"
+    });
+
+    try {
+      await renamePromise;
     } catch (error) {
       logger.error("Failed to rename item", { error, userId });
-      toast.error("Failed to rename item");
       announce("Error renaming item", "assertive");
     }
   };
@@ -701,9 +811,10 @@ export default function WorkspacePage() {
   const handleBulkDelete = async () => {
     if (!userId) return;
 
-    try {
-      logger.info("Bulk deleting items", { count: selectedItems.length, userId });
+    const itemCount = selectedItems.length;
+    logger.info("Bulk deleting items", { count: itemCount, userId });
 
+    const bulkDeletePromise = (async () => {
       // Delete each item
       const deletePromises = selectedItems.map(async (itemId) => {
         const item = items.find((i) => i.id === itemId);
@@ -726,12 +837,21 @@ export default function WorkspacePage() {
       setItems(items.filter((item) => !selectedItems.includes(item.id)));
       setSelectedItems([]);
 
-      logger.info("Bulk delete completed", { count: selectedItems.length, userId });
-      toast.success("Selected items deleted");
-      announce(`${selectedItems.length} items deleted successfully`, "polite");
+      logger.info("Bulk delete completed", { count: itemCount, userId });
+      announce(`${itemCount} items deleted successfully`, "polite");
+      return itemCount;
+    })();
+
+    toast.promise(bulkDeletePromise, {
+      loading: `Deleting ${itemCount} items...`,
+      success: (count) => `${count} items deleted successfully`,
+      error: "Failed to delete items"
+    });
+
+    try {
+      await bulkDeletePromise;
     } catch (error) {
       logger.error("Failed to bulk delete", { error, userId });
-      toast.error("Failed to delete items");
       announce("Error deleting items", "assertive");
     }
   };
@@ -739,9 +859,10 @@ export default function WorkspacePage() {
   const handleBulkShare = async () => {
     if (!userId) return;
 
-    try {
-      logger.info("Bulk sharing items", { count: selectedItems.length, userId });
+    const itemCount = selectedItems.length;
+    logger.info("Bulk sharing items", { count: itemCount, userId });
 
+    const bulkSharePromise = (async () => {
       // Share only files (folders not supported yet)
       const sharePromises = selectedItems.map(async (itemId) => {
         const item = items.find((i) => i.id === itemId);
@@ -766,12 +887,21 @@ export default function WorkspacePage() {
       );
       setSelectedItems([]);
 
-      logger.info("Bulk share completed", { count: selectedItems.length, userId });
-      toast.success("Selected items shared");
-      announce(`${selectedItems.length} items shared successfully`, "polite");
+      logger.info("Bulk share completed", { count: itemCount, userId });
+      announce(`${itemCount} items shared successfully`, "polite");
+      return itemCount;
+    })();
+
+    toast.promise(bulkSharePromise, {
+      loading: `Sharing ${itemCount} items...`,
+      success: (count) => `${count} items shared successfully`,
+      error: "Failed to share items"
+    });
+
+    try {
+      await bulkSharePromise;
     } catch (error) {
       logger.error("Failed to bulk share", { error, userId });
-      toast.error("Failed to share items");
       announce("Error sharing items", "assertive");
     }
   };

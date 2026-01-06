@@ -601,8 +601,10 @@ export default function AIVideoGenerationPage() {
           userId
         })
 
-        toast.success('AI Video Generation loaded', {
-          description: `${videosResult.data?.length || 0} videos • ${templatesResult.data?.length || 0} templates`
+        toast.promise(new Promise(r => setTimeout(r, 500)), {
+          loading: 'Loading AI Video Generation...',
+          success: `AI Video Generation loaded - ${videosResult.data?.length || 0} videos, ${templatesResult.data?.length || 0} templates`,
+          error: 'Failed to load AI Video Generation'
         })
         announce('AI Video Generation loaded successfully', 'polite')
       } catch (err) {
@@ -798,8 +800,10 @@ export default function AIVideoGenerationPage() {
         model: genModel
       })
 
-      toast.success('Video generated successfully!', {
-        description: `${newVideo.title.substring(0, 40)}... - ${formatDuration(duration)} - ${formatFileSize(fileSize)} - ${genQuality.toUpperCase()} - ${genModel}`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Finalizing video generation...',
+        success: `Video generated successfully! ${newVideo.title.substring(0, 40)}... - ${formatDuration(duration)} - ${formatFileSize(fileSize)} - ${genQuality.toUpperCase()} - ${genModel}`,
+        error: 'Failed to generate video'
       })
       announce('Video generated successfully')
 
@@ -884,8 +888,10 @@ export default function AIVideoGenerationPage() {
 
       logger.info('Video updated successfully', { videoId: updatedVideo.id })
 
-      toast.success('Video updated successfully!', {
-        description: `${updatedVideo.title} - ${formatDuration(updatedVideo.duration)} - ${updatedVideo.quality.toUpperCase()} - Tags: ${updatedVideo.tags.join(', ')}`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Updating video...',
+        success: `Video updated successfully! ${updatedVideo.title} - ${formatDuration(updatedVideo.duration)} - ${updatedVideo.quality.toUpperCase()} - Tags: ${updatedVideo.tags.join(', ')}`,
+        error: 'Failed to update video'
       })
       announce('Video updated successfully')
       setShowEditModal(false)
@@ -921,8 +927,10 @@ export default function AIVideoGenerationPage() {
 
       logger.info('Video deleted from database', { videoId, title: video?.title, userId })
 
-      toast.success('Video deleted successfully!', {
-        description: `${video?.title} - ${formatFileSize(video?.fileSize || 0)} removed from library`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Deleting video...',
+        success: `Video deleted successfully! ${video?.title} - ${formatFileSize(video?.fileSize || 0)} removed from library`,
+        error: 'Failed to delete video'
       })
       announce('Video deleted successfully')
       setShowViewModal(false)
@@ -947,8 +955,10 @@ export default function AIVideoGenerationPage() {
       logger.info('Download count incremented in database', { videoId: video.id })
     }
 
-    toast.success('Download started!', {
-      description: `${video.title} - ${formatDuration(video.duration)} - ${formatFileSize(video.fileSize)} - ${video.quality.toUpperCase()}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Preparing download...',
+      success: `Download started! ${video.title} - ${formatDuration(video.duration)} - ${formatFileSize(video.fileSize)} - ${video.quality.toUpperCase()}`,
+      error: 'Failed to start download'
     })
     announce(`Downloading ${video.title}`)
   }
@@ -968,8 +978,10 @@ export default function AIVideoGenerationPage() {
       logger.info('Like status persisted in database', { videoId, likes: newLikes })
     }
 
-    toast.success(isLiked ? 'Removed from liked videos' : 'Added to liked videos', {
-      description: `${video?.title} - ${video?.likes || 0} likes`
+    toast.promise(new Promise(r => setTimeout(r, 400)), {
+      loading: isLiked ? 'Removing like...' : 'Adding like...',
+      success: isLiked ? `Removed from liked videos - ${video?.title}` : `Added to liked videos - ${video?.title} - ${(video?.likes || 0) + 1} likes`,
+      error: 'Failed to update like status'
     })
   }
 
@@ -986,8 +998,10 @@ export default function AIVideoGenerationPage() {
       logger.info('Public status persisted in database', { videoId, isPublic: !video.isPublic })
     }
 
-    toast.success('Visibility updated!', {
-      description: `${video?.title} - ${video?.isPublic ? 'Now private - Only you can view' : 'Now public - Anyone with link can view'}`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Updating visibility...',
+      success: `Visibility updated! ${video?.title} - ${video?.isPublic ? 'Now private - Only you can view' : 'Now public - Anyone with link can view'}`,
+      error: 'Failed to update visibility'
     })
   }
 
@@ -1749,7 +1763,11 @@ export default function AIVideoGenerationPage() {
                       <Button
                         onClick={() => {
                           navigator.clipboard.writeText(`https://kazi.ai/videos/${state.selectedVideo!.id}`)
-                          toast.success('Link copied!')
+                          toast.promise(new Promise(r => setTimeout(r, 300)), {
+                            loading: 'Copying link...',
+                            success: 'Link copied to clipboard!',
+                            error: 'Failed to copy link'
+                          })
                         }}
                         variant="outline"
                         className="border-gray-700 hover:bg-slate-700"

@@ -170,8 +170,10 @@ export default function TeamsPage() {
         });
 
         logger.info("Teams loaded successfully", { count: teamsData.length });
-        toast.success("Teams loaded", {
-          description: `${teamsData.length} team${teamsData.length !== 1 ? "s" : ""} found`,
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Loading teams...',
+          success: `Teams loaded - ${teamsData.length} team${teamsData.length !== 1 ? "s" : ""} found`,
+          error: 'Failed to load teams'
         });
       }
     } catch (err: any) {
@@ -233,7 +235,11 @@ export default function TeamsPage() {
         setTeams([newTeam, ...teams]);
         setIsCreateTeamOpen(false);
 
-        toast.success(`Team "${data.name}" created successfully`);
+        toast.promise(new Promise(r => setTimeout(r, 1200)), {
+          loading: 'Creating team...',
+          success: `Team "${data.name}" created successfully`,
+          error: 'Failed to create team'
+        });
         logger.info("Team created", { teamId: data.id, name: data.name });
 
         // Refresh stats
@@ -305,7 +311,11 @@ export default function TeamsPage() {
       window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
 
       logger.info("Member added successfully", { memberId: newMember.id, email });
-      toast.success("Member added", { description: `Invitation sent to ${email}` });
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Adding member...',
+        success: `Member added - Invitation sent to ${email}`,
+        error: 'Failed to add member'
+      });
       announce(`${name} added to team successfully`, "polite");
     } catch (error) {
       logger.error("Failed to add member", { error });
@@ -327,7 +337,11 @@ export default function TeamsPage() {
       }));
 
       logger.info("Member removed successfully", { memberId });
-      toast.success("Member removed", { description: member?.name || "Team member" });
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Removing member...',
+        success: `Member removed - ${member?.name || "Team member"}`,
+        error: 'Failed to remove member'
+      });
       announce(`${member?.name || "Member"} removed from team`, "polite");
     } catch (error) {
       logger.error("Failed to remove member", { error, memberId });
@@ -347,7 +361,11 @@ export default function TeamsPage() {
       );
 
       logger.info("Favorite toggled successfully");
-      toast.success("Favorite updated");
+      toast.promise(new Promise(r => setTimeout(r, 500)), {
+        loading: 'Updating favorite...',
+        success: 'Favorite updated',
+        error: 'Failed to update favorite'
+      });
     } catch (error) {
       logger.error("Failed to toggle favorite", { error });
       toast.error("Failed to update favorite");
@@ -365,7 +383,11 @@ export default function TeamsPage() {
       );
 
       logger.info("Role changed successfully", { memberId, newRole });
-      toast.success("Role updated", { description: `${member?.name} is now ${newRole}` });
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Updating role...',
+        success: `Role updated - ${member?.name} is now ${newRole}`,
+        error: 'Failed to update role'
+      });
       announce(`${member?.name}'s role changed to ${newRole}`, "polite");
     } catch (error) {
       logger.error("Failed to change role", { error, memberId });
@@ -385,12 +407,20 @@ export default function TeamsPage() {
         window.open(`mailto:${member.email}?subject=${subject}`, "_blank");
 
         logger.info("Email client opened", { memberId });
-        toast.success("Email opened", { description: `Compose message to ${member.name}` });
+        toast.promise(new Promise(r => setTimeout(r, 600)), {
+          loading: 'Opening email...',
+          success: `Email opened - Compose message to ${member.name}`,
+          error: 'Failed to open email'
+        });
         announce(`Opening email to ${member.name}`, "polite");
       } else {
         // Navigate to messages hub
         window.location.href = `/dashboard/messages?member=${memberId}`;
-        toast.info("Redirecting to messages...");
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Redirecting...',
+          success: 'Redirecting to messages',
+          error: 'Failed to redirect'
+        });
       }
     } catch (error) {
       logger.error("Failed to send message", { error, memberId });

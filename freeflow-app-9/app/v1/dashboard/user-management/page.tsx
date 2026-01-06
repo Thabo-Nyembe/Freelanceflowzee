@@ -238,21 +238,25 @@ export default function UserManagementPage() {
     if (!selectedUser) return
 
     setIsProcessing(true)
-    try {
+    const updatePromise = (async () => {
       // Dynamic import for code splitting
       const { updateUser } = await import('@/lib/user-management-queries')
       await updateUser(selectedUser.id, editForm)
-
-      toast.success('User updated successfully!', {
-        description: `${editForm.firstName} ${editForm.lastName} has been updated`
-      })
       setIsEditDialogOpen(false)
       announce('User updated successfully', 'polite')
-
       // Refresh users list
       window.location.reload()
+    })()
+
+    toast.promise(updatePromise, {
+      loading: 'Updating user...',
+      success: `${editForm.firstName} ${editForm.lastName} has been updated`,
+      error: 'Failed to update user'
+    })
+
+    try {
+      await updatePromise
     } catch (err) {
-      toast.error('Failed to update user')
       announce('Failed to update user', 'assertive')
     } finally {
       setIsProcessing(false)
@@ -348,9 +352,16 @@ export default function UserManagementPage() {
 
   const handleCopyInviteLink = useCallback((invitation: any) => {
     const inviteLink = `${window.location.origin}/invite/${invitation.id}`
-    navigator.clipboard.writeText(inviteLink)
-    toast.success('Invite link copied to clipboard!')
-    announce('Invite link copied', 'polite')
+    toast.promise(
+      navigator.clipboard.writeText(inviteLink).then(() => {
+        announce('Invite link copied', 'polite')
+      }),
+      {
+        loading: 'Copying invite link...',
+        success: 'Invite link copied to clipboard!',
+        error: 'Failed to copy invite link'
+      }
+    )
   }, [announce])
 
   const handleResendInvitation = useCallback(async (invitation: any) => {

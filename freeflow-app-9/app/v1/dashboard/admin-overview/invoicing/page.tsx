@@ -181,10 +181,11 @@ export default function InvoicingPage() {
       return
     }
 
-    try {
+    const invoiceNumber = `INV-2024-${String(invoices.length + 1).padStart(3, '0')}`
+
+    const createOperation = async () => {
       logger.info('Creating new invoice', { userId })
 
-      const invoiceNumber = `INV-2024-${String(invoices.length + 1).padStart(3, '0')}`
       const { createInvoice } = await import('@/lib/admin-overview-queries')
 
       const newInvoice = await createInvoice(userId, {
@@ -200,22 +201,25 @@ export default function InvoicingPage() {
         items: []
       })
 
-      toast.success('Invoice Created', {
-        description: `Invoice ${invoiceNumber} has been created as draft`
-      })
-      announce('Invoice created successfully', 'polite')
       logger.info('Invoice created', { success: true, invoiceId: newInvoice.id })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
       const invoicesResult = await getInvoices(userId)
       setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Create failed'
-      toast.error('Create Failed', { description: message })
-      logger.error('Create invoice failed', { error })
-      announce('Failed to create invoice', 'assertive')
+      announce('Invoice created successfully', 'polite')
+      return newInvoice
     }
+
+    toast.promise(createOperation(), {
+      loading: 'Creating invoice...',
+      success: `Invoice ${invoiceNumber} created as draft`,
+      error: (err) => {
+        logger.error('Create invoice failed', { error: err })
+        announce('Failed to create invoice', 'assertive')
+        return err instanceof Error ? err.message : 'Create failed'
+      }
+    })
   }
 
   // Button 2: Edit Invoice
@@ -226,7 +230,7 @@ export default function InvoicingPage() {
       return
     }
 
-    try {
+    const editOperation = async () => {
       logger.info('Editing invoice', { userId, invoiceId })
 
       const { updateInvoice } = await import('@/lib/admin-overview-queries')
@@ -235,22 +239,24 @@ export default function InvoicingPage() {
         notes: 'Updated invoice terms'
       })
 
-      toast.success('Invoice Updated', {
-        description: 'Invoice details have been updated successfully'
-      })
-      announce('Invoice updated successfully', 'polite')
       logger.info('Invoice edited', { success: true, invoiceId })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
       const invoicesResult = await getInvoices(userId)
       setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
-      logger.error('Edit invoice failed', { error })
-      announce('Failed to edit invoice', 'assertive')
+      announce('Invoice updated successfully', 'polite')
     }
+
+    toast.promise(editOperation(), {
+      loading: 'Updating invoice...',
+      success: 'Invoice details updated successfully',
+      error: (err) => {
+        logger.error('Edit invoice failed', { error: err })
+        announce('Failed to edit invoice', 'assertive')
+        return err instanceof Error ? err.message : 'Edit failed'
+      }
+    })
   }
 
   // Button 3: Delete Invoice
@@ -268,30 +274,33 @@ export default function InvoicingPage() {
       return
     }
 
-    try {
-      logger.info('Deleting invoice', { userId, invoiceId: deleteInvoice.id })
+    const invoiceToDelete = deleteInvoice
+    setDeleteInvoice(null)
+
+    const deleteOperation = async () => {
+      logger.info('Deleting invoice', { userId, invoiceId: invoiceToDelete.id })
 
       const { deleteInvoice: deleteInvoiceQuery } = await import('@/lib/admin-overview-queries')
-      await deleteInvoiceQuery(deleteInvoice.id)
+      await deleteInvoiceQuery(invoiceToDelete.id)
 
-      toast.success('Invoice Deleted', {
-        description: `${deleteInvoice.number} has been permanently removed`
-      })
-      announce('Invoice deleted successfully', 'polite')
-      logger.info('Invoice deleted', { success: true, invoiceId: deleteInvoice.id })
+      logger.info('Invoice deleted', { success: true, invoiceId: invoiceToDelete.id })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
       const invoicesResult = await getInvoices(userId)
       setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Delete failed'
-      toast.error('Delete Failed', { description: message })
-      logger.error('Delete invoice failed', { error })
-      announce('Failed to delete invoice', 'assertive')
-    } finally {
-      setDeleteInvoice(null)
+      announce('Invoice deleted successfully', 'polite')
     }
+
+    toast.promise(deleteOperation(), {
+      loading: 'Deleting invoice...',
+      success: `${invoiceToDelete.number} permanently removed`,
+      error: (err) => {
+        logger.error('Delete invoice failed', { error: err })
+        announce('Failed to delete invoice', 'assertive')
+        return err instanceof Error ? err.message : 'Delete failed'
+      }
+    })
   }
 
   // Button 4: Send Invoice
@@ -302,28 +311,30 @@ export default function InvoicingPage() {
       return
     }
 
-    try {
+    const sendOperation = async () => {
       logger.info('Sending invoice', { userId, invoiceId })
 
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(invoiceId, 'sent')
 
-      toast.success('Invoice Sent', {
-        description: `${invoiceNumber} has been sent to ${clientEmail}`
-      })
-      announce('Invoice sent successfully', 'polite')
       logger.info('Invoice sent', { success: true, invoiceId })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
       const invoicesResult = await getInvoices(userId)
       setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Send failed'
-      toast.error('Send Failed', { description: message })
-      logger.error('Send invoice failed', { error })
-      announce('Failed to send invoice', 'assertive')
+      announce('Invoice sent successfully', 'polite')
     }
+
+    toast.promise(sendOperation(), {
+      loading: 'Sending invoice...',
+      success: `${invoiceNumber} sent to ${clientEmail}`,
+      error: (err) => {
+        logger.error('Send invoice failed', { error: err })
+        announce('Failed to send invoice', 'assertive')
+        return err instanceof Error ? err.message : 'Send failed'
+      }
+    })
   }
 
   // Button 5: Mark as Paid
@@ -334,28 +345,30 @@ export default function InvoicingPage() {
       return
     }
 
-    try {
+    const markPaidOperation = async () => {
       logger.info('Marking invoice as paid', { userId, invoiceId })
 
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(invoiceId, 'paid')
 
-      toast.success('Invoice Marked as Paid', {
-        description: `${invoiceNumber} has been marked as paid and closed`
-      })
-      announce('Invoice marked as paid', 'polite')
       logger.info('Invoice marked as paid', { success: true, invoiceId })
 
       // Reload invoices
       const { getInvoices } = await import('@/lib/admin-overview-queries')
       const invoicesResult = await getInvoices(userId)
       setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Update failed'
-      toast.error('Update Failed', { description: message })
-      logger.error('Mark as paid failed', { error })
-      announce('Failed to mark invoice as paid', 'assertive')
+      announce('Invoice marked as paid', 'polite')
     }
+
+    toast.promise(markPaidOperation(), {
+      loading: 'Marking as paid...',
+      success: `${invoiceNumber} marked as paid and closed`,
+      error: (err) => {
+        logger.error('Mark as paid failed', { error: err })
+        announce('Failed to mark invoice as paid', 'assertive')
+        return err instanceof Error ? err.message : 'Update failed'
+      }
+    })
   }
 
   // Button 6: Download PDF

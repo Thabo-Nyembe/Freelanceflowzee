@@ -170,37 +170,37 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Adding new lead')
-
-      const { createLead, getLeads } = await import('@/lib/admin-marketing-queries')
-
-      const leadData = {
-        name: 'New Lead',
-        email: 'lead@company.com',
-        status: 'new' as const,
-        score: 'warm' as const,
-        score_value: 60,
-        source: 'manual' as const
-      }
-
-      const result = await createLead(userId, leadData)
-
-      toast.success('Lead Added', {
-        description: `${leadData.name} has been added to your lead list`
-      })
-      logger.info('Lead added', { success: true, result })
-      announce('Lead added successfully', 'polite')
-
-      // Reload leads
-      const leadsResult = await getLeads(userId)
-      setLeads(leadsResult.data || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Add failed'
-      toast.error('Add Failed', { description: message })
-      logger.error('Add lead failed', { error: message })
-      announce('Failed to add lead', 'assertive')
+    const leadData = {
+      name: 'New Lead',
+      email: 'lead@company.com',
+      status: 'new' as const,
+      score: 'warm' as const,
+      score_value: 60,
+      source: 'manual' as const
     }
+
+    toast.promise(
+      (async () => {
+        logger.info('Adding new lead')
+        const { createLead, getLeads } = await import('@/lib/admin-marketing-queries')
+        const result = await createLead(userId, leadData)
+        logger.info('Lead added', { success: true, result })
+        announce('Lead added successfully', 'polite')
+        const leadsResult = await getLeads(userId)
+        setLeads(leadsResult.data || [])
+        return result
+      })(),
+      {
+        loading: 'Adding new lead...',
+        success: `${leadData.name} has been added to your lead list`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Add failed'
+          logger.error('Add lead failed', { error: message })
+          announce('Failed to add lead', 'assertive')
+          return `Add Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 2: Edit Lead
@@ -210,31 +210,27 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Editing lead', { leadId })
-
-      const { updateLead, getLeads } = await import('@/lib/admin-marketing-queries')
-
-      await updateLead(leadId, {
-        score_value: 90,
-        score: 'hot'
-      })
-
-      toast.success('Lead Updated', {
-        description: 'Lead information has been updated successfully'
-      })
-      logger.info('Lead edited', { success: true, leadId })
-      announce('Lead updated successfully', 'polite')
-
-      // Reload leads
-      const leadsResult = await getLeads(userId)
-      setLeads(leadsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
-      logger.error('Edit lead failed', { error: message })
-      announce('Failed to edit lead', 'assertive')
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Editing lead', { leadId })
+        const { updateLead, getLeads } = await import('@/lib/admin-marketing-queries')
+        await updateLead(leadId, { score_value: 90, score: 'hot' })
+        logger.info('Lead edited', { success: true, leadId })
+        announce('Lead updated successfully', 'polite')
+        const leadsResult = await getLeads(userId)
+        setLeads(leadsResult || [])
+      })(),
+      {
+        loading: 'Updating lead...',
+        success: 'Lead information has been updated successfully',
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Edit failed'
+          logger.error('Edit lead failed', { error: message })
+          announce('Failed to edit lead', 'assertive')
+          return `Edit Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 3: Delete Lead
@@ -251,30 +247,31 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Deleting lead', { leadId: deleteLead.id })
+    const leadName = deleteLead.name
+    const leadId = deleteLead.id
 
-      const { deleteLead: deleteLeadQuery, getLeads } = await import('@/lib/admin-marketing-queries')
-
-      await deleteLeadQuery(deleteLead.id)
-
-      toast.success('Lead Deleted', {
-        description: `${deleteLead.name} has been removed from your leads`
-      })
-      logger.info('Lead deleted', { success: true, leadId: deleteLead.id })
-      announce('Lead deleted successfully', 'polite')
-
-      // Reload leads
-      const leadsResult = await getLeads(userId)
-      setLeads(leadsResult.data || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Delete failed'
-      toast.error('Delete Failed', { description: message })
-      logger.error('Delete lead failed', { error: message })
-      announce('Failed to delete lead', 'assertive')
-    } finally {
-      setDeleteLead(null)
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Deleting lead', { leadId })
+        const { deleteLead: deleteLeadQuery, getLeads } = await import('@/lib/admin-marketing-queries')
+        await deleteLeadQuery(leadId)
+        logger.info('Lead deleted', { success: true, leadId })
+        announce('Lead deleted successfully', 'polite')
+        const leadsResult = await getLeads(userId)
+        setLeads(leadsResult.data || [])
+      })(),
+      {
+        loading: 'Deleting lead...',
+        success: `${leadName} has been removed from your leads`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Delete failed'
+          logger.error('Delete lead failed', { error: message })
+          announce('Failed to delete lead', 'assertive')
+          return `Delete Failed: ${message}`
+        }
+      }
+    )
+    setDeleteLead(null)
   }
 
   // Button 4: Qualify Lead
@@ -284,28 +281,27 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Qualifying lead', { leadId })
-
-      const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
-
-      await updateLeadStatus(leadId, 'qualified')
-
-      toast.success('Lead Qualified', {
-        description: `${leadName} has been marked as qualified and ready for sales`
-      })
-      logger.info('Lead qualified', { success: true, leadId })
-      announce('Lead qualified successfully', 'polite')
-
-      // Reload leads
-      const leadsResult = await getLeads(userId)
-      setLeads(leadsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Qualify failed'
-      toast.error('Qualify Failed', { description: message })
-      logger.error('Qualify lead failed', { error: message })
-      announce('Failed to qualify lead', 'assertive')
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Qualifying lead', { leadId })
+        const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
+        await updateLeadStatus(leadId, 'qualified')
+        logger.info('Lead qualified', { success: true, leadId })
+        announce('Lead qualified successfully', 'polite')
+        const leadsResult = await getLeads(userId)
+        setLeads(leadsResult || [])
+      })(),
+      {
+        loading: 'Qualifying lead...',
+        success: `${leadName} has been marked as qualified and ready for sales`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Qualify failed'
+          logger.error('Qualify lead failed', { error: message })
+          announce('Failed to qualify lead', 'assertive')
+          return `Qualify Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 5: Convert to Deal
@@ -315,59 +311,62 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Converting lead to deal', { leadId })
-
-      // Update lead status to converted
-      // NOTE: Future integration with CRM deals system will create actual deal record
-      const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
-
-      await updateLeadStatus(leadId, 'won')
-
-      toast.success('Lead Converted', {
-        description: `${leadName} has been converted successfully`
-      })
-      logger.info('Lead converted to deal', { success: true, leadId })
-      announce('Lead converted to deal', 'polite')
-
-      // Reload leads
-      const leadsResult = await getLeads(userId)
-      setLeads(leadsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Conversion failed'
-      toast.error('Conversion Failed', { description: message })
-      logger.error('Convert lead failed', { error: message })
-      announce('Failed to convert lead', 'assertive')
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Converting lead to deal', { leadId })
+        // Update lead status to converted
+        // NOTE: Future integration with CRM deals system will create actual deal record
+        const { updateLeadStatus, getLeads } = await import('@/lib/admin-marketing-queries')
+        await updateLeadStatus(leadId, 'won')
+        logger.info('Lead converted to deal', { success: true, leadId })
+        announce('Lead converted to deal', 'polite')
+        const leadsResult = await getLeads(userId)
+        setLeads(leadsResult || [])
+      })(),
+      {
+        loading: 'Converting lead to deal...',
+        success: `${leadName} has been converted successfully`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Conversion failed'
+          logger.error('Convert lead failed', { error: message })
+          announce('Failed to convert lead', 'assertive')
+          return `Conversion Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 6: Export Leads
   // NOTE: Export functionality uses API endpoint for server-side CSV generation
   // This requires special file handling that's better suited for API routes
   const handleExportLeads = async () => {
-    try {
-      logger.info('Exporting leads')
+    const leadsCount = filteredLeads.length
 
-      const response = await fetch('/api/admin/marketing/leads/export', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ format: 'csv', status: leadsTab })
-      })
-
-      if (!response.ok) throw new Error('Failed to export leads')
-      const result = await response.json()
-
-      toast.success('Leads Exported', {
-        description: `${filteredLeads.length} leads have been exported to CSV file`
-      })
-      logger.info('Leads export completed', { success: true, count: filteredLeads.length, result })
-      announce('Leads exported successfully', 'polite')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Export failed'
-      toast.error('Export Failed', { description: message })
-      logger.error('Export leads failed', { error: message })
-      announce('Failed to export leads', 'assertive')
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Exporting leads')
+        const response = await fetch('/api/admin/marketing/leads/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ format: 'csv', status: leadsTab })
+        })
+        if (!response.ok) throw new Error('Failed to export leads')
+        const result = await response.json()
+        logger.info('Leads export completed', { success: true, count: leadsCount, result })
+        announce('Leads exported successfully', 'polite')
+        return result
+      })(),
+      {
+        loading: 'Exporting leads to CSV...',
+        success: `${leadsCount} leads have been exported to CSV file`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Export failed'
+          logger.error('Export leads failed', { error: message })
+          announce('Failed to export leads', 'assertive')
+          return `Export Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 7: Create Campaign
@@ -377,37 +376,37 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Creating new campaign')
-
-      const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
-
-      const campaignData = {
-        name: 'New Campaign',
-        type: 'email' as const,
-        status: 'draft' as const,
-        start_date: new Date().toISOString(),
-        budget: 10000,
-        spent: 0
-      }
-
-      const result = await createCampaign(userId, campaignData)
-
-      toast.success('Campaign Created', {
-        description: 'New campaign has been created as draft'
-      })
-      logger.info('Campaign created', { success: true, result })
-      announce('Campaign created successfully', 'polite')
-
-      // Reload campaigns
-      const campaignsResult = await getCampaigns(userId)
-      setCampaigns(campaignsResult.data || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Create failed'
-      toast.error('Create Failed', { description: message })
-      logger.error('Create campaign failed', { error: message })
-      announce('Failed to create campaign', 'assertive')
+    const campaignData = {
+      name: 'New Campaign',
+      type: 'email' as const,
+      status: 'draft' as const,
+      start_date: new Date().toISOString(),
+      budget: 10000,
+      spent: 0
     }
+
+    toast.promise(
+      (async () => {
+        logger.info('Creating new campaign')
+        const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        const result = await createCampaign(userId, campaignData)
+        logger.info('Campaign created', { success: true, result })
+        announce('Campaign created successfully', 'polite')
+        const campaignsResult = await getCampaigns(userId)
+        setCampaigns(campaignsResult.data || [])
+        return result
+      })(),
+      {
+        loading: 'Creating new campaign...',
+        success: 'New campaign has been created as draft',
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Create failed'
+          logger.error('Create campaign failed', { error: message })
+          announce('Failed to create campaign', 'assertive')
+          return `Create Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 8: Edit Campaign
@@ -417,30 +416,27 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Editing campaign', { campaignId })
-
-      const { updateCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
-
-      await updateCampaign(campaignId, {
-        budget: 15000
-      })
-
-      toast.success('Campaign Updated', {
-        description: 'Campaign settings have been updated successfully'
-      })
-      logger.info('Campaign edited', { success: true, campaignId })
-      announce('Campaign updated successfully', 'polite')
-
-      // Reload campaigns
-      const campaignsResult = await getCampaigns(userId)
-      setCampaigns(campaignsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
-      logger.error('Edit campaign failed', { error: message })
-      announce('Failed to edit campaign', 'assertive')
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Editing campaign', { campaignId })
+        const { updateCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        await updateCampaign(campaignId, { budget: 15000 })
+        logger.info('Campaign edited', { success: true, campaignId })
+        announce('Campaign updated successfully', 'polite')
+        const campaignsResult = await getCampaigns(userId)
+        setCampaigns(campaignsResult || [])
+      })(),
+      {
+        loading: 'Updating campaign...',
+        success: 'Campaign settings have been updated successfully',
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Edit failed'
+          logger.error('Edit campaign failed', { error: message })
+          announce('Failed to edit campaign', 'assertive')
+          return `Edit Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 9: Delete Campaign
@@ -457,30 +453,31 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Deleting campaign', { campaignId: deleteCampaign.id })
+    const campaignName = deleteCampaign.name
+    const campaignId = deleteCampaign.id
 
-      const { deleteCampaign: deleteCampaignQuery, getCampaigns } = await import('@/lib/admin-marketing-queries')
-
-      await deleteCampaignQuery(deleteCampaign.id)
-
-      toast.success('Campaign Deleted', {
-        description: `"${deleteCampaign.name}" has been permanently removed`
-      })
-      logger.info('Campaign deleted', { success: true, campaignId: deleteCampaign.id })
-      announce('Campaign deleted successfully', 'polite')
-
-      // Reload campaigns
-      const campaignsResult = await getCampaigns(userId)
-      setCampaigns(campaignsResult.data || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Delete failed'
-      toast.error('Delete Failed', { description: message })
-      logger.error('Delete campaign failed', { error: message })
-      announce('Failed to delete campaign', 'assertive')
-    } finally {
-      setDeleteCampaign(null)
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Deleting campaign', { campaignId })
+        const { deleteCampaign: deleteCampaignQuery, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        await deleteCampaignQuery(campaignId)
+        logger.info('Campaign deleted', { success: true, campaignId })
+        announce('Campaign deleted successfully', 'polite')
+        const campaignsResult = await getCampaigns(userId)
+        setCampaigns(campaignsResult.data || [])
+      })(),
+      {
+        loading: 'Deleting campaign...',
+        success: `"${campaignName}" has been permanently removed`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Delete failed'
+          logger.error('Delete campaign failed', { error: message })
+          announce('Failed to delete campaign', 'assertive')
+          return `Delete Failed: ${message}`
+        }
+      }
+    )
+    setDeleteCampaign(null)
   }
 
   // Button 10: Send Campaign
@@ -490,28 +487,27 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Sending campaign', { campaignId })
-
-      const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
-
-      await updateCampaignStatus(campaignId, 'active')
-
-      toast.success('Campaign Sent', {
-        description: `"${campaignName}" has been sent to target audience`
-      })
-      logger.info('Campaign sent', { success: true, campaignId })
-      announce('Campaign sent successfully', 'polite')
-
-      // Reload campaigns
-      const campaignsResult = await getCampaigns(userId)
-      setCampaigns(campaignsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Send failed'
-      toast.error('Send Failed', { description: message })
-      logger.error('Send campaign failed', { error: message })
-      announce('Failed to send campaign', 'assertive')
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Sending campaign', { campaignId })
+        const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        await updateCampaignStatus(campaignId, 'active')
+        logger.info('Campaign sent', { success: true, campaignId })
+        announce('Campaign sent successfully', 'polite')
+        const campaignsResult = await getCampaigns(userId)
+        setCampaigns(campaignsResult || [])
+      })(),
+      {
+        loading: 'Sending campaign...',
+        success: `"${campaignName}" has been sent to target audience`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Send failed'
+          logger.error('Send campaign failed', { error: message })
+          announce('Failed to send campaign', 'assertive')
+          return `Send Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 11: Schedule Campaign
@@ -521,28 +517,27 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Scheduling campaign', { campaignId })
-
-      const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
-
-      await updateCampaignStatus(campaignId, 'scheduled')
-
-      toast.success('Campaign Scheduled', {
-        description: `"${campaignName}" scheduled to launch tomorrow`
-      })
-      logger.info('Campaign scheduled', { success: true, campaignId })
-      announce('Campaign scheduled successfully', 'polite')
-
-      // Reload campaigns
-      const campaignsResult = await getCampaigns(userId)
-      setCampaigns(campaignsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Schedule failed'
-      toast.error('Schedule Failed', { description: message })
-      logger.error('Schedule campaign failed', { error: message })
-      announce('Failed to schedule campaign', 'assertive')
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Scheduling campaign', { campaignId })
+        const { updateCampaignStatus, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        await updateCampaignStatus(campaignId, 'scheduled')
+        logger.info('Campaign scheduled', { success: true, campaignId })
+        announce('Campaign scheduled successfully', 'polite')
+        const campaignsResult = await getCampaigns(userId)
+        setCampaigns(campaignsResult || [])
+      })(),
+      {
+        loading: 'Scheduling campaign...',
+        success: `"${campaignName}" scheduled to launch tomorrow`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Schedule failed'
+          logger.error('Schedule campaign failed', { error: message })
+          announce('Failed to schedule campaign', 'assertive')
+          return `Schedule Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 12: View Campaign Analytics
@@ -550,8 +545,10 @@ export default function MarketingPage() {
     logger.info('Opening campaign analytics', { campaignId: campaign.id })
     setSelectedCampaign(campaign)
     setShowCampaignModal(true)
-    toast.info('Campaign Analytics', {
-      description: `Viewing detailed analytics for "${campaign.name}"`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Loading campaign analytics...',
+      success: `Viewing detailed analytics for "${campaign.name}"`,
+      error: 'Failed to load analytics'
     })
     announce('Campaign analytics opened', 'polite')
   }
@@ -560,32 +557,31 @@ export default function MarketingPage() {
   // NOTE: A/B testing requires specialized logic for variant creation and analytics
   // This uses API endpoint for complex business logic that creates test variants
   const handleABTestCampaign = async (campaignId: string, campaignName: string) => {
-    try {
-      logger.info('Creating A/B test for campaign', { campaignId })
-
-      const response = await fetch(`/api/admin/marketing/campaigns/${campaignId}/ab-test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          variants: ['A', 'B'],
-          splitRatio: 50
+    toast.promise(
+      (async () => {
+        logger.info('Creating A/B test for campaign', { campaignId })
+        const response = await fetch(`/api/admin/marketing/campaigns/${campaignId}/ab-test`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ variants: ['A', 'B'], splitRatio: 50 })
         })
-      })
-
-      if (!response.ok) throw new Error('Failed to create A/B test')
-      const result = await response.json()
-
-      toast.success('A/B Test Created', {
-        description: `A/B test created for "${campaignName}" with 50/50 split`
-      })
-      logger.info('A/B test created', { success: true, campaignId, result })
-      announce('A/B test created successfully', 'polite')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'A/B test failed'
-      toast.error('A/B Test Failed', { description: message })
-      logger.error('A/B test failed', { error: message })
-      announce('Failed to create A/B test', 'assertive')
-    }
+        if (!response.ok) throw new Error('Failed to create A/B test')
+        const result = await response.json()
+        logger.info('A/B test created', { success: true, campaignId, result })
+        announce('A/B test created successfully', 'polite')
+        return result
+      })(),
+      {
+        loading: 'Creating A/B test...',
+        success: `A/B test created for "${campaignName}" with 50/50 split`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'A/B test failed'
+          logger.error('A/B test failed', { error: message })
+          announce('Failed to create A/B test', 'assertive')
+          return `A/B Test Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Button 14: Duplicate Campaign
@@ -595,46 +591,40 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Duplicating campaign', { campaignId })
-
-      const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
-
-      // Find the original campaign
-      const originalCampaign = campaigns.find(c => c.id === campaignId)
-      if (!originalCampaign) {
-        throw new Error('Campaign not found')
+    toast.promise(
+      (async () => {
+        logger.info('Duplicating campaign', { campaignId })
+        const { createCampaign, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        const originalCampaign = campaigns.find(c => c.id === campaignId)
+        if (!originalCampaign) throw new Error('Campaign not found')
+        await createCampaign(userId, {
+          name: `${originalCampaign.name} (Copy)`,
+          description: originalCampaign.description,
+          type: originalCampaign.type,
+          status: 'draft',
+          budget: originalCampaign.budget,
+          spent: 0,
+          start_date: new Date().toISOString(),
+          target_audience: originalCampaign.targetAudience ? [String(originalCampaign.targetAudience)] : undefined,
+          channels: originalCampaign.channels,
+          tags: originalCampaign.tags
+        })
+        logger.info('Campaign duplicated', { success: true, campaignId })
+        announce('Campaign duplicated successfully', 'polite')
+        const campaignsResult = await getCampaigns(userId)
+        setCampaigns(campaignsResult || [])
+      })(),
+      {
+        loading: 'Duplicating campaign...',
+        success: `Copy of "${campaignName}" has been created`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Duplicate failed'
+          logger.error('Duplicate campaign failed', { error: message })
+          announce('Failed to duplicate campaign', 'assertive')
+          return `Duplicate Failed: ${message}`
+        }
       }
-
-      // Create duplicate with modified data
-      await createCampaign(userId, {
-        name: `${originalCampaign.name} (Copy)`,
-        description: originalCampaign.description,
-        type: originalCampaign.type,
-        status: 'draft',
-        budget: originalCampaign.budget,
-        spent: 0,
-        start_date: new Date().toISOString(),
-        target_audience: originalCampaign.targetAudience ? [String(originalCampaign.targetAudience)] : undefined,
-        channels: originalCampaign.channels,
-        tags: originalCampaign.tags
-      })
-
-      toast.success('Campaign Duplicated', {
-        description: `Copy of "${campaignName}" has been created`
-      })
-      logger.info('Campaign duplicated', { success: true, campaignId })
-      announce('Campaign duplicated successfully', 'polite')
-
-      // Reload campaigns
-      const campaignsResult = await getCampaigns(userId)
-      setCampaigns(campaignsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Duplicate failed'
-      toast.error('Duplicate Failed', { description: message })
-      logger.error('Duplicate campaign failed', { error: message })
-      announce('Failed to duplicate campaign', 'assertive')
-    }
+    )
   }
 
   // Button 15: Refresh Marketing
@@ -644,34 +634,35 @@ export default function MarketingPage() {
       return
     }
 
-    try {
-      logger.info('Refreshing marketing data')
-
-      const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
-
-      const [leadsResult, campaignsResult] = await Promise.all([
-        getLeads(userId),
-        getCampaigns(userId)
-      ])
-
-      setLeads(leadsResult || [])
-      setCampaigns(campaignsResult || [])
-
-      toast.success('Marketing Refreshed', {
-        description: `Reloaded ${leadsResult?.length || 0} leads and ${campaignsResult?.length || 0} campaigns`
-      })
-      logger.info('Marketing refresh completed', {
-        success: true,
-        leadCount: leadsResult?.length || 0,
-        campaignCount: campaignsResult?.length || 0
-      })
-      announce('Marketing refreshed successfully', 'polite')
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Refresh failed'
-      toast.error('Refresh Failed', { description: message })
-      logger.error('Marketing refresh failed', { error: message })
-      announce('Failed to refresh marketing', 'assertive')
-    }
+    toast.promise(
+      (async () => {
+        logger.info('Refreshing marketing data')
+        const { getLeads, getCampaigns } = await import('@/lib/admin-marketing-queries')
+        const [leadsResult, campaignsResult] = await Promise.all([
+          getLeads(userId),
+          getCampaigns(userId)
+        ])
+        setLeads(leadsResult || [])
+        setCampaigns(campaignsResult || [])
+        logger.info('Marketing refresh completed', {
+          success: true,
+          leadCount: leadsResult?.length || 0,
+          campaignCount: campaignsResult?.length || 0
+        })
+        announce('Marketing refreshed successfully', 'polite')
+        return { leadsCount: leadsResult?.length || 0, campaignsCount: campaignsResult?.length || 0 }
+      })(),
+      {
+        loading: 'Refreshing marketing data...',
+        success: (data) => `Reloaded ${data.leadsCount} leads and ${data.campaignsCount} campaigns`,
+        error: (err) => {
+          const message = err instanceof Error ? err.message : 'Refresh failed'
+          logger.error('Marketing refresh failed', { error: message })
+          announce('Failed to refresh marketing', 'assertive')
+          return `Refresh Failed: ${message}`
+        }
+      }
+    )
   }
 
   // Loading state

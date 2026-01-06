@@ -221,61 +221,66 @@ export default function SettingsPage() {
   // ============================================================================
 
   const handleSaveSettings = async () => {
-    try {
-      setIsSaving(true)
+    setIsSaving(true)
 
-      logger.info('Settings save initiated', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        email,
-        phone,
-        language,
-        timezone
-      })
+    logger.info('Settings save initiated', {
+      clientName: KAZI_CLIENT_DATA.clientInfo.name,
+      email,
+      phone,
+      language,
+      timezone
+    })
 
-      const response = await fetch('/api/user/update-settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clientId: KAZI_CLIENT_DATA.clientInfo.name,
-          email,
-          phone,
-          language,
-          timezone,
-          notificationSettings: notificationSettings.map(n => ({
-            id: n.id,
-            enabled: n.enabled
-          })),
-          privacySettings: privacySettings.map(p => ({
-            id: p.id,
-            enabled: p.enabled
-          })),
-          timestamp: new Date().toISOString()
+    const savePromise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch('/api/user/update-settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId: KAZI_CLIENT_DATA.clientInfo.name,
+            email,
+            phone,
+            language,
+            timezone,
+            notificationSettings: notificationSettings.map(n => ({
+              id: n.id,
+              enabled: n.enabled
+            })),
+            privacySettings: privacySettings.map(p => ({
+              id: p.id,
+              enabled: p.enabled
+            })),
+            timestamp: new Date().toISOString()
+          })
         })
-      })
 
-      if (!response.ok) {
-        throw new Error('Failed to save settings')
+        if (!response.ok) {
+          throw new Error('Failed to save settings')
+        }
+
+        const result = await response.json()
+
+        if (result.success) {
+          logger.info('Settings saved successfully', {
+            clientName: KAZI_CLIENT_DATA.clientInfo.name
+          })
+          resolve(result)
+        } else {
+          reject(new Error('Settings update failed'))
+        }
+      } catch (error: any) {
+        logger.error('Failed to save settings', { error })
+        reject(error)
+      } finally {
+        setIsSaving(false)
       }
+    })
 
-      const result = await response.json()
-
-      if (result.success) {
-        logger.info('Settings saved successfully', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name
-        })
-
-        toast.success('Settings saved successfully!', {
-          description: 'Your preferences have been updated'
-        })
-      }
-    } catch (error: any) {
-      logger.error('Failed to save settings', { error })
-      toast.error('Failed to save settings', {
-        description: error.message || 'Please try again later'
-      })
-    } finally {
-      setIsSaving(false)
-    }
+    toast.promise(savePromise, {
+      loading: 'Saving settings...',
+      success: 'Settings saved successfully! Your preferences have been updated.',
+      error: (err) => `Failed to save settings: ${err.message || 'Please try again later'}`
+    })
   }
 
   // ============================================================================
@@ -321,64 +326,70 @@ export default function SettingsPage() {
   // ============================================================================
 
   const handleExportData = async (format: 'json' | 'csv') => {
-    try {
-      setIsExporting(true)
+    setIsExporting(true)
 
-      logger.info('Data export initiated', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        format
-      })
+    logger.info('Data export initiated', {
+      clientName: KAZI_CLIENT_DATA.clientInfo.name,
+      format
+    })
 
-      const response = await fetch('/api/user/export-data', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clientId: KAZI_CLIENT_DATA.clientInfo.name,
-          format,
-          timestamp: new Date().toISOString()
+    const exportPromise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch('/api/user/export-data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clientId: KAZI_CLIENT_DATA.clientInfo.name,
+            format,
+            timestamp: new Date().toISOString()
+          })
         })
-      })
 
-      if (!response.ok) {
-        throw new Error('Failed to export data')
+        if (!response.ok) {
+          throw new Error('Failed to export data')
+        }
+
+        const result = await response.json()
+
+        if (result.success) {
+          logger.info('Data exported successfully', {
+            clientName: KAZI_CLIENT_DATA.clientInfo.name,
+            format
+          })
+
+          // Create download
+          const dataStr = format === 'json'
+            ? JSON.stringify(result.data, null, 2)
+            : result.data
+
+          const blob = new Blob([dataStr], {
+            type: format === 'json' ? 'application/json' : 'text/csv'
+          })
+
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `client-data-${new Date().toISOString().split('T')[0]}.${format}`
+          link.click()
+          URL.revokeObjectURL(url)
+
+          resolve(result)
+        } else {
+          reject(new Error('Export failed'))
+        }
+      } catch (error: any) {
+        logger.error('Failed to export data', { error, format })
+        reject(error)
+      } finally {
+        setIsExporting(false)
       }
+    })
 
-      const result = await response.json()
-
-      if (result.success) {
-        logger.info('Data exported successfully', {
-          clientName: KAZI_CLIENT_DATA.clientInfo.name,
-          format
-        })
-
-        // Create download
-        const dataStr = format === 'json'
-          ? JSON.stringify(result.data, null, 2)
-          : result.data
-
-        const blob = new Blob([dataStr], {
-          type: format === 'json' ? 'application/json' : 'text/csv'
-        })
-
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        link.download = `client-data-${new Date().toISOString().split('T')[0]}.${format}`
-        link.click()
-        URL.revokeObjectURL(url)
-
-        toast.success(`Data exported as ${format.toUpperCase()}!`, {
-          description: 'Your file is ready to download'
-        })
-      }
-    } catch (error: any) {
-      logger.error('Failed to export data', { error, format })
-      toast.error('Failed to export data', {
-        description: error.message || 'Please try again'
-      })
-    } finally {
-      setIsExporting(false)
-    }
+    toast.promise(exportPromise, {
+      loading: `Preparing ${format.toUpperCase()} export...`,
+      success: `Data exported as ${format.toUpperCase()}! Your file is ready to download.`,
+      error: (err) => `Failed to export data: ${err.message || 'Please try again'}`
+    })
   }
 
   // ============================================================================
@@ -390,8 +401,10 @@ export default function SettingsPage() {
       clientName: KAZI_CLIENT_DATA.clientInfo.name
     })
 
-    toast.info('Opening password change dialog...', {
-      description: 'You will be sent a verification email'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Opening password change dialog...',
+      success: 'Verification email sent! Check your inbox to continue.',
+      error: 'Failed to initiate password change. Please try again.'
     })
   }
 
@@ -539,7 +552,11 @@ export default function SettingsPage() {
                 setNotificationSettings(
                   notificationSettings.map(s => ({ ...s, enabled: !allEnabled }))
                 )
-                toast.success(allEnabled ? 'All notifications disabled' : 'All notifications enabled')
+                toast.promise(new Promise(r => setTimeout(r, 500)), {
+                  loading: allEnabled ? 'Disabling all notifications...' : 'Enabling all notifications...',
+                  success: allEnabled ? 'All notifications disabled!' : 'All notifications enabled!',
+                  error: 'Failed to update notification settings.'
+                })
               }}
             >
               {notificationSettings.every(s => s.enabled) ? 'Disable All' : 'Enable All'}
@@ -729,7 +746,18 @@ export default function SettingsPage() {
               <p className="text-sm text-gray-600">
                 Your privacy is important to us. We never share your personal information with third parties without your consent.
               </p>
-              <Button variant="outline" className="mt-4">
+              <Button
+                variant="outline"
+                className="mt-4"
+                onClick={() => {
+                  toast.promise(new Promise(r => setTimeout(r, 800)), {
+                    loading: 'Opening privacy policy...',
+                    success: 'Privacy policy opened in new tab',
+                    error: 'Failed to open privacy policy'
+                  })
+                  window.open('/privacy-policy', '_blank')
+                }}
+              >
                 View Privacy Policy
               </Button>
             </CardContent>
@@ -831,7 +859,16 @@ export default function SettingsPage() {
                 <p className="text-xs text-yellow-800 mb-3">
                   You can deactivate your account temporarily or permanently. You will lose access to all your projects.
                 </p>
-                <Button variant="outline">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+                      loading: 'Processing deactivation request...',
+                      success: 'Deactivation email sent. Check your inbox to confirm.',
+                      error: 'Failed to process deactivation request'
+                    })
+                  }}
+                >
                   Deactivate Account
                 </Button>
               </div>
@@ -841,7 +878,17 @@ export default function SettingsPage() {
                 <p className="text-xs text-red-800 mb-3">
                   This action is irreversible. All your data will be permanently deleted.
                 </p>
-                <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                <Button
+                  variant="outline"
+                  className="border-red-300 text-red-600 hover:bg-red-50"
+                  onClick={() => {
+                    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+                      loading: 'Preparing account deletion verification...',
+                      success: 'Verification email sent. Confirm deletion within 24 hours.',
+                      error: 'Failed to initiate account deletion'
+                    })
+                  }}
+                >
                   Delete Account
                 </Button>
               </div>

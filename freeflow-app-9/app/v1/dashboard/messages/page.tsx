@@ -156,31 +156,29 @@ export default function MessagesPage() {
       return
     }
 
-    try {
-      setIsSubmitting(true)
+    setIsSubmitting(true)
 
-      logger.info('Message sending initiated', {
-        messageLength: newMessage.length,
-        recipient: KAZI_CLIENT_DATA.clientInfo.name
+    logger.info('Message sending initiated', {
+      messageLength: newMessage.length,
+      recipient: KAZI_CLIENT_DATA.clientInfo.name
+    })
+
+    const messageToSend = newMessage
+    const sendMessagePromise = fetch('/api/client-zone/messages/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: messageToSend,
+        clientId: KAZI_CLIENT_DATA.clientInfo.email,
+        timestamp: new Date().toISOString()
       })
-
-      // Simulate API call
-      const response = await fetch('/api/client-zone/messages/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: newMessage,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email,
-          timestamp: new Date().toISOString()
-        })
-      })
-
+    }).then(async (response) => {
       if (!response.ok) {
         throw new Error('Failed to send message')
       }
 
       logger.info('Message sent successfully', {
-        messageLength: newMessage.length
+        messageLength: messageToSend.length
       })
 
       // Add message to list optimistically
@@ -188,7 +186,7 @@ export default function MessagesPage() {
         id: messages.length + 1,
         sender: KAZI_CLIENT_DATA.clientInfo.contactPerson,
         role: 'Client',
-        message: newMessage,
+        message: messageToSend,
         timestamp: 'Just now',
         avatar: KAZI_CLIENT_DATA.clientInfo.avatar,
         unread: false,
@@ -200,18 +198,16 @@ export default function MessagesPage() {
 
       setMessages([newMsg, ...messages])
       setNewMessage('')
-
-      toast.success('Message sent!', {
-        description: 'Your team will respond within 4-6 hours'
-      })
-    } catch (error: any) {
-      logger.error('Failed to send message', { error })
-      toast.error('Failed to send message', {
-        description: error.message || 'Please try again later'
-      })
-    } finally {
+      return response
+    }).finally(() => {
       setIsSubmitting(false)
-    }
+    })
+
+    toast.promise(sendMessagePromise, {
+      loading: 'Sending message...',
+      success: 'Message sent! Your team will respond within 4-6 hours',
+      error: 'Failed to send message. Please try again later'
+    })
   }, [newMessage, messages])
 
   // ============================================================================
@@ -259,32 +255,30 @@ export default function MessagesPage() {
   // ============================================================================
 
   const handleDeleteMessage = useCallback(async (messageId: number) => {
-    try {
-      logger.info('Message deletion initiated', { messageId })
+    logger.info('Message deletion initiated', { messageId })
 
-      // Simulate API call
-      const response = await fetch('/api/client-zone/messages/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messageId,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
-        })
+    const deleteMessagePromise = fetch('/api/client-zone/messages/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messageId,
+        clientId: KAZI_CLIENT_DATA.clientInfo.email
       })
-
+    }).then((response) => {
       if (!response.ok) {
         throw new Error('Failed to delete message')
       }
 
       setMessages(messages.filter(msg => msg.id !== messageId))
       logger.info('Message deleted successfully', { messageId })
-      toast.success('Message deleted', {
-        description: 'The message has been removed'
-      })
-    } catch (error: any) {
-      logger.error('Failed to delete message', { error, messageId })
-      toast.error('Failed to delete message')
-    }
+      return response
+    })
+
+    toast.promise(deleteMessagePromise, {
+      loading: 'Deleting message...',
+      success: 'Message deleted. The message has been removed',
+      error: 'Failed to delete message'
+    })
   }, [messages])
 
   // ============================================================================
@@ -296,7 +290,11 @@ export default function MessagesPage() {
     const input = document.createElement('input')
     input.type = 'file'
     input.click()
-    toast.info('File upload initiated')
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Preparing file upload...',
+      success: 'File upload ready. Select your file',
+      error: 'Failed to initialize file upload'
+    })
   }, [])
 
   // ============================================================================
@@ -304,30 +302,29 @@ export default function MessagesPage() {
   // ============================================================================
 
   const handleArchiveMessage = useCallback(async (messageId: number) => {
-    try {
-      logger.info('Message archive initiated', { messageId })
+    logger.info('Message archive initiated', { messageId })
 
-      const response = await fetch('/api/client-zone/messages/archive', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messageId,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
-        })
+    const archiveMessagePromise = fetch('/api/client-zone/messages/archive', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messageId,
+        clientId: KAZI_CLIENT_DATA.clientInfo.email
       })
-
+    }).then((response) => {
       if (!response.ok) {
         throw new Error('Failed to archive message')
       }
 
       logger.info('Message archived successfully', { messageId })
-      toast.success('Message archived', {
-        description: 'Message moved to archived conversations'
-      })
-    } catch (error: any) {
-      logger.error('Failed to archive message', { error, messageId })
-      toast.error('Failed to archive message')
-    }
+      return response
+    })
+
+    toast.promise(archiveMessagePromise, {
+      loading: 'Archiving message...',
+      success: 'Message archived. Moved to archived conversations',
+      error: 'Failed to archive message'
+    })
   }, [])
 
   // ============================================================================
@@ -335,30 +332,29 @@ export default function MessagesPage() {
   // ============================================================================
 
   const handlePinMessage = useCallback(async (messageId: number) => {
-    try {
-      logger.info('Message pin initiated', { messageId })
+    logger.info('Message pin initiated', { messageId })
 
-      const response = await fetch('/api/client-zone/messages/pin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messageId,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
-        })
+    const pinMessagePromise = fetch('/api/client-zone/messages/pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messageId,
+        clientId: KAZI_CLIENT_DATA.clientInfo.email
       })
-
+    }).then((response) => {
       if (!response.ok) {
         throw new Error('Failed to pin message')
       }
 
       logger.info('Message pinned successfully', { messageId })
-      toast.success('Message pinned', {
-        description: 'Message added to your pinned conversations'
-      })
-    } catch (error: any) {
-      logger.error('Failed to pin message', { error, messageId })
-      toast.error('Failed to pin message')
-    }
+      return response
+    })
+
+    toast.promise(pinMessagePromise, {
+      loading: 'Pinning message...',
+      success: 'Message pinned. Added to your pinned conversations',
+      error: 'Failed to pin message'
+    })
   }, [])
 
   // A+++ LOADING STATE

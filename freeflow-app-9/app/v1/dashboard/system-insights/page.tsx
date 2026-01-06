@@ -79,9 +79,10 @@ export default function SystemInsightsPage() {
       category: 'success-toast'
     })
 
-    toast.success('Operation Completed Successfully', {
-      description: '5 files processed • 2.3 MB • 1.2s',
-      icon: <CheckCircle2 className="h-5 w-5" />
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Processing files...',
+      success: 'Operation Completed Successfully - 5 files processed, 2.3 MB, 1.2s',
+      error: 'Operation failed'
     })
   }
 
@@ -111,9 +112,10 @@ export default function SystemInsightsPage() {
       category: 'copy-toast'
     })
 
-    toast.success('Code Copied', {
-      description: `${content.length} characters copied to clipboard`,
-      icon: <Copy className="h-5 w-5" />
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Copying to clipboard...',
+      success: `Code Copied - ${content.length} characters copied to clipboard`,
+      error: 'Failed to copy to clipboard'
     })
   }
 
@@ -126,9 +128,10 @@ export default function SystemInsightsPage() {
       category: 'file-toast'
     })
 
-    toast.success('File Downloaded', {
-      description: 'project-data.json • 1.2 MB',
-      icon: <Download className="h-5 w-5" />
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Downloading project-data.json...',
+      success: 'File Downloaded - project-data.json, 1.2 MB',
+      error: 'Download failed'
     })
   }
 
@@ -158,16 +161,10 @@ export default function SystemInsightsPage() {
       category: 'action-toast'
     })
 
-    toast('3 Items Deleted', {
-      description: 'Files moved to trash • Undo available for 30s',
-      icon: <Trash2 className="h-5 w-5" />,
-      action: {
-        label: 'Undo',
-        onClick: () => {
-          logger.info('Undo action triggered', { type: 'demo' })
-          toast.success('Items Restored')
-        }
-      }
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Deleting 3 items...',
+      success: '3 Items Deleted - Files moved to trash',
+      error: 'Failed to delete items'
     })
   }
 
@@ -181,9 +178,10 @@ export default function SystemInsightsPage() {
       category: 'metric-toast'
     })
 
-    toast('API Performance', {
-      description: '📈 Response time: 145ms (32% faster)',
-      icon: <TrendingUp className="h-5 w-5" />
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Fetching API metrics...',
+      success: 'API Performance - Response time: 145ms (32% faster)',
+      error: 'Failed to fetch metrics'
     })
   }
 
@@ -196,9 +194,10 @@ export default function SystemInsightsPage() {
       category: 'data-toast'
     })
 
-    toast.success('Data Synchronized', {
-      description: '247 records updated • Last sync: just now',
-      icon: <Database className="h-5 w-5" />
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Synchronizing data...',
+      success: 'Data Synchronized - 247 records updated',
+      error: 'Synchronization failed'
     })
   }
 
@@ -210,11 +209,31 @@ export default function SystemInsightsPage() {
       category: 'multiple-toasts'
     })
 
-    toast.success('Task 1 Complete', { description: 'File uploaded' })
-    setTimeout(() => toast.success('Task 2 Complete', { description: 'Data processed' }), 500)
-    setTimeout(() => toast.success('Task 3 Complete', { description: 'Report generated' }), 1000)
-    setTimeout(() => toast.success('Task 4 Complete', { description: 'Email sent' }), 1500)
-    setTimeout(() => toast.success('All Tasks Complete', { description: '4/4 completed successfully' }), 2000)
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Uploading file...',
+      success: 'Task 1 Complete - File uploaded',
+      error: 'Upload failed'
+    })
+    setTimeout(() => toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Processing data...',
+      success: 'Task 2 Complete - Data processed',
+      error: 'Processing failed'
+    }), 500)
+    setTimeout(() => toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Generating report...',
+      success: 'Task 3 Complete - Report generated',
+      error: 'Report generation failed'
+    }), 1000)
+    setTimeout(() => toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Sending email...',
+      success: 'Task 4 Complete - Email sent',
+      error: 'Email sending failed'
+    }), 1500)
+    setTimeout(() => toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Finalizing...',
+      success: 'All Tasks Complete - 4/4 completed successfully',
+      error: 'Finalization failed'
+    }), 2000)
   }
 
   const demoCategories = [

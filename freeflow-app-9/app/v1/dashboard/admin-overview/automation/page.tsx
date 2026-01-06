@@ -144,7 +144,7 @@ export default function AutomationPage() {
       return
     }
 
-    try {
+    const createWorkflowOperation = async () => {
       logger.info('Creating new workflow', { userId })
 
       const { createWorkflow } = await import('@/lib/automation-queries')
@@ -156,9 +156,6 @@ export default function AutomationPage() {
         userId
       })
 
-      toast.success('Workflow Created', {
-        description: 'New workflow has been created as draft'
-      })
       logger.info('Workflow created', { success: true, workflowId: newWorkflowId })
       announce('Workflow created successfully', 'polite')
 
@@ -166,12 +163,15 @@ export default function AutomationPage() {
       const { getWorkflows } = await import('@/lib/automation-queries')
       const workflowsResult = await getWorkflows(userId)
       setWorkflows(workflowsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Create failed'
-      toast.error('Create Failed', { description: message })
-      logger.error('Create workflow failed', { error: message })
-      announce('Failed to create workflow', 'assertive')
+
+      return newWorkflowId
     }
+
+    toast.promise(createWorkflowOperation(), {
+      loading: 'Creating workflow...',
+      success: 'Workflow created successfully',
+      error: 'Failed to create workflow'
+    })
   }
 
   // Button 2: Edit Workflow
@@ -181,7 +181,7 @@ export default function AutomationPage() {
       return
     }
 
-    try {
+    const editWorkflowOperation = async () => {
       logger.info('Editing workflow', { workflowId, userId })
 
       const { updateWorkflow } = await import('@/lib/automation-queries')
@@ -190,9 +190,6 @@ export default function AutomationPage() {
         description: 'Updated workflow configuration'
       })
 
-      toast.success('Workflow Updated', {
-        description: 'Workflow configuration has been updated successfully'
-      })
       logger.info('Workflow edited', { success: true, workflowId })
       announce('Workflow updated successfully', 'polite')
 
@@ -200,12 +197,13 @@ export default function AutomationPage() {
       const { getWorkflows } = await import('@/lib/automation-queries')
       const workflowsResult = await getWorkflows(userId)
       setWorkflows(workflowsResult || [])
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Edit failed'
-      toast.error('Edit Failed', { description: message })
-      logger.error('Edit workflow failed', { error: message })
-      announce('Failed to edit workflow', 'assertive')
     }
+
+    toast.promise(editWorkflowOperation(), {
+      loading: 'Updating workflow...',
+      success: 'Workflow updated successfully',
+      error: 'Failed to update workflow'
+    })
   }
 
   // Button 3: Delete Workflow (opens confirmation dialog)

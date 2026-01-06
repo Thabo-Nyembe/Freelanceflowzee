@@ -290,8 +290,10 @@ export default function FilesPage() {
           : f
       ))
 
-      toast.success('Download started!', {
-        description: `${file.name} is downloading`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: `Downloading ${file.name}...`,
+        success: `Download started! ${file.name} is downloading`,
+        error: 'Download failed'
       })
     } catch (error: any) {
       logger.error('Failed to download file', { error, fileName: file.name })
@@ -356,8 +358,10 @@ export default function FilesPage() {
             setFiles([newFile, ...files])
 
             logger.info('File uploaded successfully', { fileName: file.name })
-            toast.success('File uploaded!', {
-              description: file.name
+            toast.promise(new Promise(r => setTimeout(r, 1000)), {
+              loading: `Uploading ${file.name}...`,
+              success: `File uploaded! ${file.name}`,
+              error: 'Upload failed'
             })
           } catch (error: any) {
             logger.error('Failed to upload file', { error, fileName: file.name })
@@ -398,8 +402,10 @@ export default function FilesPage() {
       setSelectedFile(null)
 
       logger.info('File deleted successfully', { fileId, fileName })
-      toast.success('File deleted', {
-        description: fileName
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: `Deleting ${fileName}...`,
+        success: `File deleted: ${fileName}`,
+        error: 'Delete failed'
       })
     } catch (error: any) {
       logger.error('Failed to delete file', { error, fileId })
@@ -429,8 +435,10 @@ export default function FilesPage() {
       }
 
       logger.info('File shared successfully', { fileId: file.id })
-      toast.success('Share link copied!', {
-        description: 'File link copied to clipboard'
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Generating share link...',
+        success: 'Share link copied! File link copied to clipboard',
+        error: 'Failed to generate share link'
       })
     } catch (error: any) {
       logger.error('Failed to share file', { error, fileId: file.id })
@@ -453,8 +461,10 @@ export default function FilesPage() {
           : f
       ))
 
-      toast.info('Opening file preview...', {
-        description: file.name
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: `Opening file preview: ${file.name}...`,
+        success: `File preview opened: ${file.name}`,
+        error: 'Failed to open preview'
       })
     } catch (error: any) {
       logger.error('Failed to open file preview', { error })
@@ -471,7 +481,11 @@ export default function FilesPage() {
       const link = `https://files.kazi.io/${file.id}/${file.name}`
       await navigator.clipboard.writeText(link)
       logger.info('File link copied', { fileId: file.id })
-      toast.success('Link copied to clipboard!')
+      toast.promise(new Promise(r => setTimeout(r, 500)), {
+        loading: 'Copying link...',
+        success: 'Link copied to clipboard!',
+        error: 'Failed to copy link'
+      })
     } catch (error: any) {
       logger.error('Failed to copy link', { error })
       toast.error('Failed to copy link')
@@ -503,8 +517,10 @@ export default function FilesPage() {
 
       if (data.success && data.downloadUrl) {
         window.location.href = data.downloadUrl
-        toast.success('Download started!', {
-          description: file.fileName
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: `Downloading ${file.fileName}...`,
+          success: `Download started! ${file.fileName}`,
+          error: 'Download failed'
         })
       } else {
         throw new Error(data.error || 'Download failed')
@@ -524,7 +540,11 @@ export default function FilesPage() {
 
   const handleUploadComplete = useCallback(() => {
     setShowUploadDialog(false)
-    toast.success('File uploaded successfully!')
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Finalizing upload...',
+      success: 'File uploaded successfully!',
+      error: 'Upload finalization failed'
+    })
     // Refresh secure files list
     window.location.reload()
   }, [])
@@ -937,7 +957,11 @@ export default function FilesPage() {
             onOpenChange={setShowAccessDialog}
             onDownloaded={() => {
               setShowAccessDialog(false)
-              toast.success('File downloaded successfully!')
+              toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                loading: 'Completing download...',
+                success: 'File downloaded successfully!',
+                error: 'Download completion failed'
+              })
             }}
           />
         )}
@@ -949,7 +973,11 @@ export default function FilesPage() {
             onOpenChange={setShowEscrowDialog}
             onReleased={() => {
               setShowEscrowDialog(false)
-              toast.success('Escrow released successfully!')
+              toast.promise(new Promise(r => setTimeout(r, 1200)), {
+                loading: 'Releasing escrow...',
+                success: 'Escrow released successfully!',
+                error: 'Escrow release failed'
+              })
               // Refresh files list
               window.location.reload()
             }}

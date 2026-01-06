@@ -328,59 +328,61 @@ export default function FeedbackPage() {
   const handleUpvote = async (feedbackId: string) => {
     if (!userId) return;
 
-    try {
-      logger.info("Upvoting feedback", { feedbackId, userId });
+    logger.info("Upvoting feedback", { feedbackId, userId });
 
-      // Vote in database (handles toggle logic)
-      const { data, error } = await voteFeedback(feedbackId, userId, "up");
+    toast.promise(
+      (async () => {
+        const { data, error } = await voteFeedback(feedbackId, userId, "up");
 
-      if (error) {
-        logger.error("Failed to upvote", { error: error.message, userId });
-        toast.error("Failed to upvote");
-        announce("Error voting on feedback", "assertive");
-        return;
+        if (error) {
+          logger.error("Failed to upvote", { error: error.message, userId });
+          announce("Error voting on feedback", "assertive");
+          throw new Error("Failed to upvote");
+        }
+
+        // Refresh feedback to get updated counts
+        await fetchFeedbackData();
+
+        logger.info("Feedback upvoted", { userId });
+        announce(data ? "Upvoted" : "Vote removed", "polite");
+        return data ? "Upvoted successfully" : "Vote removed";
+      })(),
+      {
+        loading: "Processing vote...",
+        success: (msg) => msg,
+        error: "Failed to upvote"
       }
-
-      // Refresh feedback to get updated counts
-      await fetchFeedbackData();
-
-      logger.info("Feedback upvoted", { userId });
-      toast.success(data ? "Upvoted" : "Vote removed");
-      announce(data ? "Upvoted" : "Vote removed", "polite");
-    } catch (error) {
-      logger.error("Exception in handleUpvote", { error, userId });
-      toast.error("Failed to upvote");
-      announce("Error voting on feedback", "assertive");
-    }
+    );
   };
 
   const handleDownvote = async (feedbackId: string) => {
     if (!userId) return;
 
-    try {
-      logger.info("Downvoting feedback", { feedbackId, userId });
+    logger.info("Downvoting feedback", { feedbackId, userId });
 
-      // Vote in database (handles toggle logic)
-      const { data, error } = await voteFeedback(feedbackId, userId, "down");
+    toast.promise(
+      (async () => {
+        const { data, error } = await voteFeedback(feedbackId, userId, "down");
 
-      if (error) {
-        logger.error("Failed to downvote", { error: error.message, userId });
-        toast.error("Failed to downvote");
-        announce("Error voting on feedback", "assertive");
-        return;
+        if (error) {
+          logger.error("Failed to downvote", { error: error.message, userId });
+          announce("Error voting on feedback", "assertive");
+          throw new Error("Failed to downvote");
+        }
+
+        // Refresh feedback to get updated counts
+        await fetchFeedbackData();
+
+        logger.info("Feedback downvoted", { userId });
+        announce(data ? "Downvoted" : "Vote removed", "polite");
+        return data ? "Downvoted successfully" : "Vote removed";
+      })(),
+      {
+        loading: "Processing vote...",
+        success: (msg) => msg,
+        error: "Failed to downvote"
       }
-
-      // Refresh feedback to get updated counts
-      await fetchFeedbackData();
-
-      logger.info("Feedback downvoted", { userId });
-      toast.success(data ? "Downvoted" : "Vote removed");
-      announce(data ? "Downvoted" : "Vote removed", "polite");
-    } catch (error) {
-      logger.error("Exception in handleDownvote", { error, userId });
-      toast.error("Failed to downvote");
-      announce("Error voting on feedback", "assertive");
-    }
+    );
   };
 
   const handleToggleStar = async (feedbackId: string) => {
@@ -617,47 +619,67 @@ export default function FeedbackPage() {
   };
 
   const handleShareFeedback = async (feedbackId: string) => {
-    try {
-      logger.info("Sharing feedback", { feedbackId });
+    logger.info("Sharing feedback", { feedbackId });
 
-      // Copy share link to clipboard
-      await navigator.clipboard.writeText(
-        `https://app.example.com/feedback/${feedbackId}`
-      );
-
-      logger.info("Feedback link copied");
-      toast.success("Link copied to clipboard");
-    } catch (error) {
-      logger.error("Failed to share feedback", { error });
-      toast.error("Failed to share feedback");
-    }
+    toast.promise(
+      (async () => {
+        await navigator.clipboard.writeText(
+          `https://app.example.com/feedback/${feedbackId}`
+        );
+        logger.info("Feedback link copied");
+        return true;
+      })(),
+      {
+        loading: "Copying link to clipboard...",
+        success: "Link copied to clipboard",
+        error: "Failed to share feedback"
+      }
+    );
   };
 
   const handleExportFeedback = async () => {
-    try {
-      logger.info("Exporting feedback");
+    logger.info("Exporting feedback");
 
-      // Export feedback data as JSON
-      const blob = new Blob([JSON.stringify(feedbacks, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `feedback-export-${Date.now()}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+    toast.promise(
+      new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            // Export feedback data as JSON
+            const blob = new Blob([JSON.stringify(feedbacks, null, 2)], { type: 'application/json' })
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = `feedback-export-${Date.now()}.json`
+            document.body.appendChild(a)
+            a.click()
+            document.body.removeChild(a)
+            URL.revokeObjectURL(url)
 
-      logger.info("Feedback exported successfully");
-      toast.success("Feedback data exported");
-    } catch (error) {
-      logger.error("Failed to export feedback", { error });
-      toast.error("Failed to export data");
-    }
+            logger.info("Feedback exported successfully");
+            resolve();
+          } catch (error) {
+            logger.error("Failed to export feedback", { error });
+            reject(error);
+          }
+        }, 1500);
+      }),
+      {
+        loading: "Exporting feedback data...",
+        success: "Feedback data exported successfully",
+        error: "Failed to export data"
+      }
+    );
   };
 
   const handleRefreshData = async () => {
-    await fetchFeedbackData();
+    toast.promise(
+      fetchFeedbackData(),
+      {
+        loading: "Refreshing feedback data...",
+        success: "Feedback data refreshed",
+        error: "Failed to refresh data"
+      }
+    );
   };
 
   const filteredFeedbacks = feedbacks.filter((feedback) => {

@@ -154,9 +154,14 @@ export default function AIVoiceSynthesisPage() {
           projects: projectsResult.data?.length || 0
         })
 
-        toast.success('AI Voice Synthesis loaded', {
-          description: `${voicesResult.data?.length || 0} voices • ${synthesesResult.data?.length || 0} syntheses • ${projectsResult.data?.length || 0} projects`
-        })
+        toast.promise(
+          new Promise(resolve => setTimeout(resolve, 500)),
+          {
+            loading: 'Loading AI Voice Synthesis...',
+            success: `AI Voice Synthesis loaded - ${voicesResult.data?.length || 0} voices • ${synthesesResult.data?.length || 0} syntheses • ${projectsResult.data?.length || 0} projects`,
+            error: 'Failed to load AI Voice Synthesis'
+          }
+        )
 
         setIsPageLoading(false)
         announce('AI voice synthesis loaded successfully', 'polite')
@@ -196,18 +201,14 @@ export default function AIVoiceSynthesisPage() {
       language: selectedVoice.language
     })
 
-    toast.info('Synthesizing voice...', {
-      description: `${selectedVoice.name} - ${characterCount} characters - ${estimatedDuration}s - ${audioFormat.toUpperCase()} ${audioQuality}`
-    })
-
     setIsSynthesizing(true)
 
     const startTime = Date.now()
     const fileSize = Math.round(estimatedDuration * (audioQuality === 'high' ? 128 : audioQuality === 'medium' ? 96 : 64) / 8)
 
-    // Save synthesis to database
-    if (userId) {
-      try {
+    const synthesisPromise = async () => {
+      // Save synthesis to database
+      if (userId) {
         const { createVoiceSynthesis, incrementVoiceUsage, trackVoiceAnalytics } = await import('@/lib/ai-voice-queries')
 
         // Simulate synthesis processing
@@ -244,7 +245,6 @@ export default function AIVoiceSynthesisPage() {
           total_cost: estimatedCost
         })
 
-        setIsSynthesizing(false)
         logger.info('Voice synthesis saved to database', {
           synthesisId: synthesis?.id,
           voice: selectedVoice.name,
@@ -252,25 +252,32 @@ export default function AIVoiceSynthesisPage() {
           duration: estimatedDuration
         })
 
-        toast.success('Voice synthesized successfully', {
-          description: `${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
-        })
         announce('Voice synthesis completed', 'polite')
-      } catch (err) {
-        setIsSynthesizing(false)
-        logger.error('Voice synthesis failed', { error: err })
-        toast.error('Synthesis failed', {
-          description: err instanceof Error ? err.message : 'Please try again'
-        })
+        return { synthesis, fileSize }
+      } else {
+        // Fallback for non-authenticated users
+        await new Promise(resolve => setTimeout(resolve, 2000))
+        return { synthesis: null, fileSize }
       }
-    } else {
-      // Fallback for non-authenticated users
-      setTimeout(() => {
-        setIsSynthesizing(false)
-        toast.success('Voice synthesized successfully', {
-          description: `${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`
-        })
-      }, 2000)
+    }
+
+    const promise = synthesisPromise()
+
+    toast.promise(
+      promise,
+      {
+        loading: `Synthesizing voice with ${selectedVoice.name} - ${characterCount} characters - ${estimatedDuration}s - ${audioFormat.toUpperCase()} ${audioQuality}...`,
+        success: `Voice synthesized successfully - ${selectedVoice.name} - ${characterCount} chars - ${estimatedDuration}s - ${fileSize}KB ${audioFormat.toUpperCase()} - $${estimatedCost.toFixed(4)} - Ready to download`,
+        error: 'Synthesis failed - Please try again'
+      }
+    )
+
+    try {
+      await promise
+    } catch (err) {
+      logger.error('Voice synthesis failed', { error: err })
+    } finally {
+      setIsSynthesizing(false)
     }
   }
 

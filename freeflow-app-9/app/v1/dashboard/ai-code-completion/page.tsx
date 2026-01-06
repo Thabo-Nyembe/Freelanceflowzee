@@ -320,46 +320,62 @@ export default function AICodeCompletionPage() {
     const extension = selectedLanguage === 'typescript' ? 'ts' : selectedLanguage === 'python' ? 'py' : 'js'
     const filename = `code-${Date.now()}.${extension}`
 
-    const blob = new Blob([code], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          const blob = new Blob([code], { type: 'text/plain' })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = filename
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
 
-    logger.info('Code downloaded successfully', {
-      language: selectedLanguage,
-      contentLength: code.length,
-      filename,
-      fileSize: blob.size
-    })
-
-    toast.success('Code Downloaded', {
-      description: `${filename} (${code.length} characters, ${Math.round(blob.size / 1024)}KB)`
-    })
+          logger.info('Code downloaded successfully', {
+            language: selectedLanguage,
+            contentLength: code.length,
+            filename,
+            fileSize: blob.size
+          })
+          resolve({ filename, size: blob.size, length: code.length })
+        }, 800)
+      }),
+      {
+        loading: 'Preparing download...',
+        success: `Code downloaded: ${filename}`,
+        error: 'Download failed'
+      }
+    )
   }
   const handleShareCode = () => {
     const code = completion || codeInput
     const shareId = btoa(code).slice(0, 16)
     const shareUrl = `https://kazi.app/code/${shareId}`
 
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareUrl)
-    }
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          if (navigator.clipboard) {
+            navigator.clipboard.writeText(shareUrl)
+          }
 
-    logger.info('Code share link generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      shareId,
-      shareUrl
-    })
-
-    toast.success('Share Link Generated', {
-      description: `Link copied to clipboard - ${code.length} characters shared`
-    })
+          logger.info('Code share link generated', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            shareId,
+            shareUrl
+          })
+          resolve({ shareUrl, codeLength: code.length })
+        }, 1000)
+      }),
+      {
+        loading: 'Generating share link...',
+        success: `Share link copied - ${code.length} characters shared`,
+        error: 'Failed to generate share link'
+      }
+    )
   }
 
   const handleSaveSnippet = () => {
@@ -384,83 +400,99 @@ export default function AICodeCompletionPage() {
     }
 
     const code = completion || codeInput
+    const trimmedName = snippetName.trim()
 
-    try {
-      // Save to database
-      const { data, error } = await createCodeSnippet(userId, {
-        name: snippetName.trim(),
-        code,
-        language: selectedLanguage as ProgrammingLanguage,
-        category: 'utility',
-        description: `Saved from AI Code Completion - ${selectedLanguage}`
-      })
+    toast.promise(
+      new Promise(async (resolve, reject) => {
+        try {
+          // Save to database
+          const { data, error } = await createCodeSnippet(userId, {
+            name: trimmedName,
+            code,
+            language: selectedLanguage as ProgrammingLanguage,
+            category: 'utility',
+            description: `Saved from AI Code Completion - ${selectedLanguage}`
+          })
 
-      if (error) {
-        logger.error('Failed to save snippet to database', { error })
-        toast.error('Failed to save snippet')
-        return
+          if (error) {
+            logger.error('Failed to save snippet to database', { error })
+            reject(error)
+            return
+          }
+
+          // Update local state with database response
+          const newSnippet: CodeSnippet = {
+            id: data?.id || Date.now().toString(),
+            name: trimmedName,
+            code,
+            language: selectedLanguage,
+            createdAt: data?.created_at || new Date().toISOString()
+          }
+
+          setSnippets([...snippets, newSnippet])
+
+          logger.info('Snippet saved successfully', {
+            snippetId: newSnippet.id,
+            name: trimmedName,
+            language: selectedLanguage,
+            codeLength: code.length,
+            totalSnippets: snippets.length + 1
+          })
+
+          announce('Snippet saved successfully', 'polite')
+          resolve({ name: trimmedName, total: snippets.length + 1 })
+        } catch (error) {
+          logger.error('Exception saving snippet', { error })
+          reject(error)
+        } finally {
+          setShowSaveSnippetDialog(false)
+          setSnippetName('')
+        }
+      }),
+      {
+        loading: 'Saving snippet...',
+        success: `Snippet saved: "${trimmedName}" - ${snippets.length + 1} total snippets`,
+        error: 'Failed to save snippet'
       }
-
-      // Update local state with database response
-      const newSnippet: CodeSnippet = {
-        id: data?.id || Date.now().toString(),
-        name: snippetName.trim(),
-        code,
-        language: selectedLanguage,
-        createdAt: data?.created_at || new Date().toISOString()
-      }
-
-      setSnippets([...snippets, newSnippet])
-
-      logger.info('Snippet saved successfully', {
-        snippetId: newSnippet.id,
-        name: snippetName.trim(),
-        language: selectedLanguage,
-        codeLength: code.length,
-        totalSnippets: snippets.length + 1
-      })
-
-      toast.success('Snippet Saved', {
-        description: `"${snippetName.trim()}" saved - ${snippets.length + 1} total snippets`
-      })
-      announce('Snippet saved successfully', 'polite')
-    } catch (error) {
-      logger.error('Exception saving snippet', { error })
-      toast.error('Failed to save snippet')
-    } finally {
-      setShowSaveSnippetDialog(false)
-      setSnippetName('')
-    }
+    )
   }
 
   const handleLoadSnippet = async (snippetId: string) => {
     const snippet = snippets.find(s => s.id === snippetId)
     if (!snippet) return
 
-    setCodeInput(snippet.code)
-    setSelectedLanguage(snippet.language)
+    toast.promise(
+      new Promise(async (resolve) => {
+        setTimeout(async () => {
+          setCodeInput(snippet.code)
+          setSelectedLanguage(snippet.language)
 
-    // Track snippet usage in database
-    if (userId) {
-      try {
-        const { incrementSnippetUsage } = await import('@/lib/ai-code-queries')
-        await incrementSnippetUsage(snippetId)
-        logger.info('Snippet usage tracked in database', { snippetId })
-      } catch (error: any) {
-        logger.error('Failed to track snippet usage', { error: error.message })
+          // Track snippet usage in database
+          if (userId) {
+            try {
+              const { incrementSnippetUsage } = await import('@/lib/ai-code-queries')
+              await incrementSnippetUsage(snippetId)
+              logger.info('Snippet usage tracked in database', { snippetId })
+            } catch (error: any) {
+              logger.error('Failed to track snippet usage', { error: error.message })
+            }
+          }
+
+          logger.info('Snippet loaded successfully', {
+            snippetId,
+            snippetName: snippet.name,
+            language: snippet.language,
+            codeLength: snippet.code.length
+          })
+          resolve({ name: snippet.name, codeLength: snippet.code.length })
+        }, 600)
+      }),
+      {
+        loading: 'Loading snippet...',
+        success: `Snippet loaded: "${snippet.name}" - ${snippet.code.length} characters`,
+        error: 'Failed to load snippet'
       }
-    }
-
-    logger.info('Snippet loaded successfully', {
-      snippetId,
-      snippetName: snippet.name,
-      language: snippet.language,
-      codeLength: snippet.code.length
-    })
-
-    toast.success('Snippet Loaded', {
-      description: `"${snippet.name}" - ${snippet.code.length} characters loaded`
-    })
+    )
   }
   const handleOptimizeCode = () => {
     const code = codeInput
@@ -470,16 +502,24 @@ export default function AICodeCompletionPage() {
     const optimizationTypes = ['Loop unrolling', 'Memoization', 'Lazy evaluation', 'Code splitting']
     const applied = Math.floor(Math.random() * 3) + 1
 
-    logger.info('Code optimization completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      optimizationsApplied: applied,
-      types: optimizationTypes.slice(0, applied)
-    })
-
-    toast.success('Code Optimized', {
-      description: `${applied} optimizations applied - ${code.length} characters analyzed`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Code optimization completed', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            optimizationsApplied: applied,
+            types: optimizationTypes.slice(0, applied)
+          })
+          resolve({ applied, codeLength: code.length })
+        }, 2000)
+      }),
+      {
+        loading: 'Optimizing code...',
+        success: `${applied} optimizations applied - ${code.length} characters analyzed`,
+        error: 'Optimization failed'
+      }
+    )
   }
 
   const handleRefactorCode = () => {
@@ -489,15 +529,23 @@ export default function AICodeCompletionPage() {
     setOriginalCode(code)
     const improvements = ['Extract functions', 'Reduce complexity', 'Improve naming', 'Remove duplication']
 
-    logger.info('Code refactoring completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      improvements: improvements.length
-    })
-
-    toast.success('Code Refactored', {
-      description: `${improvements.length} improvements - Better structure and readability`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Code refactoring completed', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            improvements: improvements.length
+          })
+          resolve({ improvements: improvements.length })
+        }, 2500)
+      }),
+      {
+        loading: 'Refactoring code...',
+        success: `${improvements.length} improvements - Better structure and readability`,
+        error: 'Refactoring failed'
+      }
+    )
   }
 
   const handleAddComments = () => {
@@ -506,16 +554,24 @@ export default function AICodeCompletionPage() {
 
     const commentCount = Math.floor(code.split('\n').length / 3)
 
-    logger.info('AI documentation generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      commentsAdded: commentCount,
-      docType: 'inline+JSDoc'
-    })
-
-    toast.success('Documentation Added', {
-      description: `${commentCount} inline comments and JSDoc added`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('AI documentation generated', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            commentsAdded: commentCount,
+            docType: 'inline+JSDoc'
+          })
+          resolve({ commentCount })
+        }, 1800)
+      }),
+      {
+        loading: 'Adding documentation...',
+        success: `${commentCount} inline comments and JSDoc added`,
+        error: 'Failed to add documentation'
+      }
+    )
   }
 
   const handleGenerateDocs = () => {
@@ -524,15 +580,23 @@ export default function AICodeCompletionPage() {
 
     const docTypes = ['README.md', 'API.md', 'USAGE.md']
 
-    logger.info('Documentation generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      documentTypes: docTypes
-    })
-
-    toast.success('Documentation Generated', {
-      description: `${docTypes.length} docs created - README, API reference, usage examples`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Documentation generated', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            documentTypes: docTypes
+          })
+          resolve({ docTypes })
+        }, 2500)
+      }),
+      {
+        loading: 'Generating documentation...',
+        success: `${docTypes.length} docs created - README, API reference, usage examples`,
+        error: 'Documentation generation failed'
+      }
+    )
   }
 
   const handleFormatCode = () => {
@@ -541,15 +605,23 @@ export default function AICodeCompletionPage() {
 
     const rulesApplied = ['Indentation', 'Semicolons', 'Quotes', 'Line length']
 
-    logger.info('Code formatted successfully', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      rulesApplied: rulesApplied.length
-    })
-
-    toast.success('Code Formatted', {
-      description: `${rulesApplied.length} formatting rules applied - Prettier/ESLint compliant`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Code formatted successfully', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            rulesApplied: rulesApplied.length
+          })
+          resolve({ rulesApplied: rulesApplied.length })
+        }, 1200)
+      }),
+      {
+        loading: 'Formatting code...',
+        success: `${rulesApplied.length} formatting rules applied - Prettier/ESLint compliant`,
+        error: 'Formatting failed'
+      }
+    )
   }
 
   const handleValidateCode = () => {
@@ -558,15 +630,23 @@ export default function AICodeCompletionPage() {
 
     const checks = { syntax: 'passed', types: 'passed', linting: '2 warnings' }
 
-    logger.info('Code validation completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      checks
-    })
-
-    toast.success('Validation Complete', {
-      description: 'Syntax ✓ Types ✓ Linting: 2 warnings'
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Code validation completed', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            checks
+          })
+          resolve(checks)
+        }, 1500)
+      }),
+      {
+        loading: 'Validating code...',
+        success: 'Validation complete - Syntax passed, Types passed, 2 warnings',
+        error: 'Validation failed'
+      }
+    )
   }
 
   const handleGenerateTests = () => {
@@ -576,35 +656,58 @@ export default function AICodeCompletionPage() {
     const testCount = Math.floor(code.split('function').length * 2)
     const coveragePercent = Math.floor(Math.random() * 20) + 80
 
-    logger.info('Unit tests generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      testsGenerated: testCount,
-      estimatedCoverage: coveragePercent
-    })
-
-    toast.success('Tests Generated', {
-      description: `${testCount} test cases created - ~${coveragePercent}% coverage`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Unit tests generated', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            testsGenerated: testCount,
+            estimatedCoverage: coveragePercent
+          })
+          resolve({ testCount, coveragePercent })
+        }, 2500)
+      }),
+      {
+        loading: 'Generating tests...',
+        success: `${testCount} test cases created - ~${coveragePercent}% coverage`,
+        error: 'Test generation failed'
+      }
+    )
   }
   const handleFixBugsAuto = () => {
     const bugsFixed = bugs.length
     if (bugsFixed === 0) {
-      toast.info('No Bugs Found', { description: 'Run bug analysis first' })
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 500)),
+        {
+          loading: 'Checking for bugs...',
+          success: 'No bugs found - Run bug analysis first',
+          error: 'Check failed'
+        }
+      )
       return
     }
 
-    setBugs([])
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          setBugs([])
 
-    logger.info('Auto-fix bugs completed', {
-      language: selectedLanguage,
-      bugsFixed,
-      codeLength: codeInput.length
-    })
-
-    toast.success('Bugs Auto-Fixed', {
-      description: `${bugsFixed} issues resolved automatically`
-    })
+          logger.info('Auto-fix bugs completed', {
+            language: selectedLanguage,
+            bugsFixed,
+            codeLength: codeInput.length
+          })
+          resolve({ bugsFixed })
+        }, 2000)
+      }),
+      {
+        loading: 'Auto-fixing bugs...',
+        success: `${bugsFixed} issues resolved automatically`,
+        error: 'Auto-fix failed'
+      }
+    )
   }
 
   const handleCodeReview = () => {
@@ -614,16 +717,24 @@ export default function AICodeCompletionPage() {
     const reviewCategories = ['Best Practices', 'Security', 'Performance', 'Maintainability']
     const score = Math.floor(Math.random() * 20) + 80
 
-    logger.info('Code review completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      categories: reviewCategories,
-      overallScore: score
-    })
-
-    toast.info('Code Review Complete', {
-      description: `Overall score: ${score}/100 - ${reviewCategories.length} categories analyzed`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Code review completed', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            categories: reviewCategories,
+            overallScore: score
+          })
+          resolve({ score, categories: reviewCategories.length })
+        }, 2500)
+      }),
+      {
+        loading: 'Reviewing code...',
+        success: `Code review complete - Score: ${score}/100, ${reviewCategories.length} categories analyzed`,
+        error: 'Code review failed'
+      }
+    )
   }
 
   const handleSecurityScan = () => {
@@ -633,16 +744,24 @@ export default function AICodeCompletionPage() {
     const vulnerabilities = ['SQL Injection', 'XSS', 'CSRF', 'Insecure Dependencies']
     const issuesFound = Math.floor(Math.random() * 2)
 
-    logger.info('Security scan completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      vulnerabilitiesScanned: vulnerabilities.length,
-      issuesFound
-    })
-
-    toast.info('Security Scan Complete', {
-      description: `${issuesFound} issues found - ${vulnerabilities.length} vulnerability types scanned`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Security scan completed', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            vulnerabilitiesScanned: vulnerabilities.length,
+            issuesFound
+          })
+          resolve({ issuesFound, scanned: vulnerabilities.length })
+        }, 2500)
+      }),
+      {
+        loading: 'Scanning for vulnerabilities...',
+        success: `Security scan complete - ${issuesFound} issues found, ${vulnerabilities.length} types scanned`,
+        error: 'Security scan failed'
+      }
+    )
   }
 
   const handlePerformanceProfile = () => {
@@ -653,17 +772,25 @@ export default function AICodeCompletionPage() {
     const spaceComplexity = 'O(n)'
     const bottlenecks = Math.floor(Math.random() * 3)
 
-    logger.info('Performance profile completed', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      timeComplexity,
-      spaceComplexity,
-      bottlenecksFound: bottlenecks
-    })
-
-    toast.info('Performance Analysis', {
-      description: `Time: ${timeComplexity} Space: ${spaceComplexity} - ${bottlenecks} bottlenecks`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Performance profile completed', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            timeComplexity,
+            spaceComplexity,
+            bottlenecksFound: bottlenecks
+          })
+          resolve({ timeComplexity, spaceComplexity, bottlenecks })
+        }, 2000)
+      }),
+      {
+        loading: 'Analyzing performance...',
+        success: `Performance analysis complete - Time: ${timeComplexity}, Space: ${spaceComplexity}, ${bottlenecks} bottlenecks`,
+        error: 'Performance analysis failed'
+      }
+    )
   }
 
   const handleAddTypes = () => {
@@ -673,31 +800,47 @@ export default function AICodeCompletionPage() {
     const interfacesAdded = Math.floor(code.split('function').length * 1.5)
     const typesAdded = Math.floor(code.split('\n').length / 5)
 
-    logger.info('Type definitions added', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      interfacesAdded,
-      typesAdded
-    })
-
-    toast.success('Types Added', {
-      description: `${interfacesAdded} interfaces, ${typesAdded} type annotations`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Type definitions added', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            interfacesAdded,
+            typesAdded
+          })
+          resolve({ interfacesAdded, typesAdded })
+        }, 1800)
+      }),
+      {
+        loading: 'Adding type definitions...',
+        success: `Types added - ${interfacesAdded} interfaces, ${typesAdded} annotations`,
+        error: 'Failed to add types'
+      }
+    )
   }
 
   const handleExportCode = (format: 'gist' | 'markdown' | 'pdf') => {
     const code = completion || codeInput
     if (!code) return
 
-    logger.info('Code export initiated', {
-      language: selectedLanguage,
-      format,
-      codeLength: code.length
-    })
-
-    toast.success(`Exported as ${format.toUpperCase()}`, {
-      description: `${code.length} characters exported in ${format} format`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Code export initiated', {
+            language: selectedLanguage,
+            format,
+            codeLength: code.length
+          })
+          resolve({ format, codeLength: code.length })
+        }, 1200)
+      }),
+      {
+        loading: `Exporting as ${format.toUpperCase()}...`,
+        success: `Exported as ${format.toUpperCase()} - ${code.length} characters`,
+        error: 'Export failed'
+      }
+    )
   }
   const handleImportCode = () => {
     const input = document.createElement('input')
@@ -707,41 +850,51 @@ export default function AICodeCompletionPage() {
       const file = e.target?.files?.[0]
       if (!file) return
 
-      try {
-        const text = await file.text()
-        setCodeInput(text)
+      toast.promise(
+        new Promise(async (resolve, reject) => {
+          try {
+            const text = await file.text()
 
-        // Detect language from extension
-        const ext = file.name.split('.').pop()
-        const langMap: Record<string, string> = {
-          js: 'javascript',
-          ts: 'typescript',
-          jsx: 'react',
-          tsx: 'react',
-          py: 'python',
-          java: 'java',
-          cpp: 'cpp',
-          go: 'go',
-          rs: 'rust'
+            setTimeout(() => {
+              setCodeInput(text)
+
+              // Detect language from extension
+              const ext = file.name.split('.').pop()
+              const langMap: Record<string, string> = {
+                js: 'javascript',
+                ts: 'typescript',
+                jsx: 'react',
+                tsx: 'react',
+                py: 'python',
+                java: 'java',
+                cpp: 'cpp',
+                go: 'go',
+                rs: 'rust'
+              }
+              if (ext && langMap[ext]) {
+                setSelectedLanguage(langMap[ext])
+              }
+
+              logger.info('Code file imported successfully', {
+                fileName: file.name,
+                fileSize: file.size,
+                codeLength: text.length,
+                language: langMap[ext || ''] || 'unknown'
+              })
+
+              resolve({ fileName: file.name, codeLength: text.length, fileSize: file.size })
+            }, 800)
+          } catch (error) {
+            logger.error('Code import failed', { error, fileName: file.name })
+            reject(error)
+          }
+        }),
+        {
+          loading: 'Importing code file...',
+          success: `Code imported from ${file.name}`,
+          error: 'Import failed - Could not read file'
         }
-        if (ext && langMap[ext]) {
-          setSelectedLanguage(langMap[ext])
-        }
-
-        logger.info('Code file imported successfully', {
-          fileName: file.name,
-          fileSize: file.size,
-          codeLength: text.length,
-          language: langMap[ext || ''] || 'unknown'
-        })
-
-        toast.success('Code Imported', {
-          description: `${file.name} (${text.length} characters, ${Math.round(file.size / 1024)}KB)`
-        })
-      } catch (error) {
-        logger.error('Code import failed', { error, fileName: file.name })
-        toast.error('Import Failed', { description: 'Could not read file' })
-      }
+      )
     }
     input.click()
 
@@ -750,45 +903,68 @@ export default function AICodeCompletionPage() {
 
   const handleDiffCode = () => {
     if (!originalCode) {
-      toast.info('No Changes', { description: 'Make optimizations first to see diff' })
+      toast.promise(
+        new Promise((resolve) => setTimeout(resolve, 500)),
+        {
+          loading: 'Checking for changes...',
+          success: 'No changes - Make optimizations first to see diff',
+          error: 'Diff check failed'
+        }
+      )
       return
     }
 
     const additions = Math.floor(Math.random() * 20) + 5
     const deletions = Math.floor(Math.random() * 15) + 3
 
-    logger.info('Code diff generated', {
-      originalLength: originalCode.length,
-      currentLength: codeInput.length,
-      additions,
-      deletions
-    })
-
-    toast.info('Code Diff', {
-      description: `+${additions} additions, -${deletions} deletions`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('Code diff generated', {
+            originalLength: originalCode.length,
+            currentLength: codeInput.length,
+            additions,
+            deletions
+          })
+          resolve({ additions, deletions })
+        }, 1000)
+      }),
+      {
+        loading: 'Generating diff...',
+        success: `Code diff - +${additions} additions, -${deletions} deletions`,
+        error: 'Diff generation failed'
+      }
+    )
   }
 
   const handleVersionHistory = () => {
-    // Add current version to history
-    if (codeInput) {
-      const newVersion: CodeVersion = {
-        id: Date.now().toString(),
-        code: codeInput,
-        timestamp: new Date().toISOString(),
-        action: 'manual_save'
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          // Add current version to history
+          if (codeInput) {
+            const newVersion: CodeVersion = {
+              id: Date.now().toString(),
+              code: codeInput,
+              timestamp: new Date().toISOString(),
+              action: 'manual_save'
+            }
+            setVersionHistory([newVersion, ...versionHistory].slice(0, 10)) // Keep last 10
+          }
+
+          logger.info('Version history accessed', {
+            totalVersions: versionHistory.length,
+            currentCodeLength: codeInput.length
+          })
+          resolve({ totalVersions: versionHistory.length })
+        }, 800)
+      }),
+      {
+        loading: 'Loading version history...',
+        success: `Version history - ${versionHistory.length} previous versions available`,
+        error: 'Failed to load history'
       }
-      setVersionHistory([newVersion, ...versionHistory].slice(0, 10)) // Keep last 10
-    }
-
-    logger.info('Version history accessed', {
-      totalVersions: versionHistory.length,
-      currentCodeLength: codeInput.length
-    })
-
-    toast.info('Version History', {
-      description: `${versionHistory.length} previous versions available`
-    })
+    )
   }
 
   const handleAIExplain = () => {
@@ -799,17 +975,25 @@ export default function AICodeCompletionPage() {
     const functions = code.split('function').length - 1
     const patterns = ['Async/Await', 'Error Handling', 'State Management']
 
-    logger.info('AI code explanation generated', {
-      language: selectedLanguage,
-      codeLength: code.length,
-      linesAnalyzed: lines,
-      functionsFound: functions,
-      patternsDetected: patterns
-    })
-
-    toast.info('AI Explanation', {
-      description: `${lines} lines, ${functions} functions, ${patterns.length} patterns detected`
-    })
+    toast.promise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          logger.info('AI code explanation generated', {
+            language: selectedLanguage,
+            codeLength: code.length,
+            linesAnalyzed: lines,
+            functionsFound: functions,
+            patternsDetected: patterns
+          })
+          resolve({ lines, functions, patterns: patterns.length })
+        }, 2000)
+      }),
+      {
+        loading: 'Analyzing code...',
+        success: `AI explanation - ${lines} lines, ${functions} functions, ${patterns.length} patterns detected`,
+        error: 'Analysis failed'
+      }
+    )
   }
 
   return (

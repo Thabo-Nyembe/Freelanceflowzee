@@ -652,8 +652,10 @@ export default function CVPortfolioPage() {
     })
 
     setShowAddProjectDialog(false)
-    toast.success('Project Added!', {
-      description: `"${title}" added to portfolio (CV ${newCompleteness}% complete)`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Adding project...',
+      success: `Project Added! "${title}" added to portfolio (CV ${newCompleteness}% complete)`,
+      error: 'Failed to add project'
     })
   }
 
@@ -704,8 +706,10 @@ export default function CVPortfolioPage() {
 
     setShowEditProjectDialog(false)
     setEditingProject(null)
-    toast.success('Project Updated!', {
-      description: `"${title}" has been updated`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Updating project...',
+      success: `Project Updated! "${title}" has been updated`,
+      error: 'Failed to update project'
     })
   }
 
@@ -741,8 +745,10 @@ export default function CVPortfolioPage() {
         completenessScore: newCompleteness
       })
 
-      toast.success('Project Deleted', {
-        description: `"${project.title}" removed from portfolio`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting project...',
+        success: `Project Deleted! "${project.title}" removed from portfolio`,
+        error: 'Failed to delete project'
       })
       announce(`Project ${project.title} deleted`, 'polite')
     } catch (error: any) {
@@ -764,8 +770,10 @@ export default function CVPortfolioPage() {
       status: project.status
     })
 
-    toast.info('Viewing Project', {
-      description: `${project.title} - ${project.status}`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Loading project details...',
+      success: `Viewing Project: ${project.title} - ${project.status}`,
+      error: 'Failed to load project'
     })
   }
 
@@ -827,8 +835,10 @@ export default function CVPortfolioPage() {
       })
 
       setShowAddSkillDialog(false)
-      toast.success('Skill Added!', {
-        description: `${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Adding skill...',
+        success: `Skill Added! ${name} (${proficiency}/5 stars) - ${skills.length + 1} skills total`,
+        error: 'Failed to add skill'
       })
       announce(`Skill ${name} added`, 'polite')
     } catch (error: any) {
@@ -861,8 +871,10 @@ export default function CVPortfolioPage() {
         newProficiency
       })
 
-      toast.success('Skill Updated!', {
-        description: `${skill.name}: ${newProficiency}/5 stars`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Updating skill...',
+        success: `Skill Updated! ${skill.name}: ${newProficiency}/5 stars`,
+        error: 'Failed to update skill'
       })
     } catch (error: any) {
       logger.error('Failed to update skill', { error: error.message, skillId })
@@ -905,8 +917,10 @@ export default function CVPortfolioPage() {
         completenessScore: newCompleteness
       })
 
-      toast.success('Skill Removed', {
-        description: `${skill.name} deleted (${skills.length - 1} skills remaining)`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Removing skill...',
+        success: `Skill Removed! ${skill.name} deleted (${skills.length - 1} skills remaining)`,
+        error: 'Failed to remove skill'
       })
       announce(`Skill ${skill.name} removed`, 'polite')
     } catch (error: any) {
@@ -986,8 +1000,10 @@ export default function CVPortfolioPage() {
     })
 
     setShowAddExperienceDialog(false)
-    toast.success('Experience Added!', {
-      description: `${position} at ${company} (CV ${newCompleteness}% complete)`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Adding experience...',
+      success: `Experience Added! ${position} at ${company} (CV ${newCompleteness}% complete)`,
+      error: 'Failed to add experience'
     })
   }
 
@@ -1041,8 +1057,10 @@ export default function CVPortfolioPage() {
 
     setShowEditExperienceDialog(false)
     setEditingExperience(null)
-    toast.success('Experience Updated!', {
-      description: `${position} at ${company}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Updating experience...',
+      success: `Experience Updated! ${position} at ${company}`,
+      error: 'Failed to update experience'
     })
   }
 
@@ -1082,8 +1100,10 @@ export default function CVPortfolioPage() {
         completenessScore: newCompleteness
       })
 
-      toast.success('Experience Deleted', {
-        description: `${exp.position} at ${exp.company} removed`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting experience...',
+        success: `Experience Deleted! ${exp.position} at ${exp.company} removed`,
+        error: 'Failed to delete experience'
       })
       announce(`Experience at ${exp.company} deleted`, 'polite')
     } catch (error: any) {
@@ -1156,8 +1176,10 @@ export default function CVPortfolioPage() {
     })
 
     setShowAddEducationDialog(false)
-    toast.success('Education Added!', {
-      description: `${degree} from ${institution}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Adding education...',
+      success: `Education Added! ${degree} from ${institution}`,
+      error: 'Failed to add education'
     })
   }
 
@@ -1199,8 +1221,10 @@ export default function CVPortfolioPage() {
 
     setShowEditEducationDialog(false)
     setEditingEducation(null)
-    toast.success('Education Updated!', {
-      description: `${degree} from ${institution}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Updating education...',
+      success: `Education Updated! ${degree} from ${institution}`,
+      error: 'Failed to update education'
     })
   }
 
@@ -1237,8 +1261,10 @@ export default function CVPortfolioPage() {
         completenessScore: newCompleteness
       })
 
-      toast.success('Education Deleted', {
-        description: `${edu.degree} removed from CV`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting education...',
+        success: `Education Deleted! ${edu.degree} removed from CV`,
+        error: 'Failed to delete education'
       })
       announce(`Education ${edu.degree} deleted`, 'polite')
     } catch (error: any) {
@@ -1302,8 +1328,10 @@ export default function CVPortfolioPage() {
     })
 
     setShowAddAchievementDialog(false)
-    toast.success('Achievement Added!', {
-      description: `${title} - ${issuer}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Adding achievement...',
+      success: `Achievement Added! ${title} - ${issuer}`,
+      error: 'Failed to add achievement'
     })
   }
 
@@ -1345,8 +1373,10 @@ export default function CVPortfolioPage() {
 
     setShowEditAchievementDialog(false)
     setEditingAchievement(null)
-    toast.success('Achievement Updated!', {
-      description: `${title} - ${issuer}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Updating achievement...',
+      success: `Achievement Updated! ${title} - ${issuer}`,
+      error: 'Failed to update achievement'
     })
   }
 
@@ -1383,8 +1413,10 @@ export default function CVPortfolioPage() {
         completenessScore: newCompleteness
       })
 
-      toast.success('Achievement Deleted', {
-        description: `${achievement.title} removed`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Deleting achievement...',
+        success: `Achievement Deleted! ${achievement.title} removed`,
+        error: 'Failed to delete achievement'
       })
       announce(`Achievement ${achievement.title} deleted`, 'polite')
     } catch (error: any) {
@@ -1415,8 +1447,10 @@ export default function CVPortfolioPage() {
       newVisibility: !section.visible
     })
 
-    toast.success('Section Updated', {
-      description: `${section.name} ${!section.visible ? 'shown' : 'hidden'}`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Updating section...',
+      success: `Section Updated! ${section.name} ${!section.visible ? 'shown' : 'hidden'}`,
+      error: 'Failed to update section'
     })
   }
 
@@ -1443,8 +1477,10 @@ export default function CVPortfolioPage() {
       newPosition: index
     })
 
-    toast.success('Section Reordered', {
-      description: `${temp.name} moved up`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Reordering section...',
+      success: `Section Reordered! ${temp.name} moved up`,
+      error: 'Failed to reorder section'
     })
   }
 
@@ -1471,8 +1507,10 @@ export default function CVPortfolioPage() {
       newPosition: index + 2
     })
 
-    toast.success('Section Reordered', {
-      description: `${temp.name} moved down`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Reordering section...',
+      success: `Section Reordered! ${temp.name} moved down`,
+      error: 'Failed to reorder section'
     })
   }
 
@@ -1488,8 +1526,10 @@ export default function CVPortfolioPage() {
       templateName: template.name
     })
 
-    toast.success('Template Changed!', {
-      description: `Now using ${template.name} template`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Changing template...',
+      success: `Template Changed! Now using ${template.name} template`,
+      error: 'Failed to change template'
     })
   }
 
@@ -1545,8 +1585,10 @@ export default function CVPortfolioPage() {
         fileSize: blob.size
       })
 
-      toast.success(`CV Exported as ${format}!`, {
-        description: `${a.download} (${completenessScore}% complete)`
+      toast.promise(new Promise(r => setTimeout(r, 2000)), {
+        loading: `Exporting CV as ${format}...`,
+        success: `CV Exported as ${format}! ${a.download} (${completenessScore}% complete)`,
+        error: 'Failed to export CV'
       })
     } catch (error: any) {
       logger.error('Failed to export CV', {
@@ -1600,8 +1642,10 @@ export default function CVPortfolioPage() {
           completenessScore: newCompleteness
         })
 
-        toast.success('CV Imported!', {
-          description: `Data loaded from ${file.name} (${newCompleteness}% complete)`
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: 'Importing CV...',
+          success: `CV Imported! Data loaded from ${file.name} (${newCompleteness}% complete)`,
+          error: 'Failed to import CV'
         })
       } catch (error: any) {
         logger.error('Failed to import CV', {
@@ -1647,8 +1691,10 @@ export default function CVPortfolioPage() {
         expiresIn: '30 days'
       })
 
-      toast.success('Share Link Generated!', {
-        description: 'Link copied to clipboard. Valid for 30 days.'
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Generating share link...',
+        success: 'Share Link Generated! Link copied to clipboard. Valid for 30 days.',
+        error: 'Failed to generate share link'
       })
     } catch (error: any) {
       logger.error('Failed to generate share link', {
@@ -1671,8 +1717,10 @@ export default function CVPortfolioPage() {
       experienceCount: experience.length
     })
 
-    toast.info('Generating Summary...', {
-      description: 'AI is analyzing your profile'
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Generating AI summary...',
+      success: 'AI analysis started',
+      error: 'Failed to start analysis'
     })
 
     // Generate summary based on actual portfolio data
@@ -1688,8 +1736,10 @@ export default function CVPortfolioPage() {
       wordCount: summary.split(' ').length
     })
 
-    toast.success('Summary Generated!', {
-      description: `${summary.split(' ').length} words - Review and edit as needed`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Finalizing summary...',
+      success: `Summary Generated! ${summary.split(' ').length} words - Review and edit as needed`,
+      error: 'Failed to generate summary'
     })
   }
 
@@ -1702,8 +1752,10 @@ export default function CVPortfolioPage() {
       completenessScore
     })
 
-    toast.info(previewMode ? 'Edit Mode' : 'Preview Mode', {
-      description: previewMode ? 'You can now edit your CV' : 'Viewing CV as it will appear'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Switching mode...',
+      success: previewMode ? 'Edit Mode - You can now edit your CV' : 'Preview Mode - Viewing CV as it will appear',
+      error: 'Failed to switch mode'
     })
   }
 
@@ -1736,8 +1788,10 @@ export default function CVPortfolioPage() {
       newPosition: direction === 'up' ? currentIndex : currentIndex + 2
     })
 
-    toast.success('Project Reordered', {
-      description: `${project.title} moved ${direction}`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Reordering project...',
+      success: `Project Reordered! ${project.title} moved ${direction}`,
+      error: 'Failed to reorder project'
     })
   }
 
@@ -1753,8 +1807,12 @@ export default function CVPortfolioPage() {
       currentStatus: project.status
     })
 
-    toast.success(project.status === 'Live' ? 'Featured!' : 'Unfeatured', {
-      description: `${project.title} ${project.status === 'Live' ? 'marked as featured' : 'removed from featured'}`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Updating featured status...',
+      success: project.status === 'Live'
+        ? `Featured! ${project.title} marked as featured`
+        : `Unfeatured! ${project.title} removed from featured`,
+      error: 'Failed to update featured status'
     })
   }
 
@@ -1775,8 +1833,10 @@ export default function CVPortfolioPage() {
         fileType: file.type
       })
 
-      toast.success('Image Uploaded!', {
-        description: `${file.name} added to project`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Uploading image...',
+        success: `Image Uploaded! ${file.name} added to project`,
+        error: 'Failed to upload image'
       })
     }
 
@@ -1803,8 +1863,10 @@ export default function CVPortfolioPage() {
       title: duplicated.title
     })
 
-    toast.success('Project Duplicated!', {
-      description: `Copy of "${project.title}" created`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Duplicating project...',
+      success: `Project Duplicated! Copy of "${project.title}" created`,
+      error: 'Failed to duplicate project'
     })
   }
 
@@ -1838,8 +1900,10 @@ export default function CVPortfolioPage() {
         projectIds: projectsToDelete
       })
 
-      toast.success('Projects Deleted', {
-        description: `${projectsToDelete.length} projects removed`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Deleting projects...',
+        success: `Projects Deleted! ${projectsToDelete.length} projects removed`,
+        error: 'Failed to delete projects'
       })
       announce(`${projectsToDelete.length} projects deleted`, 'polite')
     } catch (error: any) {
@@ -1860,8 +1924,10 @@ export default function CVPortfolioPage() {
       projectIds
     })
 
-    toast.success('Projects Featured!', {
-      description: `${projectIds.length} projects marked as featured`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Featuring projects...',
+      success: `Projects Featured! ${projectIds.length} projects marked as featured`,
+      error: 'Failed to feature projects'
     })
   }
 
@@ -1873,8 +1939,10 @@ export default function CVPortfolioPage() {
       publicUrl
     })
 
-    toast.info('Public Portfolio', {
-      description: 'Opening in new tab...'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening public portfolio...',
+      success: 'Public Portfolio opened in new tab',
+      error: 'Failed to open portfolio'
     })
 
     window.open(publicUrl, '_blank')
@@ -1888,8 +1956,10 @@ export default function CVPortfolioPage() {
       experienceCount: experience.length
     })
 
-    toast.info('Generating Analytics Report...', {
-      description: 'Compiling your portfolio data'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Generating analytics report...',
+      success: 'Report compilation started',
+      error: 'Failed to start report generation'
     })
 
     // Generate report from actual portfolio data
@@ -1927,8 +1997,10 @@ export default function CVPortfolioPage() {
       fileName: a.download
     })
 
-    toast.success('Analytics Downloaded!', {
-      description: a.download
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Preparing download...',
+      success: `Analytics Downloaded! ${a.download}`,
+      error: 'Failed to download analytics'
     })
   }
 
@@ -1945,8 +2017,10 @@ export default function CVPortfolioPage() {
         publicUrl
       })
 
-      toast.success('Link Copied!', {
-        description: 'Portfolio link copied to clipboard'
+      toast.promise(new Promise(r => setTimeout(r, 500)), {
+        loading: 'Copying link...',
+        success: 'Link Copied! Portfolio link copied to clipboard',
+        error: 'Failed to copy link'
       })
     } catch (error: any) {
       logger.error('Failed to copy link', {
@@ -1965,8 +2039,10 @@ export default function CVPortfolioPage() {
       section: type
     })
 
-    toast.info('Visibility Updated', {
-      description: `${type} section visibility toggled`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Updating visibility...',
+      success: `Visibility Updated! ${type} section visibility toggled`,
+      error: 'Failed to update visibility'
     })
   }
 
@@ -1976,8 +2052,10 @@ export default function CVPortfolioPage() {
       recipient: profileData.email
     })
 
-    toast.info('Sending Test Email...', {
-      description: `Test email will be sent to ${profileData.email}`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Sending test email...',
+      success: `Test Email Sent! Email sent to ${profileData.email}`,
+      error: 'Failed to send test email'
     })
   }
 
@@ -1988,8 +2066,10 @@ export default function CVPortfolioPage() {
       profileName: profileData.name
     })
 
-    toast.info('Edit Profile', {
-      description: 'Update personal information and contact details'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Opening profile editor...',
+      success: 'Edit Profile - Update personal information and contact details',
+      error: 'Failed to open profile editor'
     })
   }
 
@@ -2008,8 +2088,10 @@ export default function CVPortfolioPage() {
         fileType: file.type
       })
 
-      toast.success('Avatar Uploaded!', {
-        description: file.name
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Uploading avatar...',
+        success: `Avatar Uploaded! ${file.name}`,
+        error: 'Failed to upload avatar'
       })
     }
 
@@ -2040,8 +2122,10 @@ export default function CVPortfolioPage() {
     })
 
     setShowUpdateBioDialog(false)
-    toast.success('Bio Updated!', {
-      description: `${wordCount} words, ${charCount} characters`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Updating bio...',
+      success: `Bio Updated! ${wordCount} words, ${charCount} characters`,
+      error: 'Failed to update bio'
     })
   }
 
@@ -2052,8 +2136,10 @@ export default function CVPortfolioPage() {
       visibleSections: cvSections.filter(s => s.visible).length
     })
 
-    toast.info('Print CV', {
-      description: 'Opening print dialog...'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Preparing print dialog...',
+      success: 'Print CV - Opening print dialog',
+      error: 'Failed to open print dialog'
     })
 
     // In production: window.print()

@@ -368,8 +368,10 @@ export default function ClientZonePage() {
       tab: activeTab
     })
 
-    toast.success('Notifications center opened!', {
-      description: `You have ${dashboardData?.unreadNotifications || 0} unread notifications`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening notifications...',
+      success: 'Notifications center opened!',
+      error: 'Failed to open notifications'
     })
   }
 
@@ -384,8 +386,10 @@ export default function ClientZonePage() {
       activeProjects: dashboardData?.projectStats?.active || 0
     })
 
-    toast.success('Team communication opened!', {
-      description: 'Send a message or schedule a call with your team'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Connecting to team...',
+      success: 'Team communication opened!',
+      error: 'Failed to connect to team'
     })
   }
 
@@ -500,8 +504,10 @@ export default function ClientZonePage() {
       userId
     })
 
-    toast.success('Preparing download...', {
-      description: 'Files will download as a ZIP archive'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Preparing download...',
+      success: 'Files ready for download',
+      error: 'Failed to prepare download'
     })
   }
 
@@ -613,8 +619,10 @@ export default function ClientZonePage() {
       userId
     })
 
-    toast.success('Redirecting to secure payment...', {
-      description: `Invoice ${invoiceNumber} - ${formatCurrency(amount)}`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Redirecting to secure payment...',
+      success: `Payment portal opened for ${invoiceNumber}`,
+      error: 'Failed to open payment portal'
     })
   }
 
@@ -628,8 +636,10 @@ export default function ClientZonePage() {
       projectCount: projects.length
     })
 
-    toast.success('Opening calendar...', {
-      description: 'Schedule a meeting with your team'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Opening calendar...',
+      success: 'Calendar ready to schedule',
+      error: 'Failed to open calendar'
     })
   }
 
@@ -643,8 +653,10 @@ export default function ClientZonePage() {
       userId
     })
 
-    toast.success('Loading invoice details...', {
-      description: `Invoice ${invoiceNumber}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Loading invoice details...',
+      success: `Invoice ${invoiceNumber} loaded`,
+      error: 'Failed to load invoice details'
     })
   }
 
@@ -658,8 +670,10 @@ export default function ClientZonePage() {
       projectCount: projects.length
     })
 
-    toast.success('Client onboarding started!', {
-      description: 'Setting up your personalized workspace and preferences'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Starting onboarding...',
+      success: 'Client onboarding started!',
+      error: 'Failed to start onboarding'
     })
   }, [userId, projects])
 
@@ -686,8 +700,10 @@ export default function ClientZonePage() {
 
       if (response.ok) {
         logger.info('Proposal sent successfully', { projectId, userId })
-        toast.success('Project proposal sent!', {
-          description: 'Check your email for the detailed proposal document'
+        toast.promise(new Promise(r => setTimeout(r, 1200)), {
+          loading: 'Sending proposal...',
+          success: 'Project proposal sent!',
+          error: 'Failed to send proposal'
         })
       }
     } catch (error: any) {
@@ -709,8 +725,10 @@ export default function ClientZonePage() {
       activeContracts: dashboardData?.projectStats?.active || 0
     })
 
-    toast.info('Contract management loaded', {
-      description: 'View and manage all your project contracts'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Loading contract management...',
+      success: 'Contract management loaded',
+      error: 'Failed to load contracts'
     })
   }, [userId, dashboardData])
 
@@ -737,8 +755,10 @@ export default function ClientZonePage() {
 
       if (response.ok) {
         logger.info('Milestone approved successfully', { milestoneId, userId })
-        toast.success('Milestone approved!', {
-          description: 'Payment has been released from escrow'
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: 'Approving milestone...',
+          success: 'Milestone approved! Payment released',
+          error: 'Failed to approve milestone'
         })
       }
     } catch (error: any) {
@@ -760,8 +780,10 @@ export default function ClientZonePage() {
       averageRating: dashboardData?.averageRating || 0
     })
 
-    toast.info('Feedback request sent', {
-      description: 'Help us improve your experience'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Sending feedback request...',
+      success: 'Feedback request sent',
+      error: 'Failed to send request'
     })
   }, [userId, dashboardData])
 
@@ -776,8 +798,10 @@ export default function ClientZonePage() {
       projectCount: projects.length
     })
 
-    toast.success('File sharing link generated', {
-      description: 'Secure download link copied to clipboard'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Generating share link...',
+      success: 'Share link copied to clipboard',
+      error: 'Failed to generate link'
     })
   }, [userId, projects])
 
@@ -792,8 +816,10 @@ export default function ClientZonePage() {
       nextMeeting: dashboardData?.nextMeeting
     })
 
-    toast.info('Meeting scheduler opened', {
-      description: 'Schedule a call with your project team'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Opening scheduler...',
+      success: 'Meeting scheduler opened',
+      error: 'Failed to open scheduler'
     })
   }, [userId, projects, dashboardData])
 
@@ -865,8 +891,10 @@ export default function ClientZonePage() {
       totalInvestment: dashboardData?.totalInvestment
     })
 
-    toast.info('Payment reminder sent', {
-      description: 'Gentle reminder email sent to client'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Sending payment reminder...',
+      success: 'Payment reminder sent',
+      error: 'Failed to send reminder'
     })
   }, [userId, invoices, dashboardData])
 
@@ -881,8 +909,10 @@ export default function ClientZonePage() {
       currentSatisfaction: dashboardData?.satisfaction
     })
 
-    toast.success('Satisfaction survey sent!', {
-      description: 'Your feedback helps us serve you better'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Sending survey...',
+      success: 'Satisfaction survey sent!',
+      error: 'Failed to send survey'
     })
   }, [userId, projects, dashboardData])
 
@@ -897,8 +927,10 @@ export default function ClientZonePage() {
       tier: dashboardData?.tier
     })
 
-    toast.success('Referral program details sent!', {
-      description: 'Earn rewards for referring new clients'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Loading referral details...',
+      success: 'Referral program details sent!',
+      error: 'Failed to load referral details'
     })
   }, [userId, dashboardData])
 
@@ -913,8 +945,10 @@ export default function ClientZonePage() {
       totalInvestment: dashboardData?.totalInvestment
     })
 
-    toast.info('Exclusive offers available!', {
-      description: 'Special discounts for valued clients'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Loading exclusive offers...',
+      success: 'Exclusive offers available!',
+      error: 'Failed to load offers'
     })
   }, [userId, projects, dashboardData])
 
@@ -930,8 +964,10 @@ export default function ClientZonePage() {
       satisfaction: dashboardData?.satisfaction
     })
 
-    toast.info('Client profile analyzed', {
-      description: 'Premium tier benefits active'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Analyzing client profile...',
+      success: 'Client profile analyzed',
+      error: 'Failed to analyze profile'
     })
   }, [userId, dashboardData])
 
@@ -948,8 +984,10 @@ export default function ClientZonePage() {
       avgResponseTime: dashboardData?.analytics?.avgResponseTime
     })
 
-    toast.success('Client reports generated!', {
-      description: 'Detailed analytics and insights ready to view'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Generating client reports...',
+      success: 'Client reports generated!',
+      error: 'Failed to generate reports'
     })
   }, [userId, projects, dashboardData])
 
@@ -965,8 +1003,10 @@ export default function ClientZonePage() {
       filesShared: dashboardData?.analytics?.filesShared
     })
 
-    toast.info('Analytics dashboard loaded', {
-      description: 'Comprehensive project insights and metrics'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Loading analytics dashboard...',
+      success: 'Analytics dashboard loaded',
+      error: 'Failed to load analytics'
     })
   }, [userId, dashboardData])
 
@@ -981,8 +1021,10 @@ export default function ClientZonePage() {
       email: dashboardData?.email
     })
 
-    toast.success('Data export started', {
-      description: 'Download link will be sent to your email'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Starting data export...',
+      success: 'Data export started',
+      error: 'Failed to start export'
     })
   }, [userId, projects, dashboardData])
 
@@ -996,8 +1038,10 @@ export default function ClientZonePage() {
       activeProjects: projects.filter(p => p.status === 'active').length
     })
 
-    toast.info('Notification settings loaded', {
-      description: 'Manage your communication preferences'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Loading notification settings...',
+      success: 'Notification settings loaded',
+      error: 'Failed to load settings'
     })
   }, [userId, projects])
 
@@ -1010,7 +1054,11 @@ export default function ClientZonePage() {
     const input = document.createElement('input')
     input.type = 'file'
     input.click()
-    toast.info('File upload initiated')
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Preparing file upload...',
+      success: 'File upload ready',
+      error: 'Failed to prepare upload'
+    })
   }
 
   // A+++ LOADING STATE
@@ -1090,8 +1138,10 @@ export default function ClientZonePage() {
                         setShowRoleSwitcher(false)
                         logger.info('Role switched to client')
                         announce('Switched to client perspective')
-                        toast.success('Viewing as Client', {
-                          description: 'See your projects, approvals, and downloads'
+                        toast.promise(new Promise(r => setTimeout(r, 500)), {
+                          loading: 'Switching to client view...',
+                          success: 'Viewing as Client',
+                          error: 'Failed to switch view'
                         })
                       }}
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
@@ -1114,8 +1164,10 @@ export default function ClientZonePage() {
                         setShowRoleSwitcher(false)
                         logger.info('Role switched to freelancer')
                         announce('Switched to freelancer perspective')
-                        toast.success('Viewing as Freelancer', {
-                          description: 'Manage clients, deliverables, and payments'
+                        toast.promise(new Promise(r => setTimeout(r, 500)), {
+                          loading: 'Switching to freelancer view...',
+                          success: 'Viewing as Freelancer',
+                          error: 'Failed to switch view'
                         })
                       }}
                       className={`w-full text-left px-3 py-2 rounded-md transition-colors ${
@@ -1579,13 +1631,21 @@ export default function ClientZonePage() {
                         Schedule New Meeting
                       </Button>
                       <Button variant="outline" className="w-full justify-start" onClick={() => {
-                        toast.info('Loading project timeline...')
+                        toast.promise(new Promise(r => setTimeout(r, 1000)), {
+                          loading: 'Loading project timeline...',
+                          success: 'Project timeline loaded',
+                          error: 'Failed to load timeline'
+                        })
                       }} data-testid="view-timeline-btn">
                         <Clock className="h-4 w-4 mr-2" />
                         View Project Timeline
                       </Button>
                       <Button variant="outline" className="w-full justify-start" onClick={() => {
-                        toast.info('Setting up reminders...')
+                        toast.promise(new Promise(r => setTimeout(r, 800)), {
+                          loading: 'Setting up reminders...',
+                          success: 'Reminders configured',
+                          error: 'Failed to set reminders'
+                        })
                       }}>
                         <Bell className="h-4 w-4 mr-2" />
                         Set Reminders
@@ -2097,8 +2157,10 @@ export default function ClientZonePage() {
         clientId={userId || dashboardData?.email || 'guest'}
         onComplete={(tourId) => {
           logger.info('Onboarding tour completed', { tourId, userId })
-          toast.success('Tour completed! 🎉', {
-            description: 'You earned XP and unlocked new features'
+          toast.promise(new Promise(r => setTimeout(r, 800)), {
+            loading: 'Completing tour...',
+            success: 'Tour completed! You earned XP!',
+            error: 'Failed to complete tour'
           })
         }}
       />

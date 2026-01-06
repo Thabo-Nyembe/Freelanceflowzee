@@ -466,9 +466,9 @@ export default function AdvancedMicroFeaturesPage() {
                     data={mockWidgetData}
                     size="large"
                     variant="detailed"
-                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.info('Refreshing widget data...') }}
-                    onSettings={() => { logger.info('Opening widget settings'); toast.info('Opening widget settings...') }}
-                    onMaximize={() => { logger.info('Maximizing widget'); toast.success('Widget maximized') }}
+                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Refreshing widget data...', success: 'Widget data refreshed', error: 'Failed to refresh widget' }) }}
+                    onSettings={() => { logger.info('Opening widget settings'); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening widget settings...', success: 'Settings opened', error: 'Failed to open settings' }) }}
+                    onMaximize={() => { logger.info('Maximizing widget'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Maximizing widget...', success: 'Widget maximized', error: 'Failed to maximize widget' }) }}
                   />
                 </div>
 
@@ -488,8 +488,8 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedNotifications
                     notifications={mockNotifications}
                     maxItems={5}
-                    onMarkAsRead={(id) => { logger.info('Marking notification as read', { notificationId: id }); toast.success('Notification marked as read') }}
-                    onClearAll={() => { logger.info('Clearing all notifications'); toast.success('All notifications cleared') }}
+                    onMarkAsRead={(id) => { logger.info('Marking notification as read', { notificationId: id }); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Marking as read...', success: 'Notification marked as read', error: 'Failed to mark as read' }) }}
+                    onClearAll={() => { logger.info('Clearing all notifications'); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Clearing all notifications...', success: 'All notifications cleared', error: 'Failed to clear notifications' }) }}
                   />
                 </div>
               </div>
@@ -505,15 +505,15 @@ export default function AdvancedMicroFeaturesPage() {
                     title="Revenue Trends"
                     description="Monthly revenue performance"
                     dateRange="Last 6 months"
-                    onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully', { description: 'Revenue Trends - CSV format' }) }}
-                    onShare={() => { logger.info('Sharing chart'); toast.success('Share link copied to clipboard') }}
-                    onSettings={() => { logger.info('Opening chart settings'); toast.info('Opening chart settings...') }}
+                    onExport={() => { logger.info('Exporting chart data'); toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting chart data...', success: 'Chart exported successfully - Revenue Trends CSV', error: 'Failed to export chart' }) }}
+                    onShare={() => { logger.info('Sharing chart'); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating share link...', success: 'Share link copied to clipboard', error: 'Failed to generate share link' }) }}
+                    onSettings={() => { logger.info('Opening chart settings'); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening chart settings...', success: 'Chart settings opened', error: 'Failed to open settings' }) }}
                     legend={[
                       { name: 'Revenue', color: '#3b82f6', value: '$45K', visible: true },
                       { name: 'Expenses', color: '#ef4444', value: '$28K', visible: true },
                       { name: 'Profit', color: '#10b981', value: '$17K', visible: false }
                     ]}
-                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.info(`Legend  toggled`) }}
+                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Toggling legend...', success: `Legend ${name} toggled`, error: 'Failed to toggle legend' }) }}
                   >
                     <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
                       <div className="text-center text-muted-foreground">
@@ -535,7 +535,7 @@ export default function AdvancedMicroFeaturesPage() {
                     exportable={true}
                     pagination={true}
                     pageSize={3}
-                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.info(`Viewing details for `) }}
+                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading project details...', success: `Viewing details for ${row.project}`, error: 'Failed to load details' }) }}
                   />
                 </div>
               </div>
@@ -554,7 +554,7 @@ export default function AdvancedMicroFeaturesPage() {
                         maxDisplay={4}
                         showDetails={true}
                         size="lg"
-                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.info(`Viewing 's profile`) }}
+                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading profile...', success: `Viewing ${user.name}'s profile`, error: 'Failed to load profile' }) }}
                       />
                       <div className="text-sm text-muted-foreground">
                         Team members currently online and their status
@@ -570,7 +570,7 @@ export default function AdvancedMicroFeaturesPage() {
                     activities={mockActivities}
                     maxItems={5}
                     showTimestamps={true}
-                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.info('Opening activity details...') }}
+                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening activity details...', success: 'Activity details loaded', error: 'Failed to load activity' }) }}
                   />
                 </div>
 
@@ -582,13 +582,13 @@ export default function AdvancedMicroFeaturesPage() {
                     currentUser={mockUsers[0]}
                     onAddComment={(content, mentions, attachments) => {
                       logger.info('Adding comment', { contentLength: content.length, mentionsCount: mentions?.length || 0, attachmentsCount: attachments?.length || 0 })
-                      toast.success('Comment posted successfully')
+                      toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Posting comment...', success: 'Comment posted successfully', error: 'Failed to post comment' })
                     }}
                     onReply={(commentId, content) => {
                       logger.info('Replying to comment', { commentId, contentLength: content.length })
-                      toast.success('Reply posted successfully')
+                      toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Posting reply...', success: 'Reply posted successfully', error: 'Failed to post reply' })
                     }}
-                    onLike={(commentId) => { logger.info('Liking comment', { commentId }); toast.success('Comment liked') }}
+                    onLike={(commentId) => { logger.info('Liking comment', { commentId }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Liking...', success: 'Comment liked', error: 'Failed to like comment' }) }}
                     allowAttachments={true}
                     allowMentions={true}
                   />
@@ -605,7 +605,7 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedSettingsCategories
                     categories={mockSettingsCategories}
                     activeCategory="theme"
-                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.info(`Switched to  settings`) }}
+                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading settings...', success: `Switched to ${categoryId} settings`, error: 'Failed to load settings' }) }}
                   />
                 </div>
 
@@ -615,7 +615,7 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedThemeSelector
                     themes={mockThemes}
                     currentTheme="default"
-                    onThemeChange={(themeId) => { logger.info('Theme changed', { themeId }); toast.success(`Theme changed to ${themeId}`, { description: 'Your preferences have been saved' }) }}
+                    onThemeChange={(themeId) => { logger.info('Theme changed', { themeId }); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Applying theme...', success: `Theme changed to ${themeId}`, error: 'Failed to apply theme' }) }}
                   />
                 </div>
               </div>

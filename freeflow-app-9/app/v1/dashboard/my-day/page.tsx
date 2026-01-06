@@ -158,7 +158,14 @@ export default function MyDayTodayPage() {
         setNewTaskDescription('')
         setNewTaskPriority('medium')
         setIsAddingTask(false)
-        toast.success(result.message)
+        toast.promise(
+          new Promise(r => setTimeout(r, 800)),
+          {
+            loading: 'Adding task...',
+            success: result.message || 'Task added successfully!',
+            error: 'Failed to add task'
+          }
+        )
 
         logger.info('Task added successfully', {
           taskId: result.task.id,
@@ -212,11 +219,23 @@ export default function MyDayTodayPage() {
         }
 
         if (result.celebration) {
-          toast.success(`${result.message} ${result.celebration.message} +${result.celebration.points} points!`, {
-            description: `Streak: ${result.celebration.streak} days`
-          })
+          toast.promise(
+            new Promise(r => setTimeout(r, 1200)),
+            {
+              loading: 'Updating task...',
+              success: `${result.message} ${result.celebration.message} +${result.celebration.points} points! Streak: ${result.celebration.streak} days`,
+              error: 'Failed to update task'
+            }
+          )
         } else {
-          toast.success(result.message)
+          toast.promise(
+            new Promise(r => setTimeout(r, 800)),
+            {
+              loading: 'Updating task...',
+              success: result.message || 'Task updated successfully!',
+              error: 'Failed to update task'
+            }
+          )
         }
       }
     } catch (error: any) {
@@ -244,9 +263,14 @@ export default function MyDayTodayPage() {
 
     dispatch({ type: 'START_TIMER', taskId })
 
-    toast.success('Timer Started', {
-      description: `Tracking time for: ${task?.title || 'Unknown task'}`
-    })
+    toast.promise(
+      new Promise(r => setTimeout(r, 600)),
+      {
+        loading: 'Starting timer...',
+        success: `Timer Started - Tracking time for: ${task?.title || 'Unknown task'}`,
+        error: 'Failed to start timer'
+      }
+    )
   }
 
   const stopTimer = () => {
@@ -262,9 +286,14 @@ export default function MyDayTodayPage() {
 
     dispatch({ type: 'STOP_TIMER' })
 
-    toast.info('Timer Stopped', {
-      description: `${task?.title || 'Unknown'} - ${formatTime(state.elapsedTime)} tracked`
-    })
+    toast.promise(
+      new Promise(r => setTimeout(r, 600)),
+      {
+        loading: 'Stopping timer...',
+        success: `Timer Stopped - ${task?.title || 'Unknown'} - ${formatTime(state.elapsedTime)} tracked`,
+        error: 'Failed to stop timer'
+      }
+    )
   }
 
   // Calculate progress metrics

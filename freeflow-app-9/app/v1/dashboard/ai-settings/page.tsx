@@ -370,8 +370,10 @@ export default function AISettingsPage() {
           featuresImported: Object.keys(config.features || {}).length
         })
 
-        toast.success('Configuration Imported Securely!', {
-          description: `${file.name} - API keys saved to database`
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: 'Importing configuration...',
+          success: `Configuration Imported Securely! ${file.name} - API keys saved to database`,
+          error: 'Failed to import configuration'
         })
       } catch (error) {
         logger.error('Configuration import failed', { error })
@@ -424,8 +426,10 @@ export default function AISettingsPage() {
         providerName: provider?.name
       })
 
-      toast.success('Provider Disconnected', {
-        description: `${provider?.name} API key removed securely`
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Disconnecting provider...',
+        success: `Provider Disconnected: ${provider?.name} API key removed securely`,
+        error: 'Failed to disconnect provider'
       })
     } catch (error) {
       logger.error('Failed to delete provider API key', { error, providerId: providerToDelete })
@@ -449,8 +453,10 @@ export default function AISettingsPage() {
       await testConnection(provider.id)
     }
 
-    toast.success('Providers Refreshed', {
-      description: `Validated ${connectedProviders.length} connected providers`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Refreshing providers...',
+      success: `Providers Refreshed: Validated ${connectedProviders.length} connected providers`,
+      error: 'Failed to refresh providers'
     })
   }
 
@@ -469,8 +475,10 @@ export default function AISettingsPage() {
       requests: usage.requests
     })
 
-    toast.info(`${provider?.name} Usage Analytics`, {
-      description: `${usage.tokens.toLocaleString()} tokens • $${usage.cost.toFixed(2)} • ${usage.requests} requests`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: `Loading ${provider?.name} usage analytics...`,
+      success: `${provider?.name} Usage Analytics: ${usage.tokens.toLocaleString()} tokens • $${usage.cost.toFixed(2)} • ${usage.requests} requests`,
+      error: 'Failed to load usage analytics'
     })
   }
 
@@ -499,8 +507,10 @@ export default function AISettingsPage() {
         newBudget: budgetAmount
       })
 
-      toast.success('Budget Set', {
-        description: `Monthly limit: $${budgetAmount}/month - Alerts at 80% usage`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Setting budget...',
+        success: `Budget Set: Monthly limit $${budgetAmount}/month - Alerts at 80% usage`,
+        error: 'Failed to set budget'
       })
       announce('Budget set successfully', 'polite')
     } catch (error) {
@@ -536,8 +546,10 @@ export default function AISettingsPage() {
         newLimits
       })
 
-      toast.success('Rate Limiting Configured', {
-        description: `${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Configuring rate limits...',
+        success: `Rate Limiting Configured: ${newLimits.perMinute}/min • ${newLimits.perHour}/hr - Requests will be throttled`,
+        error: 'Failed to configure rate limits'
       })
       announce('Rate limiting configured successfully', 'polite')
     } catch (error) {
@@ -557,8 +569,10 @@ export default function AISettingsPage() {
       availableFeatures: securityFeatures.length
     })
 
-    toast.info('Security Settings', {
-      description: `${securityFeatures.length} security features available - Encryption, Access Controls, Audit Logs`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Loading security settings...',
+      success: `Security Settings: ${securityFeatures.length} security features available - Encryption, Access Controls, Audit Logs`,
+      error: 'Failed to load security settings'
     })
   }
 
@@ -575,8 +589,10 @@ export default function AISettingsPage() {
       // Tests run sequentially to avoid rate limiting
     }
 
-    toast.success('Connection Tests Complete', {
-      description: `Tested ${providersWithKeys.length} providers - Check results above`
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Testing all connections...',
+      success: `Connection Tests Complete: Tested ${providersWithKeys.length} providers - Check results above`,
+      error: 'Failed to complete connection tests'
     })
   }
 
@@ -620,8 +636,10 @@ export default function AISettingsPage() {
         providerName: provider?.name
       })
 
-      toast.success('Key Rotation Ready', {
-        description: `${provider?.name} old key removed - Please enter new key and test connection`
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Rotating API key...',
+        success: `Key Rotation Ready: ${provider?.name} old key removed - Please enter new key and test connection`,
+        error: 'Failed to rotate API key'
       })
     } catch (error) {
       logger.error('Failed to rotate API key', { error, providerId: providerToRotate })
@@ -654,8 +672,10 @@ export default function AISettingsPage() {
       providerName: provider.name
     })
 
-    toast.success('Default Provider Set', {
-      description: `${provider.name} is now default for ${feature}`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Setting default provider...',
+      success: `Default Provider Set: ${provider.name} is now default for ${feature}`,
+      error: 'Failed to set default provider'
     })
   }
 
@@ -679,8 +699,10 @@ export default function AISettingsPage() {
       docUrl: url
     })
 
-    toast.info('API Documentation', {
-      description: `Opening ${provider.name} documentation - ${url}`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: `Opening ${provider.name} documentation...`,
+      success: `API Documentation: Opening ${provider.name} documentation - ${url}`,
+      error: 'Failed to open documentation'
     })
 
     // In real app, would open: window.open(url, '_blank')
@@ -703,8 +725,10 @@ export default function AISettingsPage() {
       events: events.length
     })
 
-    toast.success('Webhook Configured', {
-      description: `${events.length} events will notify: ${webhookUrl.trim().slice(0, 30)}...`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Configuring webhook...',
+      success: `Webhook Configured: ${events.length} events will notify ${webhookUrl.trim().slice(0, 30)}...`,
+      error: 'Failed to configure webhook'
     })
     announce('Webhook configured successfully', 'polite')
     setShowWebhookDialog(false)
@@ -730,8 +754,10 @@ export default function AISettingsPage() {
       includePayloads: true
     })
 
-    toast.success('Request Logging Enabled', {
-      description: 'All AI API requests will be logged for debugging'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Enabling request logging...',
+      success: 'Request Logging Enabled: All AI API requests will be logged for debugging',
+      error: 'Failed to enable request logging'
     })
 
     setShowEnableLoggingDialog(false)
@@ -763,8 +789,10 @@ export default function AISettingsPage() {
       fileSize: blob.size
     })
 
-    toast.success('Backup Created', {
-      description: `${Object.keys(apiKeys).length} keys, ${features.length} features - ${Math.round(blob.size / 1024)}KB`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Creating backup...',
+      success: `Backup Created: ${Object.keys(apiKeys).length} keys, ${features.length} features - ${Math.round(blob.size / 1024)}KB`,
+      error: 'Failed to create backup'
     })
   }
 
@@ -788,8 +816,10 @@ export default function AISettingsPage() {
       itemsCleared: cacheKeys.length
     })
 
-    toast.success('Cache Cleared', {
-      description: `${cacheKeys.length} cached responses removed`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Clearing cache...',
+      success: `Cache Cleared: ${cacheKeys.length} cached responses removed`,
+      error: 'Failed to clear cache'
     })
 
     setShowClearCacheDialog(false)
@@ -811,8 +841,10 @@ export default function AISettingsPage() {
       backoffStrategy: 'exponential'
     })
 
-    toast.success('Retry Configuration Set', {
-      description: `Max ${maxRetries} retries • ${timeout}s timeout • Exponential backoff`
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Configuring retry settings...',
+      success: `Retry Configuration Set: Max ${maxRetries} retries • ${timeout}s timeout • Exponential backoff`,
+      error: 'Failed to configure retry settings'
     })
     announce('Retry configuration set successfully', 'polite')
     setShowRetryDialog(false)
@@ -827,8 +859,10 @@ export default function AISettingsPage() {
       analyticsTypes: analyticsTypes.length
     })
 
-    toast.success('Analytics Enabled', {
-      description: `${analyticsTypes.length} analytics types: Usage, Performance, Cost, Errors`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Enabling analytics...',
+      success: `Analytics Enabled: ${analyticsTypes.length} analytics types - Usage, Performance, Cost, Errors`,
+      error: 'Failed to enable analytics'
     })
   }
 
@@ -849,8 +883,10 @@ export default function AISettingsPage() {
       fallbackProvider: newFallbackProvider.trim()
     })
 
-    toast.success('Fallback Configured', {
-      description: `${newPrimaryProvider.trim()} → ${newFallbackProvider.trim()} on failure`
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Configuring fallback provider...',
+      success: `Fallback Configured: ${newPrimaryProvider.trim()} → ${newFallbackProvider.trim()} on failure`,
+      error: 'Failed to configure fallback provider'
     })
     announce('Fallback configured successfully', 'polite')
     setShowFallbackDialog(false)
@@ -893,8 +929,10 @@ export default function AISettingsPage() {
         }
 
         setIsPageLoading(false)
-        toast.success('AI settings loaded', {
-          description: `${providersResult.data?.length || AI_PROVIDERS.length} providers configured`
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Loading AI settings...',
+          success: `AI settings loaded: ${providersResult.data?.length || AI_PROVIDERS.length} providers configured`,
+          error: 'Failed to load AI settings'
         })
         logger.info('AI settings data loaded successfully', {
           providersCount: providersResult.data?.length,
@@ -965,8 +1003,10 @@ export default function AISettingsPage() {
           : p
       ))
 
-      toast.success('API Key Saved Securely', {
-        description: `${provider?.name} key stored in database`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Saving API key...',
+        success: `API Key Saved Securely: ${provider?.name} key stored in database`,
+        error: 'Failed to save API key'
       })
     } catch (error) {
       logger.error('Failed to save API key to database', {
@@ -1020,8 +1060,10 @@ export default function AISettingsPage() {
             : p
         ))
 
-        toast.success(`${provider?.name} Connected`, {
-          description: 'API connection verified successfully'
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: `Verifying ${provider?.name} connection...`,
+          success: `${provider?.name} Connected: API connection verified successfully`,
+          error: `${provider?.name} connection failed`
         })
       } else {
         logger.warn('Connection test failed', {
@@ -1111,8 +1153,10 @@ export default function AISettingsPage() {
           enabledFeatures
         })
 
-        toast.success('Settings Saved', {
-          description: `${keysCount} API keys • ${enabledFeatures} features enabled`
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: 'Saving settings...',
+          success: `Settings Saved: ${keysCount} API keys • ${enabledFeatures} features enabled`,
+          error: 'Failed to save settings'
         })
       } else {
         throw new Error('Failed to save settings')

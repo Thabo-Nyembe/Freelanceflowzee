@@ -318,8 +318,10 @@ export default function AIDesignStudioPage() {
       model: 'Midjourney V6 + DALL-E 3',
       styles: ['Watercolor', 'Oil Painting', 'Abstract', 'Minimalist', '3D Rendered', 'Vintage', 'Cyberpunk', 'Sketch', 'Pop Art', 'Art Deco', 'Manga', 'Photorealistic']
     })
-    toast.success('AI Style Transfer Applied!', {
-      description: '12 artistic style variations created with Midjourney V6'
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Applying AI style transfer...',
+      success: 'AI Style Transfer Applied! 12 artistic variations created with Midjourney V6',
+      error: 'Failed to apply style transfer'
     })
   }
 
@@ -331,8 +333,10 @@ export default function AIDesignStudioPage() {
       qualityScore: 9.8,
       enhancements: ['denoise', 'sharpen', 'color correction']
     })
-    toast.success('AI Image Enhancement Complete!', {
-      description: '4x upscale with AI denoise and sharpening - Quality 9.8/10'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Enhancing image with AI...',
+      success: 'AI Image Enhancement Complete! 4x upscale with denoise and sharpening - Quality 9.8/10',
+      error: 'Failed to enhance image'
     })
   }
 
@@ -343,8 +347,10 @@ export default function AIDesignStudioPage() {
       proportions: 'golden ratio',
       optimizedFor: 'social media'
     })
-    toast.success('Smart Auto Layout Applied!', {
-      description: '8 elements arranged with golden ratio proportions'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Applying smart auto layout...',
+      success: 'Smart Auto Layout Applied! 8 elements arranged with golden ratio proportions',
+      error: 'Failed to apply auto layout'
     })
   }
 
@@ -358,8 +364,10 @@ export default function AIDesignStudioPage() {
         category: template.category,
         rating: template.rating
       })
-      toast.success('AI Template Loaded!', {
-        description: templateName + ' - ' + template.category + ' (' + template.rating + ' stars)'
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Loading AI template...',
+        success: 'AI Template Loaded! ' + templateName + ' - ' + template.category + ' (' + template.rating + ' stars)',
+        error: 'Failed to load template'
       })
     }
   }
@@ -367,8 +375,10 @@ export default function AIDesignStudioPage() {
   // Handler 7: Customize Template
   const handleCustomizeTemplate = (templateId: string) => {
     logger.info('Template customization opened', { templateId })
-    toast.info('Template Customization Mode', {
-      description: 'AI-assisted editing with smart suggestions and GPT-4 copywriting'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Opening customization mode...',
+      success: 'Template Customization Mode - AI-assisted editing with smart suggestions and GPT-4 copywriting',
+      error: 'Failed to open customization mode'
     })
   }
 
@@ -379,8 +389,10 @@ export default function AIDesignStudioPage() {
       resolution: '300 DPI',
       optimization: 'AI-optimized'
     })
-    toast.success('Exporting Design - ' + format.toUpperCase(), {
-      description: 'Production-ready export with AI-optimized compression'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Exporting design as ' + format.toUpperCase() + '...',
+      success: 'Design Exported! ' + format.toUpperCase() + ' - Production-ready with AI-optimized compression',
+      error: 'Failed to export design'
     })
   }
 
@@ -391,8 +403,10 @@ export default function AIDesignStudioPage() {
       autoTagged: true,
       cloudSync: true
     })
-    toast.success('Saved to Design Library!', {
-      description: 'Design ID: ' + designId + ' - Auto-tagged and cloud synced'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Saving to design library...',
+      success: 'Saved to Design Library! Design ID: ' + designId + ' - Auto-tagged and cloud synced',
+      error: 'Failed to save to library'
     })
   }
 
@@ -402,16 +416,20 @@ export default function AIDesignStudioPage() {
       designId,
       features: ['co-editing', 'comments', 'version control']
     })
-    toast.success('Design Shared with Team!', {
-      description: 'Real-time co-editing enabled with comments and version control'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Sharing design with team...',
+      success: 'Design Shared with Team! Real-time co-editing enabled with comments and version control',
+      error: 'Failed to share design'
     })
   }
 
   // Handler 11: Collaborate
   const handleCollaborate = () => {
     logger.info('Collaboration mode opened')
-    toast.info('Start Collaboration', {
-      description: 'Real-time co-editing with AI-assisted conflict resolution'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Starting collaboration session...',
+      success: 'Collaboration Started! Real-time co-editing with AI-assisted conflict resolution',
+      error: 'Failed to start collaboration'
     })
   }
 
@@ -421,8 +439,10 @@ export default function AIDesignStudioPage() {
       versions: 12,
       autoSave: '5 minutes'
     })
-    toast.info('Version History', {
-      description: '12 versions with AI-powered change summaries and impact analysis'
+    toast.promise(new Promise(r => setTimeout(r, 700)), {
+      loading: 'Loading version history...',
+      success: 'Version History loaded - 12 versions with AI-powered change summaries and impact analysis',
+      error: 'Failed to load version history'
     })
   }
 
@@ -434,8 +454,10 @@ export default function AIDesignStudioPage() {
         projectId,
         name: project.name
       })
-      toast.success('Project Duplicated!', {
-        description: project.name + ' copied with all assets and settings'
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Duplicating project...',
+        success: 'Project Duplicated! ' + project.name + ' copied with all assets and settings',
+        error: 'Failed to duplicate project'
       })
     }
   }
@@ -554,8 +576,10 @@ export default function AIDesignStudioPage() {
       platforms: ['Instagram Post', 'Instagram Story', 'Facebook', 'Twitter', 'LinkedIn', 'YouTube', 'Pinterest', 'Web Banner'],
       features: ['Focal point detection', 'Layout adaptation', 'Typography scaling']
     })
-    toast.success('Smart Resize Complete!', {
-      description: '8 social media formats with AI-adaptive layout and focal point detection'
+    toast.promise(new Promise(r => setTimeout(r, 1800)), {
+      loading: 'Resizing for multiple formats...',
+      success: 'Smart Resize Complete! 8 social media formats with AI-adaptive layout and focal point detection',
+      error: 'Failed to resize design'
     })
   }
 
@@ -572,8 +596,10 @@ export default function AIDesignStudioPage() {
         readability: 8.2
       }
     })
-    toast.info('AI Design Feedback', {
-      description: 'GPT-4 Vision analysis complete - Overall score: 8.7/10'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Analyzing design with GPT-4 Vision...',
+      success: 'AI Design Feedback Complete! GPT-4 Vision analysis - Overall score: 8.7/10',
+      error: 'Failed to generate AI feedback'
     })
   }
 
@@ -585,8 +611,10 @@ export default function AIDesignStudioPage() {
       accuracy: '99.2%',
       features: ['Hair detail preserved', 'Clean transparent background', 'Crisp edges', 'Fine details maintained']
     })
-    toast.success('Background Removed Successfully!', {
-      description: '99.2% accurate edge detection in 1.8 seconds - Ready for compositing'
+    toast.promise(new Promise(r => setTimeout(r, 1800)), {
+      loading: 'Removing background with AI...',
+      success: 'Background Removed! 99.2% accurate edge detection - Ready for compositing',
+      error: 'Failed to remove background'
     })
   }
 
@@ -599,8 +627,10 @@ export default function AIDesignStudioPage() {
       composition: 'Rule of thirds optimal',
       alternatives: ['Square (1:1)', 'Portrait (4:5)', 'Landscape (16:9)', 'Story (9:16)']
     })
-    toast.success('Smart Crop Applied!', {
-      description: '3 focal points detected with 95% confidence - 4 crop variations ready'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Analyzing and cropping with AI...',
+      success: 'Smart Crop Applied! 3 focal points detected with 95% confidence - 4 crop variations ready',
+      error: 'Failed to apply smart crop'
     })
   }
 
@@ -618,8 +648,10 @@ export default function AIDesignStudioPage() {
         noiseReduction: '-87%'
       }
     })
-    toast.success('Image Upscaled 4x!', {
-      description: '1MP to 16MP with 245% sharpness increase - 9.6/10 quality'
+    toast.promise(new Promise(r => setTimeout(r, 2500)), {
+      loading: 'Upscaling image 4x with AI...',
+      success: 'Image Upscaled 4x! 1MP to 16MP with 245% sharpness increase - 9.6/10 quality',
+      error: 'Failed to upscale image'
     })
   }
 
@@ -631,8 +663,10 @@ export default function AIDesignStudioPage() {
       types: ['Cool colors', 'Warm colors', 'Minimal layout', 'Bold layout', 'Modern typography', 'Combined best'],
       features: ['Quality maintained', 'A/B test ready', 'User preference prediction']
     })
-    toast.success('6 Design Variations Generated!', {
-      description: 'High diversity score 8.9/10 - A/B test ready with AI predictions'
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: 'Generating design variations...',
+      success: '6 Design Variations Generated! High diversity score 8.9/10 - A/B test ready with AI predictions',
+      error: 'Failed to generate variations'
     })
   }
 
@@ -644,8 +678,10 @@ export default function AIDesignStudioPage() {
       compliance: '100%',
       accessibility: 'WCAG AA'
     })
-    toast.success('Brand Kit Applied!', {
-      description: '100% brand compliance with WCAG AA accessibility'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Applying brand kit...',
+      success: 'Brand Kit Applied! 100% brand compliance with WCAG AA accessibility',
+      error: 'Failed to apply brand kit'
     })
   }
 
@@ -672,8 +708,10 @@ export default function AIDesignStudioPage() {
         { name: 'AI Upscaler Pro', uses: 'Image enhancement, upscaling', speed: '4-8s', quality: 'Outstanding', status: 'Active' }
       ]
     })
-    toast.info('AI Models Overview', {
-      description: '5 AI models active - GPT-4 Vision, DALL-E 3, Midjourney V6, and more'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading AI models overview...',
+      success: 'AI Models Overview - 5 AI models active: GPT-4 Vision, DALL-E 3, Midjourney V6, and more',
+      error: 'Failed to load AI models'
     })
   }
 
@@ -690,8 +728,10 @@ export default function AIDesignStudioPage() {
         rating: tool.rating,
         description: tool.description
       })
-      toast.success(toolName + ' Activated!', {
-        description: tool.model + ' - ' + tool.rating + ' stars (' + tool.uses.toLocaleString() + ' uses)'
+      toast.promise(new Promise(r => setTimeout(r, 700)), {
+        loading: 'Activating ' + toolName + '...',
+        success: toolName + ' Activated! ' + tool.model + ' - ' + tool.rating + ' stars (' + tool.uses.toLocaleString() + ' uses)',
+        error: 'Failed to activate ' + toolName
       })
     } else {
       logger.info('AI tool launched', { toolId, toolName })
