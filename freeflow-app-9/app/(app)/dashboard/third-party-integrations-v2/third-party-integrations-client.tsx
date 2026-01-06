@@ -324,9 +324,9 @@ const mockIntegrationsAIInsights = [
 ]
 
 const mockIntegrationsCollaborators = [
-  { id: '1', name: 'Integration Lead', avatar: '/avatars/int.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'API Developer', avatar: '/avatars/api.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'Support Engineer', avatar: '/avatars/support.jpg', status: 'away' as const, role: 'Support' },
+  { id: '1', name: 'Integration Lead', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'API Developer', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Developer' },
+  { id: '3', name: 'Support Engineer', avatar: '/avatars/bob.jpg', status: 'away' as const, role: 'Support' },
 ]
 
 const mockIntegrationsPredictions = [

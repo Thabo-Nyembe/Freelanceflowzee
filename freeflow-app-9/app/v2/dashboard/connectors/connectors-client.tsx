@@ -630,9 +630,9 @@ const mockConnectorsAIInsights = [
 ]
 
 const mockConnectorsCollaborators = [
-  { id: '1', name: 'Integration Lead', avatar: '/avatars/integration.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Automation Eng', avatar: '/avatars/automation.jpg', status: 'online' as const, role: 'Engineer' },
-  { id: '3', name: 'API Specialist', avatar: '/avatars/api.jpg', status: 'away' as const, role: 'Specialist' },
+  { id: '1', name: 'Integration Lead', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Automation Eng', avatar: '/avatars/jane.jpg', status: 'online' as const, role: 'Engineer' },
+  { id: '3', name: 'API Specialist', avatar: '/avatars/alex.jpg', status: 'away' as const, role: 'Specialist' },
 ]
 
 const mockConnectorsPredictions = [

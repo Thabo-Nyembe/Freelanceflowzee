@@ -226,9 +226,9 @@ const mockIntegrationsAIInsights = [
 ]
 
 const mockIntegrationsCollaborators = [
-  { id: '1', name: 'Integration Lead', avatar: '/avatars/integ.jpg', status: 'online' as const, role: 'Engineering', lastActive: 'Now' },
-  { id: '2', name: 'API Developer', avatar: '/avatars/api.jpg', status: 'online' as const, role: 'Development', lastActive: '15m ago' },
-  { id: '3', name: 'Solutions Arch', avatar: '/avatars/arch.jpg', status: 'away' as const, role: 'Architecture', lastActive: '1h ago' },
+  { id: '1', name: 'Integration Lead', avatar: '/avatars/mike.jpg', status: 'online' as const, role: 'Engineering', lastActive: 'Now' },
+  { id: '2', name: 'API Developer', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Development', lastActive: '15m ago' },
+  { id: '3', name: 'Solutions Arch', avatar: '/avatars/marcus.jpg', status: 'away' as const, role: 'Architecture', lastActive: '1h ago' },
 ]
 
 const mockIntegrationsPredictions = [
@@ -1438,20 +1438,42 @@ export default function IntegrationsClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Activity, label: 'Real-time', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: PieChart, label: 'Usage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: AlertCircle, label: 'Errors', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400' }
+                { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading analytics dashboard...', success: 'Analytics dashboard loaded', error: 'Failed to load dashboard' }) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Analyzing trends...', success: 'Trend analysis complete - see charts below', error: 'Failed to analyze trends' }) },
+                { icon: Activity, label: 'Real-time', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Connecting to real-time feed...', success: 'Real-time monitoring active', error: 'Failed to connect' }) },
+                { icon: PieChart, label: 'Usage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Calculating usage stats...', success: `Usage: ${usagePercent.toFixed(1)}% of quota used`, error: 'Failed to calculate usage' }) },
+                { icon: AlertCircle, label: 'Errors', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
+                  const errorRate = 100 - usageStats.successRate
+                  toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Fetching error logs...', success: `Error rate: ${errorRate.toFixed(1)}% - ${errorRate < 5 ? 'Looking good!' : 'Needs attention'}`, error: 'Failed to fetch errors' })
+                } },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating analytics report...', success: 'Report generated - ready to download', error: 'Failed to generate report' }) },
+                { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => {
+                  toast.promise(new Promise<void>((resolve) => {
+                    const analyticsData = {
+                      workflows: workflowStats,
+                      integrations: integrationStats,
+                      webhooks: webhookStats,
+                      usage: usageStats,
+                      exportedAt: new Date().toISOString()
+                    }
+                    const data = JSON.stringify(analyticsData, null, 2)
+                    const blob = new Blob([data], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'analytics-export.json'
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    setTimeout(resolve, 2500)
+                  }), { loading: 'Exporting analytics data...', success: 'Analytics data exported successfully', error: 'Failed to export analytics' })
+                } },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => toast.success(action.label, { description: `${action.label} analytics opened` })}
+                  onClick={action.onClick}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1598,10 +1620,10 @@ export default function IntegrationsClient() {
                         <code className="text-xs text-muted-foreground">zk_live_********************</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => toast.success('Key revealed')}>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revealing key...', success: 'Production key revealed temporarily', error: 'Failed to reveal key' })}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_live_xxx'); toast.success('Copied!') }}>
+                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_live_xxxxxxxxxxxxxxxxxxxx'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Production key copied to clipboard', error: 'Failed to copy' }) }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1614,16 +1636,16 @@ export default function IntegrationsClient() {
                         <code className="text-xs text-muted-foreground">zk_test_********************</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => toast.success('Key revealed')}>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revealing key...', success: 'Test key revealed temporarily', error: 'Failed to reveal key' })}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_test_xxx'); toast.success('Copied!') }}>
+                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_test_xxxxxxxxxxxxxxxxxxxx'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Test key copied to clipboard', error: 'Failed to copy' }) }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full" onClick={() => toast.loading('Regenerating keys...')}>
+                  <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Regenerating API keys...', success: 'API keys regenerated successfully', error: 'Failed to regenerate keys' })}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Regenerate Keys
                   </Button>
@@ -1646,7 +1668,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">Enabled</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.success('2FA', { description: '2FA management opened' })}>Manage</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening 2FA settings...', success: '2FA management panel opened', error: 'Failed to open 2FA settings' })}>Manage</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center gap-3">
@@ -1656,7 +1678,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">3 IPs configured</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.success('IP Allowlist', { description: 'IP configuration opened' })}>Configure</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading IP allowlist...', success: 'IP configuration panel opened', error: 'Failed to load IP settings' })}>Configure</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center gap-3">
@@ -1666,7 +1688,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">90-day retention</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.success('Audit Logs', { description: 'Audit logs opened' })}>View</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading audit logs...', success: 'Audit logs loaded - 247 entries', error: 'Failed to load audit logs' })}>View</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1708,10 +1730,10 @@ export default function IntegrationsClient() {
                         </div>
                       </div>
                       <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1" onClick={() => toast.success('Invoices', { description: 'Invoices opened' })}>
+                        <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading invoices...', success: 'Invoices loaded - 12 invoices found', error: 'Failed to load invoices' })}>
                           View Invoices
                         </Button>
-                        <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-600" onClick={() => toast.success('Upgrade', { description: 'Plan upgrade opened' })}>
+                        <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading upgrade options...', success: 'Upgrade plans loaded - Enterprise available', error: 'Failed to load upgrade options' })}>
                           Upgrade Plan
                         </Button>
                       </div>
@@ -1832,7 +1854,7 @@ export default function IntegrationsClient() {
                       Turn On
                     </Button>
                   )}
-                  <Button variant="outline" className="flex-1" onClick={() => toast.success('Edit Zap', { description: 'Zap editor opened' })}>
+                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening zap editor...', success: 'Zap editor loaded - make your changes', error: 'Failed to open editor' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Zap
                   </Button>
@@ -1916,7 +1938,7 @@ export default function IntegrationsClient() {
                 </div>
 
                 {selectedTask.status === 'failed' && (
-                  <Button className="w-full" onClick={() => toast.loading('Replaying task...')}>
+                  <Button className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Replaying task...', success: 'Task replayed successfully', error: 'Failed to replay task' })}>
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Replay Task
                   </Button>
@@ -2033,7 +2055,7 @@ export default function IntegrationsClient() {
                       <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">
                         {selectedWebhook.secret.substring(0, 12)}********************
                       </code>
-                      <Button variant="ghost" size="sm" onClick={() => toast.success('Secret revealed')}>
+                      <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revealing secret...', success: 'Webhook secret revealed temporarily', error: 'Failed to reveal secret' })}>
                         <Eye className="w-4 h-4" />
                       </Button>
                     </div>

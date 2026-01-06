@@ -234,8 +234,9 @@ export const authOptions: NextAuthOptions = {
   // Security options
   secret: process.env.NEXTAUTH_SECRET,
 
-  // Enable debug in development
-  debug: process.env.NODE_ENV === 'development',
+  // Debug mode disabled to suppress DEBUG_ENABLED warning
+  // Set to true only when troubleshooting authentication issues
+  debug: false,
 
   // Events for logging
   events: {

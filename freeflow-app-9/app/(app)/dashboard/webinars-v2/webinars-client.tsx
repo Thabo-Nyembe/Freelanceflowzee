@@ -447,7 +447,7 @@ const mockWebinarsActivities = [
 const mockWebinarsQuickActions = [
   { id: '1', label: 'New Webinar', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening webinar wizard...', success: 'Set up your webinar title, description, and schedule', error: 'Failed to open' }), variant: 'default' as const },
   { id: '2', label: 'Go Live', icon: 'video', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Initializing broadcast...', success: 'You are now live! 45 attendees connected', error: 'Broadcast failed to start' }), variant: 'default' as const },
-  { id: '3', label: 'Recordings', icon: 'film', action: () => toast.success('Recordings', { description: 'View and manage 12 past webinar recordings' }), variant: 'outline' as const },
+  { id: '3', label: 'Recordings', icon: 'film', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading recordings...', success: 'View and manage 12 past webinar recordings', error: 'Failed to load' }), variant: 'outline' as const },
 ]
 
 export default function WebinarsClient() {
@@ -1702,7 +1702,7 @@ export default function WebinarsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="sk_webinar_****************************" readOnly className="font-mono" />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('sk_webinar_live_abc123xyz789...'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'API key copied to clipboard!', error: 'Failed to copy' }) }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1711,7 +1711,7 @@ export default function WebinarsClient() {
                           <Label>Webhook URL</Label>
                           <Input defaultValue="https://api.yoursite.com/webhooks/webinar" className="mt-1 font-mono" />
                         </div>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Regenerating API key...', success: 'New API key generated! Update your integrations', error: 'Failed to regenerate key' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1852,11 +1852,11 @@ export default function WebinarsClient() {
                           <Input type="number" defaultValue="365" className="mt-1" />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Preparing data export...', success: 'All webinar data exported as ZIP file', error: 'Export failed' })}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:text-red-700">
+                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing cache...', success: 'Cache cleared! 45MB freed', error: 'Failed to clear cache' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -1877,7 +1877,7 @@ export default function WebinarsClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Reset All Settings</p>
                             <p className="text-sm text-red-600/70">Restore all settings to defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Resetting all settings to defaults...', success: 'All settings have been reset to defaults', error: 'Reset failed' })}>
                             Reset
                           </Button>
                         </div>
@@ -1886,7 +1886,7 @@ export default function WebinarsClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Delete All Data</p>
                             <p className="text-sm text-red-600/70">Permanently delete all webinar data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Permanently deleting all data...', success: 'All webinar data has been deleted', error: 'Delete failed - please try again' })}>
                             Delete
                           </Button>
                         </div>
@@ -2025,7 +2025,7 @@ export default function WebinarsClient() {
                       <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <Link className="w-4 h-4 text-gray-400" />
                         <span className="text-sm flex-1 truncate">{selectedWebinar.joinUrl}</span>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(selectedWebinar.joinUrl || ''); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Join URL copied to clipboard!', error: 'Failed to copy' }) }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2033,7 +2033,7 @@ export default function WebinarsClient() {
                         <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <UserPlus className="w-4 h-4 text-gray-400" />
                           <span className="text-sm flex-1 truncate">{selectedWebinar.registrationUrl}</span>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(selectedWebinar.registrationUrl || ''); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Registration URL copied to clipboard!', error: 'Failed to copy' }) }}>
                             <Copy className="w-4 h-4" />
                           </Button>
                         </div>
@@ -2045,26 +2045,26 @@ export default function WebinarsClient() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
                   {selectedWebinar.status === 'scheduled' && (
-                    <Button className="gap-2 bg-red-600 hover:bg-red-700">
+                    <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={() => { handleStartWebinar(selectedWebinar.title); setSelectedWebinar(null); }}>
                       <Play className="w-4 h-4" />
                       Start Webinar
                     </Button>
                   )}
                   {selectedWebinar.status === 'live' && (
-                    <Button className="gap-2 bg-red-600 hover:bg-red-700">
+                    <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Connecting to "${selectedWebinar.title}"...`, success: `You are now in "${selectedWebinar.title}" with ${selectedWebinar.attendedCount} attendees`, error: 'Failed to join webinar' })}>
                       <Video className="w-4 h-4" />
                       Join Webinar
                     </Button>
                   )}
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading webinar editor...', success: 'Edit title, description, schedule, and settings', error: 'Failed to load editor' })}>
                     <Edit className="w-4 h-4" />
                     Edit
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('registrations'); setSelectedWebinar(null); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading registrations...', success: `${selectedWebinar.registeredCount} registrations found`, error: 'Failed to load' }); }}>
                     <Users className="w-4 h-4" />
                     View Registrations
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => { navigator.clipboard.writeText(selectedWebinar.joinUrl || selectedWebinar.registrationUrl || `https://kazi.app/webinar/${selectedWebinar.id}`); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying share link...', success: 'Share link copied to clipboard!', error: 'Failed to copy' }); }}>
                     <Share2 className="w-4 h-4" />
                     Share
                   </Button>

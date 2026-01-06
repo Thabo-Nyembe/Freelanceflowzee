@@ -387,7 +387,7 @@ const mockCollections: Collection[] = [
 
 const mockTopics: Topic[] = [
   { id: '1', name: 'Nature', slug: 'nature', description: 'Photos of natural landscapes and wildlife', coverPhoto: '/topics/nature.jpg', photoCount: 45000, featured: true },
-  { id: '2', name: 'Architecture', slug: 'architecture', description: 'Buildings and structural photography', coverPhoto: '/topics/arch.jpg', photoCount: 28000, featured: true },
+  { id: '2', name: 'Architecture', slug: 'architecture', description: 'Buildings and structural photography', coverPhoto: '/placeholder.svg', photoCount: 28000, featured: true },
   { id: '3', name: 'Travel', slug: 'travel', description: 'Destinations and adventures worldwide', coverPhoto: '/topics/travel.jpg', photoCount: 52000, featured: true },
   { id: '4', name: 'People', slug: 'people', description: 'Portraits and human moments', coverPhoto: '/topics/people.jpg', photoCount: 38000, featured: false },
   { id: '5', name: 'Food & Drink', slug: 'food-drink', description: 'Culinary photography', coverPhoto: '/topics/food.jpg', photoCount: 21000, featured: false },

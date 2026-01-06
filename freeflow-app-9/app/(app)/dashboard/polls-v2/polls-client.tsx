@@ -491,9 +491,9 @@ const mockPollsAIInsights = [
 ]
 
 const mockPollsCollaborators = [
-  { id: '1', name: 'Research Lead', avatar: '/avatars/research.jpg', status: 'online' as const, role: 'Survey Manager', lastActive: 'Now' },
-  { id: '2', name: 'Marketing Team', avatar: '/avatars/marketing.jpg', status: 'online' as const, role: 'Contributor', lastActive: '10m ago' },
-  { id: '3', name: 'Data Analyst', avatar: '/avatars/analyst.jpg', status: 'away' as const, role: 'Analyst', lastActive: '30m ago' },
+  { id: '1', name: 'Research Lead', avatar: '/avatars/sarah-chen.jpg', status: 'online' as const, role: 'Survey Manager', lastActive: 'Now' },
+  { id: '2', name: 'Marketing Team', avatar: '/avatars/emily.jpg', status: 'online' as const, role: 'Contributor', lastActive: '10m ago' },
+  { id: '3', name: 'Data Analyst', avatar: '/avatars/maya.jpg', status: 'away' as const, role: 'Analyst', lastActive: '30m ago' },
 ]
 
 const mockPollsPredictions = [

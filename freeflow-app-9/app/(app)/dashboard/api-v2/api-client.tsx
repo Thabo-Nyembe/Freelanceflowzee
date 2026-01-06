@@ -308,9 +308,9 @@ const mockApiAIInsights = [
 ]
 
 const mockApiCollaborators = [
-  { id: '1', name: 'API Lead', avatar: '/avatars/api.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Backend Dev', avatar: '/avatars/backend.jpg', status: 'online' as const, role: 'Developer' },
-  { id: '3', name: 'DevOps', avatar: '/avatars/devops.jpg', status: 'away' as const, role: 'DevOps' },
+  { id: '1', name: 'API Lead', avatar: '/avatars/alex.jpg', status: 'online' as const, role: 'Lead' },
+  { id: '2', name: 'Backend Dev', avatar: '/avatars/john.jpg', status: 'online' as const, role: 'Developer' },
+  { id: '3', name: 'DevOps', avatar: '/avatars/mike-manager.jpg', status: 'away' as const, role: 'DevOps' },
 ]
 
 const mockApiPredictions = [

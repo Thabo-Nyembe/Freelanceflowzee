@@ -433,9 +433,9 @@ const mockSurveysAIInsights = [
 ]
 
 const mockSurveysCollaborators = [
-  { id: '1', name: 'Research Lead', avatar: '/avatars/research.jpg', status: 'online' as const, role: 'Research' },
-  { id: '2', name: 'UX Designer', avatar: '/avatars/ux.jpg', status: 'online' as const, role: 'UX' },
-  { id: '3', name: 'Product Manager', avatar: '/avatars/pm.jpg', status: 'away' as const, role: 'Product' },
+  { id: '1', name: 'Research Lead', avatar: '/avatars/sarah-chen.jpg', status: 'online' as const, role: 'Research' },
+  { id: '2', name: 'UX Designer', avatar: '/avatars/alice.jpg', status: 'online' as const, role: 'UX' },
+  { id: '3', name: 'Product Manager', avatar: '/avatars/marcus.jpg', status: 'away' as const, role: 'Product' },
 ]
 
 const mockSurveysPredictions = [

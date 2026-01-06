@@ -1328,14 +1328,14 @@ export default function WebinarsClient() {
             {/* Templates Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Template', color: 'bg-green-500', action: () => toast.info('New Template', { description: 'Creating new email template...' }) },
-                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => toast.info('Confirmation', { description: 'Editing confirmation template...' }) },
-                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => toast.info('Reminder', { description: 'Editing reminder template...' }) },
-                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => toast.info('Follow Up', { description: 'Editing follow-up template...' }) },
-                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => toast.success('Duplicate', { description: 'Template duplicated successfully' }) },
-                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => toast.info('Preview', { description: 'Opening template preview...' }) },
-                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => toast.info('Edit', { description: 'Select a template to edit' }) },
-                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => toast.info('Delete', { description: 'Select a template to delete' }) }
+                { icon: Plus, label: 'New Template', color: 'bg-green-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating new template...', success: 'Template editor opened', error: 'Failed to create template' }) },
+                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading confirmation template...', success: 'Template loaded', error: 'Failed to load template' }) },
+                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading reminder template...', success: 'Template loaded', error: 'Failed to load template' }) },
+                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading follow-up template...', success: 'Template loaded', error: 'Failed to load template' }) },
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Duplicating template...', success: 'Template duplicated successfully', error: 'Failed to duplicate template' }) },
+                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading preview...', success: 'Template preview opened', error: 'Failed to load preview' }) },
+                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading editor...', success: 'Select a template to edit', error: 'Failed to load editor' }) },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing deletion...', success: 'Select a template to delete', error: 'Failed to prepare deletion' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1353,7 +1353,7 @@ export default function WebinarsClient() {
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Email Templates</h3>
-              <Button className="gap-2" onClick={() => toast.info('Create Template', { description: 'Opening template editor...' })}>
+              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening template editor...', success: 'Template editor ready', error: 'Failed to open editor' })}>
                 <Plus className="w-4 h-4" />
                 Create Template
               </Button>
@@ -1393,7 +1393,7 @@ export default function WebinarsClient() {
                           <span className="text-sm text-gray-500">{template.enabled ? 'Enabled' : 'Disabled'}</span>
                           <input type="checkbox" checked={template.enabled} className="w-5 h-5" readOnly />
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Edit Template', { description: `Editing "${template.name}"...` })}>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading "${template.name}"...`, success: 'Template editor opened', error: 'Failed to load template' })}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>

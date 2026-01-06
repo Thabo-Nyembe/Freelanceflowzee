@@ -1,8 +1,7 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react'
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import { createEngagementAlgorithm, EngagementAlgorithm } from '@/lib/engagement-algorithm'
 
 interface EngagementContextValue {
@@ -38,9 +37,30 @@ interface EngagementProviderProps {
   userId?: string
 }
 
+// Safe session hook that doesn't require SessionProvider
+function useSafeSession() {
+  const [sessionUserId, setSessionUserId] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    // Fetch session directly from API to avoid SessionProvider requirement
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.user?.id) {
+          setSessionUserId(data.user.id)
+        }
+      })
+      .catch(() => {
+        // Session fetch failed, continue without user ID
+      })
+  }, [])
+
+  return sessionUserId
+}
+
 export function EngagementProvider({ children, userId: propUserId }: EngagementProviderProps) {
-  const { data: session } = useSession()
-  const userId = propUserId || session?.user?.id
+  const sessionUserId = useSafeSession()
+  const userId = propUserId || sessionUserId
   const pathname = usePathname()
 
   const algorithmRef = useRef<EngagementAlgorithm | null>(null)
