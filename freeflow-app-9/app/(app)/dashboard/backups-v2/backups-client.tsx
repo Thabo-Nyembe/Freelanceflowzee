@@ -485,9 +485,21 @@ const mockBackupsActivities = [
 ]
 
 const mockBackupsQuickActions = [
-  { id: '1', label: 'New Backup', icon: 'plus', action: () => console.log('New backup'), variant: 'default' as const },
-  { id: '2', label: 'Restore', icon: 'refresh-cw', action: () => console.log('Restore'), variant: 'default' as const },
-  { id: '3', label: 'Verify', icon: 'check', action: () => console.log('Verify'), variant: 'outline' as const },
+  { id: '1', label: 'New Backup', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
+    loading: 'Creating new backup...',
+    success: 'Backup created successfully',
+    error: 'Failed to create backup'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Restore', icon: 'refresh-cw', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), {
+    loading: 'Restoring from backup...',
+    success: 'Restore completed successfully',
+    error: 'Restore failed'
+  }), variant: 'default' as const },
+  { id: '3', label: 'Verify', icon: 'check', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Verifying backup integrity...',
+    success: 'Backup verified successfully',
+    error: 'Verification failed'
+  }), variant: 'outline' as const },
 ]
 
 export default function BackupsClient() {

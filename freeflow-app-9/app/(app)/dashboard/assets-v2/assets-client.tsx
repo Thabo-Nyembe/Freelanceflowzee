@@ -672,9 +672,21 @@ const mockAssetsActivities = [
 ]
 
 const mockAssetsQuickActions = [
-  { id: '1', label: 'Upload Assets', icon: 'upload', action: () => console.log('Upload assets'), variant: 'default' as const },
-  { id: '2', label: 'New Collection', icon: 'folder', action: () => console.log('New collection'), variant: 'default' as const },
-  { id: '3', label: 'Bulk Edit', icon: 'edit', action: () => console.log('Bulk edit'), variant: 'outline' as const },
+  { id: '1', label: 'Upload Assets', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Uploading assets...',
+    success: 'Assets uploaded successfully',
+    error: 'Failed to upload assets'
+  }), variant: 'default' as const },
+  { id: '2', label: 'New Collection', icon: 'folder', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Creating collection...',
+    success: 'Collection created successfully',
+    error: 'Failed to create collection'
+  }), variant: 'default' as const },
+  { id: '3', label: 'Bulk Edit', icon: 'edit', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
+    loading: 'Processing bulk edit...',
+    success: 'Bulk edit completed successfully',
+    error: 'Bulk edit failed'
+  }), variant: 'outline' as const },
 ]
 
 // Form Types
