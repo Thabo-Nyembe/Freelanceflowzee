@@ -14,7 +14,7 @@ import {
   getVideoMetadata,
   checkFFmpegAvailability
 } from '@/lib/video/ffmpeg-processor'
-import path from 'path'
+import { runtimeJoin, runtimeFilePath, basename, extname } from '@/lib/utils/runtime-path'
 import fs from 'fs/promises'
 
 const logger = createFeatureLogger('API-VideoTrim')
@@ -141,10 +141,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure trim directory exists
-    const projectTrimDir = path.join(TRIM_DIR, body.projectId || 'temp')
+    const projectTrimDir = runtimeJoin(TRIM_DIR, body.projectId || 'temp')
     await fs.mkdir(projectTrimDir, { recursive: true })
 
-    const baseName = path.basename(inputPath, path.extname(inputPath))
+    const baseName = basename(inputPath, extname(inputPath))
     const format = body.format || 'mp4'
     let result: any
 
@@ -182,9 +182,10 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        const outputPath = path.join(
+        const outputPath = runtimeFilePath(
           projectTrimDir,
-          `${baseName}_trim_${body.startTime.toFixed(0)}-${(body.startTime + duration).toFixed(0)}_${Date.now()}.${format}`
+          `${baseName}_trim_${body.startTime.toFixed(0)}-${(body.startTime + duration).toFixed(0)}_${Date.now()}`,
+          format
         )
 
         logger.info('Trimming video', {
@@ -203,7 +204,7 @@ export async function POST(request: NextRequest) {
           action: 'trim',
           output: {
             path: outputPath,
-            url: `/trimmed/${path.basename(projectTrimDir)}/${path.basename(outputPath)}`,
+            url: `/trimmed/${basename(projectTrimDir)}/${basename(outputPath)}`,
             size: stats.size,
             sizeMB: (stats.size / (1024 * 1024)).toFixed(2)
           },
@@ -260,14 +261,14 @@ export async function POST(request: NextRequest) {
 
         // Part 1: From start to cutStart (if cutStart > 0)
         if (body.cutStart > 0) {
-          const part1Path = path.join(projectTrimDir, `${baseName}_part1_${Date.now()}.${format}`)
+          const part1Path = runtimeJoin(projectTrimDir, `${baseName}_part1_${Date.now()}.${format}`)
           await trimVideo(inputPath, part1Path, 0, body.cutStart)
           tempParts.push(part1Path)
         }
 
         // Part 2: From cutEnd to end (if cutEnd < duration)
         if (body.cutEnd < metadata.duration) {
-          const part2Path = path.join(projectTrimDir, `${baseName}_part2_${Date.now()}.${format}`)
+          const part2Path = runtimeJoin(projectTrimDir, `${baseName}_part2_${Date.now()}.${format}`)
           await trimVideo(inputPath, part2Path, body.cutEnd, metadata.duration - body.cutEnd)
           tempParts.push(part2Path)
         }
@@ -280,9 +281,10 @@ export async function POST(request: NextRequest) {
         }
 
         // Concatenate remaining parts
-        const outputPath = path.join(
+        const outputPath = runtimeFilePath(
           projectTrimDir,
-          `${baseName}_cut_${Date.now()}.${format}`
+          `${baseName}_cut_${Date.now()}`,
+          format
         )
 
         if (tempParts.length === 1) {
@@ -308,7 +310,7 @@ export async function POST(request: NextRequest) {
           action: 'cut',
           output: {
             path: outputPath,
-            url: `/trimmed/${path.basename(projectTrimDir)}/${path.basename(outputPath)}`,
+            url: `/trimmed/${basename(projectTrimDir)}/${basename(outputPath)}`,
             size: stats.size,
             sizeMB: (stats.size / (1024 * 1024)).toFixed(2)
           },
@@ -366,7 +368,7 @@ export async function POST(request: NextRequest) {
           const maxDuration = metadata.duration - segment.startTime
           duration = Math.min(duration, maxDuration)
 
-          const segmentPath = path.join(
+          const segmentPath = runtimeJoin(
             projectTrimDir,
             `${baseName}_segment_${i + 1}_${Date.now()}.${format}`
           )
@@ -379,7 +381,7 @@ export async function POST(request: NextRequest) {
           extractedSegments.push({
             index: i + 1,
             path: segmentPath,
-            url: `/trimmed/${path.basename(projectTrimDir)}/${path.basename(segmentPath)}`,
+            url: `/trimmed/${basename(projectTrimDir)}/${basename(segmentPath)}`,
             startTime: segment.startTime,
             endTime: segment.startTime + duration,
             duration: segmentMetadata.duration,
@@ -441,7 +443,7 @@ export async function POST(request: NextRequest) {
           const duration = endTime - startTime
           if (duration <= 0) continue
 
-          const segmentPath = path.join(
+          const segmentPath = runtimeJoin(
             projectTrimDir,
             `${baseName}_split_${i + 1}_${Date.now()}.${format}`
           )
@@ -454,7 +456,7 @@ export async function POST(request: NextRequest) {
           splitSegments.push({
             index: i + 1,
             path: segmentPath,
-            url: `/trimmed/${path.basename(projectTrimDir)}/${path.basename(segmentPath)}`,
+            url: `/trimmed/${basename(projectTrimDir)}/${basename(segmentPath)}`,
             startTime,
             endTime,
             duration: segmentMetadata.duration,

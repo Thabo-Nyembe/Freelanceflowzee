@@ -101,18 +101,23 @@ export function EmailIntegrationStep({ onComplete, onBack }: any) {
       `width=${width},height=${height},left=${left},top=${top}`
     );
 
-    // Listen for OAuth completion
+    // Listen for OAuth completion with timeout guard
+    let attempts = 0;
+    const maxAttempts = 120; // 60 seconds max (120 * 500ms)
     const checkPopup = setInterval(() => {
-      if (popup?.closed) {
+      attempts++;
+      if (popup?.closed || attempts >= maxAttempts) {
         clearInterval(checkPopup);
-        // Check if OAuth was successful
-        const params = new URLSearchParams(window.location.search);
-        if (params.get(providerName) === 'success') {
-          toast({
-            title: 'Connected Successfully!',
-            description: `Your ${providerName} account is now connected.`,
-          });
-          setTimeout(onComplete, 1500);
+        if (popup?.closed) {
+          // Check if OAuth was successful
+          const params = new URLSearchParams(window.location.search);
+          if (params.get(providerName) === 'success') {
+            toast({
+              title: 'Connected Successfully!',
+              description: `Your ${providerName} account is now connected.`,
+            });
+            setTimeout(onComplete, 1500);
+          }
         }
       }
     }, 500);

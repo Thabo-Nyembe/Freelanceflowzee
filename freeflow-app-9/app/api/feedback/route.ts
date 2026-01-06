@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
+import { createClient } from "@/lib/supabase/server"
 import { z } from "zod"
 import { PDFDocument, StandardFonts } from "pdf-lib"
 import { Parser } from "json2csv"
@@ -145,7 +144,7 @@ if (process.env.UPSTASH_REDIS_REST_URL) {
 
 // Helper functions
 const validateAuth = async (request: NextRequest) => {
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createClient()
   const {
     data: { session },
   } = await supabase.auth.getSession()

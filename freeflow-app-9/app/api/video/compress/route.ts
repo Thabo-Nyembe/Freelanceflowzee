@@ -14,7 +14,7 @@ import {
   checkFFmpegAvailability
 } from '@/lib/video/ffmpeg-processor'
 import { queueCompressJob, getJobStatus } from '@/lib/video/video-queue'
-import path from 'path'
+import { runtimeJoin, runtimeFilePath, basename, extname } from '@/lib/utils/runtime-path'
 import fs from 'fs/promises'
 
 const logger = createFeatureLogger('API-VideoCompress')
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure compression directory exists
-    const projectCompressDir = path.join(COMPRESS_DIR, body.projectId || 'temp')
+    const projectCompressDir = runtimeJoin(COMPRESS_DIR, body.projectId || 'temp')
     await fs.mkdir(projectCompressDir, { recursive: true })
 
     // Get video metadata
@@ -164,10 +164,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Build output path
-    const baseName = path.basename(inputPath, path.extname(inputPath))
-    const outputPath = path.join(
+    const baseName = basename(inputPath, extname(inputPath))
+    const outputPath = runtimeFilePath(
       projectCompressDir,
-      `${baseName}_compressed_${Date.now()}.mp4`
+      `${baseName}_compressed_${Date.now()}`,
+      'mp4'
     )
 
     logger.info('Starting video compression', {
@@ -252,7 +253,7 @@ export async function POST(request: NextRequest) {
       async: false,
       output: {
         path: compressedPath,
-        url: `/compressed/${path.basename(projectCompressDir)}/${path.basename(compressedPath)}`,
+        url: `/compressed/${basename(projectCompressDir)}/${basename(compressedPath)}`,
         size: compressedStats.size,
         sizeMB: compressedSizeMB.toFixed(2)
       },

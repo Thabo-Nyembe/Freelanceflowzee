@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 import { validateApiKey, hasPermission, withRateLimitHeaders, logApiRequest } from '@/lib/api/middleware'
 
 /**
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createClient()
 
   try {
     // Parse query parameters
@@ -85,7 +84,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Insufficient permissions - write access required' }, { status: 403 })
   }
 
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createClient()
 
   try {
     const body = await request.json()

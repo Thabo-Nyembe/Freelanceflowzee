@@ -13,7 +13,7 @@ import {
   checkFFmpegAvailability,
   addWatermark
 } from '@/lib/video/ffmpeg-processor'
-import path from 'path'
+import { runtimeJoin, runtimeFilePath } from '@/lib/utils/runtime-path'
 import fs from 'fs/promises'
 
 const logger = createFeatureLogger('API-VideoMerge')
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure merge directory exists
-    const userMergeDir = path.join(MERGE_DIR, user.id)
+    const userMergeDir = runtimeJoin(MERGE_DIR, user.id)
     await fs.mkdir(userMergeDir, { recursive: true })
 
     const format = body.outputFormat || 'mp4'
@@ -172,7 +172,7 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        const outputPath = path.join(userMergeDir, `${outputName}.${format}`)
+        const outputPath = runtimeFilePath(userMergeDir, outputName, format)
 
         // Concatenate videos
         await concatenateVideos(videoPaths, outputPath, {
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
           position: body.watermarkPosition
         })
 
-        const outputPath = path.join(userMergeDir, `${outputName}_watermarked.${format}`)
+        const outputPath = runtimeFilePath(userMergeDir, `${outputName}_watermarked`, format)
 
         // Map position string to FFmpeg position
         const positionMap: Record<string, 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'> = {
@@ -406,7 +406,7 @@ export async function POST(request: NextRequest) {
             overlayY = mainMetadata.height - pipHeight - padding
         }
 
-        const outputPath = path.join(userMergeDir, `${outputName}_pip.${format}`)
+        const outputPath = runtimeFilePath(userMergeDir, `${outputName}_pip`, format)
 
         // Use FFmpeg to create PIP effect
         const ffmpeg = (await import('fluent-ffmpeg')).default

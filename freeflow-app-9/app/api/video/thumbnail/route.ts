@@ -14,7 +14,7 @@ import {
   getVideoMetadata,
   checkFFmpegAvailability
 } from '@/lib/video/ffmpeg-processor'
-import path from 'path'
+import { runtimeJoin, runtimeFilePath, basename } from '@/lib/utils/runtime-path'
 import fs from 'fs/promises'
 
 const logger = createFeatureLogger('API-VideoThumbnail')
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure thumbnail directory exists
-    const projectThumbnailDir = path.join(THUMBNAIL_DIR, body.projectId || 'temp')
+    const projectThumbnailDir = runtimeJoin(THUMBNAIL_DIR, body.projectId || 'temp')
     await fs.mkdir(projectThumbnailDir, { recursive: true })
 
     // Get video metadata to determine duration
@@ -130,9 +130,10 @@ export async function POST(request: NextRequest) {
       const startTime = body.startTime ?? 1
       const duration = body.duration ?? 3
       const format = body.format === 'gif' ? 'gif' : 'webp'
-      const outputPath = path.join(
+      const outputPath = runtimeFilePath(
         projectThumbnailDir,
-        `animated_${Date.now()}.${format}`
+        `animated_${Date.now()}`,
+        format
       )
 
       const animatedPath = await generateAnimatedThumbnail(inputPath, outputPath, {
@@ -149,7 +150,7 @@ export async function POST(request: NextRequest) {
       result = {
         type: 'animated',
         path: animatedPath,
-        url: `/thumbnails/${path.basename(projectThumbnailDir)}/${path.basename(animatedPath)}`,
+        url: `/thumbnails/${basename(projectThumbnailDir)}/${basename(animatedPath)}`,
         format,
         startTime,
         duration,
@@ -202,7 +203,7 @@ export async function POST(request: NextRequest) {
           const stats = await fs.stat(thumbPath)
           return {
             path: thumbPath,
-            url: `/thumbnails/${path.basename(projectThumbnailDir)}/${path.basename(thumbPath)}`,
+            url: `/thumbnails/${basename(projectThumbnailDir)}/${basename(thumbPath)}`,
             timestamp: timestamps[index],
             fileSize: stats.size
           }

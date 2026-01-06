@@ -3,7 +3,7 @@
 // Multi-model support with persistent storage
 // =====================================================
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import OpenAI from 'openai';
 import Anthropic from '@anthropic-ai/sdk';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -78,13 +78,20 @@ export interface AIGenerationResult {
 
 class AIService {
   private static instance: AIService;
-  private supabase = createClient();
+  private _supabase: ReturnType<typeof createAdminClient> | null = null;
   private openai: OpenAI | null = null;
   private anthropic: Anthropic | null = null;
   private google: GoogleGenerativeAI | null = null;
 
   private constructor() {
     this.initializeClients();
+  }
+
+  private getSupabase() {
+    if (!this._supabase) {
+      this._supabase = createAdminClient();
+    }
+    return this._supabase;
   }
 
   public static getInstance(): AIService {
@@ -520,7 +527,7 @@ Be specific and actionable.`,
   // =====================================================
 
   private async logRequest(request: AIRequest): Promise<{ id: string }> {
-    const { data, error } = await this.supabase
+    const { data, error } = await this.getSupabase()
       .from('ai_requests')
       .insert({
         user_id: request.user_id,
@@ -545,7 +552,7 @@ Be specific and actionable.`,
   }
 
   private async logResponse(response: AIResponse): Promise<void> {
-    await this.supabase.from('ai_responses').insert({
+    await this.getSupabase().from('ai_responses').insert({
       request_id: response.request_id,
       content: response.content.substring(0, 10000),
       prompt_tokens: response.usage.prompt_tokens,
@@ -558,7 +565,7 @@ Be specific and actionable.`,
   }
 
   private async logError(request: AIRequest, error: any): Promise<void> {
-    await this.supabase.from('ai_errors').insert({
+    await this.getSupabase().from('ai_errors').insert({
       user_id: request.user_id,
       provider: request.provider,
       model: request.model,
@@ -577,7 +584,7 @@ Be specific and actionable.`,
     // Upsert usage record for today
     const today = new Date().toISOString().split('T')[0];
 
-    await this.supabase.rpc('increment_ai_usage', {
+    await this.getSupabase().rpc('increment_ai_usage', {
       p_user_id: userId,
       p_date: today,
       p_tokens: response.usage.total_tokens,
@@ -587,7 +594,7 @@ Be specific and actionable.`,
   }
 
   private async saveAnalysisResult(result: AIAnalysisResult): Promise<void> {
-    await this.supabase.from('ai_analysis_results').insert({
+    await this.getSupabase().from('ai_analysis_results').insert({
       id: result.id,
       user_id: result.user_id,
       analysis_type: result.analysis_type,
@@ -600,7 +607,7 @@ Be specific and actionable.`,
   }
 
   private async saveGenerationResult(result: AIGenerationResult): Promise<void> {
-    await this.supabase.from('ai_generation_results').insert({
+    await this.getSupabase().from('ai_generation_results').insert({
       id: result.id,
       user_id: result.user_id,
       generation_type: result.generation_type,
@@ -625,7 +632,7 @@ Be specific and actionable.`,
   }> {
     const startDate = this.getPeriodStartDate(period);
 
-    const { data: usage } = await this.supabase
+    const { data: usage } = await this.getSupabase()
       .from('ai_usage_daily')
       .select('*')
       .eq('user_id', userId)
@@ -657,12 +664,12 @@ Be specific and actionable.`,
     averageLatency: number;
     topModels: { model: string; count: number }[];
   }> {
-    const { data: requests } = await this.supabase
+    const { data: requests } = await this.getSupabase()
       .from('ai_requests')
       .select('model')
       .eq('user_id', userId);
 
-    const { data: responses } = await this.supabase
+    const { data: responses } = await this.getSupabase()
       .from('ai_responses')
       .select('total_tokens, latency_ms')
       .in('request_id', (requests || []).map(r => r.model));
@@ -749,13 +756,33 @@ Be specific and actionable.`,
   }
 }
 
-// Export singleton instance
-export const aiService = AIService.getInstance();
+// Lazy singleton getter to avoid build-time initialization
+let _aiServiceInstance: AIService | null = null;
+export function getAIService(): AIService {
+  if (!_aiServiceInstance) {
+    _aiServiceInstance = AIService.getInstance();
+  }
+  return _aiServiceInstance;
+}
+
+// For backwards compatibility (deprecated - use getAIService() instead)
+// @deprecated
+export const aiService = {
+  get instance() {
+    return getAIService();
+  },
+  chat: (request: AIRequest) => getAIService().chat(request),
+  analyzeContent: (userId: string, type: string, content: string) =>
+    getAIService().analyzeContent(userId, type, content),
+  generateContent: (userId: string, type: AIGenerationResult['generation_type'], prompt: string) =>
+    getAIService().generateContent(userId, type, prompt),
+  getAIStats: (userId: string) => getAIService().getAIStats(userId),
+} as unknown as AIService;
 
 // Export convenience functions
-export const chat = (request: AIRequest) => aiService.chat(request);
+export const chat = (request: AIRequest) => getAIService().chat(request);
 export const analyzeContent = (userId: string, type: string, content: string) =>
-  aiService.analyzeContent(userId, type, content);
+  getAIService().analyzeContent(userId, type, content);
 export const generateContent = (userId: string, type: AIGenerationResult['generation_type'], prompt: string) =>
-  aiService.generateContent(userId, type, prompt);
-export const getAIStats = (userId: string) => aiService.getAIStats(userId);
+  getAIService().generateContent(userId, type, prompt);
+export const getAIStats = (userId: string) => getAIService().getAIStats(userId);

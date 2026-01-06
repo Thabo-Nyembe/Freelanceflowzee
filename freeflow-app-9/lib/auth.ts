@@ -256,3 +256,14 @@ export { useSession, signIn, signOut } from 'next-auth/react'
 
 // Re-export authOptions for API routes
 export { authOptions } from './auth.config'
+
+// ============================================================================
+// BACKWARD COMPATIBILITY EXPORTS
+// ============================================================================
+
+/**
+ * Authenticate request (alias for verifyAuthToken)
+ * @deprecated Use verifyAuthToken or getServerSession instead
+ */
+export const authenticate = verifyAuthToken
+export const authenticateRequest = verifyAuthToken

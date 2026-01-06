@@ -172,7 +172,7 @@ export default function CustomReportsClient() {
     setIsGenerating(true)
     setProgress(0)
 
-    // Simulate report generation
+    // Simulate report generation with timeout safety
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
@@ -184,6 +184,9 @@ export default function CustomReportsClient() {
         return prev + 10
       })
     }, 300)
+
+    // Safety timeout - ensure interval clears after max 5 seconds
+    setTimeout(() => clearInterval(interval), 5000)
   }
 
   const getIconForTemplate = (icon: string) => {

@@ -1,5 +1,4 @@
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 
 /**
  * User roles and their default permissions
@@ -34,7 +33,7 @@ export type Permission =
  * Gets the current user and their permissions
  */
 export async function getCurrentUser() {
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createClient()
   const { data: { user }, error } = await supabase.auth.getUser()
 
   if (error || !user) {
@@ -137,7 +136,7 @@ export async function isResourceOwner(
     return false
   }
 
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createClient()
 
   const { data } = await supabase
     .from(resourceTable)
@@ -166,7 +165,7 @@ export async function canAccessResource(
     return true
   }
 
-  const supabase = createServerActionClient({ cookies })
+  const supabase = await createClient()
 
   const { data } = await supabase
     .from(resourceTable)

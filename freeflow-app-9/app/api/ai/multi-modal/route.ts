@@ -26,9 +26,23 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 const supabaseAdmin = supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey) : null;
 
-// Initialize Multi-modal AI System
-const multiModalSystem = MultiModalAISystem.getInstance();
-const integratedAISystem = IntegratedAISystem.getInstance();
+// Lazy-initialized Multi-modal AI System (to avoid build-time initialization)
+let multiModalSystem: MultiModalAISystem | null = null;
+let integratedAISystem: IntegratedAISystem | null = null;
+
+function getMultiModalSystem(): MultiModalAISystem {
+  if (!multiModalSystem) {
+    multiModalSystem = MultiModalAISystem.getInstance();
+  }
+  return multiModalSystem;
+}
+
+function getIntegratedAISystem(): IntegratedAISystem {
+  if (!integratedAISystem) {
+    integratedAISystem = IntegratedAISystem.getInstance();
+  }
+  return integratedAISystem;
+}
 
 // Initialize WebSocket server (for serverless environments, this would be handled differently)
 let wsServer: WebSocketServer | null = null;
@@ -407,8 +421,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Get operation status if requestId is provided
     const requestId = url.searchParams.get('requestId');
     if (requestId) {
-      const status = multiModalSystem.getOperationStatus(requestId);
-      const result = multiModalSystem.getOperationResult(requestId);
+      const status = getMultiModalSystem().getOperationStatus(requestId);
+      const result = getMultiModalSystem().getOperationResult(requestId);
       
       return NextResponse.json({
         success: true,
@@ -421,7 +435,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     // Get asset if assetId is provided
     const assetId = url.searchParams.get('assetId');
     if (assetId) {
-      const asset = multiModalSystem.getAsset(assetId);
+      const asset = getMultiModalSystem().getAsset(assetId);
       
       if (!asset) {
         return NextResponse.json(
@@ -442,7 +456,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit')!) : undefined;
     const offset = url.searchParams.get('offset') ? parseInt(url.searchParams.get('offset')!) : undefined;
     
-    const assets = multiModalSystem.searchAssets(query, {
+    const assets = getMultiModalSystem().searchAssets(query, {
       contentTypes,
       limit,
       offset,
@@ -464,7 +478,8 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     // Apply rate limiting
-    const ip = headers().get('x-forwarded-for') || 'localhost';
+    const headersList = await headers();
+    const ip = headersList.get('x-forwarded-for') || 'localhost';
     try {
       await limiter.check(10, ip); // 10 requests per minute per IP
     } catch {
@@ -484,8 +499,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
     
     // Initialize Multi-modal AI System if not already initialized
-    if (!multiModalSystem['isInitialized']) {
-      await multiModalSystem.initialize({
+    const aiSystem = getMultiModalSystem();
+    if (!aiSystem['isInitialized']) {
+      await aiSystem.initialize({
         userOptions: {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
@@ -508,7 +524,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.generateImage(validation.data, {
+        const result = await getMultiModalSystem().generateImage(validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -542,7 +558,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.createImageVariations(imageData, validation.data, {
+        const result = await getMultiModalSystem().createImageVariations(imageData, validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -578,7 +594,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.editImage(imageData, maskData, validation.data, {
+        const result = await getMultiModalSystem().editImage(imageData, maskData, validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -601,7 +617,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.upscaleImage(imageData, scale, {
+        const result = await getMultiModalSystem().upscaleImage(imageData, scale, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -625,7 +641,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.applyStyleTransfer(imageData, styleData, { strength }, {
+        const result = await getMultiModalSystem().applyStyleTransfer(imageData, styleData, { strength }, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -646,7 +662,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.textToSpeech(validation.data, {
+        const result = await getMultiModalSystem().textToSpeech(validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -678,7 +694,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.cloneVoice(audioSamples, { name, description }, {
+        const result = await getMultiModalSystem().cloneVoice(audioSamples, { name, description }, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -699,7 +715,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.createEmbeddings(
+        const result = await getMultiModalSystem().createEmbeddings(
           validation.data.content,
           validation.data.contentType,
           validation.data,
@@ -725,7 +741,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.semanticSearch(validation.data, {
+        const result = await getMultiModalSystem().semanticSearch(validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -746,7 +762,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.contentSimilarity(validation.data, {
+        const result = await getMultiModalSystem().contentSimilarity(validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -767,7 +783,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.executeWorkflow(validation.data, {
+        const result = await getMultiModalSystem().executeWorkflow(validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -788,7 +804,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.processMultiModalContent(validation.data, {
+        const result = await getMultiModalSystem().processMultiModalContent(validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -812,7 +828,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.generateMultiModalContent(
+        const result = await getMultiModalSystem().generateMultiModalContent(
           prompt,
           outputTypes,
           {
@@ -847,7 +863,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.translateAcrossModalities(
+        const result = await getMultiModalSystem().translateAcrossModalities(
           content,
           contentType,
           targetType,
@@ -881,7 +897,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.getRecommendations(
+        const result = await getMultiModalSystem().getRecommendations(
           content,
           contentType,
           {
@@ -915,7 +931,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.discoverContent(
+        const result = await getMultiModalSystem().discoverContent(
           query,
           queryType,
           {
@@ -947,7 +963,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.matchAssets(
+        const result = await getMultiModalSystem().matchAssets(
           criteria,
           {
             contentTypes: body.contentTypes,
@@ -977,7 +993,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const result = await multiModalSystem.manageAssetLibrary(validation.data, {
+        const result = await getMultiModalSystem().manageAssetLibrary(validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -1001,7 +1017,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         // Override userId with authenticated user ID for security
         validation.data.userId = auth.user.id;
         
-        const result = await multiModalSystem.manageCollaboration(validation.data, {
+        const result = await getMultiModalSystem().manageCollaboration(validation.data, {
           userId: auth.user.id,
           organizationId: auth.user.organizationId,
         });
@@ -1040,7 +1056,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const cancelled = await multiModalSystem.cancelOperation(requestId);
+        const cancelled = await getMultiModalSystem().cancelOperation(requestId);
         
         return NextResponse.json({
           success: true,
@@ -1066,14 +1082,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           end: new Date(body.timeRange.end),
         } : undefined;
         
-        const metrics = multiModalSystem.getPerformanceMetrics({
+        const metrics = getMultiModalSystem().getPerformanceMetrics({
           operationType,
           contentType,
           provider,
           timeRange,
         });
         
-        const aggregated = multiModalSystem.getAggregatedMetrics({
+        const aggregated = getMultiModalSystem().getAggregatedMetrics({
           operationType,
           contentType,
           provider,
@@ -1104,13 +1120,13 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           end: new Date(body.timeRange.end),
         } : undefined;
         
-        const byOperationType = multiModalSystem.getCostBreakdown({
+        const byOperationType = getMultiModalSystem().getCostBreakdown({
           userId,
           projectId,
           timeRange,
         });
         
-        const byProvider = multiModalSystem.getCostBreakdownByProvider({
+        const byProvider = getMultiModalSystem().getCostBreakdownByProvider({
           userId,
           projectId,
           timeRange,
@@ -1132,7 +1148,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           );
         }
         
-        const stats = multiModalSystem.getCacheStats();
+        const stats = getMultiModalSystem().getCacheStats();
         
         return NextResponse.json({
           success: true,
@@ -1150,7 +1166,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         }
         
         const body = await req.json();
-        multiModalSystem.clearCache({
+        getMultiModalSystem().clearCache({
           operationType: body.operationType,
           contentType: body.contentType,
           userId: body.userId,
@@ -1171,7 +1187,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         const userId = isAdmin ? body.userId : auth.user.id;
         const projectId = isAdmin ? body.projectId : auth.user.projectId;
         
-        const operations = multiModalSystem.exportOperationHistory({
+        const operations = getMultiModalSystem().exportOperationHistory({
           operationType: body.operationType,
           contentType: body.contentType,
           userId,
@@ -1234,7 +1250,7 @@ export async function PUT(req: NextRequest): Promise<NextResponse> {
     body.id = assetId;
     
     // Update asset
-    const updatedAsset = await multiModalSystem.addOrUpdateAsset(body);
+    const updatedAsset = await getMultiModalSystem().addOrUpdateAsset(body);
     
     return NextResponse.json({
       success: true,
@@ -1271,7 +1287,7 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
     }
     
     // Delete asset
-    const deleted = await multiModalSystem.deleteAsset(assetId);
+    const deleted = await getMultiModalSystem().deleteAsset(assetId);
     
     if (!deleted) {
       return NextResponse.json(
@@ -1289,20 +1305,5 @@ export async function DELETE(req: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Initialize WebSocket server if in Node.js environment
-if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
-  // For development environment only
-  try {
-    const { createServer } = require('http');
-    const server = createServer();
-    initWebSocketServer(server);
-    server.listen(3001, () => {
-      logger.info('WebSocket server started', { port: 3001, environment: 'development' });
-    });
-  } catch (error) {
-    logger.error('Failed to initialize WebSocket server', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-  }
-}
+// NOTE: WebSocket server initialization removed - it was causing build-time issues.
+// WebSocket functionality should be handled by a separate worker or serverless function.

@@ -1547,5 +1547,19 @@ export class IntegratedAISystem {
   }
 }
 
-// Export singleton instance
-export const integratedAISystem = IntegratedAISystem.getInstance();
+// Lazy singleton getter to avoid build-time initialization
+let _integratedAISystemInstance: IntegratedAISystem | null = null;
+export function getIntegratedAISystem(): IntegratedAISystem {
+  if (!_integratedAISystemInstance) {
+    _integratedAISystemInstance = IntegratedAISystem.getInstance();
+  }
+  return _integratedAISystemInstance;
+}
+
+// For backwards compatibility (deprecated - use getIntegratedAISystem() instead)
+// @deprecated
+export const integratedAISystem = {
+  get instance() {
+    return getIntegratedAISystem();
+  }
+} as unknown as IntegratedAISystem;

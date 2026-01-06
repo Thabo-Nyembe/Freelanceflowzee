@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createFeatureLogger } from '@/lib/logger'
-
-const logger = createFeatureLogger('API-SmartCollaboration')
-import { SmartCollaborationAI, 
-  SmartCollaborationFeatureType, 
-  CollaborationContextType,
-  DocumentType
-} from '@/lib/ai/smart-collaboration-ai';
+import { SmartCollaborationAI } from '@/lib/ai/smart-collaboration-ai';
 import { WebSocketServer } from '@/lib/websocket-server';
 import { rateLimit } from '@/lib/rate-limit';
-import { validateToken } from '@/lib/auth';
+import { verifyAuthToken } from '@/lib/auth';
 import { sanitizeInput } from '@/lib/security';
 import { logApiUsage, trackCost } from '@/lib/analytics';
+
+// Inline type definitions
+type SmartCollaborationFeatureType = 'suggestions' | 'workload' | 'scheduling' | 'matching';
+type CollaborationContextType = 'project' | 'team' | 'task' | 'document';
+type DocumentType = 'contract' | 'proposal' | 'report' | 'policy' | 'invoice' | 'presentation';
+
+const logger = createFeatureLogger('API-SmartCollaboration')
 
 // Environment configuration
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -41,19 +42,15 @@ const initializeAI = async () => {
 
 // Middleware for authentication and rate limiting
 const applyMiddleware = async (req: NextRequest) => {
-  // Get authorization token
-  const authHeader = req.headers.get('authorization') || '';
-  const token = authHeader.replace('Bearer ', '');
-  
   // Validate token
-  const authResult = await validateToken(token);
-  if (!authResult.valid) {
+  const authResult = await verifyAuthToken(req);
+  if (!authResult) {
     return NextResponse.json(
-      { error: 'Unauthorized', message: authResult.message },
+      { error: 'Unauthorized', message: 'Authentication required' },
       { status: 401 }
     );
   }
-  
+
   // Apply rate limiting
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
   const rateLimitResult = await rateLimit(`smart-collab-${ip}`, MAX_REQUESTS_PER_MINUTE);
@@ -63,16 +60,16 @@ const applyMiddleware = async (req: NextRequest) => {
       { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
     );
   }
-  
+
   // Log API usage
   await logApiUsage({
     endpoint: req.nextUrl.pathname,
     method: req.method,
-    userId: authResult.userId,
+    userId: authResult.id,
     timestamp: new Date(),
     ip
   });
-  
+
   return null; // No error, continue processing
 };
 

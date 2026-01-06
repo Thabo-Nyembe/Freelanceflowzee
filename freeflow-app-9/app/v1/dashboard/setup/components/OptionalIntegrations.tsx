@@ -58,11 +58,17 @@ export function CalendarIntegrationStep({ onComplete, onSkip, onBack }: any) {
       'width=600,height=700'
     );
 
+    // Timeout guard to prevent infinite polling
+    let attempts = 0;
+    const maxAttempts = 120; // 60 seconds max
     const checkPopup = setInterval(() => {
-      if (popup?.closed) {
+      attempts++;
+      if (popup?.closed || attempts >= maxAttempts) {
         clearInterval(checkPopup);
-        toast({ title: 'Calendar Connected!', description: `${providerName} Calendar is now synced.` });
-        setTimeout(onComplete, 1500);
+        if (popup?.closed) {
+          toast({ title: 'Calendar Connected!', description: `${providerName} Calendar is now synced.` });
+          setTimeout(onComplete, 1500);
+        }
       }
     }, 500);
   };

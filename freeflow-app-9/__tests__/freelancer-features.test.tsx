@@ -3,7 +3,7 @@ import '@testing-library/jest-dom'
 import { FreelancerDashboard } from '../components/freelancer/freelancer-dashboard'
 import { PortfolioEnhancer } from '../components/video/ai/portfolio-enhancer'
 import { ClientReviewEnhancer } from '../components/video/ai/client-review-enhancer'
-import { FreelancerAnalytics } from '../components/freelancer/freelancer-analytics'
+import { _FreelancerAnalytics as FreelancerAnalytics } from '../components/freelancer/freelancer-analytics'
 
 // Mock the Supabase client
 jest.mock('@supabase/supabase-js', () => ({

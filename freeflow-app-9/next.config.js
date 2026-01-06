@@ -76,15 +76,21 @@ const withPWA = require('next-pwa')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
+    // TODO: Set to false once TypeScript errors in test files and dashboard components are fixed
     ignoreBuildErrors: true,
   },
   experimental: {
     externalDir: true,
   },
+
+  // Exclude native modules from server bundling
+  serverExternalPackages: [
+    '@ffmpeg-installer/ffmpeg',
+    '@ffmpeg-installer/darwin-arm64',
+    'fluent-ffmpeg',
+    'sharp',
+  ],
 
   // Turbopack configuration
   turbopack: {
@@ -100,12 +106,6 @@ const nextConfig = {
   // Advanced Webpack configuration for A+++ grade
   webpack: (config, { isServer, dev, webpack }) => {
     if (!dev) {
-      // Ignore problematic files during production build
-      config.module.rules.push({
-        test: /[\\/]app[\\/]api[\\/]ai[\\/].*\.ts$/,
-        use: 'null-loader',
-      });
-
       // A+++ Bundle optimization - only for client bundles
       if (!isServer) {
         config.optimization.splitChunks = {
@@ -185,15 +185,15 @@ const nextConfig = {
     formats: ['image/webp'],
   },
   
-  // Route rewrites for mock endpoints
-  async rewrites() {
-    return [
-      {
-        source: '/api/ai/:path*',
-        destination: '/api/mock/ai-:path*',
-      },
-    ];
-  },
+  // Route rewrites - disabled AI mock redirect to use real endpoints
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/ai/:path*',
+  //       destination: '/api/mock/ai-:path*',
+  //     },
+  //   ];
+  // },
 }
 
 module.exports = withPWA(nextConfig)

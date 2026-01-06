@@ -3,8 +3,9 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { FileUpload } from '@/components/file-upload'
 import { DownloadButton } from '@/components/download-button'
 import { SiteHeader } from '@/components/site-header'
-import AICreatePage from '@/app/dashboard/ai-create/page'
-import PaymentPage from '@/app/payment/page'
+// TODO: Fix these imports - pages don't exist at these paths
+// import AICreatePage from '@/app/dashboard/ai-create/page'
+// import PaymentPage from '@/app/payment/page'
 
 // Mock fetch for download tests
 global.fetch = jest.fn(() =>

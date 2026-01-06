@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 import { validateApiKey, hasPermission, withRateLimitHeaders, logApiRequest } from '@/lib/api/middleware'
 
 /**
@@ -21,7 +20,7 @@ export async function GET(
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createClient()
 
   try {
     const { data, error: queryError } = await supabase
@@ -71,7 +70,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Insufficient permissions - write access required' }, { status: 403 })
   }
 
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createClient()
 
   try {
     const body = await request.json()
@@ -132,7 +131,7 @@ export async function DELETE(
     return NextResponse.json({ error: 'Insufficient permissions - delete access required' }, { status: 403 })
   }
 
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createClient()
 
   try {
     // Soft delete by setting archived_at

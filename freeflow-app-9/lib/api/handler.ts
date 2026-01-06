@@ -11,8 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 import { z } from 'zod'
 import { User } from '@supabase/supabase-js'
 import {
@@ -41,7 +40,7 @@ export interface ApiHandlerContext {
   /** User ID shorthand */
   userId: string | null
   /** Supabase client */
-  supabase: ReturnType<typeof createRouteHandlerClient>
+  supabase: Awaited<ReturnType<typeof createClient>>
   /** Request logger with correlation ID */
   logger: Logger
   /** Request ID for correlation */
@@ -126,7 +125,7 @@ export function createHandler<TBody = unknown>(
     const startTime = Date.now()
     const requestId = generateRequestId()
     const logger = createRequestLogger(requestId)
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createClient()
 
     try {
       // Rate limiting

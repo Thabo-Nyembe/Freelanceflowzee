@@ -8,8 +8,9 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth.config';
 
-// Demo user for unauthenticated access
+// Demo user for unauthenticated access (development only)
 const DEMO_USER_ID = '00000000-0000-0000-0000-000000000001';
+const IS_DEVELOPMENT = process.env.NODE_ENV === 'development';
 
 // =====================================================
 // GET - Dashboard stats, recent activity, quick actions
@@ -23,17 +24,33 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     let userId: string;
     try {
       const session = await getServerSession(authOptions);
-      userId = session?.user?.id || DEMO_USER_ID;
-    } catch {
-      userId = DEMO_USER_ID;
+      if (session?.user?.id) {
+        userId = session.user.id;
+      } else if (IS_DEVELOPMENT) {
+        userId = DEMO_USER_ID;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
+    } catch (error) {
+      if (IS_DEVELOPMENT) {
+        userId = DEMO_USER_ID;
+      } else {
+        return NextResponse.json(
+          { success: false, error: 'Authentication error' },
+          { status: 401 }
+        );
+      }
     }
 
     const { searchParams } = new URL(request.url);
     const action = searchParams.get('action');
 
-    // Allow override via query param for testing
+    // Allow override via query param for testing (development only)
     const queryUserId = searchParams.get('userId');
-    if (queryUserId) {
+    if (queryUserId && IS_DEVELOPMENT) {
       userId = queryUserId;
     }
 

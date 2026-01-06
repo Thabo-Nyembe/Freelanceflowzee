@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   description: 'Manage client review workflows and approval processes for your video projects',
 };
 
+// Force dynamic rendering since this page requires user context
+export const dynamic = 'force-dynamic';
+
 // Define a type for your review object for better type safety
 type Review = {
   status: 'in_review' | 'draft' | 'approved' | 'rejected';
@@ -24,7 +27,7 @@ type Review = {
 };
 
 async function getReviewData(userId: string) {
-  const supabase = createAnonClient();
+  const supabase = await createAnonClient();
   
   try {
     // Get user&apos;s reviews
@@ -157,7 +160,7 @@ function calculateReviewStats(reviews: Review[]) {
 }
 
 export default async function ReviewsPage() {
-  const supabase = createAnonClient();
+  const supabase = await createAnonClient();
   
   const {
     data: { user },

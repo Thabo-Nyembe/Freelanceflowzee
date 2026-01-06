@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { redirect, notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import MuxVideoPlayer from '@/components/video/mux-video-player';
@@ -32,7 +31,7 @@ interface VideoReviewPageProps {
 }
 
 export async function generateMetadata({ params }: VideoReviewPageProps): Promise<Metadata> {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
   
   const { data: video } = await supabase
     .from('videos')
@@ -59,7 +58,7 @@ type Review = {
 }
 
 async function getVideoReviewData(videoId: string, reviewId?: string, userId?: string) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
 
   try {
     // Get video details
@@ -189,7 +188,7 @@ function ReviewPanelSkeleton() {
 }
 
 export default async function VideoReviewPage({ params, searchParams }: VideoReviewPageProps) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
   
   const {
     data: { user },

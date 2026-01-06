@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
 import crypto from 'crypto'
 
 export interface ApiContext {
@@ -39,7 +38,7 @@ export async function validateApiKey(request: NextRequest): Promise<{ context?: 
     }
   }
 
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createClient()
 
   // Hash the key to compare with stored hash
   const keyHash = Buffer.from(apiKey).toString('base64')
@@ -189,7 +188,7 @@ export async function logApiRequest(
   latencyMs: number,
   errorMessage?: string
 ) {
-  const supabase = createRouteHandlerClient({ cookies })
+  const supabase = await createClient()
 
   await supabase.from('api_request_logs').insert({
     user_id: context.userId,

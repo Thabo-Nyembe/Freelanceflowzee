@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
+import { createClient } from '@/lib/supabase/server';
 import { Suspense } from 'react';
 
 import { ShareHeader } from '@/components/video/share-header';
@@ -17,7 +16,7 @@ interface VideoPageProps {
 }
 
 export async function generateMetadata({ params }: VideoPageProps): Promise<Metadata> {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
   
   const { data: video } = await supabase
     .from('videos')
@@ -48,7 +47,7 @@ export async function generateMetadata({ params }: VideoPageProps): Promise<Meta
 }
 
 export default async function VideoPage({ params }: VideoPageProps) {
-  const supabase = createServerComponentClient({ cookies });
+  const supabase = await createClient();
 
   // RLS will enforce security, ensuring only authorized users can fetch the video.
   const { data: video } = await supabase

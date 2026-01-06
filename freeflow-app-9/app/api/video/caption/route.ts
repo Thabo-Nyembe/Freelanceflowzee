@@ -18,7 +18,7 @@ import {
   type CaptionOptions
 } from '@/lib/video/caption-service'
 import { checkFFmpegAvailability } from '@/lib/video/ffmpeg-processor'
-import path from 'path'
+import { runtimeJoin, basename, extname } from '@/lib/utils/runtime-path'
 import fs from 'fs/promises'
 
 const logger = createFeatureLogger('API-VideoCaption')
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure caption directory exists
-    const projectCaptionDir = path.join(CAPTION_DIR, body.projectId || 'temp')
+    const projectCaptionDir = runtimeJoin(CAPTION_DIR, body.projectId || 'temp')
     await fs.mkdir(projectCaptionDir, { recursive: true })
 
     let result: any
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
           },
           caption: {
             path: captionPath,
-            url: `/captions/${path.basename(projectCaptionDir)}/${path.basename(captionPath)}`,
+            url: `/captions/${basename(projectCaptionDir)}/${basename(captionPath)}`,
             format
           }
         }
@@ -233,9 +233,9 @@ export async function POST(request: NextRequest) {
 
         const transcription: TranscriptionResult = project.transcription_data
         const format = body.format || 'srt'
-        const outputPath = path.join(
+        const outputPath = runtimeJoin(
           projectCaptionDir,
-          `${path.basename(inputPath!, path.extname(inputPath!))}_${Date.now()}.${format}`
+          `${basename(inputPath!, extname(inputPath!))}_${Date.now()}.${format}`
         )
 
         await generateCaptions(transcription, outputPath, {
@@ -248,7 +248,7 @@ export async function POST(request: NextRequest) {
           action: 'generate',
           caption: {
             path: outputPath,
-            url: `/captions/${path.basename(projectCaptionDir)}/${path.basename(outputPath)}`,
+            url: `/captions/${basename(projectCaptionDir)}/${basename(outputPath)}`,
             format
           }
         }
@@ -317,9 +317,9 @@ export async function POST(request: NextRequest) {
 
         // Generate caption file for translated version
         const format = body.format || 'srt'
-        const outputPath = path.join(
+        const outputPath = runtimeJoin(
           projectCaptionDir,
-          `${path.basename(inputPath!, path.extname(inputPath!))}_${body.targetLanguage}.${format}`
+          `${basename(inputPath!, extname(inputPath!))}_${body.targetLanguage}.${format}`
         )
 
         await generateCaptions(translatedTranscription, outputPath, {
@@ -359,7 +359,7 @@ export async function POST(request: NextRequest) {
           },
           caption: {
             path: outputPath,
-            url: `/captions/${path.basename(projectCaptionDir)}/${path.basename(outputPath)}`,
+            url: `/captions/${basename(projectCaptionDir)}/${basename(outputPath)}`,
             format
           }
         }
@@ -396,9 +396,9 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        const outputPath = path.join(
+        const outputPath = runtimeJoin(
           projectCaptionDir,
-          `${path.basename(inputPath!, path.extname(inputPath!))}_captioned_${Date.now()}.mp4`
+          `${basename(inputPath!, extname(inputPath!))}_captioned_${Date.now()}.mp4`
         )
 
         logger.info('Burning captions into video', {
@@ -422,7 +422,7 @@ export async function POST(request: NextRequest) {
           action: 'burn',
           output: {
             path: outputPath,
-            url: `/videos/${path.basename(projectCaptionDir)}/${path.basename(outputPath)}`,
+            url: `/videos/${basename(projectCaptionDir)}/${basename(outputPath)}`,
             fileSize: stats.size
           },
           options: {
@@ -516,7 +516,7 @@ export async function GET(request: NextRequest) {
           isTranslation: c.is_translation,
           sourceLanguage: c.source_language,
           createdAt: c.created_at,
-          url: `/captions/${projectId}/${path.basename(c.file_path)}`
+          url: `/captions/${projectId}/${basename(c.file_path)}`
         }))
       })
     }

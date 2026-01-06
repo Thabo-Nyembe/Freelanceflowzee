@@ -8,18 +8,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { 
-  IntegratedAISystem, 
-  AIOperationType, 
-  AIOperationStatus,
-  AIProvider
-} from '@/lib/ai/integrated-ai-system';
-import { WebSocketServer } from 'ws';
 import { createHash } from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
 import { writeFile, mkdir } from 'fs';
 import { promisify } from 'util';
-import { join } from 'path';
+import { runtimeJoin } from '@/lib/utils/runtime-path';
 import { pipeline } from 'stream';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
@@ -28,6 +21,11 @@ import { getErrorMessage } from '@/lib/error-utils';
 import { getVideoMetadata } from '@/lib/video-utils';
 import { createFeatureLogger } from '@/lib/logger'
 
+// Inline type definitions to avoid module resolution issues
+type AIOperationType = 'transcription' | 'summarization' | 'analysis' | 'generation' | 'moderation';
+type AIOperationStatus = 'pending' | 'processing' | 'completed' | 'failed';
+type AIProviderType = 'openai' | 'anthropic' | 'google' | 'azure' | 'custom' | 'assemblyai' | 'deepgram';
+
 const logger = createFeatureLogger('API-VideoIntelligence')
 
 // Promisify fs functions
@@ -35,20 +33,33 @@ const writeFileAsync = promisify(writeFile);
 const mkdirAsync = promisify(mkdir);
 const pipelineAsync = promisify(pipeline);
 
-// Initialize AI System
-const aiSystem = IntegratedAISystem.getInstance();
+// Lazy-loaded AI System (to avoid build-time initialization)
+let _aiSystem: any = null;
+function getAISystem() {
+  if (!_aiSystem) {
+    const { IntegratedAISystem } = require('@/lib/ai/integrated-ai-system');
+    _aiSystem = IntegratedAISystem.getInstance();
+  }
+  return _aiSystem;
+}
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+// Lazy-loaded Supabase client
+let _supabase: any = null;
+function getSupabase() {
+  if (!_supabase) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
+    _supabase = createClient(supabaseUrl, supabaseServiceKey);
+  }
+  return _supabase;
+}
 
 // Constants
 const UPLOAD_DIR = process.env.VIDEO_UPLOAD_DIR || './uploads';
 const MAX_VIDEO_SIZE = parseInt(process.env.MAX_VIDEO_SIZE || '524288000', 10); // 500MB default
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-msvideo'];
-const DEFAULT_PROVIDER = AIProvider.OPENAI;
-const FALLBACK_PROVIDERS = [AIProvider.ANTHROPIC, AIProvider.ASSEMBLYAI, AIProvider.DEEPGRAM];
+const DEFAULT_PROVIDER: AIProviderType = 'openai';
+const FALLBACK_PROVIDERS: AIProviderType[] = ['anthropic', 'assemblyai', 'deepgram'];
 const RATE_LIMIT = { windowMs: 60000, max: 5 }; // 5 requests per minute
 
 // WebSocket connections for real-time updates
@@ -192,7 +203,7 @@ async function storeVideoFile(
   contentType: string
 ): Promise<string> {
   // Create upload directory if it doesn't exist
-  const uploadPath = join(UPLOAD_DIR, new Date().toISOString().split('T')[0]);
+  const uploadPath = runtimeJoin(UPLOAD_DIR, new Date().toISOString().split('T')[0]);
   await mkdirAsync(uploadPath, { recursive: true });
   
   // Generate unique filename
@@ -201,14 +212,14 @@ async function storeVideoFile(
     .digest('hex');
   const fileExt = fileName.split('.').pop() || 'mp4';
   const uniqueFileName = `${fileHash}_${Date.now()}.${fileExt}`;
-  const filePath = join(uploadPath, uniqueFileName);
+  const filePath = runtimeJoin(uploadPath, uniqueFileName);
   
   // Write file
   await writeFileAsync(filePath, Buffer.from(videoData));
   
   // Upload to Supabase Storage
   const fileBuffer = Buffer.from(videoData);
-  const { data, error } = await supabase.storage
+  const { data, error } = await getSupabase().storage
     .from('video-processing')
     .upload(`uploads/${uniqueFileName}`, fileBuffer, {
       contentType,
@@ -235,7 +246,7 @@ async function processSceneDetection(
   
   try {
     // Request scene detection from AI system
-    const result = await aiSystem.executeOperation(
+    const result = await getAISystem().executeOperation(
       AIOperationType.SCENE_DETECTION,
       { videoPath, options },
       {
@@ -270,7 +281,7 @@ async function processEmotionAnalysis(
   
   try {
     // Request emotion analysis from AI system
-    const result = await aiSystem.executeOperation(
+    const result = await getAISystem().executeOperation(
       AIOperationType.EMOTION_ANALYSIS,
       { videoPath, options },
       {
@@ -305,7 +316,7 @@ async function processVisualElements(
   
   try {
     // Request object detection from AI system
-    const result = await aiSystem.executeOperation(
+    const result = await getAISystem().executeOperation(
       AIOperationType.OBJECT_DETECTION,
       { videoPath, options },
       {
@@ -340,7 +351,7 @@ async function processAudioQuality(
   
   try {
     // Request audio enhancement from AI system
-    const result = await aiSystem.executeOperation(
+    const result = await getAISystem().executeOperation(
       AIOperationType.AUDIO_ENHANCEMENT,
       { videoPath, options },
       {
@@ -375,7 +386,7 @@ async function processContentModeration(
   
   try {
     // Request content moderation from AI system
-    const result = await aiSystem.executeOperation(
+    const result = await getAISystem().executeOperation(
       AIOperationType.CONTENT_MODERATION,
       { videoPath, options },
       {
@@ -411,7 +422,7 @@ async function processThumbnailsAndBRoll(
   
   try {
     // Use scene detection results to generate thumbnails and B-roll suggestions
-    const result = await aiSystem.executeOperation(
+    const result = await getAISystem().executeOperation(
       AIOperationType.THUMBNAIL_GENERATION,
       { videoPath, scenes, options },
       {
@@ -725,7 +736,7 @@ async function checkUserQuota(userId: string, estimatedCost: number): Promise<bo
 async function updateUserQuota(userId: string, cost: number): Promise<void> {
   try {
     // Update user quota in Supabase
-    const { error } = await supabase.rpc('increment_user_quota_usage', {
+    const { error } = await getSupabase().rpc('increment_user_quota_usage', {
       p_user_id: userId,
       p_usage: cost
     });
@@ -973,7 +984,7 @@ async function handleDeleteRequest(req: NextRequest): Promise<NextResponse> {
     
     // Cancel AI operations
     for (const [operationType, requestId] of job.operations.entries()) {
-      await aiSystem.cancelOperation(requestId);
+      await getAISystem().cancelOperation(requestId);
     }
     
     // Update job status

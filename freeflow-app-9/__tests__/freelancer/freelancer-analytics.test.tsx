@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SupabaseProvider } from '../../__mocks__/supabase-provider'
 import { ThemeProvider } from '../../__mocks__/theme-provider'
-import FreelancerAnalytics from '../../components/freelancer/freelancer-analytics'
+import { _FreelancerAnalytics as FreelancerAnalytics } from '../../components/freelancer/freelancer-analytics'
 
 const queryClient = new QueryClient({
   defaultOptions: {

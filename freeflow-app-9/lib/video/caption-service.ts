@@ -10,7 +10,7 @@ import { createFeatureLogger } from '@/lib/logger'
 import { extractAudio } from './ffmpeg-processor'
 import fs from 'fs/promises'
 import { createReadStream, existsSync } from 'fs'
-import path from 'path'
+import { runtimeFilePath, basename, extname } from '@/lib/utils/runtime-path'
 
 const logger = createFeatureLogger('CaptionService')
 
@@ -201,8 +201,8 @@ export async function createCaptions(
 
   // Generate caption filename
   const format = options?.format || 'srt'
-  const baseName = path.basename(videoPath, path.extname(videoPath))
-  const captionPath = path.join(outputDir, `${baseName}.${format}`)
+  const baseName = basename(videoPath, extname(videoPath))
+  const captionPath = runtimeFilePath(outputDir, baseName, format)
 
   // Generate captions
   await generateCaptions(transcription, captionPath, options)

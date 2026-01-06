@@ -24,21 +24,45 @@ import {
 } from '@/lib/deepgram';
 
 // Environment configuration
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY!;
-const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
-const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
 const RATE_LIMIT_REQUESTS = 10;
 const RATE_LIMIT_WINDOW = 60 * 1000; // 1 minute
 
-// Initialize clients
-const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
-const assemblyai = ASSEMBLYAI_API_KEY ? new AssemblyAI(ASSEMBLYAI_API_KEY) : null;
-const deepgram = DEEPGRAM_API_KEY ? new Deepgram(DEEPGRAM_API_KEY) : null;
+// Lazy-loaded clients (to avoid build-time initialization)
+let _supabase: any = null;
+let _openai: OpenAI | null = null;
+let _assemblyai: AssemblyAI | null = null;
+let _deepgram: Deepgram | null = null;
+
+function getSupabase() {
+  if (!_supabase) {
+    const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY!;
+    _supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+  }
+  return _supabase;
+}
+
+function getOpenAI(): OpenAI | null {
+  if (_openai === null && typeof _openai === 'object') return _openai;
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  _openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
+  return _openai;
+}
+
+function getAssemblyAI(): AssemblyAI | null {
+  if (_assemblyai === null && typeof _assemblyai === 'object') return _assemblyai;
+  const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
+  _assemblyai = ASSEMBLYAI_API_KEY ? new AssemblyAI(ASSEMBLYAI_API_KEY) : null;
+  return _assemblyai;
+}
+
+function getDeepgram(): Deepgram | null {
+  if (_deepgram === null && typeof _deepgram === 'object') return _deepgram;
+  const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
+  _deepgram = DEEPGRAM_API_KEY ? new Deepgram(DEEPGRAM_API_KEY) : null;
+  return _deepgram;
+}
 
 // WebSocket connections for real-time updates
 const connections = new Map<string, WebSocket>();
@@ -245,7 +269,7 @@ async function uploadVideoToStorage(
     const fileExtension = file.name.split('.').pop();
     const filePath = `videos/${userId}/${projectId}/${fileId}.${fileExtension}`;
     
-    const { error } = await supabase.storage
+    const { error } = await getSupabase().storage
       .from('media')
       .upload(filePath, file);
 
@@ -440,7 +464,7 @@ async function transcribeWithAssemblyAI(
     };
 
     // Create transcript
-    const transcript = await assemblyai.transcripts.create(transcriptOptions);
+    const transcript = await getAssemblyAI()!.transcripts.create(transcriptOptions);
     
     // Poll for completion
     let result: TranscriptResponse;
@@ -448,7 +472,7 @@ async function transcribeWithAssemblyAI(
     
     do {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      result = await assemblyai.transcripts.get(transcript.id);
+      result = await getAssemblyAI()!.transcripts.get(transcript.id);
       status = result.status;
       
       // Send progress updates
@@ -515,7 +539,7 @@ async function transcribeWithOpenAI(
   }
 
   try {
-    const response = await openai.audio.transcriptions.create({
+    const response = await getOpenAI()!.audio.transcriptions.create({
       file: videoFile,
       model: 'whisper-1',
       response_format: 'verbose_json',
@@ -567,7 +591,7 @@ async function transcribeWithDeepgram(
       punctuate: true
     };
 
-    const response = await deepgram.transcribe(deepgramOptions);
+    const response = await getDeepgram()!.transcribe(deepgramOptions);
 
     // Map to our segment format
     const segments: TranscriptionSegment[] = response.results.channels[0].alternatives[0].words.map(
@@ -625,7 +649,7 @@ async function analyzeSentiment(text: string): Promise<'positive' | 'neutral' | 
   }
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI()!.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         {
@@ -674,7 +698,7 @@ async function generateChapters(
       .join(' ');
     
     // Use AI to generate chapters
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI()!.chat.completions.create({
       model: 'gpt-4',
       messages: [
         {
@@ -915,7 +939,7 @@ async function processVideo(jobId: string): Promise<void> {
     const options = job.options as VideoProcessingOptions;
 
     // Get video URL
-    const { data: urlData } = await supabase.storage
+    const { data: urlData } = await getSupabase().storage
       .from('media')
       .createSignedUrl(videoPath, 3600);
 

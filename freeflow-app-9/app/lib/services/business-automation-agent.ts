@@ -253,6 +253,7 @@ export class BusinessAutomationAgent {
   private aiService: AIService;
   private supabase: ReturnType<typeof createClient>;
   private config: AgentConfiguration;
+  private intervals: NodeJS.Timeout[] = []; // Store intervals for cleanup
 
   constructor(config?: Partial<AgentConfiguration>) {
     this.emailAgent = new EmailAgentService();
@@ -1643,23 +1644,41 @@ Please let us know how we can help!`;
 
     logger.info('Starting business automation agent');
 
+    // Clear any existing intervals before starting new ones
+    this.stop();
+
     // Process tasks every minute
-    setInterval(() => {
-      this.processPendingTasks();
-    }, 60000);
+    this.intervals.push(
+      setInterval(() => {
+        this.processPendingTasks();
+      }, 60000)
+    );
 
     // Daily tasks
-    setInterval(() => {
-      this.identifyClientsNeedingFollowUp();
-      this.processOverdueInvoices();
-    }, 24 * 60 * 60 * 1000);
+    this.intervals.push(
+      setInterval(() => {
+        this.identifyClientsNeedingFollowUp();
+        this.processOverdueInvoices();
+      }, 24 * 60 * 60 * 1000)
+    );
 
     // Weekly tasks
-    setInterval(() => {
-      this.sendWeeklyProjectUpdates();
-    }, 7 * 24 * 60 * 60 * 1000);
+    this.intervals.push(
+      setInterval(() => {
+        this.sendWeeklyProjectUpdates();
+      }, 7 * 24 * 60 * 60 * 1000)
+    );
 
     logger.info('Business automation agent started');
+  }
+
+  /**
+   * Stop all running intervals - call this when shutting down
+   */
+  stop(): void {
+    this.intervals.forEach(interval => clearInterval(interval));
+    this.intervals = [];
+    logger.info('Business automation agent stopped');
   }
 }
 

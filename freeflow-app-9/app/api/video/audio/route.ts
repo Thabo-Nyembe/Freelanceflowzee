@@ -13,7 +13,7 @@ import {
   getVideoMetadata,
   checkFFmpegAvailability
 } from '@/lib/video/ffmpeg-processor'
-import path from 'path'
+import { runtimeJoin, runtimeFilePath, basename, extname } from '@/lib/utils/runtime-path'
 import fs from 'fs/promises'
 
 const logger = createFeatureLogger('API-VideoAudio')
@@ -168,10 +168,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure audio directory exists
-    const projectAudioDir = path.join(AUDIO_DIR, body.projectId || 'temp')
+    const projectAudioDir = runtimeJoin(AUDIO_DIR, body.projectId || 'temp')
     await fs.mkdir(projectAudioDir, { recursive: true })
 
-    const baseName = path.basename(inputPath, path.extname(inputPath))
+    const baseName = basename(inputPath, extname(inputPath))
     let result: any
 
     // Import FFmpeg for advanced operations
@@ -196,9 +196,10 @@ export async function POST(request: NextRequest) {
       case 'extract': {
         // Extract audio from video
         const formatConfig = AUDIO_FORMATS[body.format || 'mp3']
-        const outputPath = path.join(
+        const outputPath = runtimeFilePath(
           projectAudioDir,
-          `${baseName}_audio_${Date.now()}.${formatConfig.extension}`
+          `${baseName}_audio_${Date.now()}`,
+          formatConfig.extension
         )
 
         logger.info('Extracting audio', {
@@ -231,7 +232,7 @@ export async function POST(request: NextRequest) {
           action: 'extract',
           output: {
             path: outputPath,
-            url: `/audio/${path.basename(projectAudioDir)}/${path.basename(outputPath)}`,
+            url: `/audio/${basename(projectAudioDir)}/${basename(outputPath)}`,
             format: body.format || 'mp3',
             size: stats.size,
             sizeMB: (stats.size / (1024 * 1024)).toFixed(2)
@@ -262,9 +263,10 @@ export async function POST(request: NextRequest) {
           )
         }
 
-        const outputPath = path.join(
+        const outputPath = runtimeFilePath(
           projectAudioDir,
-          `${baseName}_new_audio_${Date.now()}.mp4`
+          `${baseName}_new_audio_${Date.now()}`,
+          'mp4'
         )
 
         logger.info('Replacing audio', {
@@ -315,7 +317,7 @@ export async function POST(request: NextRequest) {
           action: 'replace',
           output: {
             path: outputPath,
-            url: `/audio/${path.basename(projectAudioDir)}/${path.basename(outputPath)}`,
+            url: `/audio/${basename(projectAudioDir)}/${basename(outputPath)}`,
             size: stats.size,
             sizeMB: (stats.size / (1024 * 1024)).toFixed(2)
           },
@@ -340,9 +342,10 @@ export async function POST(request: NextRequest) {
 
       case 'remove': {
         // Remove audio from video (make silent)
-        const outputPath = path.join(
+        const outputPath = runtimeFilePath(
           projectAudioDir,
-          `${baseName}_no_audio_${Date.now()}.mp4`
+          `${baseName}_no_audio_${Date.now()}`,
+          'mp4'
         )
 
         logger.info('Removing audio', {
@@ -365,7 +368,7 @@ export async function POST(request: NextRequest) {
           action: 'remove',
           output: {
             path: outputPath,
-            url: `/audio/${path.basename(projectAudioDir)}/${path.basename(outputPath)}`,
+            url: `/audio/${basename(projectAudioDir)}/${basename(outputPath)}`,
             size: stats.size,
             sizeMB: (stats.size / (1024 * 1024)).toFixed(2)
           },
@@ -392,9 +395,10 @@ export async function POST(request: NextRequest) {
       case 'enhance':
       case 'normalize': {
         // Enhance audio with normalization and optional effects
-        const outputPath = path.join(
+        const outputPath = runtimeFilePath(
           projectAudioDir,
-          `${baseName}_enhanced_${Date.now()}.mp4`
+          `${baseName}_enhanced_${Date.now()}`,
+          'mp4'
         )
 
         logger.info('Enhancing audio', {
@@ -454,7 +458,7 @@ export async function POST(request: NextRequest) {
           action: body.action,
           output: {
             path: outputPath,
-            url: `/audio/${path.basename(projectAudioDir)}/${path.basename(outputPath)}`,
+            url: `/audio/${basename(projectAudioDir)}/${basename(outputPath)}`,
             size: stats.size,
             sizeMB: (stats.size / (1024 * 1024)).toFixed(2)
           },

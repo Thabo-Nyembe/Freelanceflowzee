@@ -1,20 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import {
-  PredictiveAnalyticsSystem,
-  CostMetricType,
-  PerformanceMetricType,
-  OptimizationStrategyType,
-  TimeWindow,
-  AlertSeverity
-} from '@/lib/ai/predictive-analytics-system';
+import { PredictiveAnalyticsSystem } from '@/lib/ai/predictive-analytics-system';
 import { WebSocketServer } from '@/lib/websocket-server';
 import { rateLimit } from '@/lib/rate-limit';
-import { validateToken } from '@/lib/auth';
+import { verifyAuthToken } from '@/lib/auth';
 import { sanitizeInput } from '@/lib/security';
 import { logApiUsage, trackMetric } from '@/lib/analytics';
 import { v4 as uuidv4 } from 'uuid';
 import { createFeatureLogger } from '@/lib/logger'
+
+// Inline type definitions
+type TimeWindow = '1h' | '24h' | '7d' | '30d' | '90d' | '1y';
+type CostMetricType = 'compute' | 'storage' | 'network' | 'api' | 'total';
+type PerformanceMetricType = 'latency' | 'throughput' | 'error_rate' | 'availability';
+type OptimizationStrategyType = 'cost' | 'performance' | 'balanced';
+type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 
 const logger = createFeatureLogger('API-PredictiveAnalytics')
 
@@ -23,7 +23,7 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 const API_SECRET_KEY = process.env.API_SECRET_KEY || '';
 const MAX_REQUESTS_PER_MINUTE = Number(process.env.MAX_REQUESTS_PER_MINUTE || '60');
-const DEFAULT_TIME_WINDOW = (process.env.DEFAULT_TIME_WINDOW as TimeWindow) || TimeWindow.DAY_1;
+const DEFAULT_TIME_WINDOW: TimeWindow = '24h';
 
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -45,19 +45,15 @@ const initializeSystem = async () => {
 
 // Middleware for authentication and rate limiting
 const applyMiddleware = async (req: NextRequest) => {
-  // Get authorization token
-  const authHeader = req.headers.get('authorization') || '';
-  const token = authHeader.replace('Bearer ', '');
-  
   // Validate token
-  const authResult = await validateToken(token);
-  if (!authResult.valid) {
+  const authResult = await verifyAuthToken(req);
+  if (!authResult) {
     return NextResponse.json(
-      { error: 'Unauthorized', message: authResult.message },
+      { error: 'Unauthorized', message: 'Authentication required' },
       { status: 401 }
     );
   }
-  
+
   // Apply rate limiting
   const ip = req.headers.get('x-forwarded-for') || 'unknown';
   const rateLimitResult = await rateLimit(`predictive-analytics-${ip}`, MAX_REQUESTS_PER_MINUTE);
@@ -67,16 +63,16 @@ const applyMiddleware = async (req: NextRequest) => {
       { status: 429, headers: { 'Retry-After': String(rateLimitResult.retryAfter) } }
     );
   }
-  
+
   // Log API usage
   await logApiUsage({
     endpoint: req.nextUrl.pathname,
     method: req.method,
-    userId: authResult.userId,
+    userId: authResult.id,
     timestamp: new Date(),
     ip
   });
-  
+
   return null; // No error, continue processing
 };
 
