@@ -797,7 +797,7 @@ export default function CommunityHubPage() {
       currentComments: post?.comments
     })
 
-    toast.info('Add comment', {
+    toast.success('Comments opened', {
       description: `${post?.type} post - ${post?.comments || 0} comments - ${post?.likes || 0} likes`
     })
   }
@@ -1034,7 +1034,7 @@ export default function CommunityHubPage() {
       isOnline: member?.isOnline
     })
 
-    toast.info('Opening chat...', {
+    toast.success('Chat opened', {
       description: `${member?.name} - ${member?.title} - ${member?.isOnline ? 'Online' : `Last seen: ${member?.lastSeen}`}`
     })
   }
@@ -1068,7 +1068,7 @@ export default function CommunityHubPage() {
   const handleCreateEvent = () => {
     logger.info('Opening event creation form')
 
-    toast.info('Create community event', {
+    toast.success('Event form opened', {
       description: 'Online, offline, or hybrid - Set date, location, and attendee limit'
     })
   }
@@ -1101,7 +1101,7 @@ export default function CommunityHubPage() {
   const handleCreateGroup = () => {
     logger.info('Opening group creation form')
 
-    toast.info('Create new group', {
+    toast.success('Group form opened', {
       description: 'Public, private, or secret - Set category, rules, and member permissions'
     })
   }
@@ -1109,7 +1109,7 @@ export default function CommunityHubPage() {
   const handlePostJob = () => {
     logger.info('Opening job posting form')
 
-    toast.info('Post job opportunity', {
+    toast.success('Job post form opened', {
       description: 'Fixed or hourly - Set budget, deadline, and required skills'
     })
   }
@@ -1147,7 +1147,7 @@ export default function CommunityHubPage() {
       resultCount: results.length
     })
 
-    toast.info(`Searching: ${query}`, {
+    toast.success(`Search results: ${query}`, {
       description: `${results.length} members found - ${results.filter(m => m.isOnline).length} online`
     })
   }
@@ -1161,7 +1161,7 @@ export default function CommunityHubPage() {
       resultCount: matchingMembers.length
     })
 
-    toast.info(`Filter by: ${skill}`, {
+    toast.success(`Filtered: ${skill}`, {
       description: `${matchingMembers.length} members - ${matchingMembers.filter(m => m.availability === 'available').length} available`
     })
   }
@@ -1175,7 +1175,7 @@ export default function CommunityHubPage() {
       category: member?.category
     })
 
-    toast.info('Viewing profile', {
+    toast.success('Profile opened', {
       description: `${member?.name} - ${member?.title} - ${member?.rating}★ rating - ${member?.totalProjects} projects completed`
     })
   }
@@ -1183,7 +1183,7 @@ export default function CommunityHubPage() {
   const handleEditProfile = () => {
     logger.info('Opening profile editor')
 
-    toast.info('Edit your profile', {
+    toast.success('Profile editor opened', {
       description: 'Update skills, bio, portfolio, rates, and availability'
     })
   }
@@ -2102,10 +2102,10 @@ export default function CommunityHubPage() {
         dispatch({ type: 'SHARE_POST', payload: postId })
         break
       case 'comment':
-        toast.info('💬 Opening comments for post ' + postId)
+        toast.success('💬 Comments opened for post ' + postId)
         break
       case 'report':
-        toast.info('⚠️ Reporting post ' + postId)
+        toast.warning('⚠️ Reporting post ' + postId)
         break
       default:
         break
@@ -2133,10 +2133,10 @@ export default function CommunityHubPage() {
         dispatch({ type: 'UNBLOCK_MEMBER', payload: memberId })
         break
       case 'message':
-        toast.info('💬 Opening chat with ' + memberId)
+        toast.success('💬 Chat opened with ' + memberId)
         break
       case 'hire':
-        toast.info('💼 Hiring ' + memberId)
+        toast.success('💼 Starting hire process for ' + memberId)
         break
       default:
         break

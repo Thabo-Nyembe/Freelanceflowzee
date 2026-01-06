@@ -831,9 +831,9 @@ const mockApiKeysActivities = [
 ]
 
 const mockApiKeysQuickActions = [
-  { id: '1', label: 'Create Key', icon: 'plus', action: () => console.log('Create key'), variant: 'default' as const },
-  { id: '2', label: 'View Usage', icon: 'chart', action: () => console.log('View usage'), variant: 'default' as const },
-  { id: '3', label: 'Rotate Keys', icon: 'refresh', action: () => console.log('Rotate keys'), variant: 'outline' as const },
+  { id: '1', label: 'Create Key', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating API key...', success: 'New API key created! Copy it now - it won\'t be shown again', error: 'Failed to create' }), variant: 'default' as const },
+  { id: '2', label: 'View Usage', icon: 'chart', action: () => toast.success('API Usage', { description: 'View request counts, rate limits, and error rates' }), variant: 'default' as const },
+  { id: '3', label: 'Rotate Keys', icon: 'refresh', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Rotating API keys...', success: 'All keys rotated successfully', error: 'Rotation failed' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

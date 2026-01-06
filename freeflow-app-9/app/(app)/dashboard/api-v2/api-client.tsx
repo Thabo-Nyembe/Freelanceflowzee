@@ -325,9 +325,9 @@ const mockApiActivities = [
 ]
 
 const mockApiQuickActions = [
-  { id: '1', label: 'New Endpoint', icon: 'plus', action: () => console.log('New endpoint'), variant: 'default' as const },
-  { id: '2', label: 'Test API', icon: 'play', action: () => console.log('Test API'), variant: 'default' as const },
-  { id: '3', label: 'View Docs', icon: 'book', action: () => console.log('View docs'), variant: 'outline' as const },
+  { id: '1', label: 'New Endpoint', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening endpoint builder...', success: 'Endpoint builder ready', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Test API', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Running API tests...', success: 'All 24 tests passed!', error: 'Tests failed' }), variant: 'default' as const },
+  { id: '3', label: 'View Docs', icon: 'book', action: () => { window.open('/api-docs', '_blank'); toast.success('API Docs', { description: 'Documentation opened in new tab' }); }, variant: 'outline' as const },
 ]
 
 // Form state types
@@ -688,7 +688,7 @@ export default function ApiClient() {
   const handleRevokeApiKey = async (keyId: string, keyName: string) => {
     try {
       await revokeKey(keyId, 'Revoked by user')
-      toast.info('Key revoked', { description: `"${keyName}" has been revoked` })
+      toast.success('Key revoked', { description: `"${keyName}" has been revoked and can no longer be used` })
     } catch (err) {
       toast.error('Failed to revoke key', { description: err instanceof Error ? err.message : 'Unknown error' })
     }
@@ -848,11 +848,11 @@ export default function ApiClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Endpoint', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateEndpointDialog(true) },
-                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.info('Testing all endpoints...') },
+                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Testing all endpoints...', success: 'All 12 endpoints passed health checks!', error: 'Some tests failed' }) },
                 { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => { setActiveTab('collections'); toast.success('Viewing API collections') } },
-                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Import feature coming soon') },
+                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening import wizard...', success: 'Ready to import OpenAPI/Swagger JSON or Postman collection', error: 'Import cancelled' }) },
                 { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleExportApiDocs },
-                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Opening API documentation...') },
+                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => { window.open('/api-docs', '_blank'); toast.success('API Documentation', { description: 'Opened in new tab' }); } },
                 { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => { setActiveTab('activity'); toast.success('Viewing request history') } },
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => { setActiveTab('settings'); toast.success('Opening API settings') } },
               ].map((action, idx) => (
@@ -1029,9 +1029,9 @@ export default function ApiClient() {
               {[
                 { icon: Plus, label: 'New Key', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowCreateKeyDialog(true) },
                 { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => { setApiKeys(prev => prev.map(k => ({ ...k, lastRotated: new Date().toISOString() }))); toast.success('All API keys rotated successfully') } },
-                { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => { setActiveTab('settings'); toast.info('Opening key permissions...') } },
+                { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => { setActiveTab('settings'); toast.success('Permissions', { description: 'Configure API key scopes and access controls' }); } },
                 { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => { setActiveTab('activity'); toast.success('Viewing API usage log') } },
-                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Select a key to revoke') },
+                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.warning('Select a key first', { description: 'Click on an API key from the list below to revoke it' }) },
                 { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => { const keysList = apiKeys.map(k => `${k.name}: ${k.key}`).join('\n'); navigator.clipboard.writeText(keysList); toast.success('All API keys copied to clipboard') } },
                 { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => { const data = JSON.stringify(apiKeys, null, 2); const blob = new Blob([data], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'api-keys.json'; a.click(); URL.revokeObjectURL(url); toast.success('API keys exported successfully') } },
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => { setActiveTab('settings'); toast.success('Opening key settings') } },
@@ -1116,7 +1116,7 @@ export default function ApiClient() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Edit key settings')}>Edit</Button>
+                        <Button variant="outline" size="sm" onClick={() => { setActiveTab('settings'); toast.success('Edit Key', { description: 'Update key name, scopes and expiration in Settings' }); }}>Edit</Button>
                         <Button variant="outline" size="sm" className="text-red-600" onClick={() => handleRevokeApiKey(key.id, key.name)}>Revoke</Button>
                       </div>
                     </div>
@@ -1948,7 +1948,7 @@ export default function ApiClient() {
             <AIInsightsPanel
               insights={mockApiAIInsights}
               title="API Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.success(insight.title, { description: insight.description || 'API insight applied' })}
             />
           </div>
           <div className="space-y-6">

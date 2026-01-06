@@ -442,10 +442,10 @@ const mockMotionGraphicsActivities = [
 ]
 
 const mockMotionGraphicsQuickActions = [
-  { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => console.log('New project') },
-  { id: '2', label: 'Render', icon: 'Play', shortcut: 'R', action: () => console.log('Render') },
-  { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A', action: () => console.log('Assets') },
-  { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => console.log('Templates') },
+  { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => toast.success('New Project', { description: 'Creating new motion graphics project...' }) },
+  { id: '2', label: 'Render', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Starting render...', success: 'Render queued successfully!', error: 'Render failed to start' }) },
+  { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A', action: () => toast.success('Asset Library', { description: 'Opening asset manager...' }) },
+  { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.success('Templates', { description: 'Opening template gallery...' }) },
 ]
 
 // Database types

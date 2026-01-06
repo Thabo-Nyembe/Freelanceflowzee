@@ -540,10 +540,10 @@ const mockLearningActivities = [
 ]
 
 const mockLearningQuickActions = [
-  { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => console.log('Continue learning') },
-  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => console.log('Browse courses') },
-  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => console.log('View certificates') },
-  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => console.log('View plan') },
+  { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading your course...', success: 'Resuming: React Advanced Patterns - Chapter 4', error: 'Failed to load' }) },
+  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => toast.success('Course Library', { description: 'Browse 150+ courses across 12 categories' }) },
+  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => toast.success('Certificates', { description: 'You have earned 3 certificates' }) },
+  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => toast.success('Study Plan', { description: 'Next: Complete 2 chapters by Friday' }) },
 ]
 
 // ============================================================================

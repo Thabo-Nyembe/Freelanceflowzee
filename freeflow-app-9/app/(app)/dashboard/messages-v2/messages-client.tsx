@@ -450,27 +450,15 @@ export default function MessagesClient() {
     }
   }
 
-  const handleCreateChannel = () => {
-    toast.info('Create Channel', {
-      description: 'Opening channel builder...'
-    })
-  }
+  const handleCreateChannel = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: 'Channel builder ready', error: 'Failed' })
 
-  const handleStartCall = (contactName: string) => {
-    toast.info('Starting call', {
-      description: `Calling ${contactName}...`
-    })
-  }
+  const handleStartCall = (contactName: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Calling ${contactName}...`, success: 'Call connected!', error: 'Call failed' })
 
-  const handleMuteChannel = (channelName: string) => {
-    toast.info('Channel muted', {
-      description: `#${channelName} notifications muted`
-    })
-  }
+  const handleMuteChannel = (channelName: string) => toast.success('Channel muted', { description: `#${channelName} notifications muted` })
 
   const handleMarkAllAsRead = async () => {
     if (!supabaseMessages || supabaseMessages.length === 0) {
-      toast.info('No messages to mark as read')
+      toast.warning('No messages to mark as read')
       return
     }
 
@@ -601,7 +589,7 @@ export default function MessagesClient() {
             </Button>
             <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white" onClick={() => {
               setMessageInput('')
-              toast.info('Compose Message', { description: 'Use the message input below to send a new message' })
+              toast.success('Compose Message', { description: 'Use the message input below to send a new message' })
             }}>
               <Plus className="w-4 h-4 mr-2" />
               New Message
@@ -836,15 +824,15 @@ export default function MessagesClient() {
                       <Plus className="w-4 h-4 mr-2" />
                       Create Channel
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Invite People', { description: 'Opening invite dialog...' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: 'Invite people to channel', error: 'Failed' })}>
                       <UserPlus className="w-4 h-4 mr-2" />
                       Invite People
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Add App', { description: 'Opening app marketplace...' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading marketplace...', success: 'Browse apps', error: 'Failed' })}>
                       <Bot className="w-4 h-4 mr-2" />
                       Add App
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Create Workflow', { description: 'Opening workflow builder...' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading builder...', success: 'Create your workflow', error: 'Failed' })}>
                       <Workflow className="w-4 h-4 mr-2" />
                       Create Workflow
                     </Button>
@@ -984,9 +972,9 @@ export default function MessagesClient() {
                         <div className="flex items-center gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Phone className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Video className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => toast.info('Pinned Items', { description: 'View pinned messages in this channel' })}><Pin className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.success('Pinned Items', { description: 'View pinned messages in this channel' })}><Pin className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleMuteChannel(selectedChannel.name)}><BellOff className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => toast.info('Archive Channel', { description: 'Archive this channel to hide it from the sidebar' })}><Archive className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Archiving channel...', success: 'Channel archived', error: 'Failed' })}><Archive className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </CardHeader>
@@ -1244,7 +1232,7 @@ export default function MessagesClient() {
                               <p className="text-sm text-gray-500">{new Date(call.startTime).toLocaleString()}</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('View Scheduled Call', { description: `Call scheduled for ${new Date(call.startTime).toLocaleString()}` })}>View</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('Scheduled Call', { description: `Call scheduled for ${new Date(call.startTime).toLocaleString()}` })}>View</Button>
                         </div>
                       </div>
                     ))}
@@ -1335,7 +1323,7 @@ export default function MessagesClient() {
                     <CardTitle>Shared Files</CardTitle>
                     <CardDescription>All files shared across channels</CardDescription>
                   </div>
-                  <Button onClick={() => toast.info('Upload File', { description: 'File upload dialog will open...' })}>
+                  <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening uploader...', success: 'Select files to upload', error: 'Failed' })}>
                     <Upload className="w-4 h-4 mr-2" />
                     Upload File
                   </Button>
@@ -1449,7 +1437,7 @@ export default function MessagesClient() {
                           <p className="text-sm">{mention.message.content}</p>
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.info('Reply', { description: 'Enter your reply in the message input below' })
+                          toast.success('Reply', { description: 'Enter your reply in the message input below' })
                           setMessageInput(`@${mention.message.author.name} `)
                         }}>
                           <Reply className="w-4 h-4" />
@@ -1936,7 +1924,7 @@ export default function MessagesClient() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Active Sessions', { description: 'Opening session management...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: 'Manage active sessions', error: 'Failed' })}>
                           <Key className="w-4 h-4 mr-2" />
                           Manage Active Sessions
                         </Button>
@@ -2002,7 +1990,7 @@ export default function MessagesClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Connect Zoom', { description: 'Starting Zoom OAuth flow...' })}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Starting Zoom OAuth...', success: 'Complete authorization in popup', error: 'Failed' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2034,9 +2022,9 @@ export default function MessagesClient() {
                               <div className="text-sm text-gray-500">3 active workflows</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Manage Workflows', { description: 'Opening workflow manager...' })}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: 'Workflow manager ready', error: 'Failed' })}>Manage</Button>
                         </div>
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={() => toast.info('Add App', { description: 'Opening app marketplace...' })}>
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading marketplace...', success: 'Browse apps', error: 'Failed' })}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add App
                         </Button>
@@ -2071,7 +2059,7 @@ export default function MessagesClient() {
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1" onClick={() => toast.info('Export Data', { description: 'Preparing data export...' })}>
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing export...', success: 'Data export ready', error: 'Failed' })}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Data
                           </Button>
@@ -2092,15 +2080,15 @@ export default function MessagesClient() {
                         <CardDescription>Get help and support resources</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Documentation', { description: 'Opening documentation...' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.success('Documentation', { description: 'Opening documentation in new tab' })}>
                           <BookOpen className="w-4 h-4 mr-2" />
                           Documentation
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Contact Support', { description: 'Opening support chat...' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Connecting...', success: 'Support chat ready', error: 'Failed' })}>
                           <MessageSquare className="w-4 h-4 mr-2" />
                           Contact Support
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.info('Keyboard Shortcuts', { description: 'Press Ctrl+/ to view shortcuts' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.success('Keyboard Shortcuts', { description: 'Press Ctrl+/ to view shortcuts' })}>
                           <Zap className="w-4 h-4 mr-2" />
                           Keyboard Shortcuts
                         </Button>
@@ -2127,7 +2115,7 @@ export default function MessagesClient() {
                           </div>
                           <Button variant="destructive" size="sm" onClick={() => {
                             if (confirm('Are you sure you want to leave this workspace?')) {
-                              toast.info('Leaving workspace', { description: 'Redirecting...' })
+                              toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Leaving workspace...', success: 'Redirecting...', error: 'Failed' })
                             }
                           }}>
                             <LogOut className="w-4 h-4 mr-2" />
@@ -2141,7 +2129,7 @@ export default function MessagesClient() {
                           </div>
                           <Button variant="destructive" size="sm" onClick={async () => {
                             if (!supabaseMessages || supabaseMessages.length === 0) {
-                              toast.info('No messages to delete')
+                              toast.warning('No messages to delete')
                               return
                             }
                             if (confirm('Are you sure you want to delete all messages? This cannot be undone.')) {

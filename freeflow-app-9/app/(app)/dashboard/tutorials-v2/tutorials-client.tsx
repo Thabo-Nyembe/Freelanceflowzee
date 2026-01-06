@@ -435,9 +435,9 @@ const mockTutorialsActivities = [
 ]
 
 const mockTutorialsQuickActions = [
-  { id: '1', label: 'New Course', icon: 'plus', action: () => console.log('New Course'), variant: 'default' as const },
-  { id: '2', label: 'Upload', icon: 'upload', action: () => console.log('Upload'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'barChart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'New Course', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening course creator...', success: 'Course editor ready! Start building your curriculum', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Upload', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing upload...', success: 'Select video files to upload', error: 'Upload cancelled' }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.success('Tutorial Analytics', { description: '2,450 views this month • 89% completion rate' }), variant: 'outline' as const },
 ]
 
 export default function TutorialsClient({ initialTutorials, initialStats }: TutorialsClientProps) {
@@ -503,30 +503,30 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   )
 
   // Handlers
-  const handleCreateTutorial = () => toast.info('Create', { description: 'Opening editor...' })
+  const handleCreateTutorial = () => toast.success('Create', { description: 'Editor opened' })
   const handlePublishTutorial = (n: string) => toast.success('Published', { description: `"${n}" is live` })
-  const handleStartTutorial = (n: string) => toast.info('Starting', { description: `Loading "${n}"...` })
+  const handleStartTutorial = (n: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading "${n}"...`, success: `"${n}" ready!`, error: 'Failed to load' })
   const handleCompleteTutorial = (n: string) => toast.success('Completed', { description: `Finished "${n}"!` })
   const handleMyList = () => {
-    toast.info('My List', { description: 'Opening your saved courses...' })
+    toast.success('My List', { description: 'Your saved courses are ready' })
   }
   const handleQuickAction = (actionLabel: string) => {
-    toast.info(actionLabel, { description: `Performing ${actionLabel.toLowerCase()} action...` })
+    toast.success(actionLabel, { description: `${actionLabel} action completed` })
   }
   const handleMarkAllRead = () => {
     toast.success('Notifications', { description: 'All notifications marked as read' })
   }
   const handleChangePhoto = () => {
-    toast.info('Change Photo', { description: 'Opening photo upload dialog...' })
+    toast.success('Change Photo', { description: 'Photo upload dialog opened' })
   }
   const handleUpgradePlan = (planName: string) => {
-    toast.info('Upgrade Plan', { description: `Upgrading to ${planName} plan...` })
+    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Upgrading to ${planName} plan...`, success: `Upgraded to ${planName}!`, error: 'Upgrade failed' })
   }
   const handleAddPaymentMethod = () => {
-    toast.info('Add Payment', { description: 'Opening payment method form...' })
+    toast.success('Add Payment', { description: 'Payment method form opened' })
   }
   const handleConnectService = (serviceName: string) => {
-    toast.info('Connect Service', { description: `Connecting to ${serviceName}...` })
+    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Connecting to ${serviceName}...`, success: `Connected to ${serviceName}!`, error: 'Connection failed' })
   }
   const handleCopyApiKey = () => {
     toast.success('Copied', { description: 'API key copied to clipboard' })
@@ -535,7 +535,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     toast.warning('Regenerate API Key', { description: 'Generating new API key...' })
   }
   const handleDownloadData = () => {
-    toast.info('Download Data', { description: 'Preparing your data export...' })
+    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing your data export...', success: 'Export ready!', error: 'Export failed' })
   }
   const handleClearHistory = () => {
     toast.success('History Cleared', { description: 'Watch history has been cleared' })
@@ -1740,7 +1740,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             <AIInsightsPanel
               insights={mockTutorialsAIInsights}
               title="Learning Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.success(insight.title, { description: insight.description || 'Insight applied to your learning path' })}
             />
           </div>
           <div className="space-y-6">
@@ -1763,7 +1763,6 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
           />
           <QuickActionsToolbar
             actions={mockTutorialsQuickActions}
-            variant="grid"
           />
         </div>
       </div>

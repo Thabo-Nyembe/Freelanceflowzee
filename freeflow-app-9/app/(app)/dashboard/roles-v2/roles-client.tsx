@@ -434,9 +434,9 @@ const mockRolesActivities = [
 ]
 
 const mockRolesQuickActions = [
-  { id: '1', label: 'New Role', icon: 'plus', action: () => console.log('New role'), variant: 'default' as const },
-  { id: '2', label: 'Audit Permissions', icon: 'shield', action: () => console.log('Audit'), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Role', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating role...', success: 'Role created! Configure permissions', error: 'Failed to create role' }), variant: 'default' as const },
+  { id: '2', label: 'Audit Permissions', icon: 'shield', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running permission audit...', success: 'Audit complete! 3 roles have elevated access', error: 'Audit failed' }), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating roles report...', success: 'Report exported to roles-report.csv', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 // Initial form state for creating/editing roles

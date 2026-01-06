@@ -498,9 +498,9 @@ const mockWorkflowActivities = [
 ]
 
 const mockWorkflowQuickActions = [
-  { id: '1', label: 'New Flow', icon: 'plus', action: () => console.log('New Workflow'), variant: 'default' as const },
-  { id: '2', label: 'Test', icon: 'play', action: () => console.log('Test'), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: () => console.log('Logs'), variant: 'outline' as const },
+  { id: '1', label: 'New Flow', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating workflow...', success: 'New workflow created! Add triggers and actions', error: 'Failed to create workflow' }), variant: 'default' as const },
+  { id: '2', label: 'Test', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running workflow test...', success: 'Workflow test passed! All 5 steps completed successfully', error: 'Test failed - check step 3' }), variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'list', action: () => toast.success('Workflow Logs', { description: '156 executions today • 98% success rate • 2 warnings' }), variant: 'outline' as const },
 ]
 
 export default function WorkflowBuilderClient() {
@@ -540,439 +540,100 @@ export default function WorkflowBuilderClient() {
     )
   }, [searchQuery])
 
+  // Dialog states
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+
   // Handlers
-  const handleCreateWorkflow = () => {
-    toast.info('Create Workflow', {
-      description: 'Opening workflow builder canvas...'
-    })
-  }
-
-  const handleEditWorkflow = (workflowName: string) => {
-    toast.info('Edit Workflow', {
-      description: `Opening "${workflowName}" in editor...`
-    })
-  }
-
-  const handleActivateWorkflow = (workflowName: string) => {
-    toast.success('Workflow Activated', {
-      description: `"${workflowName}" is now active`
-    })
-  }
-
-  const handleDuplicateWorkflow = (workflowName: string) => {
-    toast.success('Workflow Duplicated', {
-      description: `Copy of "${workflowName}" created`
-    })
-  }
-
-  const handleDeleteWorkflow = (workflowName: string) => {
-    toast.info('Workflow Deleted', {
-      description: `"${workflowName}" has been removed`
-    })
-  }
+  const handleCreateWorkflow = () => setShowCreateDialog(true)
+  const handleEditWorkflow = (workflowName: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Opening "${workflowName}"...`, success: 'Workflow editor ready', error: 'Failed to open' })
+  const handleActivateWorkflow = (workflowName: string) => toast.success('Workflow Activated', { description: `"${workflowName}" is now active` })
+  const handleDuplicateWorkflow = (workflowName: string) => toast.success('Workflow Duplicated', { description: `Copy of "${workflowName}" created` })
+  const handleDeleteWorkflow = (workflowName: string) => toast.success('Workflow Deleted', { description: `"${workflowName}" has been removed` })
 
   // Workflows Tab Handlers
-  const handleImportWorkflow = () => {
-    toast.info('Import Workflow', {
-      description: 'Opening workflow import dialog...'
-    })
-  }
-
-  const handleRunAllWorkflows = () => {
-    toast.info('Run All Workflows', {
-      description: 'Starting all active workflows...'
-    })
-  }
-
-  const handlePauseAllWorkflows = () => {
-    toast.info('Pause All Workflows', {
-      description: 'Pausing all running workflows...'
-    })
-  }
-
-  const handleExportWorkflows = () => {
-    toast.info('Export Workflows', {
-      description: 'Preparing workflow export...'
-    })
-  }
-
-  const handleViewHistory = () => {
-    toast.info('View History', {
-      description: 'Opening workflow history...'
-    })
-  }
-
-  const handleWorkflowSettings = () => {
-    toast.info('Workflow Settings', {
-      description: 'Opening workflow settings...'
-    })
-  }
-
-  const handleFilter = () => {
-    toast.info('Filter', {
-      description: 'Opening filter options...'
-    })
-  }
-
-  const handleWorkflowCardSettings = (workflowName: string) => {
-    toast.info('Workflow Settings', {
-      description: `Opening settings for "${workflowName}"...`
-    })
-  }
-
-  const handlePauseWorkflow = (workflowName: string) => {
-    toast.info('Pause Workflow', {
-      description: `Pausing "${workflowName}"...`
-    })
-  }
-
-  const handlePlayWorkflow = (workflowName: string) => {
-    toast.info('Run Workflow', {
-      description: `Starting "${workflowName}"...`
-    })
-  }
-
-  const handleWorkflowCardMore = (workflowName: string) => {
-    toast.info('More Options', {
-      description: `Showing options for "${workflowName}"...`
-    })
-  }
+  const handleImportWorkflow = () => setShowImportDialog(true)
+  const handleRunAllWorkflows = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Starting all workflows...', success: 'All workflows started!', error: 'Failed to start' })
+  const handlePauseAllWorkflows = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Pausing workflows...', success: 'All workflows paused', error: 'Failed to pause' })
+  const handleExportWorkflows = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting...', success: 'Export ready for download', error: 'Export failed' })
+  const handleViewHistory = () => { setActiveTab('executions'); toast.success('Viewing execution history') }
+  const handleWorkflowSettings = () => { setActiveTab('settings'); toast.success('Workflow settings') }
+  const handleFilter = () => setShowFilterDialog(true)
+  const handleWorkflowCardSettings = (workflowName: string) => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: `Configure "${workflowName}"`, error: 'Failed' })
+  const handlePauseWorkflow = (workflowName: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Pausing "${workflowName}"...`, success: 'Workflow paused', error: 'Failed' })
+  const handlePlayWorkflow = (workflowName: string) => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Starting "${workflowName}"...`, success: 'Workflow running', error: 'Failed' })
+  const handleWorkflowCardMore = (workflowName: string) => toast.success('Options', { description: `Options for "${workflowName}"` })
 
   // Executions Tab Handlers
-  const handleRunNow = () => {
-    toast.info('Run Now', {
-      description: 'Starting manual execution...'
-    })
-  }
+  const handleRunNow = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Starting execution...', success: 'Execution started!', error: 'Failed' })
+  const handleStopAll = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Stopping...', success: 'All executions stopped', error: 'Failed' })
+  const handleRetryFailed = () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Retrying failed...', success: 'Retried all failed executions', error: 'Failed' })
+  const handleDebug = () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening debugger...', success: 'Debug console ready', error: 'Failed' })
+  const handleLiveView = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading live view...', success: 'Real-time view active', error: 'Failed' })
+  const handleExportLogs = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting logs...', success: 'Logs exported', error: 'Failed' })
+  const handleClearExecutions = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Clearing...', success: 'Execution history cleared', error: 'Failed' })
+  const handleExecutionSettings = () => { setActiveTab('settings'); toast.success('Execution settings') }
 
-  const handleStopAll = () => {
-    toast.info('Stop All', {
-      description: 'Stopping all running executions...'
-    })
-  }
-
-  const handleRetryFailed = () => {
-    toast.info('Retry Failed', {
-      description: 'Retrying failed executions...'
-    })
-  }
-
-  const handleDebug = () => {
-    toast.info('Debug', {
-      description: 'Opening debug console...'
-    })
-  }
-
-  const handleLiveView = () => {
-    toast.info('Live View', {
-      description: 'Opening real-time execution view...'
-    })
-  }
-
-  const handleExportLogs = () => {
-    toast.info('Export Logs', {
-      description: 'Exporting execution logs...'
-    })
-  }
-
-  const handleClearExecutions = () => {
-    toast.info('Clear Executions', {
-      description: 'Clearing execution history...'
-    })
-  }
-
-  const handleExecutionSettings = () => {
-    toast.info('Execution Settings', {
-      description: 'Opening execution settings...'
-    })
-  }
-
-  const handleViewExecution = (workflowName: string) => {
-    toast.info('View Execution', {
-      description: `Opening execution details for "${workflowName}"...`
-    })
-  }
+  const handleViewExecution = (workflowName: string) => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading details...', success: `Viewing execution for "${workflowName}"`, error: 'Failed' })
 
   // Nodes Tab Handlers
-  const handleCreateNode = () => {
-    toast.info('Create Node', {
-      description: 'Opening node creation wizard...'
-    })
-  }
-
-  const handleImportNode = () => {
-    toast.info('Import Node', {
-      description: 'Opening node import dialog...'
-    })
-  }
-
-  const handleCustomCode = () => {
-    toast.info('Custom Code', {
-      description: 'Opening custom code editor...'
-    })
-  }
-
-  const handleWebhooks = () => {
-    toast.info('Webhooks', {
-      description: 'Opening webhook configuration...'
-    })
-  }
-
-  const handleDataNodes = () => {
-    toast.info('Data Nodes', {
-      description: 'Showing data integration nodes...'
-    })
-  }
-
-  const handleEmailNodes = () => {
-    toast.info('Email Nodes', {
-      description: 'Showing email integration nodes...'
-    })
-  }
-
-  const handleHttpNodes = () => {
-    toast.info('HTTP Nodes', {
-      description: 'Showing HTTP request nodes...'
-    })
-  }
-
-  const handleFavoriteNodes = () => {
-    toast.info('Favorites', {
-      description: 'Showing favorite nodes...'
-    })
-  }
+  const handleCreateNode = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading wizard...', success: 'Node creation ready', error: 'Failed' })
+  const handleImportNode = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: 'Import node dialog ready', error: 'Failed' })
+  const handleCustomCode = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading editor...', success: 'Custom code editor ready', error: 'Failed' })
+  const handleWebhooks = () => { setActiveTab('settings'); toast.success('Webhook configuration') }
+  const handleDataNodes = () => toast.success('Data Nodes', { description: 'Showing data integration nodes' })
+  const handleEmailNodes = () => toast.success('Email Nodes', { description: 'Showing email nodes' })
+  const handleHttpNodes = () => toast.success('HTTP Nodes', { description: 'Showing HTTP request nodes' })
+  const handleFavoriteNodes = () => toast.success('Favorites', { description: 'Showing favorite nodes' })
 
   // Templates Tab Handlers
-  const handleFeaturedTemplates = () => {
-    toast.info('Featured Templates', {
-      description: 'Showing featured templates...'
-    })
-  }
-
-  const handlePopularTemplates = () => {
-    toast.info('Popular Templates', {
-      description: 'Showing popular templates...'
-    })
-  }
-
-  const handleRecentTemplates = () => {
-    toast.info('Recent Templates', {
-      description: 'Showing recently used templates...'
-    })
-  }
-
-  const handleEmailTemplates = () => {
-    toast.info('Email Templates', {
-      description: 'Showing email automation templates...'
-    })
-  }
-
-  const handleDataSyncTemplates = () => {
-    toast.info('Data Sync Templates', {
-      description: 'Showing data synchronization templates...'
-    })
-  }
-
-  const handleChatTemplates = () => {
-    toast.info('Chat Templates', {
-      description: 'Showing chat automation templates...'
-    })
-  }
-
-  const handleCreateTemplate = () => {
-    toast.info('Create Template', {
-      description: 'Opening template creation wizard...'
-    })
-  }
-
-  const handleShareTemplate = () => {
-    toast.info('Share Template', {
-      description: 'Opening template sharing options...'
-    })
-  }
-
-  const handleUseTemplate = (templateName: string) => {
-    toast.info('Use Template', {
-      description: `Creating workflow from "${templateName}"...`
-    })
-  }
+  const handleFeaturedTemplates = () => { setActiveTab('templates'); toast.success('Featured templates') }
+  const handlePopularTemplates = () => { setActiveTab('templates'); toast.success('Popular templates') }
+  const handleRecentTemplates = () => { setActiveTab('templates'); toast.success('Recent templates') }
+  const handleEmailTemplates = () => { setActiveTab('templates'); toast.success('Email templates') }
+  const handleDataSyncTemplates = () => { setActiveTab('templates'); toast.success('Data sync templates') }
+  const handleChatTemplates = () => { setActiveTab('templates'); toast.success('Chat templates') }
+  const handleCreateTemplate = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening wizard...', success: 'Template creator ready', error: 'Failed' })
+  const handleShareTemplate = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: 'Share template options ready', error: 'Failed' })
+  const handleUseTemplate = (templateName: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Creating from "${templateName}"...`, success: 'Workflow created from template!', error: 'Failed' })
 
   // Credentials Tab Handlers
-  const handleAddKey = () => {
-    toast.info('Add Key', {
-      description: 'Opening API key creation form...'
-    })
-  }
+  const handleAddKey = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: 'Create your API key', error: 'Failed' })
+  const handleApiKeys = () => { setActiveTab('credentials'); toast.success('API key credentials') }
+  const handleOAuth = () => { setActiveTab('credentials'); toast.success('OAuth credentials') }
+  const handleSecuritySettings = () => { setActiveTab('settings'); toast.success('Security settings') }
+  const handleShareCredentials = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: 'Sharing options ready', error: 'Failed' })
+  const handleRotateCredentials = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Rotating credentials...', success: 'Credentials rotated securely', error: 'Failed' })
 
-  const handleApiKeys = () => {
-    toast.info('API Keys', {
-      description: 'Showing API key credentials...'
-    })
-  }
-
-  const handleOAuth = () => {
-    toast.info('OAuth', {
-      description: 'Showing OAuth credentials...'
-    })
-  }
-
-  const handleSecuritySettings = () => {
-    toast.info('Security', {
-      description: 'Opening security settings...'
-    })
-  }
-
-  const handleShareCredentials = () => {
-    toast.info('Share Credentials', {
-      description: 'Opening credential sharing options...'
-    })
-  }
-
-  const handleRotateCredentials = () => {
-    toast.info('Rotate Credentials', {
-      description: 'Opening credential rotation wizard...'
-    })
-  }
-
-  const handleExportCredentials = () => {
-    toast.info('Export Credentials', {
-      description: 'Exporting credentials...'
-    })
-  }
-
-  const handleCredentialSettings = () => {
-    toast.info('Credential Settings', {
-      description: 'Opening credential settings...'
-    })
-  }
-
-  const handleAddCredential = () => {
-    toast.info('Add Credential', {
-      description: 'Opening credential creation form...'
-    })
-  }
-
-  const handleCredentialItemSettings = (credName: string) => {
-    toast.info('Credential Settings', {
-      description: `Opening settings for "${credName}"...`
-    })
-  }
-
-  const handleDeleteCredential = (credName: string) => {
-    toast.info('Delete Credential', {
-      description: `Deleting "${credName}"...`
-    })
-  }
+  const handleExportCredentials = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting credentials...', success: 'Credentials exported', error: 'Failed' })
+  const handleCredentialSettings = () => { setActiveTab('settings'); toast.success('Credential settings') }
+  const handleAddCredential = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: 'Create your credential', error: 'Failed' })
+  const handleCredentialItemSettings = (credName: string) => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: `Configure "${credName}"`, error: 'Failed' })
+  const handleDeleteCredential = (credName: string) => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Deleting "${credName}"...`, success: 'Credential deleted', error: 'Failed' })
 
   // Variables Tab Handlers
-  const handleAddVariable = () => {
-    toast.info('Add Variable', {
-      description: 'Opening variable creation form...'
-    })
-  }
-
-  const handleAddSecret = () => {
-    toast.info('Add Secret', {
-      description: 'Opening secret creation form...'
-    })
-  }
-
-  const handleImportVariables = () => {
-    toast.info('Import Variables', {
-      description: 'Opening variable import dialog...'
-    })
-  }
-
-  const handleExportVariables = () => {
-    toast.info('Export Variables', {
-      description: 'Exporting variables...'
-    })
-  }
-
-  const handleDuplicateVariable = () => {
-    toast.info('Duplicate Variable', {
-      description: 'Duplicating selected variable...'
-    })
-  }
-
-  const handleSyncVariables = () => {
-    toast.info('Sync Variables', {
-      description: 'Syncing variables across environments...'
-    })
-  }
-
-  const handleViewAllVariables = () => {
-    toast.info('View All', {
-      description: 'Showing all variables...'
-    })
-  }
-
-  const handleVariableSettings = () => {
-    toast.info('Variable Settings', {
-      description: 'Opening variable settings...'
-    })
-  }
-
-  const handleVariableItemSettings = (varKey: string) => {
-    toast.info('Variable Settings', {
-      description: `Opening settings for "${varKey}"...`
-    })
-  }
+  const handleAddVariable = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: 'Create your variable', error: 'Failed' })
+  const handleAddSecret = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: 'Create your secret securely', error: 'Failed' })
+  const handleImportVariables = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: 'Import variables dialog ready', error: 'Failed' })
+  const handleExportVariables = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting...', success: 'Variables exported', error: 'Failed' })
+  const handleDuplicateVariable = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Duplicating...', success: 'Variable duplicated', error: 'Failed' })
+  const handleSyncVariables = () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Syncing across environments...', success: 'Variables synced!', error: 'Sync failed' })
+  const handleViewAllVariables = () => { setActiveTab('variables'); toast.success('Showing all variables') }
+  const handleVariableSettings = () => { setActiveTab('settings'); toast.success('Variable settings') }
+  const handleVariableItemSettings = (varKey: string) => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: `Configure "${varKey}"`, error: 'Failed' })
 
   // Settings Tab Handlers
-  const handleGeneralSettings = () => {
-    toast.info('General Settings', {
-      description: 'Opening general settings...'
-    })
-  }
+  const handleGeneralSettings = () => { setActiveTab('settings'); toast.success('General settings') }
+  const handleExecutionSettingsNav = () => { setActiveTab('settings'); toast.success('Execution settings') }
 
-  const handleExecutionSettingsNav = () => {
-    toast.info('Execution Settings', {
-      description: 'Opening execution settings...'
-    })
-  }
-
-  const handleAlertsSettings = () => {
-    toast.info('Alerts Settings', {
-      description: 'Opening alert settings...'
-    })
-  }
-
-  const handleSecuritySettingsNav = () => {
-    toast.info('Security Settings', {
-      description: 'Opening security settings...'
-    })
-  }
-
-  const handleIntegrationsSettings = () => {
-    toast.info('Integrations Settings', {
-      description: 'Opening integration settings...'
-    })
-  }
-
-  const handleAdvancedSettings = () => {
-    toast.info('Advanced Settings', {
-      description: 'Opening advanced settings...'
-    })
-  }
-
-  const handleSaveAllSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'All settings have been saved successfully.'
-    })
-  }
-
-  const handleResetSettings = () => {
-    toast.info('Reset Settings', {
-      description: 'Resetting settings to defaults...'
-    })
-  }
-
-  const handleRegenerateApiKey = () => {
-    toast.info('Regenerate API Key', {
-      description: 'Generating new API key...'
-    })
-  }
+  const handleAlertsSettings = () => { setActiveTab('settings'); toast.success('Alerts settings') }
+  const handleSecuritySettingsNav = () => { setActiveTab('settings'); toast.success('Security settings') }
+  const handleIntegrationsSettings = () => { setActiveTab('settings'); toast.success('Integration settings') }
+  const handleAdvancedSettings = () => { setActiveTab('settings'); toast.success('Advanced settings') }
+  const handleSaveAllSettings = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving settings...', success: 'All settings saved!', error: 'Save failed' })
+  const handleResetSettings = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Resetting settings...', success: 'Settings reset to defaults', error: 'Reset failed' })
+  const handleRegenerateApiKey = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating new API key...', success: 'New API key generated! Copy it now.', error: 'Generation failed' })
 
   const handleCopyToClipboard = (label: string) => {
     toast.success('Copied', {

@@ -646,10 +646,10 @@ const mockHealthScoreActivities = [
 ]
 
 const mockHealthScoreQuickActions = [
-  { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: () => console.log('Run check') },
-  { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: () => console.log('View metrics') },
-  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => console.log('Alerts') },
-  { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: () => console.log('Reports') },
+  { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running health check...', success: 'Health check completed!', error: 'Health check failed' }) },
+  { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: () => toast.success('View Metrics', { description: 'Opening metrics dashboard...' }) },
+  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.success('Health Alerts', { description: 'Opening alerts panel...' }) },
+  { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: () => toast.success('Health Reports', { description: 'Opening reports viewer...' }) },
 ]
 
 export default function HealthScoreClient() {

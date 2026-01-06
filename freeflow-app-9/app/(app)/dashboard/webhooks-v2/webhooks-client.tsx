@@ -372,10 +372,10 @@ const mockWebhooksActivities = [
 ]
 
 const mockWebhooksQuickActions = [
-  { id: '1', label: 'New Webhook', icon: 'Plus', shortcut: 'N', action: () => console.log('New webhook') },
-  { id: '2', label: 'Test Delivery', icon: 'Send', shortcut: 'T', action: () => console.log('Test delivery') },
-  { id: '3', label: 'View Logs', icon: 'FileJson', shortcut: 'L', action: () => console.log('View logs') },
-  { id: '4', label: 'Retry Failed', icon: 'RefreshCw', shortcut: 'R', action: () => console.log('Retry failed') },
+  { id: '1', label: 'New Webhook', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening webhook builder...', success: 'Configure URL, events, and authentication', error: 'Failed to open' }) },
+  { id: '2', label: 'Test Delivery', icon: 'Send', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Sending test payload...', success: 'Test delivered! Response: 200 OK', error: 'Delivery failed' }) },
+  { id: '3', label: 'View Logs', icon: 'FileJson', shortcut: 'L', action: () => toast.success('Delivery Logs', { description: 'View request/response history and errors' }) },
+  { id: '4', label: 'Retry Failed', icon: 'RefreshCw', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Retrying 23 failed deliveries...', success: '20 retries successful, 3 still failing', error: 'Retry failed' }) },
 ]
 
 export default function WebhooksClient({

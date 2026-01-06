@@ -511,9 +511,9 @@ const mockKnowledgeArticlesActivities = [
 ]
 
 const mockKnowledgeArticlesQuickActions = [
-  { id: '1', label: 'New Article', icon: 'plus', action: () => console.log('New article'), variant: 'default' as const },
-  { id: '2', label: 'Templates', icon: 'layout', action: () => console.log('Templates'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'New Article', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: 'Create your article with rich text formatting', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Templates', icon: 'layout', action: () => toast.success('Article Templates', { description: 'Choose from 15 pre-built article templates' }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => toast.success('Content Analytics', { description: 'View reads, time on page, and helpfulness scores' }), variant: 'outline' as const },
 ]
 
 export default function KnowledgeArticlesClient({ initialArticles, initialStats }: KnowledgeArticlesClientProps) {

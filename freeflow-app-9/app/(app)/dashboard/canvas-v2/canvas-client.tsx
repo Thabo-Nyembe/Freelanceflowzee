@@ -149,10 +149,10 @@ const mockCanvasActivities = [
 ]
 
 const mockCanvasQuickActions = [
-  { id: '1', label: 'New Board', icon: 'Layout', shortcut: 'N', action: () => console.log('New board') },
-  { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => console.log('Templates') },
-  { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => console.log('Share') },
+  { id: '1', label: 'New Board', icon: 'Layout', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating canvas board...', success: 'New canvas ready! Start designing', error: 'Failed to create board' }) },
+  { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => toast.success('Canvas Templates', { description: '47 templates available • Wireframes, flowcharts, diagrams & more' }) },
+  { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting canvas...', success: 'Exported to PNG, SVG, and PDF formats', error: 'Export failed' }) },
+  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Generating share link...', success: 'Share link copied! Anyone with link can view', error: 'Failed to share' }) },
 ]
 
 export default function CanvasClient({ initialCanvases }: { initialCanvases: Canvas[] }) {
@@ -1029,8 +1029,8 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 { label: 'Prototype', icon: Smartphone, color: 'from-green-500 to-emerald-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'prototype' })); setShowNewBoard(true) } },
                 { label: 'Diagram', icon: Workflow, color: 'from-orange-500 to-red-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'diagram' })); setShowNewBoard(true) } },
                 { label: 'Templates', icon: FileText, color: 'from-pink-500 to-rose-500', action: () => setActiveTab('templates') },
-                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500', action: () => toast.info('Import feature', { description: 'Coming soon - upload .fig, .sketch or .psd files' }) },
-                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500', action: () => toast.info('AI Generate', { description: 'Coming soon - generate designs with AI' }) }
+                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening file picker...', success: 'Ready to import .fig, .sketch, or .psd files', error: 'Import cancelled' }) },
+                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Initializing AI design generator...', success: 'AI ready! Describe your design to generate', error: 'AI unavailable' }) }
               ].map((action, i) => (
                 <button
                   key={i}

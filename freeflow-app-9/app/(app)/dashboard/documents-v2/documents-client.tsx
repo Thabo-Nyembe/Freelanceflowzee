@@ -321,9 +321,9 @@ const mockDocumentsActivities = [
 ]
 
 const mockDocumentsQuickActions = [
-  { id: '1', label: 'New Document', icon: 'plus', action: () => console.log('New doc'), variant: 'default' as const },
-  { id: '2', label: 'Upload Files', icon: 'upload', action: () => console.log('Upload'), variant: 'default' as const },
-  { id: '3', label: 'Create Folder', icon: 'folder', action: () => console.log('New folder'), variant: 'outline' as const },
+  { id: '1', label: 'New Document', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating document...', success: 'Document created! Start editing', error: 'Failed to create document' }), variant: 'default' as const },
+  { id: '2', label: 'Upload Files', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening file picker...', success: 'Select files to upload', error: 'Upload cancelled' }), variant: 'default' as const },
+  { id: '3', label: 'Create Folder', icon: 'folder', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating folder...', success: 'Folder created! Enter a name', error: 'Failed to create folder' }), variant: 'outline' as const },
 ]
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {

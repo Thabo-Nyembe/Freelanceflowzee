@@ -420,10 +420,10 @@ const mockGalleryActivities = [
 ]
 
 const mockGalleryQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
-  { id: '2', label: 'New Album', icon: 'FolderPlus', shortcut: 'A', action: () => console.log('New album') },
-  { id: '3', label: 'Bulk Edit', icon: 'Edit', shortcut: 'E', action: () => console.log('Bulk edit') },
-  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => console.log('Share') },
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.success('Upload Media', { description: 'Opening file uploader...' }) },
+  { id: '2', label: 'New Album', icon: 'FolderPlus', shortcut: 'A', action: () => toast.success('New Album', { description: 'Creating new album...' }) },
+  { id: '3', label: 'Bulk Edit', icon: 'Edit', shortcut: 'E', action: () => toast.success('Bulk Edit', { description: 'Opening bulk editor...' }) },
+  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.success('Share Gallery', { description: 'Opening sharing options...' }) },
 ]
 
 export default function GalleryClient() {

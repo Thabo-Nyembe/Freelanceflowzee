@@ -663,9 +663,9 @@ const mockAuditActivities = [
 ]
 
 const mockAuditQuickActions = [
-  { id: '1', label: 'Search Logs', icon: 'search', action: () => console.log('Search logs'), variant: 'default' as const },
-  { id: '2', label: 'Create Alert', icon: 'bell', action: () => console.log('Create alert'), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'Search Logs', icon: 'search', action: () => toast.success('Search Logs', { description: 'Opening advanced log search' }), variant: 'default' as const },
+  { id: '2', label: 'Create Alert', icon: 'bell', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating alert rule...', success: 'Alert rule created', error: 'Failed to create alert' }), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting audit logs...', success: 'Audit logs exported', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

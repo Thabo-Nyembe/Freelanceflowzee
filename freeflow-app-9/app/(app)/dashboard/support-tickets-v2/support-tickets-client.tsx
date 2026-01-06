@@ -204,9 +204,9 @@ const mockSupportTicketsActivities = [
 ]
 
 const mockSupportTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => console.log('New ticket'), variant: 'default' as const },
-  { id: '2', label: 'My Queue', icon: 'inbox', action: () => console.log('My queue'), variant: 'default' as const },
-  { id: '3', label: 'Macros', icon: 'zap', action: () => console.log('Macros'), variant: 'outline' as const },
+  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening ticket form...', success: 'Create a new support ticket', error: 'Failed to open form' }), variant: 'default' as const },
+  { id: '2', label: 'My Queue', icon: 'inbox', action: () => toast.success('Your Queue', { description: '12 assigned tickets • 3 high priority • 2 overdue' }), variant: 'default' as const },
+  { id: '3', label: 'Macros', icon: 'zap', action: () => toast.success('Quick Macros', { description: '24 macros available • Click to apply common responses' }), variant: 'outline' as const },
 ]
 
 export default function SupportTicketsClient({ initialTickets, initialStats }: SupportTicketsClientProps) {

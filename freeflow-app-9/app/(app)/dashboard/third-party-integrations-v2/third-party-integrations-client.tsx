@@ -341,9 +341,9 @@ const mockIntegrationsActivities = [
 ]
 
 const mockIntegrationsQuickActions = [
-  { id: '1', label: 'Add Integration', icon: 'plus', action: () => console.log('Add integration'), variant: 'default' as const },
-  { id: '2', label: 'Test Connection', icon: 'refresh', action: () => console.log('Test connection'), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => console.log('View logs'), variant: 'outline' as const },
+  { id: '1', label: 'Add Integration', icon: 'plus', action: () => toast.success('Add Integration', { description: 'Opening integration wizard...' }), variant: 'default' as const },
+  { id: '2', label: 'Test Connection', icon: 'refresh', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Testing connection...', success: 'Connection test passed!', error: 'Connection test failed' }), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.success('Integration Logs', { description: 'Opening logs viewer...' }), variant: 'outline' as const },
 ]
 
 export default function ThirdPartyIntegrationsClient() {

@@ -412,9 +412,9 @@ const mockFeaturesActivities = [
 ]
 
 const mockFeaturesQuickActions = [
-  { id: '1', label: 'New Feature', icon: 'plus', action: () => console.log('New feature'), variant: 'default' as const },
-  { id: '2', label: 'View Roadmap', icon: 'map', action: () => console.log('Roadmap'), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Feature', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening feature request form...', success: 'Submit your feature idea with priority scoring', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'View Roadmap', icon: 'map', action: () => toast.success('Product Roadmap', { description: 'View planned features across quarters' }), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating feature report...', success: 'Feature backlog exported to CSV', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 export default function FeaturesClient() {

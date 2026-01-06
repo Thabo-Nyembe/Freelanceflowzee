@@ -475,10 +475,10 @@ const mockMonitoringActivities = [
 ]
 
 const mockMonitoringQuickActions = [
-  { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => console.log('Add host') },
-  { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => console.log('Dashboards') },
-  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => console.log('Alerts') },
-  { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => console.log('Metrics') },
+  { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Adding host...', success: 'Host added successfully', error: 'Failed to add host' }) },
+  { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.success('Dashboards', { description: 'Opening monitoring dashboards' }) },
+  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.success('Alerts', { description: 'Opening alert configuration' }) },
+  { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => toast.success('Metrics', { description: 'Opening metrics explorer' }) },
 ]
 
 // ============================================================================

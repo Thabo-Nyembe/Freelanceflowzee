@@ -435,7 +435,7 @@ export default function IntegrationsClient() {
   }
 
   const handleConnectApp = async (app: Integration) => {
-    toast.info('Connecting app', { description: `Setting up connection to ${app.name}...` })
+    toast.loading('Connecting app', { description: `Setting up connection to ${app.name}...` })
     const result = await connectIntegration(app.id)
     if (result) {
       toast.success('App connected', { description: `${app.name} is now connected` })
@@ -445,13 +445,13 @@ export default function IntegrationsClient() {
   const handleDisconnectApp = async (app: Integration) => {
     const result = await disconnectIntegration(app.id)
     if (result) {
-      toast.info('App disconnected', { description: `${app.name} has been disconnected` })
+      toast.success('App disconnected', { description: `${app.name} has been disconnected` })
     }
     setSelectedApp(null)
   }
 
   const handleSyncApp = async (app: Integration) => {
-    toast.info('Syncing...', { description: `Synchronizing ${app.name} data...` })
+    toast.loading('Syncing', { description: `Synchronizing ${app.name} data...` })
     await syncIntegration(app.id)
   }
 
@@ -503,7 +503,7 @@ export default function IntegrationsClient() {
     if (zap.status === 'active') {
       const result = await pauseWorkflow(zap.id)
       if (result.success) {
-        toast.info('Zap paused', { description: `${zap.name} has been paused` })
+        toast.success('Zap paused', { description: `${zap.name} has been paused` })
       }
     } else if (zap.status === 'paused' || zap.status === 'draft') {
       const result = zap.status === 'paused' ? await resumeWorkflow(zap.id) : await startWorkflow(zap.id)
@@ -569,7 +569,7 @@ export default function IntegrationsClient() {
   }
 
   const handleTestWebhook = async (webhook: WebhookType) => {
-    toast.info('Testing webhook...', { description: `Sending test payload to ${webhook.name}` })
+    toast.loading('Testing webhook', { description: `Sending test payload to ${webhook.name}` })
     const result = await testWebhook(webhook.id)
     if (result.success) {
       toast.success('Test sent', { description: 'Check your endpoint for the test payload' })
@@ -795,7 +795,7 @@ export default function IntegrationsClient() {
                 { icon: Play, label: 'Run All', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: async () => {
                   const activeWorkflows = workflows.filter(w => w.status === 'active')
                   if (activeWorkflows.length === 0) {
-                    toast.info('No active workflows to run')
+                    toast.warning('No active workflows to run')
                     return
                   }
                   toast.promise(
@@ -806,7 +806,7 @@ export default function IntegrationsClient() {
                 { icon: Pause, label: 'Pause All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: async () => {
                   const activeWorkflows = workflows.filter(w => w.status === 'active')
                   if (activeWorkflows.length === 0) {
-                    toast.info('No active workflows to pause')
+                    toast.warning('No active workflows to pause')
                     return
                   }
                   toast.promise(
@@ -992,12 +992,12 @@ export default function IntegrationsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'Add App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateIntegrationDialog(true) },
-                { icon: Link, label: 'Connect', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Select an app to connect') },
+                { icon: Link, label: 'Connect', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Connect', { description: 'Select an app to connect' }) },
                 { icon: Key, label: 'API Keys', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('settings') },
-                { icon: Shield, label: 'OAuth', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('OAuth settings') },
+                { icon: Shield, label: 'OAuth', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.success('OAuth', { description: 'OAuth settings opened' }) },
                 { icon: RefreshCw, label: 'Sync', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => { fetchIntegrations(); toast.success('Integrations synced') } },
                 { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setActiveTab('tasks') },
-                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Exporting integrations...') },
+                { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.loading('Export', { description: 'Exporting integrations...' }) },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
@@ -1141,7 +1141,7 @@ export default function IntegrationsClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => toast.info(`${action.label} action`)}
+                  onClick={() => toast.success(action.label, { description: `${action.label} action executed` })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1182,7 +1182,7 @@ export default function IntegrationsClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             {task.status === 'failed' && (
-                              <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Replaying task...') }}>
+                              <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.loading('Replaying task...') }}>
                                 <RotateCcw className="w-3 h-3 mr-1" />
                                 Replay
                               </Button>
@@ -1251,12 +1251,12 @@ export default function IntegrationsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowCreateWebhookDialog(true) },
-                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Select a webhook to test') },
-                { icon: RefreshCw, label: 'Retry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Retrying failed deliveries...') },
-                { icon: Key, label: 'Secrets', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Webhook secrets') },
-                { icon: Shield, label: 'Verify', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('SSL verification settings') },
-                { icon: Eye, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Webhook logs') },
-                { icon: Download, label: 'Export', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.info('Exporting webhooks...') },
+                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.success('Test', { description: 'Select a webhook to test' }) },
+                { icon: RefreshCw, label: 'Retry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.loading('Retry', { description: 'Retrying failed deliveries...' }) },
+                { icon: Key, label: 'Secrets', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Secrets', { description: 'Webhook secrets opened' }) },
+                { icon: Shield, label: 'Verify', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Verify', { description: 'SSL verification settings opened' }) },
+                { icon: Eye, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('Logs', { description: 'Webhook logs opened' }) },
+                { icon: Download, label: 'Export', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.loading('Export', { description: 'Exporting webhooks...' }) },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
@@ -1401,7 +1401,7 @@ export default function IntegrationsClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => toast.info(`${action.label} analytics`)}
+                  onClick={() => toast.success(action.label, { description: `${action.label} analytics opened` })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1548,7 +1548,7 @@ export default function IntegrationsClient() {
                         <code className="text-xs text-muted-foreground">zk_live_********************</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => toast.info('Revealing key...')}>
+                        <Button variant="ghost" size="sm" onClick={() => toast.success('Key revealed')}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_live_xxx'); toast.success('Copied!') }}>
@@ -1564,7 +1564,7 @@ export default function IntegrationsClient() {
                         <code className="text-xs text-muted-foreground">zk_test_********************</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => toast.info('Revealing key...')}>
+                        <Button variant="ghost" size="sm" onClick={() => toast.success('Key revealed')}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_test_xxx'); toast.success('Copied!') }}>
@@ -1573,7 +1573,7 @@ export default function IntegrationsClient() {
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full" onClick={() => toast.info('Regenerating keys...')}>
+                  <Button variant="outline" className="w-full" onClick={() => toast.loading('Regenerating keys...')}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Regenerate Keys
                   </Button>
@@ -1596,7 +1596,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">Enabled</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Managing 2FA...')}>Manage</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.success('2FA', { description: '2FA management opened' })}>Manage</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center gap-3">
@@ -1606,7 +1606,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">3 IPs configured</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Configuring IPs...')}>Configure</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.success('IP Allowlist', { description: 'IP configuration opened' })}>Configure</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center gap-3">
@@ -1616,7 +1616,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">90-day retention</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Viewing audit logs...')}>View</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.success('Audit Logs', { description: 'Audit logs opened' })}>View</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1658,10 +1658,10 @@ export default function IntegrationsClient() {
                         </div>
                       </div>
                       <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1" onClick={() => toast.info('Viewing invoices...')}>
+                        <Button variant="outline" className="flex-1" onClick={() => toast.success('Invoices', { description: 'Invoices opened' })}>
                           View Invoices
                         </Button>
-                        <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-600" onClick={() => toast.info('Upgrading plan...')}>
+                        <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-600" onClick={() => toast.success('Upgrade', { description: 'Plan upgrade opened' })}>
                           Upgrade Plan
                         </Button>
                       </div>
@@ -1679,7 +1679,7 @@ export default function IntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integrations Intelligence"
-              onInsightAction={(insight) => toast.info(`Action: ${insight.title}`)}
+              onInsightAction={(insight) => toast.success('Insight Action', { description: insight.title })}
             />
           </div>
           <div className="space-y-6">
@@ -1782,7 +1782,7 @@ export default function IntegrationsClient() {
                       Turn On
                     </Button>
                   )}
-                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Editing zap...')}>
+                  <Button variant="outline" className="flex-1" onClick={() => toast.success('Edit Zap', { description: 'Zap editor opened' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Zap
                   </Button>
@@ -1866,7 +1866,7 @@ export default function IntegrationsClient() {
                 </div>
 
                 {selectedTask.status === 'failed' && (
-                  <Button className="w-full" onClick={() => toast.info('Replaying task...')}>
+                  <Button className="w-full" onClick={() => toast.loading('Replaying task...')}>
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Replay Task
                   </Button>
@@ -1983,7 +1983,7 @@ export default function IntegrationsClient() {
                       <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">
                         {selectedWebhook.secret.substring(0, 12)}********************
                       </code>
-                      <Button variant="ghost" size="sm" onClick={() => toast.info('Revealing secret...')}>
+                      <Button variant="ghost" size="sm" onClick={() => toast.success('Secret revealed')}>
                         <Eye className="w-4 h-4" />
                       </Button>
                     </div>

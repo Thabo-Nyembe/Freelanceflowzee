@@ -520,10 +520,10 @@ const mockTestingActivities = [
 ]
 
 const mockTestingQuickActions = [
-  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => console.log('Run tests') },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V', action: () => console.log('View report') },
-  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D', action: () => console.log('Debug failed') },
-  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N', action: () => console.log('Add test') },
+  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Running tests...', success: 'All tests passed!', error: 'Some tests failed' }) },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V', action: () => toast.success('Test Report', { description: 'Opening test report viewer...' }) },
+  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D', action: () => toast.success('Debug Mode', { description: 'Opening debugger for failed tests...' }) },
+  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N', action: () => toast.success('Add Test', { description: 'Opening test creation form...' }) },
 ]
 
 export default function TestingClient() {

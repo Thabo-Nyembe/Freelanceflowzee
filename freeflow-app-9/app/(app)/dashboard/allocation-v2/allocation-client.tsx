@@ -688,9 +688,9 @@ const mockAllocationActivities = [
 ]
 
 const mockAllocationQuickActions = [
-  { id: '1', label: 'New Allocation', icon: 'plus', action: () => console.log('New allocation'), variant: 'default' as const },
-  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => console.log('View calendar'), variant: 'default' as const },
-  { id: '3', label: 'Capacity Report', icon: 'chart', action: () => console.log('Capacity report'), variant: 'outline' as const },
+  { id: '1', label: 'New Allocation', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new allocation...', success: 'Resource allocation created', error: 'Failed to create allocation' }), variant: 'default' as const },
+  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => toast.success('Calendar', { description: 'Opening resource allocation calendar' }), variant: 'default' as const },
+  { id: '3', label: 'Capacity Report', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating capacity report...', success: 'Capacity report generated', error: 'Failed to generate report' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

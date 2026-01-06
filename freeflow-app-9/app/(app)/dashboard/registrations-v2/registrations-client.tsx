@@ -744,9 +744,9 @@ const mockRegistrationsActivities = [
 ]
 
 const mockRegistrationsQuickActions = [
-  { id: '1', label: 'New Event', icon: 'plus', action: () => console.log('New event'), variant: 'default' as const },
-  { id: '2', label: 'Import List', icon: 'upload', action: () => console.log('Import list'), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Event', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new event...', success: 'Event created successfully', error: 'Failed to create event' }), variant: 'default' as const },
+  { id: '2', label: 'Import List', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Importing registration list...', success: 'Registrations imported successfully', error: 'Import failed' }), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting registration data...', success: 'Data exported successfully', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

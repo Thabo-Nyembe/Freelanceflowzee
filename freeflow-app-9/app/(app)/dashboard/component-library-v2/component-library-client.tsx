@@ -363,10 +363,10 @@ const mockComponentLibActivities = [
 ]
 
 const mockComponentLibQuickActions = [
-  { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => console.log('New component') },
-  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => console.log('Browse') },
-  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => console.log('Playground') },
-  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => console.log('Docs') },
+  { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating component...', success: 'Component scaffold created! Add props and variants', error: 'Failed to create' }) },
+  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => toast.success('Component Browser', { description: '47 components • 12 categories • Filter by type' }) },
+  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => toast.success('Playground Mode', { description: 'Interactive testing environment ready' }) },
+  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => toast.success('Component Docs', { description: 'Full API reference, examples, and guidelines' }) },
 ]
 
 export default function ComponentLibraryClient() {

@@ -365,9 +365,9 @@ const mockSocialMediaActivities = [
 ]
 
 const mockSocialMediaQuickActions = [
-  { id: '1', label: 'Create Post', icon: 'edit', action: () => console.log('Create post'), variant: 'default' as const },
-  { id: '2', label: 'Schedule', icon: 'calendar', action: () => console.log('Schedule'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'Create Post', icon: 'edit', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening composer...', success: 'Create content for multiple platforms at once', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Schedule', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening scheduler...', success: 'Plan posts for optimal engagement times', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.success('Social Analytics', { description: 'View engagement, reach, and follower growth' }), variant: 'outline' as const },
 ]
 
 export default function SocialMediaClient() {

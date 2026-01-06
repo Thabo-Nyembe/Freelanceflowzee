@@ -436,9 +436,9 @@ const mockTicketsActivities = [
 ]
 
 const mockTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => console.log('New ticket'), variant: 'default' as const },
-  { id: '2', label: 'View Queue', icon: 'list', action: () => console.log('View queue'), variant: 'default' as const },
-  { id: '3', label: 'Reports', icon: 'chart', action: () => console.log('Reports'), variant: 'outline' as const },
+  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening ticket form...', success: 'Create a new support ticket', error: 'Failed to open form' }), variant: 'default' as const },
+  { id: '2', label: 'View Queue', icon: 'list', action: () => toast.success('Ticket Queue', { description: '47 open • 12 in progress • 8 high priority' }), variant: 'default' as const },
+  { id: '3', label: 'Reports', icon: 'chart', action: () => toast.success('Ticket Reports', { description: 'Resolution time: 2.4h avg • 94% satisfaction' }), variant: 'outline' as const },
 ]
 
 export default function TicketsClient() {

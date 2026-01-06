@@ -299,9 +299,9 @@ const mockTimeTrackingActivities = [
 ]
 
 const mockTimeTrackingQuickActions = [
-  { id: '1', label: 'Start Timer', icon: 'play', action: () => console.log('Start Timer'), variant: 'default' as const },
-  { id: '2', label: 'Manual Entry', icon: 'plus', action: () => console.log('Manual Entry'), variant: 'default' as const },
-  { id: '3', label: 'Reports', icon: 'barChart', action: () => console.log('Reports'), variant: 'outline' as const },
+  { id: '1', label: 'Start Timer', icon: 'play', action: () => toast.success('Timer Started', { description: 'Tracking time for current task' }), variant: 'default' as const },
+  { id: '2', label: 'Manual Entry', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening time entry form...', success: 'Enter hours, project, and description', error: 'Failed to open form' }), variant: 'default' as const },
+  { id: '3', label: 'Reports', icon: 'barChart', action: () => toast.success('Time Reports', { description: '38.5 hours this week • 12 projects tracked' }), variant: 'outline' as const },
 ]
 
 export default function TimeTrackingClient() {

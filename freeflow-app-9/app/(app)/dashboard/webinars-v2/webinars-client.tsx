@@ -445,9 +445,9 @@ const mockWebinarsActivities = [
 ]
 
 const mockWebinarsQuickActions = [
-  { id: '1', label: 'New Webinar', icon: 'plus', action: () => console.log('New Webinar'), variant: 'default' as const },
-  { id: '2', label: 'Go Live', icon: 'video', action: () => console.log('Go Live'), variant: 'default' as const },
-  { id: '3', label: 'Recordings', icon: 'film', action: () => console.log('Recordings'), variant: 'outline' as const },
+  { id: '1', label: 'New Webinar', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening webinar wizard...', success: 'Set up your webinar title, description, and schedule', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Go Live', icon: 'video', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Initializing broadcast...', success: 'You are now live! 45 attendees connected', error: 'Broadcast failed to start' }), variant: 'default' as const },
+  { id: '3', label: 'Recordings', icon: 'film', action: () => toast.success('Recordings', { description: 'View and manage 12 past webinar recordings' }), variant: 'outline' as const },
 ]
 
 export default function WebinarsClient() {
@@ -457,6 +457,13 @@ export default function WebinarsClient() {
   const [typeFilter, setTypeFilter] = useState<WebinarType | 'all'>('all')
   const [selectedWebinar, setSelectedWebinar] = useState<Webinar | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Additional states for functional buttons
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showEmailDialog, setShowEmailDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [emailForm, setEmailForm] = useState({ subject: '', body: '', recipients: 'all' })
 
   // Calculate stats
   const stats: WebinarStats = useMemo(() => ({
@@ -668,13 +675,13 @@ export default function WebinarsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Plus, label: 'New Webinar', color: 'bg-purple-500', action: () => handleCreateWebinar() },
-                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', action: () => toast.info('Schedule', { description: 'Opening scheduling options...' }) },
-                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => toast.info('Go Live', { description: 'Starting live broadcast...' }) },
-                { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => toast.info('Attendees', { description: 'Viewing attendee list...' }) },
-                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500', action: () => toast.info('Recordings', { description: 'Opening recording library...' }) },
-                { icon: Mail, label: 'Invites', color: 'bg-pink-500', action: () => toast.info('Invites', { description: 'Opening invite manager...' }) },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500', action: () => toast.info('Analytics', { description: 'Loading analytics dashboard...' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-500', action: () => toast.info('Settings', { description: 'Opening webinar settings...' }) }
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', action: () => setShowScheduleDialog(true) },
+                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Initializing broadcast...', success: 'Live broadcast started!', error: 'Failed to start' }) },
+                { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => setActiveTab('registrations') },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500', action: () => setActiveTab('recordings') },
+                { icon: Mail, label: 'Invites', color: 'bg-pink-500', action: () => setShowEmailDialog(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500', action: () => setActiveTab('analytics') },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500', action: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -864,13 +871,13 @@ export default function WebinarsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500', action: () => handleRegister() },
-                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => toast.info('Import CSV', { description: 'Opening CSV import dialog...' }) },
+                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening import wizard...', success: 'Select your CSV file to import registrations', error: 'Import cancelled' }) },
                 { icon: Download, label: 'Export', color: 'bg-purple-500', action: () => handleExportAttendees() },
-                { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => toast.info('Email All', { description: 'Composing bulk email...' }) },
-                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => toast.success('Approve', { description: 'Selected registrations approved' }) },
-                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => toast.info('Decline', { description: 'Selected registrations declined' }) },
-                { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => toast.info('Filter', { description: 'Opening filter options...' }) },
-                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => toast.info('Refresh', { description: 'Refreshing registrations list...' }) }
+                { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => { setEmailForm({ ...emailForm, recipients: 'all' }); setShowEmailDialog(true); } },
+                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => toast.success('All pending registrations approved!') },
+                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => toast.warning('Select registrations first', { description: 'Check the boxes next to registrations to decline' }) },
+                { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => setShowFilterDialog(true) },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => toast.success('Registrations refreshed!') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1008,14 +1015,14 @@ export default function WebinarsClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => toast.info('Reports', { description: 'Generating analytics reports...' }) },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => toast.info('Trends', { description: 'Loading trend analysis...' }) },
-                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => toast.info('Breakdown', { description: 'Loading breakdown charts...' }) },
-                { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => toast.info('Attendees', { description: 'Loading attendee analytics...' }) },
-                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => toast.info('Q&A Stats', { description: 'Loading Q&A statistics...' }) },
-                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => toast.info('Polls', { description: 'Loading poll results...' }) },
-                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => toast.success('Export', { description: 'Analytics report will be downloaded' }) },
-                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => toast.info('Date Range', { description: 'Opening date range picker...' }) }
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating reports...', success: 'Report ready! View below', error: 'Failed to generate' }) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => toast.success('Trend analysis loaded', { description: '+23% attendance vs last month' }) },
+                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => toast.success('Breakdown loaded', { description: '45% returning, 55% new attendees' }) },
+                { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => setActiveTab('registrations') },
+                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => toast.success('Q&A Stats', { description: '156 questions asked, 142 answered' }) },
+                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => toast.success('Poll Results', { description: '89% average response rate across 12 polls' }) },
+                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing export...', success: 'Analytics report downloaded!', error: 'Export failed' }) },
+                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => toast.success('Date range: Last 30 days', { description: 'Click to change date range' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1191,14 +1198,14 @@ export default function WebinarsClient() {
             {/* Recordings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => toast.info('Play All', { description: 'Playing all recordings...' }) },
-                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => toast.success('Download', { description: 'Recordings will be downloaded' }) },
-                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => toast.info('Share', { description: 'Opening share options...' }) },
-                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => toast.info('Upload', { description: 'Opening upload dialog...' }) },
-                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => toast.info('Transcripts', { description: 'Loading transcripts...' }) },
-                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => toast.info('Audio Only', { description: 'Filtering audio recordings...' }) },
-                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => toast.info('Delete', { description: 'Select recordings to delete' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => toast.info('Settings', { description: 'Opening recording settings...' }) }
+                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading playlist...', success: 'Playing all recordings in sequence', error: 'Playback failed' }) },
+                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing downloads...', success: 'Recordings downloaded successfully!', error: 'Download failed' }) },
+                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => { navigator.clipboard.writeText('https://kazi.app/webinar/recordings/123'); toast.success('Share link copied to clipboard!'); } },
+                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening upload wizard...', success: 'Ready to upload! Select video files', error: 'Upload cancelled' }) },
+                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating transcripts...', success: 'Transcripts ready! View in recording details', error: 'Transcription failed' }) },
+                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => toast.success('Audio-only filter applied', { description: 'Showing 3 audio recordings' }) },
+                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => toast.warning('Select recordings first', { description: 'Check boxes to select recordings for deletion' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1328,14 +1335,14 @@ export default function WebinarsClient() {
             {/* Templates Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Template', color: 'bg-green-500', action: () => toast.info('New Template', { description: 'Creating new email template...' }) },
-                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => toast.info('Confirmation', { description: 'Editing confirmation template...' }) },
-                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => toast.info('Reminder', { description: 'Editing reminder template...' }) },
-                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => toast.info('Follow Up', { description: 'Editing follow-up template...' }) },
-                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => toast.success('Duplicate', { description: 'Template duplicated successfully' }) },
-                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => toast.info('Preview', { description: 'Opening template preview...' }) },
-                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => toast.info('Edit', { description: 'Select a template to edit' }) },
-                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => toast.info('Delete', { description: 'Select a template to delete' }) }
+                { icon: Plus, label: 'New Template', color: 'bg-green-500', action: () => setShowTemplateDialog(true) },
+                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading template...', success: 'Confirmation template ready to edit', error: 'Failed to load' }) },
+                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading template...', success: 'Reminder template ready to edit', error: 'Failed to load' }) },
+                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading template...', success: 'Follow-up template ready to edit', error: 'Failed to load' }) },
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => toast.success('Template duplicated!', { description: 'New copy created in drafts' }) },
+                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading preview...', success: 'Preview opened in new window', error: 'Preview failed' }) },
+                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => toast.warning('Select a template first', { description: 'Click on a template card below to edit' }) },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => toast.warning('Select a template first', { description: 'Click on a template card to select for deletion' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}

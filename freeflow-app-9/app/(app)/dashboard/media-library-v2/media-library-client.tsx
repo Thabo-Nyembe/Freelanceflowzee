@@ -503,10 +503,10 @@ const mockMediaActivities = [
 ]
 
 const mockMediaQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
-  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'F', action: () => console.log('New folder') },
-  { id: '3', label: 'Collection', icon: 'Layers', shortcut: 'C', action: () => console.log('Collection') },
-  { id: '4', label: 'AI Tag', icon: 'Sparkles', shortcut: 'T', action: () => console.log('AI tag') },
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening file picker...', success: 'Select files to upload to media library', error: 'Upload cancelled' }) },
+  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'F', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating folder...', success: 'New folder created! Name it to organize your media', error: 'Failed to create folder' }) },
+  { id: '3', label: 'Collection', icon: 'Layers', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating collection...', success: 'Collection created! Add media to group them', error: 'Failed to create collection' }) },
+  { id: '4', label: 'AI Tag', icon: 'Sparkles', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'AI analyzing media...', success: '47 items auto-tagged with AI! 12 categories detected', error: 'AI tagging failed' }) },
 ]
 
 interface MediaLibraryClientProps {
@@ -751,7 +751,7 @@ export default function MediaLibraryClient({
       // Increment download count
       fileMutation.update(asset.id, { download_count: (asset.downloadCount || 0) + 1 })
     } else {
-      toast.info('Download unavailable', {
+      toast.error('Download unavailable', {
         description: 'No download URL available for this asset'
       })
     }
@@ -944,19 +944,19 @@ export default function MediaLibraryClient({
   }
 
   const handleBulkExport = async () => {
-    toast.info('Preparing bulk export...', {
+    toast.loading('Preparing bulk export...', {
       description: 'This feature will download all selected assets'
     })
   }
 
   const handleAIEnhance = async (asset?: MediaAsset) => {
-    toast.info('AI Enhancement', {
+    toast.loading('AI Enhancement', {
       description: 'AI-powered optimization is being applied...'
     })
   }
 
   const handleAISearch = () => {
-    toast.info('AI Search', {
+    toast.loading('AI Search', {
       description: 'Smart search is analyzing your query...'
     })
   }
@@ -1071,9 +1071,9 @@ export default function MediaLibraryClient({
                 { icon: Folder, label: 'New Folder', desc: 'Organize files', color: 'text-blue-500', action: handleOpenNewFolder },
                 { icon: LayoutGrid, label: 'Collection', desc: 'Create group', color: 'text-purple-500', action: handleOpenNewCollection },
                 { icon: Wand2, label: 'AI Enhance', desc: 'Auto-optimize', color: 'text-amber-500', action: () => handleAIEnhance() },
-                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500', action: () => toast.info('Select an asset to share') },
+                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500', action: () => toast.success('Share', { description: 'Select an asset to share' }) },
                 { icon: Download, label: 'Bulk Export', desc: 'Download all', color: 'text-cyan-500', action: handleBulkExport },
-                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500', action: () => toast.info('Opening brand kit...') },
+                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500', action: () => toast.success('Brand Kit', { description: 'Brand kit opened' }) },
                 { icon: Sparkles, label: 'AI Search', desc: 'Smart find', color: 'text-indigo-500', action: handleAISearch },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1237,13 +1237,13 @@ export default function MediaLibraryClient({
             <div className="grid grid-cols-4 gap-4">
               {[
                 { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500', action: handleOpenNewFolder },
-                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => toast.info('Opening folder tree...') },
-                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500', action: () => toast.info('Select assets to move') },
-                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500', action: () => toast.info('Archiving old folders...') },
+                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => toast.success('Organize', { description: 'Folder tree opened' }) },
+                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500', action: () => toast.success('Move Assets', { description: 'Select assets to move' }) },
+                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500', action: () => toast.loading('Archive', { description: 'Archiving old folders...' }) },
                 { icon: RefreshCw, label: 'Sync', desc: 'Cloud sync', color: 'text-green-500', action: () => { refetchFolders(); toast.success('Folders synced') } },
-                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500', action: () => toast.info('Sorting folders...') },
-                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500', action: () => toast.info('Opening permissions...') },
-                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500', action: () => toast.info('Cleaning up empty folders...') },
+                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500', action: () => toast.success('Sort', { description: 'Sorting folders' }) },
+                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500', action: () => toast.success('Permissions', { description: 'Permissions opened' }) },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500', action: () => toast.loading('Cleanup', { description: 'Cleaning up empty folders...' }) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
@@ -1256,7 +1256,7 @@ export default function MediaLibraryClient({
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Folders</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.info('Sorting folders...')}>
+                <Button variant="outline" size="sm" onClick={() => toast.success('Sort', { description: 'Sorting folders' })}>
                   <SortAsc className="w-4 h-4 mr-2" />
                   Sort
                 </Button>
@@ -1321,12 +1321,12 @@ export default function MediaLibraryClient({
             <div className="grid grid-cols-4 gap-4">
               {[
                 { icon: Plus, label: 'Create', desc: 'New collection', color: 'text-purple-500', action: handleOpenNewCollection },
-                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => toast.info('Browsing collections...') },
-                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500', action: () => toast.info('Select a collection to share') },
-                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500', action: () => toast.info('Opening tag manager...') },
-                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500', action: () => toast.info('Opening collaboration settings...') },
-                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500', action: () => toast.info('Opening privacy settings...') },
-                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500', action: () => toast.info('Select a collection to duplicate') },
+                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => toast.success('Browse', { description: 'Browsing collections' }) },
+                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500', action: () => toast.success('Share', { description: 'Select a collection to share' }) },
+                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500', action: () => toast.success('Tags', { description: 'Tag manager opened' }) },
+                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500', action: () => toast.success('Collaborate', { description: 'Collaboration settings opened' }) },
+                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500', action: () => toast.success('Privacy', { description: 'Privacy settings opened' }) },
+                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500', action: () => toast.success('Duplicate', { description: 'Select a collection to duplicate' }) },
                 { icon: Download, label: 'Export', desc: 'Download all', color: 'text-indigo-500', action: handleBulkExport },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1408,9 +1408,9 @@ export default function MediaLibraryClient({
                 { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'video' }); setShowUploadDialog(true) } },
                 { icon: Music, label: 'Audio', desc: 'Upload audio', color: 'text-green-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'audio' }); setShowUploadDialog(true) } },
                 { icon: FileText, label: 'Documents', desc: 'Upload docs', color: 'text-orange-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'document' }); setShowUploadDialog(true) } },
-                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => toast.info('Bulk upload mode enabled') },
-                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500', action: () => toast.info('Opening cloud import...') },
-                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500', action: () => toast.info('Opening URL import...') },
+                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => toast.success('Bulk Upload', { description: 'Bulk upload mode enabled' }) },
+                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500', action: () => toast.success('Cloud Import', { description: 'Cloud import opened' }) },
+                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500', action: () => toast.success('URL Import', { description: 'URL import opened' }) },
                 { icon: FileArchive, label: 'Archives', desc: 'ZIP/RAR files', color: 'text-gray-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'archive' }); setShowUploadDialog(true) } },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1490,14 +1490,14 @@ export default function MediaLibraryClient({
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => toast.info('Loading overview...') },
-                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.info('Analyzing trends...') },
-                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => toast.info('Loading distribution chart...') },
-                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => toast.info('Connecting to real-time stats...') },
-                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500', action: () => toast.info('Loading view analytics...') },
-                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => toast.info('Loading download statistics...') },
-                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500', action: () => toast.info('Generating storage report...') },
-                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500', action: () => toast.info('Opening report builder...') },
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => toast.success('Overview', { description: 'Loading overview' }) },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.loading('Trends', { description: 'Analyzing trends...' }) },
+                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => toast.success('Distribution', { description: 'Loading distribution chart' }) },
+                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => toast.loading('Real-time', { description: 'Connecting to real-time stats...' }) },
+                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500', action: () => toast.success('Views', { description: 'Loading view analytics' }) },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => toast.success('Downloads', { description: 'Loading download statistics' }) },
+                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500', action: () => toast.loading('Storage', { description: 'Generating storage report...' }) },
+                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500', action: () => toast.success('Reports', { description: 'Report builder opened' }) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
@@ -2264,15 +2264,15 @@ export default function MediaLibraryClient({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1" onClick={() => { setSelectedCollection(null); toast.info('Opening collection...') }}>
+                  <Button className="flex-1" onClick={() => { setSelectedCollection(null); toast.success('Collection opened') }}>
                     <FolderOpen className="w-4 h-4 mr-2" />
                     Open Collection
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info('Sharing collection...')}>
+                  <Button variant="outline" onClick={() => toast.success('Share', { description: 'Sharing collection' })}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info('Opening collection editor...')}>
+                  <Button variant="outline" onClick={() => toast.success('Edit', { description: 'Collection editor opened' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

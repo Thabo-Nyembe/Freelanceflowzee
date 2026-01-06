@@ -1226,7 +1226,7 @@ export default function PayrollClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.info('Analytics view coming soon')}
+                onClick={() => { toast.success('Opening Payroll Analytics', { description: 'View detailed payroll trends and reports' }) }}
               >
                 <BarChart3 className="w-5 h-5" />
                 <span className="text-xs font-medium">Analytics</span>

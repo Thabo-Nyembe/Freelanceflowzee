@@ -433,10 +433,10 @@ const mockEscrowActivities = [
 ]
 
 const mockEscrowQuickActions = [
-  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => console.log('New transfer') },
-  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => console.log('View payouts') },
-  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => console.log('View disputes') },
-  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => console.log('View reports') },
+  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => toast.success('New Transfer', { description: 'Opening transfer form...' }) },
+  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => toast.success('Payouts', { description: 'Opening payouts dashboard...' }) },
+  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => toast.success('Disputes', { description: 'Opening dispute center...' }) },
+  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => toast.success('Financial Reports', { description: 'Opening reports viewer...' }) },
 ]
 
 export default function EscrowClient() {

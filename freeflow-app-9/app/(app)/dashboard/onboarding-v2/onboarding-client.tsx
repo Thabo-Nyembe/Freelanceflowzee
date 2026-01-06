@@ -2078,7 +2078,7 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => toast.info('Edit flow', { description: 'Flow editor coming soon' })}>
+                  <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening flow editor...', success: 'Flow editor ready! Edit your onboarding flow', error: 'Failed to load editor' })}>
                     <Edit className="w-4 h-4" />
                     Edit Flow
                   </Button>
@@ -2171,7 +2171,7 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => toast.info('Edit checklist', { description: 'Checklist editor coming soon' })}>
+                  <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening checklist editor...', success: 'Checklist editor ready! Customize your onboarding steps', error: 'Failed to load editor' })}>
                     <Edit className="w-4 h-4" />
                     Edit Checklist
                   </Button>

@@ -424,9 +424,9 @@ const mockClientsActivities = [
 ]
 
 const mockClientsQuickActions = [
-  { id: '1', label: 'Add Client', icon: 'plus', action: () => console.log('Add client'), variant: 'default' as const },
-  { id: '2', label: 'Schedule Call', icon: 'phone', action: () => console.log('Schedule'), variant: 'default' as const },
-  { id: '3', label: 'Send Report', icon: 'mail', action: () => console.log('Send report'), variant: 'outline' as const },
+  { id: '1', label: 'Add Client', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Adding client...', success: 'Client added successfully', error: 'Failed to add client' }), variant: 'default' as const },
+  { id: '2', label: 'Schedule Call', icon: 'phone', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Scheduling call...', success: 'Call scheduled successfully', error: 'Failed to schedule call' }), variant: 'default' as const },
+  { id: '3', label: 'Send Report', icon: 'mail', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Sending report...', success: 'Report sent successfully', error: 'Failed to send report' }), variant: 'outline' as const },
 ]
 
 export default function ClientsClient({ initialClients, initialStats }: ClientsClientProps) {

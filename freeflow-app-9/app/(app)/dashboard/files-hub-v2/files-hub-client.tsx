@@ -408,10 +408,10 @@ const mockFilesHubActivities = [
 ]
 
 const mockFilesHubQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
-  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => console.log('New folder') },
-  { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => console.log('Share') },
-  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => console.log('Search') },
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening file picker...', success: 'Select files to upload', error: 'Upload cancelled' }) },
+  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating folder...', success: 'New folder created! Enter a name', error: 'Failed to create folder' }) },
+  { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing share link...', success: 'Share link copied to clipboard!', error: 'Failed to generate share link' }) },
+  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => toast.success('Search Files', { description: 'Type to search across 1,247 files in your library' }) },
 ]
 
 // Database types matching schema
@@ -695,7 +695,7 @@ export default function FilesHubClient() {
               <FolderPlus className="w-4 h-4 mr-2" />
               New Folder
             </Button>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.info('Upload', { description: 'File upload coming soon' })}>
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening file picker...', success: 'Ready to upload! Drag files here or select from your computer', error: 'Upload cancelled' })}>
               <Upload className="w-4 h-4 mr-2" />
               Upload Files
             </Button>

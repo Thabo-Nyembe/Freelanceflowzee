@@ -403,9 +403,9 @@ const mockWorkflowsActivities = [
 ]
 
 const mockWorkflowsQuickActions = [
-  { id: '1', label: 'Create Workflow', icon: 'plus', action: () => console.log('Create workflow'), variant: 'default' as const },
-  { id: '2', label: 'Run Test', icon: 'play', action: () => console.log('Run test'), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => console.log('View logs'), variant: 'outline' as const },
+  { id: '1', label: 'Create Workflow', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new workflow...', success: 'Workflow created successfully', error: 'Failed to create workflow' }), variant: 'default' as const },
+  { id: '2', label: 'Run Test', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Running workflow test...', success: 'Test completed successfully', error: 'Test failed' }), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.success('Workflow Logs', { description: 'Opening execution logs' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

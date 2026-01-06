@@ -352,10 +352,10 @@ const mockInventoryActivities = [
 ]
 
 const mockInventoryQuickActions = [
-  { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: () => console.log('Stock count') },
-  { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => console.log('Transfer stock') },
-  { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => console.log('New PO') },
-  { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: () => console.log('Print labels') },
+  { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening stock count...', success: 'Scan barcodes or enter quantities manually', error: 'Failed to open' }) },
+  { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening transfer form...', success: 'Select source and destination locations', error: 'Failed to open' }) },
+  { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating purchase order...', success: 'Add items and submit to supplier', error: 'Failed to create' }) },
+  { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating labels...', success: '12 barcode labels ready to print', error: 'Print failed' }) },
 ]
 
 export default function InventoryClient({ initialInventory }: { initialInventory: InventoryItem[] }) {

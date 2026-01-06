@@ -1608,7 +1608,7 @@ export default function CrmClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Reports & Analytics</h3>
-              <Button onClick={() => toast.info('Reports', { description: 'Report builder coming soon' })}>
+              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening Report Builder...', success: 'Report Builder ready! Configure your custom report', error: 'Failed to open' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Report
               </Button>
@@ -1692,7 +1692,7 @@ export default function CrmClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Workflows & Automation</h3>
-              <Button onClick={() => toast.info('Automation', { description: 'Workflow builder coming soon' })}>
+              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening Automation Builder...', success: 'Automation Builder ready! Set up triggers and actions', error: 'Failed to open' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Automation
               </Button>

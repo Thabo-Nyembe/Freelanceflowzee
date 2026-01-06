@@ -483,9 +483,9 @@ const mockPluginsActivities = [
 ]
 
 const mockPluginsQuickActions = [
-  { id: '1', label: 'Install', icon: 'plus', action: () => console.log('Install'), variant: 'default' as const },
-  { id: '2', label: 'Update All', icon: 'refresh-cw', action: () => console.log('Update'), variant: 'default' as const },
-  { id: '3', label: 'Settings', icon: 'settings', action: () => console.log('Settings'), variant: 'outline' as const },
+  { id: '1', label: 'Install', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening plugin marketplace...', success: 'Browse 247 available plugins', error: 'Marketplace unavailable' }), variant: 'default' as const },
+  { id: '2', label: 'Update All', icon: 'refresh-cw', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Updating 5 plugins...', success: 'All plugins updated to latest versions!', error: 'Some updates failed - check logs' }), variant: 'default' as const },
+  { id: '3', label: 'Settings', icon: 'settings', action: () => toast.success('Plugin Settings', { description: 'Configure permissions, auto-update, and security options' }), variant: 'outline' as const },
 ]
 
 export default function PluginsClient() {

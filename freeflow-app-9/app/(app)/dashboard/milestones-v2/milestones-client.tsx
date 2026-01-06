@@ -603,9 +603,9 @@ const mockMilestonesActivities = [
 ]
 
 const mockMilestonesQuickActions = [
-  { id: '1', label: 'New Milestone', icon: 'plus', action: () => console.log('New milestone'), variant: 'default' as const },
-  { id: '2', label: 'View Timeline', icon: 'calendar', action: () => console.log('Timeline'), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Milestone', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening milestone form...', success: 'Define milestone objectives and due date', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'View Timeline', icon: 'calendar', action: () => toast.success('Timeline View', { description: 'Viewing project milestones on Gantt chart' }), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating milestone report...', success: 'Report exported to milestones-2024.pdf', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 // Database milestone type (matches Supabase schema)

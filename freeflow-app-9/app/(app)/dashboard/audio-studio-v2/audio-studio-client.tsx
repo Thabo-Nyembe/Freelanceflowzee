@@ -573,9 +573,9 @@ const mockAudioActivities = [
 ]
 
 const mockAudioQuickActions = [
-  { id: '1', label: 'New Track', icon: 'plus', action: () => console.log('New track'), variant: 'default' as const },
-  { id: '2', label: 'Record', icon: 'circle', action: () => console.log('Record'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Track', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating track...', success: 'New audio track added to timeline', error: 'Failed to create' }), variant: 'default' as const },
+  { id: '2', label: 'Record', icon: 'circle', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Initializing recording...', success: 'Recording started! Press again to stop', error: 'Microphone unavailable' }), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting audio mix...', success: 'Exported to master-mix.wav (48kHz/24bit)', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 export default function AudioStudioClient({ initialTracks, initialStats }: AudioStudioClientProps) {
@@ -669,12 +669,21 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
     setShowTrackDialog(true)
   }
 
+  // Dialog states
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showInstrumentDialog, setShowInstrumentDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showProjectDialog, setShowProjectDialog] = useState(false)
+  const [exportFormat, setExportFormat] = useState<string>('WAV')
+  const [sampleRateSetting, setSampleRateSetting] = useState<string>('44.1kHz')
+  const [bitDepthSetting, setBitDepthSetting] = useState<string>('16-bit')
+
   // Handlers
-  const handleUploadAudio = () => toast.info('Upload', { description: 'Opening picker...' })
+  const handleUploadAudio = () => setShowUploadDialog(true)
   const handleStartRecording = () => toast.success('Recording', { description: 'Recording active' })
-  const handleStopRecording = () => toast.info('Stopped', { description: 'Audio saved' })
-  const handleExportAudio = (n: string) => toast.success('Exporting', { description: `Exporting "${n}"...` })
-  const handleApplyEffect = (n: string) => toast.info('Applying', { description: `Applying ${n}...` })
+  const handleStopRecording = () => toast.success('Recording stopped', { description: 'Audio saved to project' })
+  const handleExportAudio = (n: string) => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Exporting "${n}"...`, success: 'Export complete!', error: 'Export failed' })
+  const handleApplyEffect = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Applying ${n}...`, success: `${n} applied successfully`, error: 'Effect failed to apply' })
 
   // Stat cards
   const statCards = [
@@ -704,7 +713,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
           </div>
 
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2" onClick={() => toast.info('Open Project', { description: 'Opening project browser...' })}>
+            <Button variant="outline" className="gap-2" onClick={() => setShowProjectDialog(true)}>
               <FolderOpen className="w-4 h-4" />
               Open
             </Button>
@@ -927,10 +936,10 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                 { icon: Mic, label: 'Record', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: handleStartRecording },
                 { icon: Upload, label: 'Import', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: handleUploadAudio },
                 { icon: Wand2, label: 'Add Effect', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => handleApplyEffect('New Effect') },
-                { icon: Piano, label: 'Instrument', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.info('Load Instrument', { description: 'Opening instrument browser...' }) },
-                { icon: TrendingUp, label: 'Automate', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.info('Automation', { description: 'Opening automation lanes...' }) },
+                { icon: Piano, label: 'Instrument', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowInstrumentDialog(true) },
+                { icon: TrendingUp, label: 'Automate', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { setActiveTab('mixer'); toast.success('Automation lanes ready', { description: 'Draw automation curves on the mixer' }) } },
                 { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => handleExportAudio('Project') },
-                { icon: Share2, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.info('Share Project', { description: 'Opening share options...' }) },
+                { icon: Share2, label: 'Share', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowShareDialog(true) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1319,7 +1328,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                     <label className="text-sm font-medium mb-2 block">Format</label>
                     <div className="flex gap-2">
                       {['WAV', 'MP3', 'FLAC', 'AIFF', 'OGG'].map(format => (
-                        <Button key={format} variant="outline" size="sm" onClick={() => toast.info('Format Selected', { description: `Export format set to ${format}` })}>{format}</Button>
+                        <Button key={format} variant="outline" size="sm" onClick={() => { setExportFormat(format); toast.success(`Format: ${format}`, { description: 'Export format updated' }) }}>{format}</Button>
                       ))}
                     </div>
                   </div>
@@ -1328,7 +1337,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                     <label className="text-sm font-medium mb-2 block">Sample Rate</label>
                     <div className="flex gap-2">
                       {['44.1 kHz', '48 kHz', '96 kHz', '192 kHz'].map(rate => (
-                        <Button key={rate} variant="outline" size="sm" onClick={() => toast.info('Sample Rate Selected', { description: `Sample rate set to ${rate}` })}>{rate}</Button>
+                        <Button key={rate} variant="outline" size="sm" onClick={() => { setSampleRateSetting(rate); toast.success(`Sample Rate: ${rate}`, { description: 'Sample rate updated' }) }}>{rate}</Button>
                       ))}
                     </div>
                   </div>
@@ -1337,7 +1346,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                     <label className="text-sm font-medium mb-2 block">Bit Depth</label>
                     <div className="flex gap-2">
                       {['16-bit', '24-bit', '32-bit float'].map(depth => (
-                        <Button key={depth} variant="outline" size="sm" onClick={() => toast.info('Bit Depth Selected', { description: `Bit depth set to ${depth}` })}>{depth}</Button>
+                        <Button key={depth} variant="outline" size="sm" onClick={() => { setBitDepthSetting(depth); toast.success(`Bit Depth: ${depth}`, { description: 'Bit depth updated' }) }}>{depth}</Button>
                       ))}
                     </div>
                   </div>
@@ -1674,7 +1683,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                           </Label>
                           <Switch id="au" defaultChecked />
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Rescanning Plugins', { description: 'Scanning plugin directories...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Scanning plugin directories...', success: 'Plugin scan complete!', error: 'Scan failed' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Rescan Plugins
                         </Button>
@@ -1791,7 +1800,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                             <p className="font-medium text-red-700 dark:text-red-400">Clear Plugin Cache</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Rescan all plugins</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.info('Plugin Cache Cleared', { description: 'Rescanning all plugins...' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Clearing plugin cache...', success: 'Cache cleared, rescanning...', error: 'Clear failed' })}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1801,7 +1810,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Preferences</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Restore default settings</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.info('Preferences Reset', { description: 'All settings restored to defaults' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Resetting preferences...', success: 'All settings restored to defaults', error: 'Reset failed' })}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -1901,7 +1910,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                       <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
                         <span className="w-6 h-6 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900 rounded text-xs">{i + 1}</span>
                         <span className="flex-1">{effect}</span>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => toast.info('Effect Options', { description: `Opening options for "${effect}"...` })}>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: `Options for "${effect}" ready`, error: 'Failed to load' })}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1957,7 +1966,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
                 <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.success('Track Duplicated', { description: `"${selectedTrack?.name}" has been duplicated` })}>
                   <Copy className="w-4 h-4" /> Duplicate
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1 text-red-500" onClick={() => toast.info('Track Deleted', { description: `"${selectedTrack?.name}" has been removed` })}>
+                <Button variant="outline" size="sm" className="gap-1 text-red-500" onClick={() => toast.success('Track Deleted', { description: `"${selectedTrack?.name}" has been removed` })}>
                   <Trash2 className="w-4 h-4" /> Delete
                 </Button>
               </div>

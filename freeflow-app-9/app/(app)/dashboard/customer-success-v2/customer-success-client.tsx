@@ -437,9 +437,9 @@ const mockCSActivities = [
 ]
 
 const mockCSQuickActions = [
-  { id: '1', label: 'New Playbook', icon: 'plus', action: () => console.log('New playbook'), variant: 'default' as const },
-  { id: '2', label: 'Health Report', icon: 'activity', action: () => console.log('Health'), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Playbook', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating playbook...', success: 'Playbook created! Add triggers and actions', error: 'Failed to create playbook' }), variant: 'default' as const },
+  { id: '2', label: 'Health Report', icon: 'activity', action: () => toast.success('Customer Health Report', { description: '87% healthy • 8% at-risk • 5% churning' }), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting customer data...', success: 'Data exported to customer-success-report.csv', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 export default function CustomerSuccessClient() {

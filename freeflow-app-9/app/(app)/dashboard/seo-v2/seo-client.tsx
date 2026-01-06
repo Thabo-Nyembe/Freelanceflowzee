@@ -419,9 +419,9 @@ const mockSEOActivities = [
 ]
 
 const mockSEOQuickActions = [
-  { id: '1', label: 'Add Keyword', icon: 'plus', action: () => console.log('Add keyword'), variant: 'default' as const },
-  { id: '2', label: 'Site Audit', icon: 'search', action: () => console.log('Site audit'), variant: 'default' as const },
-  { id: '3', label: 'Competitor Analysis', icon: 'users', action: () => console.log('Competitor'), variant: 'outline' as const },
+  { id: '1', label: 'Add Keyword', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening keyword form...', success: 'Enter keywords to track rankings', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Site Audit', icon: 'search', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Running site audit...', success: '85/100 SEO score - 12 issues found', error: 'Audit failed' }), variant: 'default' as const },
+  { id: '3', label: 'Competitor Analysis', icon: 'users', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Analyzing competitors...', success: 'Competitor analysis complete - view gaps report', error: 'Analysis failed' }), variant: 'outline' as const },
 ]
 
 export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClientProps) {

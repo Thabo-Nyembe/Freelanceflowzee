@@ -213,9 +213,9 @@ const mockExpensesActivities = [
 ]
 
 const mockExpensesQuickActions = [
-  { id: '1', label: 'New Expense', icon: 'plus', action: () => console.log('New expense'), variant: 'default' as const },
-  { id: '2', label: 'Scan Receipt', icon: 'camera', action: () => console.log('Scan'), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'file-text', action: () => console.log('Report'), variant: 'outline' as const },
+  { id: '1', label: 'New Expense', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening expense form...', success: 'Enter expense details and attach receipt', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Scan Receipt', icon: 'camera', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening camera...', success: 'Take a photo of your receipt for auto-fill', error: 'Camera unavailable' }), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'file-text', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating expense report...', success: 'Q4 Report: $12,450 across 45 expenses', error: 'Report failed' }), variant: 'outline' as const },
 ]
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {

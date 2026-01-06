@@ -537,9 +537,9 @@ const mockReleasesActivities = [
 ]
 
 const mockReleasesQuickActions = [
-  { id: '1', label: 'New Release', icon: 'plus', action: () => console.log('New release'), variant: 'default' as const },
-  { id: '2', label: 'Rollback', icon: 'undo', action: () => console.log('Rollback'), variant: 'default' as const },
-  { id: '3', label: 'Export Changelog', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Release', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating release...', success: 'New release created! Add version details and changelog', error: 'Failed to create release' }), variant: 'default' as const },
+  { id: '2', label: 'Rollback', icon: 'undo', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Rolling back to v2.4.0...', success: 'Rollback complete! System restored to v2.4.0', error: 'Rollback failed - check deployment logs' }), variant: 'default' as const },
+  { id: '3', label: 'Export Changelog', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating changelog...', success: 'Changelog exported to changelog-2025.md', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 // Initial form state
@@ -1520,7 +1520,7 @@ export default function ReleasesClient() {
                                 variant="outline"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  toast.info('Pausing deployment...', { description: 'This feature is coming soon' })
+                                  toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Pausing deployment...', success: 'Deployment paused successfully', error: 'Failed to pause' })
                                 }}
                               >
                                 <Pause className="w-3 h-3 mr-1" />

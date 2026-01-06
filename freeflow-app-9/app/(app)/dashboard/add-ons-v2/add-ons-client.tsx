@@ -448,9 +448,9 @@ const mockAddOnsActivities = [
 ]
 
 const mockAddOnsQuickActions = [
-  { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => console.log('Browse'), variant: 'default' as const },
-  { id: '2', label: 'Update All', icon: 'refresh', action: () => console.log('Update'), variant: 'default' as const },
-  { id: '3', label: 'Settings', icon: 'settings', action: () => console.log('Settings'), variant: 'outline' as const },
+  { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => toast.success('Add-On Store', { description: 'Opening add-on marketplace...' }), variant: 'default' as const },
+  { id: '2', label: 'Update All', icon: 'refresh', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Updating all add-ons...', success: 'All add-ons updated successfully!', error: 'Update failed' }), variant: 'default' as const },
+  { id: '3', label: 'Settings', icon: 'settings', action: () => toast.success('Add-On Settings', { description: 'Opening settings panel...' }), variant: 'outline' as const },
 ]
 
 export default function AddOnsClient() {

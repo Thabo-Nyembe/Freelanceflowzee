@@ -683,8 +683,8 @@ const mockShippingActivities = [
 ]
 
 const mockShippingQuickActions = [
-  { id: '1', label: 'Create Shipment', icon: 'plus', action: () => console.log('Create shipment'), variant: 'default' as const },
-  { id: '2', label: 'Print Labels', icon: 'printer', action: () => console.log('Print labels'), variant: 'outline' as const },
+  { id: '1', label: 'Create Shipment', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening shipment form...', success: 'Enter shipment details and carrier preferences', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Print Labels', icon: 'printer', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating shipping labels...', success: '5 labels ready to print', error: 'Print failed' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

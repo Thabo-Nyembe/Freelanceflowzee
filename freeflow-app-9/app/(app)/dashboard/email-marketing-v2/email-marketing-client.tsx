@@ -727,9 +727,9 @@ const mockEmailActivities = [
 ]
 
 const mockEmailQuickActions = [
-  { id: '1', label: 'New Campaign', icon: 'plus', action: () => console.log('New campaign'), variant: 'default' as const },
-  { id: '2', label: 'View Analytics', icon: 'chart', action: () => console.log('View analytics'), variant: 'default' as const },
-  { id: '3', label: 'Manage Lists', icon: 'users', action: () => console.log('Manage lists'), variant: 'outline' as const },
+  { id: '1', label: 'New Campaign', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating campaign...', success: 'Campaign created! Design your email', error: 'Failed to create campaign' }), variant: 'default' as const },
+  { id: '2', label: 'View Analytics', icon: 'chart', action: () => toast.success('Email Analytics', { description: '45% open rate • 12% click rate • 2,340 delivered' }), variant: 'default' as const },
+  { id: '3', label: 'Manage Lists', icon: 'users', action: () => toast.success('Subscriber Lists', { description: '5 lists • 12,450 total subscribers • 89% deliverability' }), variant: 'outline' as const },
 ]
 
 export default function EmailMarketingClient({

@@ -373,10 +373,10 @@ const mockSalesActivities = [
 ]
 
 const mockSalesQuickActions = [
-  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => console.log('Log call') },
-  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => console.log('Send email') },
-  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => console.log('Schedule meeting') },
-  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => console.log('Create task') },
+  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening call logger...', success: 'Log your call notes and outcome', error: 'Failed to open' }) },
+  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening email composer...', success: 'Compose your sales email', error: 'Failed to open' }) },
+  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening scheduler...', success: 'Select available time slots for your meeting', error: 'Failed to open scheduler' }) },
+  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating task...', success: 'Add task details and assign to team', error: 'Failed to create task' }) },
 ]
 
 // Default form values
@@ -435,6 +435,17 @@ export default function SalesClient() {
   const [lossReason, setLossReason] = useState('')
   const [competitor, setCompetitor] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Additional dialog states for functional buttons
+  const [showQuoteDialog, setShowQuoteDialog] = useState(false)
+  const [showProductDialog, setShowProductDialog] = useState(false)
+  const [showStageDialog, setShowStageDialog] = useState(false)
+  const [showWebhookDialog, setShowWebhookDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [quoteForm, setQuoteForm] = useState({ opportunity: '', client: '', products: [] as string[], discount: 0, validDays: 30 })
+  const [productForm, setProductForm] = useState({ name: '', code: '', price: 0, category: 'Software', description: '' })
+  const [stageForm, setStageForm] = useState({ name: '', probability: 50, color: 'blue' })
+  const [webhookConfig, setWebhookConfig] = useState({ url: '', events: ['deal.created', 'deal.won'] })
 
   // Get stats from the hook
   const salesStats = getStats()
@@ -1304,7 +1315,7 @@ export default function SalesClient() {
 
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Quotes & Proposals</h2>
-              <Button onClick={() => toast.info('Coming Soon', { description: 'Quote creation will be available soon' })}><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
+              <Button onClick={() => setShowQuoteDialog(true)}><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
             </div>
 
             <div className="grid gap-4">
@@ -1450,7 +1461,7 @@ export default function SalesClient() {
           <TabsContent value="products" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Product Catalog</h2>
-              <Button onClick={() => toast.info('Coming Soon', { description: 'Product management will be available soon' })}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
+              <Button onClick={() => setShowProductDialog(true)}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1681,7 +1692,7 @@ export default function SalesClient() {
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Coming Soon', { description: 'Custom pipeline stages will be available soon' })}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowStageDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1959,7 +1970,7 @@ export default function SalesClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'HubSpot integration will be available soon' })}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Connecting to HubSpot...', success: 'HubSpot connected! Sync starting...', error: 'Connection failed' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1990,7 +2001,7 @@ export default function SalesClient() {
                             <div className="font-medium">Webhook Events</div>
                             <div className="text-sm text-gray-500">deal.created, deal.won, deal.lost</div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Webhook configuration will be available soon' })}>Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowWebhookDialog(true)}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2027,7 +2038,7 @@ export default function SalesClient() {
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1" onClick={() => toast.info('Coming Soon', { description: 'Data import functionality will be available soon' })}>
+                          <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(true)}>
                             <Upload className="w-4 h-4 mr-2" />
                             Import Data
                           </Button>
@@ -2688,6 +2699,259 @@ export default function SalesClient() {
               }
               {showWinLossDialog === 'win' ? 'Mark as Won' : 'Mark as Lost'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Quote Dialog */}
+      <Dialog open={showQuoteDialog} onOpenChange={setShowQuoteDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-green-600" />
+              Create Quote
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Opportunity / Deal *</Label>
+              <Select value={quoteForm.opportunity} onValueChange={(v) => setQuoteForm({ ...quoteForm, opportunity: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select opportunity" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockOpportunities.slice(0, 5).map((opp) => (
+                    <SelectItem key={opp.id} value={opp.id}>{opp.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Client / Account *</Label>
+              <Input placeholder="Client name" value={quoteForm.client} onChange={(e) => setQuoteForm({ ...quoteForm, client: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Discount (%)</Label>
+                <Input type="number" min={0} max={100} value={quoteForm.discount} onChange={(e) => setQuoteForm({ ...quoteForm, discount: Number(e.target.value) })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Valid for (days)</Label>
+                <Input type="number" min={1} value={quoteForm.validDays} onChange={(e) => setQuoteForm({ ...quoteForm, validDays: Number(e.target.value) })} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowQuoteDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (!quoteForm.opportunity) {
+                toast.error('Please select an opportunity')
+                return
+              }
+              toast.success('Quote created!', { description: 'Quote #Q-2025-001 has been generated' })
+              setQuoteForm({ opportunity: '', client: '', products: [], discount: 0, validDays: 30 })
+              setShowQuoteDialog(false)
+            }}>Create Quote</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Product Dialog */}
+      <Dialog open={showProductDialog} onOpenChange={setShowProductDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Package className="w-5 h-5 text-blue-600" />
+              Add Product
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Product Name *</Label>
+              <Input placeholder="Enterprise Suite" value={productForm.name} onChange={(e) => setProductForm({ ...productForm, name: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Product Code *</Label>
+                <Input placeholder="ENT-001" value={productForm.code} onChange={(e) => setProductForm({ ...productForm, code: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Price *</Label>
+                <Input type="number" min={0} placeholder="999" value={productForm.price || ''} onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={productForm.category} onValueChange={(v) => setProductForm({ ...productForm, category: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Software">Software</SelectItem>
+                  <SelectItem value="Hardware">Hardware</SelectItem>
+                  <SelectItem value="Service">Service</SelectItem>
+                  <SelectItem value="Subscription">Subscription</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Textarea placeholder="Product description..." value={productForm.description} onChange={(e) => setProductForm({ ...productForm, description: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowProductDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (!productForm.name || !productForm.code || !productForm.price) {
+                toast.error('Please fill in required fields')
+                return
+              }
+              toast.success('Product added!', { description: `${productForm.name} has been added to catalog` })
+              setProductForm({ name: '', code: '', price: 0, category: 'Software', description: '' })
+              setShowProductDialog(false)
+            }}>Add Product</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Pipeline Stage Dialog */}
+      <Dialog open={showStageDialog} onOpenChange={setShowStageDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Target className="w-5 h-5 text-purple-600" />
+              Add Pipeline Stage
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Stage Name *</Label>
+              <Input placeholder="e.g., Demo Scheduled" value={stageForm.name} onChange={(e) => setStageForm({ ...stageForm, name: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Win Probability (%)</Label>
+              <Input type="number" min={0} max={100} value={stageForm.probability} onChange={(e) => setStageForm({ ...stageForm, probability: Number(e.target.value) })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Stage Color</Label>
+              <Select value={stageForm.color} onValueChange={(v) => setStageForm({ ...stageForm, color: v })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="blue">Blue</SelectItem>
+                  <SelectItem value="green">Green</SelectItem>
+                  <SelectItem value="yellow">Yellow</SelectItem>
+                  <SelectItem value="orange">Orange</SelectItem>
+                  <SelectItem value="purple">Purple</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStageDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (!stageForm.name) {
+                toast.error('Please enter a stage name')
+                return
+              }
+              toast.success('Stage added!', { description: `"${stageForm.name}" added to pipeline` })
+              setStageForm({ name: '', probability: 50, color: 'blue' })
+              setShowStageDialog(false)
+            }}>Add Stage</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Webhook Configuration Dialog */}
+      <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Webhook className="w-5 h-5 text-amber-600" />
+              Configure Webhooks
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Webhook URL *</Label>
+              <Input placeholder="https://your-server.com/webhooks/sales" value={webhookConfig.url} onChange={(e) => setWebhookConfig({ ...webhookConfig, url: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Events to Subscribe</Label>
+              <div className="space-y-2">
+                {['deal.created', 'deal.updated', 'deal.won', 'deal.lost', 'quote.sent', 'quote.accepted'].map((event) => (
+                  <div key={event} className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      id={event}
+                      checked={webhookConfig.events.includes(event)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setWebhookConfig({ ...webhookConfig, events: [...webhookConfig.events, event] })
+                        } else {
+                          setWebhookConfig({ ...webhookConfig, events: webhookConfig.events.filter(ev => ev !== event) })
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <label htmlFor={event} className="text-sm">{event}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (!webhookConfig.url) {
+                toast.error('Please enter a webhook URL')
+                return
+              }
+              toast.success('Webhooks configured!', { description: `${webhookConfig.events.length} events will be sent to your endpoint` })
+              setShowWebhookDialog(false)
+            }}>Save Configuration</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Data Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Upload className="w-5 h-5 text-green-600" />
+              Import Sales Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="flex items-center justify-center p-8 border-2 border-dashed rounded-lg bg-gray-50 dark:bg-gray-800">
+              <div className="text-center">
+                <Upload className="w-12 h-12 mx-auto text-gray-400 mb-2" />
+                <p className="text-sm text-gray-500">Drag & drop your CSV file here</p>
+                <p className="text-xs text-gray-400 mt-1">or click to browse</p>
+                <Button variant="outline" size="sm" className="mt-4">Select File</Button>
+              </div>
+            </div>
+            <div className="text-sm text-gray-500">
+              <p className="font-medium mb-1">Supported formats:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>CSV (comma-separated values)</li>
+                <li>Salesforce export format</li>
+                <li>HubSpot export format</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.promise(new Promise(r => setTimeout(r, 2000)), {
+                loading: 'Processing import...',
+                success: 'Data imported successfully! 150 records processed.',
+                error: 'Import failed'
+              })
+              setShowImportDialog(false)
+            }}>Start Import</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

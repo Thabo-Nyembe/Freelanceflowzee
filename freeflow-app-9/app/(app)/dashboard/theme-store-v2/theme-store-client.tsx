@@ -236,9 +236,9 @@ const mockThemeStoreActivities = [
 ]
 
 const mockThemeStoreQuickActions = [
-  { id: '1', label: 'Upload', icon: 'upload', action: () => console.log('Upload Theme'), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => console.log('Preview'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'barChart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'Upload', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening upload wizard...', success: 'Upload your theme package (.zip)', error: 'Upload cancelled' }), variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.success('Theme Preview', { description: 'Live preview mode active • See changes in real-time' }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.success('Store Analytics', { description: '1,234 downloads • $4,500 revenue • 4.8★ avg rating' }), variant: 'outline' as const },
 ]
 
 export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeStoreClientProps) {

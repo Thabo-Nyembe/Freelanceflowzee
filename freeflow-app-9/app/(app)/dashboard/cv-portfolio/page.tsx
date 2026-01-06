@@ -1961,12 +1961,22 @@ export default function CVPortfolioPage() {
 
   // Toggle Visibility
   const handleToggleVisibility = (type: 'projects' | 'skills' | 'experience' | 'education') => {
+    const sectionIndex = cvSections.findIndex(s => s.id === type)
+    if (sectionIndex !== -1) {
+      const updatedSections = [...cvSections]
+      updatedSections[sectionIndex] = {
+        ...updatedSections[sectionIndex],
+        visible: !updatedSections[sectionIndex].visible
+      }
+      setCvSections(updatedSections)
+    }
+
     logger.info('Toggling section visibility', {
       section: type
     })
 
-    toast.info('Visibility Updated', {
-      description: `${type} section visibility toggled`
+    toast.success('Visibility Updated', {
+      description: `${type} section ${sectionIndex !== -1 && !cvSections[sectionIndex].visible ? 'shown' : 'hidden'}`
     })
   }
 
@@ -1976,9 +1986,14 @@ export default function CVPortfolioPage() {
       recipient: profileData.email
     })
 
-    toast.info('Sending Test Email...', {
-      description: `Test email will be sent to ${profileData.email}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: `Sending test email to ${profileData.email}...`,
+        success: 'Test email sent! Check your inbox',
+        error: 'Failed to send test email'
+      }
+    )
   }
 
   // ==================== OTHER HANDLERS ====================
@@ -1988,8 +2003,10 @@ export default function CVPortfolioPage() {
       profileName: profileData.name
     })
 
-    toast.info('Edit Profile', {
-      description: 'Update personal information and contact details'
+    setActiveTab('overview')
+    setShowUpdateBioDialog(true)
+    toast.success('Profile Editor', {
+      description: 'Update your professional summary below'
     })
   }
 
@@ -2052,11 +2069,14 @@ export default function CVPortfolioPage() {
       visibleSections: cvSections.filter(s => s.visible).length
     })
 
-    toast.info('Print CV', {
+    toast.success('Print CV', {
       description: 'Opening print dialog...'
     })
 
-    // In production: window.print()
+    // Trigger print dialog
+    setTimeout(() => {
+      window.print()
+    }, 500)
   }
 
   // Group skills by category

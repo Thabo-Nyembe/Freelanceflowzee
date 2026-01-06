@@ -335,9 +335,9 @@ const mockCapacityActivities = [
 ]
 
 const mockCapacityQuickActions = [
-  { id: '1', label: 'Allocate', icon: 'plus', action: () => console.log('Allocate'), variant: 'default' as const },
-  { id: '2', label: 'Balance', icon: 'shuffle', action: () => console.log('Balance'), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'bar-chart', action: () => console.log('Report'), variant: 'outline' as const },
+  { id: '1', label: 'Allocate', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening allocation form...', success: 'Assign resources to projects', error: 'Failed to open form' }), variant: 'default' as const },
+  { id: '2', label: 'Balance', icon: 'shuffle', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Auto-balancing workloads...', success: 'Workloads balanced! 3 reassignments made', error: 'Balancing failed' }), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'bar-chart', action: () => toast.success('Capacity Report', { description: '78% utilized • 12 team members • 5 projects active' }), variant: 'outline' as const },
 ]
 
 export default function CapacityClient({ initialCapacity }: { initialCapacity: Capacity[] }) {

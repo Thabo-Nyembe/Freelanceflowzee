@@ -354,10 +354,10 @@ const mockDependenciesActivities = [
 ]
 
 const mockDependenciesQuickActions = [
-  { id: '1', label: 'Run Scan', icon: 'Shield', shortcut: 'S', action: () => console.log('Run scan') },
-  { id: '2', label: 'Update All', icon: 'RefreshCw', shortcut: 'U', action: () => console.log('Update all') },
-  { id: '3', label: 'Lock File', icon: 'Lock', shortcut: 'L', action: () => console.log('Lock file') },
-  { id: '4', label: 'Report', icon: 'FileText', shortcut: 'R', action: () => console.log('Report') },
+  { id: '1', label: 'Run Scan', icon: 'Shield', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Scanning dependencies for vulnerabilities...', success: 'Scan complete! 3 vulnerabilities found', error: 'Scan failed' }) },
+  { id: '2', label: 'Update All', icon: 'RefreshCw', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Updating 12 packages...', success: 'All dependencies updated to latest versions!', error: 'Update failed - check for conflicts' }) },
+  { id: '3', label: 'Lock File', icon: 'Lock', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating lockfile...', success: 'package-lock.json updated', error: 'Failed to generate lockfile' }) },
+  { id: '4', label: 'Report', icon: 'FileText', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating dependency report...', success: 'Report exported to dependencies-report.pdf', error: 'Report generation failed' }) },
 ]
 
 export default function DependenciesClient({ initialDependencies }: { initialDependencies: Dependency[] }) {
@@ -529,7 +529,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   }
 
   const handleUpdateDependency = async (depId: string, depName: string, newVersion: string) => {
-    toast.info('Updating dependency', {
+    toast.loading('Updating dependency', {
       description: `Updating "${depName}" to ${newVersion}...`
     })
 
@@ -565,7 +565,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
 
   const handleScanVulnerabilities = async () => {
     setIsScanning(true)
-    toast.info('Scanning dependencies', {
+    toast.loading('Scanning dependencies', {
       description: `Running ${scanType} security vulnerability scan...`
     })
 
@@ -616,7 +616,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       return
     }
 
-    toast.info('Fixing vulnerability', {
+    toast.loading('Fixing vulnerability', {
       description: `Updating ${vulnPackage} to ${patchedVersion}...`
     })
 
@@ -716,7 +716,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   }
 
   const handleExportDependencies = async () => {
-    toast.info('Exporting dependencies', {
+    toast.loading('Exporting dependencies', {
       description: 'Generating dependency report...'
     })
 
@@ -2233,7 +2233,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             <AIInsightsPanel
               insights={mockDependenciesAIInsights}
               title="Dependencies Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.success(insight.title, { description: insight.description || 'Security insight applied' })}
             />
           </div>
           <div className="space-y-6">

@@ -507,9 +507,9 @@ const mockSecurityActivities = [
 ]
 
 const mockSecurityQuickActions = [
-  { id: '1', label: 'Add Password', icon: 'plus', action: () => console.log('Add password'), variant: 'default' as const },
-  { id: '2', label: 'Security Audit', icon: 'shield', action: () => console.log('Audit'), variant: 'default' as const },
-  { id: '3', label: 'Export Vault', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'Add Password', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Adding password...', success: 'Password added to vault', error: 'Failed to add password' }), variant: 'default' as const },
+  { id: '2', label: 'Security Audit', icon: 'shield', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running security audit...', success: 'Security audit completed', error: 'Audit failed' }), variant: 'default' as const },
+  { id: '3', label: 'Export Vault', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting vault...', success: 'Vault exported securely', error: 'Failed to export vault' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

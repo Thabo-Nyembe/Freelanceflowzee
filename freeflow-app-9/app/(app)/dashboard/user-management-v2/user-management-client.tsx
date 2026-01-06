@@ -103,10 +103,10 @@ const mockUserMgmtActivities = [
 ]
 
 const mockUserMgmtQuickActions = [
-  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => console.log('Add user') },
-  { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => console.log('Bulk import') },
-  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => console.log('Audit log') },
-  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => console.log('Roles') },
+  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => toast.success('Add User', { description: 'Opening user creation form...' }) },
+  { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing bulk import...', success: 'Import wizard ready!', error: 'Import preparation failed' }) },
+  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => toast.success('Audit Log', { description: 'Opening audit log viewer...' }) },
+  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => toast.success('Role Management', { description: 'Opening roles configuration...' }) },
 ]
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {

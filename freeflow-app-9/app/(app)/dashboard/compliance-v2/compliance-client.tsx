@@ -440,9 +440,9 @@ const mockComplianceActivities = [
 ]
 
 const mockComplianceQuickActions = [
-  { id: '1', label: 'New Control', icon: 'plus', action: () => console.log('New control'), variant: 'default' as const },
-  { id: '2', label: 'Assess', icon: 'check-circle', action: () => console.log('Assess'), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'file-text', action: () => console.log('Report'), variant: 'outline' as const },
+  { id: '1', label: 'New Control', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating compliance control...', success: 'New control created! Configure requirements and evidence', error: 'Failed to create control' }), variant: 'default' as const },
+  { id: '2', label: 'Assess', icon: 'check-circle', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running compliance assessment...', success: 'Assessment complete! 94% compliant • 3 controls need attention', error: 'Assessment failed' }), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'file-text', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating compliance report...', success: 'Compliance report ready for download', error: 'Report generation failed' }), variant: 'outline' as const },
 ]
 
 // Aggregate all evidence from controls
@@ -499,11 +499,23 @@ export default function ComplianceClient() {
     activeAudits: mockAudits.filter(a => a.status === 'in_progress').length
   }), [])
 
+  // Dialog states
+  const [showControlDialog, setShowControlDialog] = useState(false)
+  const [showRiskDialog, setShowRiskDialog] = useState(false)
+  const [showPolicyDialog, setShowPolicyDialog] = useState(false)
+  const [showEvidenceDialog, setShowEvidenceDialog] = useState(false)
+  const [showFrameworkDialog, setShowFrameworkDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showAuditViewDialog, setShowAuditViewDialog] = useState(false)
+  const [selectedFramework, setSelectedFramework] = useState<string | null>(null)
+  const [selectedControl, setSelectedControl] = useState<string | null>(null)
+  const [selectedPolicy, setSelectedPolicy] = useState<string | null>(null)
+
   // Handlers
-  const handleRunAudit = () => toast.info('Running', { description: 'Audit started...' })
-  const handleGenerateReport = () => toast.success('Generated', { description: 'Report ready' })
+  const handleRunAudit = () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running compliance audit...', success: 'Audit completed successfully!', error: 'Audit failed' })
+  const handleGenerateReport = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating report...', success: 'Report generated and ready for download', error: 'Failed to generate report' })
   const handleResolveIssue = (id: string) => toast.success('Resolved', { description: `Issue #${id} resolved` })
-  const handleExport = () => toast.success('Exporting', { description: 'Data downloading...' })
+  const handleExport = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting data...', success: 'Export ready for download', error: 'Export failed' })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
@@ -667,7 +679,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Audit' ? handleRunAudit() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Audit' ? handleRunAudit() : action.label === 'Reports' ? handleGenerateReport() : toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `${action.label}...`, success: `${action.label} completed`, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -730,7 +742,7 @@ export default function ComplianceClient() {
                     </div>
                   </div>
 
-                  <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Viewing Controls', { description: `Loading ${framework.name} controls...` })}>
+                  <Button variant="outline" className="w-full mt-4" onClick={() => { setSelectedFramework(framework.id); setActiveTab('controls'); toast.success(`Viewing ${framework.name} controls`) }}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Controls
                   </Button>
@@ -781,7 +793,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `${action.label}...`, success: `${action.label} completed`, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -795,11 +807,11 @@ export default function ComplianceClient() {
                 <Input placeholder="Search controls..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.info('Filter', { description: 'Opening filter options...' })}>
+                <Button variant="outline" size="sm" onClick={() => setShowFilterDialog(true)}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button size="sm" onClick={() => toast.info('Add Control', { description: 'Opening new control form...' })}>
+                <Button size="sm" onClick={() => setShowControlDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Control
                 </Button>
@@ -851,10 +863,10 @@ export default function ComplianceClient() {
                         <span className="text-sm">{control.owner.split(' ')[0]}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.info('Upload Evidence', { description: `Uploading evidence for ${control.controlId}...` }); }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); { setSelectedControl(control.controlId); setShowEvidenceDialog(true) }; }}>
                           <Upload className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.info('View Control', { description: `Viewing ${control.name}...` }); }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading control details...', success: `Viewing ${control.name}`, error: 'Failed to load' }); }}>
                           <Eye className="w-4 h-4" />
                         </Button>
                       </div>
@@ -907,7 +919,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `${action.label}...`, success: `${action.label} completed`, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -917,7 +929,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Risk Register</h2>
-              <Button onClick={() => toast.info('Add Risk', { description: 'Opening new risk form...' })}>
+              <Button onClick={() => setShowRiskDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Risk
               </Button>
@@ -1021,7 +1033,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : action.label === 'New Audit' ? handleRunAudit() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : action.label === 'New Audit' ? handleRunAudit() : toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `${action.label}...`, success: `${action.label} completed`, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1090,7 +1102,7 @@ export default function ComplianceClient() {
                   </div>
 
                   <div className="flex items-center gap-2 pt-4 border-t">
-                    <Button variant="outline" size="sm" onClick={() => toast.info('View Audit', { description: `Viewing ${audit.name}...` })}>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading audit details...', success: `Viewing ${audit.name}`, error: 'Failed to load' })}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
@@ -1146,7 +1158,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => action.label === 'Export' ? handleExport() : toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `${action.label}...`, success: `${action.label} completed`, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1156,7 +1168,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Policy Management</h2>
-              <Button onClick={() => toast.info('Create Policy', { description: 'Opening new policy form...' })}>
+              <Button onClick={() => setShowPolicyDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Policy
               </Button>
@@ -1197,10 +1209,10 @@ export default function ComplianceClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => toast.info('View Policy', { description: `Viewing ${policy.name}...` })}>
+                        <Button variant="ghost" size="icon" onClick={() => { setSelectedPolicy(policy.id); toast.success(`Viewing ${policy.name}`) }}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.info('Policy Settings', { description: `Opening settings for ${policy.name}...` })}>
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: `Policy settings for ${policy.name}`, error: 'Failed to load' })}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1235,7 +1247,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Evidence Repository</h2>
-              <Button onClick={() => toast.info('Upload Evidence', { description: 'Opening file upload dialog...' })}>
+              <Button onClick={() => setShowEvidenceDialog(true)}>
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Evidence
               </Button>
@@ -1364,7 +1376,7 @@ export default function ComplianceClient() {
                             <Label className="text-gray-900 dark:text-white font-medium">Organization Name</Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">FreeFlow Inc.</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Edit', { description: 'Opening edit form...' })}>Edit</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Edit mode enabled', error: 'Failed to open' })}>Edit</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1471,7 +1483,7 @@ export default function ComplianceClient() {
                             <Switch defaultChecked={framework.enabled} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Framework', { description: 'Opening framework form...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowFrameworkDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Framework
                         </Button>
@@ -1582,7 +1594,7 @@ export default function ComplianceClient() {
                           <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook</Label>
                           <div className="flex gap-2">
                             <Input placeholder="https://your-webhook-url.com" className="flex-1" />
-                            <Button variant="outline" onClick={() => toast.info('Testing', { description: 'Webhook test in progress...' })}>Test</Button>
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Testing webhook connection...', success: 'Webhook test successful!', error: 'Webhook test failed' })}>Test</Button>
                           </div>
                         </div>
                       </div>
@@ -1614,7 +1626,7 @@ export default function ComplianceClient() {
                         ].map(service => (
                           <div key={service.name} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
                             <span className="font-medium text-gray-900 dark:text-white">{service.name}</span>
-                            <Button variant={service.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.info(service.connected ? 'Configure' : 'Connect', { description: `${service.connected ? 'Configuring' : 'Connecting'} ${service.name}...` })}>
+                            <Button variant={service.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `${service.connected ? 'Configuring' : 'Connecting'} ${service.name}...`, success: `${service.name} ${service.connected ? 'configured' : 'connected'}!`, error: `Failed to ${service.connected ? 'configure' : 'connect'}` })}>
                               {service.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1645,7 +1657,7 @@ export default function ComplianceClient() {
                             grc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Regenerating', { description: 'Creating new token...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating API token...', success: 'New token generated! Copy it now.', error: 'Failed to regenerate' })}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -1792,7 +1804,7 @@ export default function ComplianceClient() {
                             <h4 className="font-medium text-gray-900 dark:text-white">Reset All Controls</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Reset all control statuses</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => toast.info('Resetting', { description: 'All controls will be reset...' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Resetting all controls...', success: 'Controls reset successfully', error: 'Reset failed' })}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Reset
                           </Button>
@@ -1802,7 +1814,7 @@ export default function ComplianceClient() {
                             <h4 className="font-medium text-gray-900 dark:text-white">Delete All Evidence</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all evidence</p>
                           </div>
-                          <Button variant="destructive" onClick={() => toast.info('Deleting', { description: 'All evidence will be deleted...' })}>
+                          <Button variant="destructive" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all evidence...', success: 'Evidence deleted', error: 'Delete failed' })}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </Button>

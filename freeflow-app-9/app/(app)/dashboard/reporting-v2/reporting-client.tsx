@@ -128,10 +128,10 @@ const mockReportingActivities = [
 ]
 
 const mockReportingQuickActions = [
-  { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D', action: () => console.log('New dashboard') },
-  { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W', action: () => console.log('New worksheet') },
-  { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S', action: () => console.log('Schedule report') },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => console.log('Export data') },
+  { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating dashboard...', success: 'Drag widgets to build your custom dashboard', error: 'Failed to create' }) },
+  { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening worksheet...', success: 'Write SQL queries against your data sources', error: 'Failed to open' }) },
+  { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening scheduler...', success: 'Set up automated report delivery via email', error: 'Failed to open' }) },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting data...', success: 'Data exported to CSV', error: 'Export failed' }) },
 ]
 
 export default function ReportingClient() {

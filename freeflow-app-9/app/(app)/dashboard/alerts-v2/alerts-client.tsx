@@ -347,10 +347,10 @@ const mockAlertsActivities = [
 ]
 
 const mockAlertsQuickActions = [
-  { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => console.log('Acknowledge') },
-  { id: '2', label: 'Escalate', icon: 'ArrowUp', shortcut: 'E', action: () => console.log('Escalate') },
-  { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => console.log('Silence') },
-  { id: '4', label: 'Create Rule', icon: 'Plus', shortcut: 'R', action: () => console.log('Create rule') },
+  { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => toast.success('Alert Acknowledged', { description: 'Team has been notified' }) },
+  { id: '2', label: 'Escalate', icon: 'ArrowUp', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Escalating to on-call team...', success: 'Alert escalated to L2 support', error: 'Escalation failed' }) },
+  { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => toast.success('Alert Silenced', { description: 'Notifications muted for 4 hours' }) },
+  { id: '4', label: 'Create Rule', icon: 'Plus', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening rule builder...', success: 'Define conditions and actions for automatic responses', error: 'Failed to open' }) },
 ]
 
 export default function AlertsClient() {
@@ -613,7 +613,7 @@ export default function AlertsClient() {
   const handleMuteAlert = async (alertId: string, alertName: string) => {
     try {
       await snoozeAlert(alertId, 60) // 60 minutes
-      toast.info('Alert Snoozed', { description: `"${alertName}" snoozed for 1 hour` })
+      toast.success('Alert Snoozed', { description: `"${alertName}" snoozed for 1 hour` })
     } catch (err) {
       toast.error('Failed to Snooze', { description: err instanceof Error ? err.message : 'Unknown error' })
     }
@@ -631,7 +631,7 @@ export default function AlertsClient() {
   const handleDismissAlert = async (alertId: string) => {
     try {
       await updateAlert(alertId, { status: 'resolved', resolved_at: new Date().toISOString() })
-      toast.info('Alert Dismissed', { description: `Alert has been dismissed` })
+      toast.success('Alert Dismissed', { description: 'Alert has been dismissed' })
     } catch (err) {
       toast.error('Failed to Dismiss', { description: err instanceof Error ? err.message : 'Unknown error' })
     }
@@ -665,7 +665,7 @@ export default function AlertsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={() => toast.info('Filters', { description: 'Opening advanced filter options...' })}>
+            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading filters...', success: 'Advanced filters ready', error: 'Failed to load' })}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -940,11 +940,11 @@ export default function AlertsClient() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2 mt-3">
-                          <Button size="sm" variant="outline" onClick={() => toast.info('Calling On-Call', { description: `Initiating call to ${schedule.currentOnCall.name}...` })}>
+                          <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Calling ${schedule.currentOnCall.name}...`, success: 'Call initiated', error: 'Call failed' })}>
                             <Phone className="h-3 w-3 mr-1" />
                             Call
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => toast.info('Email Sent', { description: `Opening email to ${schedule.currentOnCall.email}` })}>
+                          <Button size="sm" variant="outline" onClick={() => toast.success('Email Ready', { description: `Opening email to ${schedule.currentOnCall.email}` })}>
                             <Mail className="h-3 w-3 mr-1" />
                             Email
                           </Button>
@@ -982,7 +982,7 @@ export default function AlertsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Service Directory</CardTitle>
-                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => toast.info('Add Service', { description: 'Opening service configuration...' })}>
+                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening service config...', success: 'Configure your new service', error: 'Failed to open' })}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Service
                   </Button>
@@ -1021,7 +1021,7 @@ export default function AlertsClient() {
                         <p className="text-xs text-gray-500">{service.team}</p>
                       </div>
 
-                      <Button variant="ghost" size="icon" onClick={() => toast.info('Service Settings', { description: `Configuring ${service.name}...` })}>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading settings...', success: `Configure ${service.name}`, error: 'Failed to load' })}>
                         <Settings className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1062,7 +1062,7 @@ export default function AlertsClient() {
                     </div>
                     <div className="mt-4 pt-4 border-t flex items-center justify-between">
                       <span className="text-sm text-gray-500">{policy.services} services using this policy</span>
-                      <Button variant="outline" size="sm" onClick={() => toast.info('Edit Policy', { description: `Editing "${policy.name}" escalation policy...` })}>
+                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: `Editing "${policy.name}"`, error: 'Failed to open' })}>
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>
@@ -1079,7 +1079,7 @@ export default function AlertsClient() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Connected Integrations</CardTitle>
-                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => toast.info('Add Integration', { description: 'Opening integration marketplace...' })}>
+                  <Button className="bg-red-600 hover:bg-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading marketplace...', success: 'Browse available integrations', error: 'Failed to load' })}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Integration
                   </Button>
@@ -1117,8 +1117,8 @@ export default function AlertsClient() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Switch checked={integration.status === 'active'} onCheckedChange={(checked) => toast.info(checked ? 'Integration Enabled' : 'Integration Disabled', { description: `${integration.name} has been ${checked ? 'enabled' : 'disabled'}` })} />
-                        <Button variant="ghost" size="icon" onClick={() => toast.info('Integration Settings', { description: `Configuring ${integration.name}...` })}>
+                        <Switch checked={integration.status === 'active'} onCheckedChange={(checked) => toast.success(checked ? 'Integration Enabled' : 'Integration Disabled', { description: `${integration.name} has been ${checked ? 'enabled' : 'disabled'}` })} />
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: `Configure ${integration.name}`, error: 'Failed' })}>
                           <Settings className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1359,14 +1359,14 @@ export default function AlertsClient() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Channel', { description: `Configuring ${channel.name} settings...` })}>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: `Configure ${channel.name}`, error: 'Failed' })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Switch defaultChecked={channel.enabled} onCheckedChange={(checked) => toast.info(checked ? 'Channel Enabled' : 'Channel Disabled', { description: `${channel.name} notifications ${checked ? 'enabled' : 'disabled'}` })} />
+                              <Switch defaultChecked={channel.enabled} onCheckedChange={(checked) => toast.success(checked ? 'Channel Enabled' : 'Channel Disabled', { description: `${channel.name} notifications ${checked ? 'enabled' : 'disabled'}` })} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Add Channel', { description: 'Opening notification channel setup...' })}>
+                        <Button variant="outline" className="w-full mt-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening channel setup...', success: 'Configure notification channel', error: 'Failed to open' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Notification Channel
                         </Button>
@@ -1483,16 +1483,16 @@ export default function AlertsClient() {
                               </p>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Tier', { description: `Editing ${policy.tier} escalation settings...` })}>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: `Editing ${policy.tier}`, error: 'Failed' })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.info('Tier Removed', { description: `${policy.tier} has been removed from escalation` })}>
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Tier Removed', { description: `${policy.tier} has been removed from escalation` })}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Tier', { description: 'Adding new escalation tier...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding tier...', success: 'New escalation tier added', error: 'Failed to add' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Escalation Tier
                         </Button>
@@ -1519,13 +1519,13 @@ export default function AlertsClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge variant="outline">{schedule.rotation}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Schedule', { description: `Editing ${schedule.name} rotation...` })}>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: `Editing ${schedule.name}`, error: 'Failed' })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Create Schedule', { description: 'Setting up new on-call schedule...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating schedule...', success: 'Configure on-call schedule', error: 'Failed to create' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Schedule
                         </Button>
@@ -1668,7 +1668,7 @@ export default function AlertsClient() {
                             <Button variant="outline" size="sm" onClick={() => toast.success('API Key Copied', { description: 'API key copied to clipboard' })}>
                               <Copy className="h-4 w-4" />
                             </Button>
-                            <Button variant="outline" size="sm" onClick={() => toast.info('Regenerating API Key', { description: 'New API key will be generated...' })}>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating new API key...', success: 'New API key generated! Copy it now.', error: 'Failed to generate' })}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1684,17 +1684,17 @@ export default function AlertsClient() {
                                 <p className="text-sm text-gray-500">Events: {webhook.events.join(', ')}</p>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Webhook', { description: `Configuring webhook for ${webhook.url}...` })}>
+                                <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: 'Configure webhook', error: 'Failed' })}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.info('Webhook Deleted', { description: `Webhook ${webhook.url} has been removed` })}>
+                                <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Webhook Deleted', { description: 'Webhook has been removed' })}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Webhook', { description: 'Setting up new webhook endpoint...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding webhook...', success: 'Configure new webhook endpoint', error: 'Failed to add' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Webhook
                         </Button>
@@ -1729,14 +1729,14 @@ export default function AlertsClient() {
                               </div>
                             </div>
                             <div className="flex items-center gap-3">
-                              <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Rule', { description: `Editing "${rule.name}" alert rule...` })}>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: `Editing "${rule.name}"`, error: 'Failed' })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Switch defaultChecked={rule.enabled} onCheckedChange={(checked) => toast.info(checked ? 'Rule Enabled' : 'Rule Disabled', { description: `"${rule.name}" has been ${checked ? 'enabled' : 'disabled'}` })} />
+                              <Switch defaultChecked={rule.enabled} onCheckedChange={(checked) => toast.success(checked ? 'Rule Enabled' : 'Rule Disabled', { description: `"${rule.name}" has been ${checked ? 'enabled' : 'disabled'}` })} />
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Create Rule', { description: 'Opening alert rule builder...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening rule builder...', success: 'Create your alert rule', error: 'Failed to open' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Rule
                         </Button>
@@ -1760,12 +1760,12 @@ export default function AlertsClient() {
                               <p className="font-medium font-mono">{route.service}</p>
                               <p className="text-sm text-gray-500">{route.team} • {route.schedule}</p>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => toast.info('Edit Routing', { description: `Configuring routing for ${route.service}...` })}>
+                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: `Configure ${route.service} routing`, error: 'Failed' })}>
                               <Edit className="h-4 w-4" />
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Routing', { description: 'Creating new alert routing rule...' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding routing rule...', success: 'Configure alert routing', error: 'Failed to add' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Routing Rule
                         </Button>
@@ -1960,7 +1960,7 @@ export default function AlertsClient() {
                             <p className="font-medium">Clear All Alerts</p>
                             <p className="text-sm text-gray-500">Delete all alert history</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => toast.info('Clear Alerts', { description: 'All alert history will be cleared...' })}>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Clearing alert history...', success: 'Alert history cleared', error: 'Failed to clear' })}>
                             Clear Alerts
                           </Button>
                         </div>
@@ -1969,7 +1969,7 @@ export default function AlertsClient() {
                             <p className="font-medium">Reset All Rules</p>
                             <p className="text-sm text-gray-500">Restore default alert rules</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => toast.info('Reset Rules', { description: 'All rules will be restored to defaults...' })}>
+                          <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Resetting rules...', success: 'Rules restored to defaults', error: 'Failed to reset' })}>
                             Reset Rules
                           </Button>
                         </div>
@@ -1978,7 +1978,7 @@ export default function AlertsClient() {
                             <p className="font-medium">Delete All Integrations</p>
                             <p className="text-sm text-gray-500">Remove all connected services</p>
                           </div>
-                          <Button variant="destructive" onClick={() => toast.info('Delete Integrations', { description: 'All integrations will be removed...' })}>
+                          <Button variant="destructive" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Removing integrations...', success: 'All integrations removed', error: 'Failed to remove' })}>
                             Delete All
                           </Button>
                         </div>

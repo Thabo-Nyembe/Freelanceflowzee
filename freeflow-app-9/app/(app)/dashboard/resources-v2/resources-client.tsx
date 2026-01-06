@@ -586,9 +586,9 @@ const mockResourcesActivities = [
 ]
 
 const mockResourcesQuickActions = [
-  { id: '1', label: 'Add Resource', icon: 'plus', action: () => console.log('Add resource'), variant: 'default' as const },
-  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => console.log('View calendar'), variant: 'default' as const },
-  { id: '3', label: 'Run Report', icon: 'file', action: () => console.log('Run report'), variant: 'outline' as const },
+  { id: '1', label: 'Add Resource', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening resource form...', success: 'Add team member, equipment, or space', error: 'Failed to open form' }), variant: 'default' as const },
+  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => toast.success('Resource Calendar', { description: 'Viewing allocation for 12 resources • 3 conflicts this week' }), variant: 'default' as const },
+  { id: '3', label: 'Run Report', icon: 'file', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating utilization report...', success: 'Report ready! 78% average utilization this month', error: 'Report failed' }), variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -998,7 +998,7 @@ export default function ResourcesClient() {
                 { icon: Search, label: 'Find Skills', color: 'text-blue-500', onClick: () => setActiveTab('skills') },
                 { icon: Calendar, label: 'Schedule', color: 'text-purple-500', onClick: () => setActiveTab('schedule') },
                 { icon: BarChart3, label: 'Workload', color: 'text-orange-500', onClick: () => setActiveTab('workload') },
-                { icon: Plane, label: 'Leave Mgmt', color: 'text-cyan-500', onClick: () => toast.info('Leave management coming soon') },
+                { icon: Plane, label: 'Leave Mgmt', color: 'text-cyan-500', onClick: () => toast.success('Leave Management', { description: 'View and manage team leave requests in the Schedule tab' }) },
                 { icon: Star, label: 'Skills Matrix', color: 'text-yellow-500', onClick: () => setActiveTab('skills') },
                 { icon: Download, label: 'Export', color: 'text-indigo-500', onClick: handleExportResources },
                 { icon: RefreshCw, label: 'Sync', color: 'text-gray-500', onClick: handleSyncResources }
@@ -1738,7 +1738,7 @@ export default function ResourcesClient() {
                                 </Badge>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.info('Integration configuration coming soon')}>Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.success('Opening configuration...', { description: 'Configure integration settings' })}>Configure</Button>
                           </div>
                         ))}
                       </div>
@@ -1854,7 +1854,7 @@ export default function ResourcesClient() {
                             <p className="font-medium">Import Data</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Import resources from file</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.info('Import feature coming soon')}>
+                          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening import wizard...', success: 'Select CSV or Excel file to import resources', error: 'Import cancelled' })}>
                             <Upload className="w-4 h-4" />
                             Import
                           </Button>

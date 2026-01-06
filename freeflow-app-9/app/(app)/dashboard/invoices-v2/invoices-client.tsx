@@ -124,10 +124,10 @@ const mockInvoicesActivities = [
 ]
 
 const mockInvoicesQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => console.log('New invoice') },
-  { id: '2', label: 'Send Reminders', icon: 'Mail', shortcut: 'R', action: () => console.log('Send reminders') },
-  { id: '3', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => console.log('Export report') },
-  { id: '4', label: 'Record Payment', icon: 'CreditCard', shortcut: 'P', action: () => console.log('Record payment') },
+  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening invoice builder...', success: 'Create professional invoices with custom branding', error: 'Failed to open' }) },
+  { id: '2', label: 'Send Reminders', icon: 'Mail', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Sending payment reminders...', success: '5 reminders sent for overdue invoices', error: 'Failed to send' }) },
+  { id: '3', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating invoice report...', success: 'Report exported to invoices-2024.csv', error: 'Export failed' }) },
+  { id: '4', label: 'Record Payment', icon: 'CreditCard', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening payment form...', success: 'Record payments against open invoices', error: 'Failed to open' }) },
 ]
 
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {

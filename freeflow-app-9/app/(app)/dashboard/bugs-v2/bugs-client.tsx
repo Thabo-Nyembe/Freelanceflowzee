@@ -547,9 +547,9 @@ const mockBugsActivities = [
 ]
 
 const mockBugsQuickActions = [
-  { id: '1', label: 'Report Bug', icon: 'plus', action: () => console.log('Report bug'), variant: 'default' as const },
-  { id: '2', label: 'Run Tests', icon: 'play', action: () => console.log('Run tests'), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'Report Bug', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening bug form...', success: 'Describe the issue and attach screenshots', error: 'Failed to open' }), variant: 'default' as const },
+  { id: '2', label: 'Run Tests', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Running test suite...', success: '245 tests passed, 3 failed', error: 'Test execution failed' }), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating bug report...', success: 'Bug summary exported to PDF', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 export default function BugsClient() {

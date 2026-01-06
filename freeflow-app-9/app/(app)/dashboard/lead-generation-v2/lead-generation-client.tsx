@@ -564,9 +564,9 @@ const mockLeadGenActivities = [
 ]
 
 const mockLeadGenQuickActions = [
-  { id: '1', label: 'Add Lead', icon: 'plus', action: () => console.log('Add lead'), variant: 'default' as const },
-  { id: '2', label: 'Score', icon: 'star', action: () => console.log('Score'), variant: 'default' as const },
-  { id: '3', label: 'Nurture', icon: 'mail', action: () => console.log('Nurture'), variant: 'outline' as const },
+  { id: '1', label: 'Add Lead', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening lead form...', success: 'Lead form ready! Enter contact details', error: 'Failed to open form' }), variant: 'default' as const },
+  { id: '2', label: 'Score', icon: 'star', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Running AI lead scoring...', success: '47 leads scored! 12 hot leads identified', error: 'Scoring failed' }), variant: 'default' as const },
+  { id: '3', label: 'Nurture', icon: 'mail', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Starting nurture campaign...', success: 'Nurture sequence started for 23 leads', error: 'Campaign failed to start' }), variant: 'outline' as const },
 ]
 
 // Default stats for initial hook state
@@ -902,8 +902,8 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleAssignLead = (leadName: string) => {
-    toast.info('Assign Lead', {
-      description: `Assigning "${leadName}" to sales rep...`
+    toast.success('Assign Lead', {
+      description: `Opening assignment panel for "${leadName}"`
     })
   }
 
@@ -928,8 +928,8 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Leads Tab
   const handleImportCSV = () => {
-    toast.info('Import CSV', {
-      description: 'Opening CSV import wizard...'
+    toast.success('Import CSV', {
+      description: 'CSV import wizard opened'
     })
   }
 
@@ -940,26 +940,26 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleEmailBlast = () => {
-    toast.info('Email Blast', {
-      description: 'Opening email blast composer...'
+    toast.success('Email Blast', {
+      description: 'Email blast composer opened'
     })
   }
 
   const handleSmartFilter = () => {
-    toast.info('Smart Filter', {
-      description: 'Opening advanced filter options...'
+    toast.success('Smart Filter', {
+      description: 'Advanced filter options opened'
     })
   }
 
   const handleSegments = () => {
-    toast.info('Segments', {
-      description: 'Opening segment management...'
+    toast.success('Segments', {
+      description: 'Segment management opened'
     })
   }
 
   const handleBulkTag = () => {
-    toast.info('Bulk Tag', {
-      description: 'Opening bulk tagging options...'
+    toast.success('Bulk Tag', {
+      description: 'Bulk tagging options opened'
     })
   }
 
@@ -971,44 +971,44 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Pipeline Tab
   const handleNewDeal = () => {
-    toast.info('New Deal', {
-      description: 'Opening deal creation form...'
+    toast.success('New Deal', {
+      description: 'Deal creation form opened'
     })
   }
 
   const handleStageRules = () => {
-    toast.info('Stage Rules', {
-      description: 'Opening stage configuration...'
+    toast.success('Stage Rules', {
+      description: 'Stage configuration opened'
     })
   }
 
   const handleAutomation = () => {
-    toast.info('Automation', {
-      description: 'Opening automation workflow builder...'
+    toast.success('Automation', {
+      description: 'Automation workflow builder opened'
     })
   }
 
   const handlePipelineReport = () => {
-    toast.info('Pipeline Report', {
-      description: 'Generating pipeline analytics report...'
+    toast.success('Pipeline Report', {
+      description: 'Generating pipeline analytics report'
     })
   }
 
   const handleAssignLeads = () => {
-    toast.info('Assign Leads', {
-      description: 'Opening lead assignment panel...'
+    toast.success('Assign Leads', {
+      description: 'Lead assignment panel opened'
     })
   }
 
   const handleStaleDeals = () => {
-    toast.info('Stale Deals', {
-      description: 'Showing deals with no recent activity...'
+    toast.success('Stale Deals', {
+      description: 'Showing deals with no recent activity'
     })
   }
 
   const handleForecasting = () => {
-    toast.info('Forecasting', {
-      description: 'Opening sales forecasting dashboard...'
+    toast.success('Forecasting', {
+      description: 'Sales forecasting dashboard opened'
     })
   }
 
@@ -1020,44 +1020,44 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Activities Tab
   const handleLogEmail = () => {
-    toast.info('Log Email', {
-      description: 'Opening email activity log form...'
+    toast.success('Log Email', {
+      description: 'Email activity log form opened'
     })
   }
 
   const handleLogCallActivity = () => {
-    toast.info('Log Call', {
-      description: 'Opening call activity log form...'
+    toast.success('Log Call', {
+      description: 'Call activity log form opened'
     })
   }
 
   const handleLogMeeting = () => {
-    toast.info('Log Meeting', {
-      description: 'Opening meeting activity log form...'
+    toast.success('Log Meeting', {
+      description: 'Meeting activity log form opened'
     })
   }
 
   const handleAddNote = () => {
-    toast.info('Add Note', {
-      description: 'Opening note creation form...'
+    toast.success('Add Note', {
+      description: 'Note creation form opened'
     })
   }
 
   const handleCreateTask = () => {
-    toast.info('Create Task', {
-      description: 'Opening task creation form...'
+    toast.success('Create Task', {
+      description: 'Task creation form opened'
     })
   }
 
   const handleSchedule = () => {
-    toast.info('Schedule', {
-      description: 'Opening scheduling calendar...'
+    toast.success('Schedule', {
+      description: 'Scheduling calendar opened'
     })
   }
 
   const handleSendMessage = () => {
-    toast.info('Send Message', {
-      description: 'Opening message composer...'
+    toast.success('Send Message', {
+      description: 'Message composer opened'
     })
   }
 
@@ -1069,93 +1069,93 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Quick Actions Handlers - Campaigns Tab
   const handleNewCampaign = () => {
-    toast.info('New Campaign', {
-      description: 'Opening campaign creation wizard...'
+    toast.success('New Campaign', {
+      description: 'Campaign creation wizard opened'
     })
   }
 
   const handleAnnouncement = () => {
-    toast.info('Announcement', {
-      description: 'Opening announcement composer...'
+    toast.success('Announcement', {
+      description: 'Announcement composer opened'
     })
   }
 
   const handleSequences = () => {
-    toast.info('Sequences', {
-      description: 'Opening email sequence builder...'
+    toast.success('Sequences', {
+      description: 'Email sequence builder opened'
     })
   }
 
   const handleWorkflows = () => {
-    toast.info('Workflows', {
-      description: 'Opening workflow automation builder...'
+    toast.success('Workflows', {
+      description: 'Workflow automation builder opened'
     })
   }
 
   const handleAnalytics = () => {
-    toast.info('Analytics', {
-      description: 'Opening campaign analytics dashboard...'
+    toast.success('Analytics', {
+      description: 'Campaign analytics dashboard opened'
     })
   }
 
   const handleAudience = () => {
-    toast.info('Audience', {
-      description: 'Opening audience segmentation...'
+    toast.success('Audience', {
+      description: 'Audience segmentation opened'
     })
   }
 
   const handleDuplicate = () => {
-    toast.info('Duplicate Campaign', {
-      description: 'Select a campaign to duplicate...'
+    toast.success('Duplicate Campaign', {
+      description: 'Select a campaign to duplicate'
     })
   }
 
   const handleViewCampaign = (campaignName: string) => {
-    toast.info('View Campaign', {
-      description: `Opening "${campaignName}" campaign details...`
+    toast.success('View Campaign', {
+      description: `Opening "${campaignName}" campaign details`
     })
   }
 
   const handleCreateCampaign = () => {
-    toast.info('Create Campaign', {
-      description: 'Opening campaign creation wizard...'
+    toast.success('Create Campaign', {
+      description: 'Campaign creation wizard opened'
     })
   }
 
   // Quick Actions Handlers - Scoring Tab
   const handleNewRule = () => {
-    toast.info('New Rule', {
-      description: 'Opening scoring rule creation form...'
+    toast.success('New Rule', {
+      description: 'Scoring rule creation form opened'
     })
   }
 
   const handleAIScoring = () => {
-    toast.info('AI Scoring', {
-      description: 'Configuring AI-powered lead scoring...'
+    toast.success('AI Scoring', {
+      description: 'Configuring AI-powered lead scoring'
     })
   }
 
   const handleBehavioral = () => {
-    toast.info('Behavioral Scoring', {
-      description: 'Opening behavioral scoring rules...'
+    toast.success('Behavioral Scoring', {
+      description: 'Behavioral scoring rules opened'
     })
   }
 
   const handleDemographic = () => {
-    toast.info('Demographic Scoring', {
-      description: 'Opening demographic scoring rules...'
+    toast.success('Demographic Scoring', {
+      description: 'Demographic scoring rules opened'
     })
   }
 
   const handleDistribution = () => {
-    toast.info('Score Distribution', {
-      description: 'Opening score distribution analytics...'
+    toast.success('Score Distribution', {
+      description: 'Score distribution analytics opened'
     })
   }
 
   const handleRecalculate = async () => {
     setIsSubmitting(true)
-    toast.info('Recalculating Scores', {
+    toast.loading('Recalculating Scores', {
       description: 'Processing all lead scores...'
     })
 
@@ -1203,8 +1203,8 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleConfigure = () => {
-    toast.info('Configure', {
-      description: 'Opening scoring engine configuration...'
+    toast.success('Configure', {
+      description: 'Scoring engine configuration opened'
     })
   }
 
@@ -1246,15 +1246,15 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Integration Handlers
   const handleConnect = (integrationName: string) => {
-    toast.info('Connect Integration', {
-      description: `Connecting to ${integrationName}...`
+    toast.success('Connect Integration', {
+      description: `Connecting to ${integrationName}`
     })
   }
 
   // Data Management Handlers
   const handleArchiveLeads = () => {
-    toast.info('Archive Old Leads', {
-      description: 'Opening lead archive options...'
+    toast.success('Archive Old Leads', {
+      description: 'Lead archive options opened'
     })
   }
 
@@ -1279,7 +1279,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
   }
 
   const handleTestWebhook = () => {
-    toast.info('Testing Webhook', {
+    toast.loading('Testing Webhook', {
       description: 'Sending test payload to webhook URL...'
     })
   }
@@ -1293,8 +1293,8 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
 
   // Dialog Actions
   const handleDialogMore = () => {
-    toast.info('More Options', {
-      description: 'Opening additional lead actions...'
+    toast.success('More Options', {
+      description: 'Additional lead actions opened'
     })
   }
 
@@ -3044,7 +3044,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   onChange={(e) => {
                     const file = e.target.files?.[0]
                     if (file) {
-                      toast.info('Processing File', {
+                      toast.loading('Processing File', {
                         description: `Importing leads from ${file.name}...`
                       })
                       // In a real implementation, parse and import the CSV

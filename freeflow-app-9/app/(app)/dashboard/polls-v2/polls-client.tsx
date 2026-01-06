@@ -509,10 +509,10 @@ const mockPollsActivities = [
 ]
 
 const mockPollsQuickActions = [
-  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => console.log('New survey') },
-  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => console.log('View results') },
-  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => console.log('Templates') },
-  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
+  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Survey', { description: 'Opening survey builder...' }) },
+  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => toast.success('Survey Results', { description: 'Opening results dashboard...' }) },
+  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.success('Survey Templates', { description: 'Opening template library...' }) },
+  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting survey data...', success: 'Export completed!', error: 'Export failed' }) },
 ]
 
 // ============================================================================

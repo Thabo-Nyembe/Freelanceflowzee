@@ -346,9 +346,9 @@ const mock3DActivities = [
 ]
 
 const mock3DQuickActions = [
-  { id: '1', label: 'New Model', icon: 'plus', action: () => console.log('New model'), variant: 'default' as const },
-  { id: '2', label: 'Render', icon: 'play', action: () => console.log('Render'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Model', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating 3D model...', success: 'Model created! Start sculpting in the editor', error: 'Failed to create model' }), variant: 'default' as const },
+  { id: '2', label: 'Render', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 5000)), { loading: 'Rendering scene at 4K...', success: 'Render complete! View in preview', error: 'Render failed - check GPU memory' }), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting model...', success: 'Exported to FBX, OBJ, and GLTF formats', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 export default function ThreeDModelingClient() {

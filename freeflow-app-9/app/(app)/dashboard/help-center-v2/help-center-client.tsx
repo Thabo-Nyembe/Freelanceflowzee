@@ -793,9 +793,9 @@ const mockHelpCenterActivities = [
 ]
 
 const mockHelpCenterQuickActions = [
-  { id: '1', label: 'New Article', icon: 'plus', action: () => console.log('New article'), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => console.log('Preview'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'New Article', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening article editor...', success: 'Article editor ready! Start writing your help content', error: 'Failed to open editor' }), variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Generating preview...', success: 'Preview mode active - see how users will view your help center', error: 'Preview failed' }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => toast.success('Help Center Analytics', { description: '2,450 article views • 89% helpful ratings • 12 most-searched terms' }), variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -865,123 +865,123 @@ export default function HelpCenterClient() {
   }
 
   // Handlers
-  const handleCreateArticle = () => toast.info('Create', { description: 'Opening editor...' })
+  const handleCreateArticle = () => toast.success('Create', { description: 'Editor opened' })
   const handlePublishArticle = (n: string) => toast.success('Published', { description: `"${n}" is live` })
-  const handleCreateCategory = () => toast.info('Create Category', { description: 'Adding category...' })
-  const handleSearch = () => toast.info('Searching', { description: 'Searching articles...' })
+  const handleCreateCategory = () => toast.success('Create Category', { description: 'Adding new category' })
+  const handleSearch = () => toast.success('Searching', { description: 'Searching articles' })
   const handleSearchArticles = () => {
-    toast.info('Searching', { description: 'Searching help articles...' })
+    toast.success('Searching', { description: 'Searching help articles' })
   }
   const handleAnalytics = () => {
-    toast.info('Analytics', { description: 'Loading help center analytics...' })
+    toast.success('Analytics', { description: 'Loading help center analytics' })
   }
   const handleImport = () => {
-    toast.info('Import', { description: 'Opening import wizard...' })
+    toast.success('Import', { description: 'Import wizard opened' })
   }
   const handleManageTags = () => {
-    toast.info('Manage Tags', { description: 'Opening tag manager...' })
+    toast.success('Manage Tags', { description: 'Tag manager opened' })
   }
   const handleTranslate = () => {
-    toast.info('Translate', { description: 'Opening translation center...' })
+    toast.success('Translate', { description: 'Translation center opened' })
   }
   const handleArchives = () => {
-    toast.info('Archives', { description: 'Loading archived articles...' })
+    toast.success('Archives', { description: 'Loading archived articles' })
   }
   const handleSettings = () => {
-    toast.info('Settings', { description: 'Opening help center settings...' })
+    toast.success('Settings', { description: 'Help center settings opened' })
   }
   const handleSubcategory = () => {
-    toast.info('Subcategory', { description: 'Creating new subcategory...' })
+    toast.success('Subcategory', { description: 'Creating new subcategory' })
   }
   const handleOrganize = () => {
-    toast.info('Organize', { description: 'Opening content organizer...' })
+    toast.success('Organize', { description: 'Content organizer opened' })
   }
   const handleAutoSort = () => {
-    toast.info('Auto-Sort', { description: 'AI is sorting your content...' })
+    toast.loading('Auto-Sort', { description: 'AI is sorting your content...' })
   }
   const handleCrossLink = () => {
-    toast.info('Cross-Link', { description: 'Opening link manager...' })
+    toast.success('Cross-Link', { description: 'Link manager opened' })
   }
   const handleCleanup = () => {
-    toast.info('Cleanup', { description: 'Starting content cleanup...' })
+    toast.loading('Cleanup', { description: 'Starting content cleanup...' })
   }
   const handleViewCollection = (collectionName: string) => {
-    toast.info('View Collection', { description: `Opening "${collectionName}"...` })
+    toast.success('View Collection', { description: `Opening "${collectionName}"` })
   }
   const handleNewCollection = () => {
-    toast.info('New Collection', { description: 'Creating new collection...' })
+    toast.success('New Collection', { description: 'Creating new collection' })
   }
   const handleAllFeedback = () => {
-    toast.info('All Feedback', { description: 'Loading all feedback...' })
+    toast.success('All Feedback', { description: 'Loading all feedback' })
   }
   const handlePositiveFeedback = () => {
-    toast.info('Positive Feedback', { description: 'Filtering positive feedback...' })
+    toast.success('Positive Feedback', { description: 'Filtering positive feedback' })
   }
   const handleNegativeFeedback = () => {
-    toast.info('Negative Feedback', { description: 'Filtering negative feedback...' })
+    toast.success('Negative Feedback', { description: 'Filtering negative feedback' })
   }
   const handleIncorrectFeedback = () => {
-    toast.info('Incorrect Feedback', { description: 'Filtering incorrect reports...' })
+    toast.success('Incorrect Feedback', { description: 'Filtering incorrect reports' })
   }
   const handleNeedsUpdate = () => {
-    toast.info('Needs Update', { description: 'Filtering update requests...' })
+    toast.success('Needs Update', { description: 'Filtering update requests' })
   }
   const handleExport = () => {
-    toast.info('Export', { description: 'Preparing export...' })
+    toast.loading('Export', { description: 'Preparing export...' })
   }
   const handleReports = () => {
-    toast.info('Reports', { description: 'Loading reports...' })
+    toast.success('Reports', { description: 'Loading reports' })
   }
   const handleReviewNegative = () => {
-    toast.info('Review Negative', { description: 'Loading negative feedback for review...' })
+    toast.success('Review Negative', { description: 'Loading negative feedback for review' })
   }
   const handleUpdateRequested = () => {
-    toast.info('Update Requested', { description: 'Loading articles needing updates...' })
+    toast.success('Update Requested', { description: 'Loading articles needing updates' })
   }
   const handleFollowUp = () => {
-    toast.info('Follow Up', { description: 'Opening follow-up panel...' })
+    toast.success('Follow Up', { description: 'Follow-up panel opened' })
   }
   const handleOverview = () => {
-    toast.info('Overview', { description: 'Loading analytics overview...' })
+    toast.success('Overview', { description: 'Loading analytics overview' })
   }
   const handleTrends = () => {
-    toast.info('Trends', { description: 'Loading trend analysis...' })
+    toast.success('Trends', { description: 'Loading trend analysis' })
   }
   const handleSearchTerms = () => {
-    toast.info('Search Terms', { description: 'Loading search analytics...' })
+    toast.success('Search Terms', { description: 'Loading search analytics' })
   }
   const handlePageViews = () => {
-    toast.info('Page Views', { description: 'Loading view statistics...' })
+    toast.success('Page Views', { description: 'Loading view statistics' })
   }
   const handleTimeOnPage = () => {
-    toast.info('Time on Page', { description: 'Loading engagement metrics...' })
+    toast.success('Time on Page', { description: 'Loading engagement metrics' })
   }
   const handleGaps = () => {
-    toast.info('Content Gaps', { description: 'Analyzing content gaps...' })
+    toast.loading('Content Gaps', { description: 'Analyzing content gaps...' })
   }
   const handleSchedule = () => {
-    toast.info('Schedule', { description: 'Opening content calendar...' })
+    toast.success('Schedule', { description: 'Content calendar opened' })
   }
   const handleViewArticleExternal = (articleTitle: string) => {
-    toast.info('View Article', { description: `Opening "${articleTitle}"...` })
+    toast.success('View Article', { description: `Opening "${articleTitle}"` })
   }
   const handleEditArticle = (articleTitle: string) => {
-    toast.info('Edit Article', { description: `Editing "${articleTitle}"...` })
+    toast.success('Edit Article', { description: `Editing "${articleTitle}"` })
   }
   const handleViewLive = (articleTitle: string) => {
-    toast.info('View Live', { description: `Opening live preview of "${articleTitle}"...` })
+    toast.success('View Live', { description: `Opening live preview of "${articleTitle}"` })
   }
   const handleDuplicate = (articleTitle: string) => {
     toast.success('Duplicated', { description: `"${articleTitle}" has been duplicated` })
   }
   const handleShare = (articleTitle: string) => {
-    toast.info('Share', { description: `Sharing "${articleTitle}"...` })
+    toast.success('Share', { description: `Sharing "${articleTitle}"` })
   }
   const handleArchive = (articleTitle: string) => {
     toast.success('Archived', { description: `"${articleTitle}" has been archived` })
   }
   const handleEditCategory = (categoryName: string) => {
-    toast.info('Edit Category', { description: `Editing "${categoryName}"...` })
+    toast.success('Edit Category', { description: `Editing "${categoryName}"` })
   }
 
   return (

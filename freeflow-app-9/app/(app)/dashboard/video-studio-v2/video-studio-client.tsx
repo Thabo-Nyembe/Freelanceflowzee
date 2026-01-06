@@ -341,9 +341,9 @@ const mockVideoStudioActivities = [
 ]
 
 const mockVideoStudioQuickActions = [
-  { id: '1', label: 'New Project', icon: 'plus', action: () => console.log('New project'), variant: 'default' as const },
-  { id: '2', label: 'Export Video', icon: 'download', action: () => console.log('Export'), variant: 'default' as const },
-  { id: '3', label: 'Templates', icon: 'layout', action: () => console.log('Templates'), variant: 'outline' as const },
+  { id: '1', label: 'New Project', icon: 'plus', action: () => toast.success('New Project', { description: 'Creating new video project...' }), variant: 'default' as const },
+  { id: '2', label: 'Export Video', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Preparing export...', success: 'Video export started!', error: 'Export failed' }), variant: 'default' as const },
+  { id: '3', label: 'Templates', icon: 'layout', action: () => toast.success('Video Templates', { description: 'Opening template library...' }), variant: 'outline' as const },
 ]
 
 export default function VideoStudioClient() {

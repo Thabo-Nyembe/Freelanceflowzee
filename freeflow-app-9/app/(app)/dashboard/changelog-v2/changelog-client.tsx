@@ -386,10 +386,10 @@ const mockChangelogActivities = [
 ]
 
 const mockChangelogQuickActions = [
-  { id: '1', label: 'New Release', icon: 'Tag', shortcut: 'N', action: () => console.log('New release') },
-  { id: '2', label: 'Draft', icon: 'Edit', shortcut: 'D', action: () => console.log('Draft') },
-  { id: '3', label: 'Compare', icon: 'GitBranch', shortcut: 'C', action: () => console.log('Compare') },
-  { id: '4', label: 'Notify', icon: 'Bell', shortcut: 'T', action: () => console.log('Notify') },
+  { id: '1', label: 'New Release', icon: 'Tag', shortcut: 'N', action: () => toast.success('New Release', { description: 'Opening release creation form...' }) },
+  { id: '2', label: 'Draft', icon: 'Edit', shortcut: 'D', action: () => toast.success('Create Draft', { description: 'Starting new changelog draft...' }) },
+  { id: '3', label: 'Compare', icon: 'GitBranch', shortcut: 'C', action: () => toast.success('Compare Versions', { description: 'Opening version comparison tool...' }) },
+  { id: '4', label: 'Notify', icon: 'Bell', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending notifications...', success: 'Notifications sent to subscribers!', error: 'Failed to send notifications' }) },
 ]
 
 // Default form state for new changelog entry

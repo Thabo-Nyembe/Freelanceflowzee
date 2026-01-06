@@ -208,10 +208,10 @@ const mockAutomationActivities = [
 ]
 
 const mockAutomationQuickActions = [
-  { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => console.log('New workflow') },
-  { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => console.log('Templates') },
-  { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => console.log('History') },
-  { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => console.log('Connections') },
+  { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating workflow...', success: 'Workflow created successfully', error: 'Failed to create workflow' }) },
+  { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => toast.success('Templates', { description: 'Opening workflow templates gallery' }) },
+  { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => toast.success('Run History', { description: 'Opening execution history' }) },
+  { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => toast.success('Connections', { description: 'Opening integration connections' }) },
 ]
 
 // ============================================================================

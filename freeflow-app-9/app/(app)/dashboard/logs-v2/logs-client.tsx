@@ -516,9 +516,9 @@ const mockLogsActivities = [
 ]
 
 const mockLogsQuickActions = [
-  { id: '1', label: 'Live Tail', icon: 'play', action: () => console.log('Live tail'), variant: 'default' as const },
-  { id: '2', label: 'Create Alert', icon: 'bell', action: () => console.log('Create alert'), variant: 'default' as const },
-  { id: '3', label: 'Export Logs', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'Live Tail', icon: 'play', action: () => toast.success('Live Tail', { description: 'Starting live log stream...' }), variant: 'default' as const },
+  { id: '2', label: 'Create Alert', icon: 'bell', action: () => toast.success('Create Alert', { description: 'Opening alert configuration...' }), variant: 'default' as const },
+  { id: '3', label: 'Export Logs', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting logs...', success: 'Logs exported successfully!', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 // ============== MAIN COMPONENT ==============

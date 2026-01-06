@@ -553,10 +553,10 @@ const mockCoursesActivities = [
 ]
 
 const mockCoursesQuickActions = [
-  { id: '1', label: 'New Course', icon: 'BookOpen', shortcut: 'C', action: () => console.log('New course') },
-  { id: '2', label: 'Add Lecture', icon: 'PlayCircle', shortcut: 'L', action: () => console.log('Add lecture') },
-  { id: '3', label: 'Create Quiz', icon: 'FileText', shortcut: 'Q', action: () => console.log('Create quiz') },
-  { id: '4', label: 'View Analytics', icon: 'BarChart3', shortcut: 'A', action: () => console.log('Analytics') },
+  { id: '1', label: 'New Course', icon: 'BookOpen', shortcut: 'C', action: () => toast.success('New Course', { description: 'Opening course creation wizard...' }) },
+  { id: '2', label: 'Add Lecture', icon: 'PlayCircle', shortcut: 'L', action: () => toast.success('Add Lecture', { description: 'Opening lecture editor...' }) },
+  { id: '3', label: 'Create Quiz', icon: 'FileText', shortcut: 'Q', action: () => toast.success('Create Quiz', { description: 'Opening quiz builder...' }) },
+  { id: '4', label: 'View Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.success('Course Analytics', { description: 'Opening analytics dashboard...' }) },
 ]
 
 export default function CoursesClient() {

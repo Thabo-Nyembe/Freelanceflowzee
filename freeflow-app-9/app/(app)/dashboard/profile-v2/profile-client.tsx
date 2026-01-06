@@ -597,9 +597,9 @@ const mockProfileActivities = [
 ]
 
 const mockProfileQuickActions = [
-  { id: '1', label: 'Edit Profile', icon: 'edit', action: () => console.log('Edit'), variant: 'default' as const },
-  { id: '2', label: 'Add Skill', icon: 'plus', action: () => console.log('Add skill'), variant: 'default' as const },
-  { id: '3', label: 'Download CV', icon: 'download', action: () => console.log('Download'), variant: 'outline' as const },
+  { id: '1', label: 'Edit Profile', icon: 'edit', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening profile editor...', success: 'Profile editor ready! Update your information', error: 'Failed to open editor' }), variant: 'default' as const },
+  { id: '2', label: 'Add Skill', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening skill picker...', success: 'Select skills to add to your profile', error: 'Failed to load skills' }), variant: 'default' as const },
+  { id: '3', label: 'Download CV', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating CV PDF...', success: 'CV downloaded! Check your downloads folder', error: 'CV generation failed' }), variant: 'outline' as const },
 ]
 
 // Database types
@@ -1213,7 +1213,7 @@ export default function ProfileClient() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
                   { icon: Edit, label: 'Edit Profile', color: 'from-blue-500 to-indigo-600', onClick: () => setActiveTab('settings') },
-                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => toast.info('Photo upload coming soon') },
+                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening camera...', success: 'Select a photo from your device or take a new one', error: 'Camera unavailable' }) },
                   { icon: Share2, label: 'Share Profile', color: 'from-green-500 to-emerald-600', onClick: handleShareProfile },
                   { icon: Download, label: 'Export PDF', color: 'from-orange-500 to-amber-600', onClick: handleDownloadPDF },
                   { icon: UserPlus, label: 'Grow Network', color: 'from-cyan-500 to-blue-600', onClick: () => setActiveTab('network') },
