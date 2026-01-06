@@ -277,6 +277,7 @@ export default function IntegrationsClient() {
   const [showCreateIntegrationDialog, setShowCreateIntegrationDialog] = useState(false)
   const [showCreateZapDialog, setShowCreateZapDialog] = useState(false)
   const [showCreateWebhookDialog, setShowCreateWebhookDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Form states
@@ -790,12 +791,42 @@ export default function IntegrationsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'Create Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowCreateZapDialog(true) },
-                { icon: Zap, label: 'Templates', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Templates coming soon') },
-                { icon: Play, label: 'Run All', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Running all active zaps...') },
-                { icon: Pause, label: 'Pause All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => toast.info('Pausing all zaps...') },
+                { icon: Zap, label: 'Templates', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowTemplatesDialog(true) },
+                { icon: Play, label: 'Run All', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: async () => {
+                  const activeWorkflows = workflows.filter(w => w.status === 'active')
+                  if (activeWorkflows.length === 0) {
+                    toast.info('No active workflows to run')
+                    return
+                  }
+                  toast.promise(
+                    Promise.all(activeWorkflows.map(w => startWorkflow(w.id))),
+                    { loading: `Running ${activeWorkflows.length} workflows...`, success: `Started ${activeWorkflows.length} workflows!`, error: 'Failed to run workflows' }
+                  )
+                } },
+                { icon: Pause, label: 'Pause All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: async () => {
+                  const activeWorkflows = workflows.filter(w => w.status === 'active')
+                  if (activeWorkflows.length === 0) {
+                    toast.info('No active workflows to pause')
+                    return
+                  }
+                  toast.promise(
+                    Promise.all(activeWorkflows.map(w => pauseWorkflow(w.id))),
+                    { loading: `Pausing ${activeWorkflows.length} workflows...`, success: `Paused ${activeWorkflows.length} workflows!`, error: 'Failed to pause workflows' }
+                  )
+                } },
                 { icon: History, label: 'History', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('tasks') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('analytics') },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Exporting zaps...') },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
+                  const data = JSON.stringify(workflows, null, 2)
+                  const blob = new Blob([data], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'workflows-export.json'
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Workflows exported successfully!')
+                } },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
@@ -2169,6 +2200,49 @@ export default function IntegrationsClient() {
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Webhook className="w-4 h-4 mr-2" />}
                 Create Webhook
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Templates Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-amber-500" />
+                Workflow Templates
+              </DialogTitle>
+              <DialogDescription>
+                Choose a pre-built workflow template to get started quickly
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid grid-cols-2 gap-4 py-4">
+              {[
+                { name: 'Lead to CRM', desc: 'Automatically add new leads to your CRM', icon: Users, color: 'text-blue-500' },
+                { name: 'Email Notifications', desc: 'Send emails when events occur', icon: Mail, color: 'text-green-500' },
+                { name: 'Slack Updates', desc: 'Post updates to Slack channels', icon: MessageSquare, color: 'text-purple-500' },
+                { name: 'Data Sync', desc: 'Keep data in sync across apps', icon: RefreshCw, color: 'text-orange-500' },
+                { name: 'Task Automation', desc: 'Create tasks from events', icon: CheckCircle, color: 'text-teal-500' },
+                { name: 'Custom Webhook', desc: 'Trigger custom webhooks', icon: Webhook, color: 'text-red-500' }
+              ].map((template, idx) => (
+                <button
+                  key={idx}
+                  className="p-4 border rounded-lg hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-colors text-left"
+                  onClick={() => {
+                    setShowTemplatesDialog(false)
+                    setShowCreateZapDialog(true)
+                    setWorkflowForm({ ...workflowForm, name: template.name, description: template.desc })
+                    toast.success(`Template "${template.name}" selected`)
+                  }}
+                >
+                  <template.icon className={`w-8 h-8 mb-2 ${template.color}`} />
+                  <p className="font-medium">{template.name}</p>
+                  <p className="text-xs text-gray-500">{template.desc}</p>
+                </button>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>Cancel</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

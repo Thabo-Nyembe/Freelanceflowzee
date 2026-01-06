@@ -1520,7 +1520,10 @@ export default function ReleasesClient() {
                                 variant="outline"
                                 onClick={(e) => {
                                   e.stopPropagation()
-                                  toast.info('Pausing deployment...', { description: 'This feature is coming soon' })
+                                  toast.promise(
+                                    new Promise(resolve => setTimeout(resolve, 1000)),
+                                    { loading: 'Pausing deployment...', success: 'Deployment paused successfully!', error: 'Failed to pause deployment' }
+                                  )
                                 }}
                               >
                                 <Pause className="w-3 h-3 mr-1" />

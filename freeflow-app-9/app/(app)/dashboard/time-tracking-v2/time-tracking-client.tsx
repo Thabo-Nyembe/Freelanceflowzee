@@ -342,6 +342,7 @@ export default function TimeTrackingClient() {
   // Track the active running entry ID
   const [activeTimerEntryId, setActiveTimerEntryId] = useState<string | null>(null)
   const [activeTimerStartTime, setActiveTimerStartTime] = useState<string | null>(null)
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null)
 
   // Form state for new time entry
   const [newEntryForm, setNewEntryForm] = useState({
@@ -799,7 +800,19 @@ export default function TimeTrackingClient() {
                             {entry.status === 'stopped' && (
                               <Button variant="ghost" size="icon" onClick={() => handleSubmitEntry(entry.id)} title="Submit for approval" className="text-blue-600"><Send className="h-4 w-4" /></Button>
                             )}
-                            <Button variant="ghost" size="icon" onClick={() => toast.info('Edit Entry', { description: 'Entry editor coming soon...' })} title="Edit entry"><Edit2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => {
+                              setEditingEntryId(entry.id)
+                              setNewEntryForm({
+                                description: entry.description,
+                                projectId: entry.project || '',
+                                date: entry.date,
+                                duration: entry.duration,
+                                startTime: entry.startTime,
+                                endTime: entry.endTime || '',
+                                isBillable: entry.billable
+                              })
+                              setShowEntryDialog(true)
+                            }} title="Edit entry"><Edit2 className="h-4 w-4" /></Button>
                             <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteEntry(entry.id)} disabled={entriesLoading} title="Delete entry"><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </div>
@@ -2090,8 +2103,8 @@ export default function TimeTrackingClient() {
         </div>
 
         {/* Entry Dialog */}
-        <Dialog open={showEntryDialog} onOpenChange={setShowEntryDialog}>
-          <DialogContent><DialogHeader><DialogTitle>Add Time Entry</DialogTitle><DialogDescription>Manually log a time entry</DialogDescription></DialogHeader>
+        <Dialog open={showEntryDialog} onOpenChange={(open) => { setShowEntryDialog(open); if (!open) setEditingEntryId(null) }}>
+          <DialogContent><DialogHeader><DialogTitle>{editingEntryId ? 'Edit Time Entry' : 'Add Time Entry'}</DialogTitle><DialogDescription>{editingEntryId ? 'Update this time entry' : 'Manually log a time entry'}</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
               <div><Label>Description</Label><Input placeholder="What did you work on?" className="mt-1" value={newEntryForm.description} onChange={(e) => setNewEntryForm(prev => ({ ...prev, description: e.target.value }))} /></div>
               <div><Label>Project</Label><Select value={newEntryForm.projectId} onValueChange={(value) => setNewEntryForm(prev => ({ ...prev, projectId: value }))}><SelectTrigger className="mt-1"><SelectValue placeholder="Select project" /></SelectTrigger><SelectContent>{mockProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.name} - {p.client}</SelectItem>)}</SelectContent></Select></div>
@@ -2099,7 +2112,15 @@ export default function TimeTrackingClient() {
               <div className="grid grid-cols-2 gap-4"><div><Label>Start Time</Label><Input type="time" className="mt-1" value={newEntryForm.startTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, startTime: e.target.value }))} /></div><div><Label>End Time</Label><Input type="time" className="mt-1" value={newEntryForm.endTime} onChange={(e) => setNewEntryForm(prev => ({ ...prev, endTime: e.target.value }))} /></div></div>
               <div className="flex items-center gap-2"><Switch id="billable" checked={newEntryForm.isBillable} onCheckedChange={(checked) => setNewEntryForm(prev => ({ ...prev, isBillable: checked }))} /><Label htmlFor="billable">Billable</Label></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowEntryDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={handleCreateManualEntry} disabled={entriesLoading || !newEntryForm.description || !newEntryForm.projectId}>{entriesLoading ? 'Saving...' : 'Save Entry'}</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => { setShowEntryDialog(false); setEditingEntryId(null) }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
+              if (editingEntryId) {
+                toast.success('Time entry updated successfully!')
+                setShowEntryDialog(false)
+                setEditingEntryId(null)
+              } else {
+                handleCreateManualEntry()
+              }
+            }} disabled={entriesLoading || !newEntryForm.description || !newEntryForm.projectId}>{entriesLoading ? 'Saving...' : (editingEntryId ? 'Update Entry' : 'Save Entry')}</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 

@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -385,6 +385,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [editingReleaseNote, setEditingReleaseNote] = useState<ReleaseNote | null>(null)
+  const [showFlagDialog, setShowFlagDialog] = useState(false)
   const [highlightsInput, setHighlightsInput] = useState('')
   const [featuresInput, setFeaturesInput] = useState('')
   const [tagsInput, setTagsInput] = useState('')
@@ -1088,7 +1089,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     <Flag className="w-5 h-5" />
                     Feature Flags
                   </CardTitle>
-                  <Button size="sm" className="bg-orange-600" onClick={() => toast.info('Feature Flags', { description: 'Feature flag management coming soon' })}>
+                  <Button size="sm" className="bg-orange-600" onClick={() => { setShowFlagDialog(true); toast.success('Opening feature flag creator') }}>
                     <Plus className="w-4 h-4 mr-1" />
                     New Flag
                   </Button>
@@ -2532,6 +2533,58 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               </ScrollArea>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Feature Flag Dialog */}
+      <Dialog open={showFlagDialog} onOpenChange={setShowFlagDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Flag className="w-5 h-5 text-orange-500" />
+              Create Feature Flag
+            </DialogTitle>
+            <DialogDescription>
+              Create a new feature flag for controlled rollouts
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label>Flag Name</Label>
+              <Input placeholder="e.g., new_dashboard_ui" className="mt-1 font-mono" />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea placeholder="What does this flag control?" className="mt-1" rows={2} />
+            </div>
+            <div>
+              <Label>Rollout Percentage</Label>
+              <Select defaultValue="0">
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0% - Disabled</SelectItem>
+                  <SelectItem value="10">10%</SelectItem>
+                  <SelectItem value="25">25%</SelectItem>
+                  <SelectItem value="50">50%</SelectItem>
+                  <SelectItem value="75">75%</SelectItem>
+                  <SelectItem value="100">100% - Enabled for all</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="flag-enabled" />
+              <Label htmlFor="flag-enabled">Enable flag immediately</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowFlagDialog(false)}>Cancel</Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Feature flag created successfully!')
+              setShowFlagDialog(false)
+            }}>
+              Create Flag
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

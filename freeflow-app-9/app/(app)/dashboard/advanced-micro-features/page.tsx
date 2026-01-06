@@ -1,8 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 import dynamic from 'next/dynamic'
+import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -96,6 +97,7 @@ const logger = createFeatureLogger('Advanced-Micro-Features')
 
 export default function AdvancedMicroFeaturesPage() {
   // A+++ STATE MANAGEMENT
+  const router = useRouter()
   const { userId, loading: userLoading } = useCurrentUser()
   const { announce } = useAnnouncer()
 
@@ -165,13 +167,13 @@ export default function AdvancedMicroFeaturesPage() {
   }), [])
 
   const mockQuickActions = useMemo(() => [
-    { id: '1', label: 'New Project', icon: Zap, onClick: () => {}, variant: 'primary' as const, shortcut: '⌘N' },
-    { id: '2', label: 'Upload Files', icon: Download, onClick: () => {}, badge: '5' },
-    { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => {}, badge: 3 },
-    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => {} },
-    { id: '5', label: 'Settings', icon: Settings, onClick: () => {} },
-    { id: '6', label: 'Share', icon: Share2, onClick: () => {}, disabled: true }
-  ], [])
+    { id: '1', label: 'New Project', icon: Zap, onClick: () => { router.push('/dashboard/projects-v2?action=new'); toast.success('Opening new project...') }, variant: 'primary' as const, shortcut: '⌘N' },
+    { id: '2', label: 'Upload Files', icon: Download, onClick: () => { router.push('/dashboard/files-hub-v2?action=upload'); toast.success('Opening file upload...') }, badge: '5' },
+    { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => { router.push('/dashboard/messages-v2'); toast.success('Opening team chat...') }, badge: 3 },
+    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => { router.push('/dashboard/analytics-v2'); toast.success('Opening analytics...') } },
+    { id: '5', label: 'Settings', icon: Settings, onClick: () => { router.push('/dashboard/settings-v2'); toast.success('Opening settings...') } },
+    { id: '6', label: 'Share', icon: Share2, onClick: () => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied to clipboard!') }, disabled: false }
+  ], [router])
 
   const mockNotifications = useMemo(() => [
     {
@@ -181,8 +183,8 @@ export default function AdvancedMicroFeaturesPage() {
       type: 'info' as const,
       timestamp: new Date(Date.now() - 5 * 60 * 1000),
       actions: [
-        { label: 'View Project', onClick: () => {}, variant: 'primary' as const },
-        { label: 'Dismiss', onClick: () => {} }
+        { label: 'View Project', onClick: () => { router.push('/dashboard/projects-v2'); toast.success('Opening project...') }, variant: 'primary' as const },
+        { label: 'Dismiss', onClick: () => { toast.info('Notification dismissed') } }
       ]
     },
     {
@@ -200,7 +202,7 @@ export default function AdvancedMicroFeaturesPage() {
       type: 'warning' as const,
       timestamp: new Date(Date.now() - 60 * 60 * 1000)
     }
-  ], [])
+  ], [router])
 
   const mockActivities = useMemo(() => [
     {

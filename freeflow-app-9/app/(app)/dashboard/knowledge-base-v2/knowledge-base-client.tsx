@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
@@ -717,6 +717,7 @@ export default function KnowledgeBaseClient() {
 
   // Form State
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showSearchDialog, setShowSearchDialog] = useState(false)
   const [newPageTitle, setNewPageTitle] = useState('')
   const [newPageContent, setNewPageContent] = useState('')
   const [newPageCategory, setNewPageCategory] = useState('general')
@@ -1053,7 +1054,7 @@ export default function KnowledgeBaseClient() {
                 { icon: Plus, label: 'New Page', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowCreateDialog(true) },
                 { icon: FolderOpen, label: 'New Space', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Creating space...') },
                 { icon: Layout, label: 'Templates', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('templates') },
-                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {} },
+                { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowSearchDialog(true) },
                 { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Showing starred pages') },
                 { icon: Clock, label: 'Recent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.info('Showing recent pages') },
                 { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: () => setSelectedStatus('archived') },
@@ -2115,6 +2116,55 @@ export default function KnowledgeBaseClient() {
               {isSubmitting ? 'Creating...' : 'Create Page'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Search Dialog */}
+      <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-teal-500" />
+              Search Knowledge Base
+            </DialogTitle>
+            <DialogDescription>
+              Find pages, articles, and documentation
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search pages, docs, articles..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+            </div>
+            {searchQuery && (
+              <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
+                {pages.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5).map((page) => (
+                  <button
+                    key={page.id}
+                    className="w-full p-3 text-left border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => {
+                      setSelectedPage(page)
+                      setShowSearchDialog(false)
+                      setSearchQuery('')
+                      toast.success(`Opening "${page.title}"`)
+                    }}
+                  >
+                    <div className="font-medium">{page.title}</div>
+                    <div className="text-sm text-gray-500 truncate">{page.content.substring(0, 80)}...</div>
+                  </button>
+                ))}
+                {pages.filter(p => p.title.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
+                  <p className="text-center text-gray-500 py-4">No results found</p>
+                )}
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </div>

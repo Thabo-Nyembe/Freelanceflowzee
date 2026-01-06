@@ -455,6 +455,8 @@ export default function FilesHubClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null)
   const [showFileDialog, setShowFileDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [currentFolderId, setCurrentFolderId] = useState<string | null>(null)
   const [sortBy, setSortBy] = useState<SortBy>('modified')
   const [filterType, setFilterType] = useState<FileType | 'all'>('all')
@@ -695,7 +697,7 @@ export default function FilesHubClient() {
               <FolderPlus className="w-4 h-4 mr-2" />
               New Folder
             </Button>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.info('Upload', { description: 'File upload coming soon' })}>
+            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => setShowUploadDialog(true)}>
               <Upload className="w-4 h-4 mr-2" />
               Upload Files
             </Button>
@@ -2189,6 +2191,109 @@ export default function FilesHubClient() {
               <Button variant="outline" onClick={() => setShowCreateFolderDialog(false)}>Cancel</Button>
               <Button onClick={handleCreateFolder} disabled={isSubmitting} className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white">
                 {isSubmitting ? 'Creating...' : 'Create Folder'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Upload Files Dialog */}
+        <Dialog open={showUploadDialog} onOpenChange={setShowUploadDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-cyan-600" />
+                Upload Files
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div
+                className="border-2 border-dashed border-cyan-200 dark:border-cyan-800 rounded-lg p-8 text-center hover:border-cyan-400 transition-colors cursor-pointer"
+                onClick={() => document.getElementById('file-upload-input')?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('border-cyan-500', 'bg-cyan-50', 'dark:bg-cyan-900/20') }}
+                onDragLeave={(e) => { e.preventDefault(); e.currentTarget.classList.remove('border-cyan-500', 'bg-cyan-50', 'dark:bg-cyan-900/20') }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  e.currentTarget.classList.remove('border-cyan-500', 'bg-cyan-50', 'dark:bg-cyan-900/20')
+                  const droppedFiles = Array.from(e.dataTransfer.files)
+                  if (droppedFiles.length > 0) {
+                    // Simulate upload progress
+                    setUploadProgress(0)
+                    const interval = setInterval(() => {
+                      setUploadProgress(prev => {
+                        if (prev >= 100) {
+                          clearInterval(interval)
+                          toast.success(`${droppedFiles.length} file(s) uploaded successfully`)
+                          setTimeout(() => {
+                            setShowUploadDialog(false)
+                            setUploadProgress(0)
+                          }, 500)
+                          return 100
+                        }
+                        return prev + 10
+                      })
+                    }, 100)
+                  }
+                }}
+              >
+                <input
+                  id="file-upload-input"
+                  type="file"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => {
+                    const selectedFiles = Array.from(e.target.files || [])
+                    if (selectedFiles.length > 0) {
+                      // Simulate upload progress
+                      setUploadProgress(0)
+                      const interval = setInterval(() => {
+                        setUploadProgress(prev => {
+                          if (prev >= 100) {
+                            clearInterval(interval)
+                            toast.success(`${selectedFiles.length} file(s) uploaded successfully`)
+                            setTimeout(() => {
+                              setShowUploadDialog(false)
+                              setUploadProgress(0)
+                            }, 500)
+                            return 100
+                          }
+                          return prev + 10
+                        })
+                      }, 100)
+                    }
+                  }}
+                />
+                <Upload className="w-12 h-12 text-cyan-400 mx-auto mb-4" />
+                <p className="text-lg font-medium text-gray-700 dark:text-gray-300">Drag and drop files here</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">or click to browse</p>
+                <p className="text-xs text-gray-400 mt-3">Max file size: 100MB</p>
+              </div>
+
+              {uploadProgress > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Uploading...</span>
+                    <span className="font-medium text-cyan-600">{uploadProgress}%</span>
+                  </div>
+                  <Progress value={uploadProgress} className="h-2" />
+                </div>
+              )}
+
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 space-y-2">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Supported formats:</p>
+                <div className="flex flex-wrap gap-2">
+                  {['PDF', 'DOC', 'XLS', 'PNG', 'JPG', 'MP4', 'ZIP'].map(format => (
+                    <Badge key={format} variant="secondary" className="text-xs">{format}</Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowUploadDialog(false); setUploadProgress(0) }}>Cancel</Button>
+              <Button
+                onClick={() => document.getElementById('file-upload-input')?.click()}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+              >
+                Select Files
               </Button>
             </DialogFooter>
           </DialogContent>

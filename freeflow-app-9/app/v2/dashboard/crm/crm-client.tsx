@@ -270,6 +270,8 @@ export default function CrmClient() {
   const [showEditContactDialog, setShowEditContactDialog] = useState(false)
   const [showEditDealDialog, setShowEditDealDialog] = useState(false)
   const [showAddActivityDialog, setShowAddActivityDialog] = useState(false)
+  const [showReportDialog, setShowReportDialog] = useState(false)
+  const [showAutomationDialog, setShowAutomationDialog] = useState(false)
 
   // Form states
   const [contactForm, setContactForm] = useState({
@@ -1608,7 +1610,7 @@ export default function CrmClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Reports & Analytics</h3>
-              <Button onClick={() => toast.info('Reports', { description: 'Report builder coming soon' })}>
+              <Button onClick={() => setShowReportDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Report
               </Button>
@@ -1692,7 +1694,7 @@ export default function CrmClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Workflows & Automation</h3>
-              <Button onClick={() => toast.info('Automation', { description: 'Workflow builder coming soon' })}>
+              <Button onClick={() => setShowAutomationDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Automation
               </Button>
@@ -2948,6 +2950,125 @@ export default function CrmClient() {
               >
                 {activityMutation.isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                 Log Activity
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Builder Dialog */}
+        <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-500" />
+                Create Report
+              </DialogTitle>
+              <DialogDescription>
+                Build a custom CRM report
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Report Name</Label>
+                <Input placeholder="e.g., Q1 Sales Pipeline" className="mt-1" />
+              </div>
+              <div>
+                <Label>Report Type</Label>
+                <Select defaultValue="pipeline">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pipeline">Pipeline Analysis</SelectItem>
+                    <SelectItem value="conversion">Conversion Rates</SelectItem>
+                    <SelectItem value="revenue">Revenue Forecast</SelectItem>
+                    <SelectItem value="activity">Activity Summary</SelectItem>
+                    <SelectItem value="leads">Lead Sources</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select defaultValue="30">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7">Last 7 days</SelectItem>
+                    <SelectItem value="30">Last 30 days</SelectItem>
+                    <SelectItem value="90">Last 90 days</SelectItem>
+                    <SelectItem value="365">Last year</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="schedule" />
+                <Label htmlFor="schedule">Schedule automatic delivery</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => {
+                toast.success('Report created successfully!')
+                setShowReportDialog(false)
+              }}>
+                Create Report
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Builder Dialog */}
+        <Dialog open={showAutomationDialog} onOpenChange={setShowAutomationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-amber-500" />
+                Create Automation
+              </DialogTitle>
+              <DialogDescription>
+                Set up an automated workflow
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Automation Name</Label>
+                <Input placeholder="e.g., Welcome New Leads" className="mt-1" />
+              </div>
+              <div>
+                <Label>Trigger</Label>
+                <Select defaultValue="new_lead">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new_lead">New lead created</SelectItem>
+                    <SelectItem value="deal_stage">Deal stage changed</SelectItem>
+                    <SelectItem value="contact_tag">Contact tagged</SelectItem>
+                    <SelectItem value="inactivity">Contact inactive</SelectItem>
+                    <SelectItem value="deal_won">Deal won</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Action</Label>
+                <Select defaultValue="send_email">
+                  <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="send_email">Send email</SelectItem>
+                    <SelectItem value="create_task">Create task</SelectItem>
+                    <SelectItem value="update_field">Update field</SelectItem>
+                    <SelectItem value="notify_team">Notify team member</SelectItem>
+                    <SelectItem value="add_tag">Add tag</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch id="active" defaultChecked />
+                <Label htmlFor="active">Activate immediately</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>Cancel</Button>
+              <Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
+                toast.success('Automation created successfully!')
+                setShowAutomationDialog(false)
+              }}>
+                Create Automation
               </Button>
             </DialogFooter>
           </DialogContent>

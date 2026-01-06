@@ -2306,7 +2306,12 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                     {isExecutingTest ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Play className="w-4 h-4 mr-2" />}
                     Execute Test
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.info('Edit mode', { description: 'Test case editing coming soon' })}>
+                  <Button variant="outline" className="flex-1" onClick={() => {
+                    if (selectedTestCase) {
+                      setShowCreateTestDialog(true)
+                      toast.success('Editing test case')
+                    }
+                  }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

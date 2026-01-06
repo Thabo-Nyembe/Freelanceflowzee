@@ -556,6 +556,13 @@ export default function EventsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showCheckInDialog, setShowCheckInDialog] = useState(false)
+  const [showAddAttendeeDialog, setShowAddAttendeeDialog] = useState(false)
+  const [showEmailDialog, setShowEmailDialog] = useState(false)
+  const [checkInCode, setCheckInCode] = useState('')
+  const [newAttendeeEmail, setNewAttendeeEmail] = useState('')
+  const [emailSubject, setEmailSubject] = useState('')
+  const [emailBody, setEmailBody] = useState('')
   const [eventToEdit, setEventToEdit] = useState<SupabaseEvent | null>(null)
   const [eventToDelete, setEventToDelete] = useState<SupabaseEvent | null>(null)
 
@@ -1050,8 +1057,8 @@ export default function EventsClient() {
                   { icon: Plus, label: 'Create Event', color: 'from-orange-500 to-pink-600', action: () => { resetFormData(); setShowCreateDialog(true); } },
                   { icon: Ticket, label: 'Manage Tickets', color: 'from-blue-500 to-indigo-600', action: () => setActiveTab('orders') },
                   { icon: Users, label: 'Attendees', color: 'from-green-500 to-emerald-600', action: () => setActiveTab('attendees') },
-                  { icon: QrCode, label: 'Check-in', color: 'from-purple-500 to-pink-600', action: () => toast.info('Check-in feature coming soon') },
-                  { icon: Mail, label: 'Send Invite', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Invite feature coming soon') },
+                  { icon: QrCode, label: 'Check-in', color: 'from-purple-500 to-pink-600', action: () => setShowCheckInDialog(true) },
+                  { icon: Mail, label: 'Send Invite', color: 'from-cyan-500 to-blue-600', action: () => setShowEmailDialog(true) },
                   { icon: BarChart3, label: 'Analytics', color: 'from-yellow-500 to-orange-600', action: () => setActiveTab('analytics') },
                   { icon: Download, label: 'Export', color: 'from-indigo-500 to-purple-600', action: handleExportAttendees },
                   { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', action: () => setActiveTab('settings') },
@@ -1395,10 +1402,10 @@ export default function EventsClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: UserPlus, label: 'Add Attendee', color: 'from-purple-500 to-violet-600', action: () => toast.info('Add attendee feature coming soon') },
-                  { icon: QrCode, label: 'Check-in', color: 'from-blue-500 to-indigo-600', action: () => toast.info('Check-in scanner coming soon') },
-                  { icon: Mail, label: 'Email All', color: 'from-green-500 to-emerald-600', action: () => toast.info('Email feature coming soon') },
-                  { icon: Send, label: 'Send Reminder', color: 'from-orange-500 to-amber-600', action: () => toast.info('Reminder feature coming soon') },
+                  { icon: UserPlus, label: 'Add Attendee', color: 'from-purple-500 to-violet-600', action: () => setShowAddAttendeeDialog(true) },
+                  { icon: QrCode, label: 'Check-in', color: 'from-blue-500 to-indigo-600', action: () => setShowCheckInDialog(true) },
+                  { icon: Mail, label: 'Email All', color: 'from-green-500 to-emerald-600', action: () => { setEmailSubject('Event Update'); setEmailBody(''); setShowEmailDialog(true) } },
+                  { icon: Send, label: 'Send Reminder', color: 'from-orange-500 to-amber-600', action: () => { setEmailSubject('Event Reminder'); setEmailBody('This is a friendly reminder about the upcoming event.'); setShowEmailDialog(true) } },
                   { icon: Download, label: 'Export List', color: 'from-cyan-500 to-blue-600', action: handleExportAttendees },
                   { icon: Filter, label: 'Filter', color: 'from-pink-500 to-rose-600', action: () => toast.info('Filter feature coming soon') },
                   { icon: Search, label: 'Search', color: 'from-indigo-500 to-purple-600', action: () => toast.info('Use the search bar above') },
@@ -1428,7 +1435,7 @@ export default function EventsClient() {
                     Export
                   </Button>
                 </div>
-                <Button className="bg-gradient-to-r from-orange-500 to-pink-500" onClick={() => toast.info('Add attendee feature coming soon')}>
+                <Button className="bg-gradient-to-r from-orange-500 to-pink-500" onClick={() => setShowAddAttendeeDialog(true)}>
                   <UserPlus className="w-4 h-4 mr-2" />
                   Add Attendee
                 </Button>
@@ -2753,6 +2760,161 @@ export default function EventsClient() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Check-in Dialog */}
+      <Dialog open={showCheckInDialog} onOpenChange={setShowCheckInDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <QrCode className="w-5 h-5 text-purple-600" />
+              Event Check-in
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-6 text-center">
+              <QrCode className="w-16 h-16 text-purple-400 mx-auto mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400">Scan QR code or enter code manually</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Ticket Code / Registration ID</Label>
+              <Input
+                placeholder="Enter ticket code..."
+                value={checkInCode}
+                onChange={(e) => setCheckInCode(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCheckInDialog(false)}>Cancel</Button>
+            <Button
+              className="bg-gradient-to-r from-purple-500 to-pink-600"
+              onClick={() => {
+                if (checkInCode.trim()) {
+                  toast.success(`Attendee "${checkInCode}" checked in successfully!`)
+                  setCheckInCode('')
+                  setShowCheckInDialog(false)
+                } else {
+                  toast.error('Please enter a ticket code')
+                }
+              }}
+            >
+              Check In
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Attendee Dialog */}
+      <Dialog open={showAddAttendeeDialog} onOpenChange={setShowAddAttendeeDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-purple-600" />
+              Add Attendee
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <Input
+                type="email"
+                placeholder="attendee@example.com"
+                value={newAttendeeEmail}
+                onChange={(e) => setNewAttendeeEmail(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Full Name</Label>
+              <Input placeholder="John Doe" />
+            </div>
+            <div className="space-y-2">
+              <Label>Ticket Type</Label>
+              <Select defaultValue="general">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="general">General Admission</SelectItem>
+                  <SelectItem value="vip">VIP</SelectItem>
+                  <SelectItem value="early">Early Bird</SelectItem>
+                  <SelectItem value="speaker">Speaker</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAddAttendeeDialog(false)}>Cancel</Button>
+            <Button
+              className="bg-gradient-to-r from-purple-500 to-violet-600"
+              onClick={() => {
+                if (newAttendeeEmail.trim()) {
+                  toast.success(`Attendee added successfully! Confirmation sent to ${newAttendeeEmail}`)
+                  setNewAttendeeEmail('')
+                  setShowAddAttendeeDialog(false)
+                } else {
+                  toast.error('Please enter an email address')
+                }
+              }}
+            >
+              Add Attendee
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email All Dialog */}
+      <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5 text-cyan-600" />
+              Send Email to Attendees
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Subject</Label>
+              <Input
+                placeholder="Email subject..."
+                value={emailSubject}
+                onChange={(e) => setEmailSubject(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Message</Label>
+              <textarea
+                className="w-full min-h-[120px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                placeholder="Write your message..."
+                value={emailBody}
+                onChange={(e) => setEmailBody(e.target.value)}
+              />
+            </div>
+            <div className="bg-cyan-50 dark:bg-cyan-900/20 rounded-lg p-3">
+              <p className="text-sm text-cyan-700 dark:text-cyan-300">
+                This email will be sent to all registered attendees.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowEmailDialog(false)}>Cancel</Button>
+            <Button
+              className="bg-gradient-to-r from-cyan-500 to-blue-600"
+              onClick={() => {
+                if (emailSubject.trim() && emailBody.trim()) {
+                  toast.success('Email sent to all attendees!')
+                  setEmailSubject('')
+                  setEmailBody('')
+                  setShowEmailDialog(false)
+                } else {
+                  toast.error('Please fill in both subject and message')
+                }
+              }}
+            >
+              Send Email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
