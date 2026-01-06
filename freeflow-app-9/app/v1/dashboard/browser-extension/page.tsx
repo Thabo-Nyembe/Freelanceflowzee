@@ -626,48 +626,42 @@ export default function BrowserExtensionPage() {
   const handleInstallExtension = async () => {
     logger.info('Installing extension', { browser: state.currentBrowser })
 
-    try {
-      logger.debug('Starting installation')
-      toast.info('Installing extension...', {
-        description: 'Setting up browser integration'
-      })
+    toast.promise(
+      (async () => {
+        logger.debug('Starting installation')
 
-      // Create installation record in database
-      if (userId) {
-        const { createInstallation } = await import('@/lib/browser-extension-queries')
-        const { data, error } = await createInstallation(userId, {
-          browser: state.currentBrowser as any,
-          browser_version: navigator.userAgent.match(/Chrome\/(\d+)/)?.[1] || '120',
-          extension_version: '1.0.0',
-          status: 'active',
-          installed_at: new Date().toISOString(),
-          settings: {},
-          enabled_features: ['screenshot', 'quick-actions', 'sync'],
-          total_captures: 0,
-          total_actions: 0,
-          storage_used: 0
-        })
-        if (error) throw error
-        logger.info('Installation record created in database', { installationId: data?.id })
+        // Create installation record in database
+        if (userId) {
+          const { createInstallation } = await import('@/lib/browser-extension-queries')
+          const { data, error } = await createInstallation(userId, {
+            browser: state.currentBrowser as any,
+            browser_version: navigator.userAgent.match(/Chrome\/(\d+)/)?.[1] || '120',
+            extension_version: '1.0.0',
+            status: 'active',
+            installed_at: new Date().toISOString(),
+            settings: {},
+            enabled_features: ['screenshot', 'quick-actions', 'sync'],
+            total_captures: 0,
+            total_actions: 0,
+            storage_used: 0
+          })
+          if (error) throw error
+          logger.info('Installation record created in database', { installationId: data?.id })
+        }
+
+        dispatch({ type: 'SET_INSTALLED', isInstalled: true })
+        setShowInstallModal(false)
+
+        logger.info('Extension installed successfully', { browser: state.currentBrowser })
+        announce('Extension installed', 'polite')
+        return state.currentBrowser
+      })(),
+      {
+        loading: 'Installing extension...',
+        success: (browser) => `Extension installed - ${browser} - Active and syncing`,
+        error: 'Failed to install extension'
       }
-
-      dispatch({ type: 'SET_INSTALLED', isInstalled: true })
-      setShowInstallModal(false)
-
-      logger.info('Extension installed successfully', { browser: state.currentBrowser })
-      toast.success('Extension installed', {
-        description: `${state.currentBrowser} - Active and syncing - All features enabled`
-      })
-      announce('Extension installed', 'polite')
-    } catch (error) {
-      logger.error('Extension installation error', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        errorObject: error,
-        browser: state.currentBrowser
-      })
-      toast.error('Failed to install extension')
-      announce('Failed to install extension', 'assertive')
-    }
+    )
   }
 
   const handleViewCapture = (capture: PageCapture) => {
@@ -699,43 +693,39 @@ export default function BrowserExtensionPage() {
 
     logger.info('User confirmed deletion', { captureId: deleteCapture.id, userId })
 
-    try {
-      // Dynamic import for code splitting
-      const { deleteCapture: deleteCaptureFromDB } = await import('@/lib/browser-extension-queries')
+    const captureToDelete = deleteCapture
+    setDeleteCapture(null)
 
-      const { error: deleteError } = await deleteCaptureFromDB(deleteCapture.id)
+    toast.promise(
+      (async () => {
+        // Dynamic import for code splitting
+        const { deleteCapture: deleteCaptureFromDB } = await import('@/lib/browser-extension-queries')
 
-      if (deleteError) {
-        throw new Error(deleteError.message || 'Failed to delete capture')
+        const { error: deleteError } = await deleteCaptureFromDB(captureToDelete.id)
+
+        if (deleteError) {
+          throw new Error(deleteError.message || 'Failed to delete capture')
+        }
+
+        dispatch({ type: 'DELETE_CAPTURE', captureId: captureToDelete.id })
+
+        const fileSizeMB = (captureToDelete.fileSize / (1024 * 1024)).toFixed(1)
+
+        logger.info('Capture deleted from database', {
+          captureId: captureToDelete.id,
+          title: captureToDelete.title,
+          userId
+        })
+
+        announce('Capture deleted', 'polite')
+        return { title: captureToDelete.title, type: captureToDelete.type, fileSizeMB }
+      })(),
+      {
+        loading: 'Deleting capture...',
+        success: (data) => `Capture deleted - ${data.title} - ${data.type} - ${data.fileSizeMB} MB freed`,
+        error: 'Failed to delete capture'
       }
-
-      dispatch({ type: 'DELETE_CAPTURE', captureId: deleteCapture.id })
-
-      const fileSizeMB = (deleteCapture.fileSize / (1024 * 1024)).toFixed(1)
-
-      logger.info('Capture deleted from database', {
-        captureId: deleteCapture.id,
-        title: deleteCapture.title,
-        userId
-      })
-
-      toast.success('Capture deleted', {
-        description: `${deleteCapture.title} - ${deleteCapture.type} - ${fileSizeMB} MB freed`
-      })
-      announce('Capture deleted', 'polite')
-    } catch (error: any) {
-      logger.error('Failed to delete capture', {
-        error: error.message,
-        captureId: deleteCapture.id,
-        userId
-      })
-      toast.error('Failed to delete capture', {
-        description: error.message || 'Please try again later'
-      })
-      announce('Error deleting capture', 'assertive')
-    } finally {
-      setDeleteCapture(null)
-    }
+    )
   }
 
   const handleToggleFeature = async (featureId: string) => {
@@ -748,38 +738,52 @@ export default function BrowserExtensionPage() {
       currentState: feature.enabled
     })
 
-    dispatch({ type: 'TOGGLE_FEATURE', featureId })
-
     const newState = !feature.enabled
 
-    // Persist feature toggle in database
-    if (userId) {
-      const { getUserInstallations, updateInstallation } = await import('@/lib/browser-extension-queries')
-      const { data: installations } = await getUserInstallations(userId)
-      if (installations && installations.length > 0) {
-        const installation = installations[0]
-        const enabledFeatures = newState
-          ? [...(installation.enabled_features || []), featureId]
-          : (installation.enabled_features || []).filter((f: string) => f !== featureId)
-        await updateInstallation(installation.id, { enabled_features: enabledFeatures })
-        logger.info('Feature toggle persisted in database', { featureId, enabled: newState })
-      }
-    }
+    toast.promise(
+      (async () => {
+        dispatch({ type: 'TOGGLE_FEATURE', featureId })
 
-    toast.success(newState ? `${feature.name} enabled` : `${feature.name} disabled`, {
-      description: `${feature.description} - ${newState ? 'Now active' : 'Disabled'}`
-    })
-    announce(newState ? `${feature.name} enabled` : `${feature.name} disabled`, 'polite')
+        // Persist feature toggle in database
+        if (userId) {
+          const { getUserInstallations, updateInstallation } = await import('@/lib/browser-extension-queries')
+          const { data: installations } = await getUserInstallations(userId)
+          if (installations && installations.length > 0) {
+            const installation = installations[0]
+            const enabledFeatures = newState
+              ? [...(installation.enabled_features || []), featureId]
+              : (installation.enabled_features || []).filter((f: string) => f !== featureId)
+            await updateInstallation(installation.id, { enabled_features: enabledFeatures })
+            logger.info('Feature toggle persisted in database', { featureId, enabled: newState })
+          }
+        }
+
+        announce(newState ? `${feature.name} enabled` : `${feature.name} disabled`, 'polite')
+        return { name: feature.name, enabled: newState, description: feature.description }
+      })(),
+      {
+        loading: `${newState ? 'Enabling' : 'Disabling'} ${feature.name}...`,
+        success: (data) => `${data.name} ${data.enabled ? 'enabled' : 'disabled'} - ${data.description}`,
+        error: `Failed to ${newState ? 'enable' : 'disable'} ${feature.name}`
+      }
+    )
   }
 
   const handleCopyUrl = (url: string) => {
     logger.info('Copying URL', { url })
 
-    navigator.clipboard.writeText(url)
-    toast.success('URL copied to clipboard', {
-      description: url.length > 50 ? url.substring(0, 50) + '...' : url
-    })
-    announce('URL copied', 'polite')
+    toast.promise(
+      (async () => {
+        await navigator.clipboard.writeText(url)
+        announce('URL copied', 'polite')
+        return url
+      })(),
+      {
+        loading: 'Copying URL...',
+        success: (copiedUrl) => `URL copied to clipboard - ${copiedUrl.length > 50 ? copiedUrl.substring(0, 50) + '...' : copiedUrl}`,
+        error: 'Failed to copy URL'
+      }
+    )
   }
 
   // ========================================
@@ -854,7 +858,7 @@ export default function BrowserExtensionPage() {
           <ScrollReveal variant="scale" duration={0.6} delay={0.1}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
               <LiquidGlassCard className="p-6 relative overflow-hidden">
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2">
                     <Camera className="w-5 h-5 text-emerald-400" />
@@ -867,7 +871,7 @@ export default function BrowserExtensionPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-6 relative overflow-hidden">
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2">
                     <Image className="w-5 h-5 text-teal-400" />
@@ -880,7 +884,7 @@ export default function BrowserExtensionPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-6 relative overflow-hidden">
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2">
                     <FileText className="w-5 h-5 text-cyan-400" />
@@ -893,7 +897,7 @@ export default function BrowserExtensionPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-6 relative overflow-hidden">
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2">
                     <Cloud className="w-5 h-5 text-blue-400" />
@@ -906,7 +910,7 @@ export default function BrowserExtensionPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-6 relative overflow-hidden">
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2">
                     <Zap className="w-5 h-5 text-purple-400" />
@@ -919,7 +923,7 @@ export default function BrowserExtensionPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-6 relative overflow-hidden">
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center justify-between mb-2">
                     <CheckCircle className="w-5 h-5 text-pink-400" />

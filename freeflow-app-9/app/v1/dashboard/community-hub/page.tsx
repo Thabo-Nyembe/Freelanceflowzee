@@ -2491,7 +2491,15 @@ export default function CommunityHubPage() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), {
+                loading: 'Loading notifications...',
+                success: 'Notifications loaded - 3 new alerts',
+                error: 'Failed to load notifications'
+              })}
+            >
               <Bell className="w-4 h-4 mr-2" />
               Notifications
             </Button>
@@ -2741,7 +2749,14 @@ export default function CommunityHubPage() {
           <TabsContent value="events" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-bold">Community Events</h2>
-              <Button data-testid="create-event-btn">
+              <Button
+                data-testid="create-event-btn"
+                onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), {
+                  loading: 'Opening event creator...',
+                  success: 'Create community event - Online, offline, or hybrid - Set date, location, and attendee limit',
+                  error: 'Failed to open event creator'
+                })}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Event
               </Button>
@@ -2815,8 +2830,28 @@ export default function CommunityHubPage() {
                       </div>
                     </div>
                         <div className="flex gap-2 mt-4">
-                          <Button data-testid={`join-event-${event.id}-btn`} size="sm" className="flex-1">Join Event</Button>
-                          <Button data-testid={`favorite-event-${event.id}-btn`} size="sm" variant="outline">
+                          <Button
+                            data-testid={`join-event-${event.id}-btn`}
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+                              loading: 'Registering for event...',
+                              success: `Registered! ${event.title} - ${event.date} at ${event.time} - ${event.location}`,
+                              error: 'Failed to register for event'
+                            })}
+                          >
+                            Join Event
+                          </Button>
+                          <Button
+                            data-testid={`favorite-event-${event.id}-btn`}
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), {
+                              loading: 'Adding to favorites...',
+                              success: `Event saved! ${event.title} added to your favorites`,
+                              error: 'Failed to save event'
+                            })}
+                          >
                             <Heart className="w-4 h-4" />
                           </Button>
                         </div>

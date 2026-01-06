@@ -700,11 +700,31 @@ export default function ConnectorsClient() {
   const categories = [...new Set(mockApps.map(a => a.category))]
 
   // Handlers
-  const handleAddConnector = () => toast.info('Add', { description: 'Opening setup...' })
-  const handleConfigureConnector = (n: string) => toast.info('Configure', { description: `Settings for "${n}"...` })
-  const handleTestConnector = (n: string) => toast.info('Testing', { description: `Testing "${n}"...` })
-  const handleDisconnect = (n: string) => toast.info('Disconnected', { description: `"${n}" disconnected` })
-  const handleRefreshConnector = (n: string) => toast.success('Refreshed', { description: `"${n}" refreshed` })
+  const handleAddConnector = () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+    loading: 'Opening connector setup...',
+    success: 'Setup wizard ready',
+    error: 'Failed to open setup'
+  })
+  const handleConfigureConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: `Loading settings for "${n}"...`,
+    success: `Settings loaded for "${n}"`,
+    error: `Failed to load settings for "${n}"`
+  })
+  const handleTestConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: `Testing "${n}"...`,
+    success: `"${n}" test passed`,
+    error: `"${n}" test failed`
+  })
+  const handleDisconnect = (n: string) => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: `Disconnecting "${n}"...`,
+    success: `"${n}" disconnected successfully`,
+    error: `Failed to disconnect "${n}"`
+  })
+  const handleRefreshConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+    loading: `Refreshing "${n}"...`,
+    success: `"${n}" refreshed successfully`,
+    error: `Failed to refresh "${n}"`
+  })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-8">
@@ -724,7 +744,7 @@ export default function ConnectorsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => toast.info('History', { description: 'Opening task history...' })}>
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading task history...', success: 'Task history loaded', error: 'Failed to load history' })}>
                 <History className="w-4 h-4 mr-2" />
                 History
               </Button>
@@ -800,11 +820,11 @@ export default function ConnectorsClient() {
                 { icon: Plus, label: 'New Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: handleAddConnector },
                 { icon: Link2, label: 'Connect App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleAddConnector },
                 { icon: RefreshCw, label: 'Sync All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => handleRefreshConnector('All Connectors') },
-                { icon: History, label: 'Task History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Task History', { description: 'Opening task history...' }) },
-                { icon: AlertCircle, label: 'View Errors', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('View Errors', { description: 'Loading error logs...' }) },
-                { icon: Sparkles, label: 'Templates', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('Templates', { description: 'Loading templates...' }) },
-                { icon: Key, label: 'API Keys', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('API Keys', { description: 'Opening API key management...' }) },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info('Analytics', { description: 'Loading analytics dashboard...' }) },
+                { icon: History, label: 'Task History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading task history...', success: 'Task history loaded', error: 'Failed to load history' }) },
+                { icon: AlertCircle, label: 'View Errors', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading error logs...', success: 'Error logs loaded', error: 'Failed to load error logs' }) },
+                { icon: Sparkles, label: 'Templates', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading templates...', success: 'Templates loaded', error: 'Failed to load templates' }) },
+                { icon: Key, label: 'API Keys', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening API key management...', success: 'API keys loaded', error: 'Failed to load API keys' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading analytics dashboard...', success: 'Analytics loaded', error: 'Failed to load analytics' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1048,7 +1068,7 @@ export default function ConnectorsClient() {
                         <span>Last run: {zap.last_run_at ? formatDate(zap.last_run_at) : 'Never'}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('History', { description: `Viewing history for "${zap.name}"...` }) }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Loading history for "${zap.name}"...`, success: `History loaded for "${zap.name}"`, error: 'Failed to load history' }) }}>
                           <Eye className="w-4 h-4 mr-2" />
                           History
                         </Button>
@@ -1148,7 +1168,7 @@ export default function ConnectorsClient() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Task History</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.info('Filter', { description: 'Opening filter options...' })}>
+                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filter options...', success: 'Filter options ready', error: 'Failed to open filters' })}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1193,7 +1213,7 @@ export default function ConnectorsClient() {
                           <td className="px-4 py-3 text-sm text-gray-500">{task.duration_seconds}s</td>
                           <td className="px-4 py-3 text-sm text-gray-500">{formatDate(task.started_at)}</td>
                           <td className="px-4 py-3">
-                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('View Details', { description: `Viewing task details for "${task.zap_name}"...` }) }}>
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading task details...`, success: `Task details loaded for "${task.zap_name}"`, error: 'Failed to load task details' }) }}>
                               <Eye className="w-4 h-4" />
                             </Button>
                           </td>
@@ -1210,7 +1230,7 @@ export default function ConnectorsClient() {
           <TabsContent value="templates" className="space-y-6 mt-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Popular Templates</h2>
-              <Button variant="outline" onClick={() => toast.info('Templates', { description: 'Loading all templates...' })}>View All</Button>
+              <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading all templates...', success: 'All templates loaded', error: 'Failed to load templates' })}>View All</Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1238,7 +1258,7 @@ export default function ConnectorsClient() {
                       </div>
                       <span className="text-xs text-gray-500">{formatNumber(template.usage_count)} users</span>
                     </div>
-                    <Button size="sm" className="w-full" onClick={() => toast.info('Use Template', { description: `Setting up "${template.name}" template...` })}>Use Template</Button>
+                    <Button size="sm" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Setting up "${template.name}" template...`, success: `"${template.name}" template ready`, error: 'Failed to setup template' })}>Use Template</Button>
                   </CardContent>
                 </Card>
               ))}

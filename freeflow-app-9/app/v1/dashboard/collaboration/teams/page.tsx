@@ -430,59 +430,78 @@ export default function TeamsPage() {
   };
 
   const handleStartVideoCall = async (memberId: string) => {
-    try {
-      const member = members.find((m) => m.id === memberId);
-      logger.info("Starting video call", { memberId, memberName: member?.name });
+    const member = members.find((m) => m.id === memberId);
+    logger.info("Starting video call", { memberId, memberName: member?.name });
 
-      // Navigate to meetings page with quick call parameter
-      window.location.href = `/dashboard/collaboration/meetings?call=${memberId}&name=${encodeURIComponent(member?.name || "")}`;
-
-      logger.info("Redirecting to video call");
-      toast.success("Starting video call...", { description: `Calling ${member?.name || "team member"}` });
-      announce(`Starting video call with ${member?.name}`, "polite");
-    } catch (error) {
-      logger.error("Failed to start video call", { error, memberId });
-      toast.error("Failed to start video call");
-      announce("Error starting video call", "assertive");
-    }
+    toast.promise(
+      new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            // Navigate to meetings page with quick call parameter
+            window.location.href = `/dashboard/collaboration/meetings?call=${memberId}&name=${encodeURIComponent(member?.name || "")}`;
+            logger.info("Redirecting to video call");
+            announce(`Starting video call with ${member?.name}`, "polite");
+            resolve();
+          } catch (error) {
+            logger.error("Failed to start video call", { error, memberId });
+            announce("Error starting video call", "assertive");
+            reject(error);
+          }
+        }, 1200);
+      }),
+      {
+        loading: 'Starting video call...',
+        success: `Video call started - Calling ${member?.name || "team member"}`,
+        error: 'Failed to start video call'
+      }
+    );
   };
 
   const handleExportTeamData = () => {
-    try {
-      logger.info("Exporting team data");
+    logger.info("Exporting team data");
 
-      const exportData = {
-        teams,
-        members,
-        stats,
-        exportedAt: new Date().toISOString(),
-        summary: {
-          totalTeams: teams.length,
-          totalMembers: members.length,
-          activeTeams: teams.filter(t => t.status === 'active').length,
-          membersByRole: members.reduce((acc, m) => {
-            acc[m.role] = (acc[m.role] || 0) + 1;
-            return acc;
-          }, {} as Record<string, number>)
-        }
-      };
+    toast.promise(
+      new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          try {
+            const exportData = {
+              teams,
+              members,
+              stats,
+              exportedAt: new Date().toISOString(),
+              summary: {
+                totalTeams: teams.length,
+                totalMembers: members.length,
+                activeTeams: teams.filter(t => t.status === 'active').length,
+                membersByRole: members.reduce((acc, m) => {
+                  acc[m.role] = (acc[m.role] || 0) + 1;
+                  return acc;
+                }, {} as Record<string, number>)
+              }
+            };
 
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `teams-export-${new Date().toISOString().split('T')[0]}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `teams-export-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
 
-      logger.info("Team data exported successfully", { teamCount: teams.length, memberCount: members.length });
-      toast.success("Team data exported", {
-        description: `Exported ${teams.length} teams and ${members.length} members`
-      });
-    } catch (error) {
-      logger.error("Failed to export team data", { error });
-      toast.error("Failed to export data");
-    }
+            logger.info("Team data exported successfully", { teamCount: teams.length, memberCount: members.length });
+            resolve();
+          } catch (error) {
+            logger.error("Failed to export team data", { error });
+            reject(error);
+          }
+        }, 1500);
+      }),
+      {
+        loading: 'Exporting team data...',
+        success: `Team data exported - ${teams.length} teams and ${members.length} members`,
+        error: 'Failed to export data'
+      }
+    );
   };
 
   const handleImportTeamData = async () => {
@@ -497,44 +516,53 @@ export default function TeamsPage() {
         const file = (e.target as HTMLInputElement).files?.[0];
         if (!file) return;
 
-        try {
-          const text = await file.text();
-          const importData = JSON.parse(text);
+        toast.promise(
+          new Promise<number>((resolve, reject) => {
+            setTimeout(async () => {
+              try {
+                const text = await file.text();
+                const importData = JSON.parse(text);
 
-          // Validate and import data
-          if (importData.members && Array.isArray(importData.members)) {
-            const importedMembers: TeamMember[] = importData.members.map((m: any) => ({
-              id: m.id || Date.now().toString() + Math.random(),
-              name: m.name || "Unknown",
-              email: m.email || "",
-              role: m.role || "Member",
-              status: "offline",
-              department: m.department || "",
-              joinedDate: m.joinedDate || new Date().toISOString().split("T")[0],
-              tasksCompleted: m.tasksCompleted || 0,
-              performance: m.performance || 0,
-              isFavorite: false,
-            }));
+                // Validate and import data
+                if (importData.members && Array.isArray(importData.members)) {
+                  const importedMembers: TeamMember[] = importData.members.map((m: any) => ({
+                    id: m.id || Date.now().toString() + Math.random(),
+                    name: m.name || "Unknown",
+                    email: m.email || "",
+                    role: m.role || "Member",
+                    status: "offline",
+                    department: m.department || "",
+                    joinedDate: m.joinedDate || new Date().toISOString().split("T")[0],
+                    tasksCompleted: m.tasksCompleted || 0,
+                    performance: m.performance || 0,
+                    isFavorite: false,
+                  }));
 
-            setMembers([...members, ...importedMembers]);
-            setStats((prev) => ({
-              ...prev,
-              totalMembers: prev.totalMembers + importedMembers.length,
-            }));
+                  setMembers([...members, ...importedMembers]);
+                  setStats((prev) => ({
+                    ...prev,
+                    totalMembers: prev.totalMembers + importedMembers.length,
+                  }));
 
-            logger.info("Team data imported successfully", { count: importedMembers.length });
-            toast.success("Team data imported", {
-              description: `${importedMembers.length} members added`,
-            });
-            announce(`${importedMembers.length} team members imported successfully`, "polite");
-          } else {
-            toast.error("Invalid file format", { description: "File must contain a 'members' array" });
+                  logger.info("Team data imported successfully", { count: importedMembers.length });
+                  announce(`${importedMembers.length} team members imported successfully`, "polite");
+                  resolve(importedMembers.length);
+                } else {
+                  reject(new Error("Invalid file format - File must contain a 'members' array"));
+                }
+              } catch {
+                logger.error("Failed to parse import file");
+                announce("Error parsing import file", "assertive");
+                reject(new Error("Invalid JSON file"));
+              }
+            }, 1200);
+          }),
+          {
+            loading: 'Importing team data...',
+            success: (count) => `Team data imported - ${count} members added`,
+            error: (err) => err.message || 'Failed to import data'
           }
-        } catch {
-          logger.error("Failed to parse import file");
-          toast.error("Invalid JSON file");
-          announce("Error parsing import file", "assertive");
-        }
+        );
       };
       input.click();
     } catch (error) {
@@ -546,7 +574,14 @@ export default function TeamsPage() {
 
   const handleRefreshData = async () => {
     logger.info("Refreshing teams data");
-    await fetchTeamsData();
+    toast.promise(
+      fetchTeamsData(),
+      {
+        loading: 'Refreshing teams data...',
+        success: 'Teams data refreshed',
+        error: 'Failed to refresh data'
+      }
+    );
   };
 
   const filteredMembers = members.filter((member) => {

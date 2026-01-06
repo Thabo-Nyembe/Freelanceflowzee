@@ -237,8 +237,10 @@ export default function AIAssistantPage() {
         setIsPageLoading(false)
         announce('AI assistant loaded successfully', 'polite')
 
-        toast.success('AI Assistant loaded', {
-          description: `${conversationsResult.data?.length || 0} conversations • ${insightsResult.data?.length || 0} insights • ${analysesResult.data?.length || 0} analyses`
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Loading AI Assistant...',
+          success: `AI Assistant loaded - ${conversationsResult.data?.length || 0} conversations, ${insightsResult.data?.length || 0} insights`,
+          error: 'Failed to load AI Assistant'
         })
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load AI assistant'
@@ -293,7 +295,7 @@ export default function AIAssistantPage() {
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([
     {
       id: '0',
-      title: '🚀 NEW: AI-Powered Growth Engine',
+      title: 'NEW: AI-Powered Growth Engine',
       description: 'Unlock 110% revenue growth! Our Growth Hub uses research-backed strategies (2025 data) to optimize pricing, reduce CAC by 45%, and improve conversions by 35-78%.',
       category: 'business',
       priority: 'high',
@@ -441,8 +443,10 @@ export default function AIAssistantPage() {
 
       setMessages(prev => [...prev, assistantMessage])
 
-      toast.success('AI response received', {
-        description: `${response.metadata.provider} • ${response.metadata.tokens.total} tokens${response.metadata.cached ? ' • Cached' : ''}`
+      toast.promise(new Promise(r => setTimeout(r, 500)), {
+        loading: 'Processing AI response...',
+        success: `AI response received - ${response.metadata.provider} (${response.metadata.tokens.total} tokens${response.metadata.cached ? ', cached' : ''})`,
+        error: 'Failed to process response'
       })
     } catch (error) {
       logger.error('AI response failed', {
@@ -509,7 +513,7 @@ export default function AIAssistantPage() {
       'time-management': 'Analyze my time allocation and suggest better time management strategies.',
       'business-insights': 'Provide insights on my business performance and suggest growth opportunities.'
     }
-    
+
     setInputMessage(actionMessages[actionId] || '')
   }
 
@@ -532,6 +536,12 @@ export default function AIAssistantPage() {
         logger.error('Failed to persist message rating', { error: error.message })
       }
     }
+
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Saving feedback...',
+      success: `Feedback saved - ${rating === 'up' ? 'Positive' : 'Negative'} rating recorded`,
+      error: 'Failed to save feedback'
+    })
   }
 
   const toggleVoiceMode = () => {
@@ -539,6 +549,11 @@ export default function AIAssistantPage() {
     if (!isVoiceMode) {
       setIsListening(false)
     }
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: !isVoiceMode ? 'Enabling voice mode...' : 'Disabling voice mode...',
+      success: !isVoiceMode ? 'Voice mode enabled - Ready for voice commands' : 'Voice mode disabled',
+      error: 'Failed to toggle voice mode'
+    })
   }
 
   const getPriorityColor = (priority: string) => {
@@ -631,8 +646,10 @@ export default function AIAssistantPage() {
           }))
           setMessages(transformedMessages)
           logger.info('Conversation loaded from database', { messageCount: transformedMessages.length })
-          toast.success('Conversation loaded', {
-            description: `${title} - ${transformedMessages.length} messages restored`
+          toast.promise(new Promise(r => setTimeout(r, 800)), {
+            loading: `Loading conversation: ${title}...`,
+            success: `${title} loaded - ${transformedMessages.length} messages restored`,
+            error: 'Failed to load conversation'
           })
         } else {
           toast.promise(new Promise(r => setTimeout(r, 1200)), {
@@ -671,7 +688,7 @@ export default function AIAssistantPage() {
 
     const conversation = conversations.find(c => c.id === conversationToDelete)
 
-    try {
+    const deleteOperation = async () => {
       if (userId) {
         const { deleteConversation } = await import('@/lib/ai-assistant-queries')
         const { error: deleteError } = await deleteConversation(conversationToDelete)
@@ -687,19 +704,18 @@ export default function AIAssistantPage() {
         messageCount: conversation?.messageCount
       })
 
-      toast.success('Conversation deleted', {
-        description: `${conversation?.title} - ${conversation?.messageCount} messages removed`
-      })
-      announce('Conversation deleted successfully', 'polite')
-    } catch (error: any) {
-      logger.error('Failed to delete conversation', { error: error.message })
-      toast.error('Failed to delete conversation', {
-        description: error.message || 'Please try again'
-      })
-    } finally {
-      setShowDeleteConversationDialog(false)
-      setConversationToDelete(null)
+      return { title: conversation?.title, messageCount: conversation?.messageCount }
     }
+
+    toast.promise(deleteOperation(), {
+      loading: 'Deleting conversation...',
+      success: (data) => `Conversation deleted - ${data.title} (${data.messageCount} messages removed)`,
+      error: 'Failed to delete conversation'
+    })
+
+    announce('Conversation deleted successfully', 'polite')
+    setShowDeleteConversationDialog(false)
+    setConversationToDelete(null)
   }
 
   const handleCopyMessage = (messageId: string, content: string) => {
@@ -766,8 +782,10 @@ export default function AIAssistantPage() {
           }))
           setAiInsights(transformedInsights)
           const newHighPriority = transformedInsights.filter(i => i.priority === 'high').length
-          toast.success('Insights refreshed', {
-            description: `${transformedInsights.length} insights loaded - ${newHighPriority} high priority`
+          toast.promise(new Promise(r => setTimeout(r, 1500)), {
+            loading: 'Refreshing insights...',
+            success: `Insights refreshed - ${transformedInsights.length} insights loaded (${newHighPriority} high priority)`,
+            error: 'Failed to refresh insights'
           })
           logger.info('Insights refreshed from database', { count: transformedInsights.length })
         } else {
@@ -1026,13 +1044,13 @@ export default function AIAssistantPage() {
     })
   }
 
-  const handleSaveChat = async () => {
+  const handleSaveChat = () => {
     logger.info('Saving chat', {
       messageCount: messages.length,
       hasUserMessages: messages.some(m => m.type === 'user')
     })
 
-    try {
+    const saveOperation = async () => {
       // Create conversation in database
       if (userId && messages.length > 0) {
         const { createConversation } = await import('@/lib/ai-assistant-queries')
@@ -1051,14 +1069,18 @@ export default function AIAssistantPage() {
         if (error) throw new Error(error.message || 'Failed to save conversation')
         logger.info('Chat saved to database', { conversationId: conversation?.id })
       }
-
-      toast.success('Chat saved', {
-        description: `${messages.length} messages preserved - ${messages.filter(m => m.type === 'user').length} user messages, ${messages.filter(m => m.type === 'assistant').length} AI responses`
-      })
-    } catch (error: any) {
-      logger.error('Failed to save chat', { error: error.message })
-      toast.error('Failed to save chat', { description: error.message || 'Please try again' })
+      return {
+        messageCount: messages.length,
+        userMessages: messages.filter(m => m.type === 'user').length,
+        aiResponses: messages.filter(m => m.type === 'assistant').length
+      }
     }
+
+    toast.promise(saveOperation(), {
+      loading: 'Saving chat...',
+      success: (data) => `Chat saved - ${data.messageCount} messages preserved (${data.userMessages} user, ${data.aiResponses} AI)`,
+      error: 'Failed to save chat'
+    })
   }
 
   const handleClearChat = () => {
@@ -1101,8 +1123,10 @@ export default function AIAssistantPage() {
           fileSize: file.size,
           fileType: file.type
         })
-        toast.success('File attached', {
-          description: `${file.name} - ${Math.round(file.size / 1024)}KB`
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: `Attaching ${file.name}...`,
+          success: `File attached - ${file.name} (${Math.round(file.size / 1024)}KB)`,
+          error: 'Failed to attach file'
         })
       }
     }
@@ -1133,7 +1157,7 @@ export default function AIAssistantPage() {
 
     const insight = aiInsights.find(i => i.id === insightToDismiss)
 
-    try {
+    const dismissOperation = async () => {
       if (userId) {
         const { dismissInsight } = await import('@/lib/ai-assistant-queries')
         const { error: dismissError } = await dismissInsight(insightToDismiss)
@@ -1148,25 +1172,24 @@ export default function AIAssistantPage() {
         title: insight?.title
       })
 
-      toast.success('Insight dismissed', {
-        description: `${insight?.title} - ${insight?.priority} priority removed`
-      })
-      announce('Insight dismissed successfully', 'polite')
-    } catch (error: any) {
-      logger.error('Failed to dismiss insight', { error: error.message })
-      toast.error('Failed to dismiss insight', {
-        description: error.message || 'Please try again'
-      })
-    } finally {
-      setShowDismissInsightDialog(false)
-      setInsightToDismiss(null)
+      return { title: insight?.title, priority: insight?.priority }
     }
+
+    toast.promise(dismissOperation(), {
+      loading: 'Dismissing insight...',
+      success: (data) => `Insight dismissed - ${data.title} (${data.priority} priority removed)`,
+      error: 'Failed to dismiss insight'
+    })
+
+    announce('Insight dismissed successfully', 'polite')
+    setShowDismissInsightDialog(false)
+    setInsightToDismiss(null)
   }
 
   const handlePinConversation = async (conversationId: string) => {
     const conversation = conversations.find(c => c.id === conversationId)
 
-    try {
+    const pinOperation = async () => {
       if (userId) {
         const { togglePinConversation } = await import('@/lib/ai-assistant-queries')
         const { error: pinError } = await togglePinConversation(conversationId)
@@ -1179,22 +1202,22 @@ export default function AIAssistantPage() {
         messageCount: conversation?.messageCount
       })
 
-      toast.success('Conversation pinned', {
-        description: `${conversation?.title} - Pinned to top of list`
-      })
-      announce('Conversation pinned successfully', 'polite')
-    } catch (error: any) {
-      logger.error('Failed to pin conversation', { error: error.message })
-      toast.error('Failed to pin conversation', {
-        description: error.message || 'Please try again'
-      })
+      return { title: conversation?.title }
     }
+
+    toast.promise(pinOperation(), {
+      loading: 'Pinning conversation...',
+      success: (data) => `Conversation pinned - ${data.title} moved to top`,
+      error: 'Failed to pin conversation'
+    })
+
+    announce('Conversation pinned successfully', 'polite')
   }
 
   const handleArchiveConversation = async (conversationId: string) => {
     const conversation = conversations.find(c => c.id === conversationId)
 
-    try {
+    const archiveOperation = async () => {
       if (userId) {
         const { archiveConversation } = await import('@/lib/ai-assistant-queries')
         const { error: archiveError } = await archiveConversation(conversationId)
@@ -1210,16 +1233,16 @@ export default function AIAssistantPage() {
         messageCount: conversation?.messageCount
       })
 
-      toast.success('Conversation archived', {
-        description: `${conversation?.title} - ${conversation?.messageCount} messages moved to archive`
-      })
-      announce('Conversation archived successfully', 'polite')
-    } catch (error: any) {
-      logger.error('Failed to archive conversation', { error: error.message })
-      toast.error('Failed to archive conversation', {
-        description: error.message || 'Please try again'
-      })
+      return { title: conversation?.title, messageCount: conversation?.messageCount }
     }
+
+    toast.promise(archiveOperation(), {
+      loading: 'Archiving conversation...',
+      success: (data) => `Conversation archived - ${data.title} (${data.messageCount} messages moved)`,
+      error: 'Failed to archive conversation'
+    })
+
+    announce('Conversation archived successfully', 'polite')
   }
 
   // A+++ LOADING STATE
@@ -1271,9 +1294,9 @@ export default function AIAssistantPage() {
               <span className="text-sm text-gray-600">Powered by Advanced AI</span>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <select 
+            <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
               className="text-sm border border-gray-300 rounded px-3 py-1"
@@ -1282,7 +1305,7 @@ export default function AIAssistantPage() {
                 <option key={model.id} value={model.id}>{model.name}</option>
               ))}
             </select>
-            
+
             <Button
               variant={isVoiceMode ? "default" : "outline"}
               size="sm"
@@ -1290,7 +1313,7 @@ export default function AIAssistantPage() {
             >
               {isVoiceMode ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
             </Button>
-            
+
             <Button variant="outline" size="sm" onClick={handleConfigureAI}>
               <Settings className="w-4 h-4" />
             </Button>
@@ -1307,7 +1330,7 @@ export default function AIAssistantPage() {
               New Conversation
             </Button>
           </div>
-          
+
           <ScrollArea className="h-[calc(100%-80px)]">
             <div className="p-4 space-y-3">
               {conversations.map(conversation => (
@@ -1348,7 +1371,7 @@ export default function AIAssistantPage() {
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
             </div>
-            
+
             <TabsContent value="chat" className="flex-1 flex flex-col m-0">
               {/* Messages Area */}
               <ScrollArea className="flex-1 p-4">
@@ -1371,16 +1394,16 @@ export default function AIAssistantPage() {
                             </>
                           )}
                         </Avatar>
-                        
+
                         <div className={`space-y-2 ${message.type === 'user' ? 'items-end' : 'items-start'} flex flex-col`}>
                           <div className={`rounded-lg px-4 py-3 ${
-                            message.type === 'user' 
-                              ? 'bg-purple-600 text-white' 
+                            message.type === 'user'
+                              ? 'bg-purple-600 text-white'
                               : 'bg-gray-100 text-gray-900'
                           }`}>
                             <p className="text-sm">{message.content}</p>
                           </div>
-                          
+
                           {message.type === 'assistant' && (
                             <div className="flex items-center gap-2">
                               <Button
@@ -1407,7 +1430,7 @@ export default function AIAssistantPage() {
                               </Button>
                             </div>
                           )}
-                          
+
                           {message.suggestions && (
                             <div className="flex flex-wrap gap-2 mt-2">
                               {message.suggestions.map((suggestion, index) => (
@@ -1427,7 +1450,7 @@ export default function AIAssistantPage() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {isLoading && (
                     <div className="flex justify-start">
                       <div className="flex gap-3">
@@ -1449,7 +1472,7 @@ export default function AIAssistantPage() {
                   <div ref={messagesEndRef} />
                 </div>
               </ScrollArea>
-              
+
               {/* Quick Actions */}
               <div className="p-4 border-t border-gray-200 bg-gray-50 dark:bg-slate-800">
                 <div className="max-w-4xl mx-auto">
@@ -1469,7 +1492,7 @@ export default function AIAssistantPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Input Area */}
               <div className="p-4 border-t border-gray-200">
                 <div className="max-w-4xl mx-auto">
@@ -1504,7 +1527,7 @@ export default function AIAssistantPage() {
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="insights" className="flex-1 p-6">
               <div className="max-w-6xl mx-auto space-y-6">
                 <div className="flex items-center justify-between">
@@ -1514,7 +1537,7 @@ export default function AIAssistantPage() {
                     Refresh Insights
                   </Button>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {aiInsights.map(insight => (
                     <Card key={insight.id}>
@@ -1540,11 +1563,11 @@ export default function AIAssistantPage() {
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="projects" className="flex-1 p-6">
               <div className="max-w-6xl mx-auto space-y-6">
                 <h2 className="text-2xl font-bold">Project Analysis</h2>
-                
+
                 <div className="space-y-4">
                   {projectAnalysis.map((project, index) => (
                     <Card key={index}>
@@ -1573,7 +1596,7 @@ export default function AIAssistantPage() {
                               ))}
                             </ul>
                           </div>
-                          
+
                           <div>
                             <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                               <Lightbulb className="w-4 h-4" />
@@ -1588,7 +1611,7 @@ export default function AIAssistantPage() {
                               ))}
                             </ul>
                           </div>
-                          
+
                           <div>
                             <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
                               <Target className="w-4 h-4" />
@@ -1610,11 +1633,11 @@ export default function AIAssistantPage() {
                 </div>
               </div>
             </TabsContent>
-            
+
             <TabsContent value="analytics" className="flex-1 p-6">
               <div className="max-w-6xl mx-auto space-y-6">
                 <h2 className="text-2xl font-bold">AI-Powered Analytics</h2>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <Card>
                     <CardContent className="p-4">
@@ -1627,7 +1650,7 @@ export default function AIAssistantPage() {
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -1639,7 +1662,7 @@ export default function AIAssistantPage() {
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -1651,7 +1674,7 @@ export default function AIAssistantPage() {
                       </div>
                     </CardContent>
                   </Card>
-                  
+
                   <Card>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
@@ -1664,7 +1687,7 @@ export default function AIAssistantPage() {
                     </CardContent>
                   </Card>
                 </div>
-                
+
                 <Card>
                   <CardHeader>
                     <CardTitle>Weekly Performance Summary</CardTitle>
@@ -1678,7 +1701,7 @@ export default function AIAssistantPage() {
                         </div>
                         <span className="text-sm text-green-600">Excellent</span>
                       </div>
-                      
+
                       <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                         <div className="flex items-center gap-3">
                           <Clock className="w-5 h-5 text-blue-600" />
@@ -1686,7 +1709,7 @@ export default function AIAssistantPage() {
                         </div>
                         <span className="text-sm text-blue-600">Good</span>
                       </div>
-                      
+
                       <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
                         <div className="flex items-center gap-3">
                           <Star className="w-5 h-5 text-purple-600" />

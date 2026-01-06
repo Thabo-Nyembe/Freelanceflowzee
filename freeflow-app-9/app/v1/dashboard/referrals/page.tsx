@@ -222,28 +222,26 @@ export default function ReferralsPage() {
   // ============================================================================
 
   const handleCopyReferralCode = () => {
-    try {
-      navigator.clipboard.writeText(referralCode)
-      setCopiedToClipboard(true)
+    toast.promise(
+      (async () => {
+        await navigator.clipboard.writeText(referralCode)
+        setCopiedToClipboard(true)
 
-      logger.info('Referral code copied', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        code: referralCode
-      })
+        logger.info('Referral code copied', {
+          clientName: KAZI_CLIENT_DATA.clientInfo.name,
+          code: referralCode
+        })
 
-      toast.success('Referral code copied!', {
-        description: 'Share it with your network to earn rewards'
-      })
-
-      setTimeout(() => {
-        setCopiedToClipboard(false)
-      }, 2000)
-    } catch (error) {
-      logger.error('Failed to copy referral code', { error })
-      toast.error('Failed to copy code', {
-        description: 'Please try again'
-      })
-    }
+        setTimeout(() => {
+          setCopiedToClipboard(false)
+        }, 2000)
+      })(),
+      {
+        loading: 'Copying referral code...',
+        success: `Code "${referralCode}" copied - Share it with your network to earn rewards`,
+        error: 'Failed to copy code - Please try again'
+      }
+    )
   }
 
   // ============================================================================
@@ -251,23 +249,21 @@ export default function ReferralsPage() {
   // ============================================================================
 
   const handleCopyReferralLink = () => {
-    try {
-      navigator.clipboard.writeText(referralLink)
+    toast.promise(
+      (async () => {
+        await navigator.clipboard.writeText(referralLink)
 
-      logger.info('Referral link copied', {
-        clientName: KAZI_CLIENT_DATA.clientInfo.name,
-        link: referralLink
-      })
-
-      toast.success('Referral link copied!', {
-        description: 'Ready to share with your network'
-      })
-    } catch (error) {
-      logger.error('Failed to copy referral link', { error })
-      toast.error('Failed to copy link', {
-        description: 'Please try again'
-      })
-    }
+        logger.info('Referral link copied', {
+          clientName: KAZI_CLIENT_DATA.clientInfo.name,
+          link: referralLink
+        })
+      })(),
+      {
+        loading: 'Copying referral link...',
+        success: 'Referral link copied - Ready to share with your network',
+        error: 'Failed to copy link - Please try again'
+      }
+    )
   }
 
   // ============================================================================

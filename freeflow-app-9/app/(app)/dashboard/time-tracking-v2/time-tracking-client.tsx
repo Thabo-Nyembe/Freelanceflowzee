@@ -299,9 +299,9 @@ const mockTimeTrackingActivities = [
 ]
 
 const mockTimeTrackingQuickActions = [
-  { id: '1', label: 'Start Timer', icon: 'play', action: () => toast.success('Timer Started', { description: 'Tracking time for current task' }), variant: 'default' as const },
+  { id: '1', label: 'Start Timer', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Starting timer...', success: 'Timer started - tracking time for current task', error: 'Failed to start timer' }), variant: 'default' as const },
   { id: '2', label: 'Manual Entry', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening time entry form...', success: 'Enter hours, project, and description', error: 'Failed to open form' }), variant: 'default' as const },
-  { id: '3', label: 'Reports', icon: 'barChart', action: () => toast.success('Time Reports', { description: '38.5 hours this week • 12 projects tracked' }), variant: 'outline' as const },
+  { id: '3', label: 'Reports', icon: 'barChart', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading time reports...', success: '38.5 hours this week - 12 projects tracked', error: 'Failed to load reports' }), variant: 'outline' as const },
 ]
 
 export default function TimeTrackingClient() {
@@ -856,7 +856,7 @@ export default function TimeTrackingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'Add Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowEntryDialog(true) },
-                { icon: Copy, label: 'Copy Week', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Week Copied', { description: 'Previous week entries duplicated' }) },
+                { icon: Copy, label: 'Copy Week', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Copying previous week entries...', success: 'Week copied - previous week entries duplicated', error: 'Failed to copy week entries' }) },
                 { icon: CheckCircle, label: 'Submit', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleApproveTimesheet },
                 { icon: Lock, label: 'Lock', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: async () => {
                   // Lock all entries for the current week
@@ -872,8 +872,8 @@ export default function TimeTrackingClient() {
                 }},
                 { icon: Calendar, label: 'View Month', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('calendar') },
                 { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: handleExportTimesheet },
-                { icon: Printer, label: 'Print', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.info('Printing', { description: 'Opening print dialog...' }) },
-                { icon: Mail, label: 'Email', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Email Sent', { description: 'Timesheet emailed successfully' }) },
+                { icon: Printer, label: 'Print', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening print dialog...', success: 'Print dialog opened', error: 'Failed to open print dialog' }) },
+                { icon: Mail, label: 'Email', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Sending timesheet via email...', success: 'Timesheet emailed successfully', error: 'Failed to send email' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -969,13 +969,13 @@ export default function TimeTrackingClient() {
             {/* Reports Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Summary', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.info('Summary Report', { description: 'Generating summary report...' }) },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.info('Trends Report', { description: 'Analyzing time tracking trends...' }) },
-                { icon: Users, label: 'By Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.info('Team Report', { description: 'Generating team breakdown...' }) },
-                { icon: Briefcase, label: 'By Project', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.info('Project Report', { description: 'Generating project breakdown...' }) },
-                { icon: Building2, label: 'By Client', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.info('Client Report', { description: 'Generating client breakdown...' }) },
-                { icon: DollarSign, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.info('Revenue Report', { description: 'Calculating revenue metrics...' }) },
-                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Schedule Report', { description: 'Generating schedule overview...' }) },
+                { icon: BarChart3, label: 'Summary', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating summary report...', success: 'Summary report generated successfully', error: 'Failed to generate summary report' }) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Analyzing time tracking trends...', success: 'Trends analysis completed', error: 'Failed to analyze trends' }) },
+                { icon: Users, label: 'By Team', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating team breakdown...', success: 'Team breakdown report ready', error: 'Failed to generate team report' }) },
+                { icon: Briefcase, label: 'By Project', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating project breakdown...', success: 'Project breakdown report ready', error: 'Failed to generate project report' }) },
+                { icon: Building2, label: 'By Client', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating client breakdown...', success: 'Client breakdown report ready', error: 'Failed to generate client report' }) },
+                { icon: DollarSign, label: 'Revenue', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Calculating revenue metrics...', success: 'Revenue report generated', error: 'Failed to calculate revenue' }) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating schedule overview...', success: 'Schedule overview ready', error: 'Failed to generate schedule' }) },
                 { icon: Download, label: 'Export All', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: handleExportTimesheet },
               ].map((action, idx) => (
                 <Button
@@ -1072,7 +1072,7 @@ export default function TimeTrackingClient() {
                           <td className="px-4 py-4 text-gray-500">{report.dateRange}</td>
                           <td className="px-4 py-4">{report.schedule || <span className="text-gray-400">Manual</span>}</td>
                           <td className="px-4 py-4 text-gray-500">{report.lastRun}</td>
-                          <td className="px-4 py-4"><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => toast.info('Running Report', { description: 'Generating report data...' })}><Play className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={handleExportTimesheet}><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => toast.info('Edit Report', { description: 'Opening report editor...' })}><Edit2 className="h-4 w-4" /></Button></div></td>
+                          <td className="px-4 py-4"><div className="flex gap-1"><Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating report data...', success: 'Report generated successfully', error: 'Failed to generate report' })}><Play className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={handleExportTimesheet}><Download className="h-4 w-4" /></Button><Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening report editor...', success: 'Report editor opened', error: 'Failed to open editor' })}><Edit2 className="h-4 w-4" /></Button></div></td>
                         </tr>
                       ))}
                     </tbody>
@@ -1095,7 +1095,7 @@ export default function TimeTrackingClient() {
                           <td className="px-4 py-4"><span className="font-bold text-emerald-600">${client.totalBilled.toLocaleString()}</span></td>
                           <td className="px-4 py-4">{client.outstandingBalance > 0 ? <span className="font-medium text-amber-600">${client.outstandingBalance.toLocaleString()}</span> : <span className="text-gray-400">$0</span>}</td>
                           <td className="px-4 py-4"><Badge className={getStatusColor(client.status)}>{client.status}</Badge></td>
-                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => toast.info('Client Options', { description: 'Opening client menu...' })}><MoreHorizontal className="h-4 w-4" /></Button></td>
+                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening client menu...', success: 'Client options loaded', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button></td>
                         </tr>
                       ))}
                     </tbody>
@@ -1113,7 +1113,7 @@ export default function TimeTrackingClient() {
                       <div key={tag.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2"><div className={`w-3 h-3 rounded-full bg-${tag.color}-500`}></div><span className="font-medium">{tag.name}</span></div>
-                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.info('Edit Tag', { description: 'Opening tag editor...' })}><Edit2 className="h-3 w-3" /></Button>
+                          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening tag editor...', success: 'Tag editor ready', error: 'Failed to open editor' })}><Edit2 className="h-3 w-3" /></Button>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-2xl font-bold">{tag.usageCount}</span>
@@ -1153,12 +1153,12 @@ export default function TimeTrackingClient() {
             {/* Projects Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Project', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.info('New Project', { description: 'Opening project creation form...' }) },
+                { icon: Plus, label: 'New Project', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening project creation form...', success: 'Project form ready', error: 'Failed to open form' }) },
                 { icon: Users, label: 'Team View', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setActiveTab('team') },
-                { icon: DollarSign, label: 'Budgets', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.info('Budgets', { description: 'Opening budget management...' }) },
-                { icon: Target, label: 'Milestones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Milestones', { description: 'Viewing project milestones...' }) },
-                { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Archive', { description: 'Viewing archived projects...' }) },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.info('Analytics', { description: 'Loading project analytics...' }) },
+                { icon: DollarSign, label: 'Budgets', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening budget management...', success: 'Budget manager loaded', error: 'Failed to load budgets' }) },
+                { icon: Target, label: 'Milestones', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading project milestones...', success: 'Milestones loaded', error: 'Failed to load milestones' }) },
+                { icon: Archive, label: 'Archive', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading archived projects...', success: 'Archive loaded', error: 'Failed to load archive' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading project analytics...', success: 'Analytics loaded', error: 'Failed to load analytics' }) },
                 { icon: Tag, label: 'Tags', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: () => setShowTagDialog(true) },
                 { icon: Download, label: 'Export', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleExportTimesheet },
               ].map((action, idx) => (
@@ -1175,7 +1175,7 @@ export default function TimeTrackingClient() {
             </div>
 
             <Card className="border-gray-200 dark:border-gray-700">
-              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Projects</CardTitle><Button onClick={() => toast.info('New Project', { description: 'Opening project creation form...' })}><Plus className="h-4 w-4 mr-2" />New Project</Button></CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Projects</CardTitle><Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening project creation form...', success: 'Project form ready', error: 'Failed to open form' })}><Plus className="h-4 w-4 mr-2" />New Project</Button></CardHeader>
               <CardContent className="p-0">
                 <table className="w-full">
                   <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Project</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Client</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rate</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Budget</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>
@@ -1188,7 +1188,7 @@ export default function TimeTrackingClient() {
                         <td className="px-4 py-4 font-medium">{project.totalHours}h</td>
                         <td className="px-4 py-4">{project.budget ? <div><span className="font-medium">${project.spent.toLocaleString()}</span><span className="text-gray-500"> / ${project.budget.toLocaleString()}</span><Progress value={(project.spent / project.budget) * 100} className="h-1 mt-1" /></div> : '-'}</td>
                         <td className="px-4 py-4"><Badge className={getStatusColor(project.status)}>{project.status.replace('_', ' ')}</Badge></td>
-                        <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => toast.info('Project Options', { description: 'Opening project menu...' })}><MoreHorizontal className="h-4 w-4" /></Button></td>
+                        <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening project menu...', success: 'Project options loaded', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button></td>
                       </tr>
                     ))}
                   </tbody>
@@ -1223,13 +1223,13 @@ export default function TimeTrackingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Users, label: 'All Members', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setTeamTab('activity') },
-                { icon: Clock, label: 'Time Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.info('Time Logs', { description: 'Opening team time logs...' }) },
+                { icon: Clock, label: 'Time Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading team time logs...', success: 'Time logs loaded', error: 'Failed to load time logs' }) },
                 { icon: Calendar, label: 'Schedule', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => setActiveTab('calendar') },
                 { icon: Coffee, label: 'Time Off', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setTeamTab('timeoff') },
                 { icon: Target, label: 'Utilization', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => setTeamTab('utilization') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => setActiveTab('reports') },
-                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.info('Reminders', { description: 'Opening reminder settings...' }) },
-                { icon: Plus, label: 'Add Member', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.info('Add Member', { description: 'Opening team member form...' }) },
+                { icon: Bell, label: 'Reminders', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening reminder settings...', success: 'Reminder settings loaded', error: 'Failed to load settings' }) },
+                { icon: Plus, label: 'Add Member', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening team member form...', success: 'Member form ready', error: 'Failed to open form' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1251,7 +1251,7 @@ export default function TimeTrackingClient() {
                   </Button>
                 ))}
               </div>
-              <Button variant="outline" onClick={() => toast.info('Manage Team', { description: 'Opening team management...' })}><Users className="h-4 w-4 mr-2" />Manage Team</Button>
+              <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening team management...', success: 'Team management loaded', error: 'Failed to load team management' })}><Users className="h-4 w-4 mr-2" />Manage Team</Button>
             </div>
 
             {teamTab === 'activity' && (
@@ -1276,7 +1276,7 @@ export default function TimeTrackingClient() {
                         <p className="font-bold text-amber-600">{member.todayHours}h today</p>
                         <p className="text-sm text-gray-500">{member.weekHours}h this week</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => toast.info('Member Options', { description: 'Opening member menu...' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening member menu...', success: 'Member options loaded', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </CardContent>
@@ -1285,7 +1285,7 @@ export default function TimeTrackingClient() {
 
             {teamTab === 'timeoff' && (
               <Card className="border-gray-200 dark:border-gray-700">
-                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => toast.info('Request Time Off', { description: 'Opening time off request form...' })}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between"><CardTitle>Time Off Requests</CardTitle><Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening time off request form...', success: 'Request form ready', error: 'Failed to open form' })}><Plus className="h-4 w-4 mr-2" />Request Time Off</Button></CardHeader>
                 <CardContent className="p-0">
                   <table className="w-full">
                     <thead className="bg-gray-50 dark:bg-gray-800"><tr><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Dates</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hours</th><th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th><th className="px-4 py-3"></th></tr></thead>

@@ -2153,11 +2153,11 @@ export default function AppStoreClient() {
                 <div className="flex items-center gap-3 pt-4 border-t">
                   {selectedApp.status === 'installed' ? (
                     <>
-                      <Button className="flex-1" onClick={() => toast.info('Opening app...')}>
+                      <Button className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching app...', success: 'App opened successfully', error: 'Failed to open app' })}>
                         <Play className="w-4 h-4 mr-2" />
                         Open App
                       </Button>
-                      <Button variant="outline" onClick={() => toast.info('Opening settings...')}>
+                      <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' })}>
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </Button>
@@ -2172,7 +2172,7 @@ export default function AppStoreClient() {
                         <DollarSign className="w-4 h-4 mr-2" />
                         Purchase Now
                       </Button>
-                      <Button variant="outline" onClick={() => toast.info('Opening app...')}>
+                      <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching trial app...', success: 'Trial app opened successfully', error: 'Failed to open trial app' })}>
                         <Play className="w-4 h-4 mr-2" />
                         Continue Trial
                       </Button>

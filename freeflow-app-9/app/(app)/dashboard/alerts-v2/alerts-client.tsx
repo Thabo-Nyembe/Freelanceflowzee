@@ -944,7 +944,7 @@ export default function AlertsClient() {
                             <Phone className="h-3 w-3 mr-1" />
                             Call
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => toast.success('Email Ready', { description: `Opening email to ${schedule.currentOnCall.email}` })}>
+                          <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Opening email to ${schedule.currentOnCall.email}...`, success: 'Email client ready', error: 'Failed to open email' })}>
                             <Mail className="h-3 w-3 mr-1" />
                             Email
                           </Button>
@@ -1486,7 +1486,7 @@ export default function AlertsClient() {
                               <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: `Editing ${policy.tier}`, error: 'Failed' })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Tier Removed', { description: `${policy.tier} has been removed from escalation` })}>
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Removing ${policy.tier}...`, success: `${policy.tier} has been removed from escalation`, error: 'Failed to remove tier' })}>
                                 <Trash2 className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1665,7 +1665,7 @@ export default function AlertsClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="kazi-alerts-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm" onClick={() => toast.success('API Key Copied', { description: 'API key copied to clipboard' })}>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy' })}>
                               <Copy className="h-4 w-4" />
                             </Button>
                             <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating new API key...', success: 'New API key generated! Copy it now.', error: 'Failed to generate' })}>
@@ -1687,7 +1687,7 @@ export default function AlertsClient() {
                                 <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: 'Configure webhook', error: 'Failed' })}>
                                   <Edit className="h-4 w-4" />
                                 </Button>
-                                <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Webhook Deleted', { description: 'Webhook has been removed' })}>
+                                <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Deleting webhook...', success: 'Webhook has been removed', error: 'Failed to delete webhook' })}>
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </div>

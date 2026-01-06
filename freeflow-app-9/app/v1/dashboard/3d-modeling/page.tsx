@@ -223,8 +223,10 @@ export default function ModelingStudioPage() {
 
       setObjects([...objects, newObject])
 
-      toast.success('Object Added', {
-        description: `${newObject.name} - ${objectType} primitive - Position (0, 0, 0)`
+      toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
+        loading: `Adding ${objectType} to scene...`,
+        success: `Object Added: ${newObject.name} - ${objectType} primitive - Position (0, 0, 0)`,
+        error: 'Failed to add object'
       })
 
       logger.info('Object added successfully', {
@@ -248,8 +250,10 @@ export default function ModelingStudioPage() {
       objectsCount: objects.length
     })
 
-    toast.success(`Material applied: ${materialName}`, {
-      description: `${material?.type || 'Custom'} material - ${material?.color || '#ffffff'} - Applied to ${selectedObject?.name || 'selected object'}`
+    toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), {
+      loading: `Applying ${materialName} material...`,
+      success: `Material applied: ${materialName} - ${material?.type || 'Custom'} material - ${material?.color || '#ffffff'}`,
+      error: 'Failed to apply material'
     })
   }, [materials, selectedObject, objects.length])
 
@@ -281,8 +285,10 @@ export default function ModelingStudioPage() {
 
     setLights([...lights, newLight])
 
-    toast.success(`Light added: ${lightType}`, {
-      description: `${lightType.charAt(0).toUpperCase() + lightType.slice(1)} light - Intensity: ${newLight.intensity} - ${lights.length + 1} total lights in scene`
+    toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), {
+      loading: `Adding ${lightType} light to scene...`,
+      success: `Light added: ${lightType} - Intensity: ${newLight.intensity} - ${lights.length + 1} total lights in scene`,
+      error: 'Failed to add light'
     })
   }, [lights])
 
@@ -492,8 +498,10 @@ export default function ModelingStudioPage() {
       }
     }
 
-    toast.success('3D model exported', {
-      description: `${fileName} - ${fileSizeKB} KB - ${objects.length} objects - ${materials.length} materials - ${lights.length} lights`
+    toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), {
+      loading: 'Exporting 3D model...',
+      success: `3D model exported: ${fileName} - ${fileSizeKB} KB - ${objects.length} objects - ${materials.length} materials - ${lights.length} lights`,
+      error: 'Failed to export 3D model'
     })
   }
 
@@ -511,8 +519,10 @@ export default function ModelingStudioPage() {
       visibleObjects: objects.filter(o => o.visible).length
     })
 
-    toast.info('Rendering 3D scene...', {
-      description: `${quality} quality (${renderQuality[0]}%) - ${objects.length} objects - ${lights.length} lights - ${objects.filter(o => o.visible).length} visible`
+    toast.promise(new Promise(resolve => setTimeout(resolve, 2500)), {
+      loading: `Rendering 3D scene at ${quality} quality...`,
+      success: `Scene rendered: ${quality} quality - ${objects.length} objects - ${lights.length} lights - ${objects.filter(o => o.visible).length} visible`,
+      error: 'Failed to render scene'
     })
 
     // Save render job to database if user is authenticated
@@ -549,12 +559,7 @@ export default function ModelingStudioPage() {
       }
     }
 
-    // Simulate rendering
-    setTimeout(() => {
-      toast.success('Scene rendered successfully', {
-        description: `${quality} quality - ${objects.length} objects - Ready to export`
-      })
-    }, 2000)
+    // Rendering simulation handled by toast.promise above
   }
 
   // A+++ LOADING STATE

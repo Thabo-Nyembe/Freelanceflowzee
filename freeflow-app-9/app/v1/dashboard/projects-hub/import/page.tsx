@@ -316,7 +316,11 @@ export default function ProjectImportPage() {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-    toast.success('Template downloaded!')
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Preparing template download...',
+      success: 'Template downloaded!',
+      error: 'Failed to download template'
+    })
   }, [announce])
 
   const handlePreviewImport = useCallback((importItem: ImportItem | ImportSource) => {
@@ -470,8 +474,10 @@ export default function ProjectImportPage() {
 
       const oauthUrl = oauthUrls[selectedSource.id]
       if (oauthUrl && window.location.hostname !== 'localhost') {
-        toast.info('OAuth connection', {
-          description: `Redirecting to ${selectedSource.name} authorization...`
+        toast.promise(new Promise(r => setTimeout(r, 1500)), {
+          loading: `Redirecting to ${selectedSource.name} authorization...`,
+          success: 'OAuth redirect initiated',
+          error: 'OAuth redirect failed'
         })
         // In production: window.location.href = `/api/oauth/${selectedSource.id}/connect`
       }

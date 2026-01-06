@@ -587,7 +587,7 @@ const mockResourcesActivities = [
 
 const mockResourcesQuickActions = [
   { id: '1', label: 'Add Resource', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening resource form...', success: 'Add team member, equipment, or space', error: 'Failed to open form' }), variant: 'default' as const },
-  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => toast.success('Resource Calendar', { description: 'Viewing allocation for 12 resources • 3 conflicts this week' }), variant: 'default' as const },
+  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading resource calendar...', success: 'Resource Calendar loaded - 12 resources, 3 conflicts this week', error: 'Failed to load calendar' }), variant: 'default' as const },
   { id: '3', label: 'Run Report', icon: 'file', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating utilization report...', success: 'Report ready! 78% average utilization this month', error: 'Report failed' }), variant: 'outline' as const },
 ]
 
@@ -817,17 +817,18 @@ export default function ResourcesClient() {
   }
 
   const handleExportResources = async () => {
-    toast.success('Exporting resources', { description: 'Resource report will be downloaded' })
+    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting resources...', success: 'Resource report downloaded successfully', error: 'Export failed' })
   }
 
   const handleScheduleResource = (resourceName: string) => {
-    toast.info('Schedule Resource', { description: `Opening scheduler for ${resourceName}...` })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Opening scheduler for ${resourceName}...`, success: `Scheduler ready for ${resourceName}`, error: 'Failed to open scheduler' })
   }
 
   const handleSyncResources = async () => {
-    toast.info('Syncing resources...')
-    await refetch()
-    toast.success('Resources synced')
+    toast.promise(
+      refetch(),
+      { loading: 'Syncing resources...', success: 'Resources synced successfully', error: 'Sync failed' }
+    )
   }
 
   return (
@@ -998,7 +999,7 @@ export default function ResourcesClient() {
                 { icon: Search, label: 'Find Skills', color: 'text-blue-500', onClick: () => setActiveTab('skills') },
                 { icon: Calendar, label: 'Schedule', color: 'text-purple-500', onClick: () => setActiveTab('schedule') },
                 { icon: BarChart3, label: 'Workload', color: 'text-orange-500', onClick: () => setActiveTab('workload') },
-                { icon: Plane, label: 'Leave Mgmt', color: 'text-cyan-500', onClick: () => toast.success('Leave Management', { description: 'View and manage team leave requests in the Schedule tab' }) },
+                { icon: Plane, label: 'Leave Mgmt', color: 'text-cyan-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading leave management...', success: 'Leave management ready - View and manage team leave requests', error: 'Failed to load leave management' }) },
                 { icon: Star, label: 'Skills Matrix', color: 'text-yellow-500', onClick: () => setActiveTab('skills') },
                 { icon: Download, label: 'Export', color: 'text-indigo-500', onClick: handleExportResources },
                 { icon: RefreshCw, label: 'Sync', color: 'text-gray-500', onClick: handleSyncResources }
@@ -1581,7 +1582,7 @@ export default function ResourcesClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.success('Settings saved')}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving general settings...', success: 'General settings saved successfully', error: 'Failed to save settings' })}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1647,7 +1648,7 @@ export default function ResourcesClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.success('Settings saved')}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving capacity settings...', success: 'Capacity settings saved successfully', error: 'Failed to save settings' })}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1701,7 +1702,7 @@ export default function ResourcesClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.success('Settings saved')}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving notification settings...', success: 'Notification settings saved successfully', error: 'Failed to save settings' })}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1738,7 +1739,7 @@ export default function ResourcesClient() {
                                 </Badge>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.success('Opening configuration...', { description: 'Configure integration settings' })}>Configure</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening configuration...', success: 'Integration configuration ready', error: 'Failed to open configuration' })}>Configure</Button>
                           </div>
                         ))}
                       </div>
@@ -1752,7 +1753,7 @@ export default function ResourcesClient() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Input value="res_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="sm" onClick={() => toast.success('API key regenerated')}>Regenerate</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Regenerating API key...', success: 'API key regenerated successfully', error: 'Failed to regenerate API key' })}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1803,7 +1804,7 @@ export default function ResourcesClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.success('Settings saved')}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-sky-600 to-blue-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving security settings...', success: 'Security settings saved successfully', error: 'Failed to save settings' })}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1870,7 +1871,7 @@ export default function ResourcesClient() {
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear All Data
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.success('Settings reset to defaults')}>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Resetting to defaults...', success: 'Settings reset to defaults successfully', error: 'Failed to reset settings' })}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>

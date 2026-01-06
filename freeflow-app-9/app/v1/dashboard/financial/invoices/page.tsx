@@ -259,8 +259,8 @@ export default function InvoicesPage() {
           prev.map(inv => (inv.id === editingInvoice.id ? mapDbInvoiceToUi(data!) : inv))
         )
 
-        toast.success('Invoice updated', {
-          description: 'Changes saved successfully'
+        toast.promise(new Promise(r => setTimeout(r, 800)), {
+          loading: 'Saving changes...', success: 'Invoice updated successfully', error: 'Failed to update invoice'
         })
 
         logger.info('Invoice updated successfully', { invoiceId: editingInvoice.id })
@@ -286,8 +286,8 @@ export default function InvoicesPage() {
         // Optimistically add to UI
         setInvoices(prev => [mapDbInvoiceToUi(data!), ...prev])
 
-        toast.success('Invoice created', {
-          description: 'Invoice created successfully'
+        toast.promise(new Promise(r => setTimeout(r, 1000)), {
+          loading: 'Creating invoice...', success: 'Invoice created successfully', error: 'Failed to create invoice'
         })
 
         logger.info('Invoice created successfully', { invoiceId: data!.id })

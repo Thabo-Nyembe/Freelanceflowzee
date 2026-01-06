@@ -720,7 +720,7 @@ export default function CanvasPage() {
       setSelectedTemplate('blank')
 
       toast.success('Canvas created', {
-        description: `${newCanvas.name} - ${template?.name || newCanvas.template} - ${size.width}×${size.height}px - v${newCanvas.version}`
+        description: `${newCanvas.name} - ${template?.name || newCanvas.template} - ${size.width}x${size.height}px - v${newCanvas.version}`
       })
       announce('New canvas created', 'polite')
     } catch (err: any) {
@@ -906,7 +906,14 @@ export default function CanvasPage() {
           logger.info('Star status saved to database', { canvasId, isStarred: newStarredState })
         }
 
-        toast.success(newStarredState ? 'Added to favorites' : 'Removed from favorites')
+        toast.promise(
+          new Promise(r => setTimeout(r, 600)),
+          {
+            loading: newStarredState ? 'Adding to favorites...' : 'Removing from favorites...',
+            success: newStarredState ? 'Added to favorites' : 'Removed from favorites',
+            error: 'Failed to update favorites'
+          }
+        )
         announce(newStarredState ? 'Added to favorites' : 'Removed from favorites', 'polite')
       } catch (err: any) {
         logger.error('Failed to toggle star', { error: err.message, canvasId })
@@ -919,8 +926,6 @@ export default function CanvasPage() {
 
   const handleExportCanvas = async () => {
     logger.info('Exporting canvas', { format: exportFormat, quality: exportQuality })
-    
-    
 
     if (!state.selectedCanvas) {
       logger.warn('No canvas selected for export')
@@ -928,17 +933,22 @@ export default function CanvasPage() {
       return
     }
 
-    logger.info('Exporting canvas', { canvasName: state.selectedCanvas.name, format: exportFormat })
-    toast.info(`📥 Exporting as ${exportFormat.toUpperCase()}...`, {
-      description: 'Preparing canvas for download'
-    })
+    const canvasName = state.selectedCanvas.name
+    logger.info('Exporting canvas', { canvasName, format: exportFormat })
+
+    setShowExportModal(false)
+
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+      {
+        loading: `Exporting ${canvasName} as ${exportFormat.toUpperCase()}...`,
+        success: `Canvas exported - ${canvasName} ready for download`,
+        error: 'Failed to export canvas'
+      }
+    )
 
     // Note: Using local state - in production, this would POST to /api/canvases/export
-    logger.info('Export completed', { canvasName: state.selectedCanvas.name, format: exportFormat })
-    setShowExportModal(false)
-    toast.success('🎨 Canvas exported', {
-      description: `${state.selectedCanvas.name} ready for download`
-    })
+    logger.info('Export completed', { canvasName, format: exportFormat })
     announce('Canvas exported', 'polite')
   }
 
@@ -1503,7 +1513,7 @@ export default function CanvasPage() {
                       <Icon className="h-8 w-8 mx-auto mb-2 text-gray-400" />
                       <p className="text-sm font-medium text-center">{template.name}</p>
                       <p className="text-xs text-gray-500 text-center mt-1">
-                        {template.defaultSize.width}×{template.defaultSize.height}
+                        {template.defaultSize.width}x{template.defaultSize.height}
                       </p>
                     </button>
                   )
@@ -1642,7 +1652,7 @@ export default function CanvasPage() {
                     <div className="flex items-center justify-between">
                       <h4 className="font-semibold text-white">{artboard.name}</h4>
                       <Badge variant="outline">
-                        {artboard.width}×{artboard.height}
+                        {artboard.width}x{artboard.height}
                       </Badge>
                     </div>
                     <div className="text-sm text-gray-400">

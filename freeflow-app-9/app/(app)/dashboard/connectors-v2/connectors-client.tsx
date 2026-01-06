@@ -724,7 +724,7 @@ export default function ConnectorsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => toast.success('History', { description: 'Task history opened' })}>
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading task history...', success: 'Task history opened', error: 'Failed to load history' })}>
                 <History className="w-4 h-4 mr-2" />
                 History
               </Button>
@@ -1048,7 +1048,7 @@ export default function ConnectorsClient() {
                         <span>Last run: {zap.last_run_at ? formatDate(zap.last_run_at) : 'Never'}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.success('History', { description: `Viewing history for "${zap.name}"` }) }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Loading history for "${zap.name}"...`, success: `Viewing history for "${zap.name}"`, error: 'Failed to load zap history' }) }}>
                           <Eye className="w-4 h-4 mr-2" />
                           History
                         </Button>
@@ -1148,7 +1148,7 @@ export default function ConnectorsClient() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Task History</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.success('Filter', { description: 'Filter options opened' })}>
+                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filter options...', success: 'Filter options opened', error: 'Failed to open filters' })}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1193,7 +1193,7 @@ export default function ConnectorsClient() {
                           <td className="px-4 py-3 text-sm text-gray-500">{task.duration_seconds}s</td>
                           <td className="px-4 py-3 text-sm text-gray-500">{formatDate(task.started_at)}</td>
                           <td className="px-4 py-3">
-                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.success('View Details', { description: `Task details for "${task.zap_name}"` }) }}>
+                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading task details...`, success: `Task details for "${task.zap_name}" loaded`, error: 'Failed to load task details' }) }}>
                               <Eye className="w-4 h-4" />
                             </Button>
                           </td>
@@ -1210,7 +1210,7 @@ export default function ConnectorsClient() {
           <TabsContent value="templates" className="space-y-6 mt-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Popular Templates</h2>
-              <Button variant="outline" onClick={() => toast.success('Templates', { description: 'All templates loaded' })}>View All</Button>
+              <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading all templates...', success: 'All templates loaded', error: 'Failed to load templates' })}>View All</Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

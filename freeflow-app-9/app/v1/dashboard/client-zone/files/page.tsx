@@ -435,8 +435,10 @@ export default function FilesPage() {
       }
 
       logger.info('File shared successfully', { fileId: file.id })
-      toast.success('Share link copied!', {
-        description: 'File link copied to clipboard'
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Generating share link...',
+        success: 'Share link copied to clipboard!',
+        error: 'Failed to generate share link'
       })
     } catch (error: any) {
       logger.error('Failed to share file', { error, fileId: file.id })
@@ -459,8 +461,10 @@ export default function FilesPage() {
           : f
       ))
 
-      toast.info('Opening file preview...', {
-        description: file.name
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Opening file preview...',
+        success: `Preview opened: ${file.name}`,
+        error: 'Failed to open preview'
       })
     } catch (error: any) {
       logger.error('Failed to open file preview', { error })
@@ -477,7 +481,11 @@ export default function FilesPage() {
       const link = `https://files.kazi.io/${file.id}/${file.name}`
       await navigator.clipboard.writeText(link)
       logger.info('File link copied', { fileId: file.id })
-      toast.success('Link copied to clipboard!')
+      toast.promise(new Promise(r => setTimeout(r, 500)), {
+        loading: 'Copying link...',
+        success: 'Link copied to clipboard!',
+        error: 'Failed to copy link'
+      })
     } catch (error: any) {
       logger.error('Failed to copy link', { error })
       toast.error('Failed to copy link')

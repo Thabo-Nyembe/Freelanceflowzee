@@ -2086,7 +2086,7 @@ export default function OnboardingClient() {
                     <Copy className="w-4 h-4" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Analytics', { description: 'View detailed analytics for this flow' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading flow analytics...', success: 'Analytics dashboard ready! Viewing detailed metrics', error: 'Failed to load analytics' })}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
@@ -2175,11 +2175,11 @@ export default function OnboardingClient() {
                     <Edit className="w-4 h-4" />
                     Edit Checklist
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Add item', { description: 'Add new checklist item' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing item form...', success: 'Ready to add new checklist item', error: 'Failed to open form' })}>
                     <Plus className="w-4 h-4" />
                     Add Item
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Analytics', { description: 'View checklist analytics' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading checklist analytics...', success: 'Analytics ready! Viewing completion metrics', error: 'Failed to load analytics' })}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>

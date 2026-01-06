@@ -1565,7 +1565,7 @@ export default function TeamHubPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="kazi-card p-4">
                     <div className="flex items-center space-x-3">
                       <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -1577,7 +1577,7 @@ export default function TeamHubPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="kazi-card p-4">
                     <div className="flex items-center space-x-3">
                       <Trophy className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
@@ -1627,16 +1627,35 @@ export default function TeamHubPage() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold kazi-text-primary">{member.rating.toFixed(1)} ⭐</p>
+                          <p className="font-semibold kazi-text-primary">{member.rating.toFixed(1)} star</p>
                           <p className="text-sm kazi-text-tertiary">{member.projects} projects</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Button variant="outline" className="justify-start h-auto p-4">
+                  <Button
+                    variant="outline"
+                    className="justify-start h-auto p-4"
+                    onClick={() => {
+                      logger.info('Generate team report initiated', {
+                        totalMembers: teamStats.totalMembers,
+                        activeProjects: teamStats.activeProjects,
+                        completedTasks: teamStats.completedTasks
+                      })
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 2500)),
+                        {
+                          loading: 'Generating team analytics report...',
+                          success: 'Report Generated - Team analytics exported successfully',
+                          error: 'Failed to generate report'
+                        }
+                      )
+                      handleTeamExport('csv')
+                    }}
+                  >
                     <div className="flex items-center space-x-3">
                       <FileText className="h-5 w-5" />
                       <div className="text-left">
@@ -1645,8 +1664,26 @@ export default function TeamHubPage() {
                       </div>
                     </div>
                   </Button>
-                  
-                  <Button variant="outline" className="justify-start h-auto p-4">
+
+                  <Button
+                    variant="outline"
+                    className="justify-start h-auto p-4"
+                    onClick={() => {
+                      logger.info('Set team goals initiated', {
+                        activeProjects: teamStats.activeProjects,
+                        totalMembers: teamStats.totalMembers
+                      })
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 800)),
+                        {
+                          loading: 'Loading goals manager...',
+                          success: 'Goals Manager - Define and track team objectives',
+                          error: 'Failed to load goals manager'
+                        }
+                      )
+                      setShowGoalsDialog(true)
+                    }}
+                  >
                     <div className="flex items-center space-x-3">
                       <Target className="h-5 w-5" />
                       <div className="text-left">

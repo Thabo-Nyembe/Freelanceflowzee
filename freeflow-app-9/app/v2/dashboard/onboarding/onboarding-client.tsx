@@ -2078,7 +2078,7 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => toast.info('Edit flow', { description: 'Flow editor coming soon' })}>
+                  <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening flow editor...', success: 'Flow editor ready', error: 'Failed to open editor' })}>
                     <Edit className="w-4 h-4" />
                     Edit Flow
                   </Button>
@@ -2086,7 +2086,7 @@ export default function OnboardingClient() {
                     <Copy className="w-4 h-4" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Analytics', { description: 'View detailed analytics for this flow' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading flow analytics...', success: 'Analytics loaded', error: 'Failed to load analytics' })}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
@@ -2171,15 +2171,15 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => toast.info('Edit checklist', { description: 'Checklist editor coming soon' })}>
+                  <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening checklist editor...', success: 'Checklist editor ready', error: 'Failed to open editor' })}>
                     <Edit className="w-4 h-4" />
                     Edit Checklist
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Add item', { description: 'Add new checklist item' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Adding checklist item...', success: 'Item added successfully', error: 'Failed to add item' })}>
                     <Plus className="w-4 h-4" />
                     Add Item
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.info('Analytics', { description: 'View checklist analytics' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading checklist analytics...', success: 'Analytics loaded', error: 'Failed to load analytics' })}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>

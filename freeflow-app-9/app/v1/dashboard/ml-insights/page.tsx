@@ -655,8 +655,10 @@ export default function MLInsightsPage() {
     dispatch({ type: 'SELECT_INSIGHT', insight })
     setShowViewModal(true)
 
-    toast.info('View ML Insight', {
-      description: `${insight.title} - ${insight.type} - ${insight.confidence} confidence - ${(insight.metrics.accuracy * 100).toFixed(1)}% accuracy - ${insight.affectedUsers || 0} users affected`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Loading ML insight details...',
+      success: `Loaded: ${insight.title} - ${insight.type} - ${insight.confidence} confidence - ${(insight.metrics.accuracy * 100).toFixed(1)}% accuracy`,
+      error: 'Failed to load insight details'
     })
   }
 
@@ -780,55 +782,55 @@ export default function MLInsightsPage() {
 
     try {
       dispatch({ type: 'RETRAIN_MODEL', insightId })
-      toast.info('Model retraining started...', {
-        description: `${insight?.modelName} - v${insight?.modelVersion} - This may take a few moments`
-      })
+      toast.promise(
+        (async () => {
+          const response = await fetch('/api/ml-insights', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'retrain',
+              insightId
+            })
+          })
 
-      const response = await fetch('/api/ml-insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'retrain',
-          insightId
-        })
-      })
+          const result = await response.json()
 
-      const result = await response.json()
+          if (result.success) {
+            const insight = state.insights.find(i => i.id === insightId)
+            if (insight) {
+              const updatedInsight = {
+                ...insight,
+                modelStatus: result.insight.modelStatus,
+                modelVersion: result.insight.modelVersion,
+                metrics: result.metrics,
+                updatedAt: result.insight.updatedAt
+              }
+              dispatch({ type: 'UPDATE_INSIGHT', insight: updatedInsight })
+            }
 
-      if (result.success) {
-        const insight = state.insights.find(i => i.id === insightId)
-        if (insight) {
-          const updatedInsight = {
-            ...insight,
-            modelStatus: result.insight.modelStatus,
-            modelVersion: result.insight.modelVersion,
-            metrics: result.metrics,
-            updatedAt: result.insight.updatedAt
+            logger.info('Model retrained successfully', {
+              insightId,
+              modelName: insight?.modelName,
+              newVersion: result.insight.modelVersion,
+              newMetrics: result.metrics
+            })
+
+            return `${insight?.modelName} v${result.insight.modelVersion} - Accuracy: ${(result.metrics.accuracy * 100).toFixed(1)}% - F1: ${(result.metrics.f1Score * 100).toFixed(1)}%`
+          } else {
+            throw new Error(result.error || 'Retrain failed')
           }
-          dispatch({ type: 'UPDATE_INSIGHT', insight: updatedInsight })
+        })(),
+        {
+          loading: `Retraining ${insight?.modelName} v${insight?.modelVersion}...`,
+          success: (msg) => `Model retrained: ${msg}`,
+          error: 'Failed to retrain model'
         }
-
-        logger.info('Model retrained successfully', {
-          insightId,
-          modelName: insight?.modelName,
-          newVersion: result.insight.modelVersion,
-          newMetrics: result.metrics
-        })
-
-        toast.success('Model retrained successfully', {
-          description: `${insight?.modelName} - v${result.insight.modelVersion} - Accuracy: ${(result.metrics.accuracy * 100).toFixed(1)}% - F1: ${(result.metrics.f1Score * 100).toFixed(1)}%`
-        })
-      } else {
-        throw new Error(result.error || 'Retrain failed')
-      }
+      )
     } catch (error: any) {
       logger.error('Failed to retrain model', {
         error: error.message,
         insightId,
         modelName: insight?.modelName
-      })
-      toast.error('Failed to retrain model', {
-        description: error.message || 'Please try again later'
       })
     }
   }
@@ -1001,7 +1003,7 @@ export default function MLInsightsPage() {
           <ScrollReveal variant="scale" duration={0.6} delay={0.2}>
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
               <LiquidGlassCard className="p-4">
-                
+
                 <div className="flex items-center gap-3 mb-2">
                   <Brain className="w-5 h-5 text-purple-400" />
                   <span className="text-sm text-gray-400">Total Insights</span>
@@ -1012,7 +1014,7 @@ export default function MLInsightsPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-4">
-                
+
                 <div className="flex items-center gap-3 mb-2">
                   <AlertTriangle className="w-5 h-5 text-red-400" />
                   <span className="text-sm text-gray-400">Critical</span>
@@ -1023,7 +1025,7 @@ export default function MLInsightsPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-4">
-                
+
                 <div className="flex items-center gap-3 mb-2">
                   <Target className="w-5 h-5 text-green-400" />
                   <span className="text-sm text-gray-400">High Confidence</span>
@@ -1034,7 +1036,7 @@ export default function MLInsightsPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-4">
-                
+
                 <div className="flex items-center gap-3 mb-2">
                   <Zap className="w-5 h-5 text-blue-400" />
                   <span className="text-sm text-gray-400">Actionable</span>
@@ -1045,7 +1047,7 @@ export default function MLInsightsPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-4">
-                
+
                 <div className="flex items-center gap-3 mb-2">
                   <BarChart3 className="w-5 h-5 text-cyan-400" />
                   <span className="text-sm text-gray-400">Avg Accuracy</span>
@@ -1054,7 +1056,7 @@ export default function MLInsightsPage() {
               </LiquidGlassCard>
 
               <LiquidGlassCard className="p-4">
-                
+
                 <div className="flex items-center gap-3 mb-2">
                   <Users className="w-5 h-5 text-orange-400" />
                   <span className="text-sm text-gray-400">Affected Users</span>
@@ -1657,10 +1659,10 @@ export default function MLInsightsPage() {
                 <div className="p-4 bg-slate-800 rounded-lg">
                   <p className="text-sm text-gray-400">Export will include:</p>
                   <ul className="mt-2 space-y-1 text-sm text-white">
-                    <li>• {filteredAndSortedInsights.length} insights</li>
-                    <li>• All metadata and metrics</li>
-                    <li>• Model information</li>
-                    <li>• Recommendations</li>
+                    <li>- {filteredAndSortedInsights.length} insights</li>
+                    <li>- All metadata and metrics</li>
+                    <li>- Model information</li>
+                    <li>- Recommendations</li>
                   </ul>
                 </div>
               </div>

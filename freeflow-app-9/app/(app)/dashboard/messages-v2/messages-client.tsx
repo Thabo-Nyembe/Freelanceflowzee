@@ -972,7 +972,7 @@ export default function MessagesClient() {
                         <div className="flex items-center gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Phone className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Video className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => toast.success('Pinned Items', { description: 'View pinned messages in this channel' })}><Pin className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading pinned items...', success: 'Pinned items loaded', error: 'Failed to load pinned items' })}><Pin className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleMuteChannel(selectedChannel.name)}><BellOff className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Archiving channel...', success: 'Channel archived', error: 'Failed' })}><Archive className="w-4 h-4" /></Button>
                         </div>
@@ -1232,7 +1232,7 @@ export default function MessagesClient() {
                               <p className="text-sm text-gray-500">{new Date(call.startTime).toLocaleString()}</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.success('Scheduled Call', { description: `Call scheduled for ${new Date(call.startTime).toLocaleString()}` })}>View</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading call details...', success: `Viewing call scheduled for ${new Date(call.startTime).toLocaleString()}`, error: 'Failed to load call details' })}>View</Button>
                         </div>
                       </div>
                     ))}
@@ -1353,7 +1353,7 @@ export default function MessagesClient() {
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="text-sm text-gray-500">{file.downloads} downloads</span>
-                        <Button variant="outline" size="icon" onClick={() => toast.success('Download started', { description: `Downloading ${file.name}...` })}>
+                        <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Downloading ${file.name}...`, success: `${file.name} downloaded successfully`, error: 'Download failed' })}>
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2063,7 +2063,7 @@ export default function MessagesClient() {
                             <Download className="w-4 h-4 mr-2" />
                             Export Data
                           </Button>
-                          <Button variant="outline" className="flex-1" onClick={() => toast.success('Cache Cleared', { description: 'Local cache has been cleared' })}>
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Clearing cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}>
                             <Archive className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -2080,7 +2080,7 @@ export default function MessagesClient() {
                         <CardDescription>Get help and support resources</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.success('Documentation', { description: 'Opening documentation in new tab' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening documentation...', success: 'Documentation opened in new tab', error: 'Failed to open documentation' })}>
                           <BookOpen className="w-4 h-4 mr-2" />
                           Documentation
                         </Button>
@@ -2088,11 +2088,11 @@ export default function MessagesClient() {
                           <MessageSquare className="w-4 h-4 mr-2" />
                           Contact Support
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.success('Keyboard Shortcuts', { description: 'Press Ctrl+/ to view shortcuts' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading shortcuts...', success: 'Keyboard shortcuts: Press Ctrl+/ to view', error: 'Failed to load shortcuts' })}>
                           <Zap className="w-4 h-4 mr-2" />
                           Keyboard Shortcuts
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.success('Up to date', { description: 'You are running the latest version' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: 'Checking for updates...', success: 'You are running the latest version', error: 'Failed to check for updates' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Check for Updates
                         </Button>

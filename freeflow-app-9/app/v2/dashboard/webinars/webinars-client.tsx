@@ -507,7 +507,7 @@ export default function WebinarsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2" onClick={() => toast.info('Calendar', { description: 'Opening webinar calendar view...' })}>
+            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening calendar view...', success: 'Calendar view opened', error: 'Failed to open calendar' })}>
               <Calendar className="w-4 h-4" />
               View Calendar
             </Button>
@@ -808,15 +808,15 @@ export default function WebinarsClient() {
                           </Button>
                         )}
                         {webinar.status === 'live' && (
-                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); toast.info('Joining Webinar', { description: `Joining "${webinar.title}"...` }) }}>
+                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Joining "${webinar.title}"...`, success: `Joined webinar successfully`, error: 'Failed to join webinar' }) }}>
                             <Video className="w-4 h-4" />
                             Join
                           </Button>
                         )}
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Edit Webinar', { description: `Editing "${webinar.title}"...` }) }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading webinar editor...`, success: `Opened webinar editor`, error: 'Failed to open editor' }) }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('More Options', { description: 'Opening webinar options...' }) }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options menu opened', error: 'Failed to load options' }) }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -864,13 +864,13 @@ export default function WebinarsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500', action: () => handleRegister() },
-                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => toast.info('Import CSV', { description: 'Opening CSV import dialog...' }) },
+                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening CSV import dialog...', success: 'Import dialog ready', error: 'Failed to open import' }) },
                 { icon: Download, label: 'Export', color: 'bg-purple-500', action: () => handleExportAttendees() },
-                { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => toast.info('Email All', { description: 'Composing bulk email...' }) },
-                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => toast.success('Approve', { description: 'Selected registrations approved' }) },
-                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => toast.info('Decline', { description: 'Selected registrations declined' }) },
-                { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => toast.info('Filter', { description: 'Opening filter options...' }) },
-                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => toast.info('Refresh', { description: 'Refreshing registrations list...' }) }
+                { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Composing bulk email...', success: 'Email composer opened', error: 'Failed to compose email' }) },
+                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Approving selected registrations...', success: 'Registrations approved successfully', error: 'Failed to approve registrations' }) },
+                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Declining selected registrations...', success: 'Registrations declined', error: 'Failed to decline registrations' }) },
+                { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening filter options...', success: 'Filter options opened', error: 'Failed to open filters' }) },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Refreshing registrations...', success: 'Registrations list refreshed', error: 'Failed to refresh list' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -955,10 +955,10 @@ export default function WebinarsClient() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => toast.info('Email', { description: `Sending email to ${reg.email}...` })}>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Sending email to ${reg.email}...`, success: 'Email sent successfully', error: 'Failed to send email' })}>
                                 <Mail className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => toast.info('More Options', { description: 'Opening registration options...' })}>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options menu opened', error: 'Failed to load options' })}>
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1268,19 +1268,19 @@ export default function WebinarsClient() {
                         <div className="flex items-center gap-2">
                           {recording.status === 'ready' && (
                             <>
-                              <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.info('Playing', { description: `Playing "${recording.webinarTitle}"...` })}>
+                              <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Loading "${recording.webinarTitle}"...`, success: 'Playing recording', error: 'Failed to play recording' })}>
                                 <Play className="w-4 h-4" />
                                 Play
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => toast.success('Downloading', { description: `Downloading "${recording.webinarTitle}"...` })}>
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Downloading "${recording.webinarTitle}"...`, success: 'Download started', error: 'Failed to download recording' })}>
                                 <Download className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => toast.info('Share', { description: 'Sharing link copied to clipboard' })}>
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating share link...', success: 'Link copied to clipboard', error: 'Failed to generate link' })}>
                                 <Share2 className="w-4 h-4" />
                               </Button>
                             </>
                           )}
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Delete', { description: `Deleting "${recording.webinarTitle}"...` })}>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Deleting "${recording.webinarTitle}"...`, success: 'Recording deleted', error: 'Failed to delete recording' })}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>

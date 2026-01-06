@@ -713,8 +713,10 @@ export default function AIEnhancedPage() {
         name: tool?.name
       })
 
-      toast.success('AI tool deleted', {
-        description: `${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`
+      toast.promise(new Promise(r => setTimeout(r, 1000)), {
+        loading: 'Deleting AI tool...',
+        success: `AI tool deleted: ${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`,
+        error: 'Failed to delete AI tool'
       })
 
       setShowDeleteModal(false)
@@ -760,8 +762,10 @@ export default function AIEnhancedPage() {
         totalUsage
       })
 
-      toast.success(`Deleted ${state.selectedTools.length} tool(s)`, {
-        description: `${state.selectedTools.length} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Deleting selected tools...',
+        success: `Deleted ${state.selectedTools.length} tool(s): ${state.selectedTools.length} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`,
+        error: 'Failed to delete selected tools'
       })
 
       dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
@@ -800,8 +804,10 @@ export default function AIEnhancedPage() {
         throw error
       }
 
-      toast.success(newFavoriteState ? 'Added to favorites' : 'Removed from favorites', {
-        description: `${tool?.name} - ${tool?.type} - ${newFavoriteState ? '★ Favorited' : '☆ Unfavorited'}`
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: newFavoriteState ? 'Adding to favorites...' : 'Removing from favorites...',
+        success: `${newFavoriteState ? 'Added to favorites' : 'Removed from favorites'}: ${tool?.name} - ${tool?.type} - ${newFavoriteState ? 'Favorited' : 'Unfavorited'}`,
+        error: 'Failed to update favorite status'
       })
     } catch (error: any) {
       logger.error('Failed to toggle favorite', { error: error.message, toolId })

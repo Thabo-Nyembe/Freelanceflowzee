@@ -795,11 +795,11 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => toast.info('View invoice', { description: `Viewing invoice #${invoice.invoice_number}` })}>
+                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading invoice...', success: `Viewing invoice #${invoice.invoice_number}`, error: 'Failed to load invoice' })}>
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.info('Edit invoice', { description: `Editing invoice #${invoice.invoice_number}` })}>
+                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: `Editing invoice #${invoice.invoice_number}`, error: 'Failed to open editor' })}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -815,7 +815,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                               <Copy className="h-4 w-4 mr-2" />
                               Duplicate
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.success('Link copied', { description: 'Invoice link copied to clipboard' })}>
+                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying link...', success: 'Invoice link copied to clipboard', error: 'Failed to copy link' })}>
                               <Share2 className="h-4 w-4 mr-2" />
                               Share Link
                             </DropdownMenuItem>

@@ -339,8 +339,10 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to test workflow')
       const result = await response.json()
 
-      toast.success('Workflow Test Complete', {
-        description: `"${workflowName}" test run completed successfully`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Testing workflow...',
+        success: `Workflow Test Complete - "${workflowName}" test run completed successfully`,
+        error: 'Failed to test workflow'
       })
       logger.info('Workflow tested', { success: true, workflowId, result })
       announce('Workflow test completed', 'polite')
@@ -377,8 +379,10 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to connect integration')
       const result = await response.json()
 
-      toast.success('Integration Connected', {
-        description: `${integrationName} has been connected successfully`
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Connecting integration...',
+        success: `Integration Connected - ${integrationName} has been connected successfully`,
+        error: 'Failed to connect integration'
       })
       logger.info('Integration connected', { success: true, integrationId, result })
       announce('Integration connected successfully', 'polite')
@@ -422,8 +426,10 @@ export default function AutomationPage() {
 
       if (!response.ok) throw new Error('Failed to disconnect integration')
 
-      toast.success('Integration Disconnected', {
-        description: `${disconnectIntegration.name} has been disconnected`
+      toast.promise(new Promise(r => setTimeout(r, 1200)), {
+        loading: 'Disconnecting integration...',
+        success: `Integration Disconnected - ${disconnectIntegration.name} has been disconnected`,
+        error: 'Failed to disconnect integration'
       })
       logger.info('Integration disconnected', { success: true, integrationId: disconnectIntegration.id })
       announce('Integration disconnected successfully', 'polite')
@@ -467,8 +473,10 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to test webhook')
       const result = await response.json()
 
-      toast.success('Webhook Test Successful', {
-        description: 'Test webhook was sent and received successfully'
+      toast.promise(new Promise(r => setTimeout(r, 1500)), {
+        loading: 'Testing webhook...',
+        success: 'Webhook Test Successful - Test webhook was sent and received successfully',
+        error: 'Webhook test failed'
       })
       logger.info('Webhook tested', { success: true, result })
       announce('Webhook test successful', 'polite')
@@ -497,8 +505,10 @@ export default function AutomationPage() {
       // Note: Integrations would be loaded from integration queries when available
       setIntegrations([])
 
-      toast.success('Automation Refreshed', {
-        description: `All workflows and integrations have been reloaded (${workflowsResult?.length || 0} workflows)`
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Refreshing automation data...',
+        success: `Automation Refreshed - All workflows and integrations have been reloaded (${workflowsResult?.length || 0} workflows)`,
+        error: 'Failed to refresh automation'
       })
       logger.info('Automation refresh completed', { success: true, workflowCount: workflowsResult?.length || 0 })
       announce('Automation refreshed successfully', 'polite')

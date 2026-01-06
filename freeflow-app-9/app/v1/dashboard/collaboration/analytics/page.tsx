@@ -147,11 +147,11 @@ export default function AnalyticsPage() {
         userId
       });
 
-      toast.success(
-        `Analytics loaded: ${statsData?.totalMessages || 0} messages, ${
-          statsData?.totalMeetings || 0
-        } meetings`
-      );
+      toast.promise(new Promise(r => setTimeout(r, 800)), {
+        loading: 'Loading analytics...',
+        success: `Analytics loaded: ${statsData?.totalMessages || 0} messages, ${statsData?.totalMeetings || 0} meetings`,
+        error: 'Failed to load analytics'
+      });
       announce(`Analytics loaded successfully: ${statsData?.totalMessages || 0} messages`, "polite");
     } catch (error) {
       logger.error("Exception in fetchAnalyticsData", { error, userId });
@@ -165,87 +165,120 @@ export default function AnalyticsPage() {
   const handleExportReport = async () => {
     if (!userId) return;
 
-    try {
-      logger.info("Exporting collaboration analytics report", { userId, dateRange });
+    logger.info("Exporting collaboration analytics report", { userId, dateRange });
 
-      // Generate CSV report from real data
-      const { data: csvData, error } = await exportCollaborationReport(
-        userId,
-        dateRange as "7days" | "30days" | "90days" | "year",
-        "csv"
-      );
+    toast.promise(
+      (async () => {
+        // Generate CSV report from real data
+        const { data: csvData, error } = await exportCollaborationReport(
+          userId,
+          dateRange as "7days" | "30days" | "90days" | "year",
+          "csv"
+        );
 
-      if (error || !csvData) {
-        logger.error("Failed to generate report", { error, userId });
-        toast.error("Failed to export report");
-        announce("Error exporting report", "assertive");
-        return;
+        if (error || !csvData) {
+          logger.error("Failed to generate report", { error, userId });
+          announce("Error exporting report", "assertive");
+          throw new Error("Failed to export report");
+        }
+
+        // Create downloadable file
+        const blob = new Blob([csvData], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `collaboration-analytics-${dateRange}-${
+          new Date().toISOString().split("T")[0]
+        }.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        logger.info("Report exported successfully", {
+          size: csvData.length,
+          dateRange,
+          userId
+        });
+        announce("Analytics report exported successfully", "polite");
+        return csvData.length;
+      })(),
+      {
+        loading: 'Exporting analytics report...',
+        success: (size) => `Analytics report exported (${size} bytes)`,
+        error: 'Failed to export report'
       }
-
-      // Create downloadable file
-      const blob = new Blob([csvData], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `collaboration-analytics-${dateRange}-${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      logger.info("Report exported successfully", {
-        size: csvData.length,
-        dateRange,
-        userId
-      });
-      toast.success(`Analytics report exported (${csvData.length} bytes)`);
-      announce("Analytics report exported successfully", "polite");
-    } catch (error) {
-      logger.error("Exception in handleExportReport", { error, userId });
-      toast.error("Failed to export report");
-      announce("Error exporting report", "assertive");
-    }
+    );
   };
 
   const handleRefreshData = async () => {
-    await fetchAnalyticsData();
+    logger.info("Refreshing analytics data");
+    toast.promise(
+      fetchAnalyticsData(),
+      {
+        loading: 'Refreshing analytics data...',
+        success: 'Analytics data refreshed',
+        error: 'Failed to refresh data'
+      }
+    );
   };
 
   const handleScheduleReport = async () => {
-    try {
-      logger.info("Scheduling analytics report");
+    logger.info("Scheduling analytics report");
 
-      // Save schedule to database
-      if (userId) {
-        const { error } = await upsertReportSchedule(userId, 'weekly');
-        if (error) {
-          logger.error("Failed to save schedule to database", { error });
-        }
+    toast.promise(
+      new Promise<void>(async (resolve, reject) => {
+        setTimeout(async () => {
+          try {
+            // Save schedule to database
+            if (userId) {
+              const { error } = await upsertReportSchedule(userId, 'weekly');
+              if (error) {
+                logger.error("Failed to save schedule to database", { error });
+                reject(new Error("Failed to schedule report"));
+                return;
+              }
+            }
+
+            logger.info("Report scheduled successfully");
+            resolve();
+          } catch (error) {
+            logger.error("Failed to schedule report", { error });
+            reject(error);
+          }
+        }, 1000);
+      }),
+      {
+        loading: 'Scheduling weekly report...',
+        success: 'Weekly report scheduled',
+        error: 'Failed to schedule report'
       }
-
-      logger.info("Report scheduled successfully");
-      toast.success("Weekly report scheduled");
-    } catch (error) {
-      logger.error("Failed to schedule report", { error });
-      toast.error("Failed to schedule report");
-    }
+    );
   };
 
   const handleShareAnalytics = async () => {
-    try {
-      logger.info("Sharing analytics");
+    logger.info("Sharing analytics");
 
-      // Copy share link to clipboard
-      await navigator.clipboard.writeText(`${window.location.origin}/analytics/report`);
-
-      logger.info("Analytics shared");
-      toast.success("Analytics link copied to clipboard");
-    } catch (error) {
-      logger.error("Failed to share analytics", { error });
-      toast.error("Failed to share analytics");
-    }
+    toast.promise(
+      new Promise<void>(async (resolve, reject) => {
+        setTimeout(async () => {
+          try {
+            // Copy share link to clipboard
+            await navigator.clipboard.writeText(`${window.location.origin}/analytics/report`);
+            logger.info("Analytics shared");
+            resolve();
+          } catch (error) {
+            logger.error("Failed to share analytics", { error });
+            reject(error);
+          }
+        }, 600);
+      }),
+      {
+        loading: 'Copying analytics link...',
+        success: 'Analytics link copied to clipboard',
+        error: 'Failed to share analytics'
+      }
+    );
   };
 
   const getTrendIcon = (change: number) => {

@@ -815,7 +815,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.info('Select a document to share')}
+                onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing share options...', success: 'Select a document to share', error: 'Share preparation failed' })}
               >
                 <Share2 className="w-5 h-5" />
                 <span className="text-xs font-medium">Share</span>
@@ -1020,7 +1020,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.info('Select a document to export')}
+                onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Preparing export...', success: 'Select a document to export', error: 'Export preparation failed' })}
               >
                 <Download className="w-5 h-5" />
                 <span className="text-xs font-medium">Export</span>
@@ -1028,7 +1028,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.info('Select a document to duplicate')}
+                onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing duplication...', success: 'Select a document to duplicate', error: 'Duplication preparation failed' })}
               >
                 <Copy className="w-5 h-5" />
                 <span className="text-xs font-medium">Duplicate</span>
@@ -1036,7 +1036,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.info('Select a document to move')}
+                onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing move options...', success: 'Select a document to move', error: 'Move preparation failed' })}
               >
                 <Move className="w-5 h-5" />
                 <span className="text-xs font-medium">Move</span>
@@ -1044,7 +1044,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.info('Select a document to delete')}
+                onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing delete...', success: 'Select a document to delete', error: 'Delete preparation failed' })}
               >
                 <Trash2 className="w-5 h-5" />
                 <span className="text-xs font-medium">Delete</span>

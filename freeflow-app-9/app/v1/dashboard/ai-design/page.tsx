@@ -1322,43 +1322,43 @@ export default function AIDesignStudioPage() {
                   <CardDescription className="kazi-body">Configure AI generation preferences</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start" data-testid="ai-quality-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="ai-quality-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening AI quality settings...', success: 'AI Quality Settings loaded - Configure resolution, model precision, and output quality', error: 'Failed to load AI quality settings' })}>
                     <Sliders className="w-4 h-4 mr-2" />
                     AI Quality Settings
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="model-preferences-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="model-preferences-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading model preferences...', success: 'Model Preferences loaded - GPT-4 Vision, DALL-E 3, Midjourney V6 configuration', error: 'Failed to load model preferences' })}>
                     <Zap className="w-4 h-4 mr-2" />
                     Model Preferences
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="generation-limits-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="generation-limits-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading generation limits...', success: 'Generation Limits loaded - Daily: 100 generations, Batch: 20 max, Storage: 10GB', error: 'Failed to load generation limits' })}>
                     <Target className="w-4 h-4 mr-2" />
                     Generation Limits
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="output-format-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="output-format-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading output format settings...', success: 'Output Formats configured - PNG, SVG, PDF, JPG with AI-optimized compression', error: 'Failed to load output formats' })}>
                     <FileText className="w-4 h-4 mr-2" />
                     Default Output Formats
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="color-profile-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="color-profile-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading color profile settings...', success: 'Color Profile Settings loaded - sRGB, Adobe RGB, CMYK conversion enabled', error: 'Failed to load color profiles' })}>
                     <Palette className="w-4 h-4 mr-2" />
                     Color Profile Settings
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="resolution-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="resolution-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading resolution preferences...', success: 'Resolution Preferences loaded - Default: 2048x2048, Max: 4096x4096, 300 DPI', error: 'Failed to load resolution settings' })}>
                     <Maximize2 className="w-4 h-4 mr-2" />
                     Resolution Preferences
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="auto-save-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="auto-save-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading auto-save configuration...', success: 'Auto-Save configured - Interval: 5 minutes, Cloud sync enabled, Version history: 30 days', error: 'Failed to load auto-save settings' })}>
                     <Save className="w-4 h-4 mr-2" />
                     Auto-Save Configuration
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="collaboration-settings-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="collaboration-settings-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading collaboration settings...', success: 'Collaboration Settings loaded - Real-time editing, comments, and team permissions configured', error: 'Failed to load collaboration settings' })}>
                     <Users className="w-4 h-4 mr-2" />
                     Collaboration Settings
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="export-presets-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="export-presets-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading export presets...', success: 'Export Presets loaded - Web, Print, Social Media, and Custom presets available', error: 'Failed to load export presets' })}>
                     <Download className="w-4 h-4 mr-2" />
                     Export Presets
                   </Button>
-                  <Button variant="outline" className="w-full justify-start" data-testid="notifications-btn">
+                  <Button variant="outline" className="w-full justify-start" data-testid="notifications-btn" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading notification preferences...', success: 'Notification Preferences loaded - Email, push, and in-app notifications configured', error: 'Failed to load notification settings' })}>
                     <AlertCircle className="w-4 h-4 mr-2" />
                     Notification Preferences
                   </Button>

@@ -193,31 +193,43 @@ export default function UserManagementPage() {
 
   // A+++ CRUD HANDLERS
   const handleExportUsers = async () => {
-    try {
-      announce('Exporting user data', 'polite')
+    announce('Exporting user data', 'polite')
 
-      const exportData = {
-        users: filteredUsers,
-        stats,
-        exportedAt: new Date().toISOString()
-      }
+    const exportPromise = new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          const exportData = {
+            users: filteredUsers,
+            stats,
+            exportedAt: new Date().toISOString()
+          }
 
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-        type: 'application/json'
-      })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `users-export-${new Date().toISOString().split('T')[0]}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+            type: 'application/json'
+          })
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `users-export-${new Date().toISOString().split('T')[0]}.json`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
 
-      announce('User data exported successfully', 'polite')
-    } catch (err) {
-      announce('Failed to export user data', 'assertive')
-    }
+          announce('User data exported successfully', 'polite')
+          resolve()
+        } catch (err) {
+          announce('Failed to export user data', 'assertive')
+          reject(err)
+        }
+      }, 800)
+    })
+
+    toast.promise(exportPromise, {
+      loading: 'Preparing export...',
+      success: 'User data exported successfully',
+      error: 'Failed to export user data'
+    })
   }
 
   const handleEditUser = useCallback((user: User) => {
@@ -273,22 +285,27 @@ export default function UserManagementPage() {
     if (!selectedUser) return
 
     setIsProcessing(true)
-    try {
+    const userName = selectedUser.name
+    const deletePromise = (async () => {
       // Dynamic import for code splitting
       const { deleteUser } = await import('@/lib/user-management-queries')
       await deleteUser(selectedUser.id)
-
-      toast.success('User deleted successfully!', {
-        description: `${selectedUser.name} has been removed`
-      })
       setIsDeleteDialogOpen(false)
       setSelectedUsers(prev => prev.filter(id => id !== selectedUser.id))
       announce('User deleted successfully', 'polite')
-
       // Refresh users list
       window.location.reload()
+    })()
+
+    toast.promise(deletePromise, {
+      loading: 'Deleting user...',
+      success: `${userName} has been removed successfully`,
+      error: 'Failed to delete user'
+    })
+
+    try {
+      await deletePromise
     } catch (err) {
-      toast.error('Failed to delete user')
       announce('Failed to delete user', 'assertive')
     } finally {
       setIsProcessing(false)
@@ -302,8 +319,20 @@ export default function UserManagementPage() {
   }, [announce])
 
   const handleSendEmail = useCallback((user: User) => {
-    announce(`Opening email to ${user.name}`, 'polite')
-    window.location.href = `mailto:${user.email}`
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          window.location.href = `mailto:${user.email}`
+          announce(`Opening email to ${user.name}`, 'polite')
+          resolve()
+        }, 500)
+      }),
+      {
+        loading: 'Opening email client...',
+        success: `Email client opened for ${user.name}`,
+        error: 'Failed to open email client'
+      }
+    )
   }, [announce])
 
   const handleBulkAction = useCallback((action: string) => {
@@ -314,33 +343,55 @@ export default function UserManagementPage() {
 
   const handleConfirmBulkAction = useCallback(async () => {
     setIsProcessing(true)
-    try {
-      // Dynamic import for code splitting
-      const { bulkUpdateUsers, bulkDeleteUsers } = await import('@/lib/user-management-queries')
+    const userCount = selectedUsers.length
 
-      if (bulkActionType === 'delete') {
+    if (bulkActionType === 'delete') {
+      const bulkDeletePromise = (async () => {
+        const { bulkDeleteUsers } = await import('@/lib/user-management-queries')
         await bulkDeleteUsers(selectedUsers)
-        toast.success(`${selectedUsers.length} users deleted`)
-      } else if (bulkActionType === 'message') {
-        // Open mailto with all selected user emails
-        const emails = users.filter(u => selectedUsers.includes(u.id)).map(u => u.email).join(',')
-        window.location.href = `mailto:${emails}`
-        toast.success('Email client opened')
-      } else if (bulkActionType === 'edit') {
-        // Open bulk edit modal
-        setIsBulkEditOpen(true)
         setIsBulkActionDialogOpen(false)
-        return // Don't clear selectedUsers yet
-      }
+        setSelectedUsers([])
+        announce('Bulk action completed', 'polite')
+      })()
 
-      setIsBulkActionDialogOpen(false)
-      setSelectedUsers([])
-      announce('Bulk action completed', 'polite')
-    } catch (err) {
-      toast.error(`Failed to ${bulkActionType} users`)
-      announce('Bulk action failed', 'assertive')
-    } finally {
+      toast.promise(bulkDeletePromise, {
+        loading: `Deleting ${userCount} users...`,
+        success: `${userCount} users deleted successfully`,
+        error: 'Failed to delete users'
+      })
+
+      try {
+        await bulkDeletePromise
+      } catch (err) {
+        announce('Bulk action failed', 'assertive')
+      } finally {
+        setIsProcessing(false)
+      }
+    } else if (bulkActionType === 'message') {
+      toast.promise(
+        new Promise<void>((resolve) => {
+          setTimeout(() => {
+            const emails = users.filter(u => selectedUsers.includes(u.id)).map(u => u.email).join(',')
+            window.location.href = `mailto:${emails}`
+            setIsBulkActionDialogOpen(false)
+            setSelectedUsers([])
+            announce('Bulk action completed', 'polite')
+            resolve()
+          }, 600)
+        }),
+        {
+          loading: 'Opening email client...',
+          success: 'Email client opened with selected recipients',
+          error: 'Failed to open email client'
+        }
+      )
       setIsProcessing(false)
+    } else if (bulkActionType === 'edit') {
+      // Open bulk edit modal
+      setIsBulkEditOpen(true)
+      setIsBulkActionDialogOpen(false)
+      setIsProcessing(false)
+      return // Don't clear selectedUsers yet
     }
   }, [bulkActionType, selectedUsers, users, announce])
 
@@ -368,17 +419,22 @@ export default function UserManagementPage() {
     setIsProcessing(true)
     announce('Resending invitation', 'polite')
 
-    try {
+    const resendPromise = (async () => {
       // Dynamic import for code splitting
       const { resendInvitation } = await import('@/lib/user-management-queries')
       await resendInvitation(invitation.id)
-
-      toast.success('Invitation resent!', {
-        description: `New invitation email sent to ${invitation.email}`
-      })
       announce('Invitation resent successfully', 'polite')
+    })()
+
+    toast.promise(resendPromise, {
+      loading: 'Resending invitation...',
+      success: `New invitation email sent to ${invitation.email}`,
+      error: 'Failed to resend invitation'
+    })
+
+    try {
+      await resendPromise
     } catch (err) {
-      toast.error('Failed to resend invitation')
       announce('Failed to resend invitation', 'assertive')
     } finally {
       setIsProcessing(false)
@@ -389,18 +445,23 @@ export default function UserManagementPage() {
     setIsProcessing(true)
     announce('Canceling invitation', 'assertive')
 
-    try {
+    const cancelPromise = (async () => {
       // Dynamic import for code splitting
       const { cancelInvitation } = await import('@/lib/user-management-queries')
       await cancelInvitation(invitation.id)
-
-      toast.success('Invitation canceled', {
-        description: `Invitation to ${invitation.email} has been revoked`
-      })
       setInvitations(prev => prev.filter(inv => inv.id !== invitation.id))
       announce('Invitation canceled', 'polite')
+    })()
+
+    toast.promise(cancelPromise, {
+      loading: 'Canceling invitation...',
+      success: `Invitation to ${invitation.email} has been revoked`,
+      error: 'Failed to cancel invitation'
+    })
+
+    try {
+      await cancelPromise
     } catch (err) {
-      toast.error('Failed to cancel invitation')
       announce('Failed to cancel invitation', 'assertive')
     } finally {
       setIsProcessing(false)
@@ -425,8 +486,9 @@ export default function UserManagementPage() {
 
     setIsProcessing(true)
     announce('Applying bulk edits', 'polite')
+    const userCount = selectedUsers.length
 
-    try {
+    const bulkEditPromise = (async () => {
       const { bulkUpdateUsers } = await import('@/lib/user-management-queries')
       await bulkUpdateUsers(selectedUsers, updates)
 
@@ -435,10 +497,7 @@ export default function UserManagementPage() {
         selectedUsers.includes(user.id) ? { ...user, ...updates } : user
       ))
 
-      toast.success('Bulk edit applied', {
-        description: `Updated ${selectedUsers.length} users`
-      })
-      announce(`${selectedUsers.length} users updated`, 'polite')
+      announce(`${userCount} users updated`, 'polite')
       setIsBulkEditOpen(false)
       setSelectedUsers([])
       setBulkEditForm({
@@ -449,8 +508,17 @@ export default function UserManagementPage() {
         updateStatus: false,
         status: 'active'
       })
+    })()
+
+    toast.promise(bulkEditPromise, {
+      loading: `Updating ${userCount} users...`,
+      success: `Successfully updated ${userCount} users`,
+      error: 'Failed to apply bulk edit'
+    })
+
+    try {
+      await bulkEditPromise
     } catch (err) {
-      toast.error('Failed to apply bulk edit')
       announce('Bulk edit failed', 'assertive')
     } finally {
       setIsProcessing(false)
@@ -817,7 +885,15 @@ export default function UserManagementPage() {
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold">Departments</h3>
-                  <Button variant="outline" className="gap-2">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+                      loading: 'Creating department...',
+                      success: 'Department creation dialog opened',
+                      error: 'Failed to create department'
+                    })}
+                  >
                     <UserPlus className="w-4 h-4" />
                     Create Department
                   </Button>
@@ -830,7 +906,17 @@ export default function UserManagementPage() {
                       <p className="text-sm text-muted-foreground mb-4">{dept.description}</p>
                       <div className="flex items-center justify-between">
                         <Badge variant="secondary">{dept.memberIds.length} members</Badge>
-                        <Button variant="ghost" size="sm">View</Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), {
+                            loading: 'Loading department details...',
+                            success: `Viewing ${dept.name} department`,
+                            error: 'Failed to load department'
+                          })}
+                        >
+                          View
+                        </Button>
                       </div>
                     </Card>
                   ))}

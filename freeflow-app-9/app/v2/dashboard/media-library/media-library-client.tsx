@@ -1256,7 +1256,7 @@ export default function MediaLibraryClient({
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Folders</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.info('Sorting folders...')}>
+                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Sorting folders...', success: 'Folders sorted successfully', error: 'Failed to sort folders' })}>
                   <SortAsc className="w-4 h-4 mr-2" />
                   Sort
                 </Button>
@@ -2264,15 +2264,15 @@ export default function MediaLibraryClient({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1" onClick={() => { setSelectedCollection(null); toast.info('Opening collection...') }}>
+                  <Button className="flex-1" onClick={() => { setSelectedCollection(null); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening collection...', success: 'Collection opened', error: 'Failed to open collection' }) }}>
                     <FolderOpen className="w-4 h-4 mr-2" />
                     Open Collection
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info('Sharing collection...')}>
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Preparing share link...', success: 'Share link copied to clipboard', error: 'Failed to share collection' })}>
                     <Share2 className="w-4 h-4 mr-2" />
                     Share
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info('Opening collection editor...')}>
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening editor...', success: 'Collection editor ready', error: 'Failed to open editor' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

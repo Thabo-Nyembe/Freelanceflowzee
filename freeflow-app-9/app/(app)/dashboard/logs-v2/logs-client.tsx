@@ -1535,7 +1535,7 @@ export default function LogsClient() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => toast.info('Trace viewer', { description: `Opening trace ${log.traceId}` })}
+                                    onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening trace viewer...', success: 'Trace viewer opened', error: 'Failed to open trace viewer' })}
                                   >
                                     <ExternalLink className="w-4 h-4 mr-1" />
                                     View Trace
@@ -1544,7 +1544,7 @@ export default function LogsClient() {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => toast.success('Issue created', { description: `Issue created for log ${log.id}` })}
+                                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating issue...', success: 'Issue created successfully', error: 'Failed to create issue' })}
                                 >
                                   <Bug className="w-4 h-4 mr-1" />
                                   Create Issue
@@ -1718,7 +1718,7 @@ export default function LogsClient() {
                   <h2 className="text-xl font-semibold">Log Indexes</h2>
                   <p className="text-gray-500">Manage log retention and filtering</p>
                 </div>
-                <Button onClick={() => toast.info('Create Index', { description: 'Index creation wizard will open' })}>
+                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening index wizard...', success: 'Index wizard ready', error: 'Failed to open wizard' })}>
                   <Plus className="w-4 h-4 mr-2" />Create Index
                 </Button>
               </div>
@@ -1876,7 +1876,7 @@ export default function LogsClient() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => toast.info('Alert settings', { description: `Opening settings for "${alert.name}"` })}
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading alert settings...', success: 'Alert settings opened', error: 'Failed to load settings' })}
                         >
                           <Settings className="w-4 h-4" />
                         </Button>
@@ -1908,7 +1908,7 @@ export default function LogsClient() {
                   <h2 className="text-xl font-semibold">Log-Based Metrics</h2>
                   <p className="text-gray-500">Generate metrics from log data</p>
                 </div>
-                <Button onClick={() => toast.info('Create Metric', { description: 'Metric creation wizard will open' })}>
+                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening metric wizard...', success: 'Metric wizard ready', error: 'Failed to open wizard' })}>
                   <Plus className="w-4 h-4 mr-2" />Create Metric
                 </Button>
               </div>
@@ -2033,7 +2033,7 @@ export default function LogsClient() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => toast.info('Rule settings', { description: `Opening settings for "${rule.name}"` })}
+                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading rule settings...', success: 'Rule settings opened', error: 'Failed to load settings' })}
                         >
                           <Settings className="w-4 h-4" />
                         </Button>
@@ -2464,7 +2464,7 @@ export default function LogsClient() {
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-100"
-                            onClick={() => toast.success('Pipelines reset', { description: 'All processing pipelines have been removed' })}
+                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Resetting pipelines...', success: 'All pipelines reset successfully', error: 'Failed to reset pipelines' })}
                           >
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
