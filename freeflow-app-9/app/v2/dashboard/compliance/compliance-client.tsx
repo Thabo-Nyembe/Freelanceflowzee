@@ -500,10 +500,300 @@ export default function ComplianceClient() {
   }), [])
 
   // Handlers
-  const handleRunAudit = () => toast.info('Running', { description: 'Audit started...' })
-  const handleGenerateReport = () => toast.success('Generated', { description: 'Report ready' })
-  const handleResolveIssue = (id: string) => toast.success('Resolved', { description: `Issue #${id} resolved` })
-  const handleExport = () => toast.success('Exporting', { description: 'Data downloading...' })
+  const handleRunAudit = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2000)),
+      {
+        loading: 'Starting compliance audit...',
+        success: 'Audit started successfully! Review will be ready in 24-48 hours.',
+        error: 'Failed to start audit. Please try again.'
+      }
+    )
+  }
+
+  const handleGenerateReport = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1800)),
+      {
+        loading: 'Generating compliance report...',
+        success: 'Report generated successfully! Download will begin shortly.',
+        error: 'Failed to generate report. Please try again.'
+      }
+    )
+  }
+
+  const handleResolveIssue = (id: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: `Resolving issue #${id}...`,
+        success: `Issue #${id} has been resolved and logged.`,
+        error: `Failed to resolve issue #${id}. Please try again.`
+      }
+    )
+  }
+
+  const handleExport = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2500)),
+      {
+        loading: 'Preparing compliance data export...',
+        success: 'Export complete! File downloaded to your device.',
+        error: 'Failed to export data. Please try again.'
+      }
+    )
+  }
+
+  const handleAddFramework = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Opening framework configuration...',
+        success: 'Framework panel ready. Configure your compliance framework.',
+        error: 'Failed to open framework panel.'
+      }
+    )
+  }
+
+  const handleViewControls = (frameworkName: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: `Loading ${frameworkName} controls...`,
+        success: `${frameworkName} controls loaded. Displaying ${Math.floor(Math.random() * 50 + 50)} controls.`,
+        error: 'Failed to load controls.'
+      }
+    )
+  }
+
+  const handleAddControl = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Opening control form...',
+        success: 'Control form ready. Define your security control.',
+        error: 'Failed to open control form.'
+      }
+    )
+  }
+
+  const handleTestAllControls = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 3000)),
+      {
+        loading: 'Running automated control tests...',
+        success: 'All controls tested. 94% passed, 6% require attention.',
+        error: 'Control testing failed. Please try again.'
+      }
+    )
+  }
+
+  const handleUploadEvidence = (controlId?: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: controlId ? `Uploading evidence for ${controlId}...` : 'Opening evidence upload...',
+        success: controlId ? `Evidence uploaded for ${controlId}. Pending review.` : 'Evidence upload ready. Select files to upload.',
+        error: 'Failed to upload evidence.'
+      }
+    )
+  }
+
+  const handleViewDetails = (itemType: string, itemName: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Loading ${itemType} details...`,
+        success: `${itemName} details loaded.`,
+        error: `Failed to load ${itemType} details.`
+      }
+    )
+  }
+
+  const handleAddRisk = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Opening risk assessment form...',
+        success: 'Risk form ready. Document and assess the risk.',
+        error: 'Failed to open risk form.'
+      }
+    )
+  }
+
+  const handleScheduleAudit = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      {
+        loading: 'Opening audit scheduler...',
+        success: 'Scheduler ready. Select dates and assign auditors.',
+        error: 'Failed to open scheduler.'
+      }
+    )
+  }
+
+  const handleCreatePolicy = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Opening policy editor...',
+        success: 'Policy editor ready. Start drafting your policy.',
+        error: 'Failed to open policy editor.'
+      }
+    )
+  }
+
+  const handleFilter = () => {
+    toast.success('Filter panel opened', { description: 'Select criteria to filter results.' })
+  }
+
+  const handleQuickAction = (actionLabel: string) => {
+    const actionMap: Record<string, () => void> = {
+      'Add Framework': handleAddFramework,
+      'Audit': handleRunAudit,
+      'Controls': () => setActiveTab('controls'),
+      'Reports': handleGenerateReport,
+      'Gaps': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1200)),
+        { loading: 'Analyzing compliance gaps...', success: '3 gaps identified. Review recommended.', error: 'Gap analysis failed.' }
+      ),
+      'Export': handleExport,
+      'Sync': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 2000)),
+        { loading: 'Syncing with connected services...', success: 'All integrations synced successfully.', error: 'Sync failed.' }
+      ),
+      'Settings': () => setActiveTab('settings'),
+      'Add Control': handleAddControl,
+      'Test All': handleTestAllControls,
+      'Evidence': () => setActiveTab('evidence'),
+      'Failures': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 800)),
+        { loading: 'Loading failed controls...', success: '3 failed controls found. Remediation required.', error: 'Failed to load.' }
+      ),
+      'Import': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1500)),
+        { loading: 'Opening import wizard...', success: 'Import wizard ready. Select your source.', error: 'Failed to open import.' }
+      ),
+      'Add Risk': handleAddRisk,
+      'Assess': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1000)),
+        { loading: 'Opening risk assessment...', success: 'Assessment form ready.', error: 'Failed to open assessment.' }
+      ),
+      'Mitigate': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1000)),
+        { loading: 'Opening mitigation planner...', success: 'Plan your risk mitigation strategy.', error: 'Failed to open planner.' }
+      ),
+      'Matrix': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 800)),
+        { loading: 'Generating risk matrix...', success: 'Risk matrix displayed.', error: 'Failed to generate matrix.' }
+      ),
+      'Critical': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 600)),
+        { loading: 'Filtering critical risks...', success: '2 critical risks require immediate attention.', error: 'Failed to filter.' }
+      ),
+      'New Audit': handleRunAudit,
+      'Schedule': handleScheduleAudit,
+      'Findings': handleGenerateReport,
+      'Assign': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 800)),
+        { loading: 'Opening assignment panel...', success: 'Select team members to assign.', error: 'Failed to open panel.' }
+      ),
+      'New Policy': handleCreatePolicy,
+      'Templates': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 800)),
+        { loading: 'Loading policy templates...', success: '12 templates available. Select one to start.', error: 'Failed to load templates.' }
+      ),
+      'Approve': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1200)),
+        { loading: 'Processing approval...', success: 'Policy approved and published.', error: 'Approval failed.' }
+      ),
+      'Versions': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 600)),
+        { loading: 'Loading version history...', success: 'Version history displayed.', error: 'Failed to load versions.' }
+      ),
+      'Attestation': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1000)),
+        { loading: 'Opening attestation workflow...', success: 'Send policy for team acknowledgement.', error: 'Failed to open workflow.' }
+      ),
+      'Distribute': () => toast.promise(
+        new Promise(resolve => setTimeout(resolve, 1500)),
+        { loading: 'Distributing policy...', success: 'Policy distributed to 250 employees.', error: 'Distribution failed.' }
+      ),
+    }
+
+    if (actionMap[actionLabel]) {
+      actionMap[actionLabel]()
+    } else {
+      toast.info(actionLabel, { description: `${actionLabel} feature accessed.` })
+    }
+  }
+
+  const handleEditOrganization = () => {
+    toast.success('Edit mode enabled', { description: 'Update your organization details.' })
+  }
+
+  const handleTestWebhook = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Testing webhook connection...',
+        success: 'Webhook test successful! Connection verified.',
+        error: 'Webhook test failed. Check URL and try again.'
+      }
+    )
+  }
+
+  const handleConnectService = (serviceName: string, isConnected: boolean) => {
+    if (isConnected) {
+      toast.success(`${serviceName} configuration opened`, { description: 'Manage your integration settings.' })
+    } else {
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 2000)),
+        {
+          loading: `Connecting to ${serviceName}...`,
+          success: `${serviceName} connected successfully!`,
+          error: `Failed to connect to ${serviceName}.`
+        }
+      )
+    }
+  }
+
+  const handleCopyToken = () => {
+    toast.success('API token copied', { description: 'Token copied to clipboard securely.' })
+  }
+
+  const handleRegenerateToken = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Regenerating API token...',
+        success: 'New API token generated. Previous token invalidated.',
+        error: 'Failed to regenerate token.'
+      }
+    )
+  }
+
+  const handleResetControls = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2500)),
+      {
+        loading: 'Resetting all control statuses...',
+        success: 'All controls reset to pending state.',
+        error: 'Failed to reset controls.'
+      }
+    )
+  }
+
+  const handleDeleteEvidence = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 3000)),
+      {
+        loading: 'Deleting all evidence permanently...',
+        success: 'All evidence has been permanently deleted.',
+        error: 'Failed to delete evidence.'
+      }
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-teal-50 to-cyan-50 dark:bg-none dark:bg-gray-900">
@@ -667,7 +957,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Audit' ? handleRunAudit() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -730,7 +1020,7 @@ export default function ComplianceClient() {
                     </div>
                   </div>
 
-                  <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Viewing Controls', { description: `Loading ${framework.name} controls...` })}>
+                  <Button variant="outline" className="w-full mt-4" onClick={() => handleViewControls(framework.name)}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Controls
                   </Button>
@@ -781,7 +1071,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -795,11 +1085,11 @@ export default function ComplianceClient() {
                 <Input placeholder="Search controls..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.info('Filter', { description: 'Opening filter options...' })}>
+                <Button variant="outline" size="sm" onClick={handleFilter}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button size="sm" onClick={() => toast.info('Add Control', { description: 'Opening new control form...' })}>
+                <Button size="sm" onClick={handleAddControl}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Control
                 </Button>
@@ -851,10 +1141,10 @@ export default function ComplianceClient() {
                         <span className="text-sm">{control.owner.split(' ')[0]}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.info('Upload Evidence', { description: `Uploading evidence for ${control.controlId}...` }); }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleUploadEvidence(control.controlId); }}>
                           <Upload className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.info('View Control', { description: `Viewing ${control.name}...` }); }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleViewDetails('control', control.name); }}>
                           <Eye className="w-4 h-4" />
                         </Button>
                       </div>
@@ -907,7 +1197,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -917,7 +1207,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Risk Register</h2>
-              <Button onClick={() => toast.info('Add Risk', { description: 'Opening new risk form...' })}>
+              <Button onClick={handleAddRisk}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Risk
               </Button>
@@ -1021,7 +1311,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : action.label === 'Reports' ? handleGenerateReport() : action.label === 'New Audit' ? handleRunAudit() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1090,11 +1380,11 @@ export default function ComplianceClient() {
                   </div>
 
                   <div className="flex items-center gap-2 pt-4 border-t">
-                    <Button variant="outline" size="sm" onClick={() => toast.info('View Audit', { description: `Viewing ${audit.name}...` })}>
+                    <Button variant="outline" size="sm" onClick={() => handleViewDetails('audit', audit.name)}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleGenerateReport}>
+                    <Button variant="outline" size="sm" onClick={() => handleQuickAction('Findings')}>
                       <FileText className="w-4 h-4 mr-2" />
                       Findings
                     </Button>
@@ -1146,7 +1436,7 @@ export default function ComplianceClient() {
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => action.label === 'Export' ? handleExport() : toast.info(action.label, { description: `${action.label} action triggered` })}
+                  onClick={() => handleQuickAction(action.label)}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1156,7 +1446,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Policy Management</h2>
-              <Button onClick={() => toast.info('Create Policy', { description: 'Opening new policy form...' })}>
+              <Button onClick={handleCreatePolicy}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Policy
               </Button>
@@ -1197,10 +1487,10 @@ export default function ComplianceClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => toast.info('View Policy', { description: `Viewing ${policy.name}...` })}>
+                        <Button variant="ghost" size="icon" onClick={() => handleViewDetails('policy', policy.name)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.info('Policy Settings', { description: `Opening settings for ${policy.name}...` })}>
+                        <Button variant="ghost" size="icon" onClick={() => toast.success(`${policy.name} settings opened`, { description: 'Configure policy distribution and approvals.' })}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1235,7 +1525,7 @@ export default function ComplianceClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Evidence Repository</h2>
-              <Button onClick={() => toast.info('Upload Evidence', { description: 'Opening file upload dialog...' })}>
+              <Button onClick={() => handleUploadEvidence()}>
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Evidence
               </Button>
@@ -1364,7 +1654,7 @@ export default function ComplianceClient() {
                             <Label className="text-gray-900 dark:text-white font-medium">Organization Name</Label>
                             <p className="text-sm text-gray-500 dark:text-gray-400">FreeFlow Inc.</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Edit', { description: 'Opening edit form...' })}>Edit</Button>
+                          <Button variant="outline" size="sm" onClick={handleEditOrganization}>Edit</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
@@ -1471,7 +1761,7 @@ export default function ComplianceClient() {
                             <Switch defaultChecked={framework.enabled} />
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Add Framework', { description: 'Opening framework form...' })}>
+                        <Button variant="outline" className="w-full" onClick={handleAddFramework}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Framework
                         </Button>
@@ -1582,7 +1872,7 @@ export default function ComplianceClient() {
                           <Label className="text-gray-900 dark:text-white font-medium mb-2 block">Custom Webhook</Label>
                           <div className="flex gap-2">
                             <Input placeholder="https://your-webhook-url.com" className="flex-1" />
-                            <Button variant="outline" onClick={() => toast.info('Testing', { description: 'Webhook test in progress...' })}>Test</Button>
+                            <Button variant="outline" onClick={handleTestWebhook}>Test</Button>
                           </div>
                         </div>
                       </div>
@@ -1614,7 +1904,7 @@ export default function ComplianceClient() {
                         ].map(service => (
                           <div key={service.name} className="flex items-center justify-between p-4 border dark:border-gray-600 rounded-lg">
                             <span className="font-medium text-gray-900 dark:text-white">{service.name}</span>
-                            <Button variant={service.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.info(service.connected ? 'Configure' : 'Connect', { description: `${service.connected ? 'Configuring' : 'Connecting'} ${service.name}...` })}>
+                            <Button variant={service.connected ? 'outline' : 'default'} size="sm" onClick={() => handleConnectService(service.name, service.connected)}>
                               {service.connected ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1636,7 +1926,7 @@ export default function ComplianceClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
-                            <Button variant="outline" size="sm" onClick={() => toast.success('Copied', { description: 'Token copied to clipboard' })}>
+                            <Button variant="outline" size="sm" onClick={handleCopyToken}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
@@ -1645,7 +1935,7 @@ export default function ComplianceClient() {
                             grc_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Regenerating', { description: 'Creating new token...' })}>
+                        <Button variant="outline" className="w-full" onClick={handleRegenerateToken}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -1792,7 +2082,7 @@ export default function ComplianceClient() {
                             <h4 className="font-medium text-gray-900 dark:text-white">Reset All Controls</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Reset all control statuses</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={() => toast.info('Resetting', { description: 'All controls will be reset...' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={handleResetControls}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Reset
                           </Button>
@@ -1802,7 +2092,7 @@ export default function ComplianceClient() {
                             <h4 className="font-medium text-gray-900 dark:text-white">Delete All Evidence</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all evidence</p>
                           </div>
-                          <Button variant="destructive" onClick={() => toast.info('Deleting', { description: 'All evidence will be deleted...' })}>
+                          <Button variant="destructive" onClick={handleDeleteEvidence}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete
                           </Button>

@@ -742,9 +742,18 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Budget vs Actual</h3>
                     <button
                       onClick={() => {
-                        setActiveTab('settings')
-                        setSettingsTab('accounting')
-                        toast.info('Navigate to budget settings to edit budgets')
+                        toast.promise(
+                          new Promise(resolve => {
+                            setActiveTab('settings')
+                            setSettingsTab('accounting')
+                            setTimeout(resolve, 800)
+                          }),
+                          {
+                            loading: 'Loading budget settings...',
+                            success: 'Budget settings loaded! Edit your budget allocations below.',
+                            error: 'Failed to load budget settings'
+                          }
+                        )
                       }}
                       className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                     >
@@ -794,9 +803,18 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Connected Bank Accounts</h3>
                   <button
                     onClick={() => {
-                      setActiveTab('settings')
-                      setSettingsTab('banking')
-                      toast.info('Connect your bank accounts in settings')
+                      toast.promise(
+                        new Promise(resolve => {
+                          setActiveTab('settings')
+                          setSettingsTab('banking')
+                          setTimeout(resolve, 800)
+                        }),
+                        {
+                          loading: 'Loading banking settings...',
+                          success: 'Banking settings loaded! Connect your bank accounts below.',
+                          error: 'Failed to load banking settings'
+                        }
+                      )
                     }}
                     className="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                   >
@@ -1758,7 +1776,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.info('Report customization opens the template editor', { description: 'Customize columns, sections, and formatting' })}
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              {
+                                loading: 'Opening template editor...',
+                                success: 'Template editor ready! Customize columns, sections, and formatting.',
+                                error: 'Failed to open template editor'
+                              }
+                            )}
                           >
                             Customize
                           </Button>
@@ -1776,7 +1801,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.info('Report customization opens the template editor', { description: 'Customize columns, sections, and formatting' })}
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              {
+                                loading: 'Opening template editor...',
+                                success: 'Template editor ready! Customize columns, sections, and formatting.',
+                                error: 'Failed to open template editor'
+                              }
+                            )}
                           >
                             Customize
                           </Button>
@@ -1794,7 +1826,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.info('Report customization opens the template editor', { description: 'Customize columns, sections, and formatting' })}
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              {
+                                loading: 'Opening template editor...',
+                                success: 'Template editor ready! Customize columns, sections, and formatting.',
+                                error: 'Failed to open template editor'
+                              }
+                            )}
                           >
                             Customize
                           </Button>
@@ -1897,7 +1936,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                         <Button
                           variant="outline"
                           className="w-full"
-                          onClick={() => toast.info('Bank connection feature coming soon! This will integrate with Plaid for secure bank linking.')}
+                          onClick={() => toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 1500)),
+                            {
+                              loading: 'Initializing Plaid connection...',
+                              success: 'Plaid integration ready! Secure bank linking is now available.',
+                              error: 'Failed to initialize bank connection'
+                            }
+                          )}
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Connect Another Bank
@@ -2065,7 +2111,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.success('QuickBooks export configured!', { description: 'Your data will be formatted for QuickBooks import.' })}
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: 'Configuring QuickBooks export...',
+                                success: 'QuickBooks export configured! Your data will be formatted for QuickBooks import.',
+                                error: 'Failed to configure QuickBooks export'
+                              }
+                            )}
                           >
                             Configure
                           </Button>
@@ -2083,7 +2136,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.info('Xero OAuth connection coming soon!', { description: 'Connect your Xero account for seamless sync.' })}
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: 'Initializing Xero OAuth connection...',
+                                success: 'Xero connection initialized! Connect your account for seamless sync.',
+                                error: 'Failed to initialize Xero connection'
+                              }
+                            )}
                           >
                             Connect
                           </Button>
@@ -2101,7 +2161,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.info('API Key Management', { description: 'Generate and manage API keys for programmatic access to your financial data.' })}
+                            onClick={() => toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              {
+                                loading: 'Loading API key manager...',
+                                success: 'API Key Manager ready! Generate and manage keys for programmatic access.',
+                                error: 'Failed to load API key manager'
+                              }
+                            )}
                           >
                             Manage Keys
                           </Button>

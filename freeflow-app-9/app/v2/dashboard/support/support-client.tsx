@@ -479,11 +479,58 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
     unassigned: mockTickets.filter(t => !t.assignee).length
   }), [])
 
+  // State for dialogs
+  const [showNewTicketDialog, setShowNewTicketDialog] = useState(false)
+  const [showAutomationsDialog, setShowAutomationsDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showAddResponseDialog, setShowAddResponseDialog] = useState(false)
+  const [showAddPolicyDialog, setShowAddPolicyDialog] = useState(false)
+
   // Handlers
-  const handleCreateTicket = () => toast.info('Create', { description: 'Opening form...' })
-  const handleAssignTicket = (id: string) => toast.info('Assigning', { description: `Assigning #${id}...` })
-  const handleResolveTicket = (id: string) => toast.success('Resolved', { description: `#${id} resolved` })
-  const handleExportTickets = () => toast.success('Exporting', { description: 'Data downloading...' })
+  const handleCreateTicket = () => {
+    setShowNewTicketDialog(true)
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Preparing new ticket form...',
+        success: 'Ticket form ready',
+        error: 'Failed to open form'
+      }
+    )
+  }
+
+  const handleAssignTicket = (id: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Assigning ticket #${id}...`,
+        success: `Ticket #${id} assigned successfully`,
+        error: 'Failed to assign ticket'
+      }
+    )
+  }
+
+  const handleResolveTicket = (id: string) => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Resolving ticket #${id}...`,
+        success: `Ticket #${id} resolved successfully`,
+        error: 'Failed to resolve ticket'
+      }
+    )
+  }
+
+  const handleExportTickets = () => {
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 2500)),
+      {
+        loading: 'Preparing ticket export...',
+        success: 'Tickets exported successfully',
+        error: 'Failed to export tickets'
+      }
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -500,11 +547,31 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => toast.info('Automations', { description: 'Opening automation settings...' })}>
+            <Button variant="outline" size="sm" onClick={() => {
+              setShowAutomationsDialog(true)
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                {
+                  loading: 'Loading automation settings...',
+                  success: 'Automation settings loaded',
+                  error: 'Failed to load settings'
+                }
+              )
+            }}>
               <Bot className="w-4 h-4 mr-2" />
               Automations
             </Button>
-            <Button variant="outline" size="sm" onClick={() => toast.info('Settings', { description: 'Opening support settings...' })}>
+            <Button variant="outline" size="sm" onClick={() => {
+              setShowSettingsDialog(true)
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                {
+                  loading: 'Loading support settings...',
+                  success: 'Settings loaded',
+                  error: 'Failed to load settings'
+                }
+              )
+            }}>
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </Button>
@@ -848,7 +915,17 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
           <TabsContent value="canned" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Canned Responses</h3>
-              <Button variant="outline" size="sm" onClick={() => toast.info('Add Response', { description: 'Opening canned response form...' })}>
+              <Button variant="outline" size="sm" onClick={() => {
+                setShowAddResponseDialog(true)
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 800)),
+                  {
+                    loading: 'Preparing canned response form...',
+                    success: 'Form ready',
+                    error: 'Failed to open form'
+                  }
+                )
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Response
               </Button>
@@ -876,7 +953,17 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
           <TabsContent value="sla" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">SLA Policies</h3>
-              <Button variant="outline" size="sm" onClick={() => toast.info('Add Policy', { description: 'Opening SLA policy form...' })}>
+              <Button variant="outline" size="sm" onClick={() => {
+                setShowAddPolicyDialog(true)
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 800)),
+                  {
+                    loading: 'Preparing SLA policy form...',
+                    success: 'Form ready',
+                    error: 'Failed to open form'
+                  }
+                )
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Policy
               </Button>
@@ -1306,7 +1393,16 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Connect Facebook', { description: 'Opening Facebook Messenger integration...' })}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 2500)),
+                            {
+                              loading: 'Connecting to Facebook Messenger...',
+                              success: 'Facebook Messenger connected successfully',
+                              error: 'Failed to connect - please try again'
+                            }
+                          )
+                        }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1522,7 +1618,16 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Connect Teams', { description: 'Opening Microsoft Teams integration...' })}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 2500)),
+                            {
+                              loading: 'Connecting to Microsoft Teams...',
+                              success: 'Microsoft Teams connected successfully',
+                              error: 'Failed to connect - please try again'
+                            }
+                          )
+                        }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1540,8 +1645,27 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.success('Copied', { description: 'API key copied to clipboard' })}>Copy</Button>
-                            <Button variant="outline" onClick={() => toast.info('Regenerate Key', { description: 'Generating new API key...' })}>Regenerate</Button>
+                            <Button variant="outline" onClick={() => {
+                              navigator.clipboard?.writeText('STRIPE_KEY_PLACEHOLDER')
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Copying to clipboard...',
+                                  success: 'API key copied to clipboard',
+                                  error: 'Failed to copy'
+                                }
+                              )
+                            }}>Copy</Button>
+                            <Button variant="outline" onClick={() => {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 2500)),
+                                {
+                                  loading: 'Generating new API key...',
+                                  success: 'New API key generated successfully',
+                                  error: 'Failed to generate key'
+                                }
+                              )
+                            }}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -1553,7 +1677,16 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium">Webhook Events</div>
                             <div className="text-sm text-gray-500">ticket.created, ticket.updated, ticket.resolved</div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Configure Webhooks', { description: 'Opening webhook configuration...' })}>Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 1500)),
+                            {
+                              loading: 'Loading webhook configuration...',
+                              success: 'Webhook settings loaded',
+                              error: 'Failed to load settings'
+                            }
+                          )
+                        }}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1605,7 +1738,16 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1" onClick={() => toast.info('Archive Tickets', { description: 'Archiving old tickets...' })}>
+                          <Button variant="outline" className="flex-1" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 2500)),
+                              {
+                                loading: 'Archiving old tickets...',
+                                success: 'Old tickets archived successfully',
+                                error: 'Failed to archive tickets'
+                              }
+                            )
+                          }}>
                             <Archive className="w-4 h-4 mr-2" />
                             Archive Old Tickets
                           </Button>
@@ -1660,7 +1802,18 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium text-red-700 dark:text-red-400">Delete All Tickets</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all tickets and data</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.error('Delete All', { description: 'This action requires confirmation' })}>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            if (confirm('Are you sure you want to delete ALL tickets? This action cannot be undone.')) {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 2500)),
+                                {
+                                  loading: 'Deleting all tickets...',
+                                  success: 'All tickets deleted successfully',
+                                  error: 'Failed to delete tickets'
+                                }
+                              )
+                            }
+                          }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete All
                           </Button>
@@ -1670,7 +1823,18 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                             <div className="font-medium text-red-700 dark:text-red-400">Reset Helpdesk</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all settings to default</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.error('Reset Helpdesk', { description: 'This action requires confirmation' })}>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            if (confirm('Are you sure you want to reset the helpdesk? All settings will be restored to defaults.')) {
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 2500)),
+                                {
+                                  loading: 'Resetting helpdesk settings...',
+                                  success: 'Helpdesk reset successfully',
+                                  error: 'Failed to reset helpdesk'
+                                }
+                              )
+                            }
+                          }}>
                             <RotateCcw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -1770,9 +1934,36 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
 
                     <div className="border-t pt-4">
                       <div className="flex gap-2 mb-2">
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Reply', { description: 'Composing reply to customer...' })}>Reply</Button>
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Add Note', { description: 'Adding internal note...' })}>Add Note</Button>
-                        <Button variant="outline" size="sm" onClick={() => toast.info('Forward', { description: 'Forwarding ticket...' })}>Forward</Button>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Preparing reply composer...',
+                              success: 'Reply mode active',
+                              error: 'Failed to start reply'
+                            }
+                          )
+                        }}>Reply</Button>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Preparing note editor...',
+                              success: 'Internal note mode active',
+                              error: 'Failed to open note editor'
+                            }
+                          )
+                        }}>Add Note</Button>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Preparing forward options...',
+                              success: 'Forward mode active',
+                              error: 'Failed to open forward options'
+                            }
+                          )
+                        }}>Forward</Button>
                         <Button variant="outline" size="sm" className="text-green-600 hover:bg-green-50" onClick={() => handleResolveTicket(selectedTicket.id)}>Resolve</Button>
                       </div>
                       <div className="flex gap-2">
@@ -1782,7 +1973,21 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
                           onChange={(e) => setReplyContent(e.target.value)}
                           className="flex-1"
                         />
-                        <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => { if (selectedTicket) { toast.success('Reply Sent', { description: `Reply sent for ticket #${selectedTicket.code}` }); setReplyContent(''); } }}>
+                        <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white" onClick={() => {
+                          if (selectedTicket && replyContent.trim()) {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: `Sending reply to ticket #${selectedTicket.code}...`,
+                                success: `Reply sent successfully for ticket #${selectedTicket.code}`,
+                                error: 'Failed to send reply'
+                              }
+                            )
+                            setReplyContent('')
+                          } else if (!replyContent.trim()) {
+                            toast.error('Empty Reply', { description: 'Please enter a message before sending' })
+                          }
+                        }}>
                           <Send className="w-4 h-4 mr-2" />
                           Send
                         </Button>

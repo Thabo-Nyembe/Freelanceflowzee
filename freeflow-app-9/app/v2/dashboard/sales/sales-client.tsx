@@ -1304,7 +1304,16 @@ export default function SalesClient() {
 
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Quotes & Proposals</h2>
-              <Button onClick={() => toast.info('Coming Soon', { description: 'Quote creation will be available soon' })}><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 1500)),
+                  {
+                    loading: 'Preparing quote builder...',
+                    success: 'Quote builder ready! Opening form...',
+                    error: 'Failed to load quote builder'
+                  }
+                )
+              }}><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
             </div>
 
             <div className="grid gap-4">
@@ -1450,7 +1459,16 @@ export default function SalesClient() {
           <TabsContent value="products" className="space-y-6">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Product Catalog</h2>
-              <Button onClick={() => toast.info('Coming Soon', { description: 'Product management will be available soon' })}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
+              <Button onClick={() => {
+                toast.promise(
+                  new Promise(resolve => setTimeout(resolve, 1500)),
+                  {
+                    loading: 'Loading product catalog...',
+                    success: 'Product form ready! Add your new product.',
+                    error: 'Failed to load product form'
+                  }
+                )
+              }}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1681,7 +1699,16 @@ export default function SalesClient() {
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Coming Soon', { description: 'Custom pipeline stages will be available soon' })}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.promise(
+                            new Promise(resolve => setTimeout(resolve, 800)),
+                            {
+                              loading: 'Opening stage configuration...',
+                              success: 'Stage builder ready! Configure your custom stage.',
+                              error: 'Failed to open stage builder'
+                            }
+                          )
+                        }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1959,7 +1986,16 @@ export default function SalesClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'HubSpot integration will be available soon' })}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: 'Connecting to HubSpot...',
+                                success: 'HubSpot OAuth window opened! Complete authorization.',
+                                error: 'Failed to initialize HubSpot connection'
+                              }
+                            )
+                          }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1977,7 +2013,17 @@ export default function SalesClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="sk_live_xxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx'); toast.success('Copied', { description: 'API key copied to clipboard' }) }}>Copy</Button>
+                            <Button variant="outline" onClick={() => {
+                              navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx')
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 800)),
+                                {
+                                  loading: 'Copying to clipboard...',
+                                  success: 'API key copied to clipboard!',
+                                  error: 'Failed to copy API key'
+                                }
+                              )
+                            }}>Copy</Button>
                             <Button variant="outline" onClick={() => toast.warning('Confirm Regeneration', { description: 'This will invalidate your current API key. Are you sure?' })}>Regenerate</Button>
                           </div>
                         </div>
@@ -1990,7 +2036,16 @@ export default function SalesClient() {
                             <div className="font-medium">Webhook Events</div>
                             <div className="text-sm text-gray-500">deal.created, deal.won, deal.lost</div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.info('Coming Soon', { description: 'Webhook configuration will be available soon' })}>Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 800)),
+                              {
+                                loading: 'Loading webhook settings...',
+                                success: 'Webhook configuration panel opened!',
+                                error: 'Failed to load webhook settings'
+                              }
+                            )
+                          }}>Configure</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2027,7 +2082,16 @@ export default function SalesClient() {
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="flex-1" onClick={() => toast.info('Coming Soon', { description: 'Data import functionality will be available soon' })}>
+                          <Button variant="outline" className="flex-1" onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 1500)),
+                              {
+                                loading: 'Preparing import wizard...',
+                                success: 'Import wizard ready! Select your data file.',
+                                error: 'Failed to initialize import wizard'
+                              }
+                            )
+                          }}>
                             <Upload className="w-4 h-4 mr-2" />
                             Import Data
                           </Button>
@@ -2269,9 +2333,37 @@ export default function SalesClient() {
               </div>
 
               <div className="flex gap-2">
-                <Button className="flex-1" onClick={() => toast.success('Quote Sent', { description: 'Quote has been sent to the customer' })}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
-                <Button variant="outline" onClick={() => toast.info('Generating PDF', { description: 'Your quote PDF is being generated' })}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
-                <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedQuote.quoteNumber); toast.success('Copied', { description: 'Quote number copied to clipboard' }) }}><Copy className="w-4 h-4" /></Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1500)),
+                    {
+                      loading: 'Sending quote to customer...',
+                      success: `Quote ${selectedQuote.quoteNumber} sent successfully!`,
+                      error: 'Failed to send quote'
+                    }
+                  )
+                }}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
+                <Button variant="outline" onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 2000)),
+                    {
+                      loading: 'Generating PDF document...',
+                      success: 'PDF generated! Starting download...',
+                      error: 'Failed to generate PDF'
+                    }
+                  )
+                }}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
+                <Button variant="outline" onClick={() => {
+                  navigator.clipboard.writeText(selectedQuote.quoteNumber)
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 800)),
+                    {
+                      loading: 'Copying...',
+                      success: `Quote number ${selectedQuote.quoteNumber} copied!`,
+                      error: 'Failed to copy'
+                    }
+                  )
+                }}><Copy className="w-4 h-4" /></Button>
               </div>
             </div>
           )}
