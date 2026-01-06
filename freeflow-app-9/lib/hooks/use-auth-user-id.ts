@@ -1,8 +1,7 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useSession } from 'next-auth/react'
 
 /**
  * Hook to get the auth.users compatible ID for Supabase FK constraints
@@ -16,7 +15,14 @@ import { useSession } from 'next-auth/react'
  */
 export function useAuthUserId() {
   const supabase = createClient()
-  const { data: session } = useSession()
+  const [session, setSession] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => setSession(data))
+      .catch(() => {})
+  }, [])
 
   const getUserId = useCallback(async (): Promise<string | null> => {
     // First try Supabase auth (this gives us auth.users ID directly)

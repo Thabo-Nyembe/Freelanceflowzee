@@ -7,7 +7,6 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { useSession } from 'next-auth/react'
 import { createClient } from '@/lib/supabase/client'
 import {
   calculateRevenueData,
@@ -492,18 +491,29 @@ export function useUserMetrics(userId?: string) {
 }
 
 // ============================================================================
-// CURRENT USER HOOK - Uses NextAuth session (not Supabase Auth)
+// CURRENT USER HOOK - Fetches session via API (no SessionProvider required)
 // ============================================================================
 
 export function useCurrentUser() {
-  const { data: session, status } = useSession()
+  const [session, setSession] = useState<any>(null)
+  const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading')
 
-  // Map NextAuth session to the expected return format
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => {
+        setSession(data)
+        setStatus(data?.user ? 'authenticated' : 'unauthenticated')
+      })
+      .catch(() => setStatus('unauthenticated'))
+  }, [])
+
+  // Map session to the expected return format
   const userId = session?.user?.id || null
   const userEmail = session?.user?.email || null
   const userName = session?.user?.name || null
   const loading = status === 'loading'
-  const error = null // NextAuth handles errors differently
+  const error = null // API handles errors differently
 
   return { userId, userEmail, userName, loading, error }
 }

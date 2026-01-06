@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 
 export interface Project {
@@ -58,7 +57,14 @@ export function useProjects(initialProjects: Project[] = []) {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const supabase = createClient()
-  const { data: session } = useSession()
+  const [session, setSession] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => setSession(data))
+      .catch(() => {})
+  }, [])
 
   // Get auth.users compatible ID (same pattern as useSupabaseMutation)
   const getUserId = useCallback(async (): Promise<string | null> => {
@@ -210,7 +216,14 @@ export function useProjectTasks(projectId: string, initialTasks: ProjectTask[] =
   const [tasks, setTasks] = useState<ProjectTask[]>(initialTasks)
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
-  const { data: session } = useSession()
+  const [session, setSession] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => setSession(data))
+      .catch(() => {})
+  }, [])
 
   // Get auth.users compatible ID
   const getUserId = useCallback(async (): Promise<string | null> => {

@@ -8,7 +8,6 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 import {
   EngagementAlgorithm,
   createEngagementAlgorithm,
@@ -22,7 +21,15 @@ import {
 // ============================================================================
 
 export function useEngagement() {
-  const { data: session } = useSession()
+  const [session, setSession] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => setSession(data))
+      .catch(() => {})
+  }, [])
+
   const userId = session?.user?.id
 
   const [algorithm, setAlgorithm] = useState<EngagementAlgorithm | null>(null)
@@ -143,7 +150,15 @@ export function useEngagement() {
 // ============================================================================
 
 export function useActivityTracking() {
-  const { data: session } = useSession()
+  const [session, setSession] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => setSession(data))
+      .catch(() => {})
+  }, [])
+
   const userId = session?.user?.id
   const pathname = usePathname()
 
@@ -314,7 +329,6 @@ export interface OnboardingStep {
 }
 
 export function usePersonalizedOnboarding() {
-  useSession() // Ensure session is available
   const { profile, loading: profileLoading } = useEngagement()
 
   const [steps, setSteps] = useState<OnboardingStep[]>([])
@@ -442,7 +456,6 @@ export function usePersonalizedOnboarding() {
 // ============================================================================
 
 export function useUserPreferences() {
-  useSession() // Ensure session is available
   const { profile } = useEngagement()
 
   const [preferences, setPreferences] = useState({

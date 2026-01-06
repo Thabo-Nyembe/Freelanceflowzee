@@ -15,7 +15,6 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 
 export interface Notification {
@@ -62,7 +61,19 @@ export function useRealtimeNotifications(
     requestDesktopPermission = false
   } = options
 
-  const { data: session, status } = useSession()
+  const [session, setSession] = useState<any>(null)
+  const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>('loading')
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => {
+        setSession(data)
+        setStatus(data?.user ? 'authenticated' : 'unauthenticated')
+      })
+      .catch(() => setStatus('unauthenticated'))
+  }, [])
+
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isConnected, setIsConnected] = useState(false)

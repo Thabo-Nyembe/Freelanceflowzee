@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useSession } from 'next-auth/react'
 import { toast } from 'sonner'
 
 interface UseSupabaseMutationOptions {
@@ -26,7 +25,14 @@ export function useSupabaseMutation({
   const [loading, setLoading] = useState(false)
   const [lastMutation, setLastMutation] = useState<{ type: string; id?: string; timestamp: number } | null>(null)
   const supabase = createClient()
-  const { data: session } = useSession()
+  const [session, setSession] = useState<any>(null)
+
+  useEffect(() => {
+    fetch('/api/auth/session')
+      .then(res => res.json())
+      .then(data => setSession(data))
+      .catch(() => {})
+  }, [])
 
   // Get user ID from NextAuth session or Supabase auth
   // IMPORTANT: financial_transactions has FK to auth.users, not public.users
