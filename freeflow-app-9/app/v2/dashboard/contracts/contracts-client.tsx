@@ -166,9 +166,18 @@ const mockContractsActivities = [
 ]
 
 const mockContractsQuickActions = [
-  { id: '1', label: 'New Contract', icon: 'file-plus', action: () => console.log('New contract'), variant: 'default' as const },
-  { id: '2', label: 'Send for Signing', icon: 'send', action: () => console.log('Send'), variant: 'default' as const },
-  { id: '3', label: 'Templates', icon: 'copy', action: () => console.log('Templates'), variant: 'outline' as const },
+  { id: '1', label: 'New Contract', icon: 'file-plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new contract...', success: 'Contract created', error: 'Failed to create contract' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Sending contract for signature...', success: 'Contract sent for signing', error: 'Failed to send contract' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Templates', icon: 'copy', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading templates...', success: 'Templates loaded', error: 'Failed to load templates' }
+  ), variant: 'outline' as const },
 ]
 
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {

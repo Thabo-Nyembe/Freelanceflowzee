@@ -586,9 +586,9 @@ const mockResourcesActivities = [
 ]
 
 const mockResourcesQuickActions = [
-  { id: '1', label: 'Add Resource', icon: 'plus', action: () => console.log('Add resource'), variant: 'default' as const },
-  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => console.log('View calendar'), variant: 'default' as const },
-  { id: '3', label: 'Run Report', icon: 'file', action: () => console.log('Run report'), variant: 'outline' as const },
+  { id: '1', label: 'Add Resource', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Adding resource...', success: 'Resource added!', error: 'Failed to add resource' }), variant: 'default' as const },
+  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading calendar...', success: 'Calendar opened!', error: 'Failed to load calendar' }), variant: 'default' as const },
+  { id: '3', label: 'Run Report', icon: 'file', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Generating report...', success: 'Report generated!', error: 'Failed to generate report' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

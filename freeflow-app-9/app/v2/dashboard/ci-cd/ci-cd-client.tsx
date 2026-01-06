@@ -607,9 +607,9 @@ const mockCiCdActivities = [
 ]
 
 const mockCiCdQuickActions = [
-  { id: '1', label: 'Run Pipeline', icon: 'play', action: () => console.log('Run pipeline'), variant: 'default' as const },
-  { id: '2', label: 'Deploy', icon: 'rocket', action: () => console.log('Deploy'), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'terminal', action: () => console.log('View logs'), variant: 'outline' as const },
+  { id: '1', label: 'Run Pipeline', icon: 'play', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Starting pipeline...', success: 'Pipeline started successfully', error: 'Failed to start pipeline' }), variant: 'default' as const },
+  { id: '2', label: 'Deploy', icon: 'rocket', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Deploying...', success: 'Deployment initiated successfully', error: 'Failed to deploy' }), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'terminal', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }), variant: 'outline' as const },
 ]
 
 export default function CiCdClient() {

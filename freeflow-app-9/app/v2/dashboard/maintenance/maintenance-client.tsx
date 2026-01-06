@@ -531,9 +531,21 @@ const mockMaintenanceActivities = [
 ]
 
 const mockMaintenanceQuickActions = [
-  { id: '1', label: 'New Work Order', icon: 'plus', action: () => console.log('New WO'), variant: 'default' as const },
-  { id: '2', label: 'Schedule PM', icon: 'calendar', action: () => console.log('Schedule'), variant: 'default' as const },
-  { id: '3', label: 'Asset List', icon: 'list', action: () => console.log('Assets'), variant: 'outline' as const },
+  { id: '1', label: 'New Work Order', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Creating work order...',
+    success: 'Work order created successfully',
+    error: 'Failed to create work order'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Schedule PM', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+    loading: 'Scheduling preventive maintenance...',
+    success: 'Preventive maintenance scheduled',
+    error: 'Failed to schedule maintenance'
+  }), variant: 'default' as const },
+  { id: '3', label: 'Asset List', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Loading asset list...',
+    success: 'Asset list loaded',
+    error: 'Failed to load assets'
+  }), variant: 'outline' as const },
 ]
 
 // Database types
@@ -2084,7 +2096,11 @@ export default function MaintenanceClient() {
               <AIInsightsPanel
                 insights={mockMaintenanceAIInsights}
                 title="Maintenance Intelligence"
-                onInsightAction={(insight) => console.log('Insight action:', insight)}
+                onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+                  loading: `Processing insight: ${insight.title || 'maintenance recommendation'}...`,
+                  success: 'Insight action completed',
+                  error: 'Failed to process insight'
+                })}
               />
             </div>
             <div className="space-y-6">

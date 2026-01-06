@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -468,9 +469,21 @@ const mockIntegrationsActivities = [
 ]
 
 const mockIntegrationsQuickActions = [
-  { id: '1', label: 'Browse Apps', icon: 'search', action: () => console.log('Browse apps'), variant: 'default' as const },
-  { id: '2', label: 'Install App', icon: 'plus', action: () => console.log('Install app'), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => console.log('View logs'), variant: 'outline' as const },
+  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Loading marketplace...',
+    success: 'Marketplace loaded',
+    error: 'Failed to load marketplace'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Install App', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Preparing app installation...',
+    success: 'Ready to install app',
+    error: 'Failed to prepare installation'
+  }), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Loading integration logs...',
+    success: 'Logs loaded successfully',
+    error: 'Failed to load logs'
+  }), variant: 'outline' as const },
 ]
 
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {
@@ -527,7 +540,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
 
   // Handlers
   const handleInstall = (app: AppListing, plan: PricingPlan) => {
-    console.log(`Installing ${app.name} with plan ${plan.name}`)
+    toast.promise(new Promise(r => setTimeout(r, 2000)), {
+      loading: `Installing ${app.name} with ${plan.name} plan...`,
+      success: `${app.name} installed successfully`,
+      error: `Failed to install ${app.name}`
+    })
     setShowInstallDialog(false)
     setSelectedApp(null)
   }
@@ -1782,7 +1799,11 @@ export default function IntegrationsMarketplaceClient({ initialIntegrations, ini
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integration Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+                loading: `Processing ${insight.title}...`,
+                success: `${insight.title} action completed`,
+                error: 'Failed to process insight action'
+              })}
             />
           </div>
           <div className="space-y-6">

@@ -261,9 +261,21 @@ const mockSettingsActivities = [
 ]
 
 const mockSettingsQuickActions = [
-  { id: '1', label: 'Change Password', icon: 'lock', action: () => console.log('Change password'), variant: 'default' as const },
-  { id: '2', label: 'Export Data', icon: 'download', action: () => console.log('Export data'), variant: 'default' as const },
-  { id: '3', label: 'View Invoices', icon: 'file', action: () => console.log('View invoices'), variant: 'outline' as const },
+  { id: '1', label: 'Change Password', icon: 'lock', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Opening password change dialog...',
+    success: 'Password dialog ready',
+    error: 'Failed to open dialog'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Exporting your data...',
+    success: 'Data exported successfully',
+    error: 'Export failed'
+  }), variant: 'default' as const },
+  { id: '3', label: 'View Invoices', icon: 'file', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Loading invoices...',
+    success: 'Invoices loaded',
+    error: 'Failed to load invoices'
+  }), variant: 'outline' as const },
 ]
 
 export default function SettingsClient() {

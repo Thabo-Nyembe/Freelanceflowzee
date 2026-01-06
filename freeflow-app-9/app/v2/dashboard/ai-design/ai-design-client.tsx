@@ -359,10 +359,10 @@ const mockAIDesignActivities = [
 ]
 
 const mockAIDesignQuickActions = [
-  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => console.log('New generation') },
-  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => console.log('Browse gallery') },
-  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => console.log('Upscale') },
-  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => console.log('Edit style') },
+  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Initializing AI generation...', success: 'AI generator ready', error: 'Failed to initialize generator' }) },
+  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading gallery...', success: 'Gallery loaded successfully', error: 'Failed to load gallery' }) },
+  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Upscaling image with AI...', success: 'Image upscaled successfully', error: 'Failed to upscale image' }) },
+  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Loading style editor...', success: 'Style editor ready', error: 'Failed to load style editor' }) },
 ]
 
 export default function AIDesignClient() {

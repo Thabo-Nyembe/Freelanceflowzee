@@ -586,9 +586,18 @@ const mockContentActivities = [
 ]
 
 const mockContentQuickActions = [
-  { id: '1', label: 'New Entry', icon: 'plus', action: () => console.log('New entry'), variant: 'default' as const },
-  { id: '2', label: 'Bulk Publish', icon: 'upload', action: () => console.log('Publish'), variant: 'default' as const },
-  { id: '3', label: 'Export All', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Entry', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new entry...', success: 'New entry created', error: 'Failed to create entry' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Bulk Publish', icon: 'upload', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Publishing content...', success: 'Content published successfully', error: 'Failed to publish content' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Export All', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Exporting all content...', success: 'Export completed', error: 'Failed to export content' }
+  ), variant: 'outline' as const },
 ]
 
 // ============================================================================

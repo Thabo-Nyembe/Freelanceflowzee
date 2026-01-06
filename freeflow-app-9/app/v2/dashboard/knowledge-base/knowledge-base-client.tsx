@@ -666,9 +666,18 @@ const mockKnowledgeBaseActivities = [
 ]
 
 const mockKnowledgeBaseQuickActions = [
-  { id: '1', label: 'New Page', icon: 'plus', action: () => console.log('New page'), variant: 'default' as const },
-  { id: '2', label: 'Import Docs', icon: 'upload', action: () => console.log('Import'), variant: 'default' as const },
-  { id: '3', label: 'Search All', icon: 'search', action: () => console.log('Search'), variant: 'outline' as const },
+  { id: '1', label: 'New Page', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new page...', success: 'New page created successfully', error: 'Failed to create page' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Import Docs', icon: 'upload', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Importing documents...', success: 'Documents imported successfully', error: 'Failed to import documents' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Search All', icon: 'search', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Searching knowledge base...', success: 'Search completed', error: 'Search failed' }
+  ), variant: 'outline' as const },
 ]
 
 // Database types

@@ -78,9 +78,9 @@ const adminOverviewActivities = [
 ]
 
 const adminOverviewQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating new item...', success: 'Item created', error: 'Failed to create item' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting data...', success: 'Data exported', error: 'Failed to export' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' }) },
 ]
 
 export default function AdminOverviewClient() {

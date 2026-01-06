@@ -420,9 +420,18 @@ const mockTemplatesActivities = [
 ]
 
 const mockTemplatesQuickActions = [
-  { id: '1', label: 'New Template', icon: 'plus', action: () => console.log('New template'), variant: 'default' as const },
-  { id: '2', label: 'Browse Gallery', icon: 'grid', action: () => console.log('Gallery'), variant: 'default' as const },
-  { id: '3', label: 'Export Assets', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Template', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 700)),
+    { loading: 'Creating new template...', success: 'Template created', error: 'Failed to create template' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Browse Gallery', icon: 'grid', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading template gallery...', success: 'Gallery loaded', error: 'Failed to load gallery' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Export Assets', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Exporting template assets...', success: 'Assets exported successfully', error: 'Failed to export assets' }
+  ), variant: 'outline' as const },
 ]
 
 export default function TemplatesClient() {

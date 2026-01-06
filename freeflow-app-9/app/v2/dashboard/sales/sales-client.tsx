@@ -373,10 +373,10 @@ const mockSalesActivities = [
 ]
 
 const mockSalesQuickActions = [
-  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => console.log('Log call') },
-  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => console.log('Send email') },
-  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => console.log('Schedule meeting') },
-  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => console.log('Create task') },
+  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Opening call logger...', success: 'Call logger ready', error: 'Failed to open call logger' }) },
+  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Opening email composer...', success: 'Email composer ready', error: 'Failed to open email composer' }) },
+  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Opening meeting scheduler...', success: 'Meeting scheduler ready', error: 'Failed to open scheduler' }) },
+  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new task...', success: 'Task created successfully', error: 'Failed to create task' }) },
 ]
 
 // Default form values

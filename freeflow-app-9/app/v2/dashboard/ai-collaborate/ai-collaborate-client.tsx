@@ -174,9 +174,36 @@ const aiCollaborateActivities = [
 ]
 
 const aiCollaborateQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New AI Design', icon: 'Plus', shortcut: 'N', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+      {
+        loading: 'Initializing AI design collaboration...',
+        success: 'New AI design session created',
+        error: 'Failed to create design session'
+      }
+    )
+  }},
+  { id: '2', label: 'Export Designs', icon: 'Download', shortcut: 'E', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Preparing AI designs for export...',
+        success: 'AI designs exported successfully',
+        error: 'Failed to export designs'
+      }
+    )
+  }},
+  { id: '3', label: 'AI Settings', icon: 'Settings', shortcut: 'S', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Loading AI collaboration settings...',
+        success: 'AI settings panel opened',
+        error: 'Failed to load settings'
+      }
+    )
+  }},
 ]
 
 export default function AiCollaborateClient() {

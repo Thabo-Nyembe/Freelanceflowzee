@@ -269,9 +269,18 @@ const mockFormsActivities = [
 ]
 
 const mockFormsQuickActions = [
-  { id: '1', label: 'Create Form', icon: 'plus', action: () => console.log('Create form'), variant: 'default' as const },
-  { id: '2', label: 'Use Template', icon: 'copy', action: () => console.log('Use template'), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'Create Form', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating new form...', success: 'Form created successfully', error: 'Failed to create form' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Use Template', icon: 'copy', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading form templates...', success: 'Template applied successfully', error: 'Failed to load templates' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting form data...', success: 'Form data exported successfully', error: 'Failed to export data' }
+  ), variant: 'outline' as const },
 ]
 
 // ============================================================================

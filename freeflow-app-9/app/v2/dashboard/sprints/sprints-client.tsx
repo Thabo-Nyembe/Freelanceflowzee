@@ -399,9 +399,18 @@ const mockSprintsActivities = [
 ]
 
 const mockSprintsQuickActions = [
-  { id: '1', label: 'New Story', icon: 'plus', action: () => console.log('New Story'), variant: 'default' as const },
-  { id: '2', label: 'Start Sprint', icon: 'play', action: () => console.log('Start Sprint'), variant: 'default' as const },
-  { id: '3', label: 'Backlog', icon: 'list', action: () => console.log('Backlog'), variant: 'outline' as const },
+  { id: '1', label: 'New Story', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new story...', success: 'Story created successfully', error: 'Failed to create story' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Start Sprint', icon: 'play', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Starting sprint...', success: 'Sprint started successfully', error: 'Failed to start sprint' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Backlog', icon: 'list', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading backlog...', success: 'Backlog loaded', error: 'Failed to load backlog' }
+  ), variant: 'outline' as const },
 ]
 
 export default function SprintsClient() {

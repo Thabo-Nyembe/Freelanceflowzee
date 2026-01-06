@@ -335,9 +335,18 @@ const mockCapacityActivities = [
 ]
 
 const mockCapacityQuickActions = [
-  { id: '1', label: 'Allocate', icon: 'plus', action: () => console.log('Allocate'), variant: 'default' as const },
-  { id: '2', label: 'Balance', icon: 'shuffle', action: () => console.log('Balance'), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'bar-chart', action: () => console.log('Report'), variant: 'outline' as const },
+  { id: '1', label: 'Allocate', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Opening allocation wizard...', success: 'Allocation wizard ready', error: 'Failed to open allocation' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Balance', icon: 'shuffle', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2000)),
+    { loading: 'Balancing team capacity...', success: 'Capacity balanced successfully', error: 'Failed to balance capacity' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'bar-chart', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1800)),
+    { loading: 'Generating capacity report...', success: 'Report generated successfully', error: 'Failed to generate report' }
+  ), variant: 'outline' as const },
 ]
 
 export default function CapacityClient({ initialCapacity }: { initialCapacity: Capacity[] }) {

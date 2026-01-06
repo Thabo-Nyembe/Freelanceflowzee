@@ -483,9 +483,36 @@ const mockPluginsActivities = [
 ]
 
 const mockPluginsQuickActions = [
-  { id: '1', label: 'Install', icon: 'plus', action: () => console.log('Install'), variant: 'default' as const },
-  { id: '2', label: 'Update All', icon: 'refresh-cw', action: () => console.log('Update'), variant: 'default' as const },
-  { id: '3', label: 'Settings', icon: 'settings', action: () => console.log('Settings'), variant: 'outline' as const },
+  { id: '1', label: 'Install', icon: 'plus', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Installing plugin...',
+        success: 'Plugin installed successfully',
+        error: 'Failed to install plugin'
+      }
+    )
+  }, variant: 'default' as const },
+  { id: '2', label: 'Update All', icon: 'refresh-cw', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Updating all plugins...',
+        success: 'All plugins updated successfully',
+        error: 'Failed to update plugins'
+      }
+    )
+  }, variant: 'default' as const },
+  { id: '3', label: 'Settings', icon: 'settings', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 600)),
+      {
+        loading: 'Loading plugin settings...',
+        success: 'Plugin settings loaded',
+        error: 'Failed to load settings'
+      }
+    )
+  }, variant: 'outline' as const },
 ]
 
 export default function PluginsClient() {

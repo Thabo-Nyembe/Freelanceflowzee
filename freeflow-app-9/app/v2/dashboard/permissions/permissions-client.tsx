@@ -246,9 +246,18 @@ const mockPermissionsActivities = [
 ]
 
 const mockPermissionsQuickActions = [
-  { id: '1', label: 'Add User', icon: 'plus', action: () => console.log('Add user'), variant: 'default' as const },
-  { id: '2', label: 'Create Role', icon: 'shield', action: () => console.log('Create role'), variant: 'default' as const },
-  { id: '3', label: 'Audit Log', icon: 'file', action: () => console.log('Audit log'), variant: 'outline' as const },
+  { id: '1', label: 'Add User', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Opening user creation form...', success: 'Ready to add user', error: 'Failed to open form' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Create Role', icon: 'shield', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 900)),
+    { loading: 'Preparing role configuration...', success: 'Role editor ready', error: 'Failed to load role editor' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Audit Log', icon: 'file', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Loading audit logs...', success: 'Audit logs loaded', error: 'Failed to load audit logs' }
+  ), variant: 'outline' as const },
 ]
 
 export default function PermissionsClient({ initialRoles, initialPermissions }: PermissionsClientProps) {
@@ -1938,7 +1947,10 @@ export default function PermissionsClient({ initialRoles, initialPermissions }: 
             <AIInsightsPanel
               insights={mockPermissionsAIInsights}
               title="Security Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
+              )}
             />
           </div>
           <div className="space-y-6">

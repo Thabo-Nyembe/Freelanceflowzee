@@ -392,10 +392,22 @@ const mockLogsActivities = [
 ]
 
 const mockLogsQuickActions = [
-  { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: () => console.log('Search logs') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Set Alert', icon: 'Bell', shortcut: 'A', action: () => console.log('Set alert') },
-  { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: () => console.log('Live tail') },
+  { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Searching logs...', success: 'Search results ready', error: 'Search failed' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting logs...', success: 'Logs exported successfully', error: 'Export failed' }
+  ) },
+  { id: '3', label: 'Set Alert', icon: 'Bell', shortcut: 'A', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Setting up alert...', success: 'Alert configured successfully', error: 'Failed to set alert' }
+  ) },
+  { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Connecting to live stream...', success: 'Live tail enabled', error: 'Failed to connect' }
+  ) },
 ]
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {

@@ -831,9 +831,36 @@ const mockApiKeysActivities = [
 ]
 
 const mockApiKeysQuickActions = [
-  { id: '1', label: 'Create Key', icon: 'plus', action: () => console.log('Create key'), variant: 'default' as const },
-  { id: '2', label: 'View Usage', icon: 'chart', action: () => console.log('View usage'), variant: 'default' as const },
-  { id: '3', label: 'Rotate Keys', icon: 'refresh', action: () => console.log('Rotate keys'), variant: 'outline' as const },
+  { id: '1', label: 'Create Key', icon: 'plus', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Generating new API key...',
+        success: 'API key created successfully - Copy your key before closing',
+        error: 'Failed to create API key'
+      }
+    )
+  }, variant: 'default' as const },
+  { id: '2', label: 'View Usage', icon: 'chart', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Loading API usage analytics...',
+        success: 'Usage data loaded - View detailed metrics below',
+        error: 'Failed to load usage data'
+      }
+    )
+  }, variant: 'default' as const },
+  { id: '3', label: 'Rotate Keys', icon: 'refresh', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+      {
+        loading: 'Rotating API keys securely...',
+        success: 'API keys rotated - Update your applications with new credentials',
+        error: 'Failed to rotate API keys'
+      }
+    )
+  }, variant: 'outline' as const },
 ]
 
 // ============================================================================

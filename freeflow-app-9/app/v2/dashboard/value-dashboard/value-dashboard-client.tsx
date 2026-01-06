@@ -96,9 +96,18 @@ const valueDashboardActivities = [
 ]
 
 const valueDashboardQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Creating new value metric...', success: 'Metric created successfully', error: 'Failed to create metric' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting value dashboard...', success: 'Dashboard exported', error: 'Failed to export' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Opening dashboard settings...', success: 'Settings loaded', error: 'Failed to load settings' }
+  ) },
 ]
 
 export default function ValueDashboardClient() {

@@ -433,10 +433,26 @@ const mockCustomersActivities = [
 ]
 
 const mockCustomersQuickActions = [
-  { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => console.log('Add contact') },
-  { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => console.log('Log activity') },
-  { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => console.log('Send email') },
-  { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => console.log('Schedule call') },
+  { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Opening contact form...',
+    success: 'Contact form ready',
+    error: 'Failed to open contact form'
+  }) },
+  { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Logging activity...',
+    success: 'Activity logged successfully',
+    error: 'Failed to log activity'
+  }) },
+  { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Preparing email...',
+    success: 'Email composer opened',
+    error: 'Failed to open email composer'
+  }) },
+  { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Opening scheduler...',
+    success: 'Call scheduler ready',
+    error: 'Failed to open scheduler'
+  }) },
 ]
 
 // ============================================================================

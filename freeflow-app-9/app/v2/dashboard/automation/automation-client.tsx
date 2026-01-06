@@ -208,10 +208,26 @@ const mockAutomationActivities = [
 ]
 
 const mockAutomationQuickActions = [
-  { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => console.log('New workflow') },
-  { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => console.log('Templates') },
-  { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => console.log('History') },
-  { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => console.log('Connections') },
+  { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Creating new workflow...',
+    success: 'Workflow created successfully',
+    error: 'Failed to create workflow'
+  }) },
+  { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Loading templates...',
+    success: 'Templates loaded successfully',
+    error: 'Failed to load templates'
+  }) },
+  { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), {
+    loading: 'Fetching run history...',
+    success: 'Run history loaded',
+    error: 'Failed to load run history'
+  }) },
+  { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Loading connections...',
+    success: 'Connections loaded successfully',
+    error: 'Failed to load connections'
+  }) },
 ]
 
 // ============================================================================

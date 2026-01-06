@@ -771,9 +771,18 @@ const mockBuildsActivities = [
 ]
 
 const mockBuildsQuickActions = [
-  { id: '1', label: 'New Build', icon: 'plus', action: () => console.log('New build'), variant: 'default' as const },
-  { id: '2', label: 'Retry', icon: 'refresh-cw', action: () => console.log('Retry'), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'file-text', action: () => console.log('Logs'), variant: 'outline' as const },
+  { id: '1', label: 'New Build', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Initializing new build...', success: 'Build started successfully', error: 'Failed to start build' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Retry', icon: 'refresh-cw', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Retrying build...', success: 'Build retry initiated', error: 'Failed to retry build' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'file-text', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Fetching build logs...', success: 'Logs loaded', error: 'Failed to load logs' }
+  ), variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -1682,7 +1691,10 @@ export default function BuildsClient() {
             <AIInsightsPanel
               insights={mockBuildsAIInsights}
               title="Build Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
+              )}
             />
           </div>
           <div className="space-y-6">

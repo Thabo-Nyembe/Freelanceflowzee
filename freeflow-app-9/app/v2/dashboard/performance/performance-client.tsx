@@ -438,10 +438,10 @@ const mockPerfActivities = [
 ]
 
 const mockPerfQuickActions = [
-  { id: '1', label: 'Run Audit', icon: 'Play', shortcut: '⌘R', action: () => console.log('Run audit') },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => console.log('View report') },
-  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => console.log('Compare') },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: '⌘E', action: () => console.log('Export') },
+  { id: '1', label: 'Run Audit', icon: 'Play', shortcut: '⌘R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 3000)), { loading: 'Running performance audit...', success: 'Performance audit completed', error: 'Audit failed' }) },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading performance report...', success: 'Report loaded successfully', error: 'Failed to load report' }) },
+  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Comparing test results...', success: 'Comparison ready', error: 'Failed to compare tests' }) },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: '⌘E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Exporting performance data...', success: 'Data exported successfully', error: 'Failed to export data' }) },
 ]
 
 export default function PerformanceClient() {

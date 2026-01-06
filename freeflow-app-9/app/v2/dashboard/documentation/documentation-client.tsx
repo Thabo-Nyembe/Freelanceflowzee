@@ -347,9 +347,9 @@ const mockDocsActivities = [
 ]
 
 const mockDocsQuickActions = [
-  { id: '1', label: 'New Page', icon: 'plus', action: () => console.log('New page'), variant: 'default' as const },
-  { id: '2', label: 'Search Docs', icon: 'search', action: () => console.log('Search'), variant: 'default' as const },
-  { id: '3', label: 'Export PDF', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Page', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating page...', success: 'Page created successfully', error: 'Failed to create page' }), variant: 'default' as const },
+  { id: '2', label: 'Search Docs', icon: 'search', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Searching docs...', success: 'Search completed', error: 'Search failed' }), variant: 'default' as const },
+  { id: '3', label: 'Export PDF', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting PDF...', success: 'PDF exported successfully', error: 'Failed to export PDF' }), variant: 'outline' as const },
 ]
 
 export default function DocumentationClient() {

@@ -452,9 +452,21 @@ const cryptoPaymentsActivities = [
 ]
 
 const cryptoPaymentsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Creating new item...',
+    success: 'New item created successfully',
+    error: 'Failed to create new item'
+  }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Exporting crypto payment data...',
+    success: 'Crypto payment data exported successfully',
+    error: 'Export failed'
+  }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), {
+    loading: 'Loading settings...',
+    success: 'Settings loaded successfully',
+    error: 'Failed to load settings'
+  }) },
 ]
 
 export default function CryptoPaymentsClient() {

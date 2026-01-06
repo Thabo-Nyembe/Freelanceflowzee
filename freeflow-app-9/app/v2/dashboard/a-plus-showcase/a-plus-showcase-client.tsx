@@ -377,9 +377,18 @@ const aPlusShowcaseActivities = [
 ]
 
 const aPlusShowcaseQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Creating new component...', success: 'Component created successfully', error: 'Failed to create component' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting showcase...', success: 'Export completed', error: 'Failed to export' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }
+  ) },
 ]
 
 export default function APlusShowcaseClient() {

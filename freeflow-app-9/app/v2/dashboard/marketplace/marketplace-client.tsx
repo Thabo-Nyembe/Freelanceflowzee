@@ -336,9 +336,9 @@ const mockMarketplaceActivities = [
 ]
 
 const mockMarketplaceQuickActions = [
-  { id: '1', label: 'Add Product', icon: 'plus', action: () => console.log('Add product'), variant: 'default' as const },
-  { id: '2', label: 'View Analytics', icon: 'chart', action: () => console.log('View analytics'), variant: 'default' as const },
-  { id: '3', label: 'Manage Reviews', icon: 'message', action: () => console.log('Manage reviews'), variant: 'outline' as const },
+  { id: '1', label: 'Add Product', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Adding product...', success: 'Product added!', error: 'Failed to add product' }), variant: 'default' as const },
+  { id: '2', label: 'View Analytics', icon: 'chart', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading analytics...', success: 'Analytics loaded!', error: 'Failed to load analytics' }), variant: 'default' as const },
+  { id: '3', label: 'Manage Reviews', icon: 'message', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Opening reviews...', success: 'Reviews opened!', error: 'Failed to open reviews' }), variant: 'outline' as const },
 ]
 
 export default function MarketplaceClient() {

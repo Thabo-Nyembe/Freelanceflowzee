@@ -530,9 +530,18 @@ const mockRoadmapActivities = [
 ]
 
 const mockRoadmapQuickActions = [
-  { id: '1', label: 'New Initiative', icon: 'plus', action: () => console.log('New initiative'), variant: 'default' as const },
-  { id: '2', label: 'Timeline', icon: 'calendar', action: () => console.log('Timeline'), variant: 'default' as const },
-  { id: '3', label: 'Share', icon: 'share', action: () => console.log('Share'), variant: 'outline' as const },
+  { id: '1', label: 'New Initiative', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new initiative...', success: 'Initiative created successfully', error: 'Failed to create initiative' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Timeline', icon: 'calendar', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading timeline view...', success: 'Timeline view loaded', error: 'Failed to load timeline' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Share', icon: 'share', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Generating share link...', success: 'Roadmap link copied to clipboard', error: 'Failed to generate link' }
+  ), variant: 'outline' as const },
 ]
 
 export default function RoadmapClient({ initialInitiatives, initialMilestones }: RoadmapClientProps) {
@@ -1782,7 +1791,10 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
             <AIInsightsPanel
               insights={mockRoadmapAIInsights}
               title="Roadmap Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.promise(
+              new Promise(resolve => setTimeout(resolve, 700)),
+              { loading: `Processing insight: ${insight.title}...`, success: `Insight "${insight.title}" action completed`, error: 'Failed to process insight' }
+            )}
             />
           </div>
           <div className="space-y-6">

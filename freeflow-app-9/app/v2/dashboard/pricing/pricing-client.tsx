@@ -465,9 +465,21 @@ const mockPricingActivities = [
 ]
 
 const mockPricingQuickActions = [
-  { id: '1', label: 'New Plan', icon: 'plus', action: () => console.log('New plan'), variant: 'default' as const },
-  { id: '2', label: 'Create Coupon', icon: 'tag', action: () => console.log('Create coupon'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'New Plan', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Creating new plan...',
+    success: 'New plan created successfully',
+    error: 'Failed to create plan'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Create Coupon', icon: 'tag', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Creating coupon...',
+    success: 'Coupon created successfully',
+    error: 'Failed to create coupon'
+  }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+    loading: 'Loading analytics...',
+    success: 'Analytics loaded successfully',
+    error: 'Failed to load analytics'
+  }), variant: 'outline' as const },
 ]
 
 export default function PricingClient({

@@ -793,9 +793,9 @@ const mockHelpCenterActivities = [
 ]
 
 const mockHelpCenterQuickActions = [
-  { id: '1', label: 'New Article', icon: 'plus', action: () => console.log('New article'), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => console.log('Preview'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'New Article', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new article...', success: 'Article draft created', error: 'Failed to create article' }), variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Generating preview...', success: 'Preview ready', error: 'Failed to generate preview' }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Loading analytics dashboard...', success: 'Analytics loaded', error: 'Failed to load analytics' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

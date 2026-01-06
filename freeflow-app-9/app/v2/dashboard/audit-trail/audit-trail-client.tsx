@@ -71,9 +71,18 @@ const auditTrailActivities = [
 ]
 
 const auditTrailQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new audit entry...', success: 'Audit entry created successfully', error: 'Failed to create audit entry' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting audit trail...', success: 'Audit trail exported successfully', error: 'Failed to export audit trail' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Loading settings...', success: 'Settings loaded', error: 'Failed to load settings' }
+  ) },
 ]
 
 export default function AuditTrailClient() {

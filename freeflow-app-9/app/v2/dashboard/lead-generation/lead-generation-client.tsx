@@ -564,9 +564,21 @@ const mockLeadGenActivities = [
 ]
 
 const mockLeadGenQuickActions = [
-  { id: '1', label: 'Add Lead', icon: 'plus', action: () => console.log('Add lead'), variant: 'default' as const },
-  { id: '2', label: 'Score', icon: 'star', action: () => console.log('Score'), variant: 'default' as const },
-  { id: '3', label: 'Nurture', icon: 'mail', action: () => console.log('Nurture'), variant: 'outline' as const },
+  { id: '1', label: 'Add Lead', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Adding new lead...',
+    success: 'Lead added successfully',
+    error: 'Failed to add lead'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Score', icon: 'star', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+    loading: 'Calculating lead score...',
+    success: 'Lead score updated successfully',
+    error: 'Failed to calculate score'
+  }), variant: 'default' as const },
+  { id: '3', label: 'Nurture', icon: 'mail', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Starting nurture sequence...',
+    success: 'Nurture sequence initiated',
+    error: 'Failed to start nurture sequence'
+  }), variant: 'outline' as const },
 ]
 
 // Default stats for initial hook state

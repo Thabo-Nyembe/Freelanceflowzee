@@ -213,9 +213,18 @@ const mockExpensesActivities = [
 ]
 
 const mockExpensesQuickActions = [
-  { id: '1', label: 'New Expense', icon: 'plus', action: () => console.log('New expense'), variant: 'default' as const },
-  { id: '2', label: 'Scan Receipt', icon: 'camera', action: () => console.log('Scan'), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'file-text', action: () => console.log('Report'), variant: 'outline' as const },
+  { id: '1', label: 'New Expense', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Opening expense form...', success: 'New expense form ready', error: 'Failed to open expense form' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Scan Receipt', icon: 'camera', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Initializing receipt scanner...', success: 'Receipt scanner ready', error: 'Failed to initialize scanner' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'file-text', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Generating expense report...', success: 'Expense report generated', error: 'Failed to generate report' }
+  ), variant: 'outline' as const },
 ]
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {

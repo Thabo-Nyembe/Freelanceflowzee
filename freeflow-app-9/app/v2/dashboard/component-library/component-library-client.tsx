@@ -363,10 +363,10 @@ const mockComponentLibActivities = [
 ]
 
 const mockComponentLibQuickActions = [
-  { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => console.log('New component') },
-  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => console.log('Browse') },
-  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => console.log('Playground') },
-  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => console.log('Docs') },
+  { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new component...', success: 'Component created successfully', error: 'Failed to create component' }) },
+  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading component library...', success: 'Library loaded', error: 'Failed to load library' }) },
+  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening playground...', success: 'Playground ready', error: 'Failed to open playground' }) },
+  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading documentation...', success: 'Documentation loaded', error: 'Failed to load documentation' }) },
 ]
 
 export default function ComponentLibraryClient() {

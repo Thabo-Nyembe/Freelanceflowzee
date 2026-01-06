@@ -89,10 +89,10 @@ const projectsActivities = [
 ]
 
 const projectsQuickActions = [
-  { id: '1', label: 'New Project', icon: 'Plus', shortcut: 'N', action: () => console.log('New project') },
-  { id: '2', label: 'Quick Report', icon: 'FileText', shortcut: 'R', action: () => console.log('Generate report') },
-  { id: '3', label: 'Team Meeting', icon: 'Users', shortcut: 'M', action: () => console.log('Schedule meeting') },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
+  { id: '1', label: 'New Project', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new project...', success: 'Project created successfully', error: 'Failed to create project' }) },
+  { id: '2', label: 'Quick Report', icon: 'FileText', shortcut: 'R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Generating project report...', success: 'Report generated successfully', error: 'Failed to generate report' }) },
+  { id: '3', label: 'Team Meeting', icon: 'Users', shortcut: 'M', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Scheduling team meeting...', success: 'Meeting scheduled successfully', error: 'Failed to schedule meeting' }) },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Exporting project data...', success: 'Data exported successfully', error: 'Failed to export data' }) },
 ]
 
 // ============================================================================

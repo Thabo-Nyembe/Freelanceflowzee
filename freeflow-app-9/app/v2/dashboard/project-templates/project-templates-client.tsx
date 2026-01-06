@@ -79,9 +79,18 @@ const projectTemplatesActivities = [
 ]
 
 const projectTemplatesQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating new template...', success: 'Template created successfully', error: 'Failed to create template' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting templates...', success: 'Templates exported successfully', error: 'Failed to export templates' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' }
+  ) },
 ]
 
 export default function ProjectTemplatesClient() {

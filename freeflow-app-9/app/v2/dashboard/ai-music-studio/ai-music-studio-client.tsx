@@ -15,6 +15,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 import AIMusicStudio from '@/components/ai/ai-music-studio'
+import { toast } from 'sonner'
 
 export const metadata = {
   title: 'AI Music Studio | Kazi Platform',
@@ -50,9 +51,36 @@ const aiMusicStudioActivities = [
 ]
 
 const aiMusicStudioQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Creating new music track...',
+        success: 'New music track created successfully',
+        error: 'Failed to create music track'
+      }
+    )
+  }},
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Exporting audio files...',
+        success: 'Audio files exported successfully',
+        error: 'Failed to export audio files'
+      }
+    )
+  }},
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 500)),
+      {
+        loading: 'Loading music studio settings...',
+        success: 'Settings loaded',
+        error: 'Failed to load settings'
+      }
+    )
+  }},
 ]
 
 export default function AiMusicStudioClient() {

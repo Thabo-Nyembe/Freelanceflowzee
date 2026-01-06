@@ -212,9 +212,18 @@ const aiSettingsActivities = [
 ]
 
 const aiSettingsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Adding new AI provider...', success: 'AI provider added successfully', error: 'Failed to add AI provider' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting AI configuration...', success: 'AI configuration exported successfully', error: 'Failed to export configuration' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading AI settings...', success: 'AI settings loaded', error: 'Failed to load AI settings' }
+  ) },
 ]
 
 export default function AiSettingsClient() {

@@ -446,9 +446,18 @@ const mockLogsActivities = [
 ]
 
 const mockLogsQuickActions = [
-  { id: '1', label: 'Export Logs', icon: 'download', action: () => console.log('Export'), variant: 'default' as const },
-  { id: '2', label: 'Run Audit', icon: 'shield', action: () => console.log('Audit'), variant: 'default' as const },
-  { id: '3', label: 'Configure Alerts', icon: 'bell', action: () => console.log('Alerts'), variant: 'outline' as const },
+  { id: '1', label: 'Export Logs', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting access logs...', success: 'Access logs exported successfully', error: 'Failed to export logs' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Run Audit', icon: 'shield', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2000)),
+    { loading: 'Running security audit...', success: 'Security audit completed', error: 'Audit failed' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Configure Alerts', icon: 'bell', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading alert configuration...', success: 'Alert settings loaded', error: 'Failed to load alert settings' }
+  ), variant: 'outline' as const },
 ]
 
 // Database type for access_logs table

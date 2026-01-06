@@ -347,10 +347,22 @@ const mockAlertsActivities = [
 ]
 
 const mockAlertsQuickActions = [
-  { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => console.log('Acknowledge') },
-  { id: '2', label: 'Escalate', icon: 'ArrowUp', shortcut: 'E', action: () => console.log('Escalate') },
-  { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => console.log('Silence') },
-  { id: '4', label: 'Create Rule', icon: 'Plus', shortcut: 'R', action: () => console.log('Create rule') },
+  { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Acknowledging alerts...', success: 'Alerts acknowledged', error: 'Failed to acknowledge alerts' }
+  ) },
+  { id: '2', label: 'Escalate', icon: 'ArrowUp', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Escalating to on-call team...', success: 'Alert escalated successfully', error: 'Failed to escalate alert' }
+  ) },
+  { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Silencing alerts...', success: 'Alerts silenced', error: 'Failed to silence alerts' }
+  ) },
+  { id: '4', label: 'Create Rule', icon: 'Plus', shortcut: 'R', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Opening rule editor...', success: 'Rule editor ready', error: 'Failed to open rule editor' }
+  ) },
 ]
 
 export default function AlertsClient() {

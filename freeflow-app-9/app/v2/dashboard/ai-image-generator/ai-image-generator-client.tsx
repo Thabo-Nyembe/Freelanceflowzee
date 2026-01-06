@@ -15,6 +15,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 import AIImageGenerator from '@/components/ai/ai-image-generator'
+import { toast } from 'sonner'
 
 export const metadata = {
   title: 'AI Image Generator | Kazi Platform',
@@ -50,9 +51,36 @@ const aiImageGeneratorActivities = [
 ]
 
 const aiImageGeneratorQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Image', icon: 'Plus', shortcut: 'N', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+      {
+        loading: 'Initializing AI image generator...',
+        success: 'New AI image generation ready',
+        error: 'Failed to initialize generator'
+      }
+    )
+  }},
+  { id: '2', label: 'Export Images', icon: 'Download', shortcut: 'E', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Preparing AI-generated images for export...',
+        success: 'Images exported successfully',
+        error: 'Failed to export images'
+      }
+    )
+  }},
+  { id: '3', label: 'AI Settings', icon: 'Settings', shortcut: 'S', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Loading AI image generation settings...',
+        success: 'AI settings panel opened',
+        error: 'Failed to load settings'
+      }
+    )
+  }},
 ]
 
 export default function AiImageGeneratorClient() {

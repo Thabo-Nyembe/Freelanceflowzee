@@ -15,6 +15,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { Plus, Heart, Star } from 'lucide-react'
 
 // A+++ UTILITIES
@@ -55,9 +56,18 @@ const uiShowcaseActivities = [
 ]
 
 const uiShowcaseQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Creating new item...', success: 'Item created successfully', error: 'Failed to create item' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting showcase data...', success: 'Export completed', error: 'Failed to export' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }
+  ) },
 ]
 
 export default function UiShowcaseClient() {

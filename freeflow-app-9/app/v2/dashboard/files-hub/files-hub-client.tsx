@@ -408,10 +408,22 @@ const mockFilesHubActivities = [
 ]
 
 const mockFilesHubQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
-  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => console.log('New folder') },
-  { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => console.log('Share') },
-  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => console.log('Search') },
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Opening file picker...', success: 'Ready to upload files', error: 'Failed to open upload' }
+  ) },
+  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Creating new folder...', success: 'Folder created successfully', error: 'Failed to create folder' }
+  ) },
+  { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 700)),
+    { loading: 'Generating share link...', success: 'Share link copied to clipboard', error: 'Failed to generate link' }
+  ) },
+  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 400)),
+    { loading: 'Opening search...', success: 'Search activated', error: 'Search unavailable' }
+  ) },
 ]
 
 // Database types matching schema

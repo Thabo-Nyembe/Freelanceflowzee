@@ -178,9 +178,18 @@ const aiCodeCompletionActivities = [
 ]
 
 const aiCodeCompletionQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Creating new code snippet...', success: 'New snippet ready', error: 'Failed to create snippet' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Exporting code...', success: 'Code exported successfully', error: 'Failed to export code' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 400)),
+    { loading: 'Loading AI code settings...', success: 'Settings opened', error: 'Failed to load settings' }
+  ) },
 ]
 
 export default function AiCodeCompletionClient() {

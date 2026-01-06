@@ -445,9 +445,18 @@ const mockWebinarsActivities = [
 ]
 
 const mockWebinarsQuickActions = [
-  { id: '1', label: 'New Webinar', icon: 'plus', action: () => console.log('New Webinar'), variant: 'default' as const },
-  { id: '2', label: 'Go Live', icon: 'video', action: () => console.log('Go Live'), variant: 'default' as const },
-  { id: '3', label: 'Recordings', icon: 'film', action: () => console.log('Recordings'), variant: 'outline' as const },
+  { id: '1', label: 'New Webinar', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new webinar...', success: 'Webinar created successfully', error: 'Failed to create webinar' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Go Live', icon: 'video', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Starting live stream...', success: 'You are now live!', error: 'Failed to start stream' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Recordings', icon: 'film', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading recordings...', success: 'Recordings library opened', error: 'Failed to load recordings' }
+  ), variant: 'outline' as const },
 ]
 
 export default function WebinarsClient() {

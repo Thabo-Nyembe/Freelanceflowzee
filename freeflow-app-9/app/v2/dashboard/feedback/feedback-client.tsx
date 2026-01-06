@@ -443,10 +443,22 @@ const mockFeedbackActivities = [
 ]
 
 const mockFeedbackQuickActions = [
-  { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => console.log('New idea') },
-  { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => console.log('Respond') },
-  { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => console.log('Merge') },
-  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
+  { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new idea...', success: 'New idea created successfully', error: 'Failed to create idea' }
+  ) },
+  { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Opening response editor...', success: 'Response editor ready', error: 'Failed to open editor' }
+  ) },
+  { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Merging feedback items...', success: 'Feedback items merged successfully', error: 'Failed to merge items' }
+  ) },
+  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Exporting feedback data...', success: 'Feedback exported successfully', error: 'Failed to export feedback' }
+  ) },
 ]
 
 // Database Types

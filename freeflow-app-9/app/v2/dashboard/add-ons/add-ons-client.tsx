@@ -448,9 +448,18 @@ const mockAddOnsActivities = [
 ]
 
 const mockAddOnsQuickActions = [
-  { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => console.log('Browse'), variant: 'default' as const },
-  { id: '2', label: 'Update All', icon: 'refresh', action: () => console.log('Update'), variant: 'default' as const },
-  { id: '3', label: 'Settings', icon: 'settings', action: () => console.log('Settings'), variant: 'outline' as const },
+  { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading add-ons marketplace...', success: 'Marketplace loaded successfully', error: 'Failed to load marketplace' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Update All', icon: 'refresh', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2000)),
+    { loading: 'Checking for updates...', success: 'All add-ons are up to date', error: 'Failed to check for updates' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Settings', icon: 'settings', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Opening add-ons settings...', success: 'Add-ons settings opened', error: 'Failed to open settings' }
+  ), variant: 'outline' as const },
 ]
 
 export default function AddOnsClient() {

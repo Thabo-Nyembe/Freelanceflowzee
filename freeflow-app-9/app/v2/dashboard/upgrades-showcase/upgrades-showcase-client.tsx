@@ -18,6 +18,7 @@ import {
   Layers,
   Globe
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 // Enhanced & Competitive Upgrade Components
 import {
@@ -61,9 +62,18 @@ const upgradesShowcaseActivities = [
 ]
 
 const upgradesShowcaseQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new item...', success: 'New item created successfully', error: 'Failed to create item' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Failed to export data' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Opening settings...', success: 'Settings panel opened', error: 'Failed to open settings' }
+  ) },
 ]
 
 // Available upgrades
@@ -157,15 +167,24 @@ export default function UpgradesShowcaseClient() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <AIInsightsPanel
             insights={upgradesShowcaseAIInsights}
-            onInsightClick={(insight) => console.log('Insight clicked:', insight)}
+            onInsightClick={(insight) => toast.promise(
+              new Promise(resolve => setTimeout(resolve, 600)),
+              { loading: 'Loading insight details...', success: `Viewing: ${insight.title}`, error: 'Failed to load insight' }
+            )}
           />
           <CollaborationIndicator
             collaborators={upgradesShowcaseCollaborators}
-            onCollaboratorClick={(c) => console.log('Collaborator:', c)}
+            onCollaboratorClick={(c) => toast.promise(
+              new Promise(resolve => setTimeout(resolve, 500)),
+              { loading: 'Loading profile...', success: `Viewing ${c.name}'s profile`, error: 'Failed to load profile' }
+            )}
           />
           <PredictiveAnalytics
             predictions={upgradesShowcasePredictions}
-            onPredictionClick={(p) => console.log('Prediction:', p)}
+            onPredictionClick={(p) => toast.promise(
+              new Promise(resolve => setTimeout(resolve, 700)),
+              { loading: 'Analyzing prediction...', success: `Prediction: ${p.label} - ${p.confidence}% confidence`, error: 'Failed to load prediction' }
+            )}
           />
         </div>
 
@@ -249,7 +268,10 @@ export default function UpgradesShowcaseClient() {
         {/* Activity Feed */}
         <ActivityFeed
           activities={upgradesShowcaseActivities}
-          onActivityClick={(a) => console.log('Activity:', a)}
+          onActivityClick={(a) => toast.promise(
+            new Promise(resolve => setTimeout(resolve, 500)),
+            { loading: 'Loading activity...', success: `${a.user} ${a.action} ${a.target}`, error: 'Failed to load activity' }
+          )}
         />
 
         {/* Compare Plans CTA */}

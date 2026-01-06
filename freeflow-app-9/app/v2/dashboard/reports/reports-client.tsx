@@ -335,9 +335,18 @@ const mockReportsActivities = [
 ]
 
 const mockReportsQuickActions = [
-  { id: '1', label: 'New Report', icon: 'plus', action: () => console.log('New report'), variant: 'default' as const },
-  { id: '2', label: 'Schedule Export', icon: 'calendar', action: () => console.log('Schedule export'), variant: 'default' as const },
-  { id: '3', label: 'Data Sources', icon: 'database', action: () => console.log('Data sources'), variant: 'outline' as const },
+  { id: '1', label: 'New Report', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating new report...', success: 'Report created successfully', error: 'Failed to create report' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Schedule Export', icon: 'calendar', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Scheduling export...', success: 'Export scheduled successfully', error: 'Failed to schedule export' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Data Sources', icon: 'database', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading data sources...', success: 'Data sources loaded', error: 'Failed to load data sources' }
+  ), variant: 'outline' as const },
 ]
 
 export default function ReportsClient() {

@@ -201,9 +201,9 @@ const mockBillingActivities = [
 ]
 
 const mockBillingQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'plus', action: () => console.log('New invoice'), variant: 'default' as const },
-  { id: '2', label: 'Refund', icon: 'rotate-ccw', action: () => console.log('Refund'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Invoice', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new invoice...', success: 'Invoice created successfully', error: 'Failed to create invoice' }), variant: 'default' as const },
+  { id: '2', label: 'Refund', icon: 'rotate-ccw', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Processing refund...', success: 'Refund processed successfully', error: 'Failed to process refund' }), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Exporting billing data...', success: 'Data exported successfully', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {

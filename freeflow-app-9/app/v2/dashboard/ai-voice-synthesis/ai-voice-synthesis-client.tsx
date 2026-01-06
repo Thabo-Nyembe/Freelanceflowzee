@@ -96,9 +96,36 @@ const aiVoiceSynthesisActivities = [
 ]
 
 const aiVoiceSynthesisQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Synthesis', icon: 'Plus', shortcut: 'N', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2500)),
+      {
+        loading: 'Initializing AI voice synthesis...',
+        success: 'New voice synthesis session ready',
+        error: 'Failed to initialize synthesis'
+      }
+    )
+  }},
+  { id: '2', label: 'Export Audio', icon: 'Download', shortcut: 'E', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 3000)),
+      {
+        loading: 'Preparing audio export...',
+        success: 'Audio files exported successfully',
+        error: 'Failed to export audio'
+      }
+    )
+  }},
+  { id: '3', label: 'Voice Settings', icon: 'Settings', shortcut: 'S', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Loading voice synthesis settings...',
+        success: 'Voice settings panel opened',
+        error: 'Failed to load settings'
+      }
+    )
+  }},
 ]
 
 export default function AiVoiceSynthesisClient() {

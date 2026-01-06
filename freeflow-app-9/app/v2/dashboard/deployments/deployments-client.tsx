@@ -324,9 +324,18 @@ const mockDeploymentsActivities = [
 ]
 
 const mockDeploymentsQuickActions = [
-  { id: '1', label: 'Deploy Now', icon: 'rocket', action: () => console.log('Deploy'), variant: 'default' as const },
-  { id: '2', label: 'Rollback', icon: 'undo', action: () => console.log('Rollback'), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file-text', action: () => console.log('Logs'), variant: 'outline' as const },
+  { id: '1', label: 'Deploy Now', icon: 'rocket', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Starting deployment...', success: 'Deployment initiated successfully', error: 'Failed to start deployment' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Rollback', icon: 'undo', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Initiating rollback...', success: 'Rollback completed successfully', error: 'Failed to rollback' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file-text', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }
+  ), variant: 'outline' as const },
 ]
 
 // Default form state for creating deployments

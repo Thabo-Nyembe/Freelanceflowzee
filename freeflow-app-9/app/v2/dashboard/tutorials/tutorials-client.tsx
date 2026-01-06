@@ -435,9 +435,18 @@ const mockTutorialsActivities = [
 ]
 
 const mockTutorialsQuickActions = [
-  { id: '1', label: 'New Course', icon: 'plus', action: () => console.log('New Course'), variant: 'default' as const },
-  { id: '2', label: 'Upload', icon: 'upload', action: () => console.log('Upload'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'barChart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'New Course', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new course...', success: 'Course created - Start adding content', error: 'Failed to create course' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Upload', icon: 'upload', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Preparing upload...', success: 'Upload dialog ready', error: 'Failed to initialize upload' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 900)),
+    { loading: 'Loading course analytics...', success: 'Analytics dashboard loaded', error: 'Failed to load analytics' }
+  ), variant: 'outline' as const },
 ]
 
 export default function TutorialsClient({ initialTutorials, initialStats }: TutorialsClientProps) {

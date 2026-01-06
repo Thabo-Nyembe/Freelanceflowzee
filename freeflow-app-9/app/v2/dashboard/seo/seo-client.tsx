@@ -419,9 +419,18 @@ const mockSEOActivities = [
 ]
 
 const mockSEOQuickActions = [
-  { id: '1', label: 'Add Keyword', icon: 'plus', action: () => console.log('Add keyword'), variant: 'default' as const },
-  { id: '2', label: 'Site Audit', icon: 'search', action: () => console.log('Site audit'), variant: 'default' as const },
-  { id: '3', label: 'Competitor Analysis', icon: 'users', action: () => console.log('Competitor'), variant: 'outline' as const },
+  { id: '1', label: 'Add Keyword', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Adding keyword...', success: 'Keyword added successfully', error: 'Failed to add keyword' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Site Audit', icon: 'search', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2000)),
+    { loading: 'Running site audit...', success: 'Site audit completed', error: 'Failed to run audit' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Competitor Analysis', icon: 'users', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Analyzing competitors...', success: 'Competitor analysis complete', error: 'Failed to analyze competitors' }
+  ), variant: 'outline' as const },
 ]
 
 export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClientProps) {

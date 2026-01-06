@@ -321,9 +321,21 @@ const mockDocumentsActivities = [
 ]
 
 const mockDocumentsQuickActions = [
-  { id: '1', label: 'New Document', icon: 'plus', action: () => console.log('New doc'), variant: 'default' as const },
-  { id: '2', label: 'Upload Files', icon: 'upload', action: () => console.log('Upload'), variant: 'default' as const },
-  { id: '3', label: 'Create Folder', icon: 'folder', action: () => console.log('New folder'), variant: 'outline' as const },
+  { id: '1', label: 'New Document', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Creating new document...',
+    success: 'Document created successfully',
+    error: 'Failed to create document'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Upload Files', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Uploading files...',
+    success: 'Files uploaded successfully',
+    error: 'Upload failed'
+  }), variant: 'default' as const },
+  { id: '3', label: 'Create Folder', icon: 'folder', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Creating folder...',
+    success: 'Folder created successfully',
+    error: 'Failed to create folder'
+  }), variant: 'outline' as const },
 ]
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {
@@ -2047,7 +2059,11 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <AIInsightsPanel
               insights={mockDocumentsAIInsights}
               title="Document Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+                loading: `Processing ${insight.type || 'insight'} action...`,
+                success: 'Insight action completed successfully',
+                error: 'Failed to process insight action'
+              })}
             />
           </div>
           <div className="space-y-6">

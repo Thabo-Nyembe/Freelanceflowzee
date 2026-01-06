@@ -468,9 +468,18 @@ const mockStorageActivities = [
 ]
 
 const mockStorageQuickActions = [
-  { id: '1', label: 'Upload Files', icon: 'upload', action: () => console.log('Upload'), variant: 'default' as const },
-  { id: '2', label: 'New Folder', icon: 'folder-plus', action: () => console.log('New folder'), variant: 'default' as const },
-  { id: '3', label: 'Storage Report', icon: 'bar-chart', action: () => console.log('Report'), variant: 'outline' as const },
+  { id: '1', label: 'Upload Files', icon: 'upload', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Preparing upload...', success: 'Upload dialog opened', error: 'Failed to open upload' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'New Folder', icon: 'folder-plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Creating folder...', success: 'Folder created successfully', error: 'Failed to create folder' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Storage Report', icon: 'bar-chart', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Generating storage report...', success: 'Storage report ready', error: 'Failed to generate report' }
+  ), variant: 'outline' as const },
 ]
 
 export default function CloudStorageClient() {

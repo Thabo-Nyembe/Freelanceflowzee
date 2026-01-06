@@ -573,9 +573,21 @@ const mockAudioActivities = [
 ]
 
 const mockAudioQuickActions = [
-  { id: '1', label: 'New Track', icon: 'plus', action: () => console.log('New track'), variant: 'default' as const },
-  { id: '2', label: 'Record', icon: 'circle', action: () => console.log('Record'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Track', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
+    loading: 'Creating new track...',
+    success: 'New track created successfully',
+    error: 'Failed to create track'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Record', icon: 'circle', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), {
+    loading: 'Starting recording...',
+    success: 'Recording started',
+    error: 'Failed to start recording'
+  }), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
+    loading: 'Exporting audio...',
+    success: 'Audio exported successfully',
+    error: 'Export failed'
+  }), variant: 'outline' as const },
 ]
 
 export default function AudioStudioClient({ initialTracks, initialStats }: AudioStudioClientProps) {

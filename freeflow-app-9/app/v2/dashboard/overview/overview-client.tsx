@@ -424,10 +424,22 @@ const mockOverviewActivities = [
 ]
 
 const mockOverviewQuickActions = [
-  { id: '1', label: 'Create Alert', icon: 'Bell', shortcut: '⌘A', action: () => console.log('Create alert') },
-  { id: '2', label: 'View Logs', icon: 'FileText', shortcut: '⌘L', action: () => console.log('View logs') },
-  { id: '3', label: 'Run Health Check', icon: 'Activity', shortcut: '⌘H', action: () => console.log('Health check') },
-  { id: '4', label: 'Deploy', icon: 'Rocket', shortcut: '⌘D', action: () => console.log('Deploy') },
+  { id: '1', label: 'Create Alert', icon: 'Bell', shortcut: '⌘A', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating alert...', success: 'Alert created successfully', error: 'Failed to create alert' }
+  ) },
+  { id: '2', label: 'View Logs', icon: 'FileText', shortcut: '⌘L', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }
+  ) },
+  { id: '3', label: 'Run Health Check', icon: 'Activity', shortcut: '⌘H', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Running health check...', success: 'Health check completed - All systems operational', error: 'Health check failed' }
+  ) },
+  { id: '4', label: 'Deploy', icon: 'Rocket', shortcut: '⌘D', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2000)),
+    { loading: 'Deploying...', success: 'Deployment successful', error: 'Deployment failed' }
+  ) },
 ]
 
 // ============================================================================

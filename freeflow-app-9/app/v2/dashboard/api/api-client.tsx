@@ -325,9 +325,18 @@ const mockApiActivities = [
 ]
 
 const mockApiQuickActions = [
-  { id: '1', label: 'New Endpoint', icon: 'plus', action: () => console.log('New endpoint'), variant: 'default' as const },
-  { id: '2', label: 'Test API', icon: 'play', action: () => console.log('Test API'), variant: 'default' as const },
-  { id: '3', label: 'View Docs', icon: 'book', action: () => console.log('View docs'), variant: 'outline' as const },
+  { id: '1', label: 'New Endpoint', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new endpoint...', success: 'Endpoint created successfully', error: 'Failed to create endpoint' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Test API', icon: 'play', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Testing API endpoint...', success: 'API test passed - 200 OK', error: 'API test failed' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'View Docs', icon: 'book', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Loading API documentation...', success: 'Documentation opened', error: 'Failed to load docs' }
+  ), variant: 'outline' as const },
 ]
 
 // Form state types

@@ -440,9 +440,18 @@ const mockComplianceActivities = [
 ]
 
 const mockComplianceQuickActions = [
-  { id: '1', label: 'New Control', icon: 'plus', action: () => console.log('New control'), variant: 'default' as const },
-  { id: '2', label: 'Assess', icon: 'check-circle', action: () => console.log('Assess'), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'file-text', action: () => console.log('Report'), variant: 'outline' as const },
+  { id: '1', label: 'New Control', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating new control...', success: 'Control created successfully', error: 'Failed to create control' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Assess', icon: 'check-circle', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Running compliance assessment...', success: 'Assessment complete', error: 'Assessment failed' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'file-text', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2000)),
+    { loading: 'Generating compliance report...', success: 'Report generated successfully', error: 'Failed to generate report' }
+  ), variant: 'outline' as const },
 ]
 
 // Aggregate all evidence from controls
@@ -2112,7 +2121,10 @@ export default function ComplianceClient() {
             <AIInsightsPanel
               insights={mockComplianceAIInsights}
               title="Compliance Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
+              )}
             />
           </div>
           <div className="space-y-6">

@@ -103,10 +103,10 @@ const mockUserMgmtActivities = [
 ]
 
 const mockUserMgmtQuickActions = [
-  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => console.log('Add user') },
-  { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => console.log('Bulk import') },
-  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => console.log('Audit log') },
-  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => console.log('Roles') },
+  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Adding new user...', success: 'User added successfully', error: 'Failed to add user' }) },
+  { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Importing users...', success: 'Users imported successfully', error: 'Bulk import failed' }) },
+  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading audit log...', success: 'Audit log loaded', error: 'Failed to load audit log' }) },
+  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Loading roles...', success: 'Roles loaded', error: 'Failed to load roles' }) },
 ]
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {

@@ -540,10 +540,22 @@ const mockLearningActivities = [
 ]
 
 const mockLearningQuickActions = [
-  { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => console.log('Continue learning') },
-  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => console.log('Browse courses') },
-  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => console.log('View certificates') },
-  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => console.log('View plan') },
+  { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading course...', success: 'Course loaded - Continue learning', error: 'Failed to load course' }
+  ) },
+  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Loading course catalog...', success: 'Course catalog loaded', error: 'Failed to load catalog' }
+  ) },
+  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading certificates...', success: 'Certificates loaded', error: 'Failed to load certificates' }
+  ) },
+  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading study plan...', success: 'Study plan loaded', error: 'Failed to load study plan' }
+  ) },
 ]
 
 // ============================================================================

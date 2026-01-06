@@ -503,10 +503,22 @@ const mockMediaActivities = [
 ]
 
 const mockMediaQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => console.log('Upload') },
-  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'F', action: () => console.log('New folder') },
-  { id: '3', label: 'Collection', icon: 'Layers', shortcut: 'C', action: () => console.log('Collection') },
-  { id: '4', label: 'AI Tag', icon: 'Sparkles', shortcut: 'T', action: () => console.log('AI tag') },
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Preparing upload...', success: 'Upload ready', error: 'Upload preparation failed' }
+  ) },
+  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'F', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating folder...', success: 'Folder created', error: 'Failed to create folder' }
+  ) },
+  { id: '3', label: 'Collection', icon: 'Layers', shortcut: 'C', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating collection...', success: 'Collection created', error: 'Failed to create collection' }
+  ) },
+  { id: '4', label: 'AI Tag', icon: 'Sparkles', shortcut: 'T', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2000)),
+    { loading: 'AI tagging assets...', success: 'AI tagging completed', error: 'AI tagging failed' }
+  ) },
 ]
 
 interface MediaLibraryClientProps {

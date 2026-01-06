@@ -316,9 +316,18 @@ const mockProductsActivities = [
 ]
 
 const mockProductsQuickActions = [
-  { id: '1', label: 'New Product', icon: 'plus', action: () => console.log('New product'), variant: 'default' as const },
-  { id: '2', label: 'Update Pricing', icon: 'dollar', action: () => console.log('Pricing'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'New Product', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating new product...', success: 'Product created successfully', error: 'Failed to create product' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Update Pricing', icon: 'dollar', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Updating product pricing...', success: 'Pricing updated successfully', error: 'Failed to update pricing' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading product analytics...', success: 'Analytics loaded successfully', error: 'Failed to load analytics' }
+  ), variant: 'outline' as const },
 ]
 
 export default function ProductsClient({ initialProducts }: ProductsClientProps) {

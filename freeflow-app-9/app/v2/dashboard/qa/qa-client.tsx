@@ -314,10 +314,10 @@ const mockQAActivities = [
 ]
 
 const mockQAQuickActions = [
-  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => console.log('Run tests') },
-  { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => console.log('New case') },
-  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => console.log('Reports') },
-  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => console.log('Defects') },
+  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Running test suite...', success: 'Test suite completed successfully', error: 'Test run failed' }) },
+  { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Creating new test case...', success: 'Test case created successfully', error: 'Failed to create test case' }) },
+  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Generating QA reports...', success: 'QA reports generated', error: 'Failed to generate reports' }) },
+  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 700)), { loading: 'Loading defects list...', success: 'Defects list loaded', error: 'Failed to load defects' }) },
 ]
 
 export default function QAClient({ initialTestCases }: QAClientProps) {

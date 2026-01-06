@@ -346,9 +346,9 @@ const mock3DActivities = [
 ]
 
 const mock3DQuickActions = [
-  { id: '1', label: 'New Model', icon: 'plus', action: () => console.log('New model'), variant: 'default' as const },
-  { id: '2', label: 'Render', icon: 'play', action: () => console.log('Render'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Model', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new 3D model...', success: 'Model created successfully', error: 'Failed to create model' }), variant: 'default' as const },
+  { id: '2', label: 'Render', icon: 'play', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Starting render...', success: 'Render started successfully', error: 'Failed to start render' }), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Exporting model...', success: 'Model exported successfully', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 export default function ThreeDModelingClient() {

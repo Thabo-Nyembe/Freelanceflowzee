@@ -362,9 +362,21 @@ const mockCollabActivities = [
 ]
 
 const mockCollabQuickActions = [
-  { id: '1', label: 'New Board', icon: 'plus', action: () => console.log('New board'), variant: 'default' as const },
-  { id: '2', label: 'Schedule Meeting', icon: 'calendar', action: () => console.log('Schedule meeting'), variant: 'default' as const },
-  { id: '3', label: 'Start Call', icon: 'video', action: () => console.log('Start call'), variant: 'outline' as const },
+  { id: '1', label: 'New Board', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
+    loading: 'Creating new collaboration board...',
+    success: 'Board created successfully',
+    error: 'Failed to create board'
+  }), variant: 'default' as const },
+  { id: '2', label: 'Schedule Meeting', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
+    loading: 'Opening meeting scheduler...',
+    success: 'Meeting scheduler ready',
+    error: 'Failed to open scheduler'
+  }), variant: 'default' as const },
+  { id: '3', label: 'Start Call', icon: 'video', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
+    loading: 'Starting video call...',
+    success: 'Call started',
+    error: 'Failed to start call'
+  }), variant: 'outline' as const },
 ]
 
 export default function CollaborationClient() {

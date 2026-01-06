@@ -509,10 +509,10 @@ const mockPollsActivities = [
 ]
 
 const mockPollsQuickActions = [
-  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => console.log('New survey') },
-  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => console.log('View results') },
-  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => console.log('Templates') },
-  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
+  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new survey...', success: 'Survey created successfully', error: 'Failed to create survey' }) },
+  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading survey results...', success: 'Results loaded successfully', error: 'Failed to load results' }) },
+  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Loading templates...', success: 'Templates library opened', error: 'Failed to load templates' }) },
+  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Exporting poll data...', success: 'Data exported successfully', error: 'Failed to export data' }) },
 ]
 
 // ============================================================================

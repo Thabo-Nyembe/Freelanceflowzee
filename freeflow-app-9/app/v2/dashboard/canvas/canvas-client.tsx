@@ -149,10 +149,22 @@ const mockCanvasActivities = [
 ]
 
 const mockCanvasQuickActions = [
-  { id: '1', label: 'New Board', icon: 'Layout', shortcut: 'N', action: () => console.log('New board') },
-  { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => console.log('Templates') },
-  { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => console.log('Share') },
+  { id: '1', label: 'New Board', icon: 'Layout', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new board...', success: 'New board created successfully', error: 'Failed to create board' }
+  ) },
+  { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading templates...', success: 'Templates loaded successfully', error: 'Failed to load templates' }
+  ) },
+  { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting canvas...', success: 'Canvas exported successfully', error: 'Failed to export canvas' }
+  ) },
+  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 700)),
+    { loading: 'Generating share link...', success: 'Share link copied to clipboard', error: 'Failed to generate share link' }
+  ) },
 ]
 
 export default function CanvasClient({ initialCanvases }: { initialCanvases: Canvas[] }) {

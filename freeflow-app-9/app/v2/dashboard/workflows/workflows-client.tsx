@@ -403,9 +403,18 @@ const mockWorkflowsActivities = [
 ]
 
 const mockWorkflowsQuickActions = [
-  { id: '1', label: 'Create Workflow', icon: 'plus', action: () => console.log('Create workflow'), variant: 'default' as const },
-  { id: '2', label: 'Run Test', icon: 'play', action: () => console.log('Run test'), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => console.log('View logs'), variant: 'outline' as const },
+  { id: '1', label: 'Create Workflow', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Opening workflow builder...', success: 'Workflow builder ready', error: 'Failed to open builder' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Run Test', icon: 'play', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Running workflow test...', success: 'Test completed successfully', error: 'Test execution failed' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading workflow logs...', success: 'Logs loaded', error: 'Failed to load logs' }
+  ), variant: 'outline' as const },
 ]
 
 // ============================================================================

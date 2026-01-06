@@ -593,9 +593,18 @@ const mockAppStoreActivities = [
 ]
 
 const mockAppStoreQuickActions = [
-  { id: '1', label: 'Browse Apps', icon: 'search', action: () => console.log('Browse apps'), variant: 'default' as const },
-  { id: '2', label: 'Install App', icon: 'plus', action: () => console.log('Install app'), variant: 'default' as const },
-  { id: '3', label: 'Manage Apps', icon: 'settings', action: () => console.log('Manage apps'), variant: 'outline' as const },
+  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading app catalog...', success: 'App catalog loaded', error: 'Failed to load catalog' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Install App', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Installing app...', success: 'App installed successfully', error: 'Installation failed' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Manage Apps', icon: 'settings', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Opening app manager...', success: 'App manager ready', error: 'Failed to open manager' }
+  ), variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -2004,7 +2013,10 @@ export default function AppStoreClient() {
             <AIInsightsPanel
               insights={mockAppStoreAIInsights}
               title="App Store Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
+              )}
             />
           </div>
           <div className="space-y-6">

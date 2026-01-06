@@ -192,9 +192,18 @@ const mockSupportTicketsActivities = [
 ]
 
 const mockSupportTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => console.log('New ticket'), variant: 'default' as const },
-  { id: '2', label: 'My Queue', icon: 'inbox', action: () => console.log('My queue'), variant: 'default' as const },
-  { id: '3', label: 'Macros', icon: 'zap', action: () => console.log('Macros'), variant: 'outline' as const },
+  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating new ticket...', success: 'Ticket created successfully', error: 'Failed to create ticket' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'My Queue', icon: 'inbox', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading your queue...', success: 'Queue loaded', error: 'Failed to load queue' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Macros', icon: 'zap', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading macros...', success: 'Macros loaded', error: 'Failed to load macros' }
+  ), variant: 'outline' as const },
 ]
 
 export default function SupportTicketsClient({ initialTickets, initialStats }: SupportTicketsClientProps) {

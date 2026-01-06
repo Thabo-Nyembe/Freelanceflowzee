@@ -236,9 +236,18 @@ const mockThemeStoreActivities = [
 ]
 
 const mockThemeStoreQuickActions = [
-  { id: '1', label: 'Upload', icon: 'upload', action: () => console.log('Upload Theme'), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => console.log('Preview'), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'barChart', action: () => console.log('Analytics'), variant: 'outline' as const },
+  { id: '1', label: 'Upload', icon: 'upload', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Preparing upload...', success: 'Ready to upload theme', error: 'Upload preparation failed' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Generating preview...', success: 'Preview ready', error: 'Preview generation failed' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Loading analytics...', success: 'Analytics loaded', error: 'Failed to load analytics' }
+  ), variant: 'outline' as const },
 ]
 
 export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeStoreClientProps) {
@@ -1756,7 +1765,10 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
             <AIInsightsPanel
               insights={mockThemeStoreAIInsights}
               title="Theme Store Intelligence"
-              onInsightAction={(insight) => console.log('Insight action:', insight)}
+              onInsightAction={(insight) => toast.promise(
+                new Promise(resolve => setTimeout(resolve, 800)),
+                { loading: `Processing ${insight.title}...`, success: `${insight.title} action completed`, error: 'Action failed' }
+              )}
             />
           </div>
           <div className="space-y-6">

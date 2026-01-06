@@ -343,10 +343,10 @@ const mockReleaseNotesActivities = [
 ]
 
 const mockReleaseNotesQuickActions = [
-  { id: '1', label: 'New Release', icon: 'Rocket', shortcut: 'N', action: () => console.log('New release') },
-  { id: '2', label: 'Schedule', icon: 'Calendar', shortcut: 'S', action: () => console.log('Schedule') },
-  { id: '3', label: 'Preview', icon: 'Eye', shortcut: 'P', action: () => console.log('Preview') },
-  { id: '4', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => console.log('Analytics') },
+  { id: '1', label: 'New Release', icon: 'Rocket', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new release...', success: 'New release created successfully', error: 'Failed to create release' }) },
+  { id: '2', label: 'Schedule', icon: 'Calendar', shortcut: 'S', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening scheduler...', success: 'Release scheduler opened', error: 'Failed to open scheduler' }) },
+  { id: '3', label: 'Preview', icon: 'Eye', shortcut: 'P', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Loading preview...', success: 'Release preview ready', error: 'Failed to load preview' }) },
+  { id: '4', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 700)), { loading: 'Loading analytics...', success: 'Release analytics loaded', error: 'Failed to load analytics' }) },
 ]
 
 // Default form state for creating/editing release notes

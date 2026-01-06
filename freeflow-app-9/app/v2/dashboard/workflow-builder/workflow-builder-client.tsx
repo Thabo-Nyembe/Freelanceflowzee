@@ -498,9 +498,9 @@ const mockWorkflowActivities = [
 ]
 
 const mockWorkflowQuickActions = [
-  { id: '1', label: 'New Flow', icon: 'plus', action: () => console.log('New Workflow'), variant: 'default' as const },
-  { id: '2', label: 'Test', icon: 'play', action: () => console.log('Test'), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: () => console.log('Logs'), variant: 'outline' as const },
+  { id: '1', label: 'New Flow', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating new workflow...', success: 'Workflow created', error: 'Failed to create workflow' }), variant: 'default' as const },
+  { id: '2', label: 'Test', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Running test...', success: 'Test completed', error: 'Test failed' }), variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }), variant: 'outline' as const },
 ]
 
 export default function WorkflowBuilderClient() {

@@ -413,10 +413,46 @@ const mockFAQActivities = [
 ]
 
 const mockFAQQuickActions = [
-  { id: '1', label: 'New Article', icon: 'Plus', shortcut: 'N', action: () => console.log('New article') },
-  { id: '2', label: 'Search', icon: 'Search', shortcut: 'S', action: () => console.log('Search') },
-  { id: '3', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => console.log('Analytics') },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => console.log('Settings') },
+  { id: '1', label: 'New Article', icon: 'Plus', shortcut: 'N', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Creating new article...',
+        success: 'New article created successfully',
+        error: 'Failed to create article'
+      }
+    )
+  }},
+  { id: '2', label: 'Search', icon: 'Search', shortcut: 'S', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 500)),
+      {
+        loading: 'Searching FAQ database...',
+        success: 'Search results ready',
+        error: 'Search failed'
+      }
+    )
+  }},
+  { id: '3', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1000)),
+      {
+        loading: 'Loading FAQ analytics...',
+        success: 'Analytics data loaded',
+        error: 'Failed to load analytics'
+      }
+    )
+  }},
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 600)),
+      {
+        loading: 'Loading FAQ settings...',
+        success: 'Settings loaded',
+        error: 'Failed to load settings'
+      }
+    )
+  }},
 ]
 
 // ============================================================================

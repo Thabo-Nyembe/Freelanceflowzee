@@ -102,9 +102,36 @@ const referralsActivities = [
 ]
 
 const referralsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 800)),
+      {
+        loading: 'Creating new referral...',
+        success: 'New referral created successfully',
+        error: 'Failed to create referral'
+      }
+    )
+  }},
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Exporting referral data...',
+        success: 'Referral data exported successfully',
+        error: 'Failed to export referral data'
+      }
+    )
+  }},
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 600)),
+      {
+        loading: 'Loading referral settings...',
+        success: 'Referral settings loaded',
+        error: 'Failed to load settings'
+      }
+    )
+  }},
 ]
 
 export default function ReferralsClient() {

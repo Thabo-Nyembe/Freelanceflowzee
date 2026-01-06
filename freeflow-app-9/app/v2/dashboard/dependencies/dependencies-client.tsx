@@ -354,10 +354,22 @@ const mockDependenciesActivities = [
 ]
 
 const mockDependenciesQuickActions = [
-  { id: '1', label: 'Run Scan', icon: 'Shield', shortcut: 'S', action: () => console.log('Run scan') },
-  { id: '2', label: 'Update All', icon: 'RefreshCw', shortcut: 'U', action: () => console.log('Update all') },
-  { id: '3', label: 'Lock File', icon: 'Lock', shortcut: 'L', action: () => console.log('Lock file') },
-  { id: '4', label: 'Report', icon: 'FileText', shortcut: 'R', action: () => console.log('Report') },
+  { id: '1', label: 'Run Scan', icon: 'Shield', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2500)),
+    { loading: 'Scanning dependencies...', success: 'Security scan completed', error: 'Scan failed' }
+  ) },
+  { id: '2', label: 'Update All', icon: 'RefreshCw', shortcut: 'U', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 3000)),
+    { loading: 'Updating all dependencies...', success: 'All dependencies updated', error: 'Update failed' }
+  ) },
+  { id: '3', label: 'Lock File', icon: 'Lock', shortcut: 'L', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Generating lock file...', success: 'Lock file generated', error: 'Failed to generate lock file' }
+  ) },
+  { id: '4', label: 'Report', icon: 'FileText', shortcut: 'R', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Generating dependency report...', success: 'Report generated successfully', error: 'Failed to generate report' }
+  ) },
 ]
 
 export default function DependenciesClient({ initialDependencies }: { initialDependencies: Dependency[] }) {

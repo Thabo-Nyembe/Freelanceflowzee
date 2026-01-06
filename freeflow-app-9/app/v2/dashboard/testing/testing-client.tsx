@@ -520,10 +520,10 @@ const mockTestingActivities = [
 ]
 
 const mockTestingQuickActions = [
-  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => console.log('Run tests') },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V', action: () => console.log('View report') },
-  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D', action: () => console.log('Debug failed') },
-  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N', action: () => console.log('Add test') },
+  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2500)), { loading: 'Running test suite...', success: 'All tests completed', error: 'Test run failed' }) },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Generating test report...', success: 'Test report ready', error: 'Failed to generate report' }) },
+  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Starting debug session...', success: 'Debug session ready', error: 'Failed to start debug' }) },
+  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Creating new test...', success: 'Test created successfully', error: 'Failed to create test' }) },
 ]
 
 export default function TestingClient() {

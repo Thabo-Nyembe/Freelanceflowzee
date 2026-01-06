@@ -437,9 +437,18 @@ const mockExtensionsActivities = [
 ]
 
 const mockExtensionsQuickActions = [
-  { id: '1', label: 'Browse All', icon: 'grid', action: () => console.log('Browse all'), variant: 'default' as const },
-  { id: '2', label: 'Check Updates', icon: 'refresh', action: () => console.log('Check updates'), variant: 'default' as const },
-  { id: '3', label: 'Manage', icon: 'settings', action: () => console.log('Manage'), variant: 'outline' as const },
+  { id: '1', label: 'Browse All', icon: 'grid', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading extensions gallery...', success: 'Extensions gallery loaded', error: 'Failed to load gallery' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Check Updates', icon: 'refresh', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Checking for extension updates...', success: 'All extensions are up to date', error: 'Failed to check for updates' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Manage', icon: 'settings', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Opening extension manager...', success: 'Extension manager opened', error: 'Failed to open manager' }
+  ), variant: 'outline' as const },
 ]
 
 // ============================================================================

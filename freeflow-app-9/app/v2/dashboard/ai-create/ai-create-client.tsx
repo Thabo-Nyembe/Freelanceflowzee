@@ -560,9 +560,18 @@ const mockAICreateActivities = [
 ]
 
 const mockAICreateQuickActions = [
-  { id: '1', label: 'New Creation', icon: 'sparkles', action: () => console.log('New creation'), variant: 'default' as const },
-  { id: '2', label: 'Use Template', icon: 'copy', action: () => console.log('Use template'), variant: 'default' as const },
-  { id: '3', label: 'View Gallery', icon: 'image', action: () => console.log('View gallery'), variant: 'outline' as const },
+  { id: '1', label: 'New Creation', icon: 'sparkles', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Starting new AI creation...', success: 'AI creation started', error: 'Failed to start creation' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Use Template', icon: 'copy', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading template...', success: 'Template loaded successfully', error: 'Failed to load template' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'View Gallery', icon: 'image', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Opening gallery...', success: 'Gallery opened', error: 'Failed to open gallery' }
+  ), variant: 'outline' as const },
 ]
 
 // ============================================================================

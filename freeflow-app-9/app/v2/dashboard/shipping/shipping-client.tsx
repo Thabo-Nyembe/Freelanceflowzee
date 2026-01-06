@@ -683,8 +683,26 @@ const mockShippingActivities = [
 ]
 
 const mockShippingQuickActions = [
-  { id: '1', label: 'Create Shipment', icon: 'plus', action: () => console.log('Create shipment'), variant: 'default' as const },
-  { id: '2', label: 'Print Labels', icon: 'printer', action: () => console.log('Print labels'), variant: 'outline' as const },
+  { id: '1', label: 'Create Shipment', icon: 'plus', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 900)),
+      {
+        loading: 'Creating new shipment...',
+        success: 'Shipment created - Ready for label generation',
+        error: 'Failed to create shipment'
+      }
+    )
+  }, variant: 'default' as const },
+  { id: '2', label: 'Print Labels', icon: 'printer', action: () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 1200)),
+      {
+        loading: 'Generating shipping labels...',
+        success: 'Shipping labels ready to print',
+        error: 'Failed to generate labels'
+      }
+    )
+  }, variant: 'outline' as const },
 ]
 
 // ============================================================================

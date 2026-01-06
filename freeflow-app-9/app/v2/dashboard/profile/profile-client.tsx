@@ -597,9 +597,18 @@ const mockProfileActivities = [
 ]
 
 const mockProfileQuickActions = [
-  { id: '1', label: 'Edit Profile', icon: 'edit', action: () => console.log('Edit'), variant: 'default' as const },
-  { id: '2', label: 'Add Skill', icon: 'plus', action: () => console.log('Add skill'), variant: 'default' as const },
-  { id: '3', label: 'Download CV', icon: 'download', action: () => console.log('Download'), variant: 'outline' as const },
+  { id: '1', label: 'Edit Profile', icon: 'edit', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Opening profile editor...', success: 'Profile editor ready', error: 'Failed to open editor' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Add Skill', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Adding skill...', success: 'Skill added to profile', error: 'Failed to add skill' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Download CV', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Generating CV...', success: 'CV downloaded successfully', error: 'Failed to download CV' }
+  ), variant: 'outline' as const },
 ]
 
 // Database types

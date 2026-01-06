@@ -567,9 +567,18 @@ const mockGrowthActivities = [
 ]
 
 const mockGrowthQuickActions = [
-  { id: '1', label: 'New Experiment', icon: 'plus', action: () => console.log('New experiment'), variant: 'default' as const },
-  { id: '2', label: 'Create Funnel', icon: 'filter', action: () => console.log('Create funnel'), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Experiment', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating new experiment...', success: 'Experiment created successfully', error: 'Failed to create experiment' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Create Funnel', icon: 'filter', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Creating funnel...', success: 'Funnel created successfully', error: 'Failed to create funnel' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting report...', success: 'Report exported successfully', error: 'Failed to export report' }
+  ), variant: 'outline' as const },
 ]
 
 // ============================================================================

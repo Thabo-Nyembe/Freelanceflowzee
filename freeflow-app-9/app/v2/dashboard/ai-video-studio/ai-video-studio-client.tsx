@@ -11,6 +11,7 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { toast } from 'sonner'
 
 export const dynamic = 'force-dynamic';
 
@@ -50,9 +51,18 @@ const aiVideoStudioActivities = [
 ]
 
 const aiVideoStudioQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Creating new video project...', success: 'Video project created successfully', error: 'Failed to create project' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting video...', success: 'Video exported successfully', error: 'Export failed' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Opening video studio settings...', success: 'Settings loaded', error: 'Failed to load settings' }
+  ) },
 ]
 
 export default function AiVideoStudioClient() {

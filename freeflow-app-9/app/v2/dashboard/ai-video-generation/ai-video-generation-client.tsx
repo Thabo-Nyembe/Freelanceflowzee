@@ -533,9 +533,18 @@ const aiVideoGenerationActivities = [
 ]
 
 const aiVideoGenerationQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => console.log('New') },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => console.log('Export') },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Creating new video generation...', success: 'Ready to generate video', error: 'Failed to initialize' }
+  ) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Exporting generated videos...', success: 'Videos exported successfully', error: 'Failed to export videos' }
+  ) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 400)),
+    { loading: 'Loading video generation settings...', success: 'Settings opened', error: 'Failed to load settings' }
+  ) },
 ]
 
 export default function AiVideoGenerationClient() {

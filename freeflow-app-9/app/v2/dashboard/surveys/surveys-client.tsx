@@ -450,9 +450,18 @@ const mockSurveysActivities = [
 ]
 
 const mockSurveysQuickActions = [
-  { id: '1', label: 'Create Survey', icon: 'plus', action: () => console.log('Create survey'), variant: 'default' as const },
-  { id: '2', label: 'View Results', icon: 'bar-chart', action: () => console.log('View results'), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export data'), variant: 'outline' as const },
+  { id: '1', label: 'Create Survey', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Creating new survey...', success: 'Survey created successfully', error: 'Failed to create survey' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'View Results', icon: 'bar-chart', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Loading survey results...', success: 'Results loaded', error: 'Failed to load results' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting survey data...', success: 'Data exported successfully', error: 'Failed to export data' }
+  ), variant: 'outline' as const },
 ]
 
 export default function SurveysClient() {

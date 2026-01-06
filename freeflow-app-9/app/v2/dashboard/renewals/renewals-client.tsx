@@ -571,9 +571,18 @@ const mockRenewalsActivities = [
 ]
 
 const mockRenewalsQuickActions = [
-  { id: '1', label: 'New Renewal', icon: 'plus', action: () => console.log('New renewal'), variant: 'default' as const },
-  { id: '2', label: 'Run Playbook', icon: 'play', action: () => console.log('Run playbook'), variant: 'default' as const },
-  { id: '3', label: 'Export Pipeline', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'New Renewal', icon: 'plus', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Creating new renewal...', success: 'Renewal created successfully', error: 'Failed to create renewal' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Run Playbook', icon: 'play', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Running playbook...', success: 'Playbook executed successfully', error: 'Failed to run playbook' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Export Pipeline', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Exporting renewal pipeline...', success: 'Pipeline exported successfully', error: 'Failed to export pipeline' }
+  ), variant: 'outline' as const },
 ]
 
 export default function RenewalsClient({ initialRenewals }: RenewalsClientProps) {

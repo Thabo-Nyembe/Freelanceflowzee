@@ -438,10 +438,22 @@ const mockAIAssistantActivities = [
 ]
 
 const mockAIAssistantQuickActions = [
-  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => console.log('New chat') },
-  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => console.log('Templates') },
-  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => console.log('Knowledge') },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => console.log('Settings') },
+  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Creating new conversation...', success: 'New chat started', error: 'Failed to create chat' }
+  ) },
+  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading prompt templates...', success: 'Templates ready', error: 'Failed to load templates' }
+  ) },
+  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Loading knowledge base...', success: 'Knowledge base loaded', error: 'Failed to load knowledge' }
+  ) },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 400)),
+    { loading: 'Loading AI settings...', success: 'Settings opened', error: 'Failed to load settings' }
+  ) },
 ]
 
 export default function AIAssistantClient() {

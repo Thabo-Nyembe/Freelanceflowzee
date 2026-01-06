@@ -351,9 +351,18 @@ const mockInvestorMetricsActivities = [
 ]
 
 const mockInvestorMetricsQuickActions = [
-  { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => console.log('Update'), variant: 'default' as const },
-  { id: '2', label: 'Investor Report', icon: 'file-text', action: () => console.log('Report'), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => console.log('Export'), variant: 'outline' as const },
+  { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 2000)),
+    { loading: 'Updating investor metrics...', success: 'Metrics updated successfully', error: 'Failed to update metrics' }
+  ), variant: 'default' as const },
+  { id: '2', label: 'Investor Report', icon: 'file-text', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1500)),
+    { loading: 'Generating investor report...', success: 'Report generated successfully', error: 'Failed to generate report' }
+  ), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1800)),
+    { loading: 'Exporting investor data...', success: 'Data exported successfully', error: 'Failed to export data' }
+  ), variant: 'outline' as const },
 ]
 
 export default function InvestorMetricsClient() {

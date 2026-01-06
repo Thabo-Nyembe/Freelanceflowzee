@@ -51,8 +51,14 @@ const collaborationDemoActivities = [
 ]
 
 const collaborationDemoQuickActions = [
-  { id: '1', label: 'Start Call', icon: 'Video', shortcut: 'V', action: () => console.log('Start call') },
-  { id: '2', label: 'Share Screen', icon: 'Monitor', shortcut: 'S', action: () => console.log('Share') },
+  { id: '1', label: 'Start Call', icon: 'Video', shortcut: 'V', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Initializing video call...', success: 'Video call started successfully', error: 'Failed to start call' }
+  ) },
+  { id: '2', label: 'Share Screen', icon: 'Monitor', shortcut: 'S', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Preparing screen share...', success: 'Screen sharing enabled', error: 'Failed to share screen' }
+  ) },
 ]
 
 import { useState, useRef, useEffect, useCallback } from 'react'

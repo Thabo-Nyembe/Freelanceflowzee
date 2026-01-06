@@ -433,10 +433,22 @@ const mockEscrowActivities = [
 ]
 
 const mockEscrowQuickActions = [
-  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => console.log('New transfer') },
-  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => console.log('View payouts') },
-  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => console.log('View disputes') },
-  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => console.log('View reports') },
+  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Initiating new transfer...', success: 'Transfer form ready', error: 'Failed to start transfer' }
+  ) },
+  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: 'Loading payout history...', success: 'Payouts loaded', error: 'Failed to load payouts' }
+  ) },
+  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 700)),
+    { loading: 'Loading dispute cases...', success: 'Disputes loaded', error: 'Failed to load disputes' }
+  ) },
+  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 900)),
+    { loading: 'Generating escrow reports...', success: 'Reports generated', error: 'Failed to generate reports' }
+  ) },
 ]
 
 export default function EscrowClient() {

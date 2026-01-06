@@ -352,10 +352,22 @@ const mockInventoryActivities = [
 ]
 
 const mockInventoryQuickActions = [
-  { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: () => console.log('Stock count') },
-  { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => console.log('Transfer stock') },
-  { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => console.log('New PO') },
-  { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: () => console.log('Print labels') },
+  { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1000)),
+    { loading: 'Starting stock count...', success: 'Stock count initiated successfully', error: 'Failed to start stock count' }
+  ) },
+  { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Preparing stock transfer...', success: 'Stock transfer ready', error: 'Failed to prepare transfer' }
+  ) },
+  { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 700)),
+    { loading: 'Creating purchase order...', success: 'Purchase order created', error: 'Failed to create purchase order' }
+  ) },
+  { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 1200)),
+    { loading: 'Generating labels...', success: 'Labels ready to print', error: 'Failed to generate labels' }
+  ) },
 ]
 
 export default function InventoryClient({ initialInventory }: { initialInventory: InventoryItem[] }) {

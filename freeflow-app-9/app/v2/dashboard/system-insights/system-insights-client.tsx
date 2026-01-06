@@ -246,10 +246,10 @@ const mockSystemInsightsActivities = [
 ]
 
 const mockSystemInsightsQuickActions = [
-  { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => console.log('Deploy') },
-  { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => console.log('Restart') },
-  { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => console.log('Logs') },
-  { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => console.log('Metrics') },
+  { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 3000)), { loading: 'Deploying to production...', success: 'Deployment successful', error: 'Deployment failed' }) },
+  { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Restarting services...', success: 'Services restarted successfully', error: 'Failed to restart services' }) },
+  { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading system logs...', success: 'Logs loaded successfully', error: 'Failed to load logs' }) },
+  { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Fetching metrics...', success: 'Metrics updated', error: 'Failed to fetch metrics' }) },
 ]
 
 // Database types
