@@ -167,12 +167,12 @@ export default function AdvancedMicroFeaturesPage() {
   }), [])
 
   const mockQuickActions = useMemo(() => [
-    { id: '1', label: 'New Project', icon: Zap, onClick: () => { router.push('/dashboard/projects-v2?action=new'); toast.success('Opening new project...') }, variant: 'primary' as const, shortcut: '⌘N' },
-    { id: '2', label: 'Upload Files', icon: Download, onClick: () => { router.push('/dashboard/files-hub-v2?action=upload'); toast.success('Opening file upload...') }, badge: '5' },
-    { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => { router.push('/dashboard/messages-v2'); toast.success('Opening team chat...') }, badge: 3 },
-    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => { router.push('/dashboard/analytics-v2'); toast.success('Opening analytics...') } },
-    { id: '5', label: 'Settings', icon: Settings, onClick: () => { router.push('/dashboard/settings-v2'); toast.success('Opening settings...') } },
-    { id: '6', label: 'Share', icon: Share2, onClick: () => { navigator.clipboard.writeText(window.location.href); toast.success('Link copied to clipboard!') }, disabled: false }
+    { id: '1', label: 'New Project', icon: Zap, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/projects-v2?action=new')), { loading: 'Opening new project...', success: 'New project opened', error: 'Failed to open' }), variant: 'primary' as const, shortcut: '⌘N' },
+    { id: '2', label: 'Upload Files', icon: Download, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/files-hub-v2?action=upload')), { loading: 'Opening file upload...', success: 'File upload opened', error: 'Failed to open' }), badge: '5' },
+    { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/messages-v2')), { loading: 'Opening team chat...', success: 'Team chat opened', error: 'Failed to open' }), badge: 3 },
+    { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/analytics-v2')), { loading: 'Opening analytics...', success: 'Analytics opened', error: 'Failed to open' }) },
+    { id: '5', label: 'Settings', icon: Settings, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/settings-v2')), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open' }) },
+    { id: '6', label: 'Share', icon: Share2, onClick: () => toast.promise(Promise.resolve(navigator.clipboard.writeText(window.location.href)), { loading: 'Copying link...', success: 'Link copied to clipboard!', error: 'Failed to copy' }), disabled: false }
   ], [router])
 
   const mockNotifications = useMemo(() => [
@@ -183,8 +183,8 @@ export default function AdvancedMicroFeaturesPage() {
       type: 'info' as const,
       timestamp: new Date(Date.now() - 5 * 60 * 1000),
       actions: [
-        { label: 'View Project', onClick: () => { router.push('/dashboard/projects-v2'); toast.success('Opening project...') }, variant: 'primary' as const },
-        { label: 'Dismiss', onClick: () => { toast.info('Notification dismissed') } }
+        { label: 'View Project', onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/projects-v2')), { loading: 'Opening project...', success: 'Project opened', error: 'Failed to open' }), variant: 'primary' as const },
+        { label: 'Dismiss', onClick: () => toast.promise(Promise.resolve(), { loading: 'Dismissing...', success: 'Notification dismissed', error: 'Failed to dismiss' }) }
       ]
     },
     {
@@ -468,8 +468,8 @@ export default function AdvancedMicroFeaturesPage() {
                     data={mockWidgetData}
                     size="large"
                     variant="detailed"
-                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.info('Refreshing widget data...') }}
-                    onSettings={() => { logger.info('Opening widget settings'); toast.info('Opening widget settings...') }}
+                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Refreshing widget data...', success: 'Widget data refreshed', error: 'Failed to refresh' }) }}
+                    onSettings={() => { logger.info('Opening widget settings'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening widget settings...', success: 'Widget settings opened', error: 'Failed to open' }) }}
                     onMaximize={() => { logger.info('Maximizing widget'); toast.success('Widget maximized') }}
                   />
                 </div>
@@ -509,7 +509,7 @@ export default function AdvancedMicroFeaturesPage() {
                     dateRange="Last 6 months"
                     onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully', { description: 'Revenue Trends - CSV format' }) }}
                     onShare={() => { logger.info('Sharing chart'); toast.success('Share link copied to clipboard') }}
-                    onSettings={() => { logger.info('Opening chart settings'); toast.info('Opening chart settings...') }}
+                    onSettings={() => { logger.info('Opening chart settings'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening chart settings...', success: 'Chart settings opened', error: 'Failed to open' }) }}
                     legend={[
                       { name: 'Revenue', color: '#3b82f6', value: '$45K', visible: true },
                       { name: 'Expenses', color: '#ef4444', value: '$28K', visible: true },
@@ -572,7 +572,7 @@ export default function AdvancedMicroFeaturesPage() {
                     activities={mockActivities}
                     maxItems={5}
                     showTimestamps={true}
-                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.info('Opening activity details...') }}
+                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening activity details...', success: 'Activity details opened', error: 'Failed to open' }) }}
                   />
                 </div>
 

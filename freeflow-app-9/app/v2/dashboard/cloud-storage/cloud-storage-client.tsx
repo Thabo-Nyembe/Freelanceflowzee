@@ -1265,10 +1265,10 @@ export default function CloudStorageClient() {
               {[
                 { label: 'Upload', icon: Upload, color: 'from-sky-500 to-blue-500', onClick: handleUploadFile },
                 { label: 'New Folder', icon: FolderPlus, color: 'from-indigo-500 to-purple-500', onClick: handleCreateFolder },
-                { label: 'Share', icon: Share2, color: 'from-green-500 to-emerald-500', onClick: () => selectedFile ? handleShareFile(selectedFile) : toast.info('Select a file', { description: 'Please select a file to share' }) },
-                { label: 'Download', icon: Download, color: 'from-orange-500 to-red-500', onClick: () => selectedFile ? handleDownloadFile(selectedFile) : toast.info('Select a file', { description: 'Please select a file to download' }) },
-                { label: 'Move', icon: Move, color: 'from-purple-500 to-pink-500', onClick: () => selectedFile ? handleMove(selectedFile) : toast.info('Select a file', { description: 'Please select a file to move' }) },
-                { label: 'Copy', icon: Copy, color: 'from-teal-500 to-cyan-500', onClick: () => selectedFile ? handleCopy(selectedFile) : toast.info('Select a file', { description: 'Please select a file to copy' }) },
+                { label: 'Share', icon: Share2, color: 'from-green-500 to-emerald-500', onClick: () => selectedFile ? handleShareFile(selectedFile) : toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please select a file to share', error: 'Error' }) },
+                { label: 'Download', icon: Download, color: 'from-orange-500 to-red-500', onClick: () => selectedFile ? handleDownloadFile(selectedFile) : toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please select a file to download', error: 'Error' }) },
+                { label: 'Move', icon: Move, color: 'from-purple-500 to-pink-500', onClick: () => selectedFile ? handleMove(selectedFile) : toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please select a file to move', error: 'Error' }) },
+                { label: 'Copy', icon: Copy, color: 'from-teal-500 to-cyan-500', onClick: () => selectedFile ? handleCopy(selectedFile) : toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please select a file to copy', error: 'Error' }) },
                 { label: 'Sync', icon: RefreshCw, color: 'from-blue-500 to-indigo-500', onClick: handleSync },
                 { label: 'Scan', icon: FileText, color: 'from-gray-500 to-gray-600', onClick: handleScan }
               ].map((action, i) => (

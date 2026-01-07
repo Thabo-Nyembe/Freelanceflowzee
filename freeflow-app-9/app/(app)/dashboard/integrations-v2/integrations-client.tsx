@@ -1150,8 +1150,8 @@ export default function IntegrationsClient() {
                 } },
                 { icon: Play, label: 'Replay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing task replay...', success: 'Select a task to replay', error: 'Failed to prepare replay' }) },
                 { icon: Filter, label: 'Filter', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading filters...', success: 'Filter options ready - use search above', error: 'Failed to load filters' }) },
-                { icon: Search, label: 'Search', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => { document.querySelector<HTMLInputElement>('input[placeholder="Search..."]')?.focus(); toast.info('Search activated - start typing') } },
-                { icon: Eye, label: 'Details', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => { if (mockTasks[0]) { setSelectedTask(mockTasks[0]) } else { toast.info('No tasks available') } } },
+                { icon: Search, label: 'Search', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(Promise.resolve(document.querySelector<HTMLInputElement>('input[placeholder="Search..."]')?.focus()), { loading: 'Activating search...', success: 'Search activated - start typing', error: 'Failed to activate search' }) },
+                { icon: Eye, label: 'Details', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => { if (mockTasks[0]) { toast.promise(Promise.resolve(setSelectedTask(mockTasks[0])), { loading: 'Loading task details...', success: 'Task details loaded', error: 'Failed to load details' }) } else { toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'No tasks available', error: 'Error' }) } } },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
                   toast.promise(new Promise<void>((resolve) => {
@@ -1282,7 +1282,7 @@ export default function IntegrationsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowCreateWebhookDialog(true) },
-                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => { if (webhooks[0]) { handleTestWebhook(webhooks[0]) } else { toast.info('No webhooks available to test') } } },
+                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => { if (webhooks[0]) { handleTestWebhook(webhooks[0]) } else { toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'No webhooks available to test', error: 'Error' }) } } },
                 { icon: RefreshCw, label: 'Retry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {
                   const failedDeliveries = webhooks.filter(w => w.failed_deliveries > 0)
                   if (failedDeliveries.length === 0) {

@@ -725,7 +725,7 @@ export default function TimeTrackingClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Play, label: 'Start Timer', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => { if (timerDescription) handleStartTimerDB(); else toast.info('Enter a description first', { description: 'Type what you are working on in the timer bar above' }) }, disabled: isTimerRunning },
+                { icon: Play, label: 'Start Timer', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => { if (timerDescription) handleStartTimerDB(); else toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'Please enter a description first', error: 'Error' }) }, disabled: isTimerRunning },
                 { icon: Plus, label: 'Manual Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowEntryDialog(true) },
                 { icon: Calendar, label: 'Calendar', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('calendar') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setActiveTab('reports') },

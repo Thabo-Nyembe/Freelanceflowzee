@@ -1005,7 +1005,7 @@ export default function CiCdClient() {
                 { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening branch rules...', success: 'Branch rules opened', error: 'Failed to open branch rules' }) },
                 { icon: History, label: 'Run History', color: 'text-indigo-500', onClick: () => setActiveTab('runs') },
                 { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Exporting pipelines...', success: 'Pipelines exported', error: 'Export failed' }) },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500', onClick: () => { fetchPipelines(); toast.success('Refreshed') } },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500', onClick: () => toast.promise(Promise.resolve(fetchPipelines()), { loading: 'Refreshing pipelines...', success: 'Pipelines refreshed', error: 'Failed to refresh' }) },
               ].map((action, i) => (
                 <Button
                   key={i}
