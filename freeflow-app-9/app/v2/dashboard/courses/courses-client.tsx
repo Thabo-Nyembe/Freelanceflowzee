@@ -552,12 +552,7 @@ const mockCoursesActivities = [
   { id: '3', user: 'Content Editor', action: 'uploaded', target: '3 new video lessons', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockCoursesQuickActions = [
-  { id: '1', label: 'New Course', icon: 'BookOpen', shortcut: 'C', action: () => toast.success('Course created successfully') },
-  { id: '2', label: 'Add Lecture', icon: 'PlayCircle', shortcut: 'L', action: () => toast.success('Lecture added successfully') },
-  { id: '3', label: 'Create Quiz', icon: 'FileText', shortcut: 'Q', action: () => toast.success('Quiz created successfully') },
-  { id: '4', label: 'View Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.success('Analytics loaded') },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function CoursesClient() {
   const [activeView, setActiveView] = useState<'courses' | 'curriculum' | 'students' | 'analytics' | 'reviews'>('courses')

@@ -502,6 +502,12 @@ export default function AIAssistantClient() {
   const [showNewPrompt, setShowNewPrompt] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
 
+  // Quick action dialog states
+  const [showNewChatDialog, setShowNewChatDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showKnowledgeDialog, setShowKnowledgeDialog] = useState(false)
+  const [showAISettingsDialog, setShowAISettingsDialog] = useState(false)
+
   // Form states
   const [assistantForm, setAssistantForm] = useState<AssistantFormState>({
     name: '',

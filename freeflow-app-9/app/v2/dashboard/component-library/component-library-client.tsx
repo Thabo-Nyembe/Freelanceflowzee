@@ -362,12 +362,7 @@ const mockComponentLibActivities = [
   { id: '3', user: 'UX Writer', action: 'added', target: 'usage guidelines for Modal', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockComponentLibQuickActions = [
-  { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => toast.success('Component created successfully') },
-  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => toast.success('Library loaded') },
-  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => toast.success('Playground ready') },
-  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => toast.success('Documentation loaded') },
-]
+// Quick actions are now defined inside the component with proper dialog handlers
 
 export default function ComponentLibraryClient() {
   const [activeTab, setActiveTab] = useState('components')
@@ -1927,6 +1922,222 @@ export default function App() {
             </DialogContent>
           </Dialog>
         )}
+
+        {/* New Component Dialog */}
+        <Dialog open={showNewComponentDialog} onOpenChange={setShowNewComponentDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-violet-600" />
+                Create New Component
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Component Name</Label>
+                <Input placeholder="e.g., CustomButton" />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select defaultValue="buttons">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="buttons">Buttons</SelectItem>
+                    <SelectItem value="inputs">Inputs</SelectItem>
+                    <SelectItem value="layout">Layout</SelectItem>
+                    <SelectItem value="navigation">Navigation</SelectItem>
+                    <SelectItem value="data-display">Data Display</SelectItem>
+                    <SelectItem value="feedback">Feedback</SelectItem>
+                    <SelectItem value="overlays">Overlays</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input placeholder="Brief description of the component" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Use TypeScript</Label>
+                  <p className="text-xs text-gray-500">Generate with TypeScript types</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowNewComponentDialog(false)}>Cancel</Button>
+              <Button className="bg-violet-600" onClick={() => {
+                toast.success('Component created successfully')
+                setShowNewComponentDialog(false)
+              }}>Create Component</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Browse Library Dialog */}
+        <Dialog open={showBrowseDialog} onOpenChange={setShowBrowseDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-violet-600" />
+                Browse Component Library
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input placeholder="Search components..." className="pl-10" />
+              </div>
+              <div className="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto">
+                {categories.map(cat => (
+                  <div key={cat.id} className="p-4 border rounded-lg hover:border-violet-300 cursor-pointer transition-all">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-violet-100 rounded-lg text-violet-600">
+                        <cat.icon className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{cat.name}</p>
+                        <p className="text-xs text-gray-500">{cat.count} components</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowBrowseDialog(false)}>Close</Button>
+              <Button className="bg-violet-600" onClick={() => {
+                setShowBrowseDialog(false)
+                setActiveTab('components')
+              }}>Open Library</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Playground Dialog */}
+        <Dialog open={showPlaygroundDialog} onOpenChange={setShowPlaygroundDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5 text-violet-600" />
+                Component Playground
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <Label>Select Component</Label>
+                  <Select defaultValue="button">
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Choose a component" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockComponents.map(comp => (
+                        <SelectItem key={comp.id} value={comp.name.toLowerCase()}>{comp.displayName}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1">
+                  <Label>Variant</Label>
+                  <Select defaultValue="primary">
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Choose variant" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="primary">Primary</SelectItem>
+                      <SelectItem value="secondary">Secondary</SelectItem>
+                      <SelectItem value="outline">Outline</SelectItem>
+                      <SelectItem value="ghost">Ghost</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="border rounded-lg p-8 bg-gray-50 dark:bg-gray-800 min-h-[200px] flex items-center justify-center">
+                <div className="text-center text-gray-400">
+                  <Eye className="h-12 w-12 mx-auto mb-2" />
+                  <p>Component preview will appear here</p>
+                </div>
+              </div>
+              <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm">
+                <code>{'<Button variant="primary">Click me</Button>'}</code>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowPlaygroundDialog(false)}>Close</Button>
+              <Button className="bg-violet-600" onClick={() => {
+                setShowPlaygroundDialog(false)
+                setActiveTab('playground')
+              }}>Open Full Playground</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Documentation Dialog */}
+        <Dialog open={showDocsDialog} onOpenChange={setShowDocsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-violet-600" />
+                Documentation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg hover:border-violet-300 cursor-pointer transition-all" onClick={() => {
+                  setShowDocsDialog(false)
+                  setActiveTab('docs')
+                }}>
+                  <FileText className="h-8 w-8 text-violet-600 mb-2" />
+                  <h4 className="font-semibold">Getting Started</h4>
+                  <p className="text-sm text-gray-500">Quick start guide and installation</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:border-violet-300 cursor-pointer transition-all" onClick={() => {
+                  setShowDocsDialog(false)
+                  setActiveTab('components')
+                }}>
+                  <Puzzle className="h-8 w-8 text-violet-600 mb-2" />
+                  <h4 className="font-semibold">Component API</h4>
+                  <p className="text-sm text-gray-500">Props, variants, and examples</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:border-violet-300 cursor-pointer transition-all" onClick={() => {
+                  setShowDocsDialog(false)
+                  setActiveTab('tokens')
+                }}>
+                  <Paintbrush className="h-8 w-8 text-violet-600 mb-2" />
+                  <h4 className="font-semibold">Design Tokens</h4>
+                  <p className="text-sm text-gray-500">Colors, spacing, and typography</p>
+                </div>
+                <div className="p-4 border rounded-lg hover:border-violet-300 cursor-pointer transition-all" onClick={() => {
+                  setShowDocsDialog(false)
+                  setActiveTab('changelog')
+                }}>
+                  <History className="h-8 w-8 text-violet-600 mb-2" />
+                  <h4 className="font-semibold">Changelog</h4>
+                  <p className="text-sm text-gray-500">Version history and updates</p>
+                </div>
+              </div>
+              <div className="p-4 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Accessibility className="h-6 w-6 text-violet-600" />
+                  <div>
+                    <h4 className="font-semibold">Accessibility Guidelines</h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">WCAG 2.1 compliant components</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDocsDialog(false)}>Close</Button>
+              <Button className="bg-violet-600" onClick={() => {
+                setShowDocsDialog(false)
+                setActiveTab('docs')
+              }}>Open Full Documentation</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

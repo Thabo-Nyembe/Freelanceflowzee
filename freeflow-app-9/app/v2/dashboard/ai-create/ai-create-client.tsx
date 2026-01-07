@@ -559,20 +559,7 @@ const mockAICreateActivities = [
   { id: '3', user: 'System', action: 'Saved', target: 'creation to gallery', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockAICreateQuickActions = [
-  { id: '1', label: 'New Creation', icon: 'sparkles', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Starting new AI creation...', success: 'AI creation started', error: 'Failed to start creation' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Use Template', icon: 'copy', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading template...', success: 'Template loaded successfully', error: 'Failed to load template' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'View Gallery', icon: 'image', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Opening gallery...', success: 'Gallery opened', error: 'Failed to open gallery' }
-  ), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to use dialog state
 
 // ============================================================================
 // MAIN COMPONENT
@@ -594,6 +581,11 @@ export default function AICreateClient() {
   const [statusFilter, setStatusFilter] = useState<GenerationStatus | 'all'>('all')
   const [isGenerating, setIsGenerating] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showNewCreationDialog, setShowNewCreationDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [showGalleryDialog, setShowGalleryDialog] = useState(false)
 
   // Filtered generations
   const filteredGenerations = useMemo(() => {
@@ -625,6 +617,13 @@ export default function AICreateClient() {
     { value: '4:3', label: 'Standard' },
     { value: '3:4', label: 'Tall' },
     { value: '21:9', label: 'Ultrawide' }
+  ]
+
+  // Quick actions with proper dialog handling
+  const quickActions = [
+    { id: '1', label: 'New Creation', icon: 'sparkles', action: () => setShowNewCreationDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Use Template', icon: 'copy', action: () => setShowTemplateDialog(true), variant: 'default' as const },
+    { id: '3', label: 'View Gallery', icon: 'image', action: () => setShowGalleryDialog(true), variant: 'outline' as const },
   ]
 
   const handleGenerate = () => {
@@ -1981,7 +1980,7 @@ export default function AICreateClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAICreateQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2108,6 +2107,182 @@ export default function AICreateClient() {
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* New Creation Dialog */}
+        <Dialog open={showNewCreationDialog} onOpenChange={setShowNewCreationDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-500" />
+                New AI Creation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Quick Prompt</Label>
+                <Textarea
+                  placeholder="Describe what you want to create..."
+                  className="mt-2"
+                  rows={4}
+                />
+              </div>
+              <div>
+                <Label>Style Preset</Label>
+                <select className="w-full mt-2 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                  {styles.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>Quality</Label>
+                <select className="w-full mt-2 px-3 py-2 border rounded-lg dark:bg-gray-900 dark:border-gray-700">
+                  <option value="draft">Draft (Fast)</option>
+                  <option value="standard">Standard</option>
+                  <option value="high">High Quality</option>
+                  <option value="ultra">Ultra (Slow)</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowNewCreationDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Creation started', { description: 'Your AI creation is being generated' })
+                  setShowNewCreationDialog(false)
+                }}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Start Creating
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Use Template Dialog */}
+        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-green-500" />
+                Choose a Template
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search templates..." className="pl-10" />
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="grid grid-cols-2 gap-4">
+                  {mockTemplates.map(template => (
+                    <Card
+                      key={template.id}
+                      className="cursor-pointer hover:shadow-md transition-shadow hover:ring-2 hover:ring-purple-500"
+                      onClick={() => {
+                        toast.success('Template loaded', { description: `"${template.name}" template applied to generator` })
+                        setShowTemplateDialog(false)
+                      }}
+                    >
+                      <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 relative flex items-center justify-center text-3xl">
+                        {template.style === 'fantasy' ? '⚔️' : template.style === 'cyberpunk' ? '🤖' : template.style === 'anime' ? '🎌' : '📷'}
+                        {template.isPremium && (
+                          <Badge className="absolute top-2 right-2 bg-amber-100 text-amber-700">
+                            <Crown className="w-3 h-3 mr-1" />
+                            Pro
+                          </Badge>
+                        )}
+                      </div>
+                      <CardContent className="p-3">
+                        <h4 className="font-semibold text-sm text-gray-900 dark:text-white">{template.name}</h4>
+                        <p className="text-xs text-gray-500 mt-1">{template.description}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Gallery Dialog */}
+        <Dialog open={showGalleryDialog} onOpenChange={setShowGalleryDialog}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Image className="w-5 h-5 text-blue-500" />
+                Your Gallery
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline">{mockGenerations.length} creations</Badge>
+                  <Badge variant="secondary">{mockGenerations.filter(g => g.isFavorite).length} favorites</Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm">
+                    <Grid className="w-4 h-4" />
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <ScrollArea className="h-[500px]">
+                <div className="grid grid-cols-3 gap-4">
+                  {mockGenerations.map(gen => (
+                    <Card
+                      key={gen.id}
+                      className="cursor-pointer hover:shadow-md transition-shadow overflow-hidden"
+                      onClick={() => {
+                        setSelectedGeneration(gen)
+                        setShowGalleryDialog(false)
+                      }}
+                    >
+                      <div className="aspect-video bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 relative flex items-center justify-center text-4xl">
+                        {gen.style === 'fantasy' ? '🐉' : gen.style === 'cyberpunk' ? '🌃' : gen.style === 'anime' ? '✨' : '🎨'}
+                        {gen.isFavorite && (
+                          <Heart className="absolute top-2 left-2 w-4 h-4 text-red-500 fill-red-500" />
+                        )}
+                        <Badge className={`absolute top-2 right-2 ${getStatusColor(gen.status)}`}>
+                          {gen.status}
+                        </Badge>
+                      </div>
+                      <CardContent className="p-3">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2">{gen.prompt}</p>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                          <span className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            {formatNumber(gen.views)}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Heart className="w-3 h-3" />
+                            {gen.likes}
+                          </span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setActiveTab('gallery')}>
+                Go to Full Gallery
+              </Button>
+              <Button variant="outline" onClick={() => setShowGalleryDialog(false)}>
+                Close
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

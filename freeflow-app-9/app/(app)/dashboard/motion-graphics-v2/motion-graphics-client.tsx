@@ -531,6 +531,9 @@ export default function MotionGraphicsClient({
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showRenderDialog, setShowRenderDialog] = useState(false)
+  const [showAssetsDialog, setShowAssetsDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
   const [formState, setFormState] = useState<ProjectFormState>(initialFormState)
 
   const stats = useMemo(() => {

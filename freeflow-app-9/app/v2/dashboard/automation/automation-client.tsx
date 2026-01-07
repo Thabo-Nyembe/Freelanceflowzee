@@ -2276,6 +2276,252 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* New Workflow Dialog */}
+        <Dialog open={showNewWorkflowDialog} onOpenChange={setShowNewWorkflowDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-orange-500" />
+                Create New Workflow
+              </DialogTitle>
+              <DialogDescription>
+                Set up a new automation workflow to streamline your processes.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="workflow-name">Workflow Name</Label>
+                <Input id="workflow-name" placeholder="Enter workflow name" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="workflow-description">Description</Label>
+                <Textarea id="workflow-description" placeholder="Describe what this workflow does" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="workflow-trigger">Trigger Type</Label>
+                <Select defaultValue="webhook">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select trigger type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="webhook">Webhook</SelectItem>
+                    <SelectItem value="schedule">Schedule</SelectItem>
+                    <SelectItem value="event">Event</SelectItem>
+                    <SelectItem value="manual">Manual</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewWorkflowDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+                onClick={() => {
+                  toast.success('Workflow Created!', {
+                    description: 'Your new automation workflow is ready'
+                  })
+                  setShowNewWorkflowDialog(false)
+                }}
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                Create Workflow
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-purple-500" />
+                Automation Templates
+              </DialogTitle>
+              <DialogDescription>
+                Choose from pre-built templates to get started quickly.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4 max-h-[400px] overflow-y-auto">
+              {TEMPLATES.slice(0, 6).map((template) => (
+                <div
+                  key={template.id}
+                  className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                  onClick={() => {
+                    setSelectedTemplate(template)
+                    setShowTemplatesDialog(false)
+                    setShowTemplateDialog(true)
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{template.icon}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{template.name}</span>
+                        {template.isNew && <Badge className="bg-green-500 text-white text-xs">New</Badge>}
+                        {template.isPremium && <Badge variant="outline" className="text-yellow-600 text-xs">Premium</Badge>}
+                      </div>
+                      <p className="text-sm text-gray-500">{template.description}</p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-400" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run History Dialog */}
+        <Dialog open={showRunHistoryDialog} onOpenChange={setShowRunHistoryDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <History className="h-5 w-5 text-blue-500" />
+                Workflow Execution History
+              </DialogTitle>
+              <DialogDescription>
+                View recent automation runs and their statuses.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-3 max-h-[400px] overflow-y-auto">
+              {RUN_LOGS.map((log) => (
+                <div
+                  key={log.id}
+                  className="p-4 border rounded-lg"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {log.status === 'success' && <CheckCircle className="h-5 w-5 text-green-500" />}
+                      {log.status === 'failed' && <XCircle className="h-5 w-5 text-red-500" />}
+                      {log.status === 'running' && <RefreshCw className="h-5 w-5 text-blue-500 animate-spin" />}
+                      {log.status === 'pending' && <Clock className="h-5 w-5 text-gray-400" />}
+                      <div>
+                        <span className="font-medium">Run {log.id}</span>
+                        <p className="text-sm text-gray-500">
+                          {log.stepsExecuted}/{log.totalSteps} steps completed
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant={
+                        log.status === 'success' ? 'default' :
+                        log.status === 'failed' ? 'destructive' :
+                        log.status === 'running' ? 'secondary' : 'outline'
+                      }>
+                        {log.status}
+                      </Badge>
+                      {log.duration && (
+                        <p className="text-xs text-gray-500 mt-1">{log.duration}ms</p>
+                      )}
+                    </div>
+                  </div>
+                  {log.error && (
+                    <p className="text-sm text-red-500 mt-2 pl-8">{log.error}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRunHistoryDialog(false)}>
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  toast.success('History Refreshed', {
+                    description: 'Run history has been updated'
+                  })
+                }}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Connections Dialog */}
+        <Dialog open={showConnectionsDialog} onOpenChange={setShowConnectionsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Network className="h-5 w-5 text-green-500" />
+                App Connections
+              </DialogTitle>
+              <DialogDescription>
+                Manage your connected apps and integrations.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="py-4 space-y-3 max-h-[400px] overflow-y-auto">
+              {INTEGRATIONS.slice(0, 8).map((integration) => (
+                <div
+                  key={integration.id}
+                  className="p-4 border rounded-lg flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{integration.icon}</span>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{integration.name}</span>
+                        {integration.isPremium && <Badge variant="outline" className="text-yellow-600 text-xs">Premium</Badge>}
+                      </div>
+                      <p className="text-sm text-gray-500">{integration.category}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {integration.isConnected ? (
+                      <>
+                        <Badge className="bg-green-500 text-white">Connected</Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedIntegration(integration)
+                            setShowConnectionsDialog(false)
+                            setShowIntegrationDialog(true)
+                          }}
+                        >
+                          <Settings className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setSelectedIntegration(integration)
+                          setShowConnectionsDialog(false)
+                          setShowIntegrationDialog(true)
+                        }}
+                      >
+                        Connect
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowConnectionsDialog(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

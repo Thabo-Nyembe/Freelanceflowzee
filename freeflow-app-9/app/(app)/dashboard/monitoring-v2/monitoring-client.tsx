@@ -574,6 +574,9 @@ export default function MonitoringClient() {
   // Dialog state
   const [showAddServerDialog, setShowAddServerDialog] = useState(false)
   const [showAddAlertDialog, setShowAddAlertDialog] = useState(false)
+  const [showDashboardsDialog, setShowDashboardsDialog] = useState(false)
+  const [showAlertsConfigDialog, setShowAlertsConfigDialog] = useState(false)
+  const [showMetricsExplorerDialog, setShowMetricsExplorerDialog] = useState(false)
   const [serverForm, setServerForm] = useState<ServerFormData>(initialServerForm)
   const [alertForm, setAlertForm] = useState<AlertFormData>(initialAlertForm)
 

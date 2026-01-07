@@ -652,6 +652,12 @@ export default function InvoicingClient() {
   const [showClientDialog, setShowClientDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list')
 
+  // Quick Action Dialog States
+  const [showNewInvoiceDialog, setShowNewInvoiceDialog] = useState(false)
+  const [showRecordPaymentDialog, setShowRecordPaymentDialog] = useState(false)
+  const [showSendRemindersDialog, setShowSendRemindersDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+
   // Filtered invoices
   const filteredInvoices = useMemo(() => {
     return invoices.filter(invoice => {

@@ -447,6 +447,12 @@ export default function OverviewClient() {
   const [selectedLog, setSelectedLog] = useState<LogEntry | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Quick Action Dialog States
+  const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
+  const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
+  const [showHealthCheckDialog, setShowHealthCheckDialog] = useState(false)
+  const [showDeployDialog, setShowDeployDialog] = useState(false)
+
   // Loading States
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)

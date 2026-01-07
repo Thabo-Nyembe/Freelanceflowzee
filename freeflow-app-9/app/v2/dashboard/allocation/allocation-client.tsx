@@ -758,6 +758,13 @@ export default function AllocationClient() {
   const [showCalendarDialog, setShowCalendarDialog] = useState(false)
   const [showCapacityReportDialog, setShowCapacityReportDialog] = useState(false)
 
+  // Quick actions with proper dialog handlers
+  const allocationQuickActions = [
+    { id: '1', label: 'New Allocation', icon: 'plus', action: () => { setFormData(initialFormState); setShowCreateDialog(true) }, variant: 'default' as const },
+    { id: '2', label: 'View Calendar', icon: 'calendar', action: () => setShowCalendarDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Capacity Report', icon: 'chart', action: () => setShowCapacityReportDialog(true), variant: 'outline' as const },
+  ]
+
   // Filtered data
   const filteredAllocations = useMemo(() => {
     return mockAllocations.filter(allocation => {
@@ -1957,7 +1964,7 @@ export default function AllocationClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAllocationQuickActions}
+            actions={allocationQuickActions}
             variant="grid"
           />
         </div>
@@ -2386,6 +2393,114 @@ export default function AllocationClient() {
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Calendar View Dialog */}
+        <Dialog open={showCalendarDialog} onOpenChange={setShowCalendarDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <Calendar className="w-5 h-5" />
+                Allocation Calendar
+              </DialogTitle>
+              <DialogDescription>
+                View resource allocations across your projects
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="border rounded-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="font-semibold">February 2024</h3>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <ChevronRight className="w-4 h-4 rotate-180" />
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  {mockAllocations.filter(a => a.status === 'active').slice(0, 4).map(allocation => (
+                    <div key={allocation.id} className="flex items-center gap-3 p-3 border rounded-lg">
+                      <div
+                        className="w-3 h-3 rounded-full flex-shrink-0"
+                        style={{ backgroundColor: allocation.project_color }}
+                      />
+                      <div className="flex-1">
+                        <p className="font-medium text-sm">{allocation.resource_name}</p>
+                        <p className="text-xs text-gray-500">{allocation.project_name}</p>
+                      </div>
+                      <Badge variant="outline" className="text-xs">
+                        {allocation.hours_per_week}h/week
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCalendarDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowCalendarDialog(false); setActiveTab('schedule') }}>
+                <Calendar className="w-4 h-4 mr-2" />
+                Open Full Calendar
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Capacity Report Dialog */}
+        <Dialog open={showCapacityReportDialog} onOpenChange={setShowCapacityReportDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-3">
+                <BarChart3 className="w-5 h-5" />
+                Capacity Report
+              </DialogTitle>
+              <DialogDescription>
+                Team capacity and utilization overview
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{mockResources.reduce((acc, r) => acc + r.capacity_hours, 0)}h</p>
+                  <p className="text-sm text-gray-500">Total Capacity</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold">{mockResources.reduce((acc, r) => acc + r.allocated_hours, 0)}h</p>
+                  <p className="text-sm text-gray-500">Allocated</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">
+                    {Math.max(0, mockResources.reduce((acc, r) => acc + (r.capacity_hours - r.allocated_hours), 0))}h
+                  </p>
+                  <p className="text-sm text-gray-500">Available</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <h4 className="font-medium">Resource Utilization</h4>
+                {mockResources.map(resource => (
+                  <div key={resource.id} className="flex items-center gap-4">
+                    <div className="w-32 text-sm truncate">{resource.name}</div>
+                    <div className="flex-1">
+                      <Progress value={Math.min(resource.utilization, 100)} className="h-2" />
+                    </div>
+                    <div className={`w-16 text-right text-sm font-medium ${getUtilizationColor(resource.utilization)}`}>
+                      {resource.utilization}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCapacityReportDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowCapacityReportDialog(false); setActiveTab('capacity') }}>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View Full Report
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

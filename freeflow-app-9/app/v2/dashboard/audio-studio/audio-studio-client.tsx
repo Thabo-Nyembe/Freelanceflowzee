@@ -2250,6 +2250,234 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* New Track Dialog */}
+        <Dialog open={showNewTrackDialog} onOpenChange={setShowNewTrackDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-purple-500" />
+                Create New Track
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Track Name</Label>
+                <Input
+                  placeholder="Enter track name..."
+                  value={newTrackName}
+                  onChange={(e) => setNewTrackName(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Track Type</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {(['audio', 'midi', 'bus'] as const).map((type) => (
+                    <Button
+                      key={type}
+                      variant={newTrackType === type ? 'default' : 'outline'}
+                      className={newTrackType === type ? 'bg-purple-600 hover:bg-purple-700' : ''}
+                      onClick={() => setNewTrackType(type)}
+                    >
+                      {type === 'audio' && <AudioWaveform className="w-4 h-4 mr-1" />}
+                      {type === 'midi' && <Piano className="w-4 h-4 mr-1" />}
+                      {type === 'bus' && <Layers className="w-4 h-4 mr-1" />}
+                      {type.toUpperCase()}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg text-sm text-muted-foreground">
+                {newTrackType === 'audio' && 'Audio tracks record and play back audio files. Great for vocals, guitars, and recorded instruments.'}
+                {newTrackType === 'midi' && 'MIDI tracks control virtual instruments. Perfect for synths, drums, and orchestral sounds.'}
+                {newTrackType === 'bus' && 'Bus tracks combine multiple audio sources. Use for grouping and applying shared effects.'}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowNewTrackDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-purple-600 hover:bg-purple-700"
+                onClick={() => {
+                  handleAddTrack(newTrackType)
+                  setShowNewTrackDialog(false)
+                  setNewTrackName('')
+                }}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Create Track
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Record Dialog */}
+        <Dialog open={showRecordDialog} onOpenChange={setShowRecordDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mic className="w-5 h-5 text-red-500" />
+                Start Recording
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center animate-pulse">
+                    <Mic className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-red-700 dark:text-red-400">Recording Setup</p>
+                    <p className="text-sm text-red-600 dark:text-red-400/80">Configure your recording session</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Input Source</Label>
+                <Input defaultValue="Built-in Microphone" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Sample Rate</Label>
+                  <Input defaultValue="48000 Hz" disabled />
+                </div>
+                <div className="space-y-2">
+                  <Label>Bit Depth</Label>
+                  <Input defaultValue="24-bit" disabled />
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Label htmlFor="monitor-recording" className="cursor-pointer">
+                  <span className="font-medium">Monitor Input</span>
+                  <p className="text-sm text-muted-foreground">Hear yourself while recording</p>
+                </Label>
+                <Switch id="monitor-recording" defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Label htmlFor="count-in-recording" className="cursor-pointer">
+                  <span className="font-medium">Count-In</span>
+                  <p className="text-sm text-muted-foreground">1 bar count before recording</p>
+                </Label>
+                <Switch id="count-in-recording" defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowRecordDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-red-600 hover:bg-red-700"
+                onClick={() => {
+                  handleStartRecording()
+                  setShowRecordDialog(false)
+                }}
+              >
+                <div className="w-3 h-3 rounded-full bg-white mr-2" />
+                Start Recording
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-500" />
+                Export Audio
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {['WAV', 'MP3', 'FLAC', 'AIFF', 'OGG'].map((format) => (
+                    <Button
+                      key={format}
+                      variant={exportFormat === format ? 'default' : 'outline'}
+                      size="sm"
+                      className={exportFormat === format ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                      onClick={() => setExportFormat(format)}
+                    >
+                      {format}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Sample Rate</Label>
+                  <div className="flex gap-1 flex-wrap">
+                    {['44.1 kHz', '48 kHz', '96 kHz'].map((rate) => (
+                      <Button
+                        key={rate}
+                        variant={exportSampleRate === rate ? 'default' : 'outline'}
+                        size="sm"
+                        className={exportSampleRate === rate ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                        onClick={() => setExportSampleRate(rate)}
+                      >
+                        {rate}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Bit Depth</Label>
+                  <div className="flex gap-1 flex-wrap">
+                    {['16-bit', '24-bit', '32-bit'].map((depth) => (
+                      <Button
+                        key={depth}
+                        variant={exportBitDepth === depth ? 'default' : 'outline'}
+                        size="sm"
+                        className={exportBitDepth === depth ? 'bg-blue-600 hover:bg-blue-700' : ''}
+                        onClick={() => setExportBitDepth(depth)}
+                      >
+                        {depth}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 className="font-medium text-blue-700 dark:text-blue-400 mb-2">Export Summary</h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div className="text-muted-foreground">Format:</div>
+                  <div className="font-medium">{exportFormat} ({exportSampleRate}, {exportBitDepth})</div>
+                  <div className="text-muted-foreground">Duration:</div>
+                  <div className="font-medium">{formatTime(stats.projectLength)}</div>
+                  <div className="text-muted-foreground">Tracks:</div>
+                  <div className="font-medium">{tracks.filter(t => !t.muted).length} / {tracks.length}</div>
+                  <div className="text-muted-foreground">Est. Size:</div>
+                  <div className="font-medium">~{Math.round(stats.projectLength * 0.2)} MB</div>
+                </div>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <Label htmlFor="normalize-export" className="cursor-pointer">
+                  <span className="font-medium">Normalize</span>
+                  <p className="text-sm text-muted-foreground">Maximize volume without clipping</p>
+                </Label>
+                <Switch id="normalize-export" defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  handleExportAudio('Project')
+                  setShowExportDialog(false)
+                }}
+              >
+                <Download className="w-4 h-4 mr-1" />
+                Export Audio
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

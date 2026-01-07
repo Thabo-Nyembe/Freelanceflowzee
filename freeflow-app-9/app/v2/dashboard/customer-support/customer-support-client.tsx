@@ -287,6 +287,14 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
   const [showAgentDialog, setShowAgentDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Quick Action Dialog States
+  const [showQuickReplyDialog, setShowQuickReplyDialog] = useState(false)
+  const [showEscalateDialog, setShowEscalateDialog] = useState(false)
+  const [showViewQueueDialog, setShowViewQueueDialog] = useState(false)
+  const [quickReplyMessage, setQuickReplyMessage] = useState('')
+  const [escalateReason, setEscalateReason] = useState('')
+  const [escalatePriority, setEscalatePriority] = useState('urgent')
+
   // Supabase state
   const [dbTickets, setDbTickets] = useState<DbTicket[]>([])
   const [isLoading, setIsLoading] = useState(false)

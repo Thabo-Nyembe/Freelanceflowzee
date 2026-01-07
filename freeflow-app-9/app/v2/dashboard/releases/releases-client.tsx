@@ -536,12 +536,6 @@ const mockReleasesActivities = [
   { id: '3', user: 'QA Team', action: 'Approved', target: 'v2.5.1 release candidate', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockReleasesQuickActions = [
-  { id: '1', label: 'New Release', icon: 'plus', action: () => toast.success('Release Created', { description: 'New release draft ready' }), variant: 'default' as const },
-  { id: '2', label: 'Rollback', icon: 'undo', action: () => toast.success('Rollback Complete', { description: 'Successfully rolled back to previous version' }), variant: 'default' as const },
-  { id: '3', label: 'Export Changelog', icon: 'download', action: () => toast.success('Changelog Exported', { description: 'Changelog exported to markdown' }), variant: 'outline' as const },
-]
-
 // Initial form state
 const initialFormData: ReleaseFormData = {
   version: '',
@@ -575,6 +569,7 @@ export default function ReleasesClient() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showDeployDialog, setShowDeployDialog] = useState(false)
   const [showRollbackDialog, setShowRollbackDialog] = useState(false)
+  const [showExportChangelogDialog, setShowExportChangelogDialog] = useState(false)
 
   // Form State
   const [formData, setFormData] = useState<ReleaseFormData>(initialFormData)
@@ -1159,6 +1154,13 @@ export default function ReleasesClient() {
     { label: 'Commits', value: formatNumber(stats.totalCommits), icon: GitCommit, change: '+156', color: 'text-pink-600' },
     { label: 'Frequency', value: `${stats.releaseFrequency}/wk`, icon: Activity, change: '+0.3', color: 'text-orange-600' },
     { label: 'Rolling', value: stats.rollingReleases.toString(), icon: RefreshCw, change: '1 active', color: 'text-teal-600' }
+  ]
+
+  // Quick Actions for toolbar (with proper dialog handlers)
+  const releasesQuickActions = [
+    { id: '1', label: 'New Release', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Rollback', icon: 'undo', action: () => setShowRollbackDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Changelog', icon: 'download', action: () => setShowExportChangelogDialog(true), variant: 'outline' as const },
   ]
 
   return (
@@ -2389,7 +2391,7 @@ export default function ReleasesClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockReleasesQuickActions}
+            actions={releasesQuickActions}
             variant="grid"
           />
         </div>
@@ -3036,6 +3038,75 @@ export default function ReleasesClient() {
                   Initiate Rollback
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Changelog Dialog */}
+      <Dialog open={showExportChangelogDialog} onOpenChange={setShowExportChangelogDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-indigo-600" />
+              Export Changelog
+            </DialogTitle>
+            <DialogDescription>
+              Export your release changelog in your preferred format.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="markdown">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="markdown">Markdown (.md)</SelectItem>
+                  <SelectItem value="json">JSON (.json)</SelectItem>
+                  <SelectItem value="html">HTML (.html)</SelectItem>
+                  <SelectItem value="txt">Plain Text (.txt)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Release Range</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Releases</SelectItem>
+                  <SelectItem value="latest">Latest Release Only</SelectItem>
+                  <SelectItem value="major">Major Releases Only</SelectItem>
+                  <SelectItem value="last10">Last 10 Releases</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="includeCommits" className="rounded" defaultChecked />
+              <Label htmlFor="includeCommits" className="text-sm font-normal">Include commit details</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="includeContributors" className="rounded" defaultChecked />
+              <Label htmlFor="includeContributors" className="text-sm font-normal">Include contributors</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportChangelogDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('Changelog Exported', { description: 'Changelog exported to markdown' })
+                setShowExportChangelogDialog(false)
+              }}
+              className="bg-indigo-600 text-white hover:bg-indigo-700"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
             </Button>
           </DialogFooter>
         </DialogContent>

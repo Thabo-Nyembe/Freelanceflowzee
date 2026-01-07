@@ -2165,6 +2165,165 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
           </DialogContent>
         </Dialog>
 
+        {/* Block Time Dialog */}
+        <Dialog open={showBlockTimeDialog} onOpenChange={setShowBlockTimeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Block Time Slot</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-sm text-gray-500">
+                Block off time in your calendar to prevent bookings during specific periods.
+              </p>
+              <div>
+                <label className="block text-sm font-medium mb-1">Date</label>
+                <input
+                  type="date"
+                  value={blockTimeForm.date}
+                  onChange={(e) => setBlockTimeForm(prev => ({ ...prev, date: e.target.value }))}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Start Time</label>
+                  <select
+                    value={blockTimeForm.startTime}
+                    onChange={(e) => setBlockTimeForm(prev => ({ ...prev, startTime: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  >
+                    {timeSlots.map(slot => (
+                      <option key={slot.time} value={slot.time}>{slot.time}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">End Time</label>
+                  <select
+                    value={blockTimeForm.endTime}
+                    onChange={(e) => setBlockTimeForm(prev => ({ ...prev, endTime: e.target.value }))}
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                  >
+                    {timeSlots.map(slot => (
+                      <option key={slot.time} value={slot.time}>{slot.time}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Reason (optional)</label>
+                <input
+                  type="text"
+                  value={blockTimeForm.reason}
+                  onChange={(e) => setBlockTimeForm(prev => ({ ...prev, reason: e.target.value }))}
+                  placeholder="e.g., Lunch break, Personal time"
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+            </div>
+            <DialogFooter className="mt-6">
+              <button
+                onClick={() => {
+                  setShowBlockTimeDialog(false)
+                  setBlockTimeForm({ date: '', startTime: '09:00', endTime: '10:00', reason: '' })
+                }}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  toast.success('Time Blocked', { description: `Time slot blocked on ${blockTimeForm.date || 'selected date'}` })
+                  setShowBlockTimeDialog(false)
+                  setBlockTimeForm({ date: '', startTime: '09:00', endTime: '10:00', reason: '' })
+                }}
+                className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
+              >
+                Block Time
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Calendar Dialog */}
+        <Dialog open={showViewCalendarDialog} onOpenChange={setShowViewCalendarDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>Calendar Overview</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <p className="text-sm text-gray-500 mb-4">
+                Quick overview of your booking calendar. Click on a date to see details.
+              </p>
+              <div className="grid grid-cols-7 gap-1 mb-4">
+                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                  <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">{day}</div>
+                ))}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: 35 }, (_, i) => {
+                  const day = new Date(currentDate.getFullYear(), currentDate.getMonth(), i - currentDate.getDay() + 1)
+                  const isCurrentMonth = day.getMonth() === currentDate.getMonth()
+                  const isToday = day.toDateString() === new Date().toDateString()
+                  const hasBookings = displayBookings.some(b => new Date(b.start_time).toDateString() === day.toDateString())
+
+                  return (
+                    <div
+                      key={i}
+                      className={`p-2 min-h-[60px] rounded-lg border cursor-pointer transition-colors ${
+                        isCurrentMonth ? 'bg-white dark:bg-gray-800 hover:bg-sky-50 dark:hover:bg-sky-900/20' : 'bg-gray-50 dark:bg-gray-900'
+                      } ${isToday ? 'border-sky-500 ring-1 ring-sky-500' : 'border-gray-200 dark:border-gray-700'}`}
+                      onClick={() => {
+                        setCurrentDate(day)
+                        setShowViewCalendarDialog(false)
+                        setView('calendar')
+                        setCalendarView('day')
+                      }}
+                    >
+                      <div className={`text-sm ${isCurrentMonth ? 'text-gray-900 dark:text-white' : 'text-gray-400'} ${isToday ? 'font-bold text-sky-600' : ''}`}>
+                        {day.getDate()}
+                      </div>
+                      {hasBookings && isCurrentMonth && (
+                        <div className="mt-1">
+                          <div className="h-1.5 w-full bg-sky-500 rounded"></div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <div className="h-3 w-3 bg-sky-500 rounded"></div>
+                    <span className="text-sm text-gray-500">Has bookings</span>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-500">
+                  {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="mt-6">
+              <button
+                onClick={() => setShowViewCalendarDialog(false)}
+                className="px-4 py-2 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setShowViewCalendarDialog(false)
+                  setView('calendar')
+                }}
+                className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700"
+              >
+                Open Full Calendar
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Enhanced Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
           <div className="lg:col-span-2">

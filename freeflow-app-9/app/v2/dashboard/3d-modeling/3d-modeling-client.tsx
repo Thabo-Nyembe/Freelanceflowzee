@@ -1856,6 +1856,195 @@ export default function ThreeDModelingClient() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* New Model Dialog */}
+      <Dialog open={showNewModelDialog} onOpenChange={setShowNewModelDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Create New Model
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Model Name</Label>
+              <Input placeholder="Enter model name" />
+            </div>
+            <div className="space-y-2">
+              <Label>Description</Label>
+              <Input placeholder="Enter description" />
+            </div>
+            <div className="space-y-2">
+              <Label>Starting Template</Label>
+              <Select defaultValue="empty">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="empty">Empty Scene</SelectItem>
+                  <SelectItem value="cube">Basic Cube</SelectItem>
+                  <SelectItem value="sphere">Sphere</SelectItem>
+                  <SelectItem value="plane">Plane</SelectItem>
+                  <SelectItem value="character">Character Template</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowNewModelDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 gap-2" onClick={() => {
+                toast.success('Model created successfully')
+                setShowNewModelDialog(false)
+              }}>
+                <Plus className="w-4 h-4" />
+                Create Model
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Start Render Dialog */}
+      <Dialog open={showStartRenderDialog} onOpenChange={setShowStartRenderDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="w-5 h-5" />
+              Start Render
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Render Quality</Label>
+              <Select defaultValue="high">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="preview">Preview (Fast)</SelectItem>
+                  <SelectItem value="low">Low Quality</SelectItem>
+                  <SelectItem value="medium">Medium Quality</SelectItem>
+                  <SelectItem value="high">High Quality</SelectItem>
+                  <SelectItem value="ultra">Ultra (Slowest)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Output Resolution</Label>
+              <Select defaultValue="1080p">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="720p">720p (1280x720)</SelectItem>
+                  <SelectItem value="1080p">1080p (1920x1080)</SelectItem>
+                  <SelectItem value="2k">2K (2560x1440)</SelectItem>
+                  <SelectItem value="4k">4K (3840x2160)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Output Format</Label>
+              <Select defaultValue="png">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="png">PNG</SelectItem>
+                  <SelectItem value="jpg">JPEG</SelectItem>
+                  <SelectItem value="exr">OpenEXR</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-sm">Use Denoising</p>
+                <p className="text-xs text-muted-foreground">Apply AI noise reduction</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowStartRenderDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 gap-2" onClick={() => {
+                toast.success('Render job added to queue')
+                setShowStartRenderDialog(false)
+              }}>
+                <Play className="w-4 h-4" />
+                Start Render
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Model Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Export Model
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="gltf">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gltf">GLTF / GLB</SelectItem>
+                  <SelectItem value="obj">OBJ</SelectItem>
+                  <SelectItem value="fbx">FBX</SelectItem>
+                  <SelectItem value="stl">STL</SelectItem>
+                  <SelectItem value="dae">Collada (DAE)</SelectItem>
+                  <SelectItem value="blend">Blender (.blend)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-4 border-t pt-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Include Textures</p>
+                  <p className="text-xs text-muted-foreground">Embed texture files</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Include Animations</p>
+                  <p className="text-xs text-muted-foreground">Export animation data</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Apply Modifiers</p>
+                  <p className="text-xs text-muted-foreground">Bake modifiers to mesh</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 gap-2" onClick={() => {
+                toast.success('Model exported successfully')
+                setShowExportDialog(false)
+              }}>
+                <Download className="w-4 h-4" />
+                Export
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

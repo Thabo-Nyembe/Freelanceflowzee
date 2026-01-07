@@ -743,11 +743,7 @@ const mockRegistrationsActivities = [
   { id: '3', user: 'Marketing', action: 'Created', target: 'early bird reminder campaign', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockRegistrationsQuickActions = [
-  { id: '1', label: 'New Event', icon: 'plus', action: () => toast.success('Event Created', { description: 'New event ready for registrations' }), variant: 'default' as const },
-  { id: '2', label: 'Import List', icon: 'upload', action: () => toast.success('List Imported', { description: 'Registration list imported successfully' }), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.success('Data Exported', { description: 'Registration data exported to CSV' }), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to use state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -770,6 +766,11 @@ export default function RegistrationsClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
+  // Quick Action Dialog State
+  const [showNewEventDialog, setShowNewEventDialog] = useState(false)
+  const [showImportListDialog, setShowImportListDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
 
   // Form State
   const [formData, setFormData] = useState<RegistrationFormData>(initialFormData)
@@ -1147,6 +1148,13 @@ export default function RegistrationsClient() {
       toast.error('Export failed')
     }
   }
+
+  // Quick Actions with dialog handlers
+  const quickActions = [
+    { id: '1', label: 'New Event', icon: 'plus', action: () => setShowNewEventDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Import List', icon: 'upload', action: () => setShowImportListDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDataDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -2240,7 +2248,7 @@ export default function RegistrationsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockRegistrationsQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2650,6 +2658,162 @@ export default function RegistrationsClient() {
               disabled={isSaving}
             >
               {isSaving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deleting...</> : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Event Dialog */}
+      <Dialog open={showNewEventDialog} onOpenChange={setShowNewEventDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Create New Event</DialogTitle>
+            <DialogDescription>
+              Set up a new event for registrations. Fill in the event details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="event-name">Event Name</Label>
+              <Input id="event-name" placeholder="Enter event name" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="event-date">Event Date</Label>
+                <Input id="event-date" type="date" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="event-time">Event Time</Label>
+                <Input id="event-time" type="time" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-location">Location</Label>
+              <Input id="event-location" placeholder="Enter venue or virtual link" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-capacity">Capacity</Label>
+              <Input id="event-capacity" type="number" placeholder="Maximum attendees" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="event-description">Description</Label>
+              <Input id="event-description" placeholder="Brief event description" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewEventDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Event Created', { description: 'New event ready for registrations' })
+              setShowNewEventDialog(false)
+            }}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Event
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import List Dialog */}
+      <Dialog open={showImportListDialog} onOpenChange={setShowImportListDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Import Registration List</DialogTitle>
+            <DialogDescription>
+              Upload a CSV or Excel file containing registrant information.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 text-center">
+              <Download className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                Drag and drop your file here, or click to browse
+              </p>
+              <Button variant="outline" size="sm">
+                Choose File
+              </Button>
+              <p className="text-xs text-gray-500 mt-2">
+                Supported formats: CSV, XLSX (Max 10MB)
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Import Options</Label>
+              <div className="flex items-center space-x-2">
+                <Switch id="skip-duplicates" />
+                <Label htmlFor="skip-duplicates" className="font-normal">Skip duplicate emails</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch id="send-confirmations" />
+                <Label htmlFor="send-confirmations" className="font-normal">Send confirmation emails</Label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowImportListDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('List Imported', { description: 'Registration list imported successfully' })
+              setShowImportListDialog(false)
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Import List
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Export Registration Data</DialogTitle>
+            <DialogDescription>
+              Choose your export format and options.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="csv">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (.csv)</SelectItem>
+                  <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                  <SelectItem value="pdf">PDF (.pdf)</SelectItem>
+                  <SelectItem value="json">JSON (.json)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Data to Include</Label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Switch id="include-contact" defaultChecked />
+                  <Label htmlFor="include-contact" className="font-normal">Contact information</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="include-payment" defaultChecked />
+                  <Label htmlFor="include-payment" className="font-normal">Payment details</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="include-sessions" />
+                  <Label htmlFor="include-sessions" className="font-normal">Session selections</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Switch id="include-custom" />
+                  <Label htmlFor="include-custom" className="font-normal">Custom fields</Label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              toast.success('Data Exported', { description: 'Registration data exported to CSV' })
+              setShowExportDataDialog(false)
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Data
             </Button>
           </DialogFooter>
         </DialogContent>

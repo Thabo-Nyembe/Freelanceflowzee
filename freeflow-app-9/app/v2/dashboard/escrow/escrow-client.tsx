@@ -2742,6 +2742,242 @@ export default function EscrowClient() {
           </DialogContent>
         </Dialog>
 
+        {/* New Transfer Dialog */}
+        <Dialog open={showNewTransferDialog} onOpenChange={setShowNewTransferDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Send className="w-5 h-5 text-emerald-600" />
+                New Transfer
+              </DialogTitle>
+              <DialogDescription>
+                Initiate a new fund transfer between accounts
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="transfer-from">From Account</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select source account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="main">Main Platform Account</SelectItem>
+                    <SelectItem value="reserve">Reserve Account</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="transfer-to">To Account</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select destination" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockConnectedAccounts.map(account => (
+                      <SelectItem key={account.id} value={account.id}>{account.businessName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="transfer-amount">Amount</Label>
+                <div className="relative mt-1">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                  <Input
+                    id="transfer-amount"
+                    type="number"
+                    placeholder="0.00"
+                    className="pl-8"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="transfer-note">Note (optional)</Label>
+                <Input
+                  id="transfer-note"
+                  placeholder="Transfer description..."
+                  className="mt-1"
+                />
+              </div>
+              <DialogFooter className="pt-4">
+                <Button variant="outline" onClick={() => setShowNewTransferDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Transfer initiated'); setShowNewTransferDialog(false); }} className="bg-emerald-600 hover:bg-emerald-700">
+                  <Send className="w-4 h-4 mr-2" />
+                  Initiate Transfer
+                </Button>
+              </DialogFooter>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Payouts Dialog */}
+        <Dialog open={showViewPayoutsDialog} onOpenChange={setShowViewPayoutsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Wallet className="w-5 h-5 text-emerald-600" />
+                Payout History
+              </DialogTitle>
+              <DialogDescription>
+                View and manage your recent payouts
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto">
+              {mockPayouts.map(payout => (
+                <div key={payout.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${payout.method === 'instant' ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-emerald-100 dark:bg-emerald-900/30'}`}>
+                      {payout.method === 'instant' ? <Zap className="w-4 h-4 text-purple-600" /> : <Banknote className="w-4 h-4 text-emerald-600" />}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{payout.description}</p>
+                      <p className="text-xs text-gray-500">{payout.id} - {new Date(payout.createdAt).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900 dark:text-white">{formatCurrency(payout.amount)}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded ${getStatusColor(payout.status)}`}>
+                      {payout.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <DialogFooter className="pt-4">
+              <Button variant="outline" onClick={() => setShowViewPayoutsDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => { setShowViewPayoutsDialog(false); setActiveTab('payouts'); }} className="bg-emerald-600 hover:bg-emerald-700">
+                View All Payouts
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Disputes Overview Dialog */}
+        <Dialog open={showDisputesDialog} onOpenChange={setShowDisputesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-orange-600" />
+                Dispute Cases
+              </DialogTitle>
+              <DialogDescription>
+                Review and manage active disputes
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 max-h-[400px] overflow-y-auto">
+              {mockDisputes.map(dispute => (
+                <div key={dispute.id} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${getStatusColor(dispute.status)}`}>
+                        {dispute.status.replace('_', ' ')}
+                      </span>
+                      <span className="text-sm text-gray-500">{dispute.id}</span>
+                    </div>
+                    <span className="font-semibold text-gray-900 dark:text-white">{formatCurrency(dispute.amount)}</span>
+                  </div>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-1">
+                    Reason: <span className="font-medium">{dispute.reason.replace('_', ' ')}</span>
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Customer: {dispute.customer} - Due by {new Date(dispute.dueBy).toLocaleDateString()}
+                  </p>
+                  {dispute.status === 'needs_response' && (
+                    <Button size="sm" className="mt-2 bg-orange-600 hover:bg-orange-700">
+                      Respond Now
+                    </Button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <DialogFooter className="pt-4">
+              <Button variant="outline" onClick={() => setShowDisputesDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => { setShowDisputesDialog(false); setActiveTab('disputes'); }} className="bg-emerald-600 hover:bg-emerald-700">
+                View All Disputes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Dialog */}
+        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-emerald-600" />
+                Escrow Reports
+              </DialogTitle>
+              <DialogDescription>
+                Generate and download escrow reports
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Report Type</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select report type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="transactions">Transaction Summary</SelectItem>
+                    <SelectItem value="payouts">Payout Report</SelectItem>
+                    <SelectItem value="disputes">Dispute Analysis</SelectItem>
+                    <SelectItem value="fees">Fee Summary</SelectItem>
+                    <SelectItem value="accounts">Connected Accounts</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select date range" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                    <SelectItem value="30d">Last 30 days</SelectItem>
+                    <SelectItem value="90d">Last 90 days</SelectItem>
+                    <SelectItem value="ytd">Year to date</SelectItem>
+                    <SelectItem value="custom">Custom range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Format</Label>
+                <div className="flex gap-2 mt-1">
+                  <Button variant="outline" className="flex-1">
+                    <Download className="w-4 h-4 mr-2" />
+                    CSV
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Download className="w-4 h-4 mr-2" />
+                    PDF
+                  </Button>
+                  <Button variant="outline" className="flex-1">
+                    <Download className="w-4 h-4 mr-2" />
+                    Excel
+                  </Button>
+                </div>
+              </div>
+              <DialogFooter className="pt-4">
+                <Button variant="outline" onClick={() => setShowReportsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => { toast.success('Report generated successfully'); setShowReportsDialog(false); }} className="bg-emerald-600 hover:bg-emerald-700">
+                  Generate Report
+                </Button>
+              </DialogFooter>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </div>
     </div>
   )

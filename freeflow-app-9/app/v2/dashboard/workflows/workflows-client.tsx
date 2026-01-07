@@ -434,6 +434,10 @@ export default function WorkflowsClient() {
   const [newWorkflowDescription, setNewWorkflowDescription] = useState('')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
 
+  // Quick action dialog states
+  const [showRunTestDialog, setShowRunTestDialog] = useState(false)
+  const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
+
   // Real Supabase hook
   const {
     workflows: dbWorkflows,

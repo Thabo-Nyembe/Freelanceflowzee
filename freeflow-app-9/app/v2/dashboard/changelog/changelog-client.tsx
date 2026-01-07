@@ -2658,6 +2658,172 @@ Thanks to all contributors!`}
           </DialogContent>
         </Dialog>
 
+        {/* Compare Versions Dialog */}
+        <Dialog open={showCompareDialog} onOpenChange={setShowCompareDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="h-5 w-5" />
+                Compare Versions
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select two versions to compare their changes, commits, and contributors.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="base-version">Base Version</Label>
+                  <Select
+                    value={compareForm.baseVersion}
+                    onValueChange={(value) => setCompareForm(prev => ({ ...prev, baseVersion: value }))}
+                  >
+                    <SelectTrigger id="base-version">
+                      <SelectValue placeholder="Select base" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockReleases.map((release) => (
+                        <SelectItem key={release.id} value={release.tagName}>
+                          {release.tagName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="target-version">Target Version</Label>
+                  <Select
+                    value={compareForm.targetVersion}
+                    onValueChange={(value) => setCompareForm(prev => ({ ...prev, targetVersion: value }))}
+                  >
+                    <SelectTrigger id="target-version">
+                      <SelectValue placeholder="Select target" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {mockReleases.map((release) => (
+                        <SelectItem key={release.id} value={release.tagName}>
+                          {release.tagName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              {compareForm.baseVersion && compareForm.targetVersion && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm font-medium">
+                    Comparing {compareForm.baseVersion} ... {compareForm.targetVersion}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    View all changes between these versions
+                  </p>
+                </div>
+              )}
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setShowCompareDialog(false)
+                  setCompareForm({ baseVersion: '', targetVersion: '' })
+                }}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast.success('Comparison Ready', {
+                      description: `Comparing ${compareForm.baseVersion} to ${compareForm.targetVersion}`
+                    })
+                    setShowCompareDialog(false)
+                    setCompareForm({ baseVersion: '', targetVersion: '' })
+                  }}
+                  disabled={!compareForm.baseVersion || !compareForm.targetVersion}
+                >
+                  <GitBranch className="h-4 w-4 mr-2" />
+                  Compare
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notify Users Dialog */}
+        <Dialog open={showNotifyDialog} onOpenChange={setShowNotifyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Send Notification
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Notify users about new releases, updates, or important changes.
+              </p>
+              <div className="space-y-2">
+                <Label htmlFor="notify-release">Select Release</Label>
+                <Select>
+                  <SelectTrigger id="notify-release">
+                    <SelectValue placeholder="Select a release" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockReleases.filter(r => !r.isDraft).map((release) => (
+                      <SelectItem key={release.id} value={release.tagName}>
+                        {release.tagName} - {release.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="notify-message">Custom Message (Optional)</Label>
+                <Textarea
+                  id="notify-message"
+                  placeholder="Add a custom message to the notification..."
+                  rows={3}
+                  value={notifyForm.message}
+                  onChange={(e) => setNotifyForm(prev => ({ ...prev, message: e.target.value }))}
+                />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <Label>Notify All Users</Label>
+                  <p className="text-xs text-gray-500">Send to all subscribed users</p>
+                </div>
+                <Switch
+                  checked={notifyForm.notifyAll}
+                  onCheckedChange={(checked) => setNotifyForm(prev => ({ ...prev, notifyAll: checked }))}
+                />
+              </div>
+              <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                  <Users className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    {notifyForm.notifyAll ? 'All 2,450 users' : '0 users'} will be notified
+                  </span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => {
+                  setShowNotifyDialog(false)
+                  setNotifyForm({ message: '', notifyAll: false, selectedUsers: [] })
+                }}>
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast.success('Notifications Sent', {
+                      description: `Notified ${notifyForm.notifyAll ? 'all users' : 'selected users'} successfully`
+                    })
+                    setShowNotifyDialog(false)
+                    setNotifyForm({ message: '', notifyAll: false, selectedUsers: [] })
+                  }}
+                >
+                  <Bell className="h-4 w-4 mr-2" />
+                  Send Notifications
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {loading && (
           <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 shadow-lg rounded-lg p-4 flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-slate-600" />

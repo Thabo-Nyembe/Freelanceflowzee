@@ -426,6 +426,24 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [editingBroadcast, setEditingBroadcast] = useState<Broadcast | null>(null)
 
+  // Additional dialog states for button functionality
+  const [showImportContactsDialog, setShowImportContactsDialog] = useState(false)
+  const [showCreateAutomationDialog, setShowCreateAutomationDialog] = useState(false)
+  const [showCreateSeriesDialog, setShowCreateSeriesDialog] = useState(false)
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false)
+  const [showCreateSegmentDialog, setShowCreateSegmentDialog] = useState(false)
+  const [showDefineEventDialog, setShowDefineEventDialog] = useState(false)
+  const [showConfigureDmarcDialog, setShowConfigureDmarcDialog] = useState(false)
+  const [showAddWebhookDialog, setShowAddWebhookDialog] = useState(false)
+  const [showManageSubscriptionDialog, setShowManageSubscriptionDialog] = useState(false)
+  const [showUpgradePlanDialog, setShowUpgradePlanDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
+  const [showPurgeContactsDialog, setShowPurgeContactsDialog] = useState(false)
+  const [showDeleteCampaignsDialog, setShowDeleteCampaignsDialog] = useState(false)
+  const [showCloseAccountDialog, setShowCloseAccountDialog] = useState(false)
+  const [showConfigureAppDialog, setShowConfigureAppDialog] = useState(false)
+  const [selectedApp, setSelectedApp] = useState<string | null>(null)
+
   // Form state
   const [formData, setFormData] = useState({
     title: '',
@@ -770,7 +788,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <p className="text-gray-600 dark:text-gray-400 mt-1">Engage your audience with targeted messaging campaigns</p>
           </div>
           <div className="flex gap-3">
-            <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <button
+              onClick={() => setShowImportContactsDialog(true)}
+              className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
               Import Contacts
             </button>
             <button
@@ -1069,7 +1089,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {mockAutomations.length} automations • {mockAutomations.filter(a => a.status === 'active').length} active
               </div>
-              <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+              <button
+                onClick={() => setShowCreateAutomationDialog(true)}
+                className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
                 + Create Automation
               </button>
             </div>
@@ -1137,7 +1159,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {mockSeries.length} series • {mockSeries.reduce((sum, s) => sum + s.enrolledCount, 0).toLocaleString()} enrolled
               </div>
-              <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+              <button
+                onClick={() => setShowCreateSeriesDialog(true)}
+                className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
                 + Create Series
               </button>
             </div>
@@ -1211,7 +1235,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">Used {template.usageCount} times</div>
                 </div>
               ))}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
+              <div
+                onClick={() => setShowCreateTemplateDialog(true)}
+                className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border-2 border-dashed border-gray-200 dark:border-gray-700 flex flex-col items-center justify-center cursor-pointer hover:border-violet-300 dark:hover:border-violet-700 transition-colors">
                 <div className="w-16 h-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-2xl text-gray-400 mb-4">+</div>
                 <span className="text-gray-600 dark:text-gray-400">Create Template</span>
               </div>
@@ -1223,7 +1249,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Audience Segments</h3>
-                <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+                <button
+                  onClick={() => setShowCreateSegmentDialog(true)}
+                  className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
                   + Create Segment
                 </button>
               </div>
@@ -1278,7 +1306,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Event Tracking</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Track user events and trigger automations</p>
                 </div>
-                <button className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
+                <button
+                  onClick={() => setShowDefineEventDialog(true)}
+                  className="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm hover:bg-violet-700 transition-colors">
                   + Define Event
                 </button>
               </div>
@@ -1309,7 +1339,9 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           )}
                         </td>
                         <td className="py-3 px-4 text-right">
-                          <button className="text-violet-600 hover:text-violet-700 text-sm">Create Automation</button>
+                          <button
+                            onClick={() => setShowCreateAutomationDialog(true)}
+                            className="text-violet-600 hover:text-violet-700 text-sm">Create Automation</button>
                         </td>
                       </tr>
                     ))}
@@ -1805,7 +1837,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                               <p className="text-sm text-amber-600 dark:text-amber-500">Recommended for full protection</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Configure</Button>
+                          <Button variant="outline" size="sm" onClick={() => setShowConfigureDmarcDialog(true)}>Configure</Button>
                         </div>
 
                         <div className="space-y-2 pt-4">
@@ -1896,7 +1928,7 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           </div>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddWebhookDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook Endpoint
                         </Button>
@@ -1916,10 +1948,10 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="bc_live_xxxxxxxxxxxxxxxxxxxxx" readOnly />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('bc_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('API key copied to clipboard'); }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => toast.info('API key refresh requires confirmation. Please contact support.')}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1970,7 +2002,11 @@ export default function BroadcastsClient({ initialBroadcasts }: { initialBroadca
                                 <p className="text-sm text-gray-500">{idx < 2 ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={idx < 2 ? 'outline' : 'default'} size="sm">
+                            <Button
+                              variant={idx < 2 ? 'outline' : 'default'}
+                              size="sm"
+                              onClick={() => { setSelectedApp(app); setShowConfigureAppDialog(true); }}
+                            >
                               {idx < 2 ? 'Configure' : 'Connect'}
                             </Button>
                           </div>

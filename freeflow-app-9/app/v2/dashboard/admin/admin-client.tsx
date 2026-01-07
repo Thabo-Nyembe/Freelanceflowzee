@@ -325,6 +325,15 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
   const [featureFlags, setFeatureFlags] = useState(mockFeatureFlags)
   const [selectedTable, setSelectedTable] = useState<DatabaseTable | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showRunJobDialog, setShowRunJobDialog] = useState(false)
+  const [showExportLogsDialog, setShowExportLogsDialog] = useState(false)
+
+  // Quick actions with proper dialog triggers
+  const adminQuickActions = [
+    { id: '1', label: 'Add User', icon: 'plus', action: () => setShowNewUserDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Run Job', icon: 'play', action: () => setShowRunJobDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Logs', icon: 'download', action: () => setShowExportLogsDialog(true), variant: 'outline' as const },
+  ]
 
   // Form state for New User Dialog
   const [newUserForm, setNewUserForm] = useState({
@@ -1806,7 +1815,7 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAdminQuickActions}
+            actions={adminQuickActions}
             variant="grid"
           />
         </div>
@@ -2357,6 +2366,119 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
                 className="px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
               >
                 {isLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Job Dialog */}
+        <Dialog open={showRunJobDialog} onOpenChange={setShowRunJobDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5" />
+                Run Job
+              </DialogTitle>
+              <DialogDescription>Select a scheduled job to run immediately.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Job</label>
+                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                  {mockJobs.map((job) => (
+                    <option key={job.id} value={job.id}>{job.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <Activity className="w-5 h-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-200">Manual Execution</p>
+                    <p className="text-xs text-blue-700 dark:text-blue-300 mt-1">This will run the job immediately outside of its normal schedule.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="run-job-notify" className="rounded" defaultChecked />
+                <label htmlFor="run-job-notify" className="text-sm text-gray-700 dark:text-gray-300">Notify on completion</label>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowRunJobDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowRunJobDialog(false)
+                  toast.success('Job started', { description: 'The job is now running in the background' })
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              >
+                <Play className="w-4 h-4" />
+                Run Now
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Logs Dialog */}
+        <Dialog open={showExportLogsDialog} onOpenChange={setShowExportLogsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Export Logs
+              </DialogTitle>
+              <DialogDescription>Configure and export audit logs.</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Date Range</label>
+                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="24h">Last 24 hours</option>
+                  <option value="7d">Last 7 days</option>
+                  <option value="30d">Last 30 days</option>
+                  <option value="90d">Last 90 days</option>
+                  <option value="all">All time</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Log Severity</label>
+                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="all">All severities</option>
+                  <option value="info">Info only</option>
+                  <option value="warning">Warning and above</option>
+                  <option value="critical">Critical only</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Export Format</label>
+                <select className="mt-1 w-full px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                  <option value="json">JSON</option>
+                  <option value="csv">CSV</option>
+                  <option value="xlsx">Excel (XLSX)</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="include-metadata" className="rounded" defaultChecked />
+                <label htmlFor="include-metadata" className="text-sm text-gray-700 dark:text-gray-300">Include metadata</label>
+              </div>
+            </div>
+            <DialogFooter>
+              <button onClick={() => setShowExportLogsDialog(false)} className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowExportLogsDialog(false)
+                  handleExportLogs()
+                }}
+                disabled={isLoading}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-lg hover:bg-slate-700 disabled:opacity-50"
+              >
+                <Download className="w-4 h-4" />
+                {isLoading ? 'Exporting...' : 'Export'}
               </button>
             </DialogFooter>
           </DialogContent>

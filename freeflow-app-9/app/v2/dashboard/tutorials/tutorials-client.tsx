@@ -434,20 +434,7 @@ const mockTutorialsActivities = [
   { id: '3', user: 'Content Creator', action: 'Uploaded', target: '12 new tutorial videos', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockTutorialsQuickActions = [
-  { id: '1', label: 'New Course', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new course...', success: 'Course created - Start adding content', error: 'Failed to create course' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Upload', icon: 'upload', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Preparing upload...', success: 'Upload dialog ready', error: 'Failed to initialize upload' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 900)),
-    { loading: 'Loading course analytics...', success: 'Analytics dashboard loaded', error: 'Failed to load analytics' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function TutorialsClient({ initialTutorials, initialStats }: TutorialsClientProps) {
   const { tutorials, stats } = useTutorials(initialTutorials, initialStats)

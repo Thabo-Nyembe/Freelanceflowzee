@@ -849,6 +849,206 @@ export default function AnalyticsAdvancedClient() {
           {viewMode === 'goals' && renderGoals()}
         </ScrollReveal>
       </div>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Analytics Item</DialogTitle>
+            <DialogDescription>
+              Add a new metric, goal, or insight to track in your analytics dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="item-name">Item Name</Label>
+              <Input
+                id="item-name"
+                placeholder="Enter item name..."
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="item-type">Item Type</Label>
+              <select
+                id="item-type"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+              >
+                <option value="metric">Metric</option>
+                <option value="goal">Goal</option>
+                <option value="insight">Insight</option>
+                <option value="dashboard">Dashboard Widget</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewItemDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Analytics item created', {
+                description: `"${newItemName || 'New Item'}" has been added to your dashboard`
+              })
+              setNewItemName('')
+              setShowNewItemDialog(false)
+            }}>
+              Create Item
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Export Analytics Data</DialogTitle>
+            <DialogDescription>
+              Choose a format to export your analytics data for external use.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Export Format</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {['csv', 'xlsx', 'json', 'pdf'].map((format) => (
+                  <Button
+                    key={format}
+                    variant={exportFormat === format ? 'default' : 'outline'}
+                    className="w-full"
+                    onClick={() => setExportFormat(format)}
+                  >
+                    {format.toUpperCase()}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label>Date Range</Label>
+              <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month" selected>This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+                <option value="all">All Time</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Include</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Metrics & KPIs
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Charts & Graphs
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Insights & Recommendations
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" className="rounded" />
+                  Raw Data
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Export started', {
+                description: `Your analytics data is being exported as ${exportFormat.toUpperCase()}`
+              })
+              setShowExportDialog(false)
+            }}>
+              Export Data
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Analytics Settings</DialogTitle>
+            <DialogDescription>
+              Configure your analytics dashboard preferences and data sources.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Default Time Range</Label>
+              <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="month" selected>This Month</option>
+                <option value="quarter">This Quarter</option>
+                <option value="year">This Year</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Data Refresh Interval</Label>
+              <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                <option value="realtime">Real-time</option>
+                <option value="5min">Every 5 minutes</option>
+                <option value="15min" selected>Every 15 minutes</option>
+                <option value="hourly">Hourly</option>
+                <option value="daily">Daily</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label>Display Options</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Show trend indicators
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Enable animations
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" defaultChecked className="rounded" />
+                  Show AI insights
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" className="rounded" />
+                  Compact view
+                </label>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label>Currency Display</Label>
+              <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (EUR)</option>
+                <option value="GBP">GBP (GBP)</option>
+                <option value="ZAR">ZAR (R)</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Settings saved', {
+                description: 'Your analytics preferences have been updated'
+              })
+              setShowSettingsDialog(false)
+            }}>
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

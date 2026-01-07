@@ -592,21 +592,6 @@ const mockAppStoreActivities = [
   { id: '3', user: 'Security', action: 'Flagged', target: 'Unknown app for review', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockAppStoreQuickActions = [
-  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading app catalog...', success: 'App catalog loaded', error: 'Failed to load catalog' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Install App', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Installing app...', success: 'App installed successfully', error: 'Installation failed' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Manage Apps', icon: 'settings', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Opening app manager...', success: 'App manager ready', error: 'Failed to open manager' }
-  ), variant: 'outline' as const },
-]
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -629,6 +614,11 @@ export default function AppStoreClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [loading, setLoading] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+
+  // Quick Actions Dialog States
+  const [showBrowseAppsDialog, setShowBrowseAppsDialog] = useState(false)
+  const [showInstallAppDialog, setShowInstallAppDialog] = useState(false)
+  const [showManageAppsDialog, setShowManageAppsDialog] = useState(false)
 
   // Fetch user on mount
   useEffect(() => {
@@ -2038,7 +2028,11 @@ export default function AppStoreClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAppStoreQuickActions}
+            actions={[
+              { id: '1', label: 'Browse Apps', icon: 'search', action: () => setShowBrowseAppsDialog(true), variant: 'default' as const },
+              { id: '2', label: 'Install App', icon: 'plus', action: () => setShowInstallAppDialog(true), variant: 'default' as const },
+              { id: '3', label: 'Manage Apps', icon: 'settings', action: () => setShowManageAppsDialog(true), variant: 'outline' as const },
+            ]}
             variant="grid"
           />
         </div>
@@ -2211,6 +2205,180 @@ export default function AppStoreClient() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Browse Apps Dialog */}
+      <Dialog open={showBrowseAppsDialog} onOpenChange={setShowBrowseAppsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Browse Apps
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder="Search for apps..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <div className="grid grid-cols-2 gap-3">
+              {['Productivity', 'Business', 'Creative', 'Finance', 'Developer', 'Analytics'].map((category) => (
+                <Button
+                  key={category}
+                  variant="outline"
+                  className="justify-start"
+                  onClick={() => {
+                    setCategoryFilter(category.toLowerCase() as AppCategory)
+                    setShowBrowseAppsDialog(false)
+                    setActiveTab('discover')
+                  }}
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  {category}
+                </Button>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowBrowseAppsDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                setShowBrowseAppsDialog(false)
+                setActiveTab('discover')
+              }}>
+                Browse All Apps
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Install App Dialog */}
+      <Dialog open={showInstallAppDialog} onOpenChange={setShowInstallAppDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Install New App
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Select an app to install from the available options below, or browse the full catalog.
+            </p>
+            <div className="space-y-2">
+              {apps.filter(app => app.status === 'available').slice(0, 5).map((app) => (
+                <div
+                  key={app.id}
+                  className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                  onClick={() => {
+                    setSelectedApp(app)
+                    setShowInstallAppDialog(false)
+                    setShowAppDialog(true)
+                  }}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium">{app.name}</p>
+                      <p className="text-xs text-muted-foreground">{app.developer.name}</p>
+                    </div>
+                  </div>
+                  <Button size="sm" onClick={(e) => {
+                    e.stopPropagation()
+                    handleInstallApp(app)
+                    setShowInstallAppDialog(false)
+                  }}>
+                    <Download className="w-3 h-3 mr-1" />
+                    Install
+                  </Button>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowInstallAppDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                setShowInstallAppDialog(false)
+                setActiveTab('discover')
+              }}>
+                Browse More Apps
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Apps Dialog */}
+      <Dialog open={showManageAppsDialog} onOpenChange={setShowManageAppsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5" />
+              Manage Installed Apps
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm text-muted-foreground pb-2 border-b">
+              <span>{apps.filter(app => app.status === 'installed').length} apps installed</span>
+              <span>{updates.length} updates available</span>
+            </div>
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+              {apps.filter(app => app.status === 'installed').map((app) => (
+                <div
+                  key={app.id}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white text-sm font-bold">
+                      {app.name.substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium">{app.name}</p>
+                      <p className="text-xs text-muted-foreground">v{app.version}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" onClick={() => {
+                      setSelectedApp(app)
+                      setShowManageAppsDialog(false)
+                      setShowAppDialog(true)
+                    }}>
+                      <Settings className="w-3 h-3 mr-1" />
+                      Settings
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-red-600" onClick={() => {
+                      handleUninstallApp(app)
+                      setShowManageAppsDialog(false)
+                    }}>
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {apps.filter(app => app.status === 'installed').length === 0 && (
+                <p className="text-center text-muted-foreground py-8">
+                  No apps installed yet. Browse the app store to get started.
+                </p>
+              )}
+            </div>
+            <div className="flex justify-end gap-2 pt-4 border-t">
+              <Button variant="outline" onClick={() => setShowManageAppsDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowManageAppsDialog(false)
+                setActiveTab('installed')
+              }}>
+                View All Installed
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

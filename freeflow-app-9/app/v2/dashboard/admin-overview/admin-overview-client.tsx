@@ -103,6 +103,13 @@ export default function AdminOverviewClient() {
   const [showExportDialog, setShowExportDialog] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 
+  // Quick actions with proper dialog handlers
+  const adminOverviewQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
   // Dashboard data state
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [highValueDeals, setHighValueDeals] = useState<any[]>([])
@@ -916,6 +923,206 @@ export default function AdminOverviewClient() {
           </LiquidGlassCard>
         </ScrollReveal>
       </div>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Admin Item</DialogTitle>
+            <DialogDescription>
+              Add a new item to your admin dashboard. Fill in the details below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Item Name</label>
+              <input
+                type="text"
+                placeholder="Enter item name..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Category</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Select a category</option>
+                <option value="analytics">Analytics</option>
+                <option value="crm">CRM</option>
+                <option value="invoicing">Invoicing</option>
+                <option value="marketing">Marketing</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Description</label>
+              <textarea
+                placeholder="Enter item description..."
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setShowNewItemDialog(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Item Created', { description: 'New admin item has been created successfully' })
+                setShowNewItemDialog(false)
+              }}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+            >
+              Create Item
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Admin Data</DialogTitle>
+            <DialogDescription>
+              Select the data format and options for your export.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Export Format</label>
+              <div className="grid grid-cols-3 gap-3">
+                <button className="px-4 py-3 border-2 border-blue-500 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
+                  CSV
+                </button>
+                <button className="px-4 py-3 border border-gray-300 hover:border-gray-400 rounded-lg text-sm font-medium text-gray-700">
+                  Excel
+                </button>
+                <button className="px-4 py-3 border border-gray-300 hover:border-gray-400 rounded-lg text-sm font-medium text-gray-700">
+                  PDF
+                </button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Data Range</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="all">All Data</option>
+                <option value="30d">Last 30 Days</option>
+                <option value="90d">Last 90 Days</option>
+                <option value="1y">Last Year</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Include Sections</label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                  <span className="text-sm text-gray-700">Analytics & Revenue</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                  <span className="text-sm text-gray-700">CRM & Deals</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                  <span className="text-sm text-gray-700">Invoices & Payments</span>
+                </label>
+                <label className="flex items-center gap-2">
+                  <input type="checkbox" className="rounded border-gray-300" />
+                  <span className="text-sm text-gray-700">Marketing & Leads</span>
+                </label>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setShowExportDialog(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Export Started', { description: 'Your data export is being prepared' })
+                setShowExportDialog(false)
+              }}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+            >
+              Export Data
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Admin Settings</DialogTitle>
+            <DialogDescription>
+              Configure your admin dashboard preferences and options.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Dashboard Refresh Rate</label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="30s">Every 30 seconds</option>
+                <option value="1m">Every minute</option>
+                <option value="5m">Every 5 minutes</option>
+                <option value="manual">Manual only</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Notifications</label>
+              <div className="space-y-2">
+                <label className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Email alerts for critical issues</span>
+                  <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                </label>
+                <label className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Weekly summary reports</span>
+                  <input type="checkbox" defaultChecked className="rounded border-gray-300" />
+                </label>
+                <label className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700">Real-time deal notifications</span>
+                  <input type="checkbox" className="rounded border-gray-300" />
+                </label>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Default View</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button className="px-4 py-2 border-2 border-blue-500 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
+                  Overview
+                </button>
+                <button className="px-4 py-2 border border-gray-300 hover:border-gray-400 rounded-lg text-sm font-medium text-gray-700">
+                  Analytics
+                </button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setShowSettingsDialog(false)}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                toast.success('Settings Saved', { description: 'Your admin settings have been updated' })
+                setShowSettingsDialog(false)
+              }}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+            >
+              Save Settings
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

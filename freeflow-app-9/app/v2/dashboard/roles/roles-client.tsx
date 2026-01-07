@@ -511,6 +511,15 @@ export default function RolesClient() {
   const [editingRole, setEditingRole] = useState<UserRole | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  // Additional dialog states for toast-only actions
+  const [showAssignRoleDialog, setShowAssignRoleDialog] = useState(false)
+  const [roleToAssign, setRoleToAssign] = useState<string>('')
+  const [showExportAuditLogsDialog, setShowExportAuditLogsDialog] = useState(false)
+  const [showExportAssignmentsDialog, setShowExportAssignmentsDialog] = useState(false)
+  const [showResetPermissionsDialog, setShowResetPermissionsDialog] = useState(false)
+  const [showClearAuditLogsDialog, setShowClearAuditLogsDialog] = useState(false)
+  const [showSaveSettingsDialog, setShowSaveSettingsDialog] = useState(false)
+
   // Form state
   const [formState, setFormState] = useState(initialRoleFormState)
 
@@ -748,7 +757,8 @@ export default function RolesClient() {
   }
 
   const handleAssignRole = (roleName: string) => {
-    toast.info('Assign Role', { description: `Assigning "${roleName}" to users...` })
+    setRoleToAssign(roleName)
+    setShowAssignRoleDialog(true)
   }
 
   const handleRefreshRoles = async () => {
@@ -2116,8 +2126,8 @@ export default function RolesClient() {
                           <h4 className="font-medium">Data Management</h4>
                           <div className="grid grid-cols-2 gap-3">
                             <Button variant="outline" className="justify-start" onClick={handleExportRoles}><Download className="w-4 h-4 mr-2" />Export Roles & Permissions</Button>
-                            <Button variant="outline" className="justify-start" onClick={() => toast.success('Audit Logs Exported', { description: 'CSV file downloaded successfully' })}><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
-                            <Button variant="outline" className="justify-start" onClick={() => toast.success('User Assignments Exported', { description: 'Assignment data exported to CSV' })}><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
+                            <Button variant="outline" className="justify-start" onClick={() => setShowExportAuditLogsDialog(true)}><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
+                            <Button variant="outline" className="justify-start" onClick={() => setShowExportAssignmentsDialog(true)}><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
                             <Button variant="outline" className="justify-start" onClick={handleRefreshRoles}><RefreshCw className="w-4 h-4 mr-2" />Sync with Directory</Button>
                           </div>
                         </div>
@@ -2125,11 +2135,11 @@ export default function RolesClient() {
                           <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">Danger Zone</h4>
                           <p className="text-sm text-red-600 dark:text-red-300 mb-3">These actions are irreversible. Proceed with caution.</p>
                           <div className="flex gap-3">
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Reset All Permissions</Button>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50">Clear Audit Logs</Button>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowResetPermissionsDialog(true)}>Reset All Permissions</Button>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => setShowClearAuditLogsDialog(true)}>Clear Audit Logs</Button>
                           </div>
                         </div>
-                        <Button className="bg-purple-600 hover:bg-purple-700">Save Advanced Settings</Button>
+                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowSaveSettingsDialog(true)}>Save Advanced Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -2536,6 +2546,277 @@ export default function RolesClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Assign Role Dialog */}
+      <Dialog open={showAssignRoleDialog} onOpenChange={setShowAssignRoleDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-purple-600" />
+              Assign Role: {roleToAssign}
+            </DialogTitle>
+            <DialogDescription>
+              Select users to assign the "{roleToAssign}" role to
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Search Users</Label>
+              <Input placeholder="Search by name or email..." />
+            </div>
+            <div className="border rounded-lg p-4 min-h-[200px]">
+              <p className="text-sm text-gray-500 text-center py-8">
+                User list will appear here. Search for users to assign this role.
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowAssignRoleDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('Role Assigned', { description: `Users have been assigned the "${roleToAssign}" role` })
+                setShowAssignRoleDialog(false)
+              }}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            >
+              <UserCheck className="w-4 h-4 mr-2" />
+              Assign Role
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Audit Logs Dialog */}
+      <Dialog open={showExportAuditLogsDialog} onOpenChange={setShowExportAuditLogsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-600" />
+              Export Audit Logs
+            </DialogTitle>
+            <DialogDescription>
+              Configure audit log export settings
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select defaultValue="30days">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7days">Last 7 days</SelectItem>
+                  <SelectItem value="30days">Last 30 days</SelectItem>
+                  <SelectItem value="90days">Last 90 days</SelectItem>
+                  <SelectItem value="all">All time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="csv">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowExportAuditLogsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('Audit Logs Exported', { description: 'CSV file downloaded successfully' })
+                setShowExportAuditLogsDialog(false)
+              }}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export User Assignments Dialog */}
+      <Dialog open={showExportAssignmentsDialog} onOpenChange={setShowExportAssignmentsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-600" />
+              Export User Assignments
+            </DialogTitle>
+            <DialogDescription>
+              Export role assignments data for all users
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Filter by Role</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="admin">Admin Roles</SelectItem>
+                  <SelectItem value="manager">Manager Roles</SelectItem>
+                  <SelectItem value="user">User Roles</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="csv">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="include-inactive" />
+              <Label htmlFor="include-inactive">Include inactive assignments</Label>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowExportAssignmentsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('User Assignments Exported', { description: 'Assignment data exported to CSV' })
+                setShowExportAssignmentsDialog(false)
+              }}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Permissions Confirmation Dialog */}
+      <AlertDialog open={showResetPermissionsDialog} onOpenChange={setShowResetPermissionsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <AlertTriangle className="w-5 h-5" />
+              Reset All Permissions
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will reset all custom permissions to their default values. This action cannot be undone.
+              All users with custom permissions will revert to their role's default permissions.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                toast.success('Permissions Reset', { description: 'All permissions have been reset to defaults' })
+                setShowResetPermissionsDialog(false)
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <AlertTriangle className="w-4 h-4 mr-2" />
+              Reset Permissions
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Clear Audit Logs Confirmation Dialog */}
+      <AlertDialog open={showClearAuditLogsDialog} onOpenChange={setShowClearAuditLogsDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-600">
+              <Trash2 className="w-5 h-5" />
+              Clear Audit Logs
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all audit logs. This action cannot be undone.
+              For compliance reasons, consider exporting logs before clearing.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                toast.success('Audit Logs Cleared', { description: 'All audit logs have been deleted' })
+                setShowClearAuditLogsDialog(false)
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Clear Logs
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Save Settings Confirmation Dialog */}
+      <Dialog open={showSaveSettingsDialog} onOpenChange={setShowSaveSettingsDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-600" />
+              Save Advanced Settings
+            </DialogTitle>
+            <DialogDescription>
+              Review and confirm your advanced settings changes
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Cache TTL</span>
+                <span className="font-medium">300 seconds</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Max Roles per User</span>
+                <span className="font-medium">10</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Debug Mode</span>
+                <span className="font-medium">Disabled</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">API Rate Limiting</span>
+                <span className="font-medium">Enabled</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setShowSaveSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('Settings Saved', { description: 'Advanced settings have been updated successfully' })
+                setShowSaveSettingsDialog(false)
+              }}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Save Settings
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

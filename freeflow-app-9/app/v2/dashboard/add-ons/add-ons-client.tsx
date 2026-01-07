@@ -1797,7 +1797,7 @@ export default function AddOnsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAddOnsQuickActions}
+            actions={quickActionsWithDialogs}
             variant="grid"
           />
         </div>
@@ -1904,6 +1904,154 @@ export default function AddOnsClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Browse Add-Ons Dialog */}
+        <Dialog open={showBrowseDialog} onOpenChange={setShowBrowseDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Store className="w-5 h-5 text-orange-500" />
+                Browse Add-Ons Marketplace
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Explore our marketplace with {stats.totalAddOns} add-ons across multiple categories.
+              </p>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20">
+                  <div className="text-2xl font-bold text-orange-600">{stats.freeCount}</div>
+                  <div className="text-sm text-gray-500">Free Add-Ons</div>
+                </div>
+                <div className="p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20">
+                  <div className="text-2xl font-bold text-purple-600">{stats.paidCount}</div>
+                  <div className="text-sm text-gray-500">Premium Add-Ons</div>
+                </div>
+                <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20">
+                  <div className="text-2xl font-bold text-amber-600">{stats.featuredCount}</div>
+                  <div className="text-sm text-gray-500">Featured</div>
+                </div>
+                <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <div className="text-2xl font-bold text-green-600">{stats.installedAddOns}</div>
+                  <div className="text-sm text-gray-500">Installed</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowBrowseDialog(false)}>
+                  Close
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-orange-500 to-pink-600 text-white"
+                  onClick={() => {
+                    setShowBrowseDialog(false)
+                    setActiveTab('discover')
+                  }}
+                >
+                  <Store className="w-4 h-4 mr-2" />
+                  Go to Marketplace
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Update All Dialog */}
+        <Dialog open={showUpdateAllDialog} onOpenChange={setShowUpdateAllDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-purple-500" />
+                Update All Add-Ons
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Check and update all your installed add-ons to the latest versions.
+              </p>
+              <div className="p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Installed Add-Ons</span>
+                  <span className="font-bold text-blue-600">{stats.installedAddOns}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Updates Available</span>
+                  <span className="font-bold text-yellow-600">{mockAddOns.filter(a => a.status === 'update_available').length}</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowUpdateAllDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-purple-500 to-violet-600 text-white"
+                  onClick={() => {
+                    setShowUpdateAllDialog(false)
+                    toast.success('Update check complete', {
+                      description: 'All add-ons are up to date!'
+                    })
+                  }}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Check for Updates
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Settings Dialog */}
+        <Dialog open={showQuickSettingsDialog} onOpenChange={setShowQuickSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-500" />
+                Add-Ons Quick Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Quick access to common add-on settings.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Auto-Updates</div>
+                    <div className="text-xs text-gray-500">Update add-ons automatically</div>
+                  </div>
+                  <input type="checkbox" defaultChecked className="toggle" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Notifications</div>
+                    <div className="text-xs text-gray-500">Get notified about new add-ons</div>
+                  </div>
+                  <input type="checkbox" defaultChecked className="toggle" />
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div>
+                    <div className="font-medium text-sm">Security Scans</div>
+                    <div className="text-xs text-gray-500">Scan add-ons before install</div>
+                  </div>
+                  <input type="checkbox" defaultChecked className="toggle" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowQuickSettingsDialog(false)}>
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowQuickSettingsDialog(false)
+                    setActiveTab('settings')
+                  }}
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  All Settings
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

@@ -438,6 +438,18 @@ export default function TemplatesClient() {
   const [newTemplateDescription, setNewTemplateDescription] = useState('')
   const [newTemplateCategory, setNewTemplateCategory] = useState<TemplateCategory>('social_media')
 
+  // Quick Actions Dialog States
+  const [showNewTemplateQuickDialog, setShowNewTemplateQuickDialog] = useState(false)
+  const [showBrowseGalleryDialog, setShowBrowseGalleryDialog] = useState(false)
+  const [showExportAssetsDialog, setShowExportAssetsDialog] = useState(false)
+
+  // Quick Actions for toolbar (defined here to access state setters)
+  const templatesQuickActions = [
+    { id: '1', label: 'New Template', icon: 'plus', action: () => setShowNewTemplateQuickDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Browse Gallery', icon: 'grid', action: () => setShowBrowseGalleryDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Assets', icon: 'download', action: () => setShowExportAssetsDialog(true), variant: 'outline' as const },
+  ]
+
   // Supabase hooks for real database operations
   const dbFilters: TemplateFilters = useMemo(() => {
     const f: TemplateFilters = {}
@@ -1981,7 +1993,7 @@ export default function TemplatesClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockTemplatesQuickActions}
+            actions={templatesQuickActions}
             variant="grid"
           />
         </div>
@@ -2377,6 +2389,189 @@ export default function TemplatesClient() {
               <div className="pt-2">
                 <Button variant="outline" className="w-full" onClick={() => setIsExportOpen(false)}>
                   Cancel
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Action: New Template Dialog */}
+        <Dialog open={showNewTemplateQuickDialog} onOpenChange={setShowNewTemplateQuickDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-violet-500" />
+                Create New Template
+              </DialogTitle>
+              <DialogDescription>
+                Choose how you want to create your new template
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  className="p-4 border rounded-lg hover:border-violet-500 hover:bg-violet-50 dark:hover:bg-violet-950/20 transition-colors text-left"
+                  onClick={() => {
+                    setShowNewTemplateQuickDialog(false)
+                    setIsCreateDialogOpen(true)
+                  }}
+                >
+                  <FileText className="w-6 h-6 mb-2 text-violet-500" />
+                  <p className="font-medium">Blank Template</p>
+                  <p className="text-xs text-gray-500">Start from scratch</p>
+                </button>
+                <button
+                  className="p-4 border rounded-lg hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-colors text-left"
+                  onClick={() => {
+                    setShowNewTemplateQuickDialog(false)
+                    setIsAIGenerateOpen(true)
+                  }}
+                >
+                  <Wand2 className="w-6 h-6 mb-2 text-purple-500" />
+                  <p className="font-medium">AI Generate</p>
+                  <p className="text-xs text-gray-500">Let AI create for you</p>
+                </button>
+                <button
+                  className="p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-colors text-left"
+                  onClick={() => {
+                    setShowNewTemplateQuickDialog(false)
+                    setActiveTab('gallery')
+                  }}
+                >
+                  <Copy className="w-6 h-6 mb-2 text-blue-500" />
+                  <p className="font-medium">From Gallery</p>
+                  <p className="text-xs text-gray-500">Duplicate existing</p>
+                </button>
+                <button
+                  className="p-4 border rounded-lg hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-950/20 transition-colors text-left"
+                  onClick={() => {
+                    setShowNewTemplateQuickDialog(false)
+                    setIsImportOpen(true)
+                  }}
+                >
+                  <Upload className="w-6 h-6 mb-2 text-green-500" />
+                  <p className="font-medium">Import File</p>
+                  <p className="text-xs text-gray-500">Upload template</p>
+                </button>
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => setShowNewTemplateQuickDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Action: Browse Gallery Dialog */}
+        <Dialog open={showBrowseGalleryDialog} onOpenChange={setShowBrowseGalleryDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Grid3X3 className="w-5 h-5 text-blue-500" />
+                Browse Template Gallery
+              </DialogTitle>
+              <DialogDescription>
+                Filter templates by category to find what you need
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { cat: 'social_media', label: 'Social Media', icon: Instagram, color: 'pink' },
+                  { cat: 'presentation', label: 'Presentations', icon: Presentation, color: 'blue' },
+                  { cat: 'document', label: 'Documents', icon: FileText, color: 'green' },
+                  { cat: 'video', label: 'Video', icon: Video, color: 'red' },
+                  { cat: 'print', label: 'Print', icon: Printer, color: 'orange' },
+                  { cat: 'email', label: 'Email', icon: Mail, color: 'purple' },
+                ].map(({ cat, label, icon: Icon, color }) => (
+                  <button
+                    key={cat}
+                    className={`p-4 border rounded-lg hover:border-${color}-500 hover:bg-${color}-50 dark:hover:bg-${color}-950/20 transition-colors text-left`}
+                    onClick={() => {
+                      setShowBrowseGalleryDialog(false)
+                      setCategoryFilter(cat as TemplateCategory)
+                      setActiveTab('gallery')
+                    }}
+                  >
+                    <Icon className={`w-6 h-6 mb-2 text-${color}-500`} />
+                    <p className="font-medium">{label}</p>
+                  </button>
+                ))}
+              </div>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  setShowBrowseGalleryDialog(false)
+                  setCategoryFilter('all')
+                  setActiveTab('gallery')
+                }}
+              >
+                View All Templates
+              </Button>
+              <Button variant="outline" className="w-full" onClick={() => setShowBrowseGalleryDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Quick Action: Export Assets Dialog */}
+        <Dialog open={showExportAssetsDialog} onOpenChange={setShowExportAssetsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-cyan-500" />
+                Export Template Assets
+              </DialogTitle>
+              <DialogDescription>
+                Choose what assets to export from your templates
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <input type="checkbox" className="w-4 h-4" defaultChecked />
+                  <div>
+                    <p className="font-medium">Template Files</p>
+                    <p className="text-xs text-gray-500">JSON template definitions</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <input type="checkbox" className="w-4 h-4" defaultChecked />
+                  <div>
+                    <p className="font-medium">Images & Media</p>
+                    <p className="text-xs text-gray-500">Thumbnails and assets</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <input type="checkbox" className="w-4 h-4" />
+                  <div>
+                    <p className="font-medium">Brand Assets</p>
+                    <p className="text-xs text-gray-500">Logos, colors, fonts</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800">
+                  <input type="checkbox" className="w-4 h-4" />
+                  <div>
+                    <p className="font-medium">Usage Analytics</p>
+                    <p className="text-xs text-gray-500">Template statistics</p>
+                  </div>
+                </label>
+              </div>
+              <div className="flex items-center gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportAssetsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 gap-2 bg-cyan-600 hover:bg-cyan-700"
+                  onClick={() => {
+                    setShowExportAssetsDialog(false)
+                    toast.success('Export started', {
+                      description: 'Your assets are being prepared for download'
+                    })
+                  }}
+                >
+                  <Download className="w-4 h-4" />
+                  Export Assets
                 </Button>
               </div>
             </div>

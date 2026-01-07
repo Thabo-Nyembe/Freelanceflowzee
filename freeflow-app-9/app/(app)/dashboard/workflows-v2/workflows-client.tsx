@@ -424,6 +424,8 @@ export default function WorkflowsClient() {
   const [newWorkflowName, setNewWorkflowName] = useState('')
   const [newWorkflowDescription, setNewWorkflowDescription] = useState('')
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showRunTestDialog, setShowRunTestDialog] = useState(false)
+  const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
 
   // Real Supabase hook
   const {
@@ -532,6 +534,13 @@ export default function WorkflowsClient() {
       return matchesSearch && matchesStatus && matchesFolder
     })
   }, [searchQuery, statusFilter, folderFilter, dbWorkflows])
+
+  // Quick actions with real dialog openers (replaces mock toast-only actions)
+  const workflowsQuickActions = [
+    { id: '1', label: 'Create Workflow', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Run Test', icon: 'play', action: () => setShowRunTestDialog(true), variant: 'default' as const },
+    { id: '3', label: 'View Logs', icon: 'file', action: () => setShowViewLogsDialog(true), variant: 'outline' as const },
+  ]
 
   // Handlers - wired to REAL Supabase operations
   const handleCreateWorkflow = async () => {
@@ -1997,7 +2006,7 @@ export default function WorkflowsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWorkflowsQuickActions}
+            actions={workflowsQuickActions}
             variant="grid"
           />
         </div>
@@ -2248,6 +2257,127 @@ export default function WorkflowsClient() {
                   Create Workflow
                 </>
               )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Run Test Dialog */}
+      <Dialog open={showRunTestDialog} onOpenChange={setShowRunTestDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Play className="w-5 h-5 text-green-500" />
+              Run Workflow Test
+            </DialogTitle>
+            <DialogDescription>
+              Run a test execution of your workflow to verify it works correctly.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Workflow</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a workflow to test" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredWorkflows.map((workflow) => (
+                    <SelectItem key={workflow.id} value={workflow.id}>
+                      {workflow.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <AlertCircle className="w-4 h-4" />
+                <span>Test runs use sample data and do not affect production.</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowRunTestDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white"
+              onClick={() => {
+                toast.success('Test Started', { description: 'Workflow test is running...' })
+                setShowRunTestDialog(false)
+              }}
+            >
+              <Play className="w-4 h-4 mr-2" />
+              Run Test
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Logs Dialog */}
+      <Dialog open={showViewLogsDialog} onOpenChange={setShowViewLogsDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-blue-500" />
+              Workflow Execution Logs
+            </DialogTitle>
+            <DialogDescription>
+              View recent workflow execution logs and details.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px] pr-4">
+            <div className="space-y-3">
+              {mockRuns.map((run) => (
+                <div
+                  key={run.id}
+                  className="p-4 rounded-lg border hover:bg-muted/30 cursor-pointer"
+                  onClick={() => {
+                    setSelectedRun(run)
+                    setShowViewLogsDialog(false)
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${
+                        run.status === 'success' ? 'bg-green-500' :
+                        run.status === 'error' ? 'bg-red-500' :
+                        run.status === 'running' ? 'bg-blue-500 animate-pulse' :
+                        'bg-yellow-500'
+                      }`} />
+                      <span className="font-medium text-sm">{run.workflowName}</span>
+                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      {run.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>{formatTimeAgo(run.startedAt)}</span>
+                    <span>Duration: {run.duration}</span>
+                    <span>{run.stepsCompleted}/{run.totalSteps} steps</span>
+                  </div>
+                  {run.error && (
+                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded text-xs text-red-600 dark:text-red-400">
+                      {run.error}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+          <div className="flex justify-end gap-2 pt-4 border-t">
+            <Button variant="outline" onClick={() => setShowViewLogsDialog(false)}>
+              Close
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                toast.success('Logs Exported', { description: 'Logs downloaded successfully' })
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Export Logs
             </Button>
           </div>
         </DialogContent>

@@ -330,10 +330,11 @@ const widgetsActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const widgetsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Widget', { description: 'Widget creation form ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Started', { description: 'Widgets exported successfully' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Widget settings loaded' }) },
+// Quick actions placeholder - will be populated with actual handlers in component
+const widgetsQuickActionsTemplate = [
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N' },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E' },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S' },
 ]
 
 export default function WidgetsClient() {
@@ -368,6 +369,18 @@ export default function WidgetsClient() {
   const [isConfigureModalOpen, setIsConfigureModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
+  // QUICK ACTION DIALOG STATES
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // QUICK ACTIONS WITH REAL HANDLERS
+  const widgetsQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
 
   // FORM DATA
   const [widgetName, setWidgetName] = useState('')

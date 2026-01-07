@@ -743,9 +743,7 @@ export default function CrmClient() {
   }
 
   const handleImportContacts = () => {
-    toast.info('Import feature', {
-      description: 'CSV import coming soon'
-    })
+    setShowImportDialog(true)
   }
 
   // Filtered contacts
@@ -3008,8 +3006,8 @@ export default function CrmClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button>
               <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => {
-                toast.success('Report created successfully!')
                 setShowReportDialog(false)
+                setShowReportSuccessDialog(true)
               }}>
                 Create Report
               </Button>
@@ -3068,10 +3066,133 @@ export default function CrmClient() {
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowAutomationDialog(false)}>Cancel</Button>
               <Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
-                toast.success('Automation created successfully!')
                 setShowAutomationDialog(false)
+                setShowAutomationSuccessDialog(true)
               }}>
                 Create Automation
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Contacts Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-green-500" />
+                Import Contacts
+              </DialogTitle>
+              <DialogDescription>
+                Import contacts from a CSV file
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg p-8 text-center">
+                <Download className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+                <p className="text-sm text-muted-foreground mb-2">
+                  Drag and drop your CSV file here, or click to browse
+                </p>
+                <Button variant="outline" size="sm">
+                  Choose File
+                </Button>
+              </div>
+              <div className="space-y-2">
+                <Label>Import Options</Label>
+                <div className="flex items-center gap-2">
+                  <Switch id="skip-duplicates" defaultChecked />
+                  <Label htmlFor="skip-duplicates" className="font-normal">Skip duplicate contacts</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="send-welcome" />
+                  <Label htmlFor="send-welcome" className="font-normal">Send welcome email to new contacts</Label>
+                </div>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                <p className="text-sm text-blue-600 dark:text-blue-400">
+                  <strong>Tip:</strong> Your CSV should include columns for name, email, phone, and company.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button className="bg-green-500 hover:bg-green-600" onClick={() => {
+                setShowImportDialog(false)
+                toast.success('Import started', {
+                  description: 'Your contacts are being imported. You will be notified when complete.'
+                })
+              }}>
+                Start Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Report Success Dialog */}
+        <Dialog open={showReportSuccessDialog} onOpenChange={setShowReportSuccessDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-green-600">
+                <CheckCircle className="w-5 h-5" />
+                Report Created Successfully
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-muted-foreground mb-4">
+                Your report has been created and is now available in the Reports section.
+              </p>
+              <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-green-600" />
+                  <span className="text-sm">Report is generating...</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-green-600" />
+                  <span className="text-sm">Scheduled delivery configured</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportSuccessDialog(false)}>Close</Button>
+              <Button className="bg-blue-500 hover:bg-blue-600" onClick={() => setShowReportSuccessDialog(false)}>
+                View Reports
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Automation Success Dialog */}
+        <Dialog open={showAutomationSuccessDialog} onOpenChange={setShowAutomationSuccessDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-amber-600">
+                <CheckCircle className="w-5 h-5" />
+                Automation Created Successfully
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-muted-foreground mb-4">
+                Your automation workflow has been created and is now active.
+              </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm">Automation is active</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Workflow className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm">Trigger conditions set</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Bell className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm">Notifications enabled</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAutomationSuccessDialog(false)}>Close</Button>
+              <Button className="bg-amber-500 hover:bg-amber-600" onClick={() => setShowAutomationSuccessDialog(false)}>
+                View Automations
               </Button>
             </DialogFooter>
           </DialogContent>

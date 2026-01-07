@@ -1903,6 +1903,161 @@ export default function BuildsClient() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* New Build Dialog */}
+        <Dialog open={showNewBuildDialog} onOpenChange={setShowNewBuildDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-teal-600" />
+                Start New Build
+              </DialogTitle>
+              <DialogDescription>
+                Configure and trigger a new CI/CD build
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Workflow</label>
+                <select className="w-full p-2 border rounded-lg bg-background">
+                  <option>CI Pipeline</option>
+                  <option>Deploy Production</option>
+                  <option>Deploy Staging</option>
+                  <option>Nightly Build</option>
+                  <option>Security Scan</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Branch</label>
+                <Input placeholder="main" defaultValue="main" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Environment Variables (optional)</label>
+                <Input placeholder="KEY=value" />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowNewBuildDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
+                onClick={() => {
+                  toast.success('Build started', { description: 'New build has been queued' })
+                  setShowNewBuildDialog(false)
+                }}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Build
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Retry Build Dialog */}
+        <Dialog open={showRetryBuildDialog} onOpenChange={setShowRetryBuildDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-teal-600" />
+                Retry Build
+              </DialogTitle>
+              <DialogDescription>
+                Select a build to retry
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Select Build</label>
+                <select className="w-full p-2 border rounded-lg bg-background">
+                  {mockBuilds.slice(0, 5).map(build => (
+                    <option key={build.id} value={build.id}>
+                      #{build.build_number} - {build.workflow_name} ({build.status})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <AlertCircle className="w-4 h-4 text-amber-600" />
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  This will create a new run attempt with the same configuration
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowRetryBuildDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
+                onClick={() => {
+                  toast.success('Build retry initiated', { description: 'The build will restart shortly' })
+                  setShowRetryBuildDialog(false)
+                }}
+              >
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Retry Build
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Logs Dialog */}
+        <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="w-5 h-5 text-teal-600" />
+                Build Logs
+              </DialogTitle>
+              <DialogDescription>
+                View logs from recent builds
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-3">
+                <select className="flex-1 p-2 border rounded-lg bg-background text-sm">
+                  {mockBuilds.slice(0, 5).map(build => (
+                    <option key={build.id} value={build.id}>
+                      #{build.build_number} - {build.workflow_name}
+                    </option>
+                  ))}
+                </select>
+                <Button variant="outline" size="sm">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download
+                </Button>
+              </div>
+              <ScrollArea className="h-[400px] border rounded-lg bg-gray-950 p-4">
+                <pre className="text-xs text-green-400 font-mono whitespace-pre-wrap">
+{`[2024-01-15T10:00:00Z] Starting job: build
+[2024-01-15T10:00:00Z] Checking out repository...
+[2024-01-15T10:00:03Z] > git checkout main
+[2024-01-15T10:00:03Z] Already on 'main'
+[2024-01-15T10:00:03Z] Setting up Node.js 18.x...
+[2024-01-15T10:00:11Z] Node.js 18.19.0 installed
+[2024-01-15T10:00:11Z] Installing dependencies...
+[2024-01-15T10:00:11Z] > npm ci
+[2024-01-15T10:00:56Z] added 1247 packages in 45s
+[2024-01-15T10:00:56Z] Running build...
+[2024-01-15T10:00:56Z] > npm run build
+[2024-01-15T10:02:25Z] Build completed successfully
+[2024-01-15T10:02:25Z] Running tests...
+[2024-01-15T10:02:30Z] > npm test
+[2024-01-15T10:05:30Z] Test Suites: 45 passed, 45 total
+[2024-01-15T10:05:30Z] Tests:       234 passed, 234 total
+[2024-01-15T10:05:30Z] Coverage: 87.5%
+[2024-01-15T10:07:42Z] Job completed successfully`}
+                </pre>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowLogsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

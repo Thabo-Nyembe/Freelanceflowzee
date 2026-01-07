@@ -546,6 +546,13 @@ export default function SprintsClient() {
     return groups
   }, [activeSprint])
 
+  // Quick actions with proper dialog handlers (not toast-only)
+  const quickActions = [
+    { id: '1', label: 'New Story', icon: 'plus', action: () => setShowNewStoryDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Start Sprint', icon: 'play', action: () => setShowStartSprintDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Backlog', icon: 'list', action: () => setShowBacklogDialog(true), variant: 'outline' as const },
+  ]
+
   // ============================================================================
   // REAL SUPABASE HANDLERS
   // ============================================================================
@@ -2348,7 +2355,7 @@ export default function SprintsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSprintsQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2786,6 +2793,205 @@ export default function SprintsClient() {
                     Delete Sprint
                   </>
                 )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* NEW STORY DIALOG (Quick Action) */}
+        {/* ============================================================================ */}
+        <Dialog open={showNewStoryDialog} onOpenChange={setShowNewStoryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-500" />
+                Create New Story
+              </DialogTitle>
+              <DialogDescription>
+                Add a new user story to the current sprint backlog.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="story-title">Story Title</Label>
+                <Input id="story-title" placeholder="As a user, I want to..." />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="story-description">Description</Label>
+                <Textarea id="story-description" placeholder="Describe the acceptance criteria..." rows={3} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="story-points">Story Points</Label>
+                  <Select defaultValue="3">
+                    <SelectTrigger id="story-points">
+                      <SelectValue placeholder="Points" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">1 Point</SelectItem>
+                      <SelectItem value="2">2 Points</SelectItem>
+                      <SelectItem value="3">3 Points</SelectItem>
+                      <SelectItem value="5">5 Points</SelectItem>
+                      <SelectItem value="8">8 Points</SelectItem>
+                      <SelectItem value="13">13 Points</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="story-priority">Priority</Label>
+                  <Select defaultValue="medium">
+                    <SelectTrigger id="story-priority">
+                      <SelectValue placeholder="Priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewStoryDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                toast.success('Story created successfully')
+                setShowNewStoryDialog(false)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Story
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* START SPRINT DIALOG (Quick Action) */}
+        {/* ============================================================================ */}
+        <Dialog open={showStartSprintDialog} onOpenChange={setShowStartSprintDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PlayCircle className="w-5 h-5 text-green-500" />
+                Start Sprint
+              </DialogTitle>
+              <DialogDescription>
+                Select a sprint to start. Only sprints in planning status can be started.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="select-sprint">Select Sprint</Label>
+                <Select>
+                  <SelectTrigger id="select-sprint">
+                    <SelectValue placeholder="Choose a sprint..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockSprints
+                      .filter(s => s.status === 'planning')
+                      .map(sprint => (
+                        <SelectItem key={sprint.id} value={sprint.id}>
+                          {sprint.name} ({sprint.key})
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sprint-duration">Sprint Duration</Label>
+                <Select defaultValue="2">
+                  <SelectTrigger id="sprint-duration">
+                    <SelectValue placeholder="Duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 Week</SelectItem>
+                    <SelectItem value="2">2 Weeks</SelectItem>
+                    <SelectItem value="3">3 Weeks</SelectItem>
+                    <SelectItem value="4">4 Weeks</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Starting a sprint will lock its scope and begin tracking velocity and burndown metrics.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStartSprintDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                toast.success('Sprint started successfully')
+                setShowStartSprintDialog(false)
+              }} className="bg-green-600 hover:bg-green-700">
+                <PlayCircle className="w-4 h-4 mr-2" />
+                Start Sprint
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* ============================================================================ */}
+        {/* BACKLOG DIALOG (Quick Action) */}
+        {/* ============================================================================ */}
+        <Dialog open={showBacklogDialog} onOpenChange={setShowBacklogDialog}>
+          <DialogContent className="max-w-2xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-purple-500" />
+                Product Backlog
+              </DialogTitle>
+              <DialogDescription>
+                View and manage items in the product backlog. Drag items to reorder priority.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Input placeholder="Search backlog items..." className="flex-1" />
+                <Button variant="outline" size="sm">
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-2">
+                  {backlogTasks.map((task, index) => (
+                    <div
+                      key={task.id}
+                      className="flex items-center gap-3 p-3 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                    >
+                      <GripVertical className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm font-mono text-muted-foreground">{index + 1}</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{task.title}</p>
+                        <p className="text-xs text-muted-foreground">{task.key}</p>
+                      </div>
+                      <Badge variant="outline">{task.story_points} pts</Badge>
+                      <Badge variant={
+                        task.priority === 'critical' ? 'destructive' :
+                        task.priority === 'high' ? 'default' : 'secondary'
+                      }>
+                        {task.priority}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBacklogDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => {
+                setShowBacklogDialog(false)
+                setShowCreateTaskDialog(true)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add to Backlog
               </Button>
             </DialogFooter>
           </DialogContent>

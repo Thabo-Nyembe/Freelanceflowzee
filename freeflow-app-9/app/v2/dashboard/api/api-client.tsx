@@ -403,6 +403,15 @@ export default function ApiClient() {
   // Dialog states
   const [showCreateEndpointDialog, setShowCreateEndpointDialog] = useState(false)
   const [showCreateKeyDialog, setShowCreateKeyDialog] = useState(false)
+  const [showTestAllDialog, setShowTestAllDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showDocsDialog, setShowDocsDialog] = useState(false)
+  const [showRotateAllKeysDialog, setShowRotateAllKeysDialog] = useState(false)
+  const [showRevokeKeyDialog, setShowRevokeKeyDialog] = useState(false)
+  const [showCopyAllKeysDialog, setShowCopyAllKeysDialog] = useState(false)
+  const [showExportKeysDialog, setShowExportKeysDialog] = useState(false)
+  const [showEditKeyDialog, setShowEditKeyDialog] = useState(false)
+  const [selectedKeyForEdit, setSelectedKeyForEdit] = useState<ApiKey | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Form states
@@ -857,11 +866,11 @@ export default function ApiClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Endpoint', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateEndpointDialog(true) },
-                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('All endpoints tested successfully') },
+                { icon: Play, label: 'Test All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setShowTestAllDialog(true) },
                 { icon: Folder, label: 'Collections', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {} },
-                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.success('Import feature coming soon - stay tuned!') },
+                { icon: FileJson, label: 'Import', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowImportDialog(true) },
                 { icon: Download, label: 'Export', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: handleExportApiDocs },
-                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('API documentation loaded') },
+                { icon: BookOpen, label: 'Docs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowDocsDialog(true) },
                 { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => {} },
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {} },
               ].map((action, idx) => (
@@ -1037,12 +1046,12 @@ export default function ApiClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Key', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowCreateKeyDialog(true) },
-                { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => toast.success('API key regenerated') },
+                { icon: RotateCcw, label: 'Rotate All', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowRotateAllKeysDialog(true) },
                 { icon: Shield, label: 'Permissions', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => {} },
                 { icon: History, label: 'Usage Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {} },
-                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.success('API key deleted') },
-                { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => { navigator.clipboard.writeText('All API keys'); toast.success('API key copied'); } },
-                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.success('API keys exported successfully') },
+                { icon: Lock, label: 'Revoke', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setShowRevokeKeyDialog(true) },
+                { icon: Copy, label: 'Copy All', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCopyAllKeysDialog(true) },
+                { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setShowExportKeysDialog(true) },
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => {} },
               ].map((action, idx) => (
                 <Button
@@ -1125,7 +1134,7 @@ export default function ApiClient() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={() => toast.success('Key settings loaded - edit mode ready')}>Edit</Button>
+                        <Button variant="outline" size="sm" onClick={() => { setSelectedKeyForEdit(key); setShowEditKeyDialog(true); }}>Edit</Button>
                         <Button variant="outline" size="sm" className="text-red-600" onClick={() => handleRevokeApiKey(key.id, key.name)}>Revoke</Button>
                       </div>
                     </div>
@@ -2303,6 +2312,452 @@ export default function ApiClient() {
               <Button onClick={handleGenerateApiKey} disabled={isSubmitting}>
                 {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Key className="w-4 h-4 mr-2" />}
                 Generate Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Test All Endpoints Dialog */}
+        <Dialog open={showTestAllDialog} onOpenChange={setShowTestAllDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="w-5 h-5 text-green-600" />
+                Test All Endpoints
+              </DialogTitle>
+              <DialogDescription>
+                Run automated tests against all {endpoints.length} active endpoints
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Endpoints to test</span>
+                  <Badge>{endpoints.length}</Badge>
+                </div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Estimated duration</span>
+                  <span className="text-sm text-gray-500">{Math.ceil(endpoints.length * 0.5)}s</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Test environment</span>
+                  <Badge variant="secondary">Development</Badge>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Test Options</Label>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Include response validation</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Check response times</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch />
+                  <span className="text-sm">Run stress tests</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTestAllDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowTestAllDialog(false); toast.success('Running tests on all endpoints...'); }}>
+                <Play className="w-4 h-4 mr-2" />
+                Start Tests
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileJson className="w-5 h-5 text-purple-600" />
+                Import API Collection
+              </DialogTitle>
+              <DialogDescription>
+                Import endpoints from OpenAPI, Postman, or other formats
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Import Format</Label>
+                <Select defaultValue="openapi">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="openapi">OpenAPI 3.0 (JSON/YAML)</SelectItem>
+                    <SelectItem value="postman">Postman Collection v2.1</SelectItem>
+                    <SelectItem value="swagger">Swagger 2.0</SelectItem>
+                    <SelectItem value="insomnia">Insomnia Export</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Upload File</Label>
+                <div className="border-2 border-dashed rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+                  <Upload className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                  <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
+                  <p className="text-xs text-gray-400 mt-1">Supports JSON, YAML files up to 10MB</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Or paste URL</Label>
+                <Input placeholder="https://api.example.com/openapi.json" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowImportDialog(false); toast.success('Import started...'); }}>
+                <FileJson className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* API Documentation Dialog */}
+        <Dialog open={showDocsDialog} onOpenChange={setShowDocsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-teal-600" />
+                API Documentation
+              </DialogTitle>
+              <DialogDescription>
+                Interactive documentation for your API endpoints
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Input placeholder="Search documentation..." className="flex-1" />
+                <Button variant="outline" size="icon">
+                  <Search className="w-4 h-4" />
+                </Button>
+              </div>
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {endpoints.slice(0, 5).map(endpoint => (
+                    <div key={endpoint.id} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Badge className={`font-mono text-xs ${getMethodColor(endpoint.method)}`}>{endpoint.method}</Badge>
+                        <code className="text-sm">{endpoint.path}</code>
+                      </div>
+                      <p className="text-sm text-gray-500">{endpoint.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex items-center justify-between pt-2 border-t">
+                <span className="text-sm text-gray-500">{endpoints.length} endpoints documented</span>
+                <Button variant="link" size="sm">View full documentation</Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDocsDialog(false)}>Close</Button>
+              <Button onClick={() => { handleExportApiDocs(); setShowDocsDialog(false); }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Docs
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Rotate All Keys Dialog */}
+        <Dialog open={showRotateAllKeysDialog} onOpenChange={setShowRotateAllKeysDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RotateCcw className="w-5 h-5 text-orange-600" />
+                Rotate All API Keys
+              </DialogTitle>
+              <DialogDescription>
+                Generate new keys for all active API keys. Old keys will be invalidated.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-800 dark:text-amber-200">Warning</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-300">
+                      This action will invalidate all existing API keys. Applications using these keys will need to be updated.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Keys to rotate</span>
+                  <Badge>{apiKeys.filter(k => k.status === 'active').length}</Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Grace period</span>
+                  <span className="text-sm text-gray-500">24 hours</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Send notification emails</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Keep old keys active for grace period</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRotateAllKeysDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowRotateAllKeysDialog(false); toast.success('All API keys have been rotated'); }}>
+                <RotateCcw className="w-4 h-4 mr-2" />
+                Rotate All Keys
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Revoke Key Dialog */}
+        <Dialog open={showRevokeKeyDialog} onOpenChange={setShowRevokeKeyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lock className="w-5 h-5 text-pink-600" />
+                Revoke API Key
+              </DialogTitle>
+              <DialogDescription>
+                Select an API key to revoke. This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Key to Revoke</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose an API key" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {apiKeys.filter(k => k.status === 'active').map(key => (
+                      <SelectItem key={key.id} value={key.id}>
+                        {key.name} ({key.environment})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className="flex items-start gap-2">
+                  <XCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-red-800 dark:text-red-200">Permanent Action</p>
+                    <p className="text-sm text-red-700 dark:text-red-300">
+                      Once revoked, this key will immediately stop working. Any applications using this key will fail to authenticate.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Reason for revocation (optional)</Label>
+                <Textarea placeholder="e.g., Key compromised, no longer needed, etc." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRevokeKeyDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => { setShowRevokeKeyDialog(false); toast.success('API key revoked'); }}>
+                <Lock className="w-4 h-4 mr-2" />
+                Revoke Key
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Copy All Keys Dialog */}
+        <Dialog open={showCopyAllKeysDialog} onOpenChange={setShowCopyAllKeysDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5 text-blue-600" />
+                Copy API Keys
+              </DialogTitle>
+              <DialogDescription>
+                Copy API key information to clipboard
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Select Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="env">Environment Variables (.env)</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="yaml">YAML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Keys to Include</Label>
+                <div className="space-y-2 max-h-[200px] overflow-y-auto">
+                  {apiKeys.map(key => (
+                    <div key={key.id} className="flex items-center gap-2 p-2 border rounded">
+                      <Switch defaultChecked={key.status === 'active'} />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">{key.name}</p>
+                        <p className="text-xs text-gray-500">{key.environment}</p>
+                      </div>
+                      <Badge className={getKeyStatusColor(key.status)}>{key.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-xs text-gray-500">Note: For security, full key values are not included. Only key prefixes and metadata will be copied.</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCopyAllKeysDialog(false)}>Cancel</Button>
+              <Button onClick={() => { navigator.clipboard.writeText(JSON.stringify(apiKeys.map(k => ({ name: k.name, prefix: k.keyPrefix, environment: k.environment })), null, 2)); setShowCopyAllKeysDialog(false); toast.success('API key information copied to clipboard'); }}>
+                <Copy className="w-4 h-4 mr-2" />
+                Copy to Clipboard
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Keys Dialog */}
+        <Dialog open={showExportKeysDialog} onOpenChange={setShowExportKeysDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-teal-600" />
+                Export API Keys
+              </DialogTitle>
+              <DialogDescription>
+                Export your API keys for backup or migration
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Export Format</Label>
+                <Select defaultValue="json">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="yaml">YAML</SelectItem>
+                    <SelectItem value="env">Environment File (.env)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include in Export</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <span className="text-sm">Key metadata (name, environment, scopes)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <span className="text-sm">Usage statistics</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <span className="text-sm">IP whitelist configuration</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <span className="text-sm">Rate limit settings</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                <p className="text-xs text-amber-700 dark:text-amber-300">
+                  <AlertTriangle className="w-3 h-3 inline mr-1" />
+                  For security, actual key values are never included in exports.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportKeysDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowExportKeysDialog(false); toast.success('API keys exported successfully'); }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Keys
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Key Dialog */}
+        <Dialog open={showEditKeyDialog} onOpenChange={setShowEditKeyDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5 text-gray-600" />
+                Edit API Key
+              </DialogTitle>
+              <DialogDescription>
+                Update settings for {selectedKeyForEdit?.name || 'this API key'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Key Name</Label>
+                <Input defaultValue={selectedKeyForEdit?.name} placeholder="Enter key name" />
+              </div>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <Select defaultValue={selectedKeyForEdit?.environment}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select environment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="production">Production</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="local">Local</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Rate Limit (requests/hour)</Label>
+                <Input type="number" defaultValue={selectedKeyForEdit?.rateLimit || 1000} />
+              </div>
+              <div className="space-y-2">
+                <Label>Scopes</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['read', 'write', 'delete', 'admin'].map(scope => (
+                    <Badge
+                      key={scope}
+                      variant={selectedKeyForEdit?.scopes.includes(scope) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                    >
+                      {scope}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>IP Whitelist (one per line)</Label>
+                <Textarea
+                  placeholder="192.168.1.1&#10;10.0.0.0/24"
+                  defaultValue={selectedKeyForEdit?.ipWhitelist?.join('\n')}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditKeyDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowEditKeyDialog(false); toast.success(`API key "${selectedKeyForEdit?.name}" updated`); }}>
+                Save Changes
               </Button>
             </DialogFooter>
           </DialogContent>

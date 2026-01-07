@@ -2004,6 +2004,175 @@ export default function ContentStudioClient() {
             )}
           </DialogContent>
         </Dialog>
+
+        {/* New Entry Dialog */}
+        <Dialog open={showNewEntryDialog} onOpenChange={setShowNewEntryDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-purple-600" />
+                Create New Entry
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Content Type</label>
+                <select className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                  {mockContentTypes.map(type => (
+                    <option key={type.id} value={type.id}>{type.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                <Input placeholder="Enter entry title..." />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Slug</label>
+                <Input placeholder="entry-slug" className="font-mono" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Locale</label>
+                <select className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-gray-800">
+                  {mockLocales.filter(l => l.status === 'active').map(locale => (
+                    <option key={locale.id} value={locale.code}>{locale.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowNewEntryDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => {
+                  toast.success('Entry created', { description: 'New entry has been created successfully' })
+                  setShowNewEntryDialog(false)
+                }}>
+                  Create Entry
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Publish Dialog */}
+        <Dialog open={showBulkPublishDialog} onOpenChange={setShowBulkPublishDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-green-600" />
+                Bulk Publish Content
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-amber-800 dark:text-amber-300">Publish Multiple Entries</p>
+                    <p className="text-sm text-amber-700 dark:text-amber-400">This will publish all selected draft entries. Make sure content has been reviewed.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Select Entries to Publish</label>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {mockEntries.filter(e => e.status === 'draft' || e.status === 'changed').map(entry => (
+                    <div key={entry.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <div className="flex-1">
+                        <p className="font-medium text-gray-900 dark:text-white">{entry.title}</p>
+                        <p className="text-xs text-gray-500">{entry.content_type_name}</p>
+                      </div>
+                      <Badge className={getStatusColor(entry.status)}>{entry.status}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowBulkPublishDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                  toast.success('Content published', { description: 'Selected entries have been published' })
+                  setShowBulkPublishDialog(false)
+                }}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Publish Selected
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-blue-600" />
+                Export Content
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Export Format</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { id: 'json', label: 'JSON', description: 'Structured data format' },
+                    { id: 'csv', label: 'CSV', description: 'Spreadsheet compatible' },
+                    { id: 'xml', label: 'XML', description: 'Markup language format' },
+                    { id: 'yaml', label: 'YAML', description: 'Human-readable format' },
+                  ].map(format => (
+                    <label key={format.id} className="flex items-start gap-3 p-3 rounded-lg bg-gray-50 dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                      <input type="radio" name="format" value={format.id} defaultChecked={format.id === 'json'} className="mt-1" />
+                      <div>
+                        <p className="font-medium text-gray-900 dark:text-white">{format.label}</p>
+                        <p className="text-xs text-gray-500">{format.description}</p>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Content Types</label>
+                <div className="space-y-2">
+                  {mockContentTypes.map(type => (
+                    <label key={type.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-gray-900 dark:text-white">{type.name}</span>
+                      <Badge variant="outline" className="ml-auto">{type.entries_count}</Badge>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Include</label>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-3 p-2">
+                    <input type="checkbox" className="rounded" defaultChecked />
+                    <span className="text-gray-700 dark:text-gray-300">Include media assets</span>
+                  </label>
+                  <label className="flex items-center gap-3 p-2">
+                    <input type="checkbox" className="rounded" defaultChecked />
+                    <span className="text-gray-700 dark:text-gray-300">Include localized content</span>
+                  </label>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowExportDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  toast.success('Export started', { description: 'Your export is being prepared for download' })
+                  setShowExportDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Start Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

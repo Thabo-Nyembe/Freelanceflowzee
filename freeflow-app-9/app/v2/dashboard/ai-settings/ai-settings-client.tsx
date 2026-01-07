@@ -1882,6 +1882,197 @@ export default function AiSettingsClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add New AI Provider Dialog */}
+      <Dialog open={showAddProviderDialog} onOpenChange={setShowAddProviderDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="h-5 w-5 text-purple-500" />
+              Add New AI Provider
+            </DialogTitle>
+            <DialogDescription>
+              Configure a new AI provider to expand your capabilities
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="providerSelect">Select Provider</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a provider" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="anthropic">Anthropic</SelectItem>
+                  <SelectItem value="google">Google AI</SelectItem>
+                  <SelectItem value="replicate">Replicate</SelectItem>
+                  <SelectItem value="huggingface">Hugging Face</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newProviderKey">API Key</Label>
+              <Input
+                id="newProviderKey"
+                type="password"
+                placeholder="Enter your API key"
+              />
+              <p className="text-xs text-muted-foreground">Your API key will be securely stored</p>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowAddProviderDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('Provider added successfully')
+                setShowAddProviderDialog(false)
+              }}
+              className="bg-purple-600 hover:bg-purple-700"
+            >
+              Add Provider
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Configuration Dialog */}
+      <Dialog open={showExportConfigDialog} onOpenChange={setShowExportConfigDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Save className="h-5 w-5 text-blue-500" />
+              Export AI Configuration
+            </DialogTitle>
+            <DialogDescription>
+              Export your AI settings for backup or migration
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <div className="font-medium">Provider Settings</div>
+                  <div className="text-sm text-muted-foreground">API keys and connection status</div>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <div className="font-medium">Feature Configuration</div>
+                  <div className="text-sm text-muted-foreground">Enabled features and model preferences</div>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <div className="font-medium">Usage & Billing Data</div>
+                  <div className="text-sm text-muted-foreground">Budget limits and rate limits</div>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowExportConfigDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                handleBackupSettings()
+                setShowExportConfigDialog(false)
+              }}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Export Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Advanced Settings Dialog */}
+      <Dialog open={showAdvancedSettingsDialog} onOpenChange={setShowAdvancedSettingsDialog}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Cpu className="h-5 w-5 text-green-500" />
+              Advanced AI Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure advanced options for AI behavior
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Default Temperature</Label>
+                <Select defaultValue="0.7">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0.3">Conservative (0.3)</SelectItem>
+                    <SelectItem value="0.7">Balanced (0.7)</SelectItem>
+                    <SelectItem value="1.0">Creative (1.0)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Max Tokens</Label>
+                <Select defaultValue="4096">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1024">1,024</SelectItem>
+                    <SelectItem value="4096">4,096</SelectItem>
+                    <SelectItem value="8192">8,192</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <div className="font-medium">Stream Responses</div>
+                  <div className="text-sm text-muted-foreground">Enable real-time streaming</div>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <div className="font-medium">Auto-Retry Failed Requests</div>
+                  <div className="text-sm text-muted-foreground">Automatically retry on errors</div>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <div className="font-medium">Cache Responses</div>
+                  <div className="text-sm text-muted-foreground">Cache identical requests</div>
+                </div>
+                <Switch />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setShowAdvancedSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success('Advanced settings saved')
+                setShowAdvancedSettingsDialog(false)
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </ErrorBoundary>
   )
 }

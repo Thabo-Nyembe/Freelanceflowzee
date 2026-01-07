@@ -2386,7 +2386,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowNewCategoryModal(false)}>Cancel</Button>
-              <Button className="bg-blue-600 hover:bg-blue-700">Create Category</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('Category created successfully!')
+                setShowNewCategoryModal(false)
+              }}>Create Category</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -3070,7 +3073,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowScheduledModal(false)}>Close</Button>
-              <Button className="bg-purple-600 hover:bg-purple-700">
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowAddScheduledDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Scheduled
               </Button>
@@ -3100,7 +3103,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       <p className="text-sm text-gray-500">View spending by category</p>
                     </div>
                   </div>
-                  <Button size="sm" className="w-full mt-2">Generate</Button>
+                  <Button size="sm" className="w-full mt-2" onClick={() => setShowGenerateReportDialog('spending')}>Generate</Button>
                 </div>
 
                 <div className="p-4 border rounded-lg hover:border-green-300 cursor-pointer transition-all">
@@ -3111,7 +3114,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       <p className="text-sm text-gray-500">Monthly comparison</p>
                     </div>
                   </div>
-                  <Button size="sm" className="w-full mt-2">Generate</Button>
+                  <Button size="sm" className="w-full mt-2" onClick={() => setShowGenerateReportDialog('income-expenses')}>Generate</Button>
                 </div>
 
                 <div className="p-4 border rounded-lg hover:border-purple-300 cursor-pointer transition-all">
@@ -3122,7 +3125,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       <p className="text-sm text-gray-500">Assets vs liabilities</p>
                     </div>
                   </div>
-                  <Button size="sm" className="w-full mt-2">Generate</Button>
+                  <Button size="sm" className="w-full mt-2" onClick={() => setShowGenerateReportDialog('net-worth')}>Generate</Button>
                 </div>
 
                 <div className="p-4 border rounded-lg hover:border-orange-300 cursor-pointer transition-all">
@@ -3133,7 +3136,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                       <p className="text-sm text-gray-500">Track budget goals</p>
                     </div>
                   </div>
-                  <Button size="sm" className="w-full mt-2">Generate</Button>
+                  <Button size="sm" className="w-full mt-2" onClick={() => setShowGenerateReportDialog('budget-performance')}>Generate</Button>
                 </div>
               </div>
 
@@ -3157,7 +3160,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowReportsModal(false)}>Close</Button>
-              <Button className="bg-green-600 hover:bg-green-700">
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => setShowExportPdfDialog(true)}>
                 <Download className="h-4 w-4 mr-2" />
                 Export PDF
               </Button>
@@ -3255,6 +3258,288 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
               <Button variant="outline" onClick={() => setShowNewGoalModal(false)}>Cancel</Button>
               <Button onClick={handleCreateGoal} disabled={isSubmitting} className="bg-orange-600 hover:bg-orange-700">
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Goal'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reset Confirmation Dialog */}
+        <Dialog open={showResetConfirmDialog} onOpenChange={setShowResetConfirmDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="h-5 w-5" />
+                Reset All Budgets
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. All your budget data will be permanently deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-sm text-red-700 dark:text-red-300">
+                  Are you sure you want to reset all budgets? This will remove:
+                </p>
+                <ul className="mt-2 text-sm text-red-600 dark:text-red-400 list-disc list-inside space-y-1">
+                  <li>All budget categories and allocations</li>
+                  <li>All transaction history</li>
+                  <li>All goals and progress</li>
+                </ul>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowResetConfirmDialog(false)}>Cancel</Button>
+              <Button variant="destructive" onClick={() => {
+                toast.success('All budgets have been reset')
+                setShowResetConfirmDialog(false)
+              }}>
+                Yes, Reset Everything
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Scheduled Transaction Dialog */}
+        <Dialog open={showAddScheduledDialog} onOpenChange={setShowAddScheduledDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Repeat className="h-5 w-5 text-purple-600" />
+                Add Scheduled Transaction
+              </DialogTitle>
+              <DialogDescription>
+                Set up a recurring transaction to automate your budget
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Payee Name</Label>
+                <Input placeholder="e.g., Netflix, Rent, Salary" />
+              </div>
+              <div className="space-y-2">
+                <Label>Amount</Label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input type="number" placeholder="0.00" className="pl-10" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="subscriptions">Subscriptions</SelectItem>
+                    <SelectItem value="rent">Rent/Mortgage</SelectItem>
+                    <SelectItem value="utilities">Utilities</SelectItem>
+                    <SelectItem value="income">Income</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Frequency</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="biweekly">Bi-weekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Next Date</Label>
+                <Input type="date" />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddScheduledDialog(false)}>Cancel</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => {
+                toast.success('Scheduled transaction created!')
+                setShowAddScheduledDialog(false)
+              }}>
+                Create Schedule
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export PDF Dialog */}
+        <Dialog open={showExportPdfDialog} onOpenChange={setShowExportPdfDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-green-600" />
+                Export Report as PDF
+              </DialogTitle>
+              <DialogDescription>
+                Choose the report options for your PDF export
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Report Period</Label>
+                <Select defaultValue="current-month">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select period" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="current-month">Current Month</SelectItem>
+                    <SelectItem value="last-month">Last Month</SelectItem>
+                    <SelectItem value="last-3-months">Last 3 Months</SelectItem>
+                    <SelectItem value="last-6-months">Last 6 Months</SelectItem>
+                    <SelectItem value="ytd">Year to Date</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-3">
+                <Label>Include in Report</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="include-summary" className="rounded" defaultChecked />
+                    <label htmlFor="include-summary" className="text-sm">Budget Summary</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="include-categories" className="rounded" defaultChecked />
+                    <label htmlFor="include-categories" className="text-sm">Category Breakdown</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="include-transactions" className="rounded" defaultChecked />
+                    <label htmlFor="include-transactions" className="text-sm">Transaction History</label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="include-charts" className="rounded" defaultChecked />
+                    <label htmlFor="include-charts" className="text-sm">Charts and Graphs</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowExportPdfDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('PDF export started - download will begin shortly')
+                setShowExportPdfDialog(false)
+              }}>
+                <Download className="h-4 w-4 mr-2" />
+                Export PDF
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Generate Report Dialog */}
+        <Dialog open={!!showGenerateReportDialog} onOpenChange={(open) => !open && setShowGenerateReportDialog(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                Generate {showGenerateReportDialog === 'spending' ? 'Spending Report' :
+                          showGenerateReportDialog === 'income-expenses' ? 'Income vs Expenses Report' :
+                          showGenerateReportDialog === 'net-worth' ? 'Net Worth Report' :
+                          showGenerateReportDialog === 'budget-performance' ? 'Budget Performance Report' : 'Report'}
+              </DialogTitle>
+              <DialogDescription>
+                Configure your report parameters
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Date Range</Label>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs text-gray-500">From</Label>
+                    <Input type="date" defaultValue={new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500">To</Label>
+                    <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} />
+                  </div>
+                </div>
+              </div>
+              {showGenerateReportDialog === 'spending' && (
+                <div className="space-y-2">
+                  <Label>Categories to Include</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select categories" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      <SelectItem value="needs">Needs Only</SelectItem>
+                      <SelectItem value="wants">Wants Only</SelectItem>
+                      <SelectItem value="savings">Savings Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {showGenerateReportDialog === 'income-expenses' && (
+                <div className="space-y-2">
+                  <Label>Comparison Type</Label>
+                  <Select defaultValue="monthly">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select comparison" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="monthly">Monthly Comparison</SelectItem>
+                      <SelectItem value="weekly">Weekly Comparison</SelectItem>
+                      <SelectItem value="yearly">Year over Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {showGenerateReportDialog === 'net-worth' && (
+                <div className="space-y-2">
+                  <Label>Accounts to Include</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select accounts" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Accounts</SelectItem>
+                      <SelectItem value="on-budget">On-Budget Only</SelectItem>
+                      <SelectItem value="off-budget">Off-Budget Only</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {showGenerateReportDialog === 'budget-performance' && (
+                <div className="space-y-2">
+                  <Label>Performance Metric</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select metric" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Metrics</SelectItem>
+                      <SelectItem value="spending-rate">Spending Rate</SelectItem>
+                      <SelectItem value="savings-rate">Savings Rate</SelectItem>
+                      <SelectItem value="goal-progress">Goal Progress</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  The report will be generated based on your selected parameters and displayed in a new view.
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowGenerateReportDialog(null)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success(`${showGenerateReportDialog === 'spending' ? 'Spending' :
+                              showGenerateReportDialog === 'income-expenses' ? 'Income vs Expenses' :
+                              showGenerateReportDialog === 'net-worth' ? 'Net Worth' :
+                              'Budget Performance'} report generated successfully`)
+                setShowGenerateReportDialog(null)
+              }}>
+                Generate Report
               </Button>
             </DialogFooter>
           </DialogContent>

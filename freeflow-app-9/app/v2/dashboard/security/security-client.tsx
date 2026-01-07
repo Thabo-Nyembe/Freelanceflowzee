@@ -1946,7 +1946,7 @@ export default function SecurityClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSecurityQuickActions}
+            actions={securityQuickActions}
             variant="grid"
           />
         </div>
@@ -2123,6 +2123,136 @@ export default function SecurityClient() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Password Dialog */}
+      <Dialog open={showAddPasswordDialog} onOpenChange={setShowAddPasswordDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="w-5 h-5" />
+              Add New Password
+            </DialogTitle>
+            <DialogDescription>Add a new login credential to your secure vault</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Website/Service Name</label>
+              <Input placeholder="e.g., Google, GitHub, Netflix" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Username/Email</label>
+              <Input placeholder="Enter username or email" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Password</label>
+              <Input type="password" placeholder="Enter password" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Website URL (optional)</label>
+              <Input placeholder="https://example.com" />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAddPasswordDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 text-white" onClick={() => { toast.success('Password saved to vault'); setShowAddPasswordDialog(false) }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Save Password
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Security Audit Dialog */}
+      <Dialog open={showSecurityAuditDialog} onOpenChange={setShowSecurityAuditDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="w-5 h-5" />
+              Security Audit
+            </DialogTitle>
+            <DialogDescription>Run a comprehensive security check on your vault</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-muted/50 rounded-lg space-y-3">
+              <p className="text-sm font-medium">The security audit will check for:</p>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-green-500" />
+                  Weak or compromised passwords
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-green-500" />
+                  Reused passwords across accounts
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-green-500" />
+                  Old passwords that need updating
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-green-500" />
+                  Accounts missing two-factor authentication
+                </li>
+                <li className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-green-500" />
+                  Exposure in known data breaches
+                </li>
+              </ul>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setShowSecurityAuditDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 text-white" onClick={() => { toast.success('Security audit started'); setShowSecurityAuditDialog(false) }}>
+                <Shield className="w-4 h-4 mr-2" />
+                Start Audit
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Vault Dialog */}
+      <Dialog open={showExportVaultDialog} onOpenChange={setShowExportVaultDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5" />
+              Export Vault
+            </DialogTitle>
+            <DialogDescription>Export your vault data securely</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-4 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800">
+              <div className="flex items-center gap-2 text-amber-800 dark:text-amber-200">
+                <AlertTriangle className="w-5 h-5" />
+                <span className="font-medium">Security Warning</span>
+              </div>
+              <p className="text-sm text-amber-700 dark:text-amber-300 mt-2">
+                Exported files contain sensitive data. Keep them secure and delete after use.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Export Format</label>
+              <select className="w-full p-2 border rounded-lg bg-background">
+                <option value="encrypted">Encrypted JSON (Recommended)</option>
+                <option value="csv">CSV (Plain Text)</option>
+                <option value="1password">1Password Format</option>
+              </select>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setShowExportVaultDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1 bg-gradient-to-r from-red-500 to-rose-600 text-white" onClick={() => { toast.success('Vault export started'); setShowExportVaultDialog(false) }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

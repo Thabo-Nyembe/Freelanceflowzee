@@ -358,12 +358,7 @@ const mockAIDesignActivities = [
   { id: '3', user: 'Sophie Miller', action: 'saved', target: 'style preset "Neon Dreams"', timestamp: '30m ago', type: 'info' as const },
 ]
 
-const mockAIDesignQuickActions = [
-  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => toast.success('AI Generator Ready', { description: 'Start creating your design' }) },
-  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => toast.success('Gallery Loaded', { description: 'Browse your generated designs' }) },
-  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => toast.success('Upscale Ready', { description: 'Select an image to upscale' }) },
-  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => toast.success('Style Editor', { description: 'Customize your design style' }) },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function AIDesignClient() {
   const supabase = createClient()

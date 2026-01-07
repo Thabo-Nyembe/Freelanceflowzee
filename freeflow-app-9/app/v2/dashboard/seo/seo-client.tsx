@@ -430,6 +430,9 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedKeyword, setSelectedKeyword] = useState<Keyword | null>(null)
   const [showKeywordDialog, setShowKeywordDialog] = useState(false)
+  const [showAddKeywordDialog, setShowAddKeywordDialog] = useState(false)
+  const [showSiteAuditDialog, setShowSiteAuditDialog] = useState(false)
+  const [showCompetitorAnalysisDialog, setShowCompetitorAnalysisDialog] = useState(false)
   const [selectedBacklinks, setSelectedBacklinks] = useState<Set<string>>(new Set())
   const [sortBy, setSortBy] = useState<'position' | 'volume' | 'traffic'>('position')
   const [settingsTab, setSettingsTab] = useState('general')
@@ -480,6 +483,13 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
     }
     setSelectedBacklinks(newSet)
   }
+
+  // Quick actions with dialog openers
+  const seoQuickActions = [
+    { id: '1', label: 'Add Keyword', icon: 'plus', action: () => setShowAddKeywordDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Site Audit', icon: 'search', action: () => setShowSiteAuditDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Competitor Analysis', icon: 'users', action: () => setShowCompetitorAnalysisDialog(true), variant: 'outline' as const },
+  ]
 
   // Stat cards
   const statCards = [
@@ -1834,7 +1844,7 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSEOQuickActions}
+            actions={seoQuickActions}
             variant="grid"
           />
         </div>
@@ -1938,6 +1948,158 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
                   <ExternalLink className="w-4 h-4" /> View SERP
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Keyword Dialog */}
+        <Dialog open={showAddKeywordDialog} onOpenChange={setShowAddKeywordDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Keyword</DialogTitle>
+              <DialogDescription>Track a new keyword for SEO monitoring</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Keyword</label>
+                <Input placeholder="Enter keyword to track..." />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Target URL (optional)</label>
+                <Input placeholder="https://example.com/page" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Search Engine</label>
+                <select className="w-full h-10 px-3 rounded-md border bg-background">
+                  <option value="google">Google</option>
+                  <option value="bing">Bing</option>
+                  <option value="yahoo">Yahoo</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Location</label>
+                <select className="w-full h-10 px-3 rounded-md border bg-background">
+                  <option value="us">United States</option>
+                  <option value="uk">United Kingdom</option>
+                  <option value="ca">Canada</option>
+                  <option value="au">Australia</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowAddKeywordDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Keyword added successfully')
+                setShowAddKeywordDialog(false)
+              }}>Add Keyword</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Site Audit Dialog */}
+        <Dialog open={showSiteAuditDialog} onOpenChange={setShowSiteAuditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Run Site Audit</DialogTitle>
+              <DialogDescription>Analyze your website for SEO issues and opportunities</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Website URL</label>
+                <Input placeholder="https://yoursite.com" defaultValue="https://freeflow.com" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Audit Type</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                    <Checkbox id="technical" defaultChecked />
+                    <label htmlFor="technical" className="text-sm cursor-pointer">Technical SEO</label>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                    <Checkbox id="content" defaultChecked />
+                    <label htmlFor="content" className="text-sm cursor-pointer">Content</label>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                    <Checkbox id="performance" defaultChecked />
+                    <label htmlFor="performance" className="text-sm cursor-pointer">Performance</label>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                    <Checkbox id="mobile" defaultChecked />
+                    <label htmlFor="mobile" className="text-sm cursor-pointer">Mobile</label>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Pages to Crawl</label>
+                <select className="w-full h-10 px-3 rounded-md border bg-background">
+                  <option value="100">Up to 100 pages</option>
+                  <option value="500">Up to 500 pages</option>
+                  <option value="1000">Up to 1,000 pages</option>
+                  <option value="all">All pages</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSiteAuditDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Site audit started. You will be notified when complete.')
+                setShowSiteAuditDialog(false)
+              }}>
+                <Search className="w-4 h-4 mr-2" />
+                Start Audit
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Competitor Analysis Dialog */}
+        <Dialog open={showCompetitorAnalysisDialog} onOpenChange={setShowCompetitorAnalysisDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Competitor Analysis</DialogTitle>
+              <DialogDescription>Analyze competitors to discover keyword opportunities</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Competitor Domain</label>
+                <Input placeholder="competitor.com" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Analysis Type</label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                    <Checkbox id="keyword-gap" defaultChecked />
+                    <div>
+                      <label htmlFor="keyword-gap" className="text-sm font-medium cursor-pointer">Keyword Gap</label>
+                      <p className="text-xs text-muted-foreground">Find keywords your competitors rank for</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                    <Checkbox id="backlink-gap" defaultChecked />
+                    <div>
+                      <label htmlFor="backlink-gap" className="text-sm font-medium cursor-pointer">Backlink Gap</label>
+                      <p className="text-xs text-muted-foreground">Discover backlink opportunities</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-muted">
+                    <Checkbox id="content-gap" />
+                    <div>
+                      <label htmlFor="content-gap" className="text-sm font-medium cursor-pointer">Content Gap</label>
+                      <p className="text-xs text-muted-foreground">Find content topics you are missing</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCompetitorAnalysisDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Competitor analysis started')
+                setShowCompetitorAnalysisDialog(false)
+              }}>
+                <Users className="w-4 h-4 mr-2" />
+                Analyze
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

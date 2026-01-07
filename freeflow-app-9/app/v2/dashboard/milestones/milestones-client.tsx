@@ -2280,6 +2280,197 @@ export default function MilestonesClient() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Timeline View Dialog */}
+        <Dialog open={showTimelineDialog} onOpenChange={setShowTimelineDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarDays className="w-5 h-5 text-blue-500" />
+                Timeline View
+              </DialogTitle>
+              <DialogDescription>
+                Visualize milestone schedules with Gantt-style timeline
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-6">
+              <div className="space-y-4">
+                {mockMilestones.slice(0, 4).map((milestone) => (
+                  <div key={milestone.id} className="flex items-center gap-4 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <div className="w-32 text-sm font-medium truncate">{milestone.name}</div>
+                    <div className="flex-1">
+                      <Progress value={milestone.progress} className="h-3" />
+                    </div>
+                    <div className="w-20 text-right text-sm text-slate-600">{milestone.progress}%</div>
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-slate-500 mt-4 text-center">
+                Switch to the Timeline tab for full Gantt-style view
+              </p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowTimelineDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={() => { setShowTimelineDialog(false); setActiveTab('timeline'); }}>
+                Open Full Timeline
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Report Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-cyan-500" />
+                Export Report
+              </DialogTitle>
+              <DialogDescription>
+                Export milestone data in various formats
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-6 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => { handleExportReport(); setShowExportDialog(false); }}>
+                  <FileText className="w-5 h-5" />
+                  <span>CSV Format</span>
+                </Button>
+                <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => { handleExportReport(); setShowExportDialog(false); }}>
+                  <FileText className="w-5 h-5" />
+                  <span>JSON Format</span>
+                </Button>
+              </div>
+              <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  Export includes {dbMilestones.length > 0 ? dbMilestones.length : mockMilestones.length} milestones with progress, status, and budget data.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Risks Overview Dialog */}
+        <Dialog open={showRisksDialog} onOpenChange={setShowRisksDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-amber-500" />
+                Risk Assessment
+              </DialogTitle>
+              <DialogDescription>
+                Active risks across all milestones
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <ScrollArea className="max-h-[400px]">
+                <div className="space-y-3">
+                  {mockMilestones.flatMap(m => m.risks.map(r => ({ ...r, milestone: m.name }))).length > 0 ? (
+                    mockMilestones.flatMap(m => m.risks.map(r => ({ ...r, milestone: m.name }))).map((risk) => (
+                      <div key={risk.id} className="p-4 rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium text-amber-900 dark:text-amber-200">{risk.title}</span>
+                          <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300">
+                            {risk.probability} / {risk.impact}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-amber-800 dark:text-amber-300 mb-2">{risk.description}</p>
+                        <p className="text-xs text-amber-600 dark:text-amber-400">Milestone: {risk.milestone}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-slate-500">
+                      <Shield className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                      <p>No active risks identified</p>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowRisksDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Archive Old Milestones Dialog */}
+        <Dialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Archive className="w-5 h-5 text-slate-500" />
+                Archive Old Milestones
+              </DialogTitle>
+              <DialogDescription>
+                Archive completed milestones older than 30 days
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-6">
+              <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 mb-4">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  This will archive {mockMilestones.filter(m => m.status === 'completed').length} completed milestones.
+                  Archived milestones can be restored from the archive.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-amber-600">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="text-sm">This action can be undone</span>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowArchiveDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => { toast.success('Milestones Archived', { description: 'Old milestones archived successfully' }); setShowArchiveDialog(false); }}>
+                Archive Milestones
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Purge Completed Dialog */}
+        <Dialog open={showPurgeDialog} onOpenChange={setShowPurgeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-red-600">
+                <Trash2 className="w-5 h-5" />
+                Purge Completed Milestones
+              </DialogTitle>
+              <DialogDescription>
+                Permanently delete all completed milestones
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-6">
+              <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 mb-4">
+                <p className="text-sm text-red-600 dark:text-red-400">
+                  This will permanently delete {mockMilestones.filter(m => m.status === 'completed').length} completed milestones.
+                  This action cannot be undone.
+                </p>
+              </div>
+              <div className="flex items-center gap-2 text-red-600">
+                <AlertTriangle className="w-4 h-4" />
+                <span className="text-sm font-medium">Warning: This action is irreversible</span>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowPurgeDialog(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={() => { toast.success('Milestones Purged', { description: 'Completed milestones removed' }); setShowPurgeDialog(false); }}>
+                Purge Milestones
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

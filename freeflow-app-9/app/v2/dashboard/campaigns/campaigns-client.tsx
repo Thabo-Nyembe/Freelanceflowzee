@@ -612,6 +612,8 @@ export default function CampaignsClient() {
   const [showNewCampaignDialog, setShowNewCampaignDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [showAudienceDialog, setShowAudienceDialog] = useState(false)
+  const [showSendTestDialog, setShowSendTestDialog] = useState(false)
+  const [showViewAnalyticsDialog, setShowViewAnalyticsDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
 
   // Database integration

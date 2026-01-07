@@ -1,10 +1,21 @@
 "use client"
 
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import {
   Brain,
   LineChart,
@@ -25,6 +36,7 @@ import {
   Star,
   Rocket,
   Crown,
+  X,
 } from 'lucide-react'
 
 // Import all competitive upgrade components
@@ -182,61 +194,7 @@ const mockStorySegments = [
   },
 ]
 
-const mockActivities = [
-  {
-    id: '1',
-    type: 'mention' as const,
-    title: 'mentioned you in Q4 Planning',
-    user: { id: '1', name: 'Sarah Chen' },
-    target: { type: 'Document', name: 'Q4 Marketing Strategy' },
-    timestamp: new Date(Date.now() - 300000),
-    isRead: false,
-    actions: [
-      { label: 'View', action: () => toast.success('Document opened', { description: 'Operation completed successfully' }) },
-      { label: 'Reply', action: () => toast.success('Reply editor ready', { description: 'Operation completed successfully' }) },
-    ],
-  },
-  {
-    id: '2',
-    type: 'assignment' as const,
-    title: 'assigned you a task',
-    description: 'Review and approve the new landing page design',
-    user: { id: '2', name: 'Mike Johnson' },
-    target: { type: 'Task', name: 'Landing Page Review' },
-    timestamp: new Date(Date.now() - 1800000),
-    isRead: false,
-  },
-  {
-    id: '3',
-    type: 'status_change' as const,
-    title: 'moved to "In Review"',
-    user: { id: '3', name: 'Emily Davis' },
-    target: { type: 'Project', name: 'Website Redesign' },
-    timestamp: new Date(Date.now() - 3600000),
-    isRead: true,
-  },
-  {
-    id: '4',
-    type: 'milestone' as const,
-    title: 'completed a milestone',
-    description: 'Phase 1 of the product launch is complete',
-    user: { id: '1', name: 'Sarah Chen' },
-    target: { type: 'Project', name: 'Product Launch 2025' },
-    timestamp: new Date(Date.now() - 7200000),
-    isRead: true,
-    isPinned: true,
-  },
-  {
-    id: '5',
-    type: 'comment' as const,
-    title: 'commented on your task',
-    description: 'Great progress on the analytics dashboard! Just a few suggestions...',
-    user: { id: '4', name: 'Alex Kim' },
-    target: { type: 'Task', name: 'Analytics Dashboard' },
-    timestamp: new Date(Date.now() - 86400000),
-    isRead: true,
-  },
-]
+// mockActivities will be defined inside component to use dialog state setters
 
 const mockGoals = [
   {
@@ -345,14 +303,7 @@ const mockAchievements = [
   },
 ]
 
-const mockQuickActions = [
-  { id: '1', label: 'New Task', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => toast.success('Task created successfully', { description: 'Operation completed successfully' }), category: 'Create' },
-  { id: '2', label: 'Search', icon: <Search className="h-5 w-5" />, shortcut: '⌘K', action: () => toast.success('Search ready', { description: 'Operation completed successfully' }), category: 'Navigate' },
-  { id: '3', label: 'AI Assistant', icon: <Brain className="h-5 w-5" />, shortcut: '⌘J', action: () => toast.success('AI Assistant ready', { description: 'Operation completed successfully' }), category: 'AI' },
-  { id: '4', label: 'New Project', icon: <FileText className="h-5 w-5" />, shortcut: '⌘P', action: () => toast.success('Project created successfully', { description: 'Operation completed successfully' }), category: 'Create' },
-  { id: '5', label: 'Edit', icon: <Edit className="h-5 w-5" />, shortcut: '⌘E', action: () => toast.success('Editor ready', { description: 'Operation completed successfully' }), category: 'Actions' },
-  { id: '6', label: 'Star', icon: <Star className="h-5 w-5" />, shortcut: '⌘S', action: () => toast.success('Added to favorites', { description: 'Operation completed successfully' }), category: 'Actions' },
-]
+// mockQuickActions will be defined inside component to use dialog state setters
 
 // ============================================================================
 // MAIN COMPONENT

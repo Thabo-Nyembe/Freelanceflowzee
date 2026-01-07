@@ -17,7 +17,7 @@ import {
   Search, Settings, List, CalendarDays,
   Globe, Link2, CheckCircle2, Edit2, Trash2,
   Copy, ExternalLink, Download, Share2,
-  BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare
+  BarChart3, Timer, CalendarCheck, CalendarClock, Zap, MessageSquare, FileText
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -1268,7 +1268,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 <h2 className="text-2xl font-bold">Scheduling Links</h2>
                 <p className="text-gray-500">Let others book time on your calendar</p>
               </div>
-              <Button className="bg-teal-600 hover:bg-teal-700">
+              <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowCreateLinkDialog(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Link
               </Button>
@@ -1339,7 +1339,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Reminders</CardTitle>
-                <Button className="bg-teal-600 hover:bg-teal-700">
+                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowAddReminderDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Reminder
                 </Button>
@@ -1357,7 +1357,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </p>
                     </div>
                     <Badge variant="outline">{reminder.type}</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => toast.success('Reminder removed')}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => { setReminderToDelete(reminder); setShowDeleteReminderDialog(true); }}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
                   </div>
                 ))}
               </CardContent>
@@ -1981,6 +1981,516 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Quick Add Dialog */}
+        <Dialog open={showQuickAddDialog} onOpenChange={setShowQuickAddDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-yellow-500" />
+                Quick Add Event
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Input placeholder="Add title and time, e.g. 'Meeting tomorrow at 3pm'" />
+              <p className="text-sm text-gray-500">
+                Use natural language to quickly create events. Examples:
+              </p>
+              <ul className="text-sm text-gray-500 list-disc list-inside space-y-1">
+                <li>Team meeting tomorrow at 2pm</li>
+                <li>Lunch with Sarah on Friday</li>
+                <li>Call with client next Monday 10am-11am</li>
+              </ul>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowQuickAddDialog(false)}>Cancel</Button>
+                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowQuickAddDialog(false)}>Add Event</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Meet Now Dialog */}
+        <Dialog open={showMeetNowDialog} onOpenChange={setShowMeetNowDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5 text-blue-500" />
+                Start Instant Meeting
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Meeting Title (optional)</label>
+                <Input placeholder="Quick sync" />
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">A video meeting link will be generated instantly.</p>
+                <div className="flex items-center gap-2">
+                  <Video className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm font-medium">meet.freeflow.com/instant-abc123</span>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowMeetNowDialog(false)}>Cancel</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowMeetNowDialog(false)}>
+                  <Video className="h-4 w-4 mr-2" />
+                  Start Meeting
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Book Room Dialog */}
+        <Dialog open={showBookRoomDialog} onOpenChange={setShowBookRoomDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-purple-500" />
+                Book a Room
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Select Room</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Conference Room A (10 people)</option>
+                  <option>Conference Room B (6 people)</option>
+                  <option>Meeting Room 1 (4 people)</option>
+                  <option>Board Room (20 people)</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date</label>
+                  <Input type="date" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Duration</label>
+                  <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                    <option>30 minutes</option>
+                    <option>1 hour</option>
+                    <option>2 hours</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowBookRoomDialog(false)}>Cancel</Button>
+                <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowBookRoomDialog(false)}>Book Room</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Find Time Dialog */}
+        <Dialog open={showFindTimeDialog} onOpenChange={setShowFindTimeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="h-5 w-5 text-green-500" />
+                Find Available Time
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Participants</label>
+                <Input placeholder="Add email addresses..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Duration</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>15 minutes</option>
+                  <option>30 minutes</option>
+                  <option>45 minutes</option>
+                  <option>1 hour</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Date Range</label>
+                <div className="flex items-center gap-2">
+                  <Input type="date" className="flex-1" />
+                  <span className="text-gray-500">to</span>
+                  <Input type="date" className="flex-1" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowFindTimeDialog(false)}>Cancel</Button>
+                <Button className="bg-green-600 hover:bg-green-700" onClick={() => setShowFindTimeDialog(false)}>Find Times</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Dialog */}
+        <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarClock className="h-5 w-5 text-orange-500" />
+                Schedule for Later
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Event Title</label>
+                <Input placeholder="Enter event title" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date</label>
+                  <Input type="date" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Time</label>
+                  <Input type="time" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Repeat</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Does not repeat</option>
+                  <option>Daily</option>
+                  <option>Weekly</option>
+                  <option>Monthly</option>
+                  <option>Custom...</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>Cancel</Button>
+                <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setShowScheduleDialog(false)}>Schedule</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reminder Dialog */}
+        <Dialog open={showReminderDialog} onOpenChange={setShowReminderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-pink-500" />
+                Create Reminder
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Reminder Title</label>
+                <Input placeholder="What do you want to be reminded about?" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date</label>
+                  <Input type="date" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Time</label>
+                  <Input type="time" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Notification Type</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Push Notification</option>
+                  <option>Email</option>
+                  <option>SMS</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowReminderDialog(false)}>Cancel</Button>
+                <Button className="bg-pink-600 hover:bg-pink-700" onClick={() => setShowReminderDialog(false)}>Create Reminder</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-gray-500" />
+                Share Calendar
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Share with</label>
+                <Input placeholder="Enter email address" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Permission</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>See only free/busy</option>
+                  <option>See all event details</option>
+                  <option>Make changes to events</option>
+                  <option>Make changes and manage sharing</option>
+                </select>
+              </div>
+              <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm font-medium mb-2">Or share via link</p>
+                <div className="flex items-center gap-2">
+                  <Input value="https://calendar.freeflow.com/share/abc123" readOnly className="text-sm" />
+                  <Button variant="outline" size="sm"><Copy className="h-4 w-4" /></Button>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowShareDialog(false)}>Cancel</Button>
+                <Button onClick={() => setShowShareDialog(false)}>Share</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-teal-500" />
+                Export Calendar
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Export Format</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>iCalendar (.ics)</option>
+                  <option>CSV</option>
+                  <option>PDF</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Date Range</label>
+                <div className="flex items-center gap-2">
+                  <Input type="date" className="flex-1" />
+                  <span className="text-gray-500">to</span>
+                  <Input type="date" className="flex-1" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Calendars to Export</label>
+                <div className="space-y-2">
+                  {mockCalendars.slice(0, 3).map(cal => (
+                    <label key={cal.id} className="flex items-center gap-2">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-sm">{cal.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowExportDialog(false)}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Sync Dialog */}
+        <Dialog open={showSyncDialog} onOpenChange={setShowSyncDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5 text-purple-500" />
+                Sync Calendars
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Connect external calendars to sync events automatically.
+              </p>
+              <div className="space-y-3">
+                {[
+                  { name: 'Google Calendar', connected: true },
+                  { name: 'Outlook', connected: false },
+                  { name: 'Apple Calendar', connected: false },
+                ].map((cal, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <CalendarIcon className="h-5 w-5 text-gray-400" />
+                      <span className="font-medium">{cal.name}</span>
+                    </div>
+                    <Button variant={cal.connected ? 'outline' : 'default'} size="sm">
+                      {cal.connected ? 'Disconnect' : 'Connect'}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowSyncDialog(false)}>Close</Button>
+                <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => setShowSyncDialog(false)}>Sync Now</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Reminder Confirmation Dialog */}
+        <Dialog open={showDeleteReminderDialog} onOpenChange={setShowDeleteReminderDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-red-500" />
+                Delete Reminder
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Are you sure you want to delete this reminder?
+                {reminderToDelete && (
+                  <span className="block mt-2 font-medium text-gray-900 dark:text-white">
+                    &quot;{reminderToDelete.title}&quot;
+                  </span>
+                )}
+              </p>
+              <div className="flex justify-end gap-2 pt-6">
+                <Button variant="outline" onClick={() => { setShowDeleteReminderDialog(false); setReminderToDelete(null); }}>Cancel</Button>
+                <Button variant="destructive" onClick={() => { setShowDeleteReminderDialog(false); setReminderToDelete(null); }}>Delete</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Scheduling Link Dialog */}
+        <Dialog open={showCreateLinkDialog} onOpenChange={setShowCreateLinkDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5 text-teal-500" />
+                Create Scheduling Link
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Link Name</label>
+                <Input placeholder="e.g., 30-minute meeting" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Duration</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>15 minutes</option>
+                  <option>30 minutes</option>
+                  <option>45 minutes</option>
+                  <option>1 hour</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Available Days</label>
+                <div className="flex gap-2">
+                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => (
+                    <label key={day} className="flex items-center gap-1">
+                      <input type="checkbox" defaultChecked className="rounded" />
+                      <span className="text-sm">{day}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Buffer Time</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>No buffer</option>
+                  <option>5 minutes</option>
+                  <option>10 minutes</option>
+                  <option>15 minutes</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowCreateLinkDialog(false)}>Cancel</Button>
+                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowCreateLinkDialog(false)}>Create Link</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Reminder Dialog */}
+        <Dialog open={showAddReminderDialog} onOpenChange={setShowAddReminderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-orange-500" />
+                Add Reminder
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Reminder Title</label>
+                <Input placeholder="What do you need to remember?" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Date</label>
+                  <Input type="date" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Time</label>
+                  <Input type="time" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Notification Type</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Push Notification</option>
+                  <option>Email</option>
+                  <option>SMS</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Linked Event (optional)</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">No linked event</option>
+                  {displayEvents.slice(0, 5).map(event => (
+                    <option key={event.id} value={event.id}>{event.title}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowAddReminderDialog(false)}>Cancel</Button>
+                <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => setShowAddReminderDialog(false)}>Add Reminder</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Calendar Dialog */}
+        <Dialog open={showAddCalendarDialog} onOpenChange={setShowAddCalendarDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5 text-blue-500" />
+                Add Calendar
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Calendar Name</label>
+                <Input placeholder="e.g., Personal, Work, Family" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Calendar Type</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option>Personal</option>
+                  <option>Work</option>
+                  <option>Shared</option>
+                  <option>Subscribed (URL)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Color</label>
+                <div className="flex gap-2">
+                  {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-orange-500', 'bg-teal-500'].map(color => (
+                    <button key={color} className={`w-8 h-8 rounded-full ${color} ring-2 ring-offset-2 ring-transparent hover:ring-gray-400`} />
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowAddCalendarDialog(false)}>Cancel</Button>
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setShowAddCalendarDialog(false)}>Add Calendar</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

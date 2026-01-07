@@ -497,11 +497,7 @@ const mockWorkflowActivities = [
   { id: '3', user: 'System', action: 'Executed', target: '2,340 workflow runs today', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockWorkflowQuickActions = [
-  { id: '1', label: 'New Flow', icon: 'plus', action: () => toast.success('Workflow created'), variant: 'default' as const },
-  { id: '2', label: 'Test', icon: 'play', action: () => toast.success('Test completed'), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: () => toast.success('Logs loaded'), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function WorkflowBuilderClient() {
   const [activeTab, setActiveTab] = useState('workflows')
@@ -514,6 +510,11 @@ export default function WorkflowBuilderClient() {
   const [showNodeLibrary, setShowNodeLibrary] = useState(false)
   const [showCredentialsDialog, setShowCredentialsDialog] = useState(false)
   const [showVariablesDialog, setShowVariablesDialog] = useState(false)
+
+  // Quick Actions Dialog States
+  const [showNewFlowDialog, setShowNewFlowDialog] = useState(false)
+  const [showTestWorkflowDialog, setShowTestWorkflowDialog] = useState(false)
+  const [showLogsDialog, setShowLogsDialog] = useState(false)
 
   const stats: WorkflowStats = useMemo(() => ({
     totalWorkflows: mockWorkflows.length,

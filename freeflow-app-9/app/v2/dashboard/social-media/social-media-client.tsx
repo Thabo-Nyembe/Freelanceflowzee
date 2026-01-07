@@ -364,11 +364,7 @@ const mockSocialMediaActivities = [
   { id: '3', user: 'Analytics', action: 'Report generated for', target: 'Weekly Performance', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockSocialMediaQuickActions = [
-  { id: '1', label: 'Create Post', icon: 'edit', action: () => toast.success('Post Created', { description: 'Draft saved, ready to publish' }), variant: 'default' as const },
-  { id: '2', label: 'Schedule', icon: 'calendar', action: () => toast.success('Scheduled', { description: 'Post added to publishing queue' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.success('Analytics Loaded', { description: 'Social media metrics ready' }), variant: 'outline' as const },
-]
+// Quick actions are defined inside component to access state setters
 
 export default function SocialMediaClient() {
   const [posts] = useState<SocialPost[]>(mockPosts)
@@ -542,59 +538,69 @@ export default function SocialMediaClient() {
   ]
 
   // Handlers
-  const handleCreatePost = () => toast.info('Create', { description: 'Opening composer...' })
-  const handleSchedulePost = (n: string) => toast.success('Scheduled', { description: `"${n}" scheduled` })
+  const handleCreatePost = () => setShowCreatePostDialog(true)
+  const handleSchedulePost = (n: string) => setShowScheduleDialog(true)
   const handlePublishPost = (n: string) => toast.success('Published', { description: `"${n}" is live` })
-  const handleConnectAccount = (p: string) => toast.info('Connect', { description: `Connecting ${p}...` })
-  const handleExportAnalytics = () => toast.success('Exporting', { description: 'Data downloading...' })
+  const handleConnectAccount = (p: string) => setShowConnectAccountDialog(true)
+  const handleExportAnalytics = () => setShowExportDialog(true)
   const handleGenerateCaption = () => {
-    toast.info('AI Caption', { description: 'Generating caption with AI...' })
+    setShowGenerateCaptionDialog(true)
   }
   const handleSuggestHashtags = () => {
-    toast.info('Hashtag Suggestions', { description: 'Analyzing trending hashtags...' })
+    setShowHashtagsDialog(true)
   }
   const handleBestTimeToPost = () => {
-    toast.info('Optimal Timing', { description: 'Calculating best posting times...' })
+    setShowBestTimeDialog(true)
   }
   const handleCreateVisual = () => {
-    toast.info('Create Visual', { description: 'Opening visual editor...' })
+    setShowCreateVisualDialog(true)
   }
   const handleReplyMention = (username: string) => {
-    toast.info('Reply', { description: `Composing reply to ${username}...` })
+    setReplyUsername(username)
+    setShowReplyDialog(true)
   }
   const handleNewCampaign = () => {
-    toast.info('New Campaign', { description: 'Creating new campaign...' })
+    setShowNewCampaignDialog(true)
   }
   const handleInviteTeamMember = () => {
-    toast.info('Invite', { description: 'Sending team invitation...' })
+    setShowInviteTeamDialog(true)
   }
   const handleBrowseIntegrations = () => {
-    toast.info('Integrations', { description: 'Loading available integrations...' })
+    setShowIntegrationsDialog(true)
   }
   const handleRegenerateKey = () => {
-    toast.success('API Key', { description: 'New API key generated successfully' })
+    setShowRegenerateKeyDialog(true)
   }
   const handleImportData = () => {
-    toast.info('Import', { description: 'Opening data import wizard...' })
+    setShowImportDialog(true)
   }
   const handleDeleteDrafts = () => {
-    toast.warning('Delete Drafts', { description: 'All draft posts will be deleted' })
+    setShowDeleteDraftsDialog(true)
   }
   const handleDisconnectAccounts = () => {
-    toast.warning('Disconnect', { description: 'All accounts will be disconnected' })
+    setShowDisconnectDialog(true)
   }
   const handleResetAnalytics = () => {
-    toast.warning('Reset Analytics', { description: 'All analytics data will be cleared' })
+    setShowResetAnalyticsDialog(true)
   }
   const handleDuplicatePost = (postContent: string) => {
-    toast.success('Duplicated', { description: `Post duplicated to drafts` })
+    setShowDuplicateDialog(true)
   }
   const handleViewPostAnalytics = (postId: string) => {
-    toast.info('Analytics', { description: 'Loading post analytics...' })
+    setSelectedPostId(postId)
+    setShowPostAnalyticsDialog(true)
   }
   const handleDeletePost = (postId: string) => {
-    toast.warning('Delete Post', { description: 'Post will be permanently deleted' })
+    setSelectedPostId(postId)
+    setShowDeletePostDialog(true)
   }
+
+  // Quick actions with proper dialog handlers
+  const socialMediaQuickActions = [
+    { id: '1', label: 'Create Post', icon: 'edit', action: () => setShowCreatePostDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Schedule', icon: 'calendar', action: () => setShowScheduleDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'chart', action: () => setShowAnalyticsDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1879,7 +1885,7 @@ export default function SocialMediaClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSocialMediaQuickActions}
+            actions={socialMediaQuickActions}
             variant="grid"
           />
         </div>

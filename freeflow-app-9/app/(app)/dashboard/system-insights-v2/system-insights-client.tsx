@@ -245,12 +245,7 @@ const mockSystemInsightsActivities = [
   { id: '3', user: 'Platform Eng', action: 'scaled', target: 'API cluster to 8 nodes', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockSystemInsightsQuickActions = [
-  { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => toast.success('System deployed successfully') },
-  { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => toast.success('Services restarted successfully') },
-  { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => toast.success('System Logs opened successfully') },
-  { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => toast.success('Metrics Dashboard loaded successfully') },
-]
+// Quick actions will be defined inside the component to use state setters
 
 // Database types
 interface DbSystemAlert {
@@ -300,6 +295,12 @@ export default function SystemInsightsClient() {
   const [dbAlerts, setDbAlerts] = useState<DbSystemAlert[]>([])
   const [dbSettings, setDbSettings] = useState<DbSystemSettings | null>(null)
   const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
+
+  // Quick action dialog states
+  const [showDeployDialog, setShowDeployDialog] = useState(false)
+  const [showRestartDialog, setShowRestartDialog] = useState(false)
+  const [showLogsDialog, setShowLogsDialog] = useState(false)
+  const [showMetricsDialog, setShowMetricsDialog] = useState(false)
 
   // Form state for creating alerts
   const [alertForm, setAlertForm] = useState({

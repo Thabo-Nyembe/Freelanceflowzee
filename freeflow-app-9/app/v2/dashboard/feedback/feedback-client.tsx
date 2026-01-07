@@ -2224,6 +2224,283 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* New Idea Quick Action Dialog */}
+        <Dialog open={showNewIdeaDialog} onOpenChange={setShowNewIdeaDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-orange-500" />
+                Create New Idea
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Idea Title</Label>
+                <Input placeholder="Enter your idea title..." className="mt-1" />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <textarea
+                  className="w-full mt-1 p-3 rounded-lg border resize-none h-24 dark:bg-gray-800 dark:border-gray-700"
+                  placeholder="Describe your idea in detail..."
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Category</Label>
+                  <Select defaultValue="feature">
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="feature">Feature Request</SelectItem>
+                      <SelectItem value="improvement">Improvement</SelectItem>
+                      <SelectItem value="bug">Bug Report</SelectItem>
+                      <SelectItem value="integration">Integration</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Priority</Label>
+                  <Select defaultValue="medium">
+                    <SelectTrigger className="mt-1">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowNewIdeaDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast.success('Idea created successfully')
+                    setShowNewIdeaDialog(false)
+                  }}
+                  className="flex-1 bg-gradient-to-r from-orange-500 to-amber-600 text-white"
+                >
+                  <Lightbulb className="w-4 h-4 mr-2" />
+                  Create Idea
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Respond Quick Action Dialog */}
+        <Dialog open={showRespondDialog} onOpenChange={setShowRespondDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-blue-500" />
+                Respond to Feedback
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Select Feedback Item</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose feedback to respond to..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockIdeas.slice(0, 5).map(idea => (
+                      <SelectItem key={idea.id} value={idea.id}>{idea.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Your Response</Label>
+                <textarea
+                  className="w-full mt-1 p-3 rounded-lg border resize-none h-32 dark:bg-gray-800 dark:border-gray-700"
+                  placeholder="Write your official response..."
+                />
+              </div>
+              <div>
+                <Label>Update Status</Label>
+                <Select defaultValue="under_review">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="under_review">Under Review</SelectItem>
+                    <SelectItem value="planned">Planned</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="shipped">Shipped</SelectItem>
+                    <SelectItem value="declined">Declined</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowRespondDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast.success('Response posted successfully')
+                    setShowRespondDialog(false)
+                  }}
+                  className="flex-1"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  Post Response
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Merge Quick Action Dialog */}
+        <Dialog open={showMergeDialog} onOpenChange={setShowMergeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5 text-purple-500" />
+                Merge Feedback Items
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Primary Feedback (Keep)</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select primary feedback..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockIdeas.map(idea => (
+                      <SelectItem key={idea.id} value={idea.id}>{idea.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Duplicate Feedback (Merge Into Primary)</Label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select duplicate feedback..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {mockIdeas.map(idea => (
+                      <SelectItem key={idea.id} value={idea.id}>{idea.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                <p className="text-sm text-amber-800 dark:text-amber-300">
+                  Merging will combine votes from both items and redirect subscribers to the primary feedback.
+                </p>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowMergeDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast.success('Feedback items merged successfully')
+                    setShowMergeDialog(false)
+                  }}
+                  className="flex-1"
+                >
+                  <GitBranch className="w-4 h-4 mr-2" />
+                  Merge Items
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Quick Action Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5 text-green-500" />
+                Export Feedback Data
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="xlsx">Excel (XLSX)</SelectItem>
+                    <SelectItem value="pdf">PDF Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Data to Include</Label>
+                <div className="mt-2 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <span className="text-sm">Ideas and Feedback</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <span className="text-sm">Vote Data</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <span className="text-sm">Comments</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch />
+                    <span className="text-sm">User Information</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch defaultChecked />
+                    <span className="text-sm">NPS Responses</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="7d">Last 7 days</SelectItem>
+                    <SelectItem value="30d">Last 30 days</SelectItem>
+                    <SelectItem value="90d">Last 90 days</SelectItem>
+                    <SelectItem value="1y">Last year</SelectItem>
+                    <SelectItem value="all">All time</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowExportDialog(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast.success('Export started - download will begin shortly')
+                    setShowExportDialog(false)
+                  }}
+                  className="flex-1"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Export Data
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

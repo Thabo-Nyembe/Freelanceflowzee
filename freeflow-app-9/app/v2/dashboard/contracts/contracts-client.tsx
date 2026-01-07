@@ -188,6 +188,10 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states for quick actions
+  const [showSendForSigningDialog, setShowSendForSigningDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+
   const { contracts, loading, error, createContract, updateContract, deleteContract, mutating } = useContracts({ status: 'all' })
   const display = (contracts && contracts.length > 0) ? contracts : (initialContracts || [])
 

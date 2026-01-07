@@ -1345,12 +1345,12 @@ export default function MediaLibraryClient({
             <div className="grid grid-cols-4 gap-4">
               {[
                 { icon: Plus, label: 'Create', desc: 'New collection', color: 'text-purple-500', action: handleOpenNewCollection },
-                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => toast.success(`Showing ${mockCollections.length} collection(s)`) },
-                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500', action: () => toast.info('Share Collections', { description: 'Select a collection to share publicly' }) },
-                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500', action: () => toast.info('Tag Manager', { description: 'Add or edit collection tags' }) },
-                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500', action: () => toast.info('Collaboration', { description: 'Add team members to collaborate' }) },
-                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500', action: () => toast.info('Privacy Settings', { description: 'Manage collection visibility and access' }) },
-                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500', action: () => toast.info('Duplicate Collection', { description: 'Select a collection to clone' }) },
+                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => setShowBrowseCollectionsDialog(true) },
+                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500', action: () => setShowShareCollectionsDialog(true) },
+                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500', action: () => setShowTagManagerDialog(true) },
+                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500', action: () => setShowCollaborationDialog(true) },
+                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500', action: () => setShowPrivacySettingsDialog(true) },
+                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500', action: () => setShowDuplicateCollectionDialog(true) },
                 { icon: Download, label: 'Export', desc: 'Download all', color: 'text-indigo-500', action: handleBulkExport },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1432,9 +1432,9 @@ export default function MediaLibraryClient({
                 { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'video' }); setShowUploadDialog(true) } },
                 { icon: Music, label: 'Audio', desc: 'Upload audio', color: 'text-green-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'audio' }); setShowUploadDialog(true) } },
                 { icon: FileText, label: 'Documents', desc: 'Upload docs', color: 'text-orange-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'document' }); setShowUploadDialog(true) } },
-                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => { toast.info('Bulk Upload Mode', { description: 'Select multiple files to upload at once' }); setShowUploadDialog(true); } },
-                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500', action: () => toast.info('Cloud Import', { description: 'Import files from cloud storage' }) },
-                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500', action: () => toast.info('URL Import', { description: 'Paste URL to import external files' }) },
+                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => setShowUploadDialog(true) },
+                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500', action: () => setShowCloudImportDialog(true) },
+                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500', action: () => setShowUrlImportDialog(true) },
                 { icon: FileArchive, label: 'Archives', desc: 'ZIP/RAR files', color: 'text-gray-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'archive' }); setShowUploadDialog(true) } },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1514,14 +1514,14 @@ export default function MediaLibraryClient({
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => toast.success('Overview loaded') },
-                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.success('Trends analyzed') },
-                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => toast.success('Distribution chart loaded') },
-                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => toast.success('Real-time stats connected') },
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => setShowAnalyticsOverviewDialog(true) },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => setShowTrendsDialog(true) },
+                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => setShowDistributionDialog(true) },
+                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => setShowRealtimeStatsDialog(true) },
                 { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500', action: () => { const totalViews = mediaFiles.reduce((sum, f) => sum + f.viewCount, 0); toast.success(`Total views: ${totalViews}`); } },
                 { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => { const totalDownloads = mediaFiles.reduce((sum, f) => sum + f.downloadCount, 0); toast.success(`Total downloads: ${totalDownloads}`); } },
                 { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500', action: () => { const totalSize = mediaFiles.reduce((sum, f) => sum + f.fileSize, 0); toast.success(`Storage used: ${formatSize(totalSize)}`); } },
-                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500', action: () => toast.info('Report Builder', { description: 'Custom report generation is available' }) },
+                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500', action: () => setShowReportBuilderDialog(true) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
