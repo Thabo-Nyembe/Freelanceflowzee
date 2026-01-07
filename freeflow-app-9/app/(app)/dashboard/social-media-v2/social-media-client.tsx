@@ -385,6 +385,9 @@ export default function SocialMediaClient() {
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false)
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
+  const [isPostOptionsOpen, setIsPostOptionsOpen] = useState(false)
+  const [selectedPostForOptions, setSelectedPostForOptions] = useState<string | null>(null)
+  const [analyticsPostId, setAnalyticsPostId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState('posts')
 
   // Stats
@@ -852,7 +855,8 @@ export default function SocialMediaClient() {
   const handleViewPostAnalytics = (postId: string) => {
     const post = posts.find(p => p.id === postId)
     if (post && post.status === 'published') {
-      toast.success(`Analytics: ${formatNumber(post.views)} views, ${formatNumber(post.likes)} likes, ${post.engagementRate}% engagement`)
+      setAnalyticsPostId(postId)
+      setIsAnalyticsOpen(true)
     } else {
       toast.info('No analytics available for unpublished posts')
     }
@@ -877,7 +881,8 @@ export default function SocialMediaClient() {
   }
 
   const handlePostOptions = (postId: string) => {
-    toast.info('Post options: Edit, Duplicate, Delete, View Analytics')
+    setSelectedPostForOptions(postId)
+    setIsPostOptionsOpen(true)
   }
 
   const handleOpenOriginalPost = (postUrl: string) => {
@@ -2175,7 +2180,7 @@ export default function SocialMediaClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSocialMediaQuickActions}
+            actions={socialMediaQuickActions}
             variant="grid"
           />
         </div>
@@ -2241,15 +2246,15 @@ export default function SocialMediaClient() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1" onClick={() => handleSchedulePost(selectedPost.content.slice(0, 30))}>
+                    <Button variant="outline" className="flex-1" onClick={() => handleSchedulePost(selectedPost.id, selectedPost.content)}>
                       <Clock className="w-4 h-4 mr-2" />
                       Schedule
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => handlePublishPost(selectedPost.content.slice(0, 30))}>
+                    <Button variant="outline" className="flex-1" onClick={() => handlePublishPost(selectedPost.id, selectedPost.content)}>
                       <Send className="w-4 h-4 mr-2" />
                       Publish
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => handleDuplicatePost(selectedPost.content)}>
+                    <Button variant="outline" className="flex-1" onClick={() => handleDuplicatePost(selectedPost)}>
                       <Copy className="w-4 h-4 mr-2" />
                       Duplicate
                     </Button>
@@ -2264,6 +2269,208 @@ export default function SocialMediaClient() {
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Post Options Dialog */}
+        <Dialog open={isPostOptionsOpen} onOpenChange={setIsPostOptionsOpen}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MoreVertical className="w-5 h-5" />
+                Post Options
+              </DialogTitle>
+            </DialogHeader>
+            {selectedPostForOptions && (() => {
+              const post = posts.find(p => p.id === selectedPostForOptions)
+              if (!post) return null
+              return (
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      setSelectedPost(post)
+                      setIsPostOptionsOpen(false)
+                    }}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Details
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleSchedulePost(post.id, post.content)
+                      setIsPostOptionsOpen(false)
+                    }}
+                  >
+                    <Clock className="w-4 h-4 mr-2" />
+                    Schedule Post
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleDuplicatePost(post)
+                      setIsPostOptionsOpen(false)
+                    }}
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Duplicate Post
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleViewPostAnalytics(post.id)
+                      setIsPostOptionsOpen(false)
+                    }}
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    View Analytics
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      handleDeletePost(post.id)
+                      setIsPostOptionsOpen(false)
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Post
+                  </Button>
+                </div>
+              )
+            })()}
+          </DialogContent>
+        </Dialog>
+
+        {/* Analytics Detail Dialog */}
+        <Dialog open={isAnalyticsOpen && !!analyticsPostId} onOpenChange={(open) => {
+          setIsAnalyticsOpen(open)
+          if (!open) setAnalyticsPostId(null)
+        }}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Post Analytics
+              </DialogTitle>
+            </DialogHeader>
+            {analyticsPostId && (() => {
+              const post = posts.find(p => p.id === analyticsPostId)
+              if (!post) return null
+              return (
+                <div className="space-y-6">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">{post.content}</p>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <Heart className="w-6 h-6 mx-auto mb-2 text-pink-500" />
+                        <p className="text-2xl font-bold">{formatNumber(post.likes)}</p>
+                        <p className="text-sm text-gray-500">Likes</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <MessageSquare className="w-6 h-6 mx-auto mb-2 text-blue-500" />
+                        <p className="text-2xl font-bold">{formatNumber(post.comments)}</p>
+                        <p className="text-sm text-gray-500">Comments</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <Share2 className="w-6 h-6 mx-auto mb-2 text-green-500" />
+                        <p className="text-2xl font-bold">{formatNumber(post.shares)}</p>
+                        <p className="text-sm text-gray-500">Shares</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <Eye className="w-6 h-6 mx-auto mb-2 text-purple-500" />
+                        <p className="text-2xl font-bold">{formatNumber(post.views)}</p>
+                        <p className="text-sm text-gray-500">Views</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <Users className="w-6 h-6 mx-auto mb-2 text-orange-500" />
+                        <p className="text-2xl font-bold">{formatNumber(post.reach)}</p>
+                        <p className="text-sm text-gray-500">Reach</p>
+                      </CardContent>
+                    </Card>
+                    <Card className="border-0 shadow-sm">
+                      <CardContent className="p-4 text-center">
+                        <TrendingUp className="w-6 h-6 mx-auto mb-2 text-emerald-500" />
+                        <p className="text-2xl font-bold text-green-600">{post.engagementRate}%</p>
+                        <p className="text-sm text-gray-500">Engagement Rate</p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <h4 className="font-medium mb-3">Performance Summary</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Impressions</span>
+                        <span className="font-medium">{formatNumber(post.impressions)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Clicks</span>
+                        <span className="font-medium">{formatNumber(post.clicks)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Saves</span>
+                        <span className="font-medium">{formatNumber(post.saves)}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-500">Click-through Rate</span>
+                        <span className="font-medium">{post.views > 0 ? ((post.clicks / post.views) * 100).toFixed(2) : 0}%</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        const csvContent = `Metric,Value\nLikes,${post.likes}\nComments,${post.comments}\nShares,${post.shares}\nViews,${post.views}\nReach,${post.reach}\nEngagement Rate,${post.engagementRate}%`
+                        const blob = new Blob([csvContent], { type: 'text/csv' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `post-analytics-${post.id}.csv`
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                        URL.revokeObjectURL(url)
+                        toast.success('Analytics exported!')
+                      }}
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Export Analytics
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `Post Analytics:\nLikes: ${post.likes}\nComments: ${post.comments}\nShares: ${post.shares}\nViews: ${post.views}\nReach: ${post.reach}\nEngagement: ${post.engagementRate}%`
+                        )
+                        toast.success('Analytics copied to clipboard!')
+                      }}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Stats
+                    </Button>
+                  </div>
+                </div>
+              )
+            })()}
           </DialogContent>
         </Dialog>
       </div>

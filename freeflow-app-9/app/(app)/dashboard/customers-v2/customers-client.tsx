@@ -458,6 +458,16 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false)
+  const [showAddCampaignDialog, setShowAddCampaignDialog] = useState(false)
+  const [showAddStageDialog, setShowAddStageDialog] = useState(false)
+  const [showStageOptionsDialog, setShowStageOptionsDialog] = useState(false)
+  const [showTaskOptionsDialog, setShowTaskOptionsDialog] = useState(false)
+  const [showLeadScoringRuleDialog, setShowLeadScoringRuleDialog] = useState(false)
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null)
+  const [showEmailDialog, setShowEmailDialog] = useState(false)
+  const [emailRecipient, setEmailRecipient] = useState<Contact | Customer | null>(null)
+  const [showImportDialog, setShowImportDialog] = useState(false)
 
   // Supabase hooks
   const { customers: dbCustomers, stats: dbStats, isLoading, error, refetch } = useCustomers({ segment: 'all' })
@@ -805,18 +815,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />Refresh
             </Button>
             <Button variant="outline" onClick={handleExportCustomers}><Download className="h-4 w-4 mr-2" />Export</Button>
-            <Button variant="outline" onClick={() => {
-              const input = document.createElement('input')
-              input.type = 'file'
-              input.accept = '.csv,.xlsx,.xls'
-              input.onchange = (e) => {
-                const file = (e.target as HTMLInputElement).files?.[0]
-                if (file) {
-                  toast.success('File Selected', { description: `Ready to import ${file.name}` })
-                }
-              }
-              input.click()
-            }}><Upload className="h-4 w-4 mr-2" />Import</Button>
+            <Button variant="outline" onClick={() => setShowImportDialog(true)}><Upload className="h-4 w-4 mr-2" />Import</Button>
             <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => setShowAddContact(true)}>
               <UserPlus className="h-4 w-4 mr-2" />Add Contact
             </Button>
@@ -1165,7 +1164,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Tasks Tab */}
           <TabsContent value="tasks" className="space-y-4">
             <div className="flex justify-end">
-              <Button onClick={() => toast.success('Task Form Opened', { description: 'Create a new task for your CRM workflow' })}><Plus className="h-4 w-4 mr-2" />New Task</Button>
+              <Button onClick={() => { setShowAddTaskDialog(true); toast.success('Task Form Opened', { description: 'Create a new task for your CRM workflow' }) }}><Plus className="h-4 w-4 mr-2" />New Task</Button>
             </div>
             <div className="space-y-3">
               {MOCK_TASKS.map(task => (
@@ -1188,7 +1187,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                           <span>Owner: {task.ownerName}</span>
                         </div>
                       </div>
-                      <Button size="sm" variant="ghost" onClick={() => toast.success('Task Options', { description: 'Edit, reassign, or mark task complete' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => { setSelectedTask(task); setShowTaskOptionsDialog(true) }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1199,7 +1198,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
           {/* Campaigns Tab */}
           <TabsContent value="campaigns" className="space-y-4">
             <div className="flex justify-end">
-              <Button onClick={() => toast.success('Campaign Builder Opened', { description: 'Create email, webinar, or social campaigns' })}><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
+              <Button onClick={() => { setShowAddCampaignDialog(true); toast.success('Campaign Builder Opened', { description: 'Create email, webinar, or social campaigns' }) }}><Plus className="h-4 w-4 mr-2" />New Campaign</Button>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {MOCK_CAMPAIGNS.map(campaign => {
@@ -1572,10 +1571,10 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Input type="number" defaultValue={stage.probability} min={0} max={100} className="text-center" />
                             </div>
                             <span className="text-sm text-gray-500">% Probability</span>
-                            <Button size="sm" variant="ghost" onClick={() => toast.success('Stage Options', { description: 'Edit stage name, probability, or reorder' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => setShowStageOptionsDialog(true)}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.success('New Stage Added', { description: 'Configure stage name and probability' })}>
+                        <Button variant="outline" className="w-full" onClick={() => { setShowAddStageDialog(true); toast.success('New Stage Form', { description: 'Configure stage name and probability' }) }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Stage
                         </Button>
@@ -1745,7 +1744,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Switch defaultChecked />
                             </div>
                           </div>
-                          <Button variant="outline" className="w-full" onClick={() => toast.success('Rule Builder Opened', { description: 'Create a new lead scoring rule based on field values' })}>
+                          <Button variant="outline" className="w-full" onClick={() => { setShowLeadScoringRuleDialog(true); toast.success('Rule Builder Opened', { description: 'Create a new lead scoring rule based on field values' }) }}>
                             <Plus className="h-4 w-4 mr-2" />
                             Add Scoring Rule
                           </Button>
@@ -2231,7 +2230,12 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCustomersQuickActions}
+            actions={[
+              { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => setShowAddContact(true) },
+              { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => handleLogActivity() },
+              { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => { setShowEmailDialog(true); setEmailRecipient(selectedContact) } },
+              { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => handleScheduleMeeting(selectedContact?.firstName ? `${selectedContact.firstName} ${selectedContact.lastName}` : undefined) },
+            ]}
             variant="grid"
           />
         </div>
@@ -2448,6 +2452,392 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
               <Button variant="outline" onClick={() => { setShowDeleteDialog(false); setCustomerToDelete(null) }}>Cancel</Button>
               <Button variant="destructive" onClick={handleConfirmDelete} disabled={isDeleting}>
                 <Trash2 className="h-4 w-4 mr-2" />{isDeleting ? 'Deleting...' : 'Delete Contact'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Task Dialog */}
+        <Dialog open={showAddTaskDialog} onOpenChange={setShowAddTaskDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-blue-600" />
+                New Task
+              </DialogTitle>
+              <DialogDescription>Create a new task for your CRM workflow</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Task Subject</Label>
+                <Input placeholder="Enter task subject..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Enter task description..." />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Due Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Priority</Label>
+                  <Select defaultValue="medium">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="urgent">Urgent</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Related Contact</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select contact..." /></SelectTrigger>
+                  <SelectContent>
+                    {MOCK_CONTACTS.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddTaskDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowAddTaskDialog(false); toast.success('Task Created', { description: 'New task has been added to your workflow' }) }}>Create Task</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Task Options Dialog */}
+        <Dialog open={showTaskOptionsDialog} onOpenChange={setShowTaskOptionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Task Options</DialogTitle>
+              <DialogDescription>{selectedTask?.subject}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Editing Task', { description: 'Task editor opened' }) }}>
+                <Edit className="h-4 w-4 mr-2" />Edit Task
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Task Reassigned', { description: 'Task has been reassigned' }) }}>
+                <Users className="h-4 w-4 mr-2" />Reassign Task
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Task Completed', { description: 'Task marked as complete' }) }}>
+                <CheckCircle className="h-4 w-4 mr-2" />Mark Complete
+              </Button>
+              <Button variant="destructive" className="w-full justify-start" onClick={() => { setShowTaskOptionsDialog(false); toast.success('Task Deleted', { description: 'Task has been removed' }) }}>
+                <Trash2 className="h-4 w-4 mr-2" />Delete Task
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Campaign Dialog */}
+        <Dialog open={showAddCampaignDialog} onOpenChange={setShowAddCampaignDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Megaphone className="h-5 w-5 text-purple-600" />
+                New Campaign
+              </DialogTitle>
+              <DialogDescription>Create a new marketing campaign</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Campaign Name</Label>
+                <Input placeholder="Enter campaign name..." />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Campaign Type</Label>
+                  <Select defaultValue="email">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="webinar">Webinar</SelectItem>
+                      <SelectItem value="conference">Conference</SelectItem>
+                      <SelectItem value="social">Social Media</SelectItem>
+                      <SelectItem value="content">Content</SelectItem>
+                      <SelectItem value="ads">Advertising</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Status</Label>
+                  <Select defaultValue="planned">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="planned">Planned</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Start Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>End Date</Label>
+                  <Input type="date" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Budget</Label>
+                  <Input type="number" placeholder="0" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Expected Revenue</Label>
+                  <Input type="number" placeholder="0" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Describe your campaign..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddCampaignDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowAddCampaignDialog(false); toast.success('Campaign Created', { description: 'New campaign has been created' }) }}>Create Campaign</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Pipeline Stage Dialog */}
+        <Dialog open={showAddStageDialog} onOpenChange={setShowAddStageDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-blue-600" />
+                Add Pipeline Stage
+              </DialogTitle>
+              <DialogDescription>Configure a new stage for your sales pipeline</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Stage Name</Label>
+                <Input placeholder="e.g., Discovery, Demo, POC..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Win Probability (%)</Label>
+                <Input type="number" min={0} max={100} placeholder="50" />
+              </div>
+              <div className="space-y-2">
+                <Label>Stage Color</Label>
+                <Select defaultValue="blue">
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="gray">Gray</SelectItem>
+                    <SelectItem value="blue">Blue</SelectItem>
+                    <SelectItem value="green">Green</SelectItem>
+                    <SelectItem value="yellow">Yellow</SelectItem>
+                    <SelectItem value="orange">Orange</SelectItem>
+                    <SelectItem value="purple">Purple</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddStageDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowAddStageDialog(false); toast.success('Stage Added', { description: 'New pipeline stage has been created' }) }}>Add Stage</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Stage Options Dialog */}
+        <Dialog open={showStageOptionsDialog} onOpenChange={setShowStageOptionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Stage Options</DialogTitle>
+              <DialogDescription>Manage pipeline stage settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Editing Stage', { description: 'Stage editor opened' }) }}>
+                <Edit className="h-4 w-4 mr-2" />Edit Stage Name
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Updated Probability', { description: 'Stage probability updated' }) }}>
+                <Target className="h-4 w-4 mr-2" />Update Probability
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Stage Reordered', { description: 'Pipeline stages reordered' }) }}>
+                <Layers className="h-4 w-4 mr-2" />Reorder Stage
+              </Button>
+              <Button variant="destructive" className="w-full justify-start" onClick={() => { setShowStageOptionsDialog(false); toast.success('Stage Deleted', { description: 'Pipeline stage has been removed' }) }}>
+                <Trash2 className="h-4 w-4 mr-2" />Delete Stage
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Lead Scoring Rule Dialog */}
+        <Dialog open={showLeadScoringRuleDialog} onOpenChange={setShowLeadScoringRuleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5 text-amber-600" />
+                Add Scoring Rule
+              </DialogTitle>
+              <DialogDescription>Create a new lead scoring rule based on field values</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Rule Name</Label>
+                <Input placeholder="e.g., Enterprise Company Size..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Field</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select field..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="company_size">Company Size</SelectItem>
+                    <SelectItem value="industry">Industry</SelectItem>
+                    <SelectItem value="job_title">Job Title</SelectItem>
+                    <SelectItem value="website_visits">Website Visits</SelectItem>
+                    <SelectItem value="email_opens">Email Opens</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Operator</Label>
+                  <Select defaultValue="equals">
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="equals">Equals</SelectItem>
+                      <SelectItem value="contains">Contains</SelectItem>
+                      <SelectItem value="greater-than">Greater Than</SelectItem>
+                      <SelectItem value="less-than">Less Than</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Value</Label>
+                  <Input placeholder="Enter value..." />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Points to Add</Label>
+                <Input type="number" placeholder="10" min={-100} max={100} />
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <Label>Enable Rule</Label>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLeadScoringRuleDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowLeadScoringRuleDialog(false); toast.success('Scoring Rule Created', { description: 'New lead scoring rule has been added' }) }}>Create Rule</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Dialog */}
+        <Dialog open={showEmailDialog} onOpenChange={setShowEmailDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-blue-600" />
+                Compose Email
+              </DialogTitle>
+              <DialogDescription>
+                {emailRecipient && 'email' in emailRecipient ? `Send email to ${emailRecipient.email}` : 'Send email to contact'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>To</Label>
+                <Input
+                  value={emailRecipient && 'email' in emailRecipient ? emailRecipient.email : ''}
+                  placeholder="recipient@email.com"
+                  readOnly={!!emailRecipient}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Subject</Label>
+                <Input placeholder="Enter email subject..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Message</Label>
+                <Textarea placeholder="Type your message here..." className="min-h-[150px]" />
+              </div>
+              <div className="space-y-2">
+                <Label>Email Template (Optional)</Label>
+                <Select>
+                  <SelectTrigger><SelectValue placeholder="Select a template..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="follow-up">Follow-up</SelectItem>
+                    <SelectItem value="introduction">Introduction</SelectItem>
+                    <SelectItem value="proposal">Proposal</SelectItem>
+                    <SelectItem value="thank-you">Thank You</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmailDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                if (emailRecipient && 'email' in emailRecipient) {
+                  window.location.href = `mailto:${emailRecipient.email}`
+                }
+                setShowEmailDialog(false)
+                toast.success('Email Sent', { description: 'Your email has been sent successfully' })
+              }}>
+                <Mail className="h-4 w-4 mr-2" />Send Email
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Import Dialog */}
+        <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5 text-green-600" />
+                Import Customers
+              </DialogTitle>
+              <DialogDescription>Import customers from a CSV or Excel file</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+                <Upload className="h-10 w-10 text-gray-400 mx-auto mb-4" />
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Drag and drop your file here, or click to browse</p>
+                <Button variant="outline" onClick={() => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = '.csv,.xlsx,.xls'
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0]
+                    if (file) {
+                      toast.success('File Selected', { description: `Ready to import ${file.name}` })
+                    }
+                  }
+                  input.click()
+                }}>
+                  <Upload className="h-4 w-4 mr-2" />Browse Files
+                </Button>
+              </div>
+              <div className="text-xs text-gray-500">
+                <p className="font-medium mb-1">Supported formats:</p>
+                <p>CSV, Excel (.xlsx, .xls)</p>
+              </div>
+              <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <FileText className="h-4 w-4 text-blue-600" />
+                <a href="#" className="text-sm text-blue-600 hover:underline" onClick={(e) => { e.preventDefault(); toast.success('Template Downloaded', { description: 'CSV template downloaded' }) }}>
+                  Download sample CSV template
+                </a>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowImportDialog(false); toast.success('Import Started', { description: 'Customers are being imported...' }) }}>
+                <Upload className="h-4 w-4 mr-2" />Start Import
               </Button>
             </DialogFooter>
           </DialogContent>

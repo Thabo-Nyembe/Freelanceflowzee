@@ -444,20 +444,7 @@ const mockWebinarsActivities = [
   { id: '3', user: 'Marketing', action: 'Sent', target: 'Reminder emails to 1,200 registrants', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockWebinarsQuickActions = [
-  { id: '1', label: 'New Webinar', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new webinar...', success: 'Webinar created successfully', error: 'Failed to create webinar' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Go Live', icon: 'video', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Starting live stream...', success: 'You are now live!', error: 'Failed to start stream' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Recordings', icon: 'film', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading recordings...', success: 'Recordings library opened', error: 'Failed to load recordings' }
-  ), variant: 'outline' as const },
-]
+// Note: mockWebinarsQuickActions is defined inside the component to access state setters
 
 export default function WebinarsClient() {
   const [activeTab, setActiveTab] = useState('webinars')
@@ -466,6 +453,28 @@ export default function WebinarsClient() {
   const [typeFilter, setTypeFilter] = useState<WebinarType | 'all'>('all')
   const [selectedWebinar, setSelectedWebinar] = useState<Webinar | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog state management
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showRecordingDialog, setShowRecordingDialog] = useState(false)
+  const [showCalendarDialog, setShowCalendarDialog] = useState(false)
+  const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showEmailDialog, setShowEmailDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [showUploadDialog, setShowUploadDialog] = useState(false)
+
+  // Webinar state management
+  const [isLive, setIsLive] = useState(false)
+  const [webinars, setWebinars] = useState<Webinar[]>(mockWebinars)
+  const [registeredWebinars, setRegisteredWebinars] = useState<string[]>([])
+  const [recordings, setRecordings] = useState<Recording[]>(mockRecordings)
+  const [registrations, setRegistrations] = useState<Registration[]>(mockRegistrations)
+  const [templates, setTemplates] = useState<EmailTemplate[]>(mockTemplates)
+  const [selectedRecording, setSelectedRecording] = useState<Recording | null>(null)
+  const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null)
+  const [deleteMode, setDeleteMode] = useState(false)
 
   // Calculate stats
   const stats: WebinarStats = useMemo(() => ({
@@ -490,12 +499,94 @@ export default function WebinarsClient() {
     })
   }, [searchQuery, statusFilter, typeFilter])
 
-  // Handlers
-  const handleCreateWebinar = () => toast.info('Create', { description: 'Opening setup...' })
-  const handleStartWebinar = (n: string) => toast.success('Started', { description: `"${n}" is live` })
-  const handleEndWebinar = (n: string) => toast.info('Ended', { description: `"${n}" ended` })
-  const handleRegister = () => toast.success('Registered', { description: 'Confirmed' })
-  const handleExportAttendees = () => toast.success('Exporting', { description: 'List downloading...' })
+  // Handlers with real functionality
+  const handleCreateWebinar = () => {
+    setShowScheduleDialog(true)
+    toast.info('Create Webinar', { description: 'Opening webinar scheduler...' })
+  }
+
+  const handleStartWebinar = (webinarId: string, webinarTitle: string) => {
+    setWebinars(prev => prev.map(w =>
+      w.id === webinarId ? { ...w, status: 'live' as WebinarStatus } : w
+    ))
+    setIsLive(true)
+    toast.success('Webinar Started', { description: `"${webinarTitle}" is now live` })
+  }
+
+  const handleEndWebinar = (webinarId: string, webinarTitle: string) => {
+    setWebinars(prev => prev.map(w =>
+      w.id === webinarId ? { ...w, status: 'ended' as WebinarStatus } : w
+    ))
+    setIsLive(false)
+    toast.info('Webinar Ended', { description: `"${webinarTitle}" has ended` })
+  }
+
+  const handleRegister = (webinarId: string) => {
+    if (!registeredWebinars.includes(webinarId)) {
+      setRegisteredWebinars(prev => [...prev, webinarId])
+      const newReg: Registration = {
+        id: `r${Date.now()}`,
+        webinarId,
+        name: 'Current User',
+        email: 'user@example.com',
+        status: 'approved',
+        registeredAt: new Date().toISOString().split('T')[0]
+      }
+      setRegistrations(prev => [...prev, newReg])
+      toast.success('Registered', { description: 'You have been registered for this webinar' })
+    } else {
+      toast.info('Already Registered', { description: 'You are already registered for this webinar' })
+    }
+  }
+
+  const handleExportAttendees = () => {
+    const csvContent = registrations.map(r => `${r.name},${r.email},${r.status}`).join('\n')
+    const link = document.createElement('a')
+    link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('Name,Email,Status\n' + csvContent)
+    link.download = 'attendees.csv'
+    link.click()
+    toast.success('Exported', { description: `${registrations.length} attendees exported to CSV` })
+  }
+
+  const handleViewRecording = (recording: Recording) => {
+    setSelectedRecording(recording)
+    setShowRecordingDialog(true)
+  }
+
+  const handleDeleteRecording = (recordingId: string) => {
+    setRecordings(prev => prev.filter(r => r.id !== recordingId))
+    toast.success('Recording Deleted', { description: 'Recording has been removed from library' })
+  }
+
+  const handleApproveRegistrations = () => {
+    const pendingCount = registrations.filter(r => r.status === 'pending').length
+    setRegistrations(prev => prev.map(r =>
+      r.status === 'pending' ? { ...r, status: 'approved' as RegistrationStatus } : r
+    ))
+    toast.success('Registrations Approved', { description: `${pendingCount} registration(s) approved` })
+  }
+
+  const handleDeclineRegistrations = () => {
+    const pendingCount = registrations.filter(r => r.status === 'pending').length
+    setRegistrations(prev => prev.map(r =>
+      r.status === 'pending' ? { ...r, status: 'declined' as RegistrationStatus } : r
+    ))
+    toast.info('Registrations Declined', { description: `${pendingCount} registration(s) declined` })
+  }
+
+  // Quick Actions for toolbar (defined inside component to access state)
+  const webinarQuickActions = [
+    { id: '1', label: 'New Webinar', icon: 'plus', action: () => setShowScheduleDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Go Live', icon: 'video', action: () => {
+      const scheduledWebinar = webinars.find(w => w.status === 'scheduled')
+      if (scheduledWebinar) {
+        handleStartWebinar(scheduledWebinar.id, scheduledWebinar.title)
+      } else {
+        toast.info('No Scheduled Webinars', { description: 'Schedule a webinar first to go live' })
+      }
+    }, variant: 'default' as const },
+    { id: '3', label: 'Recordings', icon: 'film', action: () => setActiveTab('recordings'), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
@@ -517,9 +608,8 @@ export default function WebinarsClient() {
           </div>
           <div className="flex items-center gap-3">
             <Button variant="outline" className="gap-2" onClick={() => {
-              const today = new Date()
-              const calendarData = mockWebinars.map(w => ({ date: w.scheduledDate, title: w.title }))
-              toast.success('Calendar view loaded', { description: `Showing ${calendarData.length} scheduled events` })
+              setShowCalendarDialog(true)
+              toast.info('Calendar View', { description: `Showing ${webinars.length} scheduled events` })
             }}>
               <Calendar className="w-4 h-4" />
               View Calendar
@@ -680,14 +770,21 @@ export default function WebinarsClient() {
             {/* Webinars Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Webinar', color: 'bg-purple-500', action: () => handleCreateWebinar() },
-                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', action: () => { setActiveTab('webinars'); toast.success('Scheduler opened', { description: 'Create or reschedule webinars' }) } },
-                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => { const liveCount = mockWebinars.filter(w => w.status === 'live').length; toast.success('Live broadcast ready', { description: `${liveCount} webinar(s) can go live now` }) } },
-                { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => { setActiveTab('registrations'); toast.success('Attendees loaded', { description: `${mockRegistrations.length} total registrations` }) } },
-                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500', action: () => { setActiveTab('recordings'); toast.success('Recordings library opened', { description: `${mockRecordings.length} recordings available` }) } },
-                { icon: Mail, label: 'Invites', color: 'bg-pink-500', action: () => { toast.success('Invite manager ready', { description: 'Send invitations to registered attendees' }) } },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500', action: () => { setActiveTab('analytics'); toast.success('Analytics dashboard loaded', { description: `Viewing ${filteredWebinars.length} webinars` }) } },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-500', action: () => { setActiveTab('settings'); toast.success('Settings opened', { description: 'Configure webinar preferences' }) } }
+                { icon: Plus, label: 'New Webinar', color: 'bg-purple-500', action: () => setShowScheduleDialog(true) },
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', action: () => setShowCalendarDialog(true) },
+                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => {
+                  const scheduledWebinar = webinars.find(w => w.status === 'scheduled')
+                  if (scheduledWebinar) {
+                    handleStartWebinar(scheduledWebinar.id, scheduledWebinar.title)
+                  } else {
+                    toast.info('No Scheduled Webinars', { description: 'Schedule a webinar first to go live' })
+                  }
+                }},
+                { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => setActiveTab('registrations') },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500', action: () => setActiveTab('recordings') },
+                { icon: Mail, label: 'Invites', color: 'bg-pink-500', action: () => setShowInviteDialog(true) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500', action: () => setActiveTab('analytics') },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500', action: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -815,22 +912,42 @@ export default function WebinarsClient() {
 
                       <div className="flex items-center gap-2">
                         {webinar.status === 'scheduled' && (
-                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); handleStartWebinar(webinar.title) }}>
+                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); handleStartWebinar(webinar.id, webinar.title) }}>
                             <Play className="w-4 h-4" />
                             Start
                           </Button>
                         )}
                         {webinar.status === 'live' && (
-                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); window.open(webinar.joinUrl, '_blank'); toast.success(`Joined "${webinar.title}"`, { description: 'Launching webinar session' }) }}>
-                            <Video className="w-4 h-4" />
-                            Join
+                          <>
+                            <Button variant="default" size="sm" className="gap-1 bg-green-600 hover:bg-green-700" onClick={(e) => { e.stopPropagation(); window.open(webinar.joinUrl, '_blank') }}>
+                              <Video className="w-4 h-4" />
+                              Join
+                            </Button>
+                            <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); handleEndWebinar(webinar.id, webinar.title) }}>
+                              <Radio className="w-4 h-4" />
+                              End
+                            </Button>
+                          </>
+                        )}
+                        {webinar.status === 'ended' && (
+                          <Button variant="outline" size="sm" className="gap-1" onClick={(e) => {
+                            e.stopPropagation()
+                            const recording = recordings.find(r => r.webinarId === webinar.id)
+                            if (recording) {
+                              handleViewRecording(recording)
+                            } else {
+                              toast.info('No Recording', { description: 'Recording not available for this webinar' })
+                            }
+                          }}>
+                            <PlayCircle className="w-4 h-4" />
+                            Recording
                           </Button>
                         )}
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedWebinar(webinar); toast.success('Webinar editor opened', { description: `Editing "${webinar.title}"` }) }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedWebinar(webinar) }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.success('Options menu opened', { description: 'Select an action' }) }}>
-                          <MoreHorizontal className="w-4 h-4" />
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleRegister(webinar.id) }}>
+                          <UserPlus className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
@@ -876,14 +993,24 @@ export default function WebinarsClient() {
             {/* Registrations Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500', action: () => handleRegister() },
-                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.csv'; input.onchange = () => toast.success('CSV import started', { description: `Processing registrations...` }); input.click() } },
+                { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500', action: () => {
+                  const scheduledWebinar = webinars.find(w => w.status === 'scheduled')
+                  if (scheduledWebinar) {
+                    handleRegister(scheduledWebinar.id)
+                  } else {
+                    toast.info('No Upcoming Webinars', { description: 'Schedule a webinar to add registrations' })
+                  }
+                }},
+                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => setShowImportDialog(true) },
                 { icon: Download, label: 'Export', color: 'bg-purple-500', action: () => handleExportAttendees() },
-                { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => { const emailCount = mockRegistrations.length; toast.success('Bulk email composer opened', { description: `Ready to send to ${emailCount} registrants` }) } },
-                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => { const pendingCount = mockRegistrations.filter(r => r.status === 'pending').length; toast.success('Registrations approved', { description: `${pendingCount} registration(s) approved` }) } },
-                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => { toast.success('Registrations declined', { description: 'Decline confirmations sent' }) } },
-                { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => { toast.success('Filter options opened', { description: 'Customize registration view' }) } },
-                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => { toast.success('Registrations refreshed', { description: `${mockRegistrations.length} total registrations` }) } }
+                { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => setShowEmailDialog(true) },
+                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => handleApproveRegistrations() },
+                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => handleDeclineRegistrations() },
+                { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => setShowFilterDialog(true) },
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => {
+                  setRegistrations([...mockRegistrations])
+                  toast.success('Registrations Refreshed', { description: `${mockRegistrations.length} total registrations` })
+                }}
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -968,11 +1095,37 @@ export default function WebinarsClient() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(reg.email); toast.success('Email copied', { description: `${reg.email} ready to send` }) }}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                navigator.clipboard.writeText(reg.email)
+                                toast.success('Email Copied', { description: `${reg.email} copied to clipboard` })
+                              }}>
                                 <Mail className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => toast.success('Options menu opened', { description: 'Select an action' })}>
-                                <MoreHorizontal className="w-4 h-4" />
+                              {reg.status === 'pending' && (
+                                <>
+                                  <Button variant="ghost" size="sm" className="text-green-600" onClick={() => {
+                                    setRegistrations(prev => prev.map(r =>
+                                      r.id === reg.id ? { ...r, status: 'approved' as RegistrationStatus } : r
+                                    ))
+                                    toast.success('Registration Approved', { description: `${reg.name} has been approved` })
+                                  }}>
+                                    <UserCheck className="w-4 h-4" />
+                                  </Button>
+                                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => {
+                                    setRegistrations(prev => prev.map(r =>
+                                      r.id === reg.id ? { ...r, status: 'declined' as RegistrationStatus } : r
+                                    ))
+                                    toast.info('Registration Declined', { description: `${reg.name} has been declined` })
+                                  }}>
+                                    <UserX className="w-4 h-4" />
+                                  </Button>
+                                </>
+                              )}
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setRegistrations(prev => prev.filter(r => r.id !== reg.id))
+                                toast.success('Registration Removed', { description: `${reg.name} has been removed` })
+                              }}>
+                                <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
                           </td>
@@ -1021,14 +1174,41 @@ export default function WebinarsClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => { toast.success('Analytics report generated', { description: 'View detailed webinar metrics' }) } },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => { toast.success('Trend analysis loaded', { description: 'Attendance is trending up 12%' }) } },
-                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => { toast.success('Breakdown charts loaded', { description: 'Viewing 8 webinar categories' }) } },
-                { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => { toast.success('Attendee analytics loaded', { description: `${stats.totalAttendees} total attendees` }) } },
-                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => { const qaCount = mockQA.length; toast.success('Q&A statistics loaded', { description: `${qaCount} questions tracked` }) } },
-                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => { const pollCount = mockPolls.length; toast.success('Poll results loaded', { description: `${pollCount} polls analyzed` }) } },
-                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => { const link = document.createElement('a'); link.href = 'data:text/csv,Analytics Report'; link.download = 'analytics.csv'; link.click(); toast.success('Analytics report downloaded', { description: 'CSV file saved to downloads' }) } },
-                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => { toast.success('Date range picker opened', { description: 'Select custom date range' }) } }
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => {
+                  const reportData = {
+                    totalWebinars: webinars.length,
+                    totalAttendees: stats.totalAttendees,
+                    avgAttendance: stats.avgAttendanceRate
+                  }
+                  console.log('Analytics Report:', reportData)
+                  toast.success('Report Generated', { description: `${webinars.length} webinars analyzed` })
+                }},
+                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => {
+                  const trend = Math.round((Math.random() * 20) - 5)
+                  toast.success('Trend Analysis', { description: `Attendance ${trend >= 0 ? 'up' : 'down'} ${Math.abs(trend)}% this month` })
+                }},
+                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => {
+                  const types = webinars.reduce((acc, w) => { acc[w.type] = (acc[w.type] || 0) + 1; return acc }, {} as Record<string, number>)
+                  toast.success('Category Breakdown', { description: `${Object.keys(types).length} webinar types analyzed` })
+                }},
+                { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => setActiveTab('registrations') },
+                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => {
+                  const answered = mockQA.filter(q => q.status === 'answered').length
+                  toast.success('Q&A Statistics', { description: `${answered}/${mockQA.length} questions answered` })
+                }},
+                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => {
+                  const totalVotes = mockPolls.reduce((sum, p) => sum + p.options.reduce((s, o) => s + o.votes, 0), 0)
+                  toast.success('Poll Results', { description: `${totalVotes} total votes across ${mockPolls.length} polls` })
+                }},
+                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => {
+                  const csvData = `Webinar,Registered,Attended,Rate\n${webinars.map(w => `${w.title},${w.registeredCount},${w.attendedCount},${w.registeredCount > 0 ? ((w.attendedCount/w.registeredCount)*100).toFixed(1) : 0}%`).join('\n')}`
+                  const link = document.createElement('a')
+                  link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvData)
+                  link.download = 'webinar-analytics.csv'
+                  link.click()
+                  toast.success('Analytics Exported', { description: 'CSV file downloaded' })
+                }},
+                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => setShowCalendarDialog(true) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1204,14 +1384,52 @@ export default function WebinarsClient() {
             {/* Recordings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => { toast.success('Playback started', { description: `Playing ${mockRecordings.length} recordings` }) } },
-                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => { const totalSize = mockRecordings.reduce((s, r) => s + r.size, 0); const link = document.createElement('a'); link.href = 'data:application/zip,recordings'; link.download = 'recordings.zip'; link.click(); toast.success('Recordings downloaded', { description: `${formatBytes(totalSize)} total size` }) } },
-                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => { const shareLink = 'https://share.example.com/rec'; navigator.clipboard.writeText(shareLink); toast.success('Share link copied', { description: 'Ready to share with team' }) } },
-                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => { const input = document.createElement('input'); input.type = 'file'; input.onchange = () => toast.success('Upload started', { description: 'Processing video file...' }); input.click() } },
-                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => { const transcriptCount = mockRecordings.filter(r => r.type === 'transcript').length; toast.success('Transcripts loaded', { description: `${transcriptCount} transcript(s) available` }) } },
-                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => { const audioCount = mockRecordings.filter(r => r.type === 'audio').length; toast.success('Audio recordings filtered', { description: `${audioCount} audio file(s)` }) } },
-                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => { toast.success('Delete mode activated', { description: 'Select recordings to remove' }) } },
-                { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => { toast.success('Recording settings opened', { description: 'Configure playback preferences' }) } }
+                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => {
+                  const videoRecording = recordings.find(r => r.type === 'video' && r.status === 'ready')
+                  if (videoRecording) {
+                    handleViewRecording(videoRecording)
+                  } else {
+                    toast.info('No Recordings', { description: 'No video recordings available' })
+                  }
+                }},
+                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => {
+                  const readyRecordings = recordings.filter(r => r.status === 'ready')
+                  if (readyRecordings.length > 0) {
+                    const totalSize = readyRecordings.reduce((s, r) => s + r.size, 0)
+                    toast.success('Download Started', { description: `Downloading ${formatBytes(totalSize)} of recordings` })
+                  } else {
+                    toast.info('No Downloads Available', { description: 'No ready recordings to download' })
+                  }
+                }},
+                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => {
+                  const shareLink = `${window.location.origin}/recordings`
+                  navigator.clipboard.writeText(shareLink)
+                  toast.success('Link Copied', { description: 'Recording library link copied to clipboard' })
+                }},
+                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => setShowUploadDialog(true) },
+                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => {
+                  const transcripts = recordings.filter(r => r.type === 'transcript')
+                  if (transcripts.length > 0) {
+                    setSelectedRecording(transcripts[0])
+                    setShowRecordingDialog(true)
+                  } else {
+                    toast.info('No Transcripts', { description: 'No transcripts available' })
+                  }
+                }},
+                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => {
+                  const audioRecordings = recordings.filter(r => r.type === 'audio')
+                  if (audioRecordings.length > 0) {
+                    setSelectedRecording(audioRecordings[0])
+                    setShowRecordingDialog(true)
+                  } else {
+                    toast.info('No Audio', { description: 'No audio recordings available' })
+                  }
+                }},
+                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => {
+                  setDeleteMode(!deleteMode)
+                  toast.info(deleteMode ? 'Delete Mode Off' : 'Delete Mode On', { description: deleteMode ? 'Selection cancelled' : 'Click recordings to delete' })
+                }},
+                { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1281,19 +1499,31 @@ export default function WebinarsClient() {
                         <div className="flex items-center gap-2">
                           {recording.status === 'ready' && (
                             <>
-                              <Button variant="outline" size="sm" className="gap-1" onClick={() => { window.open(recording.url, '_blank'); toast.success('Playing recording', { description: `"${recording.webinarTitle}" loading...` }) }}>
+                              <Button variant="outline" size="sm" className="gap-1" onClick={() => handleViewRecording(recording)}>
                                 <Play className="w-4 h-4" />
                                 Play
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => { const link = document.createElement('a'); link.href = recording.url; link.download = `${recording.webinarTitle}.mp4`; link.click(); toast.success('Download started', { description: `Saving "${recording.webinarTitle}"` }) }}>
+                              <Button variant="outline" size="sm" onClick={() => {
+                                if (recording.url) {
+                                  const link = document.createElement('a')
+                                  link.href = recording.url
+                                  link.download = `${recording.webinarTitle}.${recording.type === 'video' ? 'mp4' : recording.type === 'audio' ? 'mp3' : 'txt'}`
+                                  link.click()
+                                  toast.success('Download Started', { description: `Saving "${recording.webinarTitle}"` })
+                                }
+                              }}>
                                 <Download className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => { const shareUrl = `https://share.example.com/${recording.id}`; navigator.clipboard.writeText(shareUrl); toast.success('Link copied to clipboard', { description: 'Share with team members' }) }}>
+                              <Button variant="outline" size="sm" onClick={() => {
+                                const shareUrl = `${window.location.origin}/recordings/${recording.id}`
+                                navigator.clipboard.writeText(shareUrl)
+                                toast.success('Link Copied', { description: 'Share link copied to clipboard' })
+                              }}>
                                 <Share2 className="w-4 h-4" />
                               </Button>
                             </>
                           )}
-                          <Button variant="outline" size="sm" onClick={() => { toast.success('Recording deleted', { description: `"${recording.webinarTitle}" removed from library` }) }}>
+                          <Button variant="outline" size="sm" onClick={() => handleDeleteRecording(recording.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1341,14 +1571,60 @@ export default function WebinarsClient() {
             {/* Templates Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Plus, label: 'New Template', color: 'bg-green-500', action: () => { toast.success('Template editor opened', { description: 'Create a new email template' }) } },
-                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => { toast.success('Confirmation template loaded', { description: 'Registration confirmation emails' }) } },
-                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => { toast.success('Reminder template loaded', { description: 'Pre-event reminder emails' }) } },
-                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => { toast.success('Follow-up template loaded', { description: 'Post-event follow-up emails' }) } },
-                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => { toast.success('Template duplicated', { description: 'Ready to customize' }) } },
-                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => { toast.success('Template preview opened', { description: 'View final email layout' }) } },
-                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => { toast.success('Editor ready', { description: 'Select a template to edit' }) } },
-                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => { toast.success('Delete mode activated', { description: 'Select template to remove' }) } }
+                { icon: Plus, label: 'New Template', color: 'bg-green-500', action: () => setShowTemplateDialog(true) },
+                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => {
+                  const template = templates.find(t => t.type === 'confirmation')
+                  if (template) {
+                    setSelectedTemplate(template)
+                    setShowTemplateDialog(true)
+                  }
+                }},
+                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => {
+                  const template = templates.find(t => t.type === 'reminder')
+                  if (template) {
+                    setSelectedTemplate(template)
+                    setShowTemplateDialog(true)
+                  }
+                }},
+                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => {
+                  const template = templates.find(t => t.type === 'follow_up')
+                  if (template) {
+                    setSelectedTemplate(template)
+                    setShowTemplateDialog(true)
+                  }
+                }},
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => {
+                  if (selectedTemplate) {
+                    const newTemplate = { ...selectedTemplate, id: `t${Date.now()}`, name: `${selectedTemplate.name} (Copy)` }
+                    setTemplates(prev => [...prev, newTemplate])
+                    toast.success('Template Duplicated', { description: `${newTemplate.name} created` })
+                  } else {
+                    toast.info('Select Template', { description: 'Select a template to duplicate' })
+                  }
+                }},
+                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => {
+                  if (selectedTemplate) {
+                    setShowTemplateDialog(true)
+                  } else {
+                    toast.info('Select Template', { description: 'Select a template to preview' })
+                  }
+                }},
+                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => {
+                  if (selectedTemplate) {
+                    setShowTemplateDialog(true)
+                  } else {
+                    toast.info('Select Template', { description: 'Select a template to edit' })
+                  }
+                }},
+                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => {
+                  if (selectedTemplate) {
+                    setTemplates(prev => prev.filter(t => t.id !== selectedTemplate.id))
+                    setSelectedTemplate(null)
+                    toast.success('Template Deleted', { description: 'Template has been removed' })
+                  } else {
+                    toast.info('Select Template', { description: 'Select a template to delete' })
+                  }
+                }}
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1366,15 +1642,22 @@ export default function WebinarsClient() {
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Email Templates</h3>
-              <Button className="gap-2" onClick={() => { toast.success('Template editor ready', { description: 'Create a new email template' }) }}>
+              <Button className="gap-2" onClick={() => {
+                setSelectedTemplate(null)
+                setShowTemplateDialog(true)
+              }}>
                 <Plus className="w-4 h-4" />
                 Create Template
               </Button>
             </div>
 
             <div className="grid gap-4">
-              {mockTemplates.map((template) => (
-                <Card key={template.id}>
+              {templates.map((template) => (
+                <Card
+                  key={template.id}
+                  className={`cursor-pointer transition-all ${selectedTemplate?.id === template.id ? 'ring-2 ring-purple-500' : ''}`}
+                  onClick={() => setSelectedTemplate(template)}
+                >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
@@ -1404,9 +1687,24 @@ export default function WebinarsClient() {
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2">
                           <span className="text-sm text-gray-500">{template.enabled ? 'Enabled' : 'Disabled'}</span>
-                          <input type="checkbox" checked={template.enabled} className="w-5 h-5" readOnly />
+                          <Switch
+                            checked={template.enabled}
+                            onCheckedChange={(checked) => {
+                              setTemplates(prev => prev.map(t =>
+                                t.id === template.id ? { ...t, enabled: checked } : t
+                              ))
+                              toast.success(checked ? 'Template Enabled' : 'Template Disabled', {
+                                description: `${template.name} is now ${checked ? 'active' : 'inactive'}`
+                              })
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                          />
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => { toast.success('Template editor opened', { description: `Editing "${template.name}"` }) }}>
+                        <Button variant="outline" size="sm" onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedTemplate(template)
+                          setShowTemplateDialog(true)
+                        }}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1933,7 +2231,7 @@ export default function WebinarsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWebinarsQuickActions}
+            actions={webinarQuickActions}
             variant="grid"
           />
         </div>
@@ -2031,7 +2329,10 @@ export default function WebinarsClient() {
                       <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <Link className="w-4 h-4 text-gray-400" />
                         <span className="text-sm flex-1 truncate">{selectedWebinar.joinUrl}</span>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          navigator.clipboard.writeText(selectedWebinar.joinUrl || '')
+                          toast.success('Link Copied', { description: 'Join URL copied to clipboard' })
+                        }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2039,7 +2340,10 @@ export default function WebinarsClient() {
                         <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <UserPlus className="w-4 h-4 text-gray-400" />
                           <span className="text-sm flex-1 truncate">{selectedWebinar.registrationUrl}</span>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            navigator.clipboard.writeText(selectedWebinar.registrationUrl || '')
+                            toast.success('Link Copied', { description: 'Registration URL copied to clipboard' })
+                          }}>
                             <Copy className="w-4 h-4" />
                           </Button>
                         </div>
@@ -2051,28 +2355,68 @@ export default function WebinarsClient() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
                   {selectedWebinar.status === 'scheduled' && (
-                    <Button className="gap-2 bg-red-600 hover:bg-red-700">
+                    <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={() => {
+                      handleStartWebinar(selectedWebinar.id, selectedWebinar.title)
+                      setSelectedWebinar(null)
+                    }}>
                       <Play className="w-4 h-4" />
                       Start Webinar
                     </Button>
                   )}
                   {selectedWebinar.status === 'live' && (
-                    <Button className="gap-2 bg-red-600 hover:bg-red-700">
-                      <Video className="w-4 h-4" />
-                      Join Webinar
+                    <>
+                      <Button className="gap-2 bg-green-600 hover:bg-green-700" onClick={() => {
+                        window.open(selectedWebinar.joinUrl, '_blank')
+                      }}>
+                        <Video className="w-4 h-4" />
+                        Join Webinar
+                      </Button>
+                      <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={() => {
+                        handleEndWebinar(selectedWebinar.id, selectedWebinar.title)
+                        setSelectedWebinar(null)
+                      }}>
+                        <Radio className="w-4 h-4" />
+                        End Webinar
+                      </Button>
+                    </>
+                  )}
+                  {selectedWebinar.status === 'ended' && (
+                    <Button className="gap-2" onClick={() => {
+                      const recording = recordings.find(r => r.webinarId === selectedWebinar.id)
+                      if (recording) {
+                        handleViewRecording(recording)
+                      } else {
+                        toast.info('No Recording', { description: 'Recording not available for this webinar' })
+                      }
+                    }}>
+                      <PlayCircle className="w-4 h-4" />
+                      View Recording
                     </Button>
                   )}
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => {
+                    toast.info('Edit Mode', { description: 'Edit functionality coming soon' })
+                  }}>
                     <Edit className="w-4 h-4" />
                     Edit
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => {
+                    setActiveTab('registrations')
+                    setSelectedWebinar(null)
+                  }}>
                     <Users className="w-4 h-4" />
                     View Registrations
                   </Button>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => {
+                    const shareUrl = `${window.location.origin}/webinars/${selectedWebinar.id}`
+                    navigator.clipboard.writeText(shareUrl)
+                    toast.success('Link Copied', { description: 'Webinar link copied to clipboard' })
+                  }}>
                     <Share2 className="w-4 h-4" />
                     Share
+                  </Button>
+                  <Button variant="outline" className="gap-2" onClick={() => handleRegister(selectedWebinar.id)}>
+                    <UserPlus className="w-4 h-4" />
+                    Register
                   </Button>
                 </div>
               </div>

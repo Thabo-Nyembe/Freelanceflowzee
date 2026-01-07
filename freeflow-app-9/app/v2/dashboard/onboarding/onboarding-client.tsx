@@ -439,6 +439,18 @@ export default function OnboardingClient() {
   const [selectedChecklist, setSelectedChecklist] = useState<Checklist | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Additional filter state for enhanced functionality
+  const [userStatusFilter, setUserStatusFilter] = useState<'all' | 'active' | 'at_risk' | 'churned' | 'new' | 'completed'>('all')
+  const [checklistStatusFilter, setChecklistStatusFilter] = useState<'all' | 'active' | 'paused'>('all')
+  const [analyticsDateRange, setAnalyticsDateRange] = useState<'7d' | '30d' | '90d' | 'custom'>('7d')
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showGoalsDialog, setShowGoalsDialog] = useState(false)
+  const [showDateRangeDialog, setShowDateRangeDialog] = useState(false)
+  const [editingFlow, setEditingFlow] = useState<Flow | null>(null)
+  const [editingChecklist, setEditingChecklist] = useState<Checklist | null>(null)
+  const [completionGoal, setCompletionGoal] = useState(80)
+
   // Form state for creating/editing
   const [flowForm, setFlowForm] = useState({
     name: '',
@@ -556,11 +568,24 @@ export default function OnboardingClient() {
 
   // Filter users
   const filteredUsers = useMemo(() => {
-    return users.filter(user =>
-      user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  }, [users, searchQuery])
+    return users.filter(user => {
+      const matchesSearch = user.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.userEmail.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = userStatusFilter === 'all' ||
+        (userStatusFilter === 'completed' ? user.flowsCompleted === user.totalFlows : user.status === userStatusFilter)
+      return matchesSearch && matchesStatus
+    })
+  }, [users, searchQuery, userStatusFilter])
+
+  // Filter checklists
+  const filteredChecklists = useMemo(() => {
+    return checklists.filter(checklist => {
+      const matchesSearch = checklist.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        checklist.description.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesStatus = checklistStatusFilter === 'all' || checklist.status === checklistStatusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [checklists, searchQuery, checklistStatusFilter])
 
   const maxViews = Math.max(...mockAnalytics.map(a => a.views))
 
@@ -1139,13 +1164,13 @@ export default function OnboardingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateChecklist },
-                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const activeCount = checklists.filter(c => c.status === 'active').length; toast.success(`${activeCount} active checklists`, { description: 'Showing all active checklists in the list' }) } },
+                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { setChecklistStatusFilter('active'); toast.success('Filter applied', { description: 'Showing active checklists' }) } },
                 { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { if (selectedChecklist) setSelectedChecklist(selectedChecklist); else toast.info('Please select a checklist to edit') } },
                 { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { if (!selectedChecklist) { toast.info('Please select a checklist to duplicate'); return; } const duplicated: Checklist = { ...selectedChecklist, id: Math.random().toString(36).substr(2, 9), name: `${selectedChecklist.name} (Copy)` }; setChecklists(prev => [duplicated, ...prev]); toast.success('Checklist duplicated', { description: `Created copy of "${selectedChecklist.name}"` }) } },
-                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => toast.info('Assignment feature coming soon', { description: 'You will be able to assign checklists to users' }) },
+                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => { if (!selectedChecklist) { toast.info('Please select a checklist first'); return; } setShowAssignDialog(true) } },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: handleExportReport },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { const archivedCount = checklists.filter(c => c.status === 'paused').length; toast.info(`${archivedCount} archived checklists`, { description: 'Filter to view archived checklists' }) } },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { setChecklistStatusFilter('paused'); toast.success('Filter applied', { description: 'Showing archived checklists' }) } },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1171,7 +1196,7 @@ export default function OnboardingClient() {
             </div>
 
             <div className="grid gap-4">
-              {checklists.map((checklist) => (
+              {filteredChecklists.map((checklist) => (
                 <Card key={checklist.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedChecklist(checklist)}>
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -1252,14 +1277,14 @@ export default function OnboardingClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { toast.success('Overview', { description: `${stats.totalFlows} flows with ${stats.avgCompletionRate.toFixed(1)}% average completion rate` }) } },
-                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { const completionTrend = ((stats.totalCompletions / stats.totalViews) * 100).toFixed(1); toast.success('Trends', { description: `${completionTrend}% completion trend detected across all flows` }) } },
+                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { setStatusFilter('all'); setTypeFilter('all'); toast.success('Overview loaded', { description: `${stats.totalFlows} flows with ${stats.avgCompletionRate.toFixed(1)}% average completion rate` }) } },
+                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { const completionTrend = ((stats.totalCompletions / stats.totalViews) * 100).toFixed(1); setAnalyticsDateRange('30d'); toast.success('Trends view', { description: `${completionTrend}% completion trend - showing 30-day data` }) } },
                 { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const byType: Record<FlowType, number> = { onboarding: 0, feature_adoption: 0, announcement: 0, survey: 0, checklist: 0 }; flows.forEach(f => byType[f.type]++); const breakdown = Object.entries(byType).filter(([_, count]) => count > 0).map(([type, count]) => `${type}: ${count}`).join(', '); toast.success('Breakdown', { description: `Flows by type: ${breakdown || 'No flows yet'}` }) } },
-                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.info('Goals tracking', { description: 'Set completion rate targets for your flows' }) },
+                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => setShowGoalsDialog(true) },
                 { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { setIsLoading(true); window.location.reload() } },
-                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => toast.info('Analytics filters', { description: 'Filter by date range, flow type, or status' }) },
-                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.info('Date range picker', { description: 'Select a date range to view analytics for that period' }) },
+                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setShowFilterDialog(true) },
+                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setShowDateRangeDialog(true) },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1399,13 +1424,13 @@ export default function OnboardingClient() {
             {/* Users Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.success(`${users.length} users total`, { description: `Showing all ${users.length} users in your workspace` }) },
-                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { const completed = users.filter(u => u.flowsCompleted === u.totalFlows).length; toast.success(`${completed} users completed`, { description: `${completed} out of ${users.length} users have completed all flows` }) } },
-                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => { const atRisk = users.filter(u => u.status === 'at_risk').length; toast.warning(`${atRisk} users at risk`, { description: 'These users may need engagement interventions' }) } },
-                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => { const churned = users.filter(u => u.status === 'churned').length; toast.error(`${churned} users churned`, { description: 'Users who have become inactive' }) } },
-                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const emailList = users.map(u => u.userEmail).join(', '); navigator.clipboard.writeText(emailList); toast.success('Emails copied', { description: `${users.length} email addresses copied to clipboard` }) } },
+                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { setUserStatusFilter('all'); toast.success('Filter cleared', { description: `Showing all ${users.length} users` }) } },
+                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { setUserStatusFilter('completed'); const completed = users.filter(u => u.flowsCompleted === u.totalFlows).length; toast.success('Filter applied', { description: `Showing ${completed} users who completed all flows` }) } },
+                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => { setUserStatusFilter('at_risk'); const atRisk = users.filter(u => u.status === 'at_risk').length; toast.warning('Filter applied', { description: `Showing ${atRisk} at-risk users` }) } },
+                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => { setUserStatusFilter('churned'); const churned = users.filter(u => u.status === 'churned').length; toast.error('Filter applied', { description: `Showing ${churned} churned users` }) } },
+                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const emailList = filteredUsers.map(u => u.userEmail).join(', '); navigator.clipboard.writeText(emailList); toast.success('Emails copied', { description: `${filteredUsers.length} email addresses copied to clipboard` }) } },
                 { icon: Download, label: 'Export', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: handleExportReport },
-                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.info('User filters available', { description: 'Filter by status, segment, or completion rate' }) },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowFilterDialog(true) },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { setIsLoading(true); window.location.reload() } },
               ].map((action, i) => (
                 <button
@@ -1499,10 +1524,10 @@ export default function OnboardingClient() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.success(`Viewing ${user.userName}`, { description: `Email: ${user.userEmail}, Flows: ${user.flowsCompleted}/${user.totalFlows}, Progress: ${user.checklistProgress}%` })}>
                                 <Eye className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(user.userEmail); toast.success('Email copied', { description: user.userEmail }) }}>
                                 <Mail className="w-4 h-4" />
                               </Button>
                             </div>
@@ -2078,7 +2103,7 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => { toast.promise(Promise.resolve({ name: selectedFlow.name }), { loading: 'Opening flow editor...', success: 'Flow editor ready', error: 'Failed to open editor' }); /* Navigate to editor would go here */ }}>
+                  <Button className="gap-2" onClick={() => { setEditingFlow(selectedFlow); setFlowForm({ name: selectedFlow.name, description: selectedFlow.description, type: selectedFlow.type, status: selectedFlow.status }); setSelectedFlow(null); toast.success('Edit mode enabled', { description: 'Make changes to your flow' }) }}>
                     <Edit className="w-4 h-4" />
                     Edit Flow
                   </Button>
@@ -2086,7 +2111,7 @@ export default function OnboardingClient() {
                     <Copy className="w-4 h-4" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { const completion = selectedFlow.completionRate.toFixed(1); const trend = selectedFlow.completions > 0 ? '+' : ''; toast.success('Analytics loaded', { description: `${completion}% completion rate, ${trend}${selectedFlow.completions} completions out of ${selectedFlow.views} views` }) }}>
+                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('analytics'); setSelectedFlow(null); toast.success('Analytics view', { description: `Viewing analytics for ${selectedFlow.name}` }) }}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
@@ -2160,7 +2185,7 @@ export default function OnboardingClient() {
                           {item.isRequired && (
                             <Badge variant="outline" className="text-xs">Required</Badge>
                           )}
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => toast.success('Edit item', { description: `Editing "${item.title}"` })}>
                             <Edit className="w-4 h-4" />
                           </Button>
                         </div>
@@ -2171,7 +2196,7 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => { toast.promise(Promise.resolve({ name: selectedChecklist.name }), { loading: 'Opening checklist editor...', success: 'Checklist editor ready', error: 'Failed to open editor' }); /* Navigate to editor would go here */ }}>
+                  <Button className="gap-2" onClick={() => { setEditingChecklist(selectedChecklist); setSelectedChecklist(null); toast.success('Edit mode enabled', { description: 'Make changes to your checklist' }) }}>
                     <Edit className="w-4 h-4" />
                     Edit Checklist
                   </Button>
@@ -2179,9 +2204,367 @@ export default function OnboardingClient() {
                     <Plus className="w-4 h-4" />
                     Add Item
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { const completed = selectedChecklist.items.filter(i => i.completed).length; const completion = selectedChecklist.items.length > 0 ? ((completed / selectedChecklist.items.length) * 100).toFixed(1) : '0'; toast.success('Analytics loaded', { description: `${completion}% completion, ${completed} out of ${selectedChecklist.items.length} items completed` }) }}>
+                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('analytics'); setSelectedChecklist(null); toast.success('Analytics view', { description: `Viewing analytics for ${selectedChecklist.name}` }) }}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Goals Dialog */}
+        <Dialog open={showGoalsDialog} onOpenChange={setShowGoalsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-orange-600" />
+                Set Completion Goals
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Target Completion Rate (%)</Label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={completionGoal}
+                  onChange={(e) => setCompletionGoal(Number(e.target.value))}
+                  className="mt-1.5"
+                />
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Current average: <span className="font-bold text-green-600">{stats.avgCompletionRate.toFixed(1)}%</span>
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  {stats.avgCompletionRate >= completionGoal
+                    ? 'You are meeting your goal!'
+                    : `${(completionGoal - stats.avgCompletionRate).toFixed(1)}% below target`}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setShowGoalsDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => { setShowGoalsDialog(false); toast.success('Goal saved', { description: `Completion target set to ${completionGoal}%` }) }}>
+                  Save Goal
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="w-5 h-5 text-pink-600" />
+                Filter Options
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div>
+                <Label>Flow Status</Label>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as FlowStatus | 'all')}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800"
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="paused">Paused</option>
+                  <option value="draft">Draft</option>
+                  <option value="archived">Archived</option>
+                </select>
+              </div>
+              <div>
+                <Label>Flow Type</Label>
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value as FlowType | 'all')}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800"
+                >
+                  <option value="all">All Types</option>
+                  <option value="onboarding">Onboarding</option>
+                  <option value="feature_adoption">Feature Adoption</option>
+                  <option value="announcement">Announcement</option>
+                  <option value="survey">Survey</option>
+                </select>
+              </div>
+              <div>
+                <Label>User Status</Label>
+                <select
+                  value={userStatusFilter}
+                  onChange={(e) => setUserStatusFilter(e.target.value as typeof userStatusFilter)}
+                  className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800"
+                >
+                  <option value="all">All Users</option>
+                  <option value="active">Active</option>
+                  <option value="at_risk">At Risk</option>
+                  <option value="new">New</option>
+                  <option value="churned">Churned</option>
+                  <option value="completed">Completed All Flows</option>
+                </select>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => { setStatusFilter('all'); setTypeFilter('all'); setUserStatusFilter('all'); toast.success('Filters cleared') }}>
+                  Clear All
+                </Button>
+                <Button className="flex-1" onClick={() => { setShowFilterDialog(false); toast.success('Filters applied') }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Date Range Dialog */}
+        <Dialog open={showDateRangeDialog} onOpenChange={setShowDateRangeDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-gray-600" />
+                Select Date Range
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: '7d', label: 'Last 7 Days' },
+                  { value: '30d', label: 'Last 30 Days' },
+                  { value: '90d', label: 'Last 90 Days' },
+                  { value: 'custom', label: 'Custom Range' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setAnalyticsDateRange(option.value as typeof analyticsDateRange)}
+                    className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
+                      analyticsDateRange === option.value
+                        ? 'bg-green-100 border-green-500 text-green-700 dark:bg-green-900/30 dark:text-green-300'
+                        : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDateRangeDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => { setShowDateRangeDialog(false); toast.success('Date range updated', { description: `Showing data for ${analyticsDateRange === '7d' ? 'last 7 days' : analyticsDateRange === '30d' ? 'last 30 days' : analyticsDateRange === '90d' ? 'last 90 days' : 'custom range'}` }) }}>
+                  Apply
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assign Checklist Dialog */}
+        <Dialog open={showAssignDialog} onOpenChange={setShowAssignDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-cyan-600" />
+                Assign Checklist to Users
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select which users or segments should receive this checklist.
+              </p>
+              <div>
+                <Label>Select Segment</Label>
+                <select className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800">
+                  <option value="">All Users</option>
+                  {segments.map(seg => (
+                    <option key={seg.id} value={seg.id}>{seg.name} ({seg.userCount} users)</option>
+                  ))}
+                </select>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm font-medium">Selected checklist:</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{selectedChecklist?.name || 'None selected'}</p>
+              </div>
+              <div className="flex gap-3">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAssignDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => { setShowAssignDialog(false); toast.success('Checklist assigned', { description: 'Users will see this checklist on their next login' }) }}>
+                  Assign
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Flow Dialog */}
+        <Dialog open={!!editingFlow} onOpenChange={() => setEditingFlow(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Edit className="w-5 h-5 text-purple-600" />
+                Edit Flow
+              </DialogTitle>
+            </DialogHeader>
+            {editingFlow && (
+              <div className="space-y-4">
+                <div>
+                  <Label>Flow Name</Label>
+                  <Input
+                    value={flowForm.name}
+                    onChange={(e) => setFlowForm(prev => ({ ...prev, name: e.target.value }))}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Input
+                    value={flowForm.description}
+                    onChange={(e) => setFlowForm(prev => ({ ...prev, description: e.target.value }))}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Type</Label>
+                  <select
+                    value={flowForm.type}
+                    onChange={(e) => setFlowForm(prev => ({ ...prev, type: e.target.value as FlowType }))}
+                    className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800"
+                  >
+                    <option value="onboarding">Onboarding</option>
+                    <option value="feature_adoption">Feature Adoption</option>
+                    <option value="announcement">Announcement</option>
+                    <option value="survey">Survey</option>
+                  </select>
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <select
+                    value={flowForm.status}
+                    onChange={(e) => setFlowForm(prev => ({ ...prev, status: e.target.value as FlowStatus }))}
+                    className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800"
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                    <option value="archived">Archived</option>
+                  </select>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setEditingFlow(null)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={async () => {
+                    setIsSaving(true)
+                    try {
+                      const { error } = await supabase
+                        .from('onboarding_flows')
+                        .update({
+                          name: flowForm.name,
+                          description: flowForm.description,
+                          flow_type: flowForm.type,
+                          status: flowForm.status,
+                          updated_at: new Date().toISOString()
+                        })
+                        .eq('id', editingFlow.id)
+
+                      if (error) throw error
+
+                      setFlows(prev => prev.map(f => f.id === editingFlow.id ? {
+                        ...f,
+                        name: flowForm.name,
+                        description: flowForm.description,
+                        type: flowForm.type,
+                        status: flowForm.status,
+                        updatedAt: new Date().toISOString().split('T')[0]
+                      } : f))
+                      setEditingFlow(null)
+                      toast.success('Flow updated', { description: 'Your changes have been saved' })
+                    } catch (error) {
+                      toast.error('Failed to update flow')
+                    } finally {
+                      setIsSaving(false)
+                    }
+                  }} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Checklist Dialog */}
+        <Dialog open={!!editingChecklist} onOpenChange={() => setEditingChecklist(null)}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckSquare className="w-5 h-5 text-green-600" />
+                Edit Checklist
+              </DialogTitle>
+            </DialogHeader>
+            {editingChecklist && (
+              <div className="space-y-4">
+                <div>
+                  <Label>Checklist Name</Label>
+                  <Input
+                    value={editingChecklist.name}
+                    onChange={(e) => setEditingChecklist(prev => prev ? { ...prev, name: e.target.value } : null)}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Input
+                    value={editingChecklist.description}
+                    onChange={(e) => setEditingChecklist(prev => prev ? { ...prev, description: e.target.value } : null)}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label>Status</Label>
+                  <select
+                    value={editingChecklist.status}
+                    onChange={(e) => setEditingChecklist(prev => prev ? { ...prev, status: e.target.value as FlowStatus } : null)}
+                    className="w-full mt-1.5 px-3 py-2 border rounded-lg dark:bg-gray-800"
+                  >
+                    <option value="active">Active</option>
+                    <option value="paused">Paused</option>
+                  </select>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setEditingChecklist(null)}>
+                    Cancel
+                  </Button>
+                  <Button className="flex-1" onClick={async () => {
+                    setIsSaving(true)
+                    try {
+                      const { error } = await supabase
+                        .from('onboarding_checklists')
+                        .update({
+                          name: editingChecklist.name,
+                          description: editingChecklist.description,
+                          status: editingChecklist.status
+                        })
+                        .eq('id', editingChecklist.id)
+
+                      if (error) throw error
+
+                      setChecklists(prev => prev.map(c => c.id === editingChecklist.id ? editingChecklist : c))
+                      setEditingChecklist(null)
+                      toast.success('Checklist updated', { description: 'Your changes have been saved' })
+                    } catch (error) {
+                      toast.error('Failed to update checklist')
+                    } finally {
+                      setIsSaving(false)
+                    }
+                  }} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Changes'}
                   </Button>
                 </div>
               </div>

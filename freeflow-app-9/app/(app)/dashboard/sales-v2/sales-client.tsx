@@ -372,12 +372,7 @@ const mockSalesActivities = [
   { id: '4', user: 'James Wilson', action: 'added', target: '3 new leads from event', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockSalesQuickActions = [
-  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => { toast.success('Call Logger', { description: 'Log your call notes and outcome' }) } },
-  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => { window.location.href = 'mailto:'; toast.success('Email Composer', { description: 'Compose your sales email' }) } },
-  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => { toast.success('Scheduler Opened', { description: 'Select available time slots for your meeting' }) } },
-  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => { toast.success('Create Task', { description: 'Add task details and assign to team' }) } },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // Default form values
 const defaultDealForm = {
@@ -442,10 +437,14 @@ export default function SalesClient() {
   const [showStageDialog, setShowStageDialog] = useState(false)
   const [showWebhookDialog, setShowWebhookDialog] = useState(false)
   const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showContactDialog, setShowContactDialog] = useState(false)
+  const [showMeetingDialog, setShowMeetingDialog] = useState(false)
   const [quoteForm, setQuoteForm] = useState({ opportunity: '', client: '', products: [] as string[], discount: 0, validDays: 30 })
   const [productForm, setProductForm] = useState({ name: '', code: '', price: 0, category: 'Software', description: '' })
   const [stageForm, setStageForm] = useState({ name: '', probability: 50, color: 'blue' })
   const [webhookConfig, setWebhookConfig] = useState({ url: '', events: ['deal.created', 'deal.won'] })
+  const [contactForm, setContactForm] = useState({ firstName: '', lastName: '', email: '', phone: '', title: '', company: '' })
+  const [meetingForm, setMeetingForm] = useState({ title: '', date: '', time: '', duration: 30, attendees: '', notes: '' })
 
   // Get stats from the hook
   const salesStats = getStats()
@@ -752,6 +751,124 @@ export default function SalesClient() {
     setSelectedDeal(deal)
     setShowWinLossDialog(type)
   }
+
+  // Export pipeline data as CSV
+  const handleExportPipeline = () => {
+    const allDeals = [...mockOpportunities.map(o => ({
+      name: o.name,
+      account: o.accountName,
+      amount: o.amount,
+      stage: o.stage,
+      probability: o.probability,
+      closeDate: o.closeDate,
+      owner: o.owner,
+      type: o.type,
+      forecastCategory: o.forecastCategory,
+    })), ...deals.map(d => ({
+      name: d.title,
+      account: d.company_name || '',
+      amount: d.deal_value,
+      stage: d.stage,
+      probability: d.probability,
+      closeDate: d.expected_close_date || '',
+      owner: 'Current User',
+      type: 'new_business',
+      forecastCategory: 'pipeline',
+    }))]
+
+    const csvContent = [
+      ['Deal Name', 'Account', 'Amount', 'Stage', 'Probability', 'Close Date', 'Owner', 'Type', 'Forecast Category'].join(','),
+      ...allDeals.map(d => [
+        `"${d.name}"`,
+        `"${d.account}"`,
+        d.amount,
+        d.stage,
+        d.probability,
+        d.closeDate,
+        `"${d.owner}"`,
+        d.type,
+        d.forecastCategory,
+      ].join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `pipeline-export-${new Date().toISOString().split('T')[0]}.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success('Pipeline Exported', { description: `${allDeals.length} deals exported to CSV` })
+  }
+
+  // Quick actions with real functionality (defined inside component to access state setters)
+  const salesQuickActions = [
+    {
+      id: '1',
+      label: 'Log Call',
+      icon: 'Phone',
+      shortcut: 'C',
+      action: () => {
+        setActivityForm({ activity_type: 'call', subject: '', description: '', outcome: '' })
+        setShowActivityDialog(true)
+      }
+    },
+    {
+      id: '2',
+      label: 'Send Email',
+      icon: 'Mail',
+      shortcut: 'E',
+      action: () => {
+        window.location.href = 'mailto:'
+      }
+    },
+    {
+      id: '3',
+      label: 'Schedule Meeting',
+      icon: 'Calendar',
+      shortcut: 'M',
+      action: () => {
+        setShowMeetingDialog(true)
+      }
+    },
+    {
+      id: '4',
+      label: 'Create Task',
+      icon: 'CheckSquare',
+      shortcut: 'T',
+      action: () => {
+        setActivityForm({ activity_type: 'task', subject: '', description: '', outcome: '' })
+        setShowActivityDialog(true)
+      }
+    },
+    {
+      id: '5',
+      label: 'New Deal',
+      icon: 'DollarSign',
+      shortcut: 'D',
+      action: () => {
+        setShowCreateDealDialog(true)
+      }
+    },
+    {
+      id: '6',
+      label: 'Add Contact',
+      icon: 'UserPlus',
+      shortcut: 'N',
+      action: () => {
+        setShowContactDialog(true)
+      }
+    },
+    {
+      id: '7',
+      label: 'Export Pipeline',
+      icon: 'Download',
+      shortcut: 'X',
+      action: handleExportPipeline
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50/30 to-teal-50/40 dark:bg-none dark:bg-gray-900">
@@ -2161,7 +2278,7 @@ export default function SalesClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSalesQuickActions}
+            actions={salesQuickActions}
             variant="grid"
           />
         </div>
@@ -2963,6 +3080,172 @@ export default function SalesClient() {
               toast.info('Import Feature', { description: 'Please select a valid CSV file to import. Supported: Salesforce, HubSpot exports.' })
               setShowImportDialog(false)
             }}>Start Import</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Contact Dialog */}
+      <Dialog open={showContactDialog} onOpenChange={setShowContactDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-green-600" />
+              Add New Contact
+            </DialogTitle>
+            <DialogDescription>Add a new contact to your sales CRM</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>First Name *</Label>
+                <Input
+                  placeholder="John"
+                  value={contactForm.firstName}
+                  onChange={(e) => setContactForm({ ...contactForm, firstName: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Last Name *</Label>
+                <Input
+                  placeholder="Smith"
+                  value={contactForm.lastName}
+                  onChange={(e) => setContactForm({ ...contactForm, lastName: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Email *</Label>
+              <Input
+                type="email"
+                placeholder="john.smith@company.com"
+                value={contactForm.email}
+                onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Phone</Label>
+              <Input
+                type="tel"
+                placeholder="+1 555-0123"
+                value={contactForm.phone}
+                onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Job Title</Label>
+              <Input
+                placeholder="VP of Sales"
+                value={contactForm.title}
+                onChange={(e) => setContactForm({ ...contactForm, title: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Company</Label>
+              <Input
+                placeholder="Acme Corporation"
+                value={contactForm.company}
+                onChange={(e) => setContactForm({ ...contactForm, company: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowContactDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (!contactForm.firstName || !contactForm.lastName || !contactForm.email) {
+                toast.error('Please fill in required fields', { description: 'First name, last name, and email are required' })
+                return
+              }
+              const contactName = `${contactForm.firstName} ${contactForm.lastName}`
+              setContactForm({ firstName: '', lastName: '', email: '', phone: '', title: '', company: '' })
+              setShowContactDialog(false)
+              toast.success('Contact Added', { description: `${contactName} has been added to your CRM` })
+            }}>Add Contact</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Meeting Dialog */}
+      <Dialog open={showMeetingDialog} onOpenChange={setShowMeetingDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-blue-600" />
+              Schedule Meeting
+            </DialogTitle>
+            <DialogDescription>Schedule a new sales meeting</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Meeting Title *</Label>
+              <Input
+                placeholder="Discovery call with Acme Corp"
+                value={meetingForm.title}
+                onChange={(e) => setMeetingForm({ ...meetingForm, title: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Date *</Label>
+                <Input
+                  type="date"
+                  value={meetingForm.date}
+                  onChange={(e) => setMeetingForm({ ...meetingForm, date: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Time *</Label>
+                <Input
+                  type="time"
+                  value={meetingForm.time}
+                  onChange={(e) => setMeetingForm({ ...meetingForm, time: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Duration (minutes)</Label>
+              <Select value={String(meetingForm.duration)} onValueChange={(v) => setMeetingForm({ ...meetingForm, duration: Number(v) })}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="15">15 minutes</SelectItem>
+                  <SelectItem value="30">30 minutes</SelectItem>
+                  <SelectItem value="45">45 minutes</SelectItem>
+                  <SelectItem value="60">1 hour</SelectItem>
+                  <SelectItem value="90">1.5 hours</SelectItem>
+                  <SelectItem value="120">2 hours</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Attendees</Label>
+              <Input
+                placeholder="john@example.com, jane@example.com"
+                value={meetingForm.attendees}
+                onChange={(e) => setMeetingForm({ ...meetingForm, attendees: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea
+                placeholder="Meeting agenda and notes..."
+                value={meetingForm.notes}
+                onChange={(e) => setMeetingForm({ ...meetingForm, notes: e.target.value })}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMeetingDialog(false)}>Cancel</Button>
+            <Button onClick={() => {
+              if (!meetingForm.title || !meetingForm.date || !meetingForm.time) {
+                toast.error('Please fill in required fields', { description: 'Title, date, and time are required' })
+                return
+              }
+              const meetingTitle = meetingForm.title
+              setMeetingForm({ title: '', date: '', time: '', duration: 30, attendees: '', notes: '' })
+              setShowMeetingDialog(false)
+              toast.success('Meeting Scheduled', { description: `"${meetingTitle}" has been added to your calendar` })
+            }}>Schedule Meeting</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

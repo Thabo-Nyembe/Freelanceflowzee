@@ -432,12 +432,7 @@ const mockCustomersActivities = [
   { id: '4', user: 'System', action: 'flagged', target: '2 accounts for review', timestamp: '1h ago', type: 'warning' as const },
 ]
 
-const mockCustomersQuickActions = [
-  { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => toast.success('Contact form opened') },
-  { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => toast.success('Activity logged successfully') },
-  { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => toast.success('Email composer opened') },
-  { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => toast.success('Call scheduler opened') },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -457,6 +452,15 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showLogActivityDialog, setShowLogActivityDialog] = useState(false)
+  const [showEmailComposer, setShowEmailComposer] = useState(false)
+  const [showScheduleCallDialog, setShowScheduleCallDialog] = useState(false)
+  const [showTaskOptionsMenu, setShowTaskOptionsMenu] = useState<string | null>(null)
+  const [showStageOptionsMenu, setShowStageOptionsMenu] = useState<string | null>(null)
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [showCalendarDialog, setShowCalendarDialog] = useState(false)
+  const [callLogContactId, setCallLogContactId] = useState<string | null>(null)
+  const [showCallLogDialog, setShowCallLogDialog] = useState(false)
 
   // Supabase hooks
   const { customers: dbCustomers, stats: dbStats, isLoading, error, refetch } = useCustomers({ segment: 'all' })
@@ -773,10 +777,44 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }
 
   const handleLogActivity = () => {
-    toast.success('Activity logged', {
-      description: 'Your activity has been recorded'
-    })
+    setShowLogActivityDialog(true)
   }
+
+  const handleOpenEmailComposer = () => {
+    setShowEmailComposer(true)
+  }
+
+  const handleScheduleCall = () => {
+    setShowScheduleCallDialog(true)
+  }
+
+  const handleOpenCalendarDialog = () => {
+    setShowCalendarDialog(true)
+  }
+
+  const handleOpenCallLog = (customerId?: string) => {
+    if (customerId) {
+      setCallLogContactId(customerId)
+    }
+    setShowCallLogDialog(true)
+  }
+
+  const handleTaskOptionsClick = (taskId: string) => {
+    setSelectedTaskId(taskId)
+    setShowTaskOptionsMenu(taskId)
+  }
+
+  const handleStageOptionsClick = (stageId: string) => {
+    setShowStageOptionsMenu(stageId)
+  }
+
+  // Quick actions with real functionality
+  const quickActions = [
+    { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => setShowAddContact(true) },
+    { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => setShowLogActivityDialog(true) },
+    { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => setShowEmailComposer(true) },
+    { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => setShowScheduleCallDialog(true) },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
@@ -902,7 +940,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); window.location.href = `mailto:${customer.email}`; toast.success(`Opening email for ${customer.email}`) }}>
                               <Mail className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.success('Call log form opened') }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); setCallLogContactId(customer.id); setShowCallLogDialog(true) }}>
                               <PhoneCall className="h-4 w-4" />
                             </Button>
                             <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(customer.id) }}>
@@ -954,7 +992,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                         <div className="flex items-center gap-2">
                           <Button size="sm" variant="ghost" onClick={() => { window.location.href = `mailto:${contact.email}`; toast.success(`Opening email for ${contact.email}`) }}><Mail className="h-4 w-4" /></Button>
                           <Button size="sm" variant="ghost" onClick={() => { window.location.href = `tel:${contact.phone}`; toast.success(`Initiating call to ${contact.phone}`) }}><PhoneCall className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost" onClick={() => toast.success('Calendar opened for scheduling')}><Calendar className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => setShowCalendarDialog(true)}><Calendar className="h-4 w-4" /></Button>
                         </div>
                         <span className="text-xs text-gray-500">Last activity: {formatTimeAgo(contact.lastActivityDate)}</span>
                       </div>
@@ -1169,7 +1207,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                           <span>Owner: {task.ownerName}</span>
                         </div>
                       </div>
-                      <Button size="sm" variant="ghost" onClick={() => toast.success('Task options menu opened')}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => { setSelectedTaskId(task.id); setShowTaskOptionsMenu(task.id) }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1553,7 +1591,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Input type="number" defaultValue={stage.probability} min={0} max={100} className="text-center" />
                             </div>
                             <span className="text-sm text-gray-500">% Probability</span>
-                            <Button size="sm" variant="ghost" onClick={() => toast.success('Stage options menu opened')}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => setShowStageOptionsMenu(stage.id)}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full">
@@ -2179,7 +2217,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCustomersQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2398,6 +2436,375 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                 <Trash2 className="h-4 w-4 mr-2" />{isDeleting ? 'Deleting...' : 'Delete Contact'}
               </Button>
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Log Activity Dialog */}
+        <Dialog open={showLogActivityDialog} onOpenChange={setShowLogActivityDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-violet-600" />
+                Log Activity
+              </DialogTitle>
+              <DialogDescription>
+                Record a new activity for tracking customer interactions.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Activity Type</Label>
+                <Select defaultValue="call">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select activity type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="call">Phone Call</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="note">Note</SelectItem>
+                    <SelectItem value="task">Task</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Subject</Label>
+                <Input placeholder="Activity subject..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea placeholder="Describe the activity..." rows={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>Related Contact</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select contact (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MOCK_CONTACTS.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowLogActivityDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowLogActivityDialog(false); toast.success('Activity Logged', { description: 'Your activity has been recorded successfully' }) }}>
+                <Activity className="h-4 w-4 mr-2" />Log Activity
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Composer Dialog */}
+        <Dialog open={showEmailComposer} onOpenChange={setShowEmailComposer}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="h-5 w-5 text-violet-600" />
+                Compose Email
+              </DialogTitle>
+              <DialogDescription>
+                Send an email to a customer or contact.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>To</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select recipient" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MOCK_CONTACTS.map(c => (
+                      <SelectItem key={c.id} value={c.email}>{c.firstName} {c.lastName} ({c.email})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Subject</Label>
+                <Input placeholder="Email subject..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Message</Label>
+                <Textarea placeholder="Write your email message..." rows={6} />
+              </div>
+              <div className="space-y-2">
+                <Label>Email Template (Optional)</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="welcome">Welcome Email</SelectItem>
+                    <SelectItem value="followup">Follow-up</SelectItem>
+                    <SelectItem value="proposal">Proposal</SelectItem>
+                    <SelectItem value="thankyou">Thank You</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEmailComposer(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowEmailComposer(false); toast.success('Email Sent', { description: 'Your email has been sent successfully' }) }}>
+                <Mail className="h-4 w-4 mr-2" />Send Email
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Call Dialog */}
+        <Dialog open={showScheduleCallDialog} onOpenChange={setShowScheduleCallDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Phone className="h-5 w-5 text-violet-600" />
+                Schedule Call
+              </DialogTitle>
+              <DialogDescription>
+                Schedule a call with a customer or contact.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Contact</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select contact" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MOCK_CONTACTS.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Time</Label>
+                  <Input type="time" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Duration</Label>
+                <Select defaultValue="30">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="15">15 minutes</SelectItem>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="45">45 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Notes</Label>
+                <Textarea placeholder="Call agenda or notes..." rows={2} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowScheduleCallDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowScheduleCallDialog(false); toast.success('Call Scheduled', { description: 'Your call has been scheduled successfully' }) }}>
+                <Phone className="h-4 w-4 mr-2" />Schedule Call
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Calendar Dialog */}
+        <Dialog open={showCalendarDialog} onOpenChange={setShowCalendarDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-violet-600" />
+                Schedule Meeting
+              </DialogTitle>
+              <DialogDescription>
+                Schedule a meeting or appointment.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Meeting Title</Label>
+                <Input placeholder="Enter meeting title..." />
+              </div>
+              <div className="space-y-2">
+                <Label>Attendees</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select attendees" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MOCK_CONTACTS.map(c => (
+                      <SelectItem key={c.id} value={c.id}>{c.firstName} {c.lastName}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Date</Label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Time</Label>
+                  <Input type="time" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Duration</Label>
+                <Select defaultValue="60">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="30">30 minutes</SelectItem>
+                    <SelectItem value="60">1 hour</SelectItem>
+                    <SelectItem value="90">1.5 hours</SelectItem>
+                    <SelectItem value="120">2 hours</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Location / Meeting Link</Label>
+                <Input placeholder="Enter location or video call link..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCalendarDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowCalendarDialog(false); toast.success('Meeting Scheduled', { description: 'Your meeting has been added to the calendar' }) }}>
+                <Calendar className="h-4 w-4 mr-2" />Schedule Meeting
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Call Log Dialog */}
+        <Dialog open={showCallLogDialog} onOpenChange={setShowCallLogDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PhoneCall className="h-5 w-5 text-violet-600" />
+                Log Call
+              </DialogTitle>
+              <DialogDescription>
+                Record the details of a phone call.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Call Direction</Label>
+                <Select defaultValue="outbound">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="outbound">Outbound Call</SelectItem>
+                    <SelectItem value="inbound">Inbound Call</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Call Outcome</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select outcome" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="connected">Connected</SelectItem>
+                    <SelectItem value="voicemail">Left Voicemail</SelectItem>
+                    <SelectItem value="no-answer">No Answer</SelectItem>
+                    <SelectItem value="busy">Busy</SelectItem>
+                    <SelectItem value="wrong-number">Wrong Number</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Duration (minutes)</Label>
+                <Input type="number" placeholder="0" min={0} />
+              </div>
+              <div className="space-y-2">
+                <Label>Call Notes</Label>
+                <Textarea placeholder="Summarize the call..." rows={3} />
+              </div>
+              <div className="space-y-2">
+                <Label>Next Steps</Label>
+                <Input placeholder="Any follow-up actions..." />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowCallLogDialog(false); setCallLogContactId(null) }}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white" onClick={() => { setShowCallLogDialog(false); setCallLogContactId(null); toast.success('Call Logged', { description: 'Your call has been recorded successfully' }) }}>
+                <PhoneCall className="h-4 w-4 mr-2" />Log Call
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Task Options Menu Dialog */}
+        <Dialog open={!!showTaskOptionsMenu} onOpenChange={() => setShowTaskOptionsMenu(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-violet-600" />
+                Task Options
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task marked as complete') }}>
+                <CheckCircle className="h-4 w-4 mr-2" />Mark as Complete
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task edit form opened') }}>
+                <Edit className="h-4 w-4 mr-2" />Edit Task
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task rescheduled') }}>
+                <Calendar className="h-4 w-4 mr-2" />Reschedule
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task assigned') }}>
+                <Users className="h-4 w-4 mr-2" />Reassign
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { setShowTaskOptionsMenu(null); toast.success('Task deleted') }}>
+                <Trash2 className="h-4 w-4 mr-2" />Delete Task
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Stage Options Menu Dialog */}
+        <Dialog open={!!showStageOptionsMenu} onOpenChange={() => setShowStageOptionsMenu(null)}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="h-5 w-5 text-violet-600" />
+                Stage Options
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2 py-4">
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage renamed') }}>
+                <Edit className="h-4 w-4 mr-2" />Rename Stage
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage probability updated') }}>
+                <Target className="h-4 w-4 mr-2" />Change Probability
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage moved up') }}>
+                <ArrowUpRight className="h-4 w-4 mr-2" />Move Up
+              </Button>
+              <Button variant="outline" className="w-full justify-start" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage moved down') }}>
+                <ArrowUpRight className="h-4 w-4 mr-2 rotate-90" />Move Down
+              </Button>
+              <Button variant="outline" className="w-full justify-start text-red-600 hover:text-red-700" onClick={() => { setShowStageOptionsMenu(null); toast.success('Stage deleted') }}>
+                <Trash2 className="h-4 w-4 mr-2" />Delete Stage
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

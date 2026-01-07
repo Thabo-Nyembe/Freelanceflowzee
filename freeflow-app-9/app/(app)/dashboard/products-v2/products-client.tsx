@@ -336,6 +336,8 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   const [showShippingZones, setShowShippingZones] = useState(false)
   const [showCarrierSettings, setShowCarrierSettings] = useState(false)
   const [showWebhookSettings, setShowWebhookSettings] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showBulkEditDialog, setShowBulkEditDialog] = useState(false)
   const [localProducts, setLocalProducts] = useState(mockProducts)
   const [localCoupons, setLocalCoupons] = useState(mockCoupons)
 
@@ -383,12 +385,70 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
   // Handlers
   const handleCreateProduct = () => {
     setShowCreateProduct(true)
-    toast.success('Create Product form ready')
   }
 
   const handleCreateCoupon = () => {
     setShowCreateCoupon(true)
-    toast.success('Create Coupon form ready')
+  }
+
+  const handleImportProducts = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv,.json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        try {
+          const content = event.target?.result as string
+          if (file.name.endsWith('.json')) {
+            const imported = JSON.parse(content)
+            if (imported.products && Array.isArray(imported.products)) {
+              setLocalProducts(prev => [...prev, ...imported.products])
+              toast.success(`Imported ${imported.products.length} products successfully`)
+            } else if (Array.isArray(imported)) {
+              setLocalProducts(prev => [...prev, ...imported])
+              toast.success(`Imported ${imported.length} products successfully`)
+            }
+          } else {
+            // CSV parsing
+            const lines = content.split('\n')
+            const headers = lines[0].split(',')
+            const products = lines.slice(1).filter(line => line.trim()).map((line, idx) => {
+              const values = line.split(',').map(v => v.replace(/^"|"$/g, ''))
+              return {
+                id: `prod_import_${Date.now()}_${idx}`,
+                name: values[headers.indexOf('Name')] || values[1] || `Imported Product ${idx + 1}`,
+                description: values[headers.indexOf('Description')] || values[2] || '',
+                status: 'draft' as ProductStatus,
+                images: [],
+                prices: [],
+                category: 'subscription',
+                metadata: {},
+                features: [],
+                shippable: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                revenue: 0,
+                subscribers: 0,
+                mrr: 0,
+                churnRate: 0,
+                conversionRate: 0,
+                averageOrderValue: 0
+              }
+            })
+            setLocalProducts(prev => [...prev, ...products])
+            toast.success(`Imported ${products.length} products from CSV`)
+          }
+        } catch (error) {
+          toast.error('Failed to parse import file. Please check the format.')
+        }
+      }
+      reader.readAsText(file)
+    }
+    input.click()
   }
 
   const handleExportProducts = () => {
@@ -449,6 +509,68 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
       ))
       setSelectedProduct(null)
       toast.success(`${product.name} has been archived`)
+    }
+  }
+
+  const handleBulkEdit = () => {
+    setShowBulkEditDialog(true)
+  }
+
+  const handleExportJSON = () => {
+    const data = {
+      products: localProducts,
+      coupons: localCoupons,
+      taxRates: mockTaxRates,
+      exportedAt: new Date().toISOString()
+    }
+    const json = JSON.stringify(data, null, 2)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `products-catalog-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Catalog exported as JSON')
+  }
+
+  const handleSyncAll = () => {
+    setLocalProducts(mockProducts)
+    setLocalCoupons(mockCoupons)
+    toast.success('All data synced successfully')
+  }
+
+  const handleQuickAction = (actionLabel: string) => {
+    switch (actionLabel) {
+      case 'New Product':
+        setShowCreateProduct(true)
+        break
+      case 'Add Price':
+        setShowCreatePrice(true)
+        break
+      case 'Coupon':
+        setShowCreateCoupon(true)
+        break
+      case 'Tax Rate':
+        setShowCreateTaxRate(true)
+        break
+      case 'Inventory':
+        setSettingsTab('inventory')
+        setActiveTab('settings')
+        break
+      case 'Analytics':
+        setActiveTab('analytics')
+        break
+      case 'Export':
+        handleExportProducts()
+        break
+      case 'Sync':
+        handleSyncAll()
+        break
+      default:
+        toast.info(`${actionLabel} action triggered`)
     }
   }
 
@@ -855,7 +977,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                   <p className="text-sm text-gray-500">per {price.billingInterval}</p>
                                 )}
                               </div>
-                              <Button variant="ghost" size="sm" onClick={() => { setShowEditPrice(true); toast.success('Price editor opened') }}>
+                              <Button variant="ghost" size="sm" onClick={() => setShowEditPrice(true)}>
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1045,7 +1167,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold">Tax Rates</h3>
-                  <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => { setShowCreateTaxRate(true); toast.success('Tax rate form ready') }}>
+                  <Button className="bg-violet-600 hover:bg-violet-700 gap-2" onClick={() => setShowCreateTaxRate(true)}>
                     <Plus className="w-4 h-4" />
                     Add Tax Rate
                   </Button>
@@ -1078,7 +1200,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                 <p className="text-sm text-gray-500">{tax.inclusive ? 'Inclusive' : 'Exclusive'}</p>
                               </div>
                               <Badge variant="outline">{tax.country}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => { setShowEditTaxRate(true); toast.success('Tax rate editor opened') }}>
+                              <Button variant="ghost" size="sm" onClick={() => setShowEditTaxRate(true)}>
                                 <Edit className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1519,14 +1641,14 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                           <div className="font-medium">Shipping Zones</div>
                           <div className="text-sm text-muted-foreground">Configure regional shipping rates</div>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => { setShowShippingZones(true); toast.success('Shipping zones loaded') }}>Manage Zones</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowShippingZones(true)}>Manage Zones</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div>
                           <div className="font-medium">Carrier Integration</div>
                           <div className="text-sm text-muted-foreground">Connect shipping carriers for real-time rates</div>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => { setShowCarrierSettings(true); toast.success('Carrier settings loaded') }}>Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowCarrierSettings(true)}>Configure</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1684,7 +1806,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                           <div className="font-medium">Webhook Events</div>
                           <div className="text-sm text-muted-foreground">Send product events to external services</div>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => { setShowWebhookSettings(true); toast.success('Webhook settings loaded') }}>Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => setShowWebhookSettings(true)}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                         <div>
@@ -1705,15 +1827,15 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                           <Download className="w-6 h-6" />
                           <span>Export Catalog</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.csv,.json'; input.onchange = () => toast.success('Import ready - file selected'); input.click() }}>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={handleImportProducts}>
                           <Upload className="w-6 h-6" />
                           <span>Import Products</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => { const backup = JSON.stringify({ products: localProducts, coupons: localCoupons, timestamp: new Date().toISOString() }); const blob = new Blob([backup], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `products-backup-${new Date().toISOString().split('T')[0]}.json`; a.click(); URL.revokeObjectURL(url); toast.success('Backup created successfully') }}>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={handleExportJSON}>
                           <Archive className="w-6 h-6" />
                           <span>Backup Data</span>
                         </Button>
-                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={() => { setLocalProducts(mockProducts); setLocalCoupons(mockCoupons); toast.success('All data synced successfully') }}>
+                        <Button variant="outline" className="h-auto py-4 flex-col gap-2" onClick={handleSyncAll}>
                           <RefreshCw className="w-6 h-6" />
                           <span>Sync All</span>
                         </Button>
@@ -1736,7 +1858,11 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 { icon: Download, label: 'Export', desc: 'Download', color: 'from-teal-500 to-green-600' },
                 { icon: RefreshCw, label: 'Sync', desc: 'Update', color: 'from-indigo-500 to-blue-600' }
               ].map((action, idx) => (
-                <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group border-0 shadow-sm">
+                <Card
+                  key={idx}
+                  className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group border-0 shadow-sm"
+                  onClick={() => handleQuickAction(action.label)}
+                >
                   <CardContent className="p-4 text-center">
                     <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
                       <action.icon className="w-5 h-5 text-white" />
@@ -1867,7 +1993,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 </div>
 
                 <div className="flex items-center gap-2 pt-4 border-t">
-                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => { setShowEditProduct(true); toast.success('Product editor opened') }}>
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => setShowEditProduct(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Product
                   </Button>
@@ -1932,7 +2058,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 )}
 
                 <div className="flex items-center gap-2 pt-4">
-                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => { setShowEditCoupon(true); toast.success('Coupon editor opened') }}>
+                  <Button className="flex-1 bg-violet-600 hover:bg-violet-700" onClick={() => setShowEditCoupon(true)}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

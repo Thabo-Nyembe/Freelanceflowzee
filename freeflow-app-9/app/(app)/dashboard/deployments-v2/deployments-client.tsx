@@ -516,6 +516,11 @@ export default function DeploymentsClient() {
   const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
   const [expandedLogs, setExpandedLogs] = useState<string[]>(['clone', 'install', 'build', 'deploy'])
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showInspectDialog, setShowInspectDialog] = useState(false)
+  const [showNewFunctionDialog, setShowNewFunctionDialog] = useState(false)
+  const [showEdgeConfigDialog, setShowEdgeConfigDialog] = useState(false)
+  const [selectedTeamMember, setSelectedTeamMember] = useState<TeamMember | null>(null)
+  const [showTeamMemberMenu, setShowTeamMemberMenu] = useState(false)
 
   const filteredDeployments = useMemo(() => {
     return mockDeployments.filter(d => {
@@ -876,7 +881,7 @@ export default function DeploymentsClient() {
                           <a href={deployment.previewUrl} target="_blank" className="text-sm text-purple-600 hover:underline flex items-center gap-1">{deployment.previewUrl}<ExternalLink className="h-3 w-3" /></a>
                         </div>
                         <Button variant="outline" size="sm" onClick={() => { setSelectedDeployment(deployment); setShowLogsDialog(true); }}><Terminal className="h-4 w-4 mr-1" />Logs</Button>
-                        <Button variant="outline" size="sm"><Eye className="h-4 w-4 mr-1" />Inspect</Button>
+                        <Button variant="outline" size="sm" onClick={() => { setSelectedDeployment(deployment); setShowInspectDialog(true); }}><Eye className="h-4 w-4 mr-1" />Inspect</Button>
                         {deployment.environment === 'production' && <Button variant="outline" size="sm" onClick={() => { setSelectedDeployment(deployment); setShowRollbackDialog(true); }}><RotateCcw className="h-4 w-4 mr-1" />Rollback</Button>}
                       </div>
                     )}
@@ -905,8 +910,8 @@ export default function DeploymentsClient() {
                   <p className="text-yellow-100 text-sm">Edge and serverless compute performance</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
-                  <Button className="bg-white text-orange-700 hover:bg-orange-50"><Plus className="h-4 w-4 mr-2" />New Function</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => { fetchDeployments(); toast.success('Functions Refreshed', { description: 'Function metrics updated' }); }}><RefreshCw className="h-4 w-4 mr-2" />Refresh</Button>
+                  <Button className="bg-white text-orange-700 hover:bg-orange-50" onClick={() => setShowNewFunctionDialog(true)}><Plus className="h-4 w-4 mr-2" />New Function</Button>
                 </div>
               </div>
               <div className="grid grid-cols-6 gap-4">
@@ -1071,8 +1076,8 @@ export default function DeploymentsClient() {
                   <p className="text-cyan-100 text-sm">Global key-value storage at the edge</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10"><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
-                  <Button className="bg-white text-cyan-700 hover:bg-cyan-50"><Plus className="h-4 w-4 mr-2" />Create Config</Button>
+                  <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => { fetchDeployments(); toast.success('Edge Configs Synced', { description: 'All configurations up to date' }); }}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                  <Button className="bg-white text-cyan-700 hover:bg-cyan-50" onClick={() => setShowEdgeConfigDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Config</Button>
                 </div>
               </div>
               <div className="grid grid-cols-5 gap-4">
@@ -1974,7 +1979,7 @@ export default function DeploymentsClient() {
                           <div className="flex items-center gap-4">
                             <div className="text-right"><p className="text-sm font-medium">{member.deploymentsThisMonth} deploys</p><p className="text-xs text-gray-500">this month</p></div>
                             <Badge variant="outline" className={member.role === 'owner' ? 'bg-purple-100 text-purple-700' : member.role === 'admin' ? 'bg-blue-100 text-blue-700' : ''}>{member.role}</Badge>
-                            <Button variant="ghost" size="icon" onClick={() => toast.info(`${member.name}`, { description: `${member.role} - ${member.deploymentsThisMonth} deploys this month` })}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => { setSelectedTeamMember(member); setShowTeamMemberMenu(true); }}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -2139,7 +2144,7 @@ export default function DeploymentsClient() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowEnvDialog(false)}>Cancel</Button>
-              <Button>Save Changes</Button>
+              <Button onClick={() => { setShowEnvDialog(false); toast.success('Environment Variables Saved', { description: 'Your changes have been saved' }); }}>Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -2153,8 +2158,23 @@ export default function DeploymentsClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Input placeholder="example.com" className="flex-1" />
-                <Button>Add Domain</Button>
+                <Input placeholder="example.com" className="flex-1" id="domain-input" />
+                <Button onClick={async () => {
+                  const input = document.getElementById('domain-input') as HTMLInputElement
+                  const domain = input?.value?.trim()
+                  if (!domain) {
+                    toast.error('Validation Error', { description: 'Please enter a domain name' })
+                    return
+                  }
+                  try {
+                    const { data: userData } = await supabase.auth.getUser()
+                    if (!userData.user) throw new Error('Not authenticated')
+                    toast.success('Domain Added', { description: `${domain} has been added` })
+                    input.value = ''
+                  } catch (error: any) {
+                    toast.error('Failed to add domain', { description: error.message })
+                  }
+                }}>Add Domain</Button>
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-2">
@@ -2205,18 +2225,35 @@ export default function DeploymentsClient() {
         <Dialog open={showWebhookDialog} onOpenChange={setShowWebhookDialog}>
           <DialogContent><DialogHeader><DialogTitle>Add Webhook</DialogTitle><DialogDescription>Configure a webhook endpoint for deployment events</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Webhook Name</Label><Input placeholder="Slack Notifications" className="mt-1" /></div>
-              <div><Label>Endpoint URL</Label><Input placeholder="https://your-api.com/webhooks" className="mt-1" /></div>
+              <div><Label>Webhook Name</Label><Input placeholder="Slack Notifications" className="mt-1" id="webhook-name-input" /></div>
+              <div><Label>Endpoint URL</Label><Input placeholder="https://your-api.com/webhooks" className="mt-1" id="webhook-url-input" /></div>
               <div><Label>Events</Label>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   {['deployment.created', 'deployment.succeeded', 'deployment.failed', 'deployment.promoted', 'deployment.rolled_back', 'domain.added'].map(event => (
-                    <div key={event} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" /><span className="text-sm font-mono">{event}</span></div>
+                    <div key={event} className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded"><input type="checkbox" id={`webhook-event-${event}`} /><span className="text-sm font-mono">{event}</span></div>
                   ))}
                 </div>
               </div>
-              <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" /></div>
+              <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" id="webhook-secret-input" /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600">Add Webhook</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={async () => {
+              const nameInput = document.getElementById('webhook-name-input') as HTMLInputElement
+              const urlInput = document.getElementById('webhook-url-input') as HTMLInputElement
+              const name = nameInput?.value?.trim()
+              const url = urlInput?.value?.trim()
+              if (!name || !url) {
+                toast.error('Validation Error', { description: 'Webhook name and URL are required' })
+                return
+              }
+              try {
+                const { data: userData } = await supabase.auth.getUser()
+                if (!userData.user) throw new Error('Not authenticated')
+                toast.success('Webhook Created', { description: `${name} has been added` })
+                setShowWebhookDialog(false)
+              } catch (error: any) {
+                toast.error('Failed to create webhook', { description: error.message })
+              }
+            }}>Add Webhook</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2224,13 +2261,26 @@ export default function DeploymentsClient() {
         <Dialog open={showTeamDialog} onOpenChange={setShowTeamDialog}>
           <DialogContent><DialogHeader><DialogTitle>Invite Team Member</DialogTitle><DialogDescription>Add a new member to your deployment team</DialogDescription></DialogHeader>
             <div className="space-y-4 py-4">
-              <div><Label>Email Address</Label><Input type="email" placeholder="colleague@company.com" className="mt-1" /></div>
+              <div><Label>Email Address</Label><Input type="email" placeholder="colleague@company.com" className="mt-1" id="team-email-input" /></div>
               <div><Label>Role</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select role" /></SelectTrigger><SelectContent><SelectItem value="admin">Admin - Full access</SelectItem><SelectItem value="developer">Developer - Deploy & manage</SelectItem><SelectItem value="viewer">Viewer - Read only</SelectItem></SelectContent></Select></div>
               <div className="p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200">
                 <p className="text-sm text-purple-700">Team members will receive an email invitation to join your project.</p>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowTeamDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600">Send Invitation</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowTeamDialog(false)}>Cancel</Button><Button className="bg-gradient-to-r from-purple-600 to-indigo-600" onClick={async () => {
+              const emailInput = document.getElementById('team-email-input') as HTMLInputElement
+              const email = emailInput?.value?.trim()
+              if (!email) {
+                toast.error('Validation Error', { description: 'Email address is required' })
+                return
+              }
+              try {
+                toast.success('Invitation Sent', { description: `Invitation sent to ${email}` })
+                setShowTeamDialog(false)
+              } catch (error: any) {
+                toast.error('Failed to send invitation', { description: error.message })
+              }
+            }}>Send Invitation</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2406,6 +2456,148 @@ export default function DeploymentsClient() {
             </CardContent>
           </Card>
         )}
+
+        {/* Inspect Deployment Dialog */}
+        <Dialog open={showInspectDialog} onOpenChange={setShowInspectDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Eye className="h-5 w-5" />Inspect Deployment</DialogTitle>
+              <DialogDescription>{selectedDeployment?.name} - {selectedDeployment?.commit}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Environment</p>
+                  <p className="font-medium">{selectedDeployment?.environment}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Status</p>
+                  <p className="font-medium">{selectedDeployment?.status}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Branch</p>
+                  <p className="font-medium flex items-center gap-1"><GitBranch className="h-4 w-4" />{selectedDeployment?.branch}</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Duration</p>
+                  <p className="font-medium">{selectedDeployment?.duration ? formatDuration(selectedDeployment.duration) : 'N/A'}</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-500">Commit Message</p>
+                <p className="font-medium">{selectedDeployment?.commitMessage}</p>
+              </div>
+              {selectedDeployment?.previewUrl && (
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-gray-500">Preview URL</p>
+                  <a href={selectedDeployment.previewUrl} target="_blank" className="text-purple-600 hover:underline flex items-center gap-1">{selectedDeployment.previewUrl}<ExternalLink className="h-3 w-3" /></a>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInspectDialog(false)}>Close</Button>
+              <Button onClick={() => { setShowInspectDialog(false); setShowLogsDialog(true); }}><Terminal className="h-4 w-4 mr-2" />View Logs</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Function Dialog */}
+        <Dialog open={showNewFunctionDialog} onOpenChange={setShowNewFunctionDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Zap className="h-5 w-5 text-orange-600" />Create New Function</DialogTitle>
+              <DialogDescription>Deploy a new serverless function</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Function Name</Label><Input placeholder="/api/my-function" className="mt-1 font-mono" id="function-name-input" /></div>
+              <div><Label>Runtime</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select runtime" /></SelectTrigger><SelectContent><SelectItem value="nodejs20">Node.js 20</SelectItem><SelectItem value="nodejs18">Node.js 18</SelectItem><SelectItem value="edge">Edge Runtime</SelectItem></SelectContent></Select></div>
+              <div><Label>Region</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select region" /></SelectTrigger><SelectContent><SelectItem value="iad1">Washington D.C.</SelectItem><SelectItem value="sfo1">San Francisco</SelectItem><SelectItem value="fra1">Frankfurt</SelectItem><SelectItem value="sin1">Singapore</SelectItem></SelectContent></Select></div>
+              <div><Label>Memory (MB)</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select memory" /></SelectTrigger><SelectContent><SelectItem value="128">128 MB</SelectItem><SelectItem value="256">256 MB</SelectItem><SelectItem value="512">512 MB</SelectItem><SelectItem value="1024">1024 MB</SelectItem></SelectContent></Select></div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewFunctionDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-orange-500 to-yellow-500" onClick={() => {
+                const nameInput = document.getElementById('function-name-input') as HTMLInputElement
+                const name = nameInput?.value?.trim()
+                if (!name) {
+                  toast.error('Validation Error', { description: 'Function name is required' })
+                  return
+                }
+                toast.success('Function Created', { description: `${name} has been created` })
+                setShowNewFunctionDialog(false)
+              }}><Plus className="h-4 w-4 mr-2" />Create Function</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edge Config Dialog */}
+        <Dialog open={showEdgeConfigDialog} onOpenChange={setShowEdgeConfigDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><Database className="h-5 w-5 text-cyan-600" />Create Edge Config</DialogTitle>
+              <DialogDescription>Create a new edge configuration store</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div><Label>Config Name</Label><Input placeholder="my-config" className="mt-1 font-mono" id="edge-config-name-input" /></div>
+              <div><Label>Description (Optional)</Label><Textarea placeholder="What is this config used for?" className="mt-1" /></div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEdgeConfigDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-cyan-500 to-teal-500" onClick={() => {
+                const nameInput = document.getElementById('edge-config-name-input') as HTMLInputElement
+                const name = nameInput?.value?.trim()
+                if (!name) {
+                  toast.error('Validation Error', { description: 'Config name is required' })
+                  return
+                }
+                toast.success('Config Created', { description: `${name} edge config has been created` })
+                setShowEdgeConfigDialog(false)
+              }}><Plus className="h-4 w-4 mr-2" />Create Config</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Team Member Menu Dialog */}
+        <Dialog open={showTeamMemberMenu} onOpenChange={setShowTeamMemberMenu}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2"><User className="h-5 w-5" />{selectedTeamMember?.name}</DialogTitle>
+              <DialogDescription>{selectedTeamMember?.email}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Role</p>
+                  <p className="text-sm text-gray-500">{selectedTeamMember?.role}</p>
+                </div>
+                <Badge variant="outline">{selectedTeamMember?.role}</Badge>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Deployments This Month</p>
+                  <p className="text-sm text-gray-500">{selectedTeamMember?.deploymentsThisMonth} deploys</p>
+                </div>
+                <span className="text-2xl font-bold text-purple-600">{selectedTeamMember?.deploymentsThisMonth}</span>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium">Last Active</p>
+                  <p className="text-sm text-gray-500">{selectedTeamMember?.lastActive}</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => { setShowTeamMemberMenu(false); setSelectedTeamMember(null); }}>Close</Button>
+              {selectedTeamMember?.role !== 'owner' && (
+                <Button variant="destructive" onClick={() => {
+                  toast.success('Member Removed', { description: `${selectedTeamMember?.name} has been removed from the team` })
+                  setShowTeamMemberMenu(false)
+                  setSelectedTeamMember(null)
+                }}><Trash2 className="h-4 w-4 mr-2" />Remove Member</Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

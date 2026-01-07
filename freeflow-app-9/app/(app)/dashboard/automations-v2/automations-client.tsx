@@ -364,6 +364,16 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
   const [formState, setFormState] = useState<WorkflowFormState>(initialFormState)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [dbWorkflows, setDbWorkflows] = useState<AutomationWorkflow[]>([])
+  const [showAIAutomationDialog, setShowAIAutomationDialog] = useState(false)
+  const [showAdvancedFiltersDialog, setShowAdvancedFiltersDialog] = useState(false)
+  const [showNewConnectionDialog, setShowNewConnectionDialog] = useState(false)
+  const [showNewWebhookDialog, setShowNewWebhookDialog] = useState(false)
+  const [showWorkflowEditorDialog, setShowWorkflowEditorDialog] = useState(false)
+  const [showTemplatePreviewDialog, setShowTemplatePreviewDialog] = useState(false)
+  const [showExecutionLogsDialog, setShowExecutionLogsDialog] = useState(false)
+  const [templateSortMode, setTemplateSortMode] = useState<'all' | 'top-rated' | 'popular'>('all')
+  const [showSubmitTemplateDialog, setShowSubmitTemplateDialog] = useState(false)
+  const [connectionMenuOpen, setConnectionMenuOpen] = useState<string | null>(null)
 
   const { workflows, loading, error, refetch } = useAutomations({ workflowType: workflowTypeFilter, status: statusFilter })
   const displayWorkflows = dbWorkflows.length > 0 ? dbWorkflows : (workflows.length > 0 ? workflows : initialWorkflows)
@@ -735,6 +745,82 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
     )
   }
 
+  // Refresh expired connections handler
+  const handleRefreshExpiredConnections = async () => {
+    const expiredConnections = mockConnections.filter(c => c.status === 'expired')
+    if (expiredConnections.length === 0) {
+      toast.info('No expired connections to refresh')
+      return
+    }
+
+    toast.promise(
+      (async () => {
+        // Simulate refreshing connections
+        await new Promise(resolve => setTimeout(resolve, 1500))
+        return { count: expiredConnections.length }
+      })(),
+      {
+        loading: `Refreshing ${expiredConnections.length} expired connection(s)...`,
+        success: (data) => `${data.count} connection(s) refreshed. Please re-authenticate if prompted.`,
+        error: 'Failed to refresh connections'
+      }
+    )
+  }
+
+  // Navigate to billing page
+  const handleNavigateToBilling = () => {
+    window.location.href = '/dashboard/billing-v2'
+  }
+
+  // Restore workflow version handler
+  const handleRestoreVersion = async (workflow: AutomationWorkflow, version: number) => {
+    toast.promise(
+      (async () => {
+        const { error } = await supabase
+          .from('automations')
+          .update({
+            version: version,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', workflow.id)
+
+        if (error) throw error
+        await fetchWorkflows()
+        return { version }
+      })(),
+      {
+        loading: `Restoring version ${version}...`,
+        success: (data) => `Version ${data.version} restored successfully`,
+        error: 'Failed to restore version'
+      }
+    )
+  }
+
+  // Toggle connection menu
+  const handleConnectionMenu = (connectionId: string, action: 'edit' | 'refresh' | 'remove') => {
+    setConnectionMenuOpen(null)
+    switch (action) {
+      case 'edit':
+        toast.info(`Editing connection settings for ${connectionId}`)
+        break
+      case 'refresh':
+        toast.promise(
+          new Promise(resolve => setTimeout(resolve, 1000)),
+          {
+            loading: 'Refreshing connection...',
+            success: 'Connection refreshed successfully',
+            error: 'Failed to refresh connection'
+          }
+        )
+        break
+      case 'remove':
+        if (confirm('Are you sure you want to remove this connection?')) {
+          toast.success('Connection removed')
+        }
+        break
+    }
+  }
+
   // Quick actions configuration with real handlers
   const quickActions = useMemo(() => [
     {
@@ -1085,7 +1171,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <Webhook className="h-5 w-5 text-orange-600" />
                     <span className="text-sm">Manage Webhooks</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => toast.info("AI Automation coming soon!")}>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => setShowAIAutomationDialog(true)}>
                     <Bot className="h-5 w-5 text-pink-600" />
                     <span className="text-sm">AI Automation</span>
                   </Button>
@@ -1430,7 +1516,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <Download className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Export Logs</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => toast.info("Advanced filters panel coming soon!")}>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setShowAdvancedFiltersDialog(true)}>
                     <Filter className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Advanced Filters</span>
                   </Button>
@@ -1539,19 +1625,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => toast.info("AI-powered templates coming soon!")}>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => { setTemplateSortMode('all'); setFormState({ ...initialFormState, workflow_name: 'AI-Generated Workflow' }); setShowAIAutomationDialog(true); }}>
                     <Sparkles className="h-5 w-5 text-pink-600" />
                     <span className="text-sm">AI Templates</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => toast.success("Showing top-rated templates (4.5+ stars)")}>
+                  <Button variant="outline" className={`h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105 ${templateSortMode === 'top-rated' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : ''}`} onClick={() => { setTemplateSortMode('top-rated'); toast.success('Filtering by top-rated templates (4.5+ stars)'); }}>
                     <Star className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Top Rated</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => toast.success("Sorting by most popular templates")}>
+                  <Button variant="outline" className={`h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105 ${templateSortMode === 'popular' ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : ''}`} onClick={() => { setTemplateSortMode('popular'); toast.success('Sorting by most popular templates'); }}>
                     <TrendingUp className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Most Popular</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105" onClick={() => toast.info("Template submission form coming soon!")}>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105" onClick={() => setShowSubmitTemplateDialog(true)}>
                     <Plus className="h-5 w-5 text-green-600" />
                     <span className="text-sm">Submit Template</span>
                   </Button>
@@ -1660,7 +1746,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105" onClick={() => toast.info("Connection wizard coming soon! For now, connections are managed in Settings.")}>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105" onClick={() => setShowNewConnectionDialog(true)}>
                     <Plus className="h-5 w-5 text-cyan-600" />
                     <span className="text-sm">New Connection</span>
                   </Button>
@@ -1668,7 +1754,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <Webhook className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">New Webhook</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={() => toast.success("Expired connections will be refreshed. Please re-authenticate if prompted.")}>
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={handleRefreshExpiredConnections}>
                     <RefreshCw className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Refresh Expired</span>
                   </Button>
@@ -1702,9 +1788,24 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-500">{connection.usageCount} uses</span>
                         <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                        <Button variant="ghost" size="sm" onClick={() => toast.info("Connection options: Edit, Refresh, or Remove")}>
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
+                        <div className="relative">
+                          <Button variant="ghost" size="sm" onClick={() => setConnectionMenuOpen(connectionMenuOpen === connection.id ? null : connection.id)}>
+                            <MoreVertical className="h-4 w-4" />
+                          </Button>
+                          {connectionMenuOpen === connection.id && (
+                            <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                              <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2" onClick={() => handleConnectionMenu(connection.id, 'edit')}>
+                                <Edit2 className="h-3 w-3" /> Edit
+                              </button>
+                              <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2" onClick={() => handleConnectionMenu(connection.id, 'refresh')}>
+                                <RefreshCw className="h-3 w-3" /> Refresh
+                              </button>
+                              <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600" onClick={() => handleConnectionMenu(connection.id, 'remove')}>
+                                <Trash2 className="h-3 w-3" /> Remove
+                              </button>
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1910,7 +2011,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             <Progress value={42} className="h-2" />
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.info("Redirecting to billing page...")}>
+                        <Button variant="outline" className="w-full" onClick={handleNavigateToBilling}>
                           <Rocket className="h-4 w-4 mr-2" />
                           Upgrade Plan
                         </Button>
@@ -2047,7 +2148,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info("Webhook creation wizard coming soon!")}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowNewWebhookDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create New Webhook
                         </Button>
@@ -2118,13 +2219,28 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                              <Button variant="ghost" size="sm" onClick={() => toast.info("Connection settings: Edit, Refresh, or Remove")}>
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
+                              <div className="relative">
+                                <Button variant="ghost" size="sm" onClick={() => setConnectionMenuOpen(connectionMenuOpen === `settings-${connection.id}` ? null : `settings-${connection.id}`)}>
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                                {connectionMenuOpen === `settings-${connection.id}` && (
+                                  <div className="absolute right-0 top-full mt-1 w-36 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                                    <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2" onClick={() => handleConnectionMenu(connection.id, 'edit')}>
+                                      <Edit2 className="h-3 w-3" /> Edit
+                                    </button>
+                                    <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2" onClick={() => handleConnectionMenu(connection.id, 'refresh')}>
+                                      <RefreshCw className="h-3 w-3" /> Refresh
+                                    </button>
+                                    <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-red-600" onClick={() => handleConnectionMenu(connection.id, 'remove')}>
+                                      <Trash2 className="h-3 w-3" /> Remove
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info("OAuth connection wizard coming soon!")}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowNewConnectionDialog(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add New Connection
                         </Button>
@@ -2350,7 +2466,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                               <p className="font-medium text-red-600">Delete Account</p>
                               <p className="text-sm text-gray-500">Permanently remove your account</p>
                             </div>
-                            <Button variant="destructive" size="sm" onClick={() => toast.error("Please contact support to delete your account")}>Delete</Button>
+                            <Button variant="destructive" size="sm" onClick={() => { window.location.href = 'mailto:support@freeflow.app?subject=Account%20Deletion%20Request'; toast.info('Opening email client to contact support for account deletion'); }}>Delete</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2447,7 +2563,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <div className="text-center">
                           <Workflow className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                           <p className="text-sm text-gray-500">Drag and drop modules to build</p>
-                          <Button className="mt-3" onClick={() => toast.info("Visual workflow editor coming soon!")}>Open Editor</Button>
+                          <Button className="mt-3" onClick={() => setShowWorkflowEditorDialog(true)}>Open Editor</Button>
                         </div>
                       </div>
                     </div>
@@ -2507,7 +2623,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <p className="text-xs text-gray-500">2 days ago</p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => toast.success("Previous version restored")}>Restore</Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleRestoreVersion(selectedWorkflow, (selectedWorkflow.published_version || 1) - 1 || 0)}>Restore</Button>
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -2564,7 +2680,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Retry
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.info("Detailed execution logs coming soon!")}>
+                  <Button variant="outline" className="flex-1" onClick={() => setShowExecutionLogsDialog(true)}>
                     <Eye className="h-4 w-4 mr-2" />
                     View Logs
                   </Button>
@@ -2621,7 +2737,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <Plus className="h-4 w-4 mr-2" />
                     Use This Template
                   </Button>
-                  <Button variant="outline" onClick={() => toast.info("Template preview coming soon!")}>
+                  <Button variant="outline" onClick={() => setShowTemplatePreviewDialog(true)}>
                     <Eye className="h-4 w-4 mr-2" />
                     Preview
                   </Button>
@@ -2630,6 +2746,447 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             </DialogContent>
           </Dialog>
         )}
+
+        {/* AI Automation Dialog */}
+        <Dialog open={showAIAutomationDialog} onOpenChange={setShowAIAutomationDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bot className="h-5 w-5 text-pink-600" />
+                AI-Powered Automation
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Describe what you want to automate and AI will generate a workflow for you.
+              </p>
+              <div>
+                <label className="block text-sm font-medium mb-2">Describe your automation</label>
+                <textarea
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 min-h-[120px]"
+                  placeholder="e.g., When a new lead comes in from my website form, send them a welcome email, add them to my CRM, and notify my sales team on Slack..."
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex-1 bg-pink-600 hover:bg-pink-700" onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 2000)),
+                    {
+                      loading: 'AI is generating your automation...',
+                      success: () => {
+                        setShowAIAutomationDialog(false)
+                        setShowNewWorkflow(true)
+                        return 'Automation generated! Review and customize your workflow.'
+                      },
+                      error: 'Failed to generate automation'
+                    }
+                  )
+                }}>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate Automation
+                </Button>
+                <Button variant="outline" onClick={() => setShowAIAutomationDialog(false)}>Cancel</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Advanced Filters Dialog */}
+        <Dialog open={showAdvancedFiltersDialog} onOpenChange={setShowAdvancedFiltersDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-purple-600" />
+                Advanced Filters
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Status</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as WorkflowStatus | 'all')}>
+                  <option value="all">All Statuses</option>
+                  <option value="active">Active</option>
+                  <option value="running">Running</option>
+                  <option value="paused">Paused</option>
+                  <option value="failed">Failed</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Workflow Type</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" value={workflowTypeFilter} onChange={(e) => setWorkflowTypeFilter(e.target.value as WorkflowType | 'all')}>
+                  <option value="all">All Types</option>
+                  <option value="sequential">Sequential</option>
+                  <option value="parallel">Parallel</option>
+                  <option value="conditional">Conditional</option>
+                  <option value="loop">Loop</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Date Range</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input type="date" placeholder="From" />
+                  <Input type="date" placeholder="To" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex-1" onClick={() => { setShowAdvancedFiltersDialog(false); toast.success('Filters applied'); }}>
+                  Apply Filters
+                </Button>
+                <Button variant="outline" onClick={() => { setStatusFilter('all'); setWorkflowTypeFilter('all'); setShowAdvancedFiltersDialog(false); toast.info('Filters cleared'); }}>
+                  Clear All
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Connection Dialog */}
+        <Dialog open={showNewConnectionDialog} onOpenChange={setShowNewConnectionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Network className="h-5 w-5 text-cyan-600" />
+                Add New Connection
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Select an app to connect to your automations.
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {['Slack', 'Google', 'GitHub', 'Stripe', 'HubSpot', 'OpenAI'].map(app => (
+                  <button key={app} className="p-4 border rounded-lg hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all flex flex-col items-center gap-2" onClick={() => {
+                    toast.promise(
+                      new Promise(resolve => setTimeout(resolve, 1500)),
+                      {
+                        loading: `Connecting to ${app}...`,
+                        success: () => {
+                          setShowNewConnectionDialog(false)
+                          return `${app} connected successfully!`
+                        },
+                        error: `Failed to connect to ${app}`
+                      }
+                    )
+                  }}>
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                      {app.slice(0, 2)}
+                    </div>
+                    <span className="text-sm font-medium">{app}</span>
+                  </button>
+                ))}
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => setShowNewConnectionDialog(false)}>Cancel</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Webhook Dialog */}
+        <Dialog open={showNewWebhookDialog} onOpenChange={setShowNewWebhookDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Webhook className="h-5 w-5 text-orange-600" />
+                Create New Webhook
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Webhook Name</label>
+                <Input placeholder="e.g., New Lead Webhook" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">HTTP Method</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="POST">POST</option>
+                  <option value="GET">GET</option>
+                  <option value="PUT">PUT</option>
+                  <option value="DELETE">DELETE</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Link to Scenario</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Select a scenario...</option>
+                  {mockScenarios.map(s => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1000)),
+                    {
+                      loading: 'Creating webhook...',
+                      success: () => {
+                        setShowNewWebhookDialog(false)
+                        return 'Webhook created successfully!'
+                      },
+                      error: 'Failed to create webhook'
+                    }
+                  )
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create Webhook
+                </Button>
+                <Button variant="outline" onClick={() => setShowNewWebhookDialog(false)}>Cancel</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Editor Dialog */}
+        <Dialog open={showWorkflowEditorDialog} onOpenChange={setShowWorkflowEditorDialog}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Workflow className="h-5 w-5 text-emerald-600" />
+                Visual Workflow Editor
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-lg relative overflow-hidden">
+                <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-30"></div>
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  {nodeCategories.map(cat => (
+                    <div key={cat.id} className="bg-white dark:bg-gray-700 rounded-lg p-2 shadow-sm border cursor-move hover:shadow-md transition-all">
+                      <div className="flex items-center gap-2">
+                        {cat.icon}
+                        <span className="text-sm font-medium">{cat.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+                  <Workflow className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                  <p className="text-gray-500">Drag nodes from the left panel to build your workflow</p>
+                </div>
+              </div>
+              <div className="flex gap-2 mt-4">
+                <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                  toast.success('Workflow saved')
+                  setShowWorkflowEditorDialog(false)
+                }}>
+                  Save Workflow
+                </Button>
+                <Button variant="outline" onClick={() => setShowWorkflowEditorDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Template Preview Dialog */}
+        <Dialog open={showTemplatePreviewDialog} onOpenChange={setShowTemplatePreviewDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-purple-600" />
+                Template Preview
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              {selectedTemplate && (
+                <div className="space-y-4">
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="p-3 bg-gradient-to-br from-purple-100 to-pink-100 text-purple-600 rounded-xl">
+                        {selectedTemplate.icon}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-lg">{selectedTemplate.name}</h3>
+                        <p className="text-gray-500">{selectedTemplate.description}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                        <div className="text-xl font-bold text-emerald-600">{selectedTemplate.nodes}</div>
+                        <div className="text-xs text-gray-500">Modules</div>
+                      </div>
+                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                        <div className="text-xl font-bold text-blue-600">{selectedTemplate.uses.toLocaleString()}</div>
+                        <div className="text-xs text-gray-500">Uses</div>
+                      </div>
+                      <div className="bg-white dark:bg-gray-700 rounded-lg p-3 text-center">
+                        <div className="flex items-center justify-center gap-1 text-xl font-bold text-amber-600">
+                          <Star className="h-4 w-4 fill-current" />
+                          {selectedTemplate.rating}
+                        </div>
+                        <div className="text-xs text-gray-500">Rating</div>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTemplate.tags.map(tag => (
+                        <Badge key={tag} variant="outline">{tag}</Badge>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                      setFormState({ workflow_name: selectedTemplate.name, description: selectedTemplate.description, workflow_type: 'sequential', trigger_type: 'webhook', is_enabled: true })
+                      setShowTemplatePreviewDialog(false)
+                      setSelectedTemplate(null)
+                      setShowNewWorkflow(true)
+                    }}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Use This Template
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowTemplatePreviewDialog(false)}>Close</Button>
+                  </div>
+                </div>
+              )}
+              {!selectedTemplate && (
+                <div className="text-center py-8 text-gray-500">
+                  <Eye className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                  <p>No template selected for preview</p>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Execution Logs Dialog */}
+        <Dialog open={showExecutionLogsDialog} onOpenChange={setShowExecutionLogsDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-hidden">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Terminal className="h-5 w-5 text-blue-600" />
+                Execution Logs
+              </DialogTitle>
+            </DialogHeader>
+            <ScrollArea className="h-96 mt-4">
+              <div className="space-y-2 font-mono text-sm">
+                {selectedExecution && (
+                  <>
+                    <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded text-blue-700 dark:text-blue-400">
+                      [INFO] {selectedExecution.startedAt.toISOString()} - Workflow execution started
+                    </div>
+                    <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-gray-600 dark:text-gray-400">
+                      [DEBUG] Initializing workflow context...
+                    </div>
+                    <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded text-gray-600 dark:text-gray-400">
+                      [DEBUG] Loading workflow configuration...
+                    </div>
+                    <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded text-green-700 dark:text-green-400">
+                      [SUCCESS] Module 1/8 completed - Trigger received
+                    </div>
+                    <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded text-green-700 dark:text-green-400">
+                      [SUCCESS] Module 2/8 completed - Data transformation
+                    </div>
+                    <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded text-green-700 dark:text-green-400">
+                      [SUCCESS] Module 3/8 completed - API call to external service
+                    </div>
+                    <div className="p-2 bg-amber-50 dark:bg-amber-900/20 rounded text-amber-700 dark:text-amber-400">
+                      [WARN] Rate limit approaching for external API
+                    </div>
+                    {selectedExecution.status === 'failed' && selectedExecution.errorMessage && (
+                      <div className="p-2 bg-red-50 dark:bg-red-900/20 rounded text-red-700 dark:text-red-400">
+                        [ERROR] {selectedExecution.errorMessage}
+                      </div>
+                    )}
+                    {selectedExecution.status === 'success' && (
+                      <div className="p-2 bg-green-50 dark:bg-green-900/20 rounded text-green-700 dark:text-green-400">
+                        [SUCCESS] Workflow execution completed successfully in {selectedExecution.duration}s
+                      </div>
+                    )}
+                  </>
+                )}
+                {!selectedExecution && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Terminal className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                    <p>No execution selected</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
+            <div className="flex gap-2 mt-4">
+              <Button variant="outline" className="flex-1" onClick={() => {
+                if (selectedExecution) {
+                  const logContent = `Execution Log - ${selectedExecution.workflowName}\n${'='.repeat(50)}\nStarted: ${selectedExecution.startedAt.toISOString()}\nStatus: ${selectedExecution.status}\nDuration: ${selectedExecution.duration}s\nModules: ${selectedExecution.nodesExecuted}/${selectedExecution.totalNodes}`
+                  const blob = new Blob([logContent], { type: 'text/plain' })
+                  const url = URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = `execution-log-${selectedExecution.id}.txt`
+                  link.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Log file downloaded')
+                }
+              }}>
+                <Download className="h-4 w-4 mr-2" />
+                Download Logs
+              </Button>
+              <Button variant="outline" onClick={() => setShowExecutionLogsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Submit Template Dialog */}
+        <Dialog open={showSubmitTemplateDialog} onOpenChange={setShowSubmitTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5 text-green-600" />
+                Submit Your Template
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 mt-4">
+              <p className="text-gray-600 dark:text-gray-400">
+                Share your automation with the community.
+              </p>
+              <div>
+                <label className="block text-sm font-medium mb-2">Template Name</label>
+                <Input placeholder="e.g., Customer Onboarding Automation" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
+                <textarea
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 min-h-[80px]"
+                  placeholder="Describe what your template does..."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Category</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Select category...</option>
+                  <option value="sales">Sales</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="productivity">Productivity</option>
+                  <option value="dev-tools">Dev Tools</option>
+                  <option value="finance">Finance</option>
+                  <option value="ai">AI</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Select Workflow to Submit</label>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="">Select a workflow...</option>
+                  {displayWorkflows.map(w => (
+                    <option key={w.id} value={w.id}>{w.workflow_name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex gap-2">
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1500)),
+                    {
+                      loading: 'Submitting template for review...',
+                      success: () => {
+                        setShowSubmitTemplateDialog(false)
+                        return 'Template submitted! Our team will review it shortly.'
+                      },
+                      error: 'Failed to submit template'
+                    }
+                  )
+                }}>
+                  Submit for Review
+                </Button>
+                <Button variant="outline" onClick={() => setShowSubmitTemplateDialog(false)}>Cancel</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

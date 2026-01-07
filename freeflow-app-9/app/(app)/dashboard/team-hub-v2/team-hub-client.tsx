@@ -472,6 +472,18 @@ export default function TeamHubClient() {
 
   // Dialog State
   const [showCreateMemberDialog, setShowCreateMemberDialog] = useState(false)
+  const [showNewTeamDialog, setShowNewTeamDialog] = useState(false)
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showCreateChannelDialog, setShowCreateChannelDialog] = useState(false)
+  const [showAddAppDialog, setShowAddAppDialog] = useState(false)
+  const [showWorkflowBuilderDialog, setShowWorkflowBuilderDialog] = useState(false)
+  const [showHuddleDialog, setShowHuddleDialog] = useState(false)
+  const [showReactionsDialog, setShowReactionsDialog] = useState(false)
+  const [showThreadDialog, setShowThreadDialog] = useState(false)
+  const [selectedMessageForThread, setSelectedMessageForThread] = useState<Message | null>(null)
+  const [showNotificationsPanel, setShowNotificationsPanel] = useState(false)
+  const [showApprovalDialog, setShowApprovalDialog] = useState(false)
+  const [showSaveSettingsDialog, setShowSaveSettingsDialog] = useState(false)
 
   // Form State
   const [memberForm, setMemberForm] = useState({
@@ -754,15 +766,11 @@ export default function TeamHubClient() {
 
   // Handlers
   const handleCreateChannel = () => {
-    toast.info('Create Channel', {
-      description: 'Opening channel builder...'
-    })
+    setShowCreateChannelDialog(true)
   }
 
   const handleStartHuddle = () => {
-    toast.success('Starting huddle', {
-      description: 'Connecting to audio channel...'
-    })
+    setShowHuddleDialog(true)
   }
 
   const handleSendMessage = (channelName: string) => {
@@ -779,6 +787,39 @@ export default function TeamHubClient() {
     toast.success('Reminder set', {
       description: 'You will be notified at the scheduled time'
     })
+  }
+
+  const handleOpenNotifications = () => {
+    setShowNotificationsPanel(true)
+  }
+
+  const handleOpenApprovalQueue = () => {
+    setShowApprovalDialog(true)
+  }
+
+  const handleAddApp = () => {
+    setShowAddAppDialog(true)
+  }
+
+  const handleOpenWorkflowBuilder = () => {
+    setShowWorkflowBuilderDialog(true)
+  }
+
+  const handleStartThread = (message: Message) => {
+    setSelectedMessageForThread(message)
+    setShowThreadDialog(true)
+  }
+
+  const handleOpenReactions = () => {
+    setShowReactionsDialog(true)
+  }
+
+  const handleSaveSettings = async () => {
+    setShowSaveSettingsDialog(true)
+    // Simulate save operation
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    toast.success('Settings saved', { description: 'Workspace settings updated' })
+    setShowSaveSettingsDialog(false)
   }
 
   // Combined stats from mock + db
@@ -803,7 +844,7 @@ export default function TeamHubClient() {
             <Button variant="outline" size="icon" onClick={() => setShowSearch(true)}>
               <Search className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" className="relative" onClick={() => toast.info('Notifications', { description: `You have ${stats.totalMentions} unread mentions` })}>
+            <Button variant="outline" size="icon" className="relative" onClick={handleOpenNotifications}>
               <Bell className="w-4 h-4" />
               {stats.totalMentions > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{stats.totalMentions}</span>
@@ -908,7 +949,7 @@ export default function TeamHubClient() {
                   window.location.href = `mailto:${emails}?subject=Team Communication`
                   toast.success('Email composer opened')
                 }},
-                { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: () => toast.info('Approval Queue', { description: 'No pending approval requests' }) },
+                { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: handleOpenApprovalQueue },
                 { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => setSettingsTab('members') },
                 { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => {
                   const adminCount = members.filter(m => m.role === 'admin' || m.role === 'owner').length
@@ -1222,9 +1263,9 @@ export default function TeamHubClient() {
                               </div>
 
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.info('Reactions', { description: 'React with emoji coming soon' })}><Smile className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.success('Thread started', { description: `Reply to ${message.senderName}` })}><MessageCircle className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.success('Message saved', { description: 'Added to your bookmarks' })}><Bookmark className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleOpenReactions}><Smile className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleStartThread(message)}><MessageCircle className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { toast.success('Message saved', { description: 'Added to your bookmarks' }) }}><Bookmark className="w-3.5 h-3.5" /></Button>
                                 <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied!', { description: 'Message copied to clipboard' }) }}><MoreVertical className="w-3.5 h-3.5" /></Button>
                               </div>
                             </div>
@@ -1347,7 +1388,10 @@ export default function TeamHubClient() {
                       ))}
                     </div>
 
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => toast.success('Joined huddle', { description: `Connected to #${huddle.channelName}` })}>
+                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => {
+                      setShowHuddleDialog(true)
+                      toast.success('Joined huddle', { description: `Connected to #${huddle.channelName}` })
+                    }}>
                       Join Huddle
                     </Button>
                   </CardContent>
@@ -1374,7 +1418,7 @@ export default function TeamHubClient() {
           <TabsContent value="apps" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Installed Apps</h3>
-              <Button onClick={() => toast.info('App Directory', { description: 'Browse available apps below' })}>
+              <Button onClick={handleAddApp}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Apps
               </Button>
@@ -1440,7 +1484,7 @@ export default function TeamHubClient() {
                           <span>{app.installCount.toLocaleString()} installs</span>
                         </div>
                       </div>
-                      <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.success(`${app.name} added`, { description: 'App installed successfully' }) }}>Add</Button>
+                      <Button size="sm" onClick={(e) => { e.stopPropagation(); setShowAddAppDialog(true); toast.success(`${app.name} added`, { description: 'App installed successfully' }) }}>Add</Button>
                     </div>
                   ))}
                 </div>
@@ -1452,7 +1496,7 @@ export default function TeamHubClient() {
           <TabsContent value="workflows" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Workflow Builder</h3>
-              <Button onClick={() => toast.info('Workflow Builder', { description: 'Create automation workflows for your team' })}>
+              <Button onClick={handleOpenWorkflowBuilder}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Workflow
               </Button>
@@ -1611,8 +1655,15 @@ export default function TeamHubClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white" onClick={() => toast.success('Settings saved', { description: 'Workspace settings updated' })}>
-                          Save Settings
+                        <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white" onClick={handleSaveSettings} disabled={showSaveSettingsDialog}>
+                          {showSaveSettingsDialog ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Saving...
+                            </>
+                          ) : (
+                            'Save Settings'
+                          )}
                         </Button>
                       </CardContent>
                     </Card>
@@ -1735,7 +1786,7 @@ export default function TeamHubClient() {
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.info('Integrations', { description: 'Browse available integrations above' })}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowAddAppDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Integration
                         </Button>
@@ -2283,6 +2334,284 @@ export default function TeamHubClient() {
                     Add Member
                   </>
                 )}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Create Channel Dialog */}
+        <Dialog open={showCreateChannelDialog} onOpenChange={setShowCreateChannelDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Hash className="w-5 h-5 text-blue-500" />
+                Create Channel
+              </DialogTitle>
+              <DialogDescription>Create a new communication channel</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Channel Name</Label>
+                <Input placeholder="project-updates" className="mt-1" />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Input placeholder="Updates and discussions for the project" className="mt-1" />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Private Channel</p>
+                  <p className="text-sm text-gray-500">Only invited members can see this channel</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCreateChannelDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowCreateChannelDialog(false); toast.success('Channel created', { description: 'Your new channel is ready' }) }}>Create Channel</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Huddle Dialog */}
+        <Dialog open={showHuddleDialog} onOpenChange={setShowHuddleDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Headphones className="w-5 h-5 text-green-500" />
+                Start Huddle
+              </DialogTitle>
+              <DialogDescription>Start a quick audio chat with your team</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Select Channel</Label>
+                <select className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  {channels.map(channel => (
+                    <option key={channel.id} value={channel.id}>#{channel.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Enable Video</p>
+                  <p className="text-sm text-gray-500">Start with video on</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">Record Huddle</p>
+                  <p className="text-sm text-gray-500">Record this conversation</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowHuddleDialog(false)}>Cancel</Button>
+              <Button className="bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => { setShowHuddleDialog(false); toast.success('Huddle started', { description: 'Connecting to audio channel...' }) }}>
+                <Headphones className="w-4 h-4 mr-2" />
+                Start Huddle
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Notifications Panel Dialog */}
+        <Dialog open={showNotificationsPanel} onOpenChange={setShowNotificationsPanel}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-orange-500" />
+                Notifications
+              </DialogTitle>
+              <DialogDescription>You have {stats.totalMentions} unread mentions</DialogDescription>
+            </DialogHeader>
+            <ScrollArea className="h-[400px] pr-4">
+              <div className="space-y-4 py-4">
+                {activities.slice(0, 5).map(activity => (
+                  <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={activity.userAvatar} />
+                      <AvatarFallback>{activity.userName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">{activity.userName}</p>
+                      <p className="text-sm text-gray-500">{activity.content}</p>
+                      <p className="text-xs text-gray-400 mt-1">#{activity.channelName} - {formatTimeAgo(activity.timestamp)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowNotificationsPanel(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Approval Queue Dialog */}
+        <Dialog open={showApprovalDialog} onOpenChange={setShowApprovalDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserCheck className="w-5 h-5 text-green-500" />
+                Approval Queue
+              </DialogTitle>
+              <DialogDescription>Review pending member requests</DialogDescription>
+            </DialogHeader>
+            <div className="py-8 text-center">
+              <UserCheck className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium mb-2">No pending requests</h3>
+              <p className="text-gray-500">All member requests have been processed</p>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowApprovalDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add App Dialog */}
+        <Dialog open={showAddAppDialog} onOpenChange={setShowAddAppDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Layers className="w-5 h-5 text-purple-500" />
+                Add App
+              </DialogTitle>
+              <DialogDescription>Browse and install apps for your workspace</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Input placeholder="Search apps..." className="w-full" />
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-3">
+                  {apps.map(app => (
+                    <div key={app.id} className="flex items-center gap-3 p-3 border rounded-lg hover:border-purple-500 cursor-pointer transition-colors">
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xl">
+                        {app.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm">{app.name}</h4>
+                        <p className="text-xs text-gray-500 truncate">{app.description}</p>
+                      </div>
+                      <Button size="sm" variant={app.isInstalled ? 'secondary' : 'default'} onClick={() => toast.success(app.isInstalled ? 'Already installed' : `${app.name} installed`, { description: app.isInstalled ? 'This app is already in your workspace' : 'App added successfully' })}>
+                        {app.isInstalled ? 'Installed' : 'Add'}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowAddAppDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Workflow Builder Dialog */}
+        <Dialog open={showWorkflowBuilderDialog} onOpenChange={setShowWorkflowBuilderDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Workflow className="w-5 h-5 text-indigo-500" />
+                Create Workflow
+              </DialogTitle>
+              <DialogDescription>Automate tasks and processes for your team</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Workflow Name</Label>
+                <Input placeholder="My Workflow" className="mt-1" />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Input placeholder="What does this workflow do?" className="mt-1" />
+              </div>
+              <div>
+                <Label>Trigger</Label>
+                <select className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  <option value="channel_message">When a message is posted</option>
+                  <option value="emoji_reaction">When an emoji is added</option>
+                  <option value="new_member">When a new member joins</option>
+                  <option value="scheduled">On a schedule</option>
+                  <option value="webhook">Via webhook</option>
+                </select>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Add steps to your workflow after creation. Steps can include sending messages, creating channels, adding reactions, and more.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowWorkflowBuilderDialog(false)}>Cancel</Button>
+              <Button onClick={() => { setShowWorkflowBuilderDialog(false); toast.success('Workflow created', { description: 'Add steps to complete your workflow' }) }}>
+                Create Workflow
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reactions Dialog */}
+        <Dialog open={showReactionsDialog} onOpenChange={setShowReactionsDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Smile className="w-5 h-5 text-yellow-500" />
+                Add Reaction
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="grid grid-cols-8 gap-2">
+                {['👍', '👎', '❤️', '🎉', '🔥', '👀', '✅', '❌', '💯', '🚀', '💪', '🙏', '😊', '😂', '🤔', '😍'].map(emoji => (
+                  <button
+                    key={emoji}
+                    className="w-10 h-10 flex items-center justify-center text-2xl hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                    onClick={() => { setShowReactionsDialog(false); toast.success('Reaction added', { description: `You reacted with ${emoji}` }) }}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Thread Dialog */}
+        <Dialog open={showThreadDialog} onOpenChange={setShowThreadDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-blue-500" />
+                Thread
+              </DialogTitle>
+              {selectedMessageForThread && (
+                <DialogDescription>Reply to {selectedMessageForThread.senderName}</DialogDescription>
+              )}
+            </DialogHeader>
+            {selectedMessageForThread && (
+              <div className="space-y-4 py-4">
+                <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Avatar className="w-6 h-6">
+                      <AvatarImage src={selectedMessageForThread.senderAvatar} />
+                      <AvatarFallback>{selectedMessageForThread.senderName.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium text-sm">{selectedMessageForThread.senderName}</span>
+                    <span className="text-xs text-gray-500">{formatTime(selectedMessageForThread.timestamp)}</span>
+                  </div>
+                  <p className="text-sm">{selectedMessageForThread.content}</p>
+                </div>
+                <div>
+                  <Label>Your Reply</Label>
+                  <Input placeholder="Write a reply..." className="mt-1" />
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => { setShowThreadDialog(false); setSelectedMessageForThread(null) }}>Cancel</Button>
+              <Button onClick={() => { setShowThreadDialog(false); setSelectedMessageForThread(null); toast.success('Reply sent', { description: 'Your message has been posted to the thread' }) }}>
+                Send Reply
               </Button>
             </div>
           </DialogContent>

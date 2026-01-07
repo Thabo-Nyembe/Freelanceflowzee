@@ -179,6 +179,16 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   const display = (contracts && contracts.length > 0) ? contracts : (initialContracts || [])
   const [showFilters, setShowFilters] = useState(false)
 
+  // Additional state for dialogs
+  const [selectedBatch, setSelectedBatch] = useState<BulkSendBatch | null>(null)
+  const [showFolderDialog, setShowFolderDialog] = useState(false)
+  const [folderToView, setFolderToView] = useState<ContractFolder | null>(null)
+  const [showInviteUserDialog, setShowInviteUserDialog] = useState(false)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [showAddRecipientDialog, setShowAddRecipientDialog] = useState(false)
+  const [newRecipientEmail, setNewRecipientEmail] = useState('')
+  const [newFolderName, setNewFolderName] = useState('')
+
   // Mock envelopes
   const envelopes: Envelope[] = [
     {
@@ -708,6 +718,105 @@ export default function ContractsClient({ initialContracts }: { initialContracts
         loading: 'Exporting data...',
         success: 'Data exported successfully',
         error: 'Export failed'
+      }
+    )
+  }
+
+  // Handler for viewing batch details
+  const handleViewBatchDetails = (batch: BulkSendBatch) => {
+    setSelectedBatch(batch)
+  }
+
+  // Handler for viewing folder contents
+  const handleViewFolderContents = (folder: ContractFolder) => {
+    setFolderToView(folder)
+    // Filter envelopes by folder and switch to envelopes tab
+    setSelectedFolder(folder.id)
+    setActiveTab('envelopes')
+    toast.success(`Viewing folder: ${folder.name}`, {
+      description: `${folder.envelopes_count} envelopes in this folder`
+    })
+  }
+
+  // Handler for creating a new folder
+  const handleCreateFolder = async () => {
+    if (!newFolderName.trim()) {
+      toast.error('Please enter a folder name')
+      return
+    }
+
+    toast.promise(
+      (async () => {
+        // In a real app, this would call an API to create the folder
+        await new Promise(resolve => setTimeout(resolve, 500))
+        return newFolderName
+      })(),
+      {
+        loading: 'Creating folder...',
+        success: (name) => {
+          setShowFolderDialog(false)
+          setNewFolderName('')
+          return `Folder "${name}" created successfully`
+        },
+        error: 'Failed to create folder'
+      }
+    )
+  }
+
+  // Handler for inviting a user
+  const handleInviteUser = async () => {
+    if (!inviteEmail.trim() || !inviteEmail.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    toast.promise(
+      fetch('/api/invitations/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: inviteEmail, role: 'sender' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to send invitation')
+        return res.json()
+      }),
+      {
+        loading: `Sending invitation to ${inviteEmail}...`,
+        success: () => {
+          setShowInviteUserDialog(false)
+          setInviteEmail('')
+          return `Invitation sent to ${inviteEmail}`
+        },
+        error: 'Failed to send invitation'
+      }
+    )
+  }
+
+  // Handler for adding a recipient to an envelope
+  const handleAddRecipient = async () => {
+    if (!newRecipientEmail.trim() || !newRecipientEmail.includes('@')) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+
+    if (!selectedEnvelope) {
+      toast.error('No envelope selected')
+      return
+    }
+
+    toast.promise(
+      (async () => {
+        // In a real app, this would call an API to add the recipient
+        await new Promise(resolve => setTimeout(resolve, 500))
+        return newRecipientEmail
+      })(),
+      {
+        loading: 'Adding recipient...',
+        success: (email) => {
+          setShowAddRecipientDialog(false)
+          setNewRecipientEmail('')
+          return `Recipient ${email} added to ${selectedEnvelope.name}`
+        },
+        error: 'Failed to add recipient'
       }
     )
   }
@@ -1427,7 +1536,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <Progress value={(batch.completed / batch.total_recipients) * 100} className="h-2" />
                         <p className="text-xs text-gray-500 mt-1 text-center">{Math.round((batch.completed / batch.total_recipients) * 100)}%</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success(`Viewing batch "${batch.name}"`, { description: `${batch.completed}/${batch.total_recipients} completed` })}>View Details</Button>
+                      <Button variant="outline" size="sm" onClick={() => handleViewBatchDetails(batch)}>View Details</Button>
                     </div>
                   ))}
                 </div>
@@ -1473,7 +1582,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <h3 className="font-semibold text-gray-900 dark:text-white">{folder.name}</h3>
                         <p className="text-sm text-gray-500">{folder.envelopes_count} envelopes</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => toast.info(`Folder: ${folder.name}`, { description: `Contains ${folder.envelopes_count} envelopes` })}>
+                      <Button variant="ghost" size="icon" onClick={() => handleViewFolderContents(folder)}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1482,7 +1591,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
               ))}
               <Card className="hover:shadow-md transition-all cursor-pointer border-dashed">
                 <CardContent className="p-6 flex items-center justify-center h-full">
-                  <Button variant="ghost" onClick={() => { const name = prompt('Enter folder name:'); if (name) toast.success(`Folder "${name}" created`) }}>
+                  <Button variant="ghost" onClick={() => setShowFolderDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Folder
                   </Button>
@@ -1585,7 +1694,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             <p className="text-sm text-gray-500">Viewers</p>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => { const email = prompt('Enter user email to invite:'); if (email) toast.success(`Invitation sent to ${email}`) }}>
+                        <Button variant="outline" className="w-full" onClick={() => setShowInviteUserDialog(true)}>
                           <Plus className="w-4 h-4 mr-2" />
                           Invite User
                         </Button>
@@ -2316,7 +2425,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                     </Button>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full" onClick={() => { const email = prompt('Enter recipient email:'); if (email) toast.success(`Recipient ${email} added`) }}>
+                <Button variant="outline" className="w-full" onClick={() => setShowAddRecipientDialog(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Recipient
                 </Button>
@@ -2454,6 +2563,229 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                 <p className="text-sm text-gray-500 mt-2">Creating contract...</p>
               </div>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Batch Details Dialog */}
+      <Dialog open={!!selectedBatch} onOpenChange={() => setSelectedBatch(null)}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg">
+                <Layers className="h-5 w-5 text-white" />
+              </div>
+              Bulk Send Batch Details
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedBatch && (
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-gray-500">Batch Name</Label>
+                  <p className="font-medium text-gray-900 dark:text-white">{selectedBatch.name}</p>
+                </div>
+                <div>
+                  <Label className="text-gray-500">Status</Label>
+                  <Badge className={selectedBatch.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
+                    {selectedBatch.status.replace('_', ' ')}
+                  </Badge>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-purple-600">{selectedBatch.total_recipients}</p>
+                  <p className="text-xs text-gray-500">Total Recipients</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{selectedBatch.sent}</p>
+                  <p className="text-xs text-gray-500">Sent</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-green-600">{selectedBatch.completed}</p>
+                  <p className="text-xs text-gray-500">Completed</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-red-600">{selectedBatch.failed}</p>
+                  <p className="text-xs text-gray-500">Failed</p>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-gray-500 mb-2 block">Progress</Label>
+                <Progress value={(selectedBatch.completed / selectedBatch.total_recipients) * 100} className="h-3" />
+                <p className="text-sm text-gray-500 mt-1">
+                  {Math.round((selectedBatch.completed / selectedBatch.total_recipients) * 100)}% complete
+                </p>
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={() => setSelectedBatch(null)}>Close</Button>
+                <Button onClick={() => {
+                  handleExportData()
+                  setSelectedBatch(null)
+                }}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Report
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Folder Dialog */}
+      <Dialog open={showFolderDialog} onOpenChange={setShowFolderDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg">
+                <Folder className="h-5 w-5 text-white" />
+              </div>
+              Create New Folder
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="folder-name">Folder Name</Label>
+              <Input
+                id="folder-name"
+                placeholder="Enter folder name..."
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => {
+                setShowFolderDialog(false)
+                setNewFolderName('')
+              }}>Cancel</Button>
+              <Button onClick={handleCreateFolder}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create Folder
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invite User Dialog */}
+      <Dialog open={showInviteUserDialog} onOpenChange={setShowInviteUserDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg">
+                <Mail className="h-5 w-5 text-white" />
+              </div>
+              Invite User
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="invite-email">Email Address</Label>
+              <Input
+                id="invite-email"
+                type="email"
+                placeholder="user@example.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label>Role</Label>
+              <Select defaultValue="sender">
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="sender">Sender</SelectItem>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => {
+                setShowInviteUserDialog(false)
+                setInviteEmail('')
+              }}>Cancel</Button>
+              <Button onClick={handleInviteUser}>
+                <Send className="h-4 w-4 mr-2" />
+                Send Invitation
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Recipient Dialog */}
+      <Dialog open={showAddRecipientDialog} onOpenChange={setShowAddRecipientDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg">
+                <Users className="h-5 w-5 text-white" />
+              </div>
+              Add Recipient
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="recipient-email">Recipient Email</Label>
+              <Input
+                id="recipient-email"
+                type="email"
+                placeholder="recipient@example.com"
+                value={newRecipientEmail}
+                onChange={(e) => setNewRecipientEmail(e.target.value)}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label>Role</Label>
+              <Select defaultValue="signer">
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="signer">Signer</SelectItem>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="approver">Approver</SelectItem>
+                  <SelectItem value="cc">CC</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label>Authentication Method</Label>
+              <Select defaultValue="email">
+                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="email">Email</SelectItem>
+                  <SelectItem value="sms">SMS</SelectItem>
+                  <SelectItem value="access_code">Access Code</SelectItem>
+                  <SelectItem value="id_verification">ID Verification</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => {
+                setShowAddRecipientDialog(false)
+                setNewRecipientEmail('')
+              }}>Cancel</Button>
+              <Button onClick={handleAddRecipient}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Recipient
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

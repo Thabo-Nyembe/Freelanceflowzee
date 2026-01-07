@@ -421,6 +421,9 @@ export default function MarketplaceClient() {
   const [orderPage, setOrderPage] = useState(1)
   const [settingsTab, setSettingsTab] = useState('general')
   const [analyticsTab, setAnalyticsTab] = useState('overview')
+  const [followedVendors, setFollowedVendors] = useState<string[]>([])
+  const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null)
+  const [mockAPIKeysState, setMockAPIKeysState] = useState(mockAPIKeys)
 
   // Database state
   const [dbApps, setDbApps] = useState<any[]>([])
@@ -1087,7 +1090,7 @@ export default function MarketplaceClient() {
                     <div className="flex gap-3">
                       <Button onClick={() => { window.open('https://techpro.example.com', '_blank'); toast.success('Vendor store opened') }}><ExternalLink className="h-4 w-4 mr-2" />Visit Store</Button>
                       <Button variant="outline" onClick={() => { window.location.href = 'mailto:contact@techpro.example.com?subject=Inquiry'; toast.success('Opening email client') }}><Mail className="h-4 w-4 mr-2" />Contact</Button>
-                      <Button variant="outline" onClick={() => toast.success('Now following TechPro Solutions')}><Heart className="h-4 w-4 mr-2" />Follow</Button>
+                      <Button variant="outline" onClick={() => { const vendorId = 'techpro'; if (followedVendors.includes(vendorId)) { setFollowedVendors(prev => prev.filter(id => id !== vendorId)); toast.success('Unfollowed TechPro Solutions'); } else { setFollowedVendors(prev => [...prev, vendorId]); toast.success('Now following TechPro Solutions'); } }}><Heart className={`h-4 w-4 mr-2 ${followedVendors.includes('techpro') ? 'fill-red-500 text-red-500' : ''}`} />{followedVendors.includes('techpro') ? 'Following' : 'Follow'}</Button>
                     </div>
                   </div>
                 </div>
@@ -1918,7 +1921,7 @@ export default function MarketplaceClient() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right"><p className="font-medium">{coupon.times_redeemed || 0}/{coupon.max_redemptions || 'Unlimited'}</p><Progress value={coupon.max_redemptions ? ((coupon.times_redeemed || 0) / coupon.max_redemptions) * 100 : 0} className="w-20 h-2" /></div>
-                              <Button variant="ghost" size="icon" onClick={() => { setShowCouponDialog(true); toast.success(`Editing coupon ${coupon.code}`) }}><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => { setMarketplaceCouponForm({ code: coupon.code, discountType: coupon.discount_type === 'percent_off' ? 'percentage' : 'fixed', value: String(coupon.discount_value), usageLimit: String(coupon.max_redemptions || ''), minPurchase: String(coupon.min_purchase || ''), expiresAt: coupon.expires_at || '', applicableProducts: 'all' }); setShowCouponDialog(true); }}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -1935,7 +1938,7 @@ export default function MarketplaceClient() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right"><p className="font-medium">{coupon.usedCount}/{coupon.usageLimit}</p><Progress value={(coupon.usedCount / coupon.usageLimit) * 100} className="w-20 h-2" /></div>
-                              <Button variant="ghost" size="icon" onClick={() => { setShowCouponDialog(true); toast.success(`Editing coupon ${coupon.code}`) }}><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => { setSelectedCoupon(coupon); setMarketplaceCouponForm({ code: coupon.code, discountType: coupon.type, value: String(coupon.value), usageLimit: String(coupon.usageLimit), minPurchase: coupon.minPurchase ? String(coupon.minPurchase) : '', expiresAt: coupon.expiresAt, applicableProducts: coupon.products.includes('all') ? 'all' : 'selected' }); setShowCouponDialog(true); }}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -1961,7 +1964,7 @@ export default function MarketplaceClient() {
                 {settingsTab === 'developers' && (
                   <>
                     <Card className="border-gray-200 dark:border-gray-700">
-                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>API Keys ({dbApiKeys.length + mockAPIKeys.length})</CardTitle><Button onClick={() => setShowAPIKeyDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Key</Button></CardHeader>
+                      <CardHeader className="flex flex-row items-center justify-between"><CardTitle>API Keys ({dbApiKeys.length + mockAPIKeysState.length})</CardTitle><Button onClick={() => setShowAPIKeyDialog(true)}><Plus className="h-4 w-4 mr-2" />Create Key</Button></CardHeader>
                       <CardContent className="space-y-4">
                         {dbApiKeys.map(apiKey => (
                           <div key={apiKey.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border-l-4 border-violet-500">
@@ -1977,7 +1980,7 @@ export default function MarketplaceClient() {
                             </div>
                           </div>
                         ))}
-                        {mockAPIKeys.map(apiKey => (
+                        {mockAPIKeysState.map(apiKey => (
                           <div key={apiKey.id} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <div>
                               <div className="flex items-center gap-2"><h4 className="font-medium">{apiKey.name}</h4><Badge className={getStatusColor(apiKey.status)}>{apiKey.status}</Badge></div>
@@ -1987,7 +1990,7 @@ export default function MarketplaceClient() {
                             <div className="flex items-center gap-4">
                               <div className="text-right text-sm text-gray-500"><p>Last used: {apiKey.lastUsed}</p><p>Created: {apiKey.createdAt}</p></div>
                               <Button variant="ghost" size="icon" onClick={() => toast.promise(navigator.clipboard.writeText(apiKey.key), { loading: 'Copying key...', success: 'API key copied to clipboard', error: 'Failed to copy key' })}><Copy className="h-4 w-4" /></Button>
-                              <Button variant="ghost" size="icon" className="text-red-500" onClick={() => { if (confirm(`Are you sure you want to revoke "${apiKey.name}"?`)) { toast.success(`API key "${apiKey.name}" revoked`) } }}><Trash2 className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" className="text-red-500" onClick={() => { if (confirm(`Are you sure you want to revoke "${apiKey.name}"?`)) { setMockAPIKeysState(prev => prev.filter(k => k.id !== apiKey.id)); toast.success(`API key "${apiKey.name}" revoked`); } }}><Trash2 className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}

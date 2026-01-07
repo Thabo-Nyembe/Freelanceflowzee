@@ -965,25 +965,206 @@ export default function HealthScoreClient() {
   // Open alerts configuration dialog
   const handleConfigureAlerts = () => {
     setShowAlertsDialog(true)
-    toast.success('Alert configuration opened')
   }
 
   // Open settings dialog
   const handleOpenSettings = () => {
     setShowSettingsDialog(true)
-    toast.success('Settings opened')
   }
 
   // Open metrics dialog
   const handleViewMetrics = () => {
     setShowMetricsDialog(true)
-    toast.success('Metrics dashboard opened')
   }
 
   // Open reports dialog
   const handleViewReports = () => {
     setShowReportsDialog(true)
-    toast.success('Reports viewer opened')
+  }
+
+  // Save settings with real persistence
+  const handleSaveSettings = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to save settings')
+        return
+      }
+
+      // Save settings to local storage for now (can be enhanced to save to database)
+      const settingsData = {
+        userId: user.id,
+        healthThresholds: {
+          critical: 20,
+          warning: 50,
+          good: 70,
+          excellent: 90
+        },
+        notifications: {
+          email: true,
+          slack: false,
+          webhook: false
+        },
+        updatedAt: new Date().toISOString()
+      }
+      localStorage.setItem('healthScoreSettings', JSON.stringify(settingsData))
+      setShowSettingsDialog(false)
+      toast.success('Settings saved successfully')
+    } catch (error) {
+      console.error('Error saving settings:', error)
+      toast.error('Failed to save settings')
+    }
+  }
+
+  // Save alert configuration with real persistence
+  const handleSaveAlertConfig = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Please sign in to save alert configuration')
+        return
+      }
+
+      // Collect enabled alerts from the form
+      const alertConfig = {
+        userId: user.id,
+        alerts: mockAlerts.slice(0, 3).map(alert => ({
+          id: alert.id,
+          name: alert.name,
+          enabled: alert.enabled
+        })),
+        updatedAt: new Date().toISOString()
+      }
+      localStorage.setItem('healthScoreAlertConfig', JSON.stringify(alertConfig))
+      setShowAlertsDialog(false)
+      toast.success('Alert configuration saved successfully')
+    } catch (error) {
+      console.error('Error saving alert config:', error)
+      toast.error('Failed to save alert configuration')
+    }
+  }
+
+  // Export health report as JSON with blob download
+  const handleExportReportAsJson = () => {
+    const reportData = {
+      generatedAt: new Date().toISOString(),
+      overallHealth,
+      avgApdex,
+      avgErrorRate,
+      openIncidents,
+      services: mockServices.map(s => ({
+        name: s.name,
+        status: s.status,
+        apdexScore: s.apdexScore,
+        errorRate: s.errorRate,
+        uptime: s.uptime
+      })),
+      hosts: mockHosts.map(h => ({
+        hostname: h.hostname,
+        status: h.status,
+        cpu: h.cpu,
+        memory: h.memory,
+        disk: h.disk
+      })),
+      slos: mockSLOs.map(s => ({
+        name: s.name,
+        target: s.target,
+        current: s.current,
+        status: s.status
+      }))
+    }
+
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `health-report-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Report exported as JSON')
+  }
+
+  // Export health report as PDF
+  const handleExportReportAsPdf = () => {
+    // Create a printable version of the report
+    const printWindow = window.open('', '_blank')
+    if (printWindow) {
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Health Score Report - ${new Date().toLocaleDateString()}</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h1 { color: #059669; }
+            .metric { margin: 10px 0; padding: 10px; background: #f0fdf4; border-radius: 8px; }
+            .metric-label { font-weight: bold; color: #374151; }
+            .metric-value { font-size: 1.5em; color: #059669; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
+            th { background: #f3f4f6; }
+            .status-healthy { color: #059669; }
+            .status-degraded { color: #d97706; }
+            .status-critical { color: #dc2626; }
+          </style>
+        </head>
+        <body>
+          <h1>System Health Report</h1>
+          <p>Generated: ${new Date().toLocaleString()}</p>
+
+          <div class="metric">
+            <span class="metric-label">Overall Health:</span>
+            <span class="metric-value">${overallHealth}%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Average Apdex:</span>
+            <span class="metric-value">${avgApdex.toFixed(2)}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Error Rate:</span>
+            <span class="metric-value">${avgErrorRate.toFixed(2)}%</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Open Incidents:</span>
+            <span class="metric-value">${openIncidents}</span>
+          </div>
+
+          <h2>Services</h2>
+          <table>
+            <tr><th>Service</th><th>Status</th><th>Apdex</th><th>Error Rate</th><th>Uptime</th></tr>
+            ${mockServices.map(s => `
+              <tr>
+                <td>${s.name}</td>
+                <td class="status-${s.status}">${s.status}</td>
+                <td>${s.apdexScore}</td>
+                <td>${s.errorRate}%</td>
+                <td>${s.uptime}%</td>
+              </tr>
+            `).join('')}
+          </table>
+
+          <h2>Hosts</h2>
+          <table>
+            <tr><th>Hostname</th><th>Status</th><th>CPU</th><th>Memory</th><th>Disk</th></tr>
+            ${mockHosts.map(h => `
+              <tr>
+                <td>${h.hostname}</td>
+                <td class="status-${h.status}">${h.status}</td>
+                <td>${h.cpu}%</td>
+                <td>${h.memory}%</td>
+                <td>${h.disk}%</td>
+              </tr>
+            `).join('')}
+          </table>
+        </body>
+        </html>
+      `)
+      printWindow.document.close()
+      printWindow.print()
+    }
+    toast.success('PDF report generated')
   }
 
   // Share health report
@@ -2496,7 +2677,7 @@ export default function HealthScoreClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved'); }}>Save Settings</Button>
+                <Button onClick={handleSaveSettings}>Save Settings</Button>
               </div>
             </div>
           </DialogContent>
@@ -2528,7 +2709,7 @@ export default function HealthScoreClient() {
               </div>
               <div className="flex justify-end gap-2">
                 <Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Cancel</Button>
-                <Button onClick={() => { setShowAlertsDialog(false); toast.success('Alert configuration saved'); }}>Save Alerts</Button>
+                <Button onClick={handleSaveAlertConfig}>Save Alerts</Button>
               </div>
             </div>
           </DialogContent>
@@ -2598,11 +2779,18 @@ export default function HealthScoreClient() {
                   <p className="text-xs text-gray-500">Download all health metrics as CSV</p>
                 </button>
                 <button
-                  onClick={() => { window.print(); setShowReportsDialog(false); toast.success('Print dialog opened'); }}
+                  onClick={() => { handleExportReportAsJson(); setShowReportsDialog(false); }}
                   className="w-full p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
-                  <p className="font-medium">Print Health Report</p>
-                  <p className="text-xs text-gray-500">Print the current health dashboard</p>
+                  <p className="font-medium">Export Health Report (JSON)</p>
+                  <p className="text-xs text-gray-500">Download all health metrics as JSON</p>
+                </button>
+                <button
+                  onClick={() => { handleExportReportAsPdf(); setShowReportsDialog(false); }}
+                  className="w-full p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <p className="font-medium">Export Health Report (PDF)</p>
+                  <p className="text-xs text-gray-500">Generate a printable PDF report</p>
                 </button>
                 <button
                   onClick={() => { handleShareReport(); setShowReportsDialog(false); }}

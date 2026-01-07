@@ -631,6 +631,22 @@ export default function MediaLibraryClient({
   const [filterType, setFilterType] = useState<string>('all')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
+  // Tag management state
+  const [newTagName, setNewTagName] = useState('')
+  const [customTags, setCustomTags] = useState<string[]>(['product', 'marketing', 'team', 'brand', 'social', 'video', 'banner', 'hero'])
+
+  // Invite management state
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [pendingInvites, setPendingInvites] = useState<string[]>([])
+
+  // Analytics state
+  const [showTrendsDialog, setShowTrendsDialog] = useState(false)
+  const [showDistributionDialog, setShowDistributionDialog] = useState(false)
+  const [showRealTimeDialog, setShowRealTimeDialog] = useState(false)
+  const [showViewsDialog, setShowViewsDialog] = useState(false)
+  const [showDownloadsDialog, setShowDownloadsDialog] = useState(false)
+  const [showStorageDialog, setShowStorageDialog] = useState(false)
+
   const stats = useMemo(() => {
     const totalViews = initialAssets.reduce((sum, a) => sum + a.viewCount, 0)
     const totalDownloads = initialAssets.reduce((sum, a) => sum + a.downloadCount, 0)
@@ -1334,6 +1350,52 @@ export default function MediaLibraryClient({
     window.open('/pricing', '_blank')
   }
 
+  // Handler for adding a new tag
+  const handleAddTag = () => {
+    if (!newTagName.trim()) {
+      toast.error('Please enter a tag name')
+      return
+    }
+    const trimmedTag = newTagName.trim().toLowerCase()
+    if (customTags.includes(trimmedTag)) {
+      toast.error('This tag already exists')
+      return
+    }
+    setCustomTags(prev => [...prev, trimmedTag])
+    setNewTagName('')
+    toast.success(`Tag "${trimmedTag}" added successfully`)
+  }
+
+  // Handler for inviting a collaborator
+  const handleInviteCollaborator = async () => {
+    if (!inviteEmail.trim()) {
+      toast.error('Please enter an email address')
+      return
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(inviteEmail.trim())) {
+      toast.error('Please enter a valid email address')
+      return
+    }
+    if (pendingInvites.includes(inviteEmail.trim())) {
+      toast.error('An invitation has already been sent to this email')
+      return
+    }
+
+    toast.loading('Sending invitation...')
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      setPendingInvites(prev => [...prev, inviteEmail.trim()])
+      setInviteEmail('')
+      toast.dismiss()
+      toast.success(`Invitation sent to ${inviteEmail.trim()}`)
+    } catch {
+      toast.dismiss()
+      toast.error('Failed to send invitation')
+    }
+  }
+
   // Quick actions defined with real functionality
   const mediaQuickActions = useMemo(() => [
     { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: handleUploadMedia },
@@ -1871,13 +1933,13 @@ export default function MediaLibraryClient({
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => { setActiveTab('analytics'); toast.success('Overview metrics loaded') } },
-                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.success('Trends analysis: Views up 25%, Downloads up 15%') },
-                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => toast.success(`Distribution: ${stats.imageCount} images, ${stats.videoCount} videos, ${stats.audioCount} audio, ${stats.docCount} docs`) },
-                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => toast.success('Real-time stats active - monitoring asset activity') },
-                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500', action: () => toast.success(`Total views: ${stats.totalViews.toLocaleString()}`) },
-                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => toast.success(`Total downloads: ${stats.totalDownloads.toLocaleString()}`) },
-                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500', action: () => toast.success(`Storage: ${formatSize(stats.totalSize)} used (${stats.storageUsed.toFixed(1)}%)`) },
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => { setActiveTab('analytics') } },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => setShowTrendsDialog(true) },
+                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => setShowDistributionDialog(true) },
+                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => setShowRealTimeDialog(true) },
+                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500', action: () => setShowViewsDialog(true) },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => setShowDownloadsDialog(true) },
+                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500', action: () => setShowStorageDialog(true) },
                 { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500', action: handleExportAnalytics },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -3084,7 +3146,7 @@ export default function MediaLibraryClient({
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex flex-wrap gap-2">
-                {['product', 'marketing', 'team', 'brand', 'social', 'video', 'banner', 'hero'].map(tag => (
+                {customTags.map(tag => (
                   <Badge key={tag} variant="secondary" className="cursor-pointer hover:bg-gray-200" onClick={() => { setSearchQuery(tag); setShowTagManagerDialog(false); toast.success(`Filtering by "${tag}"`) }}>
                     {tag}
                   </Badge>
@@ -3093,8 +3155,13 @@ export default function MediaLibraryClient({
               <div className="space-y-2">
                 <Label>Add New Tag</Label>
                 <div className="flex gap-2">
-                  <Input placeholder="Enter tag name" />
-                  <Button onClick={() => toast.success('Tag added')}>Add</Button>
+                  <Input
+                    placeholder="Enter tag name"
+                    value={newTagName}
+                    onChange={(e) => setNewTagName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAddTag()}
+                  />
+                  <Button onClick={handleAddTag}>Add</Button>
                 </div>
               </div>
             </div>
@@ -3192,11 +3259,27 @@ export default function MediaLibraryClient({
                   <Badge variant={collab.status === 'online' ? 'default' : 'secondary'}>{collab.status}</Badge>
                 </div>
               ))}
+              {pendingInvites.length > 0 && (
+                <div className="space-y-2">
+                  <Label className="text-gray-500">Pending Invitations</Label>
+                  {pendingInvites.map(email => (
+                    <div key={email} className="flex items-center justify-between p-2 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <span className="text-sm">{email}</span>
+                      <Badge variant="secondary">Pending</Badge>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Invite Member</Label>
                 <div className="flex gap-2">
-                  <Input placeholder="Enter email address" />
-                  <Button onClick={() => toast.success('Invitation sent')}>Invite</Button>
+                  <Input
+                    placeholder="Enter email address"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleInviteCollaborator()}
+                  />
+                  <Button onClick={handleInviteCollaborator}>Invite</Button>
                 </div>
               </div>
             </div>
@@ -3255,6 +3338,246 @@ export default function MediaLibraryClient({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCloudImportDialog(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Trends Analytics Dialog */}
+        <Dialog open={showTrendsDialog} onOpenChange={setShowTrendsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-green-500" />
+                Trends Analysis
+              </DialogTitle>
+              <DialogDescription>View performance trends over time</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-green-500" />
+                    <span className="text-sm font-medium text-green-700 dark:text-green-400">Views</span>
+                  </div>
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-400">+25%</p>
+                  <p className="text-xs text-green-600">vs last month</p>
+                </div>
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm font-medium text-blue-700 dark:text-blue-400">Downloads</span>
+                  </div>
+                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">+15%</p>
+                  <p className="text-xs text-blue-600">vs last month</p>
+                </div>
+              </div>
+              <div className="h-40 flex items-center justify-center border rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="text-center text-gray-500">
+                  <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Trend chart visualization</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTrendsDialog(false)}>Close</Button>
+              <Button onClick={() => { handleExportAnalytics(); setShowTrendsDialog(false) }}>Export Report</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Distribution Analytics Dialog */}
+        <Dialog open={showDistributionDialog} onOpenChange={setShowDistributionDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PieChart className="h-5 w-5 text-purple-500" />
+                Asset Distribution
+              </DialogTitle>
+              <DialogDescription>Breakdown of assets by type</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileImage className="h-4 w-4 text-blue-500" />
+                    <span className="font-medium">Images</span>
+                  </div>
+                  <p className="text-xl font-bold">{stats.imageCount}</p>
+                </div>
+                <div className="p-3 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileVideo className="h-4 w-4 text-red-500" />
+                    <span className="font-medium">Videos</span>
+                  </div>
+                  <p className="text-xl font-bold">{stats.videoCount}</p>
+                </div>
+                <div className="p-3 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileAudio className="h-4 w-4 text-green-500" />
+                    <span className="font-medium">Audio</span>
+                  </div>
+                  <p className="text-xl font-bold">{stats.audioCount}</p>
+                </div>
+                <div className="p-3 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <FileText className="h-4 w-4 text-orange-500" />
+                    <span className="font-medium">Documents</span>
+                  </div>
+                  <p className="text-xl font-bold">{stats.docCount}</p>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDistributionDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Real-time Analytics Dialog */}
+        <Dialog open={showRealTimeDialog} onOpenChange={setShowRealTimeDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-red-500" />
+                Real-time Activity
+              </DialogTitle>
+              <DialogDescription>Live monitoring of asset activity</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="text-sm font-medium text-green-700 dark:text-green-400">Monitoring active - Live data streaming</span>
+              </div>
+              <div className="space-y-2">
+                {mockMediaActivities.map(activity => (
+                  <div key={activity.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <p className="font-medium text-sm">{activity.user}</p>
+                      <p className="text-xs text-gray-500">{activity.action} {activity.target}</p>
+                    </div>
+                    <span className="text-xs text-gray-400">{activity.timestamp}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRealTimeDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Views Analytics Dialog */}
+        <Dialog open={showViewsDialog} onOpenChange={setShowViewsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5 text-blue-500" />
+                Views Analytics
+              </DialogTitle>
+              <DialogDescription>Detailed view statistics for your assets</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-center p-6 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p className="text-4xl font-bold text-blue-700 dark:text-blue-400">{stats.totalViews.toLocaleString()}</p>
+                <p className="text-sm text-blue-600">Total Views</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium">Top Viewed Assets</h4>
+                {initialAssets
+                  .sort((a, b) => b.viewCount - a.viewCount)
+                  .slice(0, 3)
+                  .map((asset, idx) => (
+                    <div key={asset.id} className="flex items-center justify-between p-2 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center">{idx + 1}</span>
+                        <span className="text-sm truncate">{asset.fileName}</span>
+                      </div>
+                      <span className="text-sm font-medium">{asset.viewCount.toLocaleString()}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowViewsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Downloads Analytics Dialog */}
+        <Dialog open={showDownloadsDialog} onOpenChange={setShowDownloadsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="h-5 w-5 text-cyan-500" />
+                Downloads Analytics
+              </DialogTitle>
+              <DialogDescription>Track download statistics for your assets</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-center p-6 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+                <p className="text-4xl font-bold text-cyan-700 dark:text-cyan-400">{stats.totalDownloads.toLocaleString()}</p>
+                <p className="text-sm text-cyan-600">Total Downloads</p>
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium">Most Downloaded Assets</h4>
+                {initialAssets
+                  .sort((a, b) => b.downloadCount - a.downloadCount)
+                  .slice(0, 3)
+                  .map((asset, idx) => (
+                    <div key={asset.id} className="flex items-center justify-between p-2 border rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-cyan-500 text-white text-xs flex items-center justify-center">{idx + 1}</span>
+                        <span className="text-sm truncate">{asset.fileName}</span>
+                      </div>
+                      <span className="text-sm font-medium">{asset.downloadCount.toLocaleString()}</span>
+                    </div>
+                  ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDownloadsDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Storage Analytics Dialog */}
+        <Dialog open={showStorageDialog} onOpenChange={setShowStorageDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5 text-amber-500" />
+                Storage Usage Report
+              </DialogTitle>
+              <DialogDescription>Detailed breakdown of your storage usage</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="text-center p-6 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-4xl font-bold text-amber-700 dark:text-amber-400">{formatSize(stats.totalSize)}</p>
+                <p className="text-sm text-amber-600">of {formatSize(mockUsageStats.storageLimit)} used</p>
+              </div>
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="text-sm font-medium">Storage Usage</span>
+                  <span className="text-sm text-gray-500">{stats.storageUsed.toFixed(1)}%</span>
+                </div>
+                <Progress value={stats.storageUsed} className="h-3" />
+              </div>
+              <div className="space-y-2">
+                <h4 className="font-medium">Usage by Type</h4>
+                {mockUsageStats.byType.map(item => (
+                  <div key={item.type} className="flex items-center justify-between p-2 border rounded-lg">
+                    <div className="flex items-center gap-2">
+                      {getFileTypeIcon(item.type)}
+                      <span className="text-sm capitalize">{item.type}</span>
+                    </div>
+                    <span className="text-sm font-medium">{formatSize(item.size)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStorageDialog(false)}>Close</Button>
+              <Button onClick={handleUpgradeStorage}>Upgrade Storage</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

@@ -498,6 +498,9 @@ export default function PluginsClient() {
   const [showFiltersPanel, setShowFiltersPanel] = useState(false)
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
   const [configurePluginName, setConfigurePluginName] = useState<string | null>(null)
+  // State for managing mock plugins locally
+  const [localPlugins, setLocalPlugins] = useState<Plugin[]>(mockPlugins)
+  const [showConfigDialog, setShowConfigDialog] = useState(false)
   const [showChangelogDialog, setShowChangelogDialog] = useState(false)
   const [changelogPlugin, setChangelogPlugin] = useState<Plugin | null>(null)
   const [showBulkActions, setShowBulkActions] = useState(false)
@@ -567,7 +570,7 @@ export default function PluginsClient() {
 
   // Filter plugins
   const filteredPlugins = useMemo(() => {
-    return mockPlugins.filter(plugin => {
+    return localPlugins.filter(plugin => {
       const matchesSearch = plugin.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            plugin.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            plugin.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -575,9 +578,9 @@ export default function PluginsClient() {
       const matchesTier = selectedTier === 'all' || plugin.tier === selectedTier
       return matchesSearch && matchesCategory && matchesTier
     })
-  }, [searchQuery, selectedCategory, selectedTier])
+  }, [searchQuery, selectedCategory, selectedTier, localPlugins])
 
-  const installedPlugins = mockPlugins.filter(p => p.isInstalled)
+  const installedPlugins = localPlugins.filter(p => p.isInstalled)
   const activePlugins = installedPlugins.filter(p => p.isActivated)
   const needsUpdatePlugins = installedPlugins.filter(p => p.status === 'needs-update')
 
@@ -724,9 +727,15 @@ export default function PluginsClient() {
   }
 
   const handleConfigurePlugin = (pluginName: string) => {
-    setConfigurePluginName(pluginName)
-    setShowSettingsDialog(true)
-    toast.success(`Settings opened for "${pluginName}"`)
+    // Find the plugin by name and open config dialog
+    const plugin = localPlugins.find(p => p.name === pluginName)
+    if (plugin) {
+      setSelectedPlugin(plugin)
+      setShowConfigDialog(true)
+    } else {
+      setConfigurePluginName(pluginName)
+      setShowSettingsDialog(true)
+    }
   }
 
   const handleEnablePlugin = async (pluginId: string, pluginName: string) => {
@@ -927,6 +936,17 @@ export default function PluginsClient() {
 
   // Handler for mock plugin toggle (for demo plugins)
   const handleToggleMockPlugin = (plugin: Plugin) => {
+    setLocalPlugins(prev => prev.map(p => {
+      if (p.id === plugin.id) {
+        const newStatus = p.isActivated ? 'inactive' : 'active'
+        return { ...p, isActivated: !p.isActivated, status: newStatus as PluginStatus }
+      }
+      return p
+    }))
+    // Update selectedPlugin if it's the one being toggled
+    if (selectedPlugin?.id === plugin.id) {
+      setSelectedPlugin(prev => prev ? { ...prev, isActivated: !prev.isActivated, status: prev.isActivated ? 'inactive' : 'active' } : null)
+    }
     if (plugin.isActivated) {
       toast.success(`"${plugin.name}" has been deactivated`)
     } else {
@@ -937,8 +957,65 @@ export default function PluginsClient() {
   // Handler for mock plugin delete with confirmation
   const handleDeleteMockPlugin = (plugin: Plugin) => {
     if (confirm(`Are you sure you want to remove "${plugin.name}"?`)) {
+      setLocalPlugins(prev => prev.filter(p => p.id !== plugin.id))
+      // Close the dialog if the deleted plugin was selected
+      if (selectedPlugin?.id === plugin.id) {
+        setSelectedPlugin(null)
+      }
       toast.success(`"${plugin.name}" has been removed`)
     }
+  }
+
+  // Handler for installing a mock plugin (add to installed list)
+  const handleInstallMockPlugin = (plugin: Plugin) => {
+    setLocalPlugins(prev => prev.map(p => {
+      if (p.id === plugin.id) {
+        return { ...p, isInstalled: true, isActivated: true, status: 'active' as PluginStatus }
+      }
+      return p
+    }))
+    // Update selectedPlugin if it's the one being installed
+    if (selectedPlugin?.id === plugin.id) {
+      setSelectedPlugin(prev => prev ? { ...prev, isInstalled: true, isActivated: true, status: 'active' } : null)
+    }
+    toast.success(`"${plugin.name}" has been installed successfully!`)
+  }
+
+  // Handler for uninstalling a mock plugin
+  const handleUninstallMockPlugin = (plugin: Plugin) => {
+    setLocalPlugins(prev => prev.map(p => {
+      if (p.id === plugin.id) {
+        return { ...p, isInstalled: false, isActivated: false, status: 'inactive' as PluginStatus }
+      }
+      return p
+    }))
+    // Update selectedPlugin if it's the one being uninstalled
+    if (selectedPlugin?.id === plugin.id) {
+      setSelectedPlugin(prev => prev ? { ...prev, isInstalled: false, isActivated: false, status: 'inactive' } : null)
+    }
+    toast.success(`"${plugin.name}" has been uninstalled`)
+  }
+
+  // Handler for updating a mock plugin to latest version
+  const handleUpdateMockPlugin = (plugin: Plugin) => {
+    setLocalPlugins(prev => prev.map(p => {
+      if (p.id === plugin.id) {
+        return { ...p, version: p.latestVersion, status: 'active' as PluginStatus }
+      }
+      return p
+    }))
+    // Update selectedPlugin if it's the one being updated
+    if (selectedPlugin?.id === plugin.id) {
+      setSelectedPlugin(prev => prev ? { ...prev, version: prev.latestVersion, status: 'active' } : null)
+    }
+    toast.success(`"${plugin.name}" updated to v${plugin.latestVersion}`)
+  }
+
+  // Handler for configuring a mock plugin
+  const handleConfigureMockPlugin = (plugin: Plugin) => {
+    setSelectedPlugin(plugin)
+    setShowConfigDialog(true)
+    toast.info(`Opening settings for "${plugin.name}"`)
   }
 
   // Handler for category/filter actions
@@ -1658,7 +1735,7 @@ export default function PluginsClient() {
                           <p className="text-sm text-gray-500">v{plugin.version} → v{plugin.latestVersion}</p>
                         </div>
                         <div className="text-right">
-                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => { toast.success(`"${plugin.name}" updated to v${plugin.latestVersion}`) }}>
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => handleUpdateMockPlugin(plugin)}>
                             Update Now
                           </Button>
                           <button className="block text-xs text-blue-600 hover:underline mt-1" onClick={() => handleViewChangelog(plugin)}>View Changelog</button>
@@ -2198,9 +2275,9 @@ export default function PluginsClient() {
           />
           <QuickActionsToolbar
             actions={[
-              { id: '1', label: 'Install', icon: 'plus', action: () => { setActiveTab('discover'); toast.success('Browse available plugins in Discover tab') }, variant: 'default' as const },
+              { id: '1', label: 'Install', icon: 'plus', action: () => { setActiveTab('discover') }, variant: 'default' as const },
               { id: '2', label: 'Update All', icon: 'refresh-cw', action: handleUpdateAllPlugins, variant: 'default' as const },
-              { id: '3', label: 'Settings', icon: 'settings', action: () => { setActiveTab('settings'); toast.success('Plugin settings opened') }, variant: 'outline' as const },
+              { id: '3', label: 'Settings', icon: 'settings', action: () => { setActiveTab('settings') }, variant: 'outline' as const },
             ]}
             variant="grid"
           />
@@ -2346,7 +2423,7 @@ export default function PluginsClient() {
                           )}
                         </Button>
                         {selectedPlugin.status === 'needs-update' && (
-                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { toast.success(`"${selectedPlugin.name}" updated to v${selectedPlugin.latestVersion}`) }}>
+                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => handleUpdateMockPlugin(selectedPlugin)}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Update to v{selectedPlugin.latestVersion}
                           </Button>
@@ -2568,6 +2645,74 @@ export default function PluginsClient() {
                 </Button>
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Plugin Configuration Dialog */}
+        <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-green-500" />
+                Configure Plugin
+              </DialogTitle>
+            </DialogHeader>
+            {selectedPlugin && (
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="w-12 h-12 rounded-lg bg-white dark:bg-gray-700 flex items-center justify-center text-2xl">
+                    {selectedPlugin.icon}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">{selectedPlugin.name}</h3>
+                    <p className="text-sm text-gray-500">v{selectedPlugin.version}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                    <div>
+                      <p className="font-medium">Enable Plugin</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Activate or deactivate this plugin</p>
+                    </div>
+                    <Switch
+                      checked={selectedPlugin.isActivated}
+                      onCheckedChange={() => handleToggleMockPlugin(selectedPlugin)}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                    <div>
+                      <p className="font-medium">Auto-Update</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Automatically update when new versions are available</p>
+                    </div>
+                    <Switch defaultChecked={selectedPlugin.autoUpdate} />
+                  </div>
+                  <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
+                    <div>
+                      <p className="font-medium">Permissions</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Manage plugin access permissions</p>
+                    </div>
+                    <Button variant="outline" size="sm">Configure</Button>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowConfigDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                    onClick={() => {
+                      toast.success(`Settings saved for "${selectedPlugin.name}"`)
+                      setShowConfigDialog(false)
+                    }}
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Save Settings
+                  </Button>
+                </div>
+              </div>
+            )}
           </DialogContent>
         </Dialog>
       </div>

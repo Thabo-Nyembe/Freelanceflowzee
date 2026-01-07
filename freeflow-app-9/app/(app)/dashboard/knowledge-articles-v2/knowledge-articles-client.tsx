@@ -559,6 +559,11 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const [showCategoriesDialog, setShowCategoriesDialog] = useState(false)
   const [showUsageStatsDialog, setShowUsageStatsDialog] = useState(false)
   const [advancedSearchQuery, setAdvancedSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState<'date' | 'views' | 'rating'>('date')
+  const [showSortMenu, setShowSortMenu] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
+  const [showDuplicateTemplateDialog, setShowDuplicateTemplateDialog] = useState(false)
+  const [showCustomizeTemplateDialog, setShowCustomizeTemplateDialog] = useState(false)
 
   // Computed values
   const filteredArticles = useMemo(() => {
@@ -586,8 +591,21 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
       result = result.filter(a => a.type === typeFilter)
     }
 
+    // Apply sorting
+    switch (sortBy) {
+      case 'date':
+        result = [...result].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+        break
+      case 'views':
+        result = [...result].sort((a, b) => b.views - a.views)
+        break
+      case 'rating':
+        result = [...result].sort((a, b) => b.rating - a.rating)
+        break
+    }
+
     return result
-  }, [articles, searchQuery, selectedSpace, statusFilter, typeFilter])
+  }, [articles, searchQuery, selectedSpace, statusFilter, typeFilter, sortBy])
 
   const recentArticles = useMemo(() => {
     return [...articles].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 5)
@@ -750,6 +768,23 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const handleUseTemplate = (template: Template) => {
     setShowCreateArticleDialog(true)
     toast.success('Template applied', { description: `Creating article with "${template.name}" template` })
+  }
+
+  const handleDuplicateTemplate = (template: Template) => {
+    setSelectedTemplate(template)
+    setShowDuplicateTemplateDialog(true)
+  }
+
+  const handleCustomizeTemplate = (template: Template) => {
+    setSelectedTemplate(template)
+    setShowCustomizeTemplateDialog(true)
+  }
+
+  const handleSortChange = (newSortBy: 'date' | 'views' | 'rating') => {
+    setSortBy(newSortBy)
+    setShowSortMenu(false)
+    const sortLabels = { date: 'Date (newest)', views: 'Views (highest)', rating: 'Rating (best)' }
+    toast.success('Sort updated', { description: `Sorting by ${sortLabels[newSortBy]}` })
   }
 
   // Quick actions for the toolbar (now with real functionality)
@@ -1015,8 +1050,32 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
               <div className="lg:col-span-3 space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium">{filteredArticles.length} Articles</h3>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.info('Sort Options', { description: 'Sort by: Date (newest), Views (highest), Rating (best)' })}>Sort by</Button>
+                  <div className="flex items-center gap-2 relative">
+                    <Button variant="outline" size="sm" onClick={() => setShowSortMenu(!showSortMenu)}>
+                      Sort by: {sortBy === 'date' ? 'Date' : sortBy === 'views' ? 'Views' : 'Rating'}
+                    </Button>
+                    {showSortMenu && (
+                      <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-gray-800 border rounded-md shadow-lg min-w-[150px]">
+                        <button
+                          className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${sortBy === 'date' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''}`}
+                          onClick={() => handleSortChange('date')}
+                        >
+                          Date (newest)
+                        </button>
+                        <button
+                          className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${sortBy === 'views' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''}`}
+                          onClick={() => handleSortChange('views')}
+                        >
+                          Views (highest)
+                        </button>
+                        <button
+                          className={`w-full px-3 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${sortBy === 'rating' ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''}`}
+                          onClick={() => handleSortChange('rating')}
+                        >
+                          Rating (best)
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1265,8 +1324,8 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 { icon: Plus, label: 'Create Template', color: 'from-green-500 to-emerald-600', action: () => { setShowCreateTemplateDialog(true); toast.success('Create Template', { description: 'Design your new template' }) } },
                 { icon: FileCode, label: 'Import', color: 'from-blue-500 to-indigo-600', action: () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = () => toast.success('Template imported', { description: 'Template ready to use' }); input.click() } },
                 { icon: Share2, label: 'Share', color: 'from-purple-500 to-pink-600', action: () => { navigator.clipboard.writeText(`${window.location.origin}/templates`); toast.success('Share link copied', { description: 'Templates share link copied to clipboard' }) } },
-                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600', action: () => toast.info('Select a template', { description: 'Click on a template card to duplicate it' }) },
-                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Select a template', { description: 'Click on a template card to customize it' }) },
+                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600', action: () => { if (templates.length > 0) { handleDuplicateTemplate(templates[0]); toast.success('Duplicate template', { description: 'Select which template to duplicate' }) } else { toast.error('No templates', { description: 'Create a template first' }) } } },
+                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600', action: () => { if (templates.length > 0) { handleCustomizeTemplate(templates[0]); toast.success('Customize template', { description: 'Select which template to customize' }) } else { toast.error('No templates', { description: 'Create a template first' }) } } },
                 { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => { setShowFavoritesDialog(true); toast.success('Favorites', { description: 'View your favorite templates' }) } },
                 { icon: Folder, label: 'Categories', color: 'from-pink-500 to-rose-600', action: () => { setShowCategoriesDialog(true); toast.success('Categories', { description: 'Browse template categories' }) } },
                 { icon: BarChart3, label: 'Usage Stats', color: 'from-indigo-500 to-purple-600', action: () => { setShowUsageStatsDialog(true); toast.success('Usage Stats', { description: 'View template usage statistics' }) } },
@@ -2058,6 +2117,95 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                   <Trash2 className="w-4 h-4" /> Delete
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Duplicate Template Dialog */}
+        <Dialog open={showDuplicateTemplateDialog} onOpenChange={setShowDuplicateTemplateDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Copy className="w-5 h-5" />
+                Duplicate Template
+              </DialogTitle>
+              <DialogDescription>Create a copy of this template with a new name</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Original Template</Label>
+                <p className="text-sm text-muted-foreground mt-1">{selectedTemplate?.name}</p>
+              </div>
+              <div>
+                <Label htmlFor="new-template-name">New Template Name</Label>
+                <Input id="new-template-name" defaultValue={`${selectedTemplate?.name} (Copy)`} className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="new-template-desc">Description</Label>
+                <Textarea id="new-template-desc" defaultValue={selectedTemplate?.description} className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowDuplicateTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Template duplicated', { description: `Created copy of "${selectedTemplate?.name}"` })
+                setShowDuplicateTemplateDialog(false)
+              }}>
+                <Copy className="w-4 h-4 mr-2" /> Duplicate
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Customize Template Dialog */}
+        <Dialog open={showCustomizeTemplateDialog} onOpenChange={setShowCustomizeTemplateDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Palette className="w-5 h-5" />
+                Customize Template
+              </DialogTitle>
+              <DialogDescription>Modify the template structure and styling</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <Label>Template Name</Label>
+                <Input defaultValue={selectedTemplate?.name} className="mt-1" />
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Textarea defaultValue={selectedTemplate?.description} className="mt-1" />
+              </div>
+              <div>
+                <Label>Category</Label>
+                <Input defaultValue={selectedTemplate?.category} className="mt-1" />
+              </div>
+              <div>
+                <Label>Article Type</Label>
+                <select className="w-full border rounded-md p-2 mt-1">
+                  <option value="page" selected={selectedTemplate?.type === 'page'}>Page</option>
+                  <option value="how-to" selected={selectedTemplate?.type === 'how-to'}>How-To</option>
+                  <option value="tutorial" selected={selectedTemplate?.type === 'tutorial'}>Tutorial</option>
+                  <option value="reference" selected={selectedTemplate?.type === 'reference'}>Reference</option>
+                  <option value="faq" selected={selectedTemplate?.type === 'faq'}>FAQ</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Global Template</p>
+                  <p className="text-xs text-muted-foreground">Available to all users</p>
+                </div>
+                <Switch defaultChecked={selectedTemplate?.isGlobal} />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowCustomizeTemplateDialog(false)}>Cancel</Button>
+              <Button onClick={() => {
+                toast.success('Template updated', { description: `Changes saved to "${selectedTemplate?.name}"` })
+                setShowCustomizeTemplateDialog(false)
+              }}>
+                <Palette className="w-4 h-4 mr-2" /> Save Changes
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

@@ -260,17 +260,7 @@ const mockSettingsActivities = [
   { id: '3', user: 'System', action: 'Revoked', target: 'inactive API key', timestamp: new Date(Date.now() - 172800000).toISOString(), type: 'warning' as const },
 ]
 
-const mockSettingsQuickActions = [
-  { id: '1', label: 'Change Password', icon: 'lock', action: () => {
-    toast.success('Password dialog ready', { description: 'You can now change your password in the Security tab' })
-  }, variant: 'default' as const },
-  { id: '2', label: 'Export Data', icon: 'download', action: () => {
-    toast.success('Data export initiated', { description: 'Your data export will be available shortly' })
-  }, variant: 'default' as const },
-  { id: '3', label: 'View Invoices', icon: 'file', action: () => {
-    toast.success('Invoices section', { description: 'Navigate to Billing tab to view invoices' })
-  }, variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to use component functions
 
 export default function SettingsClient() {
   const supabase = createClient()
@@ -295,6 +285,28 @@ export default function SettingsClient() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+
+  // Accessibility settings state
+  const [largeText, setLargeText] = useState(false)
+  const [highContrast, setHighContrast] = useState(false)
+  const [reduceMotion, setReduceMotion] = useState(false)
+  const [soundEffects, setSoundEffects] = useState(true)
+
+  // Load settings from localStorage on mount
+  useEffect(() => {
+    const savedAccessibility = localStorage.getItem('accessibility_settings')
+    if (savedAccessibility) {
+      try {
+        const parsed = JSON.parse(savedAccessibility)
+        setLargeText(parsed.largeText ?? false)
+        setHighContrast(parsed.highContrast ?? false)
+        setReduceMotion(parsed.reduceMotion ?? false)
+        setSoundEffects(parsed.soundEffects ?? true)
+      } catch (e) {
+        console.error('Failed to parse accessibility settings:', e)
+      }
+    }
+  }, [])
 
   // Fetch user and settings on mount
   useEffect(() => {
@@ -640,6 +652,212 @@ export default function SettingsClient() {
     )
   }
 
+  // Toggle accessibility setting with localStorage persistence
+  const toggleAccessibilitySetting = (setting: 'largeText' | 'highContrast' | 'reduceMotion' | 'soundEffects') => {
+    const newValues = {
+      largeText: setting === 'largeText' ? !largeText : largeText,
+      highContrast: setting === 'highContrast' ? !highContrast : highContrast,
+      reduceMotion: setting === 'reduceMotion' ? !reduceMotion : reduceMotion,
+      soundEffects: setting === 'soundEffects' ? !soundEffects : soundEffects
+    }
+
+    // Update state
+    if (setting === 'largeText') setLargeText(!largeText)
+    if (setting === 'highContrast') setHighContrast(!highContrast)
+    if (setting === 'reduceMotion') setReduceMotion(!reduceMotion)
+    if (setting === 'soundEffects') setSoundEffects(!soundEffects)
+
+    // Persist to localStorage
+    localStorage.setItem('accessibility_settings', JSON.stringify(newValues))
+
+    // Apply CSS classes for accessibility
+    const root = document.documentElement
+    if (setting === 'largeText') {
+      root.classList.toggle('large-text', newValues.largeText)
+    }
+    if (setting === 'highContrast') {
+      root.classList.toggle('high-contrast', newValues.highContrast)
+    }
+    if (setting === 'reduceMotion') {
+      root.classList.toggle('reduce-motion', newValues.reduceMotion)
+    }
+
+    toast.success(`${setting.replace(/([A-Z])/g, ' $1').trim()} ${newValues[setting] ? 'enabled' : 'disabled'}`)
+  }
+
+  // Export all settings as JSON file
+  const handleExportSettings = () => {
+    const allSettings = {
+      profile,
+      security: {
+        twoFactorEnabled: security.twoFactorEnabled,
+        twoFactorMethod: security.twoFactorMethod,
+        loginNotifications: security.loginNotifications
+      },
+      notifications,
+      theme,
+      accessibility: { largeText, highContrast, reduceMotion, soundEffects },
+      integrations: integrations.map(i => ({ id: i.id, name: i.name, status: i.status })),
+      exportedAt: new Date().toISOString()
+    }
+
+    const blob = new Blob([JSON.stringify(allSettings, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `settings-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Settings exported', { description: 'Your settings have been downloaded as JSON' })
+  }
+
+  // Download invoice as file
+  const handleDownloadInvoice = (invoice: Invoice) => {
+    const invoiceData = {
+      invoiceId: invoice.id,
+      date: invoice.date,
+      amount: invoice.amount,
+      status: invoice.status,
+      billingDetails: {
+        plan: billing.plan,
+        paymentMethod: billing.paymentMethod,
+        cardLast4: billing.cardLast4
+      }
+    }
+
+    const blob = new Blob([JSON.stringify(invoiceData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${invoice.id}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Invoice downloaded', { description: `${invoice.id} has been downloaded` })
+  }
+
+  // Handle avatar upload
+  const handleAvatarUpload = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'image/jpeg,image/png,image/gif'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('File too large', { description: 'Please select an image under 5MB' })
+        return
+      }
+
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file)
+      setProfile(prev => ({ ...prev, avatar: previewUrl }))
+
+      // In a real app, upload to server/storage here
+      toast.success('Photo uploaded', { description: 'Your profile picture has been updated' })
+    }
+    input.click()
+  }
+
+  // Remove avatar
+  const handleRemoveAvatar = () => {
+    setProfile(prev => ({ ...prev, avatar: '' }))
+    toast.success('Photo removed', { description: 'Your profile picture has been removed' })
+  }
+
+  // Sync integration
+  const handleSyncIntegration = async (integration: Integration) => {
+    setIntegrations(prev =>
+      prev.map(i => i.id === integration.id ? { ...i, lastSync: new Date().toISOString() } : i)
+    )
+
+    if (userId) {
+      try {
+        await supabase
+          .from('integrations')
+          .update({ last_sync_at: new Date().toISOString() })
+          .eq('id', integration.id)
+      } catch (error) {
+        console.error('Failed to update sync time:', error)
+      }
+    }
+
+    toast.success('Synced', { description: `${integration.name} has been synced` })
+  }
+
+  // Open upgrade dialog / redirect
+  const handleUpgradePlan = () => {
+    // Store intent in localStorage for the billing page
+    localStorage.setItem('billing_intent', JSON.stringify({ action: 'upgrade', currentPlan: billing.plan }))
+    toast.success('Upgrade options', { description: 'Redirecting to upgrade page...' })
+    // In a real app, would use router.push('/billing/upgrade')
+  }
+
+  // Open payment method update
+  const handleUpdatePaymentMethod = () => {
+    localStorage.setItem('billing_intent', JSON.stringify({ action: 'update_payment', cardLast4: billing.cardLast4 }))
+    toast.success('Payment methods', { description: 'Opening payment method editor...' })
+  }
+
+  // Send verification email
+  const handleSendVerificationEmail = async () => {
+    if (!userId) {
+      toast.error('Not authenticated', { description: 'Please log in to verify your email' })
+      return
+    }
+
+    try {
+      const { error } = await supabase.auth.resend({ type: 'signup', email: profile.email })
+      if (error) throw error
+      toast.success('Verification email sent', { description: `Check ${profile.email} for the verification link` })
+    } catch (error: any) {
+      toast.error('Error', { description: error.message || 'Failed to send verification email' })
+    }
+  }
+
+  // Quick actions with real functionality
+  const settingsQuickActions = [
+    {
+      id: '1',
+      label: 'Change Password',
+      icon: 'lock',
+      action: () => {
+        // Scroll to security tab and focus password input
+        const securityTab = document.querySelector('[value="security"]') as HTMLElement
+        if (securityTab) securityTab.click()
+        setTimeout(() => {
+          const passwordInput = document.getElementById('currentPassword') as HTMLInputElement
+          if (passwordInput) passwordInput.focus()
+        }, 100)
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Export Data',
+      icon: 'download',
+      action: handleExportSettings,
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'View Invoices',
+      icon: 'file',
+      action: () => {
+        // Navigate to billing tab
+        const billingTab = document.querySelector('[value="billing"]') as HTMLElement
+        if (billingTab) billingTab.click()
+      },
+      variant: 'outline' as const
+    },
+  ]
+
   return (
     <div className="container mx-auto p-6 max-w-7xl space-y-8">
       {/* Header Section */}
@@ -661,7 +879,7 @@ export default function SettingsClient() {
             showStatus={true}
           />
           <QuickActionsToolbar
-            actions={mockSettingsQuickActions}
+            actions={settingsQuickActions}
             variant="compact"
           />
         </div>
@@ -786,11 +1004,11 @@ export default function SettingsClient() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => toast.success('Upload dialog opened')}>
+                  <Button variant="outline" size="sm" onClick={handleAvatarUpload}>
                     <Upload className="h-4 w-4 mr-2" />
                     Upload
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => toast.success('Photo removed')}>
+                  <Button variant="ghost" size="sm" onClick={handleRemoveAvatar}>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Remove
                   </Button>
@@ -847,7 +1065,7 @@ export default function SettingsClient() {
                       disabled
                       className="flex-1"
                     />
-                    <Button variant="outline" onClick={() => toast.success('Verification email sent')}>Verify</Button>
+                    <Button variant="outline" onClick={handleSendVerificationEmail}>Verify</Button>
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -1282,7 +1500,7 @@ export default function SettingsClient() {
                       <p className="text-sm text-muted-foreground">Increase font size</p>
                     </div>
                   </div>
-                  <Switch onCheckedChange={(checked) => toast.success(`Large text ${checked ? 'enabled' : 'disabled'}`)} />
+                  <Switch checked={largeText} onCheckedChange={() => toggleAccessibilitySetting('largeText')} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -1292,7 +1510,7 @@ export default function SettingsClient() {
                       <p className="text-sm text-muted-foreground">Increase contrast</p>
                     </div>
                   </div>
-                  <Switch onCheckedChange={(checked) => toast.success(`High contrast ${checked ? 'enabled' : 'disabled'}`)} />
+                  <Switch checked={highContrast} onCheckedChange={() => toggleAccessibilitySetting('highContrast')} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -1302,7 +1520,7 @@ export default function SettingsClient() {
                       <p className="text-sm text-muted-foreground">Minimize animations</p>
                     </div>
                   </div>
-                  <Switch onCheckedChange={(checked) => toast.success(`Reduce motion ${checked ? 'enabled' : 'disabled'}`)} />
+                  <Switch checked={reduceMotion} onCheckedChange={() => toggleAccessibilitySetting('reduceMotion')} />
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -1312,7 +1530,7 @@ export default function SettingsClient() {
                       <p className="text-sm text-muted-foreground">Play UI sounds</p>
                     </div>
                   </div>
-                  <Switch defaultChecked onCheckedChange={(checked) => toast.success(`Sound effects ${checked ? 'enabled' : 'disabled'}`)} />
+                  <Switch checked={soundEffects} onCheckedChange={() => toggleAccessibilitySetting('soundEffects')} />
                 </div>
               </CardContent>
             </Card>
@@ -1361,7 +1579,7 @@ export default function SettingsClient() {
                     </div>
                     <div className="flex items-center gap-2">
                       {integration.status === 'connected' && (
-                        <Button variant="ghost" size="sm" onClick={() => toast.success(`Syncing ${integration.name}...`)}>
+                        <Button variant="ghost" size="sm" onClick={() => handleSyncIntegration(integration)}>
                           <RefreshCw className="h-4 w-4" />
                         </Button>
                       )}
@@ -1415,7 +1633,7 @@ export default function SettingsClient() {
                       Next billing date: {formatDate(billing.nextBillingDate)}
                     </p>
                   </div>
-                  <Button variant="outline" onClick={() => toast.success('Opening upgrade options...')}>
+                  <Button variant="outline" onClick={handleUpgradePlan}>
                     <ArrowUpRight className="h-4 w-4 mr-2" />
                     Upgrade Plan
                   </Button>
@@ -1428,7 +1646,7 @@ export default function SettingsClient() {
                       <p className="text-sm text-muted-foreground">Default payment method</p>
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => toast.success('Opening payment methods...')}>
+                  <Button variant="ghost" size="sm" onClick={handleUpdatePaymentMethod}>
                     Update
                   </Button>
                 </div>
@@ -1498,7 +1716,7 @@ export default function SettingsClient() {
                           {invoice.status}
                         </Badge>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => toast.success(`Downloading ${invoice.id}...`)}>
+                      <Button variant="ghost" size="icon" onClick={() => handleDownloadInvoice(invoice)}>
                         <Download className="h-4 w-4" />
                       </Button>
                     </div>

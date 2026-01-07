@@ -49,7 +49,11 @@ import {
   Headphones,
   Mail,
   Link,
-  Image
+  Image,
+  ChevronUp,
+  ChevronDown,
+  X,
+  GripVertical
 } from 'lucide-react'
 
 // Enhanced & Competitive Upgrade Components
@@ -443,6 +447,22 @@ export default function FAQClient() {
   const [articleToDelete, setArticleToDelete] = useState<string | null>(null)
   const [editingArticle, setEditingArticle] = useState<Article | null>(null)
 
+  // Collection management states
+  const [showCollectionDialog, setShowCollectionDialog] = useState(false)
+  const [editingCollection, setEditingCollection] = useState<Collection | null>(null)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [reorderMode, setReorderMode] = useState(false)
+  const [collectionsOrder, setCollectionsOrder] = useState<Collection[]>(mockCollections)
+
+  // New collection form state
+  const [newCollection, setNewCollection] = useState({
+    name: '',
+    description: '',
+    icon: '📄',
+    color: 'bg-blue-500',
+    isPublic: true
+  })
+
   // Form state for new/edit article
   const [newArticle, setNewArticle] = useState({
     title: '',
@@ -731,6 +751,118 @@ export default function FAQClient() {
       toast.error('Error', { description: error.message || 'Failed to update article' })
     }
   }, [editingArticle, newArticle, updateFAQ, resetForm])
+
+  // Collection management handlers
+  const handleOpenAddCollection = useCallback(() => {
+    setEditingCollection(null)
+    setNewCollection({
+      name: '',
+      description: '',
+      icon: '📄',
+      color: 'bg-blue-500',
+      isPublic: true
+    })
+    setShowCollectionDialog(true)
+  }, [])
+
+  const handleEditCollection = useCallback((collection: Collection) => {
+    setEditingCollection(collection)
+    setNewCollection({
+      name: collection.name,
+      description: collection.description,
+      icon: collection.icon,
+      color: collection.color,
+      isPublic: collection.isPublic
+    })
+    setShowCollectionDialog(true)
+  }, [])
+
+  const handleSaveCollection = useCallback(() => {
+    if (!newCollection.name.trim()) {
+      toast.error('Validation Error', { description: 'Collection name is required' })
+      return
+    }
+
+    if (editingCollection) {
+      // Update existing collection
+      setCollectionsOrder(prev => prev.map(col =>
+        col.id === editingCollection.id
+          ? { ...col, ...newCollection, updatedAt: new Date().toISOString() }
+          : col
+      ))
+      toast.success('Collection Updated', { description: `"${newCollection.name}" has been updated` })
+    } else {
+      // Create new collection
+      const newCol: Collection = {
+        id: `col-${Date.now()}`,
+        name: newCollection.name,
+        description: newCollection.description,
+        icon: newCollection.icon,
+        color: newCollection.color,
+        articleCount: 0,
+        order: collectionsOrder.length + 1,
+        parentId: null,
+        isPublic: newCollection.isPublic,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }
+      setCollectionsOrder(prev => [...prev, newCol])
+      toast.success('Collection Created', { description: `"${newCollection.name}" has been created` })
+    }
+    setShowCollectionDialog(false)
+  }, [newCollection, editingCollection, collectionsOrder.length])
+
+  const handleDeleteCollection = useCallback((collectionId: string) => {
+    const collection = collectionsOrder.find(c => c.id === collectionId)
+    if (collection && collection.articleCount > 0) {
+      toast.error('Cannot Delete', { description: 'Collection has articles. Move or delete them first.' })
+      return
+    }
+    setCollectionsOrder(prev => prev.filter(c => c.id !== collectionId))
+    toast.success('Collection Deleted', { description: 'Collection has been removed' })
+  }, [collectionsOrder])
+
+  const handleToggleReorderMode = useCallback(() => {
+    setReorderMode(prev => {
+      if (prev) {
+        toast.success('Reorder Saved', { description: 'Collection order has been updated' })
+      } else {
+        toast.info('Reorder Mode', { description: 'Drag collections to reorder them. Click Done when finished.' })
+      }
+      return !prev
+    })
+  }, [])
+
+  const handleMoveCollection = useCallback((collectionId: string, direction: 'up' | 'down') => {
+    setCollectionsOrder(prev => {
+      const index = prev.findIndex(c => c.id === collectionId)
+      if (index === -1) return prev
+      if (direction === 'up' && index === 0) return prev
+      if (direction === 'down' && index === prev.length - 1) return prev
+
+      const newOrder = [...prev]
+      const swapIndex = direction === 'up' ? index - 1 : index + 1
+      ;[newOrder[index], newOrder[swapIndex]] = [newOrder[swapIndex], newOrder[index]]
+      return newOrder
+    })
+  }, [])
+
+  const handleOpenImportDialog = useCallback(() => {
+    setShowImportDialog(true)
+  }, [])
+
+  const handleImportArticles = useCallback((file: File) => {
+    // Simulate import processing
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: 'Importing articles...',
+        success: `Successfully imported articles from ${file.name}`,
+        error: 'Failed to import articles'
+      }
+    )
+    setShowImportDialog(false)
+  }, [])
 
   // Quick actions with real functionality
   const mockFAQQuickActions = useMemo(() => [
@@ -1131,7 +1263,7 @@ export default function FAQClient() {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
-              <button onClick={() => { toast.success('Add Collection', { description: 'Collection creation would open here' }) }} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
+              <button onClick={handleOpenAddCollection} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
                 <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                   <Plus className="w-5 h-5 text-white" />
                 </div>
@@ -1140,7 +1272,7 @@ export default function FAQClient() {
                   <p className="text-xs text-gray-500">Create new category</p>
                 </div>
               </button>
-              <button onClick={() => { toast.success('Import', { description: 'Import dialog would open here' }) }} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
+              <button onClick={handleOpenImportDialog} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
                 <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
                   <Upload className="w-5 h-5 text-white" />
                 </div>
@@ -1149,13 +1281,13 @@ export default function FAQClient() {
                   <p className="text-xs text-gray-500">Bulk import articles</p>
                 </div>
               </button>
-              <button onClick={() => { toast.success('Reorder Mode', { description: 'Drag and drop to reorder collections' }) }} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
-                <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
-                  <RefreshCw className="w-5 h-5 text-white" />
+              <button onClick={handleToggleReorderMode} className={`flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border ${reorderMode ? 'border-amber-500 ring-2 ring-amber-200' : 'border-gray-100 dark:border-gray-700'} hover:shadow-md transition-all text-left`}>
+                <div className={`w-10 h-10 ${reorderMode ? 'bg-amber-600' : 'bg-amber-500'} rounded-lg flex items-center justify-center`}>
+                  <RefreshCw className={`w-5 h-5 text-white ${reorderMode ? 'animate-spin' : ''}`} />
                 </div>
                 <div>
-                  <p className="font-medium">Reorder</p>
-                  <p className="text-xs text-gray-500">Change order</p>
+                  <p className="font-medium">{reorderMode ? 'Done Reordering' : 'Reorder'}</p>
+                  <p className="text-xs text-gray-500">{reorderMode ? 'Click to save' : 'Change order'}</p>
                 </div>
               </button>
               <button onClick={() => { setStatusFilter('archived'); setActiveTab('articles'); toast.success('Archive View', { description: 'Showing archived articles' }) }} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
@@ -1170,25 +1302,46 @@ export default function FAQClient() {
             </div>
 
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">All Collections</h2>
-              <button onClick={() => toast.success('New Collection', { description: 'Collection creation form would open here' })} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+              <h2 className="text-xl font-semibold">All Collections {reorderMode && <span className="text-amber-600 text-sm font-normal ml-2">(Reorder mode active)</span>}</h2>
+              <button onClick={handleOpenAddCollection} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 New Collection
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {collections.map(collection => (
+              {collectionsOrder.map((collection, index) => (
                 <div
                   key={collection.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 hover:shadow-md transition-all cursor-pointer"
+                  className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border ${reorderMode ? 'border-amber-300 dark:border-amber-700' : 'border-gray-100 dark:border-gray-700'} p-6 hover:shadow-md transition-all cursor-pointer`}
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className={`w-14 h-14 ${collection.color} rounded-xl flex items-center justify-center text-3xl`}>
                       {collection.icon}
                     </div>
-                    <button onClick={() => toast.success(`Edit ${collection.name}`, { description: 'Collection settings would open here' })} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Collection options">
-                      <MoreVertical className="w-4 h-4 text-gray-400" />
-                    </button>
+                    {reorderMode ? (
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => handleMoveCollection(collection.id, 'up')}
+                          disabled={index === 0}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg disabled:opacity-30"
+                          title="Move up"
+                        >
+                          <ChevronUp className="w-4 h-4 text-gray-600" />
+                        </button>
+                        <button
+                          onClick={() => handleMoveCollection(collection.id, 'down')}
+                          disabled={index === collectionsOrder.length - 1}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg disabled:opacity-30"
+                          title="Move down"
+                        >
+                          <ChevronDown className="w-4 h-4 text-gray-600" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => handleEditCollection(collection)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg" title="Collection options">
+                        <MoreVertical className="w-4 h-4 text-gray-400" />
+                      </button>
+                    )}
                   </div>
                   <h3 className="font-semibold text-lg mb-1">{collection.name}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">{collection.description}</p>
@@ -2340,6 +2493,161 @@ export default function FAQClient() {
               </div>
             </ScrollArea>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Collection Create/Edit Dialog */}
+      <Dialog open={showCollectionDialog} onOpenChange={(open) => {
+        setShowCollectionDialog(open)
+        if (!open) {
+          setEditingCollection(null)
+          setNewCollection({ name: '', description: '', icon: '📄', color: 'bg-blue-500', isPublic: true })
+        }
+      }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editingCollection ? 'Edit Collection' : 'Create New Collection'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Collection Name</label>
+              <input
+                type="text"
+                placeholder="e.g., Getting Started"
+                value={newCollection.name}
+                onChange={(e) => setNewCollection(prev => ({ ...prev, name: e.target.value }))}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+              <textarea
+                rows={3}
+                placeholder="Brief description of this collection..."
+                value={newCollection.description}
+                onChange={(e) => setNewCollection(prev => ({ ...prev, description: e.target.value }))}
+                className="mt-1 w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Icon</label>
+                <div className="mt-1 flex gap-2 flex-wrap">
+                  {['📄', '🚀', '💳', '✨', '🔧', '🔗', '🔒', '📊', '💡', '📚'].map(icon => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setNewCollection(prev => ({ ...prev, icon }))}
+                      className={`w-10 h-10 rounded-lg text-xl flex items-center justify-center border-2 transition-colors ${
+                        newCollection.icon === icon ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Color</label>
+                <div className="mt-1 flex gap-2 flex-wrap">
+                  {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500', 'bg-red-500', 'bg-indigo-500', 'bg-pink-500', 'bg-amber-500'].map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setNewCollection(prev => ({ ...prev, color }))}
+                      className={`w-8 h-8 rounded-lg ${color} ${
+                        newCollection.color === color ? 'ring-2 ring-offset-2 ring-blue-500' : ''
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <div>
+                <p className="font-medium">Public Collection</p>
+                <p className="text-xs text-gray-500">Visible to all users</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setNewCollection(prev => ({ ...prev, isPublic: !prev.isPublic }))}
+                className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-colors ${newCollection.isPublic ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'}`}
+              >
+                <div className={`w-4 h-4 rounded-full bg-white transition-transform ${newCollection.isPublic ? 'translate-x-6' : ''}`} />
+              </button>
+            </div>
+          </div>
+          <div className="flex justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+            {editingCollection && (
+              <button
+                onClick={() => {
+                  handleDeleteCollection(editingCollection.id)
+                  setShowCollectionDialog(false)
+                }}
+                className="px-4 py-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg flex items-center gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            )}
+            <div className={`flex gap-3 ${editingCollection ? '' : 'ml-auto'}`}>
+              <button
+                onClick={() => setShowCollectionDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveCollection}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
+              >
+                {editingCollection ? 'Save Changes' : 'Create Collection'}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Import Articles</DialogTitle>
+          </DialogHeader>
+          <div className="py-6">
+            <div
+              className="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 transition-colors"
+              onClick={() => {
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = '.csv,.json'
+                input.onchange = (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  if (file) handleImportArticles(file)
+                }
+                input.click()
+              }}
+            >
+              <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="font-medium mb-1">Drop files here or click to upload</p>
+              <p className="text-sm text-gray-500">Supports CSV and JSON formats</p>
+            </div>
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <h4 className="font-medium text-blue-900 dark:text-blue-100 mb-2">Import Format</h4>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                CSV columns: title, content, collection, tags, status<br />
+                JSON: Array of article objects with same fields
+              </p>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <button
+              onClick={() => setShowImportDialog(false)}
+              className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg"
+            >
+              Cancel
+            </button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

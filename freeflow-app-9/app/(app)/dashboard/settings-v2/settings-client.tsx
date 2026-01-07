@@ -260,9 +260,10 @@ const mockSettingsActivities = [
   { id: '3', user: 'System', action: 'Revoked', target: 'inactive API key', timestamp: new Date(Date.now() - 172800000).toISOString(), type: 'warning' as const },
 ]
 
-const mockSettingsQuickActions = [
+// Quick actions will be defined inside component to access handlers
+const getSettingsQuickActions = (handleExportData: () => Promise<void>) => [
   { id: '1', label: 'Change Password', icon: 'lock', action: () => { document.querySelector('[value="security"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); toast.success('Navigate to Security tab to change password') }, variant: 'default' as const },
-  { id: '2', label: 'Export Data', icon: 'download', action: () => { toast.info('Preparing export...'); }, variant: 'default' as const },
+  { id: '2', label: 'Export Data', icon: 'download', action: () => { handleExportData(); }, variant: 'default' as const },
   { id: '3', label: 'View Invoices', icon: 'file', action: () => { document.querySelector('[value="billing"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); toast.success('Navigate to Billing tab to view invoices') }, variant: 'outline' as const },
 ]
 
@@ -289,6 +290,48 @@ export default function SettingsClient() {
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+
+  // Additional settings state
+  const [soundsEnabled, setSoundsEnabled] = useState(true)
+  const [doNotDisturb, setDoNotDisturb] = useState(false)
+  const [notificationSchedule, setNotificationSchedule] = useState<'all-day' | 'work-hours' | 'custom'>('all-day')
+  const [notificationFilters, setNotificationFilters] = useState<string[]>([])
+  const [autoRenew, setAutoRenew] = useState(true)
+  const [emailReceipts, setEmailReceipts] = useState(true)
+  const [accentColor, setAccentColor] = useState('#3B82F6')
+  const [fontScale, setFontScale] = useState<'default' | 'large'>('default')
+  const [highContrast, setHighContrast] = useState(false)
+  const [cookiePreferences, setCookiePreferences] = useState<'essential' | 'functional' | 'all'>('essential')
+
+  // Load additional settings from localStorage
+  useEffect(() => {
+    const savedSettings = localStorage.getItem('freeflow-settings')
+    if (savedSettings) {
+      try {
+        const parsed = JSON.parse(savedSettings)
+        if (parsed.soundsEnabled !== undefined) setSoundsEnabled(parsed.soundsEnabled)
+        if (parsed.doNotDisturb !== undefined) setDoNotDisturb(parsed.doNotDisturb)
+        if (parsed.notificationSchedule) setNotificationSchedule(parsed.notificationSchedule)
+        if (parsed.notificationFilters) setNotificationFilters(parsed.notificationFilters)
+        if (parsed.autoRenew !== undefined) setAutoRenew(parsed.autoRenew)
+        if (parsed.emailReceipts !== undefined) setEmailReceipts(parsed.emailReceipts)
+        if (parsed.accentColor) setAccentColor(parsed.accentColor)
+        if (parsed.fontScale) setFontScale(parsed.fontScale)
+        if (parsed.highContrast !== undefined) setHighContrast(parsed.highContrast)
+        if (parsed.cookiePreferences) setCookiePreferences(parsed.cookiePreferences)
+      } catch (e) {
+        console.error('Failed to load settings:', e)
+      }
+    }
+  }, [])
+
+  // Save additional settings to localStorage
+  const saveLocalSettings = (updates: Record<string, any>) => {
+    const current = localStorage.getItem('freeflow-settings')
+    const parsed = current ? JSON.parse(current) : {}
+    const updated = { ...parsed, ...updates }
+    localStorage.setItem('freeflow-settings', JSON.stringify(updated))
+  }
 
   // Fetch user and settings on mount
   useEffect(() => {
@@ -829,7 +872,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Privacy settings are in the Advanced tab')}
+                onClick={() => { document.querySelector('[value="advanced"]')?.dispatchEvent(new MouseEvent('click', { bubbles: true })); setTimeout(() => document.querySelector('[data-privacy-section]')?.scrollIntoView({ behavior: 'smooth' }), 100); toast.success('Navigating to Privacy settings'); }}
               >
                 <Shield className="w-5 h-5" />
                 <span className="text-xs font-medium">Privacy</span>
@@ -1085,7 +1128,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success(`${sessions.filter(s => s.status === 'active').length} active sessions`)}
+                onClick={() => { document.querySelector('[data-sessions-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.success(`${sessions.filter(s => s.status === 'active').length} active sessions - scrolling to view`); }}
               >
                 <Monitor className="w-5 h-5" />
                 <span className="text-xs font-medium">Sessions</span>
@@ -1093,7 +1136,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Activity log is displayed below')}
+                onClick={() => { document.querySelector('[data-activity-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scrolling to Activity Log'); }}
               >
                 <History className="w-5 h-5" />
                 <span className="text-xs font-medium">Activity Log</span>
@@ -1101,7 +1144,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('No security alerts at this time')}
+                onClick={() => { const alertCount = sessions.filter(s => s.status === 'expired').length; toast.info(`${alertCount} security alerts`, { description: alertCount > 0 ? 'Review expired sessions below' : 'No security concerns detected' }); }}
               >
                 <AlertTriangle className="w-5 h-5" />
                 <span className="text-xs font-medium">Alerts</span>
@@ -1325,35 +1368,35 @@ export default function SettingsClient() {
               </Button>
               <Button
                 variant="ghost"
-                className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Notification sounds are on')}
+                className={`h-20 flex-col gap-2 ${soundsEnabled ? 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400'} hover:scale-105 transition-all duration-200`}
+                onClick={() => { const newValue = !soundsEnabled; setSoundsEnabled(newValue); saveLocalSettings({ soundsEnabled: newValue }); toast.success(newValue ? 'Notification sounds enabled' : 'Notification sounds disabled'); }}
               >
                 <Volume2 className="w-5 h-5" />
-                <span className="text-xs font-medium">Sounds</span>
+                <span className="text-xs font-medium">Sounds {soundsEnabled ? 'On' : 'Off'}</span>
               </Button>
               <Button
                 variant="ghost"
-                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Do Not Disturb mode toggled')}
+                className={`h-20 flex-col gap-2 ${doNotDisturb ? 'bg-purple-600 text-white dark:bg-purple-700' : 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'} hover:scale-105 transition-all duration-200`}
+                onClick={() => { const newValue = !doNotDisturb; setDoNotDisturb(newValue); saveLocalSettings({ doNotDisturb: newValue }); toast.success(newValue ? 'Do Not Disturb enabled' : 'Do Not Disturb disabled'); }}
               >
                 <Moon className="w-5 h-5" />
-                <span className="text-xs font-medium">Do Not Disturb</span>
+                <span className="text-xs font-medium">DND {doNotDisturb ? 'On' : 'Off'}</span>
               </Button>
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Notification schedule: All day')}
+                onClick={() => { const schedules: Array<'all-day' | 'work-hours' | 'custom'> = ['all-day', 'work-hours', 'custom']; const currentIndex = schedules.indexOf(notificationSchedule); const nextSchedule = schedules[(currentIndex + 1) % schedules.length]; setNotificationSchedule(nextSchedule); saveLocalSettings({ notificationSchedule: nextSchedule }); const labels = { 'all-day': 'All Day', 'work-hours': 'Work Hours (9AM-6PM)', 'custom': 'Custom Schedule' }; toast.success(`Notification schedule: ${labels[nextSchedule]}`); }}
               >
                 <Clock className="w-5 h-5" />
-                <span className="text-xs font-medium">Schedule</span>
+                <span className="text-xs font-medium">{notificationSchedule === 'all-day' ? 'All Day' : notificationSchedule === 'work-hours' ? 'Work Hours' : 'Custom'}</span>
               </Button>
               <Button
                 variant="ghost"
-                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Notification filters: None active')}
+                className={`h-20 flex-col gap-2 ${notificationFilters.length > 0 ? 'bg-green-600 text-white dark:bg-green-700' : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'} hover:scale-105 transition-all duration-200`}
+                onClick={() => { const filters = notificationFilters.length > 0 ? [] : ['Marketing', 'Updates']; setNotificationFilters(filters); saveLocalSettings({ notificationFilters: filters }); toast.success(filters.length > 0 ? `Filters active: ${filters.join(', ')}` : 'All notification filters cleared'); }}
               >
                 <Filter className="w-5 h-5" />
-                <span className="text-xs font-medium">Filters</span>
+                <span className="text-xs font-medium">{notificationFilters.length > 0 ? `${notificationFilters.length} Active` : 'No Filters'}</span>
               </Button>
               <Button
                 variant="ghost"
@@ -1447,7 +1490,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Browse integrations below to connect new apps')}
+                onClick={() => { document.querySelector('[data-integrations-grid]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scroll to available integrations'); }}
               >
                 <Plus className="w-5 h-5" />
                 <span className="text-xs font-medium">Add New</span>
@@ -1455,7 +1498,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success(`${integrations.length} integrations available`)}
+                onClick={() => { window.open('/integrations/marketplace', '_blank'); toast.success(`Opening integrations marketplace (${integrations.length} available)`); }}
               >
                 <Globe className="w-5 h-5" />
                 <span className="text-xs font-medium">Browse All</span>
@@ -1463,7 +1506,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success(`${integrations.filter(i => i.status === 'connected').length} OAuth apps connected`)}
+                onClick={() => { const connected = integrations.filter(i => i.status === 'connected'); const details = connected.map(i => `${i.name}: ${i.scopes.join(', ')}`).join('\n'); if (connected.length > 0) { navigator.clipboard.writeText(details); toast.success(`${connected.length} OAuth apps connected - details copied`); } else { toast.info('No OAuth apps connected yet'); } }}
               >
                 <Link2 className="w-5 h-5" />
                 <span className="text-xs font-medium">OAuth Apps</span>
@@ -1495,7 +1538,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Integration logs are shown in each app card')}
+                onClick={() => { const logs = integrations.filter(i => i.lastSync).map(i => `${i.name}: Last sync ${i.lastSync}`).join('\n'); if (logs) { navigator.clipboard.writeText(logs); toast.success('Integration sync logs copied to clipboard'); } else { toast.info('No sync logs available'); } }}
               >
                 <History className="w-5 h-5" />
                 <span className="text-xs font-medium">Logs</span>
@@ -1503,7 +1546,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
-                onClick={() => { if (confirm('Revoke all integrations? This will disconnect all apps.')) { setIntegrations(prev => prev.map(i => ({ ...i, status: 'disconnected', connectedAt: null }))); toast.success('All integrations revoked'); } }}
+                onClick={() => { if (confirm('Revoke all integrations? This will disconnect all apps.')) { setIntegrations(prev => prev.map(i => ({ ...i, status: 'disconnected' as IntegrationStatus, connectedAt: null }))); toast.success('All integrations revoked'); } }}
               >
                 <Unlink className="w-5 h-5" />
                 <span className="text-xs font-medium">Revoke All</span>
@@ -1602,7 +1645,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success(`Current payment: ${billing.paymentMethod} ending in ${billing.cardLast4}`)}
+                onClick={() => { document.querySelector('[data-payment-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.success(`Current: ${billing.paymentMethod} ending in ${billing.cardLast4}`); }}
               >
                 <CreditCard className="w-5 h-5" />
                 <span className="text-xs font-medium">Payment</span>
@@ -1610,7 +1653,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success(`${invoices.length} invoices available`)}
+                onClick={() => { document.querySelector('[data-invoices-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.success(`${invoices.length} invoices available - scrolling to view`); }}
               >
                 <FileText className="w-5 h-5" />
                 <span className="text-xs font-medium">Invoices</span>
@@ -1618,7 +1661,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Billing history shown below')}
+                onClick={() => { document.querySelector('[data-billing-history]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scrolling to billing history'); }}
               >
                 <History className="w-5 h-5" />
                 <span className="text-xs font-medium">History</span>
@@ -1633,19 +1676,19 @@ export default function SettingsClient() {
               </Button>
               <Button
                 variant="ghost"
-                className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Auto-renew is enabled')}
+                className={`h-20 flex-col gap-2 ${autoRenew ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400'} hover:scale-105 transition-all duration-200`}
+                onClick={() => { const newValue = !autoRenew; setAutoRenew(newValue); saveLocalSettings({ autoRenew: newValue }); toast.success(newValue ? 'Auto-renew enabled' : 'Auto-renew disabled'); }}
               >
                 <RefreshCw className="w-5 h-5" />
-                <span className="text-xs font-medium">Auto-Renew</span>
+                <span className="text-xs font-medium">Auto-Renew {autoRenew ? 'On' : 'Off'}</span>
               </Button>
               <Button
                 variant="ghost"
-                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Receipts sent to your email')}
+                className={`h-20 flex-col gap-2 ${emailReceipts ? 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' : 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400'} hover:scale-105 transition-all duration-200`}
+                onClick={() => { const newValue = !emailReceipts; setEmailReceipts(newValue); saveLocalSettings({ emailReceipts: newValue }); toast.success(newValue ? 'Email receipts enabled' : 'Email receipts disabled'); }}
               >
                 <Mail className="w-5 h-5" />
-                <span className="text-xs font-medium">Receipts</span>
+                <span className="text-xs font-medium">Receipts {emailReceipts ? 'On' : 'Off'}</span>
               </Button>
               <Button
                 variant="ghost"
@@ -1727,7 +1770,7 @@ export default function SettingsClient() {
                         <p className="text-sm text-gray-500">Expires 12/25</p>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full mt-4" onClick={() => toast.info('Contact support to update payment method', { description: 'For security, payment changes require verification' })}>
+                    <Button variant="outline" className="w-full mt-4" onClick={async () => { try { const res = await fetch('/api/billing/create-portal-session', { method: 'POST' }); if (res.ok) { const { url } = await res.json(); window.open(url, '_blank'); toast.success('Opening payment portal'); } else { toast.info('Contact support to update payment method', { description: 'For security, payment changes require verification' }); } } catch { toast.info('Contact support to update payment method', { description: 'For security, payment changes require verification' }); } }}>
                       Update Payment Method
                     </Button>
                   </CardContent>
@@ -1799,39 +1842,39 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Color options available below')}
+                onClick={() => { document.querySelector('[data-accent-colors]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scrolling to accent color picker'); }}
               >
                 <Palette className="w-5 h-5" />
                 <span className="text-xs font-medium">Colors</span>
               </Button>
               <Button
                 variant="ghost"
-                className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Using system default fonts')}
+                className={`h-20 flex-col gap-2 ${fontScale === 'large' ? 'bg-amber-600 text-white dark:bg-amber-700' : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'} hover:scale-105 transition-all duration-200`}
+                onClick={() => { const newScale = fontScale === 'default' ? 'large' : 'default'; setFontScale(newScale); document.documentElement.style.fontSize = newScale === 'large' ? '18px' : '16px'; saveLocalSettings({ fontScale: newScale }); toast.success(newScale === 'large' ? 'Large fonts enabled' : 'Default fonts restored'); }}
               >
                 <Type className="w-5 h-5" />
-                <span className="text-xs font-medium">Fonts</span>
+                <span className="text-xs font-medium">{fontScale === 'large' ? 'Large Font' : 'Default Font'}</span>
               </Button>
               <Button
                 variant="ghost"
-                className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('High contrast mode available in Accessibility')}
+                className={`h-20 flex-col gap-2 ${highContrast ? 'bg-purple-600 text-white dark:bg-purple-700' : 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'} hover:scale-105 transition-all duration-200`}
+                onClick={() => { const newValue = !highContrast; setHighContrast(newValue); document.documentElement.classList.toggle('high-contrast', newValue); saveLocalSettings({ highContrast: newValue }); toast.success(newValue ? 'High contrast enabled' : 'High contrast disabled'); }}
               >
                 <Contrast className="w-5 h-5" />
-                <span className="text-xs font-medium">Contrast</span>
+                <span className="text-xs font-medium">{highContrast ? 'High Contrast' : 'Normal'}</span>
               </Button>
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success(`Current language: ${profile.language}`)}
+                onClick={() => { const lang = profile.language === 'en-US' ? 'es' : profile.language === 'es' ? 'fr' : 'en-US'; setProfile(prev => ({ ...prev, language: lang })); const labels: Record<string, string> = { 'en-US': 'English (US)', 'es': 'Spanish', 'fr': 'French' }; toast.success(`Language changed to ${labels[lang]}`); }}
               >
                 <Languages className="w-5 h-5" />
-                <span className="text-xs font-medium">Language</span>
+                <span className="text-xs font-medium">{profile.language === 'en-US' ? 'English' : profile.language === 'es' ? 'Spanish' : 'French'}</span>
               </Button>
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Accessibility options available below')}
+                onClick={() => { document.querySelector('[data-accessibility-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scrolling to accessibility options'); }}
               >
                 <Accessibility className="w-5 h-5" />
                 <span className="text-xs font-medium">A11y</span>
@@ -1983,7 +2026,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('API key section is below')}
+                onClick={() => { document.querySelector('[data-developer-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scrolling to API keys section'); }}
               >
                 <Key className="w-5 h-5" />
                 <span className="text-xs font-medium">API Keys</span>
@@ -1991,7 +2034,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Webhook URL field is in Developer Settings')}
+                onClick={() => { document.querySelector('[data-webhook-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scrolling to Webhooks configuration'); }}
               >
                 <Database className="w-5 h-5" />
                 <span className="text-xs font-medium">Webhooks</span>
@@ -1999,7 +2042,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success(`Storage used: ${stats.storageUsed} GB / ${stats.storageLimit} GB`)}
+                onClick={() => { document.querySelector('[data-storage-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.info(`Storage: ${stats.storageUsed} GB / ${stats.storageLimit} GB (${Math.round((stats.storageUsed / stats.storageLimit) * 100)}% used)`); }}
               >
                 <HardDrive className="w-5 h-5" />
                 <span className="text-xs font-medium">Storage</span>
@@ -2015,7 +2058,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Recent activity shown in sidebar')}
+                onClick={() => { document.querySelector('[data-activity-sidebar]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scrolling to activity logs'); }}
               >
                 <History className="w-5 h-5" />
                 <span className="text-xs font-medium">Logs</span>
@@ -2023,7 +2066,7 @@ export default function SettingsClient() {
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.success('Performance settings are below')}
+                onClick={() => { document.querySelector('[data-performance-section]')?.scrollIntoView({ behavior: 'smooth' }); toast.success('Scrolling to performance settings'); }}
               >
                 <Zap className="w-5 h-5" />
                 <span className="text-xs font-medium">Performance</span>
@@ -2301,9 +2344,9 @@ export default function SettingsClient() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium">Cookie Preferences</p>
-                        <p className="text-sm text-muted-foreground">Manage cookie consent</p>
+                        <p className="text-sm text-muted-foreground">Manage cookie consent ({cookiePreferences})</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.success('Cookies: Essential only (required for site to function)')}>Configure</Button>
+                      <Button variant="outline" size="sm" onClick={() => { const prefs: Array<'essential' | 'functional' | 'all'> = ['essential', 'functional', 'all']; const currentIdx = prefs.indexOf(cookiePreferences); const next = prefs[(currentIdx + 1) % prefs.length]; setCookiePreferences(next); saveLocalSettings({ cookiePreferences: next }); const labels = { essential: 'Essential only', functional: 'Essential + Functional', all: 'All cookies' }; toast.success(`Cookie preferences: ${labels[next]}`); }}>{cookiePreferences === 'essential' ? 'Essential' : cookiePreferences === 'functional' ? 'Functional' : 'All'}</Button>
                     </div>
                     <div className="space-y-2">
                       <Label>Session Timeout (minutes)</Label>
@@ -2539,7 +2582,7 @@ export default function SettingsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSettingsQuickActions}
+            actions={getSettingsQuickActions(handleExportData)}
             variant="grid"
           />
         </div>

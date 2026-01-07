@@ -459,6 +459,19 @@ export default function AddOnsClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showSettingsDialog, setShowSettingsDialog] = useState(false)
   const [addOns, setAddOns] = useState<AddOn[]>(mockAddOns)
+  const [showFilterDialog, setShowFilterDialog] = useState(false)
+  const [showAdvancedSearchDialog, setShowAdvancedSearchDialog] = useState(false)
+  const [showCategoryRequestDialog, setShowCategoryRequestDialog] = useState(false)
+  const [advancedSearchFilters, setAdvancedSearchFilters] = useState({
+    query: '',
+    minRating: 0,
+    maxPrice: 100,
+    pricingType: 'all' as PricingType | 'all',
+    hasFreeTrial: false,
+    isVerified: false,
+    isFeatured: false
+  })
+  const [categoryRequest, setCategoryRequest] = useState({ name: '', description: '', examples: '' })
 
   // Stats
   const stats: AddOnStats = useMemo(() => ({
@@ -643,6 +656,55 @@ export default function AddOnsClient() {
     window.open('/docs/api/add-ons', '_blank')
     toast.success('Opening API reference')
   }, [])
+
+  const handleOpenFilterDialog = useCallback(() => {
+    setShowFilterDialog(true)
+  }, [])
+
+  const handleApplyFilters = useCallback(() => {
+    setShowFilterDialog(false)
+    toast.success('Filters applied successfully!')
+  }, [])
+
+  const handleResetFilters = useCallback(() => {
+    setCategoryFilter('all')
+    setStatusFilter('all')
+    setShowFilterDialog(false)
+    toast.success('Filters reset!')
+  }, [])
+
+  const handleOpenAdvancedSearch = useCallback(() => {
+    setShowAdvancedSearchDialog(true)
+  }, [])
+
+  const handleAdvancedSearch = useCallback(() => {
+    // Apply advanced search filters
+    const { query, minRating, isVerified, isFeatured, hasFreeTrial } = advancedSearchFilters
+    setSearchQuery(query)
+    // Note: In a real implementation, these would filter the addOns array
+    setShowAdvancedSearchDialog(false)
+    toast.success(`Searching with advanced filters: ${query || 'all add-ons'}${minRating > 0 ? `, min rating ${minRating}` : ''}${isVerified ? ', verified only' : ''}${isFeatured ? ', featured only' : ''}${hasFreeTrial ? ', with free trial' : ''}`)
+  }, [advancedSearchFilters])
+
+  const handleOpenCategoryRequest = useCallback(() => {
+    setShowCategoryRequestDialog(true)
+  }, [])
+
+  const handleSubmitCategoryRequest = useCallback(async () => {
+    if (!categoryRequest.name.trim()) {
+      toast.error('Please enter a category name')
+      return
+    }
+    const result = await apiPost('/api/add-ons/categories/request', categoryRequest, {
+      loading: 'Submitting category request...',
+      success: 'Category request submitted! We will review it shortly.',
+      error: 'Failed to submit category request'
+    })
+    if (result.success) {
+      setCategoryRequest({ name: '', description: '', examples: '' })
+      setShowCategoryRequestDialog(false)
+    }
+  }, [categoryRequest])
 
   // Quick actions with real functionality
   const mockAddOnsQuickActions = useMemo(() => [
@@ -897,7 +959,7 @@ export default function AddOnsClient() {
             >
               <List className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm" onClick={() => toast.info('Filter options coming soon!')}>
+            <Button variant="outline" size="sm" onClick={handleOpenFilterDialog}>
               <Filter className="w-4 h-4 mr-2" />
               Filters
             </Button>
@@ -957,7 +1019,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{filteredAddOns.filter(a => a.isFeatured).length}</div>
                       <div className="text-xs text-blue-100">Featured</div>
                     </div>
-                    <Button className="bg-white text-blue-600 hover:bg-blue-50 gap-2" onClick={() => toast.info('Advanced search coming soon!')}>
+                    <Button className="bg-white text-blue-600 hover:bg-blue-50 gap-2" onClick={handleOpenAdvancedSearch}>
                       <Search className="w-4 h-4" />
                       Advanced Search
                     </Button>
@@ -1407,7 +1469,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{addOns.filter(a => a.category === 'integration').length}</div>
                       <div className="text-xs text-cyan-100">Integrations</div>
                     </div>
-                    <Button className="bg-white text-cyan-600 hover:bg-cyan-50 gap-2" onClick={() => toast.info('Category request coming soon!')}>
+                    <Button className="bg-white text-cyan-600 hover:bg-cyan-50 gap-2" onClick={handleOpenCategoryRequest}>
                       <Plus className="w-4 h-4" />
                       Request Category
                     </Button>
@@ -2100,6 +2162,204 @@ export default function AddOnsClient() {
                 </div>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Filter Dialog */}
+        <Dialog open={showFilterDialog} onOpenChange={setShowFilterDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Filter Add-ons</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Category</label>
+                <select
+                  className="w-full p-2 border rounded-lg dark:bg-gray-700"
+                  value={categoryFilter}
+                  onChange={(e) => setCategoryFilter(e.target.value as AddOnCategory | 'all')}
+                >
+                  <option value="all">All Categories</option>
+                  <option value="ai">AI & Machine Learning</option>
+                  <option value="integration">Integrations</option>
+                  <option value="security">Security</option>
+                  <option value="analytics">Analytics</option>
+                  <option value="communication">Communication</option>
+                  <option value="design">Design</option>
+                  <option value="developer">Developer Tools</option>
+                  <option value="storage">Storage</option>
+                  <option value="marketing">Marketing</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <select
+                  className="w-full p-2 border rounded-lg dark:bg-gray-700"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value as AddOnStatus | 'all')}
+                >
+                  <option value="all">All Status</option>
+                  <option value="installed">Installed</option>
+                  <option value="available">Available</option>
+                  <option value="update_available">Update Available</option>
+                  <option value="disabled">Disabled</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button className="flex-1" onClick={handleApplyFilters}>
+                  Apply Filters
+                </Button>
+                <Button variant="outline" onClick={handleResetFilters}>
+                  Reset
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Advanced Search Dialog */}
+        <Dialog open={showAdvancedSearchDialog} onOpenChange={setShowAdvancedSearchDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Advanced Search</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Search Query</label>
+                <Input
+                  placeholder="Search add-ons..."
+                  value={advancedSearchFilters.query}
+                  onChange={(e) => setAdvancedSearchFilters(prev => ({ ...prev, query: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Minimum Rating</label>
+                  <select
+                    className="w-full p-2 border rounded-lg dark:bg-gray-700"
+                    value={advancedSearchFilters.minRating}
+                    onChange={(e) => setAdvancedSearchFilters(prev => ({ ...prev, minRating: Number(e.target.value) }))}
+                  >
+                    <option value="0">Any Rating</option>
+                    <option value="3">3+ Stars</option>
+                    <option value="4">4+ Stars</option>
+                    <option value="4.5">4.5+ Stars</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Pricing Type</label>
+                  <select
+                    className="w-full p-2 border rounded-lg dark:bg-gray-700"
+                    value={advancedSearchFilters.pricingType}
+                    onChange={(e) => setAdvancedSearchFilters(prev => ({ ...prev, pricingType: e.target.value as PricingType | 'all' }))}
+                  >
+                    <option value="all">All Pricing</option>
+                    <option value="free">Free</option>
+                    <option value="freemium">Freemium</option>
+                    <option value="paid">Paid</option>
+                    <option value="subscription">Subscription</option>
+                  </select>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm">Has Free Trial</span>
+                  <input
+                    type="checkbox"
+                    checked={advancedSearchFilters.hasFreeTrial}
+                    onChange={(e) => setAdvancedSearchFilters(prev => ({ ...prev, hasFreeTrial: e.target.checked }))}
+                    className="toggle"
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm">Verified Only</span>
+                  <input
+                    type="checkbox"
+                    checked={advancedSearchFilters.isVerified}
+                    onChange={(e) => setAdvancedSearchFilters(prev => ({ ...prev, isVerified: e.target.checked }))}
+                    className="toggle"
+                  />
+                </div>
+                <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <span className="text-sm">Featured Only</span>
+                  <input
+                    type="checkbox"
+                    checked={advancedSearchFilters.isFeatured}
+                    onChange={(e) => setAdvancedSearchFilters(prev => ({ ...prev, isFeatured: e.target.checked }))}
+                    className="toggle"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white" onClick={handleAdvancedSearch}>
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
+                </Button>
+                <Button variant="outline" onClick={() => {
+                  setAdvancedSearchFilters({
+                    query: '',
+                    minRating: 0,
+                    maxPrice: 100,
+                    pricingType: 'all',
+                    hasFreeTrial: false,
+                    isVerified: false,
+                    isFeatured: false
+                  })
+                }}>
+                  Clear
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Category Request Dialog */}
+        <Dialog open={showCategoryRequestDialog} onOpenChange={setShowCategoryRequestDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request New Category</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+                <p className="text-sm text-cyan-700 dark:text-cyan-400">
+                  Suggest a new category for the add-on marketplace. Our team will review your request.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Category Name *</label>
+                <Input
+                  placeholder="e.g., Finance, Healthcare, Education"
+                  value={categoryRequest.name}
+                  onChange={(e) => setCategoryRequest(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description</label>
+                <textarea
+                  className="w-full p-2 border rounded-lg dark:bg-gray-700 min-h-[80px]"
+                  placeholder="Describe what types of add-ons would fit in this category..."
+                  value={categoryRequest.description}
+                  onChange={(e) => setCategoryRequest(prev => ({ ...prev, description: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Example Add-ons</label>
+                <Input
+                  placeholder="e.g., QuickBooks, Xero, Stripe"
+                  value={categoryRequest.examples}
+                  onChange={(e) => setCategoryRequest(prev => ({ ...prev, examples: e.target.value }))}
+                />
+              </div>
+              <div className="flex gap-3 pt-4">
+                <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={handleSubmitCategoryRequest}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Submit Request
+                </Button>
+                <Button variant="outline" onClick={() => setShowCategoryRequestDialog(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

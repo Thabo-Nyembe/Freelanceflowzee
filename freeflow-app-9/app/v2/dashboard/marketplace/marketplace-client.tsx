@@ -335,11 +335,7 @@ const mockMarketplaceActivities = [
   { id: '3', user: 'Support', action: 'Resolved', target: 'Customer support ticket #4521', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockMarketplaceQuickActions = [
-  { id: '1', label: 'Add Product', icon: 'plus', action: () => { setActiveTab('browse'); toast.success('Add Product dialog would open') }, variant: 'default' as const },
-  { id: '2', label: 'View Analytics', icon: 'chart', action: () => { setAnalyticsTab('overview'); setActiveTab('analytics'); toast.success('Analytics loaded!') }, variant: 'default' as const },
-  { id: '3', label: 'Manage Reviews', icon: 'message', action: () => { setActiveTab('reviews'); toast.success('Reviews opened!') }, variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function MarketplaceClient() {
   const supabase = createClient()
@@ -364,6 +360,14 @@ export default function MarketplaceClient() {
   const [analyticsTab, setAnalyticsTab] = useState('overview')
   const [currentPage, setCurrentPage] = useState(1)
   const [showCouponEditor, setShowCouponEditor] = useState<string | null>(null)
+
+  // New listing, checkout, contact, and cart state
+  const [showNewListingDialog, setShowNewListingDialog] = useState(false)
+  const [showCheckoutDialog, setShowCheckoutDialog] = useState(false)
+  const [showContactDialog, setShowContactDialog] = useState(false)
+  const [cart, setCart] = useState<Product[]>([])
+  const [checkoutProduct, setCheckoutProduct] = useState<Product | null>(null)
+  const [contactProduct, setContactProduct] = useState<Product | null>(null)
 
   // Database state
   const [dbApps, setDbApps] = useState<any[]>([])
@@ -681,9 +685,8 @@ export default function MarketplaceClient() {
   }
 
   const handlePurchaseProduct = (product: Product) => {
-    toast.success('Purchase initiated', {
-      description: `Starting checkout for "${product.name}"`
-    })
+    setCheckoutProduct(product)
+    setShowCheckoutDialog(true)
   }
 
   const handleSubmitReview = (product: Product) => {
@@ -694,10 +697,39 @@ export default function MarketplaceClient() {
   }
 
   const handleContactSeller = (product: Product) => {
-    toast.info('Contact Seller', {
-      description: `Opening chat with seller of "${product.name}"`
+    setContactProduct(product)
+    setShowContactDialog(true)
+  }
+
+  const handleAddToCart = (product: Product) => {
+    setCart(prev => {
+      const isAlreadyInCart = prev.some(p => p.id === product.id)
+      if (isAlreadyInCart) {
+        toast.info('Already in cart', {
+          description: `"${product.name}" is already in your cart`
+        })
+        return prev
+      }
+      toast.success('Added to cart', {
+        description: `"${product.name}" has been added to your cart`
+      })
+      return [...prev, product]
     })
   }
+
+  const handleRemoveFromCart = (product: Product) => {
+    setCart(prev => prev.filter(p => p.id !== product.id))
+    toast.success('Removed from cart', {
+      description: `"${product.name}" has been removed from your cart`
+    })
+  }
+
+  // Quick actions defined inside component to access state setters
+  const marketplaceQuickActions = [
+    { id: '1', label: 'Add Product', icon: 'plus', action: () => setShowNewListingDialog(true), variant: 'default' as const },
+    { id: '2', label: 'View Analytics', icon: 'chart', action: () => { setAnalyticsTab('overview'); setActiveTab('analytics') }, variant: 'default' as const },
+    { id: '3', label: 'Manage Reviews', icon: 'message', action: () => setActiveTab('reviews'), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900 p-6">
@@ -719,7 +751,7 @@ export default function MarketplaceClient() {
               <Input placeholder="Search apps..." className="w-72 pl-10" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
             </div>
             <Button variant="outline"><Heart className="h-4 w-4 mr-2" />Wishlist ({wishlist.length})</Button>
-            <Button className="bg-gradient-to-r from-violet-600 to-purple-600"><Plus className="h-4 w-4 mr-2" />Submit App</Button>
+            <Button onClick={() => setShowNewListingDialog(true)} className="bg-gradient-to-r from-violet-600 to-purple-600"><Plus className="h-4 w-4 mr-2" />Submit App</Button>
           </div>
         </div>
 
@@ -2021,7 +2053,7 @@ export default function MarketplaceClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMarketplaceQuickActions}
+            actions={marketplaceQuickActions}
             variant="grid"
           />
         </div>
@@ -2178,6 +2210,137 @@ export default function MarketplaceClient() {
               <div><Label>Secret (Optional)</Label><Input placeholder="whsec_xxxxxxxxx" className="mt-1 font-mono" value={webhookForm.secret} onChange={(e) => setWebhookForm(prev => ({ ...prev, secret: e.target.value }))} /></div>
             </div>
             <DialogFooter><Button variant="outline" onClick={() => setShowWebhookDialog(false)}>Cancel</Button><Button onClick={handleCreateWebhook} disabled={isSubmitting || !webhookForm.url || webhookForm.events.length === 0} className="bg-gradient-to-r from-violet-600 to-purple-600">{isSubmitting ? 'Adding...' : 'Add Webhook'}</Button></DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Listing Dialog */}
+        <Dialog open={showNewListingDialog} onOpenChange={setShowNewListingDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Listing</DialogTitle>
+              <DialogDescription>Create a new product listing for the marketplace</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Product Name</Label><Input placeholder="My Awesome App" className="mt-1" /></div>
+                <div><Label>Category</Label>
+                  <Select>
+                    <SelectTrigger className="mt-1"><SelectValue placeholder="Select category" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="productivity">Productivity</SelectItem>
+                      <SelectItem value="analytics">Analytics</SelectItem>
+                      <SelectItem value="marketing">Marketing</SelectItem>
+                      <SelectItem value="security">Security</SelectItem>
+                      <SelectItem value="automation">Automation</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div><Label>Short Description</Label><Input placeholder="Brief description of your product" className="mt-1" /></div>
+              <div><Label>Full Description</Label><Textarea placeholder="Detailed description of features and benefits..." className="mt-1" rows={4} /></div>
+              <div className="grid grid-cols-3 gap-4">
+                <div><Label>Pricing Model</Label>
+                  <Select>
+                    <SelectTrigger className="mt-1"><SelectValue placeholder="Select pricing" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="free">Free</SelectItem>
+                      <SelectItem value="freemium">Freemium</SelectItem>
+                      <SelectItem value="subscription">Subscription</SelectItem>
+                      <SelectItem value="one_time">One-time</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><Label>Price</Label><Input type="number" placeholder="49" className="mt-1" /></div>
+                <div><Label>Version</Label><Input placeholder="1.0.0" className="mt-1" /></div>
+              </div>
+              <div><Label>Tags</Label><Input placeholder="productivity, automation, AI (comma separated)" className="mt-1" /></div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowNewListingDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Product listing created successfully!'); setShowNewListingDialog(false) }} className="bg-gradient-to-r from-violet-600 to-purple-600">Create Listing</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Checkout Dialog */}
+        <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Complete Purchase</DialogTitle>
+              <DialogDescription>Review your order and complete checkout</DialogDescription>
+            </DialogHeader>
+            {checkoutProduct && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div className="w-16 h-16 bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900/30 dark:to-purple-900/30 rounded-lg flex items-center justify-center">
+                    <Package className="w-8 h-8 text-violet-300" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">{checkoutProduct.name}</h4>
+                    <p className="text-sm text-gray-500">by {checkoutProduct.vendor.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-violet-600">{formatPrice(checkoutProduct.price, checkoutProduct.pricingModel)}</p>
+                    {checkoutProduct.compareAtPrice && <p className="text-sm text-gray-400 line-through">${checkoutProduct.compareAtPrice}/mo</p>}
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div><Label>Payment Method</Label>
+                    <Select defaultValue="card">
+                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="card"><div className="flex items-center gap-2"><CreditCard className="h-4 w-4" />Credit Card</div></SelectItem>
+                        <SelectItem value="paypal"><div className="flex items-center gap-2"><Wallet className="h-4 w-4" />PayPal</div></SelectItem>
+                        <SelectItem value="crypto"><div className="flex items-center gap-2"><Bitcoin className="h-4 w-4" />Crypto</div></SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div><Label>Coupon Code (Optional)</Label><Input placeholder="Enter coupon code" className="mt-1" /></div>
+                </div>
+                <div className="border-t pt-4 space-y-2">
+                  <div className="flex justify-between text-sm"><span>Subtotal</span><span>${checkoutProduct.price}</span></div>
+                  <div className="flex justify-between text-sm"><span>Tax</span><span>$0.00</span></div>
+                  <div className="flex justify-between font-bold text-lg"><span>Total</span><span className="text-violet-600">${checkoutProduct.price}</span></div>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowCheckoutDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Purchase completed successfully!', { description: `You now have access to ${checkoutProduct?.name}` }); setShowCheckoutDialog(false); setCheckoutProduct(null) }} className="bg-gradient-to-r from-violet-600 to-purple-600"><CreditCard className="h-4 w-4 mr-2" />Complete Purchase</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Contact Seller Dialog */}
+        <Dialog open={showContactDialog} onOpenChange={setShowContactDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Contact Seller</DialogTitle>
+              <DialogDescription>{contactProduct ? `Send a message to ${contactProduct.vendor.name}` : 'Send a message to the seller'}</DialogDescription>
+            </DialogHeader>
+            {contactProduct && (
+              <div className="space-y-4 py-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <Avatar><AvatarFallback className="bg-violet-100 text-violet-700">{contactProduct.vendor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
+                  <div>
+                    <p className="font-medium">{contactProduct.vendor.name}</p>
+                    <p className="text-sm text-gray-500">Response time: {contactProduct.vendor.responseTime}</p>
+                  </div>
+                  {contactProduct.vendor.isVerified && <Badge className="bg-blue-100 text-blue-700"><Shield className="h-3 w-3 mr-1" />Verified</Badge>}
+                </div>
+                <div><Label>Regarding</Label><Input value={contactProduct.name} disabled className="mt-1 bg-gray-50" /></div>
+                <div><Label>Subject</Label><Input placeholder="Question about pricing..." className="mt-1" /></div>
+                <div><Label>Message</Label><Textarea placeholder="Type your message here..." className="mt-1" rows={4} /></div>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Mail className="h-4 w-4" />
+                  <span>A copy will be sent to your email</span>
+                </div>
+              </div>
+            )}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowContactDialog(false)}>Cancel</Button>
+              <Button onClick={() => { toast.success('Message sent!', { description: `Your message has been sent to ${contactProduct?.vendor.name}` }); setShowContactDialog(false); setContactProduct(null) }} className="bg-gradient-to-r from-violet-600 to-purple-600"><Send className="h-4 w-4 mr-2" />Send Message</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
