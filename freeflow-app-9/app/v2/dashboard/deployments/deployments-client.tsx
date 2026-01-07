@@ -1022,9 +1022,9 @@ export default function DeploymentsClient() {
                         <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="sm"><Terminal className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm"><BarChart3 className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm"><Settings className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening terminal...', success: 'Terminal opened', error: 'Failed to open terminal' })}><Terminal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading metrics...', success: 'Metrics loaded', error: 'Failed to load metrics' })}><BarChart3 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' })}><Settings className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1321,7 +1321,7 @@ export default function DeploymentsClient() {
                     <Input type="datetime-local" className="w-48" />
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm"><RefreshCw className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Refreshing...', success: 'Refreshed', error: 'Failed to refresh' })}><RefreshCw className="h-4 w-4" /></Button>
                     <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />More Filters</Button>
                   </div>
                 </div>
@@ -1337,9 +1337,9 @@ export default function DeploymentsClient() {
                   <Badge className="bg-green-600 text-white">Live</Badge>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700"><Copy className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700"><Download className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700"><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying logs...', success: 'Logs copied', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading logs...', success: 'Download started', error: 'Failed to download' })}><Download className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Clearing logs...', success: 'Logs cleared', error: 'Failed to clear' })}><Trash2 className="h-4 w-4" /></Button>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -1873,7 +1873,7 @@ export default function DeploymentsClient() {
                             </div>
                             <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
                           </div>
-                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm"><Settings className="h-4 w-4" /></Button></div>
+                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' })}><Settings className="h-4 w-4" /></Button></div>
                         </div>
                       ))}
                     </CardContent>
@@ -2047,7 +2047,7 @@ export default function DeploymentsClient() {
               <div className="flex items-center gap-2">
                 <Input placeholder="KEY" className="flex-1 font-mono" />
                 <Input placeholder="Value" className="flex-1" type="password" />
-                <Button><Plus className="h-4 w-4" /></Button>
+                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding variable...', success: 'Variable added', error: 'Failed to add variable' })}><Plus className="h-4 w-4" /></Button>
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-2">

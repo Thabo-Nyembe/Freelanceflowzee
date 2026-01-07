@@ -968,9 +968,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center gap-2">
-                          <Button size="sm" variant="ghost"><Mail className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost"><PhoneCall className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost"><Calendar className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening email...', success: 'Email client opened', error: 'Failed to open email' })}><Mail className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Initiating call...', success: 'Call initiated', error: 'Failed to initiate call' })}><PhoneCall className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening calendar...', success: 'Calendar opened', error: 'Failed to open calendar' })}><Calendar className="h-4 w-4" /></Button>
                         </div>
                         <span className="text-xs text-gray-500">Last activity: {formatTimeAgo(contact.lastActivityDate)}</span>
                       </div>

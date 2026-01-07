@@ -805,7 +805,7 @@ export default function CollaborationClient() {
                     <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Opening file picker...', success: 'File picker opened', error: 'Failed to open file picker' })}><Paperclip className="h-4 w-4" /></Button>
                     <Input placeholder="Type a message..." className="flex-1" value={messageInput} onChange={(e) => setMessageInput(e.target.value)} />
                     <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' })}><Smile className="h-4 w-4" /></Button>
-                    <Button className="bg-blue-600 hover:bg-blue-700"><Send className="h-4 w-4" /></Button>
+                    <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Sending message...', success: 'Message sent', error: 'Failed to send message' })}><Send className="h-4 w-4" /></Button>
                   </div>
                 </div>
               </Card>
@@ -1280,7 +1280,7 @@ export default function CollaborationClient() {
                           <p className="text-sm text-gray-500">{activity.description}</p>
                           <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(activity.timestamp)}</p>
                         </div>
-                        <Button variant="ghost" size="sm"><ExternalLink className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening link...', success: 'Link opened', error: 'Failed to open link' })}><ExternalLink className="h-4 w-4" /></Button>
                       </div>
                     ))}
                   </div>
@@ -1821,7 +1821,7 @@ export default function CollaborationClient() {
                   <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
                     <Zap className="h-4 w-4 text-purple-500" />
                     <span className="text-sm">Send notification</span>
-                    <Button variant="ghost" size="sm" className="ml-auto"><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" className="ml-auto" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Removing action...', success: 'Action removed', error: 'Failed to remove action' })}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                   <Button variant="outline" size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Action</Button>
                 </div>

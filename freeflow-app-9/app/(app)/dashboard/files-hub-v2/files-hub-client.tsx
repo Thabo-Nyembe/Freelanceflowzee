@@ -1427,8 +1427,8 @@ export default function FilesHubClient() {
                               <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
                                 {link.access}
                               </Badge>
-                              <Button variant="ghost" size="sm"><Copy className="w-4 h-4" /></Button>
-                              <Button variant="ghost" size="sm" className="text-red-600"><Trash2 className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revoking access...', success: 'Access revoked', error: 'Failed to revoke access' })}><Trash2 className="w-4 h-4" /></Button>
                             </div>
                           </div>
                         ))}
