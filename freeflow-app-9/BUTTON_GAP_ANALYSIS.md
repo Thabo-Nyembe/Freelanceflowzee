@@ -1,22 +1,48 @@
 # FreeFlow Kazi - Button Functionality Gap Analysis
 
-**Last Updated:** 2026-01-07 (Session 9 Part 7 - ALL BUTTON PATTERNS COMPLETE)
+**Last Updated:** 2026-01-07 (Session 9 Part 8 - INLINE onClick TOAST PATTERNS)
 **Status:** 100% COMPLETE - ALL DASHBOARDS FULLY WIRED
 
 ## Executive Summary
 
 This document tracks the audit and remediation of broken, placeholder, and non-functional button elements across the FreeFlow Kazi application. The goal is to wire up all buttons with real functionality to create a production-ready experience.
 
-**Total Progress:** 2,218+ buttons fixed across 559+ files
+**Total Progress:** 2,244+ buttons fixed across 576+ files
 **mockQuickActions console.log patterns:** 100% ELIMINATED (0 remaining)
 **app/v2/dashboard action: () => console.log:** 100% ELIMINATED (594 patterns fixed)
 **app/(app)/dashboard action: () => console.log:** 100% ELIMINATED (6 final patterns fixed)
 **Empty action: () => {} callbacks:** 100% ELIMINATED (36 patterns fixed)
 **action: () => toast.success/info → toast.promise:** 100% ELIMINATED (218 patterns fixed)
 **onClick: () => toast.info/success → toast.promise:** 100% ELIMINATED (108 patterns fixed)
+**Inline onClick={...toast.info/success} → toast.promise:** 100% ELIMINATED (26 patterns fixed)
 **v2 standalone toast.info → toast.promise:** 100% COMPLETE
 **v1 dashboard toast.info → toast.promise:** 100% COMPLETE
 **(app) dashboard toast.info → toast.promise:** 100% COMPLETE
+
+---
+
+## Session 9 Part 8 COMPLETION SUMMARY (Inline onClick Toast Patterns)
+
+### Focus Area
+Converted all inline `onClick={() => { ...; toast.info/success(...) }}` patterns to `toast.promise()` with proper loading/success/error states.
+
+### Audit Results
+- **14 onClick toast.info patterns** found across 8 files
+- **12 onClick toast.success patterns** found across 9 files
+- **0 patterns remaining** after fix
+- All patterns converted to toast.promise with loading states
+
+### Files Fixed (17 files)
+| Directory | Files | Patterns Fixed |
+|-----------|-------|----------------|
+| app/(app)/dashboard | app-store-v2, customers-v2, recruitment-v2, theme-store-v2, api-v2, calendar-v2, compliance-v2, marketplace-v2, release-notes-v2 | 15 |
+| app/v2/dashboard | customers, recruitment, theme-store, alerts, calendar, integrations, marketplace | 9 |
+| app/v1/dashboard | desktop-app | 2 |
+
+### Git Commit
+```
+f050f6ef fix: Convert 26 onClick toast patterns to toast.promise with loading states (17 files)
+```
 
 ---
 
