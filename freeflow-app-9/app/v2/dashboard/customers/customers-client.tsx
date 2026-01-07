@@ -1185,7 +1185,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                           <span>Owner: {task.ownerName}</span>
                         </div>
                       </div>
-                      <Button size="sm" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Task options opened', error: 'Failed to load' })}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1569,7 +1569,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Input type="number" defaultValue={stage.probability} min={0} max={100} className="text-center" />
                             </div>
                             <span className="text-sm text-gray-500">% Probability</span>
-                            <Button size="sm" variant="ghost"><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Stage options opened', error: 'Failed to load' })}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full">

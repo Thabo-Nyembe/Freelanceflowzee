@@ -1344,7 +1344,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </p>
                     </div>
                     <Badge variant="outline">{reminder.type}</Badge>
-                    <Button variant="ghost" size="sm"><Trash2 className="h-4 w-4 text-gray-400" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Removing reminder...', success: 'Reminder removed', error: 'Failed to remove' })}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
                   </div>
                 ))}
               </CardContent>

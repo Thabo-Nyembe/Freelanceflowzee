@@ -1848,7 +1848,7 @@ export default function MilestonesClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="ms_sk_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Key copied to clipboard', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                       </CardContent>

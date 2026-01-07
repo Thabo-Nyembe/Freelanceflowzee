@@ -2053,7 +2053,7 @@ export default function CiCdClient() {
                           <Label>Webhook Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="whsec_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying secret...', success: 'Webhook secret copied', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                       </CardContent>

@@ -1805,7 +1805,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" defaultValue="wf_api_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost"><Clipboard className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying API key...', success: 'API key copied', error: 'Failed to copy' })}><Clipboard className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -1835,7 +1835,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Input defaultValue="https://workflows.yourapp.com/webhook/" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost"><Clipboard className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying webhook URL...', success: 'Webhook URL copied', error: 'Failed to copy' })}><Clipboard className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">

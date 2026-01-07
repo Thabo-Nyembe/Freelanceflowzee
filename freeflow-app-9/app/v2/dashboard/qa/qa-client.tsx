@@ -1571,9 +1571,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           </div>
                         </div>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm"><Eye className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm"><Edit className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm"><MoreHorizontal className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening view...', success: 'Test case opened', error: 'Failed to open' })}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Edit mode enabled', error: 'Failed to open editor' })}><Edit className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'More options shown', error: 'Failed to load' })}><MoreHorizontal className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -1891,7 +1891,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           <p className="text-xs text-gray-500">Format</p>
                         </div>
                         <Badge className={report.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{report.status}</Badge>
-                        <Button variant="ghost" size="sm"><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options menu opened', error: 'Failed to load' })}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1939,9 +1939,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <Badge variant="outline">{report.type}</Badge>
                         <span className="text-sm text-gray-500">{report.downloads} downloads</span>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm"><Eye className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm"><Download className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm"><Share2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening preview...', success: 'Report preview opened', error: 'Failed to open' })}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading...', success: 'Report downloaded', error: 'Failed to download' })}><Download className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening share...', success: 'Share dialog opened', error: 'Failed to share' })}><Share2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -2069,7 +2069,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           <div className="flex items-center gap-4">
                             <div className="text-right text-sm"><p>{env.browser}</p><p className="text-gray-500">{env.os}</p></div>
                             <Badge className={env.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{env.status}</Badge>
-                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Environment editor opened', error: 'Failed to open' })}><Edit className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}

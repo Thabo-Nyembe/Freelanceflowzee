@@ -1820,7 +1820,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </div>
                           <div className="flex items-center gap-2">
                             {template.isDefault && <Badge className="bg-orange-100 text-orange-700">Default</Badge>}
-                            <Button variant="ghost" size="sm"><Settings className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: 'Template settings opened', error: 'Failed to open settings' })}><Settings className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}

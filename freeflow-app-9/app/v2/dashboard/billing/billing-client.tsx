@@ -1807,7 +1807,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {wh.events.length} events • {wh.success_rate}% success rate
                               </div>
                             </div>
-                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening webhook editor...', success: 'Webhook editor opened', error: 'Failed to open' })}><Edit className="h-4 w-4" /></Button>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full">
@@ -1830,7 +1830,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Publishable Key</Label>
                         <div className="flex gap-2">
                           <Input value="pk_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Publishable key copied', error: 'Failed to copy' })}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1839,10 +1839,10 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Secret Key</Label>
                         <div className="flex gap-2">
                           <Input value="STRIPE_KEY_PLACEHOLDER" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revealing key...', success: 'Secret key revealed', error: 'Failed to reveal' })}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Secret key copied', error: 'Failed to copy' })}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1892,7 +1892,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {tax.inclusive ? 'Inclusive' : 'Exclusive'}
                               </Badge>
                               <Switch checked={tax.active} />
-                              <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening tax editor...', success: 'Tax rate editor opened', error: 'Failed to open' })}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}

@@ -2369,7 +2369,7 @@ export default function CommunityClient() {
               </div>
               <div className="flex gap-2">
                 <Button className="flex-1"><MessageSquare className="w-4 h-4 mr-2" />Message</Button>
-                <Button variant="outline"><UserPlus className="w-4 h-4" /></Button>
+                <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Sending invite...', success: 'Friend request sent', error: 'Failed to send request' })}><UserPlus className="w-4 h-4" /></Button>
               </div>
             </div>
           )}

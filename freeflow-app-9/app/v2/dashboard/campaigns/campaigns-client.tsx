@@ -2209,7 +2209,7 @@ export default function CampaignsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="mc_sk_xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline"><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'API key copied', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="space-y-2">

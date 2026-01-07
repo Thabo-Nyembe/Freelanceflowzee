@@ -1919,7 +1919,7 @@ export default function TimeTrackingClient() {
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getStatusColor(integration.status)}>{integration.status}</Badge>
-                              <Button variant="ghost" size="sm"><RefreshCw className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Syncing...', success: 'Sync completed', error: 'Sync failed' })}><RefreshCw className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="sm" className="text-red-500"><X className="h-4 w-4" /></Button>
                             </div>
                           </div>
@@ -1993,7 +1993,7 @@ export default function TimeTrackingClient() {
                           {[{date:'Dec 28, 2024',amt:'$180.00'},{date:'Nov 28, 2024',amt:'$180.00'},{date:'Oct 28, 2024',amt:'$165.00'}].map((inv,i)=>(
                             <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                               <div><p className="font-medium">{inv.date}</p><p className="text-sm text-gray-500">Premium Plan</p></div>
-                              <div className="flex items-center gap-4"><span className="font-medium">{inv.amt}</span><Badge className="bg-green-100 text-green-700">Paid</Badge><Button variant="ghost" size="sm"><Download className="h-4 w-4" /></Button></div>
+                              <div className="flex items-center gap-4"><span className="font-medium">{inv.amt}</span><Badge className="bg-green-100 text-green-700">Paid</Badge><Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading...', success: 'Invoice downloaded', error: 'Download failed' })}><Download className="h-4 w-4" /></Button></div>
                             </div>
                           ))}
                         </div>

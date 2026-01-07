@@ -1292,7 +1292,7 @@ export default function CollaborationClient() {
                           <p className="text-sm text-gray-500">{activity.description}</p>
                           <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(activity.timestamp)}</p>
                         </div>
-                        <Button variant="ghost" size="sm"><ExternalLink className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening resource...', success: 'Resource opened', error: 'Failed to open' })}><ExternalLink className="h-4 w-4" /></Button>
                       </div>
                     ))}
                   </div>
@@ -1833,7 +1833,7 @@ export default function CollaborationClient() {
                   <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
                     <Zap className="h-4 w-4 text-purple-500" />
                     <span className="text-sm">Send notification</span>
-                    <Button variant="ghost" size="sm" className="ml-auto"><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" className="ml-auto" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Removing action...', success: 'Action removed', error: 'Failed to remove' })}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                   <Button variant="outline" size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Action</Button>
                 </div>

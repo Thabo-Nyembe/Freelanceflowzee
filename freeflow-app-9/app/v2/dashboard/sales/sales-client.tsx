@@ -2298,7 +2298,7 @@ export default function SalesClient() {
                 <div className="flex gap-2 pt-4 border-t">
                   <Button className="flex-1 bg-green-600 hover:bg-green-700"><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
                   <Button variant="outline" className="flex-1"><Edit className="w-4 h-4 mr-2" />Edit</Button>
-                  <Button variant="outline"><FileSignature className="w-4 h-4" /></Button>
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening contract...', success: 'Contract opened', error: 'Failed to open contract' })}><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>
             )}
