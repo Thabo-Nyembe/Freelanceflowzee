@@ -272,6 +272,9 @@ export default function CrmClient() {
   const [showAddActivityDialog, setShowAddActivityDialog] = useState(false)
   const [showReportDialog, setShowReportDialog] = useState(false)
   const [showAutomationDialog, setShowAutomationDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showReportSuccessDialog, setShowReportSuccessDialog] = useState(false)
+  const [showAutomationSuccessDialog, setShowAutomationSuccessDialog] = useState(false)
 
   // Form states
   const [contactForm, setContactForm] = useState({

@@ -492,20 +492,7 @@ const arCollaborationActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const arCollaborationQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new AR session...', success: 'AR session created successfully', error: 'Failed to create session' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Exporting AR data...', success: 'AR data exported successfully', error: 'Export failed' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function ArCollaborationClient() {
   logger.debug('Component mounting')
@@ -533,6 +520,18 @@ export default function ArCollaborationClient() {
   const [showSettingsModal, setShowSettingsModal] = useState(false)
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false)
   const [viewSessionTab, setViewSessionTab] = useState<'overview' | 'participants' | 'objects'>('overview')
+
+  // Quick Action Dialog States
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showQuickSettingsDialog, setShowQuickSettingsDialog] = useState(false)
+
+  // Quick Actions with proper dialog handlers
+  const arCollaborationQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowQuickSettingsDialog(true) },
+  ]
 
   // Form States
   const [sessionName, setSessionName] = useState('')
@@ -1784,6 +1783,164 @@ export default function ArCollaborationClient() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* New Item Dialog */}
+      <Dialog open={showNewItemDialog} onOpenChange={setShowNewItemDialog}>
+        <DialogContent className="bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Create New AR Session</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Set up a new augmented reality collaboration session quickly.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-gray-300">Session Name</Label>
+              <Input
+                placeholder="Enter session name"
+                className="bg-slate-800 border-gray-700 text-white"
+              />
+            </div>
+            <div>
+              <Label className="text-gray-300">Environment</Label>
+              <Select defaultValue="office">
+                <SelectTrigger className="bg-slate-800 border-gray-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="office">Modern Office</SelectItem>
+                  <SelectItem value="studio">Creative Studio</SelectItem>
+                  <SelectItem value="conference">Conference Room</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setShowNewItemDialog(false)
+                  toast.success('AR session created successfully')
+                }}
+                className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600"
+              >
+                Create Session
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowNewItemDialog(false)}
+                className="border-gray-700"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">Export AR Data</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Export your AR collaboration data in various formats.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-gray-300">Export Format</Label>
+              <Select defaultValue="json">
+                <SelectTrigger className="bg-slate-800 border-gray-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="json">JSON</SelectItem>
+                  <SelectItem value="csv">CSV</SelectItem>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-gray-300">Data Range</Label>
+              <Select defaultValue="all">
+                <SelectTrigger className="bg-slate-800 border-gray-700">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sessions</SelectItem>
+                  <SelectItem value="active">Active Sessions Only</SelectItem>
+                  <SelectItem value="archived">Archived Sessions</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setShowExportDialog(false)
+                  toast.success('AR data exported successfully')
+                }}
+                className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600"
+              >
+                Export Data
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowExportDialog(false)}
+                className="border-gray-700"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Quick Settings Dialog */}
+      <Dialog open={showQuickSettingsDialog} onOpenChange={setShowQuickSettingsDialog}>
+        <DialogContent className="bg-slate-900 border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-white">AR Collaboration Settings</DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure your AR collaboration preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <Label className="text-gray-300">Spatial Audio</Label>
+              <Checkbox defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <Label className="text-gray-300">Hand Tracking</Label>
+              <Checkbox defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <Label className="text-gray-300">Auto-Record Sessions</Label>
+              <Checkbox />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <Label className="text-gray-300">High Quality Rendering</Label>
+              <Checkbox defaultChecked />
+            </div>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => {
+                  setShowQuickSettingsDialog(false)
+                  toast.success('Settings saved successfully')
+                }}
+                className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600"
+              >
+                Save Settings
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowQuickSettingsDialog(false)}
+                className="border-gray-700"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

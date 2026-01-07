@@ -508,12 +508,7 @@ const mockPollsActivities = [
   { id: '3', user: 'Marketing Team', action: 'shared', target: 'survey link to 500 customers', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mockPollsQuickActions = [
-  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Survey', { description: 'Survey form ready' }) },
-  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => toast.success('Results Loaded', { description: 'Survey results ready' }) },
-  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.success('Templates', { description: 'Survey templates library opened' }) },
-  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Complete', { description: 'Poll data exported' }) },
-]
+// Quick actions moved inside component to use state setters
 
 // ============================================================================
 // SUPABASE POLL TYPE
@@ -552,6 +547,8 @@ export default function PollsClient() {
   const [_selectedForm, _setSelectedForm] = useState<Form | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
+  const [showResultsDialog, setShowResultsDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [_viewMode, _setViewMode] = useState<'grid' | 'list'>('grid')
@@ -589,6 +586,14 @@ export default function PollsClient() {
     })
     setSelectedQuestionType(null)
   }
+
+  // Quick actions with dialog state setters
+  const pollsQuickActions = useMemo(() => [
+    { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => setShowCreateDialog(true) },
+    { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => setShowResultsDialog(true) },
+    { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => setShowTemplateDialog(true) },
+    { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+  ], [])
 
   // Fetch polls from Supabase
   const fetchPolls = useCallback(async () => {
@@ -2217,7 +2222,7 @@ export default function PollsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockPollsQuickActions}
+            actions={pollsQuickActions}
             variant="grid"
           />
         </div>
@@ -2369,6 +2374,135 @@ export default function PollsClient() {
               ))}
             </div>
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Results Dialog */}
+      <Dialog open={showResultsDialog} onOpenChange={setShowResultsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-emerald-600" />
+              Survey Results
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-emerald-600">1,847</div>
+                  <div className="text-sm text-gray-500">Total Responses</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-blue-600">72%</div>
+                  <div className="text-sm text-gray-500">Completion Rate</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="pt-4">
+                  <div className="text-2xl font-bold text-purple-600">4.2 min</div>
+                  <div className="text-sm text-gray-500">Avg. Time</div>
+                </CardContent>
+              </Card>
+            </div>
+            <div className="space-y-4">
+              <h4 className="font-medium">Recent Responses</h4>
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
+                        <Users className="w-4 h-4 text-emerald-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Response #{1847 - i + 1}</p>
+                        <p className="text-xs text-gray-500">{i * 15} minutes ago</p>
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm">View</Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowResultsDialog(false)}>Close</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700">View Full Report</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-emerald-600" />
+              Export Poll Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="space-y-4">
+              <div>
+                <Label>Export Format</Label>
+                <Select defaultValue="csv">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV (.csv)</SelectItem>
+                    <SelectItem value="xlsx">Excel (.xlsx)</SelectItem>
+                    <SelectItem value="json">JSON (.json)</SelectItem>
+                    <SelectItem value="pdf">PDF Report (.pdf)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Date Range</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger className="mt-1">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="7d">Last 7 Days</SelectItem>
+                    <SelectItem value="30d">Last 30 Days</SelectItem>
+                    <SelectItem value="90d">Last 90 Days</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include in Export</Label>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Switch id="include-responses" defaultChecked />
+                    <Label htmlFor="include-responses" className="font-normal">Individual Responses</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch id="include-analytics" defaultChecked />
+                    <Label htmlFor="include-analytics" className="font-normal">Analytics Summary</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Switch id="include-charts" />
+                    <Label htmlFor="include-charts" className="font-normal">Charts & Visualizations</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button className="bg-emerald-600 hover:bg-emerald-700" onClick={() => {
+                toast.success('Export started', { description: 'Your export will be ready shortly' })
+                setShowExportDialog(false)
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export Data
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -585,20 +585,7 @@ const mockContentActivities = [
   { id: '3', user: 'System', action: 'Archived', target: '12 outdated entries', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockContentQuickActions = [
-  { id: '1', label: 'New Entry', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new entry...', success: 'New entry created', error: 'Failed to create entry' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Bulk Publish', icon: 'upload', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Publishing content...', success: 'Content published successfully', error: 'Failed to publish content' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export All', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Exporting all content...', success: 'Export completed', error: 'Failed to export content' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to use state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -613,6 +600,18 @@ export default function ContentStudioClient() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [statusFilter, setStatusFilter] = useState<EntryStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showNewEntryDialog, setShowNewEntryDialog] = useState(false)
+  const [showBulkPublishDialog, setShowBulkPublishDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+
+  // Quick actions defined inside component to use state setters
+  const contentQuickActions = [
+    { id: '1', label: 'New Entry', icon: 'plus', action: () => setShowNewEntryDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Bulk Publish', icon: 'upload', action: () => setShowBulkPublishDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export All', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
 
   // Dashboard stats
   const stats = useMemo(() => ({
@@ -1797,7 +1796,7 @@ export default function ContentStudioClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockContentQuickActions}
+            actions={contentQuickActions}
             variant="grid"
           />
         </div>

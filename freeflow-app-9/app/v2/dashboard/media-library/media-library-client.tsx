@@ -502,24 +502,7 @@ const mockMediaActivities = [
   { id: '3', user: 'Video Editor', action: 'processed', target: '3 video files', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mockMediaQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Preparing upload...', success: 'Upload ready', error: 'Upload preparation failed' }
-  ) },
-  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'F', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating folder...', success: 'Folder created', error: 'Failed to create folder' }
-  ) },
-  { id: '3', label: 'Collection', icon: 'Layers', shortcut: 'C', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating collection...', success: 'Collection created', error: 'Failed to create collection' }
-  ) },
-  { id: '4', label: 'AI Tag', icon: 'Sparkles', shortcut: 'T', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'AI tagging assets...', success: 'AI tagging completed', error: 'AI tagging failed' }
-  ) },
-]
+// Note: mockMediaQuickActions are defined dynamically inside the component to access state setters
 
 interface MediaLibraryClientProps {
   initialAssets?: MediaAsset[]
@@ -622,6 +605,27 @@ export default function MediaLibraryClient({
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [showMoveDialog, setShowMoveDialog] = useState(false)
 
+  // Additional dialog states for quick actions
+  const [showShareModeDialog, setShowShareModeDialog] = useState(false)
+  const [showBrandKitDialog, setShowBrandKitDialog] = useState(false)
+  const [showFolderTreeDialog, setShowFolderTreeDialog] = useState(false)
+  const [showBulkMoveDialog, setShowBulkMoveDialog] = useState(false)
+  const [showSortFoldersDialog, setShowSortFoldersDialog] = useState(false)
+  const [showFolderPermissionsDialog, setShowFolderPermissionsDialog] = useState(false)
+  const [showBrowseCollectionsDialog, setShowBrowseCollectionsDialog] = useState(false)
+  const [showShareCollectionsDialog, setShowShareCollectionsDialog] = useState(false)
+  const [showTagManagerDialog, setShowTagManagerDialog] = useState(false)
+  const [showCollaborationDialog, setShowCollaborationDialog] = useState(false)
+  const [showPrivacySettingsDialog, setShowPrivacySettingsDialog] = useState(false)
+  const [showDuplicateCollectionDialog, setShowDuplicateCollectionDialog] = useState(false)
+  const [showCloudImportDialog, setShowCloudImportDialog] = useState(false)
+  const [showUrlImportDialog, setShowUrlImportDialog] = useState(false)
+  const [showAnalyticsOverviewDialog, setShowAnalyticsOverviewDialog] = useState(false)
+  const [showTrendsDialog, setShowTrendsDialog] = useState(false)
+  const [showDistributionDialog, setShowDistributionDialog] = useState(false)
+  const [showRealtimeStatsDialog, setShowRealtimeStatsDialog] = useState(false)
+  const [showReportBuilderDialog, setShowReportBuilderDialog] = useState(false)
+
   // Form states
   const [fileForm, setFileForm] = useState<FileFormData>(defaultFileForm)
   const [folderForm, setFolderForm] = useState<FolderFormData>(defaultFolderForm)
@@ -631,6 +635,14 @@ export default function MediaLibraryClient({
   const [itemToMove, setItemToMove] = useState<MediaAsset | null>(null)
   const [targetFolderId, setTargetFolderId] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Dynamic quick actions that use state setters
+  const mediaQuickActions = [
+    { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => setShowUploadDialog(true) },
+    { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'F', action: () => setShowFolderDialog(true) },
+    { id: '3', label: 'Collection', icon: 'Layers', shortcut: 'C', action: () => setShowCollectionDialog(true) },
+    { id: '4', label: 'AI Tag', icon: 'Sparkles', shortcut: 'T', action: () => setShowTagManagerDialog(true) },
+  ]
 
   const stats = useMemo(() => {
     const totalViews = initialAssets.reduce((sum, a) => sum + a.viewCount, 0)
@@ -1083,9 +1095,9 @@ export default function MediaLibraryClient({
                 { icon: Folder, label: 'New Folder', desc: 'Organize files', color: 'text-blue-500', action: handleOpenNewFolder },
                 { icon: LayoutGrid, label: 'Collection', desc: 'Create group', color: 'text-purple-500', action: handleOpenNewCollection },
                 { icon: Wand2, label: 'AI Enhance', desc: 'Auto-optimize', color: 'text-amber-500', action: () => handleAIEnhance() },
-                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500', action: () => toast.info('Share Mode', { description: 'Select assets from the list to share' }) },
+                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500', action: () => setShowShareModeDialog(true) },
                 { icon: Download, label: 'Bulk Export', desc: 'Download all', color: 'text-cyan-500', action: handleBulkExport },
-                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500', action: () => toast.info('Brand Kit', { description: 'Brand asset management coming soon' }) },
+                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500', action: () => setShowBrandKitDialog(true) },
                 { icon: Sparkles, label: 'AI Search', desc: 'Smart find', color: 'text-indigo-500', action: handleAISearch },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1249,12 +1261,12 @@ export default function MediaLibraryClient({
             <div className="grid grid-cols-4 gap-4">
               {[
                 { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500', action: handleOpenNewFolder },
-                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => toast.info('Folder Tree', { description: 'Viewing folder hierarchy' }) },
-                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500', action: () => toast.info('Bulk Move', { description: 'Select assets to move between folders' }) },
+                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => setShowFolderTreeDialog(true) },
+                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500', action: () => setShowBulkMoveDialog(true) },
                 { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500', action: () => { const emptyFolders = initialFolders.filter(f => f.assetCount === 0); if (emptyFolders.length > 0) { toast.success(`Archived ${emptyFolders.length} empty folder(s)`); } else { toast.info('No empty folders', { description: 'All folders contain assets' }); } } },
                 { icon: RefreshCw, label: 'Sync', desc: 'Cloud sync', color: 'text-green-500', action: () => { refetchFolders(); toast.success('Folders synced'); } },
-                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500', action: () => toast.success('Folders sorted') },
-                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500', action: () => toast.info('Folder Permissions', { description: 'Manage access levels for folders' }) },
+                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500', action: () => setShowSortFoldersDialog(true) },
+                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500', action: () => setShowFolderPermissionsDialog(true) },
                 { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500', action: () => { const emptyFolders = initialFolders.filter(f => f.assetCount === 0); if (emptyFolders.length > 0) { toast.success(`Cleaned up ${emptyFolders.length} empty folder(s)`); } else { toast.info('No cleanup needed', { description: 'All folders contain assets' }); } } },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1268,7 +1280,7 @@ export default function MediaLibraryClient({
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Folders</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => { toast.success('Folders sorted'); }}>
+                <Button variant="outline" size="sm" onClick={() => setShowSortFoldersDialog(true)}>
                   <SortAsc className="w-4 h-4 mr-2" />
                   Sort
                 </Button>
@@ -2099,7 +2111,7 @@ export default function MediaLibraryClient({
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMediaQuickActions}
+            actions={mediaQuickActions}
             variant="grid"
           />
         </div>

@@ -423,24 +423,7 @@ const mockOverviewActivities = [
   { id: '3', type: 'create' as const, title: 'Alert created', description: 'New monitor for Redis memory usage', user: { name: 'Lisa Park', avatar: '/avatars/lisa.jpg' }, timestamp: new Date(Date.now() - 3600000).toISOString(), metadata: {} },
 ]
 
-const mockOverviewQuickActions = [
-  { id: '1', label: 'Create Alert', icon: 'Bell', shortcut: '⌘A', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating alert...', success: 'Alert created successfully', error: 'Failed to create alert' }
-  ) },
-  { id: '2', label: 'View Logs', icon: 'FileText', shortcut: '⌘L', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }
-  ) },
-  { id: '3', label: 'Run Health Check', icon: 'Activity', shortcut: '⌘H', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Running health check...', success: 'Health check completed - All systems operational', error: 'Health check failed' }
-  ) },
-  { id: '4', label: 'Deploy', icon: 'Rocket', shortcut: '⌘D', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Deploying...', success: 'Deployment successful', error: 'Deployment failed' }
-  ) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -485,6 +468,20 @@ export default function OverviewClient() {
     defaultTimeRange: '4h',
     defaultTab: 'overview'
   })
+
+  // Quick Action Dialog States
+  const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
+  const [showViewLogsDialog, setShowViewLogsDialog] = useState(false)
+  const [showHealthCheckDialog, setShowHealthCheckDialog] = useState(false)
+  const [showDeployDialog, setShowDeployDialog] = useState(false)
+
+  // Quick Actions with proper dialog handlers
+  const overviewQuickActions = [
+    { id: '1', label: 'Create Alert', icon: 'Bell', shortcut: '⌘A', action: () => setShowCreateAlertDialog(true) },
+    { id: '2', label: 'View Logs', icon: 'FileText', shortcut: '⌘L', action: () => setShowViewLogsDialog(true) },
+    { id: '3', label: 'Run Health Check', icon: 'Activity', shortcut: '⌘H', action: () => setShowHealthCheckDialog(true) },
+    { id: '4', label: 'Deploy', icon: 'Rocket', shortcut: '⌘D', action: () => setShowDeployDialog(true) },
+  ]
 
   const timeRanges: { value: TimeRange; label: string }[] = [
     { value: '1h', label: '1H' },
@@ -2343,7 +2340,230 @@ export default function OverviewClient() {
         </div>
 
         {/* Quick Actions Toolbar */}
-        <QuickActionsToolbar actions={mockOverviewQuickActions} />
+        <QuickActionsToolbar actions={overviewQuickActions} />
+
+        {/* Create Alert Dialog */}
+        <Dialog open={showCreateAlertDialog} onOpenChange={setShowCreateAlertDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Create New Alert
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="alert-name">Alert Name</Label>
+                <Input id="alert-name" placeholder="Enter alert name..." />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="alert-service">Service</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a service" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="api-gateway">API Gateway</SelectItem>
+                    <SelectItem value="payment-service">Payment Service</SelectItem>
+                    <SelectItem value="user-service">User Service</SelectItem>
+                    <SelectItem value="notification-service">Notification Service</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="alert-severity">Severity</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select severity" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowCreateAlertDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  toast.success('Alert created successfully')
+                  setShowCreateAlertDialog(false)
+                }}>
+                  Create Alert
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Logs Dialog */}
+        <Dialog open={showViewLogsDialog} onOpenChange={setShowViewLogsDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                System Logs
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center gap-2">
+                <Input placeholder="Search logs..." className="flex-1" />
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="warn">Warning</SelectItem>
+                    <SelectItem value="info">Info</SelectItem>
+                    <SelectItem value="debug">Debug</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <ScrollArea className="h-[400px] rounded-lg border">
+                <div className="p-4 space-y-2 font-mono text-sm">
+                  {mockLogs.slice(0, 10).map((log) => (
+                    <div key={log.id} className="p-2 rounded bg-gray-50 dark:bg-gray-800 flex items-start gap-2">
+                      <Badge className={getLogLevelColor(log.level)}>{log.level.toUpperCase()}</Badge>
+                      <span className="text-gray-500 text-xs">{formatDate(log.timestamp)}</span>
+                      <span className="flex-1">{log.message}</span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowViewLogsDialog(false)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Health Check Dialog */}
+        <Dialog open={showHealthCheckDialog} onOpenChange={setShowHealthCheckDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="h-5 w-5" />
+                System Health Check
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span>API Gateway</span>
+                  </div>
+                  <Badge variant="outline" className="text-green-600 border-green-600">Healthy</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span>Database</span>
+                  </div>
+                  <Badge variant="outline" className="text-green-600 border-green-600">Healthy</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span>Cache Server</span>
+                  </div>
+                  <Badge variant="outline" className="text-green-600 border-green-600">Healthy</Badge>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                    <span>Message Queue</span>
+                  </div>
+                  <Badge variant="outline" className="text-yellow-600 border-yellow-600">Degraded</Badge>
+                </div>
+              </div>
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Overall System Status</span>
+                  <Badge className="bg-green-100 text-green-800">Operational</Badge>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowHealthCheckDialog(false)}>
+                  Close
+                </Button>
+                <Button onClick={() => {
+                  toast.success('Health check completed - All systems operational')
+                  setShowHealthCheckDialog(false)
+                }}>
+                  Run Again
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Deploy Dialog */}
+        <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Play className="h-5 w-5" />
+                Deploy Application
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="deploy-environment">Environment</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select environment" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="production">Production</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="development">Development</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="deploy-version">Version</Label>
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select version" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="latest">Latest (v2.4.2)</SelectItem>
+                    <SelectItem value="v2.4.1">v2.4.1</SelectItem>
+                    <SelectItem value="v2.4.0">v2.4.0</SelectItem>
+                    <SelectItem value="v2.3.5">v2.3.5</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="p-3 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-yellow-800 dark:text-yellow-200">Production Deployment</p>
+                    <p className="text-yellow-700 dark:text-yellow-300">This action will deploy to production. Please ensure all tests have passed.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowDeployDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  toast.success('Deployment initiated successfully')
+                  setShowDeployDialog(false)
+                }}>
+                  Deploy Now
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

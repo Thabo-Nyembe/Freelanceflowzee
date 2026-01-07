@@ -687,20 +687,7 @@ const mockAllocationActivities = [
   { id: '3', user: 'System', action: 'Flagged', target: 'Conflicting allocations for 2 resources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockAllocationQuickActions = [
-  { id: '1', label: 'New Allocation', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new allocation...', success: 'Allocation created successfully', error: 'Failed to create allocation' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading calendar view...', success: 'Calendar loaded', error: 'Failed to load calendar' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Capacity Report', icon: 'chart', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Generating capacity report...', success: 'Capacity report ready', error: 'Failed to generate report' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -766,6 +753,10 @@ export default function AllocationClient() {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [formData, setFormData] = useState<AllocationForm>(initialFormState)
   const [editingId, setEditingId] = useState<string | null>(null)
+
+  // Quick action dialog states
+  const [showCalendarDialog, setShowCalendarDialog] = useState(false)
+  const [showCapacityReportDialog, setShowCapacityReportDialog] = useState(false)
 
   // Filtered data
   const filteredAllocations = useMemo(() => {

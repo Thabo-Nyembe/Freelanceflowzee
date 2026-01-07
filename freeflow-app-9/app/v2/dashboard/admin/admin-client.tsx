@@ -301,20 +301,7 @@ const mockAdminActivities = [
   { id: '3', user: 'System', action: 'Completed', target: 'daily backup job', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockAdminQuickActions = [
-  { id: '1', label: 'Add User', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Opening user form...', success: 'User form ready', error: 'Failed to open form' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Run Job', icon: 'play', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Starting job...', success: 'Job started successfully', error: 'Failed to start job' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Logs', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting logs...', success: 'Logs exported successfully', error: 'Failed to export logs' }
-  ), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
   const supabase = createClient()

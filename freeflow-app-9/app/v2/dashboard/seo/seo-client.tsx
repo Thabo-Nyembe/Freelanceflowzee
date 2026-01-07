@@ -418,20 +418,7 @@ const mockSEOActivities = [
   { id: '3', user: 'Content Team', action: 'Published article', target: '15 Best Tools Guide', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockSEOQuickActions = [
-  { id: '1', label: 'Add Keyword', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Adding keyword...', success: 'Keyword added successfully', error: 'Failed to add keyword' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Site Audit', icon: 'search', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2000)),
-    { loading: 'Running site audit...', success: 'Site audit completed', error: 'Failed to run audit' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Competitor Analysis', icon: 'users', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Analyzing competitors...', success: 'Competitor analysis complete', error: 'Failed to analyze competitors' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClientProps) {
   const [activeTab, setActiveTab] = useState('overview')

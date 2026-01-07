@@ -313,12 +313,7 @@ const mockQAActivities = [
   { id: '3', user: 'Test Analyst', action: 'reported', target: '2 new defects', timestamp: '2h ago', type: 'warning' as const },
 ]
 
-const mockQAQuickActions = [
-  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.success('Tests Running', { description: 'Test suite in progress' }) },
-  { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Test Case', { description: 'Test case form ready' }) },
-  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => toast.success('Reports Generated', { description: 'QA reports ready' }) },
-  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => toast.success('Defects Loaded', { description: 'Defects list ready' }) },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
   const supabase = createClient()
@@ -335,6 +330,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const [showCreateRun, setShowCreateRun] = useState(false)
   const [showReportDefect, setShowReportDefect] = useState(false)
   const [showCreateMilestone, setShowCreateMilestone] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
 
   // Form states for create test case
   const [newTestForm, setNewTestForm] = useState({
@@ -405,6 +401,14 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
   const overallPassRate = (passedTests / totalTests) * 100
   const activeRuns = mockRuns.filter(r => r.status === 'active').length
   const openDefects = mockDefects.filter(d => d.status === 'open' || d.status === 'in_progress').length
+
+  // Quick actions with dialog openers
+  const qaQuickActions = [
+    { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => setShowCreateRun(true) },
+    { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => setShowCreateTest(true) },
+    { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => setShowReportsDialog(true) },
+    { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => setShowReportDefect(true) },
+  ]
 
   const filteredTestCases = useMemo(() => {
     return mockTestCases.filter(test => {
@@ -2228,7 +2232,7 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockQAQuickActions}
+            actions={qaQuickActions}
             variant="grid"
           />
         </div>
@@ -2785,6 +2789,97 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
               >
                 {isCreatingMilestone ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Flag className="w-4 h-4 mr-2" />}
                 Create Milestone
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Dialog */}
+        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-600" />
+                QA Reports
+              </DialogTitle>
+              <DialogDescription>
+                Generate and view QA testing reports
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => toast.info('Generating Test Coverage Report...')}>
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <BarChart3 className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Test Coverage</p>
+                      <p className="text-sm text-muted-foreground">Code coverage analysis</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => toast.info('Generating Execution Summary...')}>
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <PieChart className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Execution Summary</p>
+                      <p className="text-sm text-muted-foreground">Pass/fail statistics</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => toast.info('Generating Defect Report...')}>
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <Bug className="w-5 h-5 text-red-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Defect Report</p>
+                      <p className="text-sm text-muted-foreground">Bug tracking summary</p>
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => toast.info('Generating Trend Analysis...')}>
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                      <TrendingUp className="w-5 h-5 text-orange-600" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Trend Analysis</p>
+                      <p className="text-sm text-muted-foreground">Historical trends</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="border-t pt-4">
+                <Label>Quick Stats</Label>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  <div className="text-center p-2 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">{passedTests}</p>
+                    <p className="text-xs text-muted-foreground">Passed</p>
+                  </div>
+                  <div className="text-center p-2 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold text-red-600">{failedTests}</p>
+                    <p className="text-xs text-muted-foreground">Failed</p>
+                  </div>
+                  <div className="text-center p-2 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold text-blue-600">{totalTests}</p>
+                    <p className="text-xs text-muted-foreground">Total</p>
+                  </div>
+                  <div className="text-center p-2 bg-muted rounded-lg">
+                    <p className="text-2xl font-bold text-purple-600">{overallPassRate.toFixed(1)}%</p>
+                    <p className="text-xs text-muted-foreground">Pass Rate</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
+              <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.info('Exporting all reports...')}>
+                <Download className="w-4 h-4 mr-2" />
+                Export All
               </Button>
             </DialogFooter>
           </DialogContent>

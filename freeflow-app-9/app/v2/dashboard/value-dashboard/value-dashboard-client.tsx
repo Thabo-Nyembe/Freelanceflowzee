@@ -22,6 +22,16 @@ import { Progress } from '@/components/ui/progress'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
   TrendingUp,
   DollarSign,
   Target,
@@ -31,7 +41,9 @@ import {
   Zap,
   CheckCircle,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  Plus,
+  Settings
 } from 'lucide-react'
 import { CardSkeleton } from '@/components/ui/loading-skeleton'
 import { ErrorEmptyState } from '@/components/ui/empty-state'
@@ -124,6 +136,20 @@ export default function ValueDashboardClient() {
   const [roiMetrics, setRoiMetrics] = useState<ROIMetric[]>([])
   const [valueTracking, setValueTracking] = useState<ValueTrackingData[]>([])
   const [selectedPeriod, setSelectedPeriod] = useState<'3m' | '6m' | '12m' | 'all'>('6m')
+
+  // DIALOG STATES
+  const [showNewMetricDialog, setShowNewMetricDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [newMetricName, setNewMetricName] = useState('')
+  const [newMetricValue, setNewMetricValue] = useState('')
+
+  // Quick Actions with Dialog Handlers
+  const quickActionsWithDialogs = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewMetricDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
 
   // A+++ LOAD VALUE DATA
   useEffect(() => {
@@ -409,7 +435,7 @@ export default function ValueDashboardClient() {
           <CollaborationIndicator collaborators={valueDashboardCollaborators} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <QuickActionsToolbar actions={valueDashboardQuickActions} />
+          <QuickActionsToolbar actions={quickActionsWithDialogs} />
           <ActivityFeed activities={valueDashboardActivities} />
         </div>
 <div className="flex items-center justify-between">
@@ -690,6 +716,178 @@ export default function ValueDashboardClient() {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* New Metric Dialog */}
+      <Dialog open={showNewMetricDialog} onOpenChange={setShowNewMetricDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
+              Create New Value Metric
+            </DialogTitle>
+            <DialogDescription>
+              Add a new metric to track in your value dashboard.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="metric-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="metric-name"
+                placeholder="e.g., Monthly Revenue"
+                className="col-span-3"
+                value={newMetricName}
+                onChange={(e) => setNewMetricName(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="metric-value" className="text-right">
+                Value
+              </Label>
+              <Input
+                id="metric-value"
+                type="number"
+                placeholder="0"
+                className="col-span-3"
+                value={newMetricValue}
+                onChange={(e) => setNewMetricValue(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewMetricDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Metric created successfully', {
+                description: `${newMetricName || 'New metric'} has been added`
+              })
+              setNewMetricName('')
+              setNewMetricValue('')
+              setShowNewMetricDialog(false)
+            }}>
+              Create Metric
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5" />
+              Export Value Dashboard
+            </DialogTitle>
+            <DialogDescription>
+              Choose your export format and options.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-3">
+              <Label>Export Format</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button variant="outline" className="h-20 flex flex-col">
+                  <span className="text-lg font-bold">PDF</span>
+                  <span className="text-xs text-muted-foreground">Report</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex flex-col">
+                  <span className="text-lg font-bold">CSV</span>
+                  <span className="text-xs text-muted-foreground">Data</span>
+                </Button>
+                <Button variant="outline" className="h-20 flex flex-col">
+                  <span className="text-lg font-bold">JSON</span>
+                  <span className="text-xs text-muted-foreground">API</span>
+                </Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <div className="flex gap-2">
+                <Button variant={selectedPeriod === '3m' ? 'default' : 'outline'} size="sm">3 Months</Button>
+                <Button variant={selectedPeriod === '6m' ? 'default' : 'outline'} size="sm">6 Months</Button>
+                <Button variant={selectedPeriod === '12m' ? 'default' : 'outline'} size="sm">12 Months</Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Export started', {
+                description: 'Your file will be ready shortly'
+              })
+              setShowExportDialog(false)
+            }}>
+              Export Now
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Settings className="h-5 w-5" />
+              Dashboard Settings
+            </DialogTitle>
+            <DialogDescription>
+              Configure your value dashboard preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
+                <div>
+                  <p className="font-medium">Auto-refresh Data</p>
+                  <p className="text-sm text-muted-foreground">Automatically refresh metrics every 5 minutes</p>
+                </div>
+                <Button variant="outline" size="sm">Enable</Button>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
+                <div>
+                  <p className="font-medium">Email Reports</p>
+                  <p className="text-sm text-muted-foreground">Receive weekly ROI summaries via email</p>
+                </div>
+                <Button variant="outline" size="sm">Configure</Button>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
+                <div>
+                  <p className="font-medium">Currency Display</p>
+                  <p className="text-sm text-muted-foreground">Choose your preferred currency format</p>
+                </div>
+                <Button variant="outline" size="sm">USD</Button>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-slate-800">
+                <div>
+                  <p className="font-medium">Chart Style</p>
+                  <p className="text-sm text-muted-foreground">Select visualization preferences</p>
+                </div>
+                <Button variant="outline" size="sm">Modern</Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              toast.success('Settings saved', {
+                description: 'Your preferences have been updated'
+              })
+              setShowSettingsDialog(false)
+            }}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

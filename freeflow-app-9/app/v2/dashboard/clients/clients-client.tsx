@@ -423,11 +423,7 @@ const mockClientsActivities = [
   { id: '3', user: 'Lisa Park', action: 'Updated status for', target: 'GlobalTech', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockClientsQuickActions = [
-  { id: '1', label: 'Add Client', icon: 'plus', action: () => toast.success('Client form ready'), variant: 'default' as const },
-  { id: '2', label: 'Schedule Call', icon: 'phone', action: () => toast.success('Call scheduler ready'), variant: 'default' as const },
-  { id: '3', label: 'Send Report', icon: 'mail', action: () => toast.success('Report sent successfully'), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function ClientsClient({ initialClients, initialStats }: ClientsClientProps) {
   const [activeTab, setActiveTab] = useState('clients')
@@ -440,6 +436,8 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [clientToDelete, setClientToDelete] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showScheduleCallDialog, setShowScheduleCallDialog] = useState(false)
+  const [showSendReportDialog, setShowSendReportDialog] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Database integration - use real clients hook
@@ -777,6 +775,13 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
       })
     }
   }
+
+  // Quick actions defined inside the component to access state setters
+  const clientsQuickActions = [
+    { id: '1', label: 'Add Client', icon: 'plus', action: () => setShowAddDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Schedule Call', icon: 'phone', action: () => setShowScheduleCallDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Send Report', icon: 'mail', action: () => setShowSendReportDialog(true), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -1997,7 +2002,7 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockClientsQuickActions}
+            actions={clientsQuickActions}
             variant="grid"
           />
         </div>
@@ -2418,6 +2423,128 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
                   <Trash2 className="w-4 h-4 mr-2" />
                 )}
                 {isSubmitting ? 'Deleting...' : 'Delete Client'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Call Dialog */}
+        <Dialog open={showScheduleCallDialog} onOpenChange={setShowScheduleCallDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <PhoneCall className="w-5 h-5 text-indigo-600" />
+                Schedule Call
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Select Client</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredClients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.company}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Call Date</label>
+                <Input type="date" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Call Time</label>
+                <Input type="time" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Notes</label>
+                <Input placeholder="Add notes for this call..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowScheduleCallDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Call scheduled successfully')
+                  setShowScheduleCallDialog(false)
+                }}
+              >
+                <PhoneCall className="w-4 h-4 mr-2" />
+                Schedule Call
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Report Dialog */}
+        <Dialog open={showSendReportDialog} onOpenChange={setShowSendReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-600" />
+                Send Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="text-sm font-medium">Select Client</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Choose a client" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredClients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.company}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Report Type</label>
+                <Select>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select report type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="summary">Account Summary</SelectItem>
+                    <SelectItem value="activity">Activity Report</SelectItem>
+                    <SelectItem value="revenue">Revenue Report</SelectItem>
+                    <SelectItem value="health">Health Score Report</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Email Recipients</label>
+                <Input placeholder="Enter email addresses..." className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Additional Message</label>
+                <Input placeholder="Add a message to include with the report..." className="mt-1" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowSendReportDialog(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button
+                className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white"
+                onClick={() => {
+                  toast.success('Report sent successfully')
+                  setShowSendReportDialog(false)
+                }}
+              >
+                <Mail className="w-4 h-4 mr-2" />
+                Send Report
               </Button>
             </div>
           </DialogContent>

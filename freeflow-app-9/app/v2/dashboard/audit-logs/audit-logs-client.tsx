@@ -662,11 +662,7 @@ const mockAuditActivities = [
   { id: '3', user: 'Compliance', action: 'Generated', target: 'quarterly compliance report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
 ]
 
-const mockAuditQuickActions = [
-  { id: '1', label: 'Search Logs', icon: 'search', action: () => toast.success('Search completed'), variant: 'default' as const },
-  { id: '2', label: 'Create Alert', icon: 'bell', action: () => toast.success('Alert created successfully'), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.success('Audit data exported successfully'), variant: 'outline' as const },
-]
+// Quick actions are now defined inline in the component to use state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -695,6 +691,10 @@ export default function AuditLogsClient() {
   const [showCreateRuleDialog, setShowCreateRuleDialog] = useState(false)
   const [showEditRuleDialog, setShowEditRuleDialog] = useState(false)
   const [editingRule, setEditingRule] = useState<DbAlertRule | null>(null)
+
+  // Quick Action Dialog States
+  const [showSearchDialog, setShowSearchDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
 
   // Form State for Alert Rules
   const [ruleFormData, setRuleFormData] = useState({
@@ -2221,7 +2221,11 @@ export default function AuditLogsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAuditQuickActions}
+            actions={[
+              { id: '1', label: 'Search Logs', icon: 'search', action: () => setShowSearchDialog(true), variant: 'default' as const },
+              { id: '2', label: 'Create Alert', icon: 'bell', action: () => setShowCreateRuleDialog(true), variant: 'default' as const },
+              { id: '3', label: 'Export Data', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+            ]}
             variant="grid"
           />
         </div>
@@ -2516,6 +2520,136 @@ export default function AuditLogsClient() {
                   Save Changes
                 </Button>
               </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Search Logs Dialog */}
+        <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5" />
+                Search Audit Logs
+              </DialogTitle>
+              <DialogDescription>
+                Use advanced search to find specific audit log entries
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="search_query">Search Query</Label>
+                <Input
+                  id="search_query"
+                  placeholder="e.g., severity:critical AND log_type:security"
+                  className="font-mono"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Quick Filters</Label>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">severity:critical</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">log_type:security</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">is_anomaly:true</Badge>
+                  <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">status:failed</Badge>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="search_date_from">From Date</Label>
+                  <Input id="search_date_from" type="date" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="search_date_to">To Date</Label>
+                  <Input id="search_date_to" type="date" />
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowSearchDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                setShowSearchDialog(false)
+                setActiveTab('search')
+              }}>
+                <Search className="w-4 h-4 mr-2" />
+                Search
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                Export Audit Data
+              </DialogTitle>
+              <DialogDescription>
+                Export audit logs for compliance and analysis
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="export_format">Export Format</Label>
+                <select
+                  id="export_format"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="csv">CSV (Spreadsheet)</option>
+                  <option value="json">JSON (Raw Data)</option>
+                  <option value="pdf">PDF (Report)</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="export_range">Date Range</Label>
+                <select
+                  id="export_range"
+                  className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+                >
+                  <option value="24h">Last 24 Hours</option>
+                  <option value="7d">Last 7 Days</option>
+                  <option value="30d">Last 30 Days</option>
+                  <option value="90d">Last 90 Days</option>
+                  <option value="custom">Custom Range</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label>Include Fields</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Timestamp</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">User Info</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">IP Address</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" defaultChecked className="rounded" />
+                    <span className="text-sm">Metadata</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => {
+                setShowExportDialog(false)
+                toast.success('Export started - file will download shortly')
+              }}>
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
             </div>
           </DialogContent>
         </Dialog>

@@ -93,11 +93,7 @@ const mockBookingsActivities = [
   { id: '3', user: 'System', action: 'Sent', target: 'reminder to 12 clients', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockBookingsQuickActions = [
-  { id: '1', label: 'New Booking', icon: 'plus', action: () => toast.success('New Booking', { description: 'Booking form ready' }), variant: 'default' as const },
-  { id: '2', label: 'Block Time', icon: 'clock', action: () => toast.success('Time Blocked', { description: 'Time slot blocked' }), variant: 'default' as const },
-  { id: '3', label: 'View Calendar', icon: 'calendar', action: () => toast.success('Calendar', { description: 'Calendar view loaded' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function BookingsClient({ initialBookings }: { initialBookings: Booking[] }) {
   const [bookingTypeFilter, setBookingTypeFilter] = useState<BookingType | 'all'>('all')
@@ -129,6 +125,18 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
   // Reschedule state
   const [rescheduleData, setRescheduleData] = useState<{ bookingId: string; newDate: string; newTime: string } | null>(null)
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false)
+
+  // Quick action dialog states
+  const [showBlockTimeDialog, setShowBlockTimeDialog] = useState(false)
+  const [showViewCalendarDialog, setShowViewCalendarDialog] = useState(false)
+
+  // Block time form state
+  const [blockTimeForm, setBlockTimeForm] = useState({
+    date: '',
+    startTime: '09:00',
+    endTime: '10:00',
+    reason: ''
+  })
   const displayBookings = (bookings && bookings.length > 0) ? bookings : (initialBookings || [])
 
   // Service types
@@ -419,6 +427,13 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
     }
     setCurrentDate(newDate)
   }
+
+  // Quick actions with proper dialog handlers (replacing toast-only actions)
+  const bookingsQuickActions = [
+    { id: '1', label: 'New Booking', icon: 'plus', action: () => setShowNewBooking(true), variant: 'default' as const },
+    { id: '2', label: 'Block Time', icon: 'clock', action: () => setShowBlockTimeDialog(true), variant: 'default' as const },
+    { id: '3', label: 'View Calendar', icon: 'calendar', action: () => setShowViewCalendarDialog(true), variant: 'outline' as const },
+  ]
 
   // In demo mode, continue with empty bookings instead of showing error
 
@@ -2178,7 +2193,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBookingsQuickActions}
+            actions={bookingsQuickActions}
             variant="grid"
           />
         </div>

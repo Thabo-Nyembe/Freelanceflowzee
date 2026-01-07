@@ -602,20 +602,7 @@ const mockMilestonesActivities = [
   { id: '3', user: 'Product Owner', action: 'Created', target: 'Q2 roadmap milestones', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockMilestonesQuickActions = [
-  { id: '1', label: 'New Milestone', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Creating new milestone...', success: 'Milestone created successfully', error: 'Failed to create milestone' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'View Timeline', icon: 'calendar', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Loading timeline view...', success: 'Timeline loaded', error: 'Failed to load timeline' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting milestone report...', success: 'Report exported successfully', error: 'Failed to export report' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // Database milestone type (matches Supabase schema)
 interface DbMilestone {
@@ -690,6 +677,20 @@ export default function MilestonesClient() {
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [_editingMilestone, _setEditingMilestone] = useState<DbMilestone | null>(null)
   const [formState, setFormState] = useState<MilestoneFormState>(initialFormState)
+
+  // Dialog states for quick actions
+  const [showTimelineDialog, setShowTimelineDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showRisksDialog, setShowRisksDialog] = useState(false)
+  const [showArchiveDialog, setShowArchiveDialog] = useState(false)
+  const [showPurgeDialog, setShowPurgeDialog] = useState(false)
+
+  // Quick actions with proper dialog openers
+  const milestonesQuickActions = [
+    { id: '1', label: 'New Milestone', icon: 'plus', action: () => setShowCreateDialog(true), variant: 'default' as const },
+    { id: '2', label: 'View Timeline', icon: 'calendar', action: () => setShowTimelineDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Report', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
 
   // Fetch milestones from Supabase
   const fetchMilestones = useCallback(async () => {
@@ -1101,7 +1102,7 @@ export default function MilestonesClient() {
                 { icon: CalendarDays, label: 'Timeline', color: 'text-blue-500', action: () => setActiveTab('timeline') },
                 { icon: Package, label: 'Deliverables', color: 'text-green-500', action: () => setActiveTab('deliverables') },
                 { icon: Link2, label: 'Dependencies', color: 'text-purple-500', action: () => setActiveTab('dependencies') },
-                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => toast.success('Risks Loaded', { description: 'Risk assessment data ready' }) },
+                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => setShowRisksDialog(true) },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-500', action: () => setActiveTab('reports') },
                 { icon: Download, label: 'Export', color: 'text-cyan-500', action: handleExportReport },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-pink-500', action: handleSync },
@@ -1935,7 +1936,7 @@ export default function MilestonesClient() {
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => toast.success('Milestones Archived', { description: 'Old milestones archived successfully' })}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => setShowArchiveDialog(true)}>
                             <Archive className="w-5 h-5" />
                             <span>Archive Old</span>
                           </Button>
@@ -1943,7 +1944,7 @@ export default function MilestonesClient() {
                             <RefreshCw className="w-5 h-5" />
                             <span>Reset Stats</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => toast.success('Milestones Purged', { description: 'Completed milestones removed' })}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => setShowPurgeDialog(true)}>
                             <Trash2 className="w-5 h-5" />
                             <span>Purge Completed</span>
                           </Button>
@@ -2006,7 +2007,7 @@ export default function MilestonesClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMilestonesQuickActions}
+            actions={milestonesQuickActions}
             variant="grid"
           />
         </div>

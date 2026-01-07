@@ -447,6 +447,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   const [showSupplierDialog, setShowSupplierDialog] = useState(false)
   const [creatingSupplier, setCreatingSupplier] = useState(false)
 
+  // New dialogs for barcode scanner and import
+  const [showBarcodeScannerDialog, setShowBarcodeScannerDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+
   const handleCreateProduct = async () => {
     if (!newProductForm.title) {
       toast.error('Please enter a product title')
@@ -979,7 +983,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                     Add Product
                   </button>
                   <button
-                    onClick={() => toast.success('Barcode Scanner Ready', { description: 'Point camera at barcode to scan' })}
+                    onClick={() => setShowBarcodeScannerDialog(true)}
                     className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium"
                   >
                     <QrCode className="w-4 h-4" />
@@ -1032,7 +1036,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => toast.success('Import Ready', { description: 'Drag and drop CSV or Excel file' })}
+                  onClick={() => setShowImportDialog(true)}
                   className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
                 >
                   <Upload className="w-4 h-4" />
@@ -2558,6 +2562,110 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {creatingSupplier ? 'Creating...' : 'Add Supplier'}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Barcode Scanner Dialog */}
+      <Dialog open={showBarcodeScannerDialog} onOpenChange={setShowBarcodeScannerDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
+                <QrCode className="w-5 h-5" />
+              </div>
+              Barcode Scanner
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="aspect-video bg-gray-900 rounded-xl flex items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-4 border-2 border-dashed border-white/30 rounded-lg" />
+              <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-1 bg-red-500/50 animate-pulse" />
+              <div className="text-center z-10">
+                <QrCode className="w-12 h-12 text-white/50 mx-auto mb-2" />
+                <p className="text-white/70 text-sm">Position barcode within the frame</p>
+              </div>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Or enter barcode manually</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Enter barcode number..."
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                />
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
+                  <Search className="w-4 h-4" />
+                  Search
+                </button>
+              </div>
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="font-medium mb-1">Supported formats:</p>
+              <p>Code 128, Code 39, EAN-13, UPC-A, QR Code</p>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowBarcodeScannerDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Inventory Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
+                <Upload className="w-5 h-5" />
+              </div>
+              Import Inventory
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer">
+              <Upload className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+              <p className="text-gray-600 dark:text-gray-300 font-medium mb-1">Drop your file here, or browse</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Supports CSV, Excel (.xlsx, .xls)</p>
+              <input type="file" accept=".csv,.xlsx,.xls" className="hidden" />
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+              <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2 flex items-center gap-2">
+                <Download className="w-4 h-4" />
+                Download Template
+              </h4>
+              <p className="text-sm text-blue-700 dark:text-blue-400 mb-3">
+                Use our template to ensure your data is formatted correctly.
+              </p>
+              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium">
+                Download CSV Template
+              </button>
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="font-medium mb-1">Required columns:</p>
+              <p>SKU, Product Name, Quantity, Unit Price</p>
+              <p className="mt-1 font-medium">Optional columns:</p>
+              <p>Description, Category, Cost Price, Barcode, Location</p>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowImportDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled
+              >
+                Import
               </button>
             </div>
           </div>

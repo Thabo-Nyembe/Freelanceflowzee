@@ -442,24 +442,7 @@ const mockFeedbackActivities = [
   { id: '3', user: 'Customer Success', action: 'responded', target: '12 feedback items', timestamp: '3h ago', type: 'info' as const },
 ]
 
-const mockFeedbackQuickActions = [
-  { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new idea...', success: 'New idea created successfully', error: 'Failed to create idea' }
-  ) },
-  { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Opening response editor...', success: 'Response editor ready', error: 'Failed to open editor' }
-  ) },
-  { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Merging feedback items...', success: 'Feedback items merged successfully', error: 'Failed to merge items' }
-  ) },
-  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Exporting feedback data...', success: 'Feedback exported successfully', error: 'Failed to export feedback' }
-  ) },
-]
+// Quick actions will be created inside the component to access state setters
 
 // Database Types
 interface DBFeedback {
@@ -498,6 +481,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick Action Dialog States
+  const [showNewIdeaDialog, setShowNewIdeaDialog] = useState(false)
+  const [showRespondDialog, setShowRespondDialog] = useState(false)
+  const [showMergeDialog, setShowMergeDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
 
   // Data State
   const [feedbackItems, setFeedbackItems] = useState<DBFeedback[]>([])
@@ -710,6 +699,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     inProgress: mockIdeas.filter(i => i.status === 'in_progress').length,
     shipped: mockIdeas.filter(i => i.status === 'shipped').length
   }), [])
+
+  // Quick Actions with dialog openers
+  const feedbackQuickActions = [
+    { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => setShowNewIdeaDialog(true) },
+    { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => setShowRespondDialog(true) },
+    { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => setShowMergeDialog(true) },
+    { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+  ]
 
   // Legacy handlers for mock data compatibility
   const handleVote = (idea: Idea) => {
@@ -2044,7 +2041,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockFeedbackQuickActions}
+            actions={feedbackQuickActions}
             variant="grid"
           />
         </div>

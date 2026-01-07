@@ -331,6 +331,10 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
   const [showNewGoalModal, setShowNewGoalModal] = useState(false)
   const [showAllocateFundsModal, setShowAllocateFundsModal] = useState(false)
   const [allocationAmount, setAllocationAmount] = useState(0)
+  const [showResetConfirmDialog, setShowResetConfirmDialog] = useState(false)
+  const [showAddScheduledDialog, setShowAddScheduledDialog] = useState(false)
+  const [showExportPdfDialog, setShowExportPdfDialog] = useState(false)
+  const [showGenerateReportDialog, setShowGenerateReportDialog] = useState<string | null>(null)
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['needs', 'wants', 'savings', 'debt'])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTransaction, setSelectedTransaction] = useState<LocalTransaction | null>(null)
@@ -2235,7 +2239,7 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                             <p className="font-medium text-gray-900 dark:text-white">Reset All Budgets</p>
                             <p className="text-sm text-gray-500">Clear all budget data and start fresh</p>
                           </div>
-                          <Button variant="destructive">Reset</Button>
+                          <Button variant="destructive" onClick={() => setShowResetConfirmDialog(true)}>Reset</Button>
                         </div>
                       </CardContent>
                     </Card>

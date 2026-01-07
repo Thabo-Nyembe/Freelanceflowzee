@@ -474,24 +474,7 @@ const mockMonitoringActivities = [
   { id: '3', user: 'SysAdmin', action: 'patched', target: '8 servers', timestamp: '3h ago', type: 'info' as const },
 ]
 
-const mockMonitoringQuickActions = [
-  { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Adding host...', success: 'Host added successfully', error: 'Failed to add host' }
-  ) },
-  { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading dashboards...', success: 'Dashboards loaded', error: 'Failed to load dashboards' }
-  ) },
-  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading alerts...', success: 'Alerts loaded', error: 'Failed to load alerts' }
-  ) },
-  { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Loading metrics...', success: 'Metrics loaded', error: 'Failed to load metrics' }
-  ) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -586,8 +569,19 @@ export default function MonitoringClient() {
   // Dialog state
   const [showAddServerDialog, setShowAddServerDialog] = useState(false)
   const [showAddAlertDialog, setShowAddAlertDialog] = useState(false)
+  const [showDashboardsDialog, setShowDashboardsDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showMetricsDialog, setShowMetricsDialog] = useState(false)
   const [serverForm, setServerForm] = useState<ServerFormData>(initialServerForm)
   const [alertForm, setAlertForm] = useState<AlertFormData>(initialAlertForm)
+
+  // Quick actions with proper dialog handlers
+  const monitoringQuickActions = [
+    { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => setShowAddServerDialog(true) },
+    { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => setShowDashboardsDialog(true) },
+    { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => setShowAlertsDialog(true) },
+    { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => setShowMetricsDialog(true) },
+  ]
 
   // Fetch servers from Supabase
   const fetchServers = useCallback(async () => {
@@ -2104,7 +2098,7 @@ export default function MonitoringClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMonitoringQuickActions}
+            actions={monitoringQuickActions}
             variant="grid"
           />
         </div>
@@ -2365,6 +2359,167 @@ export default function MonitoringClient() {
               <Button onClick={handleCreateAlert} disabled={isLoading || !alertForm.title}>
                 {isLoading ? 'Creating...' : 'Create Alert'}
               </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dashboards Dialog */}
+        <Dialog open={showDashboardsDialog} onOpenChange={setShowDashboardsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Dashboards
+              </DialogTitle>
+              <DialogDescription>View and manage your monitoring dashboards</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {mockDashboards.map(dashboard => (
+                  <div key={dashboard.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">{dashboard.name}</span>
+                      {dashboard.is_shared && (
+                        <Badge variant="outline" className="text-xs">
+                          <Users className="w-3 h-3 mr-1" />
+                          Shared
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mb-2">{dashboard.description}</p>
+                    <div className="flex items-center justify-between text-xs text-gray-400">
+                      <span>{dashboard.widgets_count} widgets</span>
+                      <span>by {dashboard.created_by}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" className="w-full">
+                <Plus className="w-4 h-4 mr-2" />
+                Create New Dashboard
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowDashboardsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Overview Dialog */}
+        <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Alerts Overview
+              </DialogTitle>
+              <DialogDescription>View active and recent alerts</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <Badge className="bg-red-100 text-red-800">
+                    {mockAlerts.filter(a => a.status === 'triggered').length} Triggered
+                  </Badge>
+                  <Badge className="bg-yellow-100 text-yellow-800">
+                    {mockAlerts.filter(a => a.status === 'acknowledged').length} Acknowledged
+                  </Badge>
+                  <Badge className="bg-green-100 text-green-800">
+                    {mockAlerts.filter(a => a.status === 'resolved').length} Resolved
+                  </Badge>
+                </div>
+              </div>
+              <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                {mockAlerts.map(alert => (
+                  <div key={alert.id} className="p-3 border rounded-lg">
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertTriangle className={`w-4 h-4 ${
+                        alert.severity === 'critical' ? 'text-red-500' :
+                        alert.severity === 'high' ? 'text-orange-500' :
+                        'text-yellow-500'
+                      }`} />
+                      <span className="font-medium">{alert.title}</span>
+                      <Badge className={getAlertSeverityColor(alert.severity)}>{alert.severity}</Badge>
+                      <Badge className={getAlertStatusColor(alert.status)}>{alert.status}</Badge>
+                    </div>
+                    <p className="text-sm text-gray-500">{alert.message}</p>
+                  </div>
+                ))}
+              </div>
+              <Button variant="outline" className="w-full" onClick={() => {
+                setShowAlertsDialog(false)
+                setShowAddAlertDialog(true)
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Create New Alert Rule
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Metrics Dialog */}
+        <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                System Metrics
+              </DialogTitle>
+              <DialogDescription>Real-time infrastructure metrics overview</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Cpu className="w-5 h-5 text-blue-500" />
+                    <span className="font-medium">CPU Usage</span>
+                  </div>
+                  <p className="text-3xl font-bold text-blue-600">{stats.avgCpu}%</p>
+                  <p className="text-sm text-gray-500">Average across {stats.total} hosts</p>
+                  <Progress value={stats.avgCpu} className="mt-2" />
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <MemoryStick className="w-5 h-5 text-purple-500" />
+                    <span className="font-medium">Memory Usage</span>
+                  </div>
+                  <p className="text-3xl font-bold text-purple-600">{stats.avgMemory}%</p>
+                  <p className="text-sm text-gray-500">Average across {stats.total} hosts</p>
+                  <Progress value={stats.avgMemory} className="mt-2" />
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Server className="w-5 h-5 text-green-500" />
+                    <span className="font-medium">Host Status</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-green-600 font-bold">{stats.healthy}</span>
+                    <span className="text-gray-400">/</span>
+                    <span className="text-yellow-600 font-bold">{stats.warning}</span>
+                    <span className="text-gray-400">/</span>
+                    <span className="text-red-600 font-bold">{stats.critical}</span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1">Healthy / Warning / Critical</p>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Container className="w-5 h-5 text-teal-500" />
+                    <span className="font-medium">Containers</span>
+                  </div>
+                  <p className="text-3xl font-bold text-teal-600">{stats.totalContainers}</p>
+                  <p className="text-sm text-gray-500">Running containers</p>
+                </div>
+              </div>
+              <Button variant="outline" className="w-full" onClick={handleRefreshMetrics} disabled={isLoading}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh Metrics
+              </Button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowMetricsDialog(false)}>Close</Button>
             </div>
           </DialogContent>
         </Dialog>

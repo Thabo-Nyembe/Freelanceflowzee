@@ -16,6 +16,17 @@ export const dynamic = 'force-dynamic';
 
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
@@ -78,20 +89,7 @@ const analyticsAdvancedActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const analyticsAdvancedQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new analytics item...', success: 'New analytics item created', error: 'Failed to create item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Exporting analytics data...', success: 'Analytics data exported successfully', error: 'Export failed' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Loading analytics settings...', success: 'Settings panel opened', error: 'Failed to load settings' }
-  ) },
-]
+// Quick actions will be defined inside the component to use state setters
 
 export default function AnalyticsAdvancedClient() {
   // A+++ STATE MANAGEMENT
@@ -99,6 +97,20 @@ export default function AnalyticsAdvancedClient() {
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
+
+  // DIALOG STATE
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [newItemName, setNewItemName] = useState('')
+  const [exportFormat, setExportFormat] = useState('csv')
+
+  // QUICK ACTIONS with dialog openers
+  const analyticsAdvancedQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewItemDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
 
   // DATABASE STATE
   const [metrics, setMetrics] = useState<Metric[]>([])

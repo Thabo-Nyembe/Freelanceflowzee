@@ -429,6 +429,11 @@ export default function SprintsClient() {
   const [sprintToDelete, setSprintToDelete] = useState<string | null>(null)
   const [selectedSprintForTask, setSelectedSprintForTask] = useState<string | null>(null)
 
+  // Dialog states for quick actions
+  const [showNewStoryDialog, setShowNewStoryDialog] = useState(false)
+  const [showStartSprintDialog, setShowStartSprintDialog] = useState(false)
+  const [showBacklogDialog, setShowBacklogDialog] = useState(false)
+
   // Form states for creating sprint
   const [newSprintName, setNewSprintName] = useState('')
   const [newSprintGoal, setNewSprintGoal] = useState('')

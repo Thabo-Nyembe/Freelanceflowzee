@@ -1,4 +1,7 @@
 'use client'
+
+import { useState } from 'react'
+
 // Enhanced & Competitive Upgrade Components
 import {
   AIInsightsPanel,
@@ -12,6 +15,17 @@ import {
 } from '@/components/ui/competitive-upgrades-extended'
 
 import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 
 export const dynamic = 'force-dynamic';
 
@@ -50,21 +64,211 @@ const aiVideoStudioActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const aiVideoStudioQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new video project...', success: 'Video project created successfully', error: 'Failed to create project' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting video...', success: 'Video exported successfully', error: 'Export failed' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening video studio settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
-]
-
 export default function AiVideoStudioClient() {
-  return <AIVideoStudio />
+  // Dialog state variables
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // Form state
+  const [projectName, setProjectName] = useState('')
+  const [exportFormat, setExportFormat] = useState('mp4')
+
+  const aiVideoStudioQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewProjectDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
+
+  const handleCreateProject = () => {
+    toast.success(`Video project "${projectName || 'Untitled'}" created successfully`)
+    setProjectName('')
+    setShowNewProjectDialog(false)
+  }
+
+  const handleExport = () => {
+    toast.success(`Video exported as ${exportFormat.toUpperCase()} successfully`)
+    setShowExportDialog(false)
+  }
+
+  const handleSaveSettings = () => {
+    toast.success('Video studio settings saved')
+    setShowSettingsDialog(false)
+  }
+
+  return (
+    <>
+      <AIVideoStudio />
+
+      {/* New Video Project Dialog */}
+      <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Video Project</DialogTitle>
+            <DialogDescription>
+              Set up a new AI video project with your preferred settings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="project-name">Project Name</Label>
+              <Input
+                id="project-name"
+                placeholder="Enter project name"
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="resolution">Resolution</Label>
+              <select
+                id="resolution"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="1080p">1080p (Full HD)</option>
+                <option value="4k">4K (Ultra HD)</option>
+                <option value="720p">720p (HD)</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="ai-model">AI Model</Label>
+              <select
+                id="ai-model"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="veo3">Veo 3</option>
+                <option value="kling">Kling</option>
+                <option value="runway">Runway Gen-3</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreateProject}>Create Project</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Video Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Video</DialogTitle>
+            <DialogDescription>
+              Choose your export format and quality settings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="export-format">Format</Label>
+              <select
+                id="export-format"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={exportFormat}
+                onChange={(e) => setExportFormat(e.target.value)}
+              >
+                <option value="mp4">MP4</option>
+                <option value="webm">WebM</option>
+                <option value="mov">MOV</option>
+                <option value="avi">AVI</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="export-quality">Quality</Label>
+              <select
+                id="export-quality"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="high">High (Original Quality)</option>
+                <option value="medium">Medium (Balanced)</option>
+                <option value="low">Low (Smaller File Size)</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="export-fps">Frame Rate</Label>
+              <select
+                id="export-fps"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="60">60 FPS</option>
+                <option value="30">30 FPS</option>
+                <option value="24">24 FPS (Cinematic)</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleExport}>Export Video</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Video Studio Settings</DialogTitle>
+            <DialogDescription>
+              Configure your AI Video Studio preferences.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="default-model">Default AI Model</Label>
+              <select
+                id="default-model"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="veo3">Veo 3</option>
+                <option value="kling">Kling</option>
+                <option value="runway">Runway Gen-3</option>
+                <option value="pika">Pika Labs</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="default-resolution">Default Resolution</Label>
+              <select
+                id="default-resolution"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="4k">4K (Ultra HD)</option>
+                <option value="1080p">1080p (Full HD)</option>
+                <option value="720p">720p (HD)</option>
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="auto-save">Auto-save Interval</Label>
+              <select
+                id="auto-save"
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              >
+                <option value="1">Every 1 minute</option>
+                <option value="5">Every 5 minutes</option>
+                <option value="10">Every 10 minutes</option>
+                <option value="off">Disabled</option>
+              </select>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input type="checkbox" id="hardware-accel" className="rounded" defaultChecked />
+              <Label htmlFor="hardware-accel">Enable hardware acceleration</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input type="checkbox" id="preview-quality" className="rounded" defaultChecked />
+              <Label htmlFor="preview-quality">High quality preview</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSettings}>Save Settings</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  )
 }

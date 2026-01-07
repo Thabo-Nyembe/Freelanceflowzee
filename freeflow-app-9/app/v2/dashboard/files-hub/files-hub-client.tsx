@@ -407,24 +407,7 @@ const mockFilesHubActivities = [
   { id: '3', user: 'Guest User', action: 'downloaded', target: 'Project assets.zip', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mockFilesHubQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Opening file picker...', success: 'Ready to upload files', error: 'Failed to open upload' }
-  ) },
-  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Creating new folder...', success: 'Folder created successfully', error: 'Failed to create folder' }
-  ) },
-  { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 700)),
-    { loading: 'Generating share link...', success: 'Share link copied to clipboard', error: 'Failed to generate link' }
-  ) },
-  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 400)),
-    { loading: 'Opening search...', success: 'Search activated', error: 'Search unavailable' }
-  ) },
-]
+// Quick actions will be defined inside component to access state setters
 
 // Database types matching schema
 interface DbFile {
@@ -484,6 +467,12 @@ export default function FilesHubClient() {
   const [newFolderName, setNewFolderName] = useState('')
   const [newFolderColor, setNewFolderColor] = useState('blue')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Quick Action Dialog States
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showSearchDialog, setShowSearchDialog] = useState(false)
+  const [shareLink, setShareLink] = useState('')
+  const [quickSearchQuery, setQuickSearchQuery] = useState('')
 
   // Fetch files and folders
   const fetchData = useCallback(async () => {
@@ -595,6 +584,14 @@ export default function FilesHubClient() {
     }
     return crumbs
   }, [folders, currentFolderId])
+
+  // Quick Actions with proper dialog handlers
+  const quickActions = useMemo(() => [
+    { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => setShowUploadDialog(true) },
+    { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => setShowCreateFolderDialog(true) },
+    { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => setShowShareDialog(true) },
+    { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => setShowSearchDialog(true) },
+  ], [])
 
   // CRUD Handlers
   const handleCreateFolder = async () => {
@@ -2090,7 +2087,7 @@ export default function FilesHubClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockFilesHubQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2306,6 +2303,163 @@ export default function FilesHubClient() {
                 className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
               >
                 Select Files
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-cyan-600" />
+                Share Files
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Share Link</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={shareLink || 'https://files.freeflow.app/share/abc123'}
+                    onChange={(e) => setShareLink(e.target.value)}
+                    readOnly
+                    className="flex-1"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigator.clipboard.writeText(shareLink || 'https://files.freeflow.app/share/abc123')
+                      toast.success('Link copied to clipboard')
+                    }}
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Access Level</Label>
+                <Select defaultValue="view">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="view">Can view</SelectItem>
+                    <SelectItem value="comment">Can comment</SelectItem>
+                    <SelectItem value="edit">Can edit</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Share with</Label>
+                <Input placeholder="Enter email addresses" />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Password protect</p>
+                  <p className="text-xs text-gray-500">Require password to access</p>
+                </div>
+                <Switch />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white text-sm">Link expiration</p>
+                  <p className="text-xs text-gray-500">Set when link expires</p>
+                </div>
+                <Select defaultValue="never">
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1day">1 day</SelectItem>
+                    <SelectItem value="7days">7 days</SelectItem>
+                    <SelectItem value="30days">30 days</SelectItem>
+                    <SelectItem value="never">Never</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowShareDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  toast.success('Share link created successfully')
+                  setShowShareDialog(false)
+                }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+              >
+                Create Share Link
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Search Dialog */}
+        <Dialog open={showSearchDialog} onOpenChange={setShowSearchDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5 text-cyan-600" />
+                Search Files
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  placeholder="Search files and folders..."
+                  value={quickSearchQuery}
+                  onChange={(e) => setQuickSearchQuery(e.target.value)}
+                  className="pl-10"
+                  autoFocus
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm text-gray-500">Filter by type</Label>
+                <div className="flex flex-wrap gap-2">
+                  {['All', 'Documents', 'Images', 'Videos', 'Audio', 'Archives'].map(type => (
+                    <Badge
+                      key={type}
+                      variant="outline"
+                      className="cursor-pointer hover:bg-cyan-100 dark:hover:bg-cyan-900/30"
+                    >
+                      {type}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="border-t pt-4">
+                <Label className="text-sm text-gray-500">Recent Searches</Label>
+                <div className="mt-2 space-y-2">
+                  {['Project Proposal', 'Financial Report', 'Brand Guidelines'].map(term => (
+                    <button
+                      key={term}
+                      className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-left"
+                      onClick={() => {
+                        setQuickSearchQuery(term)
+                        setSearchQuery(term)
+                        setShowSearchDialog(false)
+                      }}
+                    >
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">{term}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowSearchDialog(false)}>Cancel</Button>
+              <Button
+                onClick={() => {
+                  setSearchQuery(quickSearchQuery)
+                  setShowSearchDialog(false)
+                  toast.success(`Searching for "${quickSearchQuery}"`)
+                }}
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+              >
+                Search
               </Button>
             </DialogFooter>
           </DialogContent>

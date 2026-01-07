@@ -419,24 +419,7 @@ const mockGalleryActivities = [
   { id: '3', user: 'Ava Williams', action: 'featured', target: '5 photos in showcase', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockGalleryQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Opening upload dialog...', success: 'Upload ready', error: 'Failed to initialize upload' }
-  ) },
-  { id: '2', label: 'New Album', icon: 'FolderPlus', shortcut: 'A', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Creating new album...', success: 'Album created', error: 'Failed to create album' }
-  ) },
-  { id: '3', label: 'Bulk Edit', icon: 'Edit', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 700)),
-    { loading: 'Initializing bulk editor...', success: 'Bulk edit mode enabled', error: 'Failed to enable bulk edit' }
-  ) },
-  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Preparing share options...', success: 'Share dialog ready', error: 'Failed to open share dialog' }
-  ) },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function GalleryClient() {
   const supabase = createClient()
@@ -473,6 +456,8 @@ export default function GalleryClient() {
   const [viewMode, setViewMode] = useState<'masonry' | 'grid'>('masonry')
   const [showUploadDialog, setShowUploadDialog] = useState(false)
   const [showCreateCollection, setShowCreateCollection] = useState(false)
+  const [showBulkEditDialog, setShowBulkEditDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
   const [copiedLink, setCopiedLink] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
@@ -498,6 +483,14 @@ export default function GalleryClient() {
   // Liked and saved items state (local tracking for mock data)
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set())
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
+
+  // Quick actions with proper dialog handlers
+  const galleryQuickActions = [
+    { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => setShowUploadDialog(true) },
+    { id: '2', label: 'New Album', icon: 'FolderPlus', shortcut: 'A', action: () => setShowCreateCollection(true) },
+    { id: '3', label: 'Bulk Edit', icon: 'Edit', shortcut: 'E', action: () => setShowBulkEditDialog(true) },
+    { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => setShowShareDialog(true) },
+  ]
 
   // Fetch data on mount
   useEffect(() => {
@@ -1877,7 +1870,7 @@ export default function GalleryClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockGalleryQuickActions}
+            actions={galleryQuickActions}
             variant="grid"
           />
         </div>
@@ -2211,6 +2204,138 @@ export default function GalleryClient() {
                 >
                   {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
                   {isSubmitting ? 'Creating...' : 'Create'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Edit Dialog */}
+        <Dialog open={showBulkEditDialog} onOpenChange={setShowBulkEditDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Bulk Edit Photos</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Select multiple photos to edit their properties at once.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Add Tags</label>
+                  <input
+                    type="text"
+                    placeholder="Enter tags to add (comma separated)"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Move to Collection</label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select collection" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="nature">Nature & Landscapes</SelectItem>
+                      <SelectItem value="urban">Urban Architecture</SelectItem>
+                      <SelectItem value="autumn">Autumn Vibes</SelectItem>
+                      <SelectItem value="favorites">My Favorites</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" id="bulk-public" className="rounded border-gray-300" />
+                  <label htmlFor="bulk-public" className="text-sm text-gray-700 dark:text-gray-300">Set as public</label>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowBulkEditDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    toast.success('Bulk edit applied', { description: 'Changes applied to selected photos' })
+                    setShowBulkEditDialog(false)
+                  }}
+                  className="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+                >
+                  Apply Changes
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Share Dialog */}
+        <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Share Gallery</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Share your gallery or specific collections with others.
+              </p>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Share Link</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={`${typeof window !== 'undefined' ? window.location.origin : ''}/gallery/shared/my-gallery`}
+                      readOnly
+                      className="flex-1 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 font-mono text-sm"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/gallery/shared/my-gallery`)
+                        toast.success('Link copied', { description: 'Share link copied to clipboard' })
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Share via</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    <button className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                      <Globe className="w-5 h-5 mx-auto mb-1" />
+                      <span className="text-xs">Link</span>
+                    </button>
+                    <button className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                      <User className="w-5 h-5 mx-auto mb-1" />
+                      <span className="text-xs">Email</span>
+                    </button>
+                    <button className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                      <Link2 className="w-5 h-5 mx-auto mb-1" />
+                      <span className="text-xs">Embed</span>
+                    </button>
+                    <button className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 text-center">
+                      <Download className="w-5 h-5 mx-auto mb-1" />
+                      <span className="text-xs">QR Code</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-2">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Allow Downloads</label>
+                    <p className="text-xs text-gray-500">Let viewers download photos</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowShareDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg"
+                >
+                  Close
                 </button>
               </div>
             </div>

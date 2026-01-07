@@ -437,11 +437,17 @@ const mockPerfActivities = [
   { id: '3', type: 'milestone' as const, title: 'Core Web Vitals passed', description: 'Homepage now passes all CWV metrics', user: { name: 'DevOps Team', avatar: '/avatars/devops.jpg' }, timestamp: new Date(Date.now() - 86400000).toISOString(), metadata: {} },
 ]
 
-const mockPerfQuickActions = [
-  { id: '1', label: 'Run Audit', icon: 'Play', shortcut: '⌘R', action: () => toast.success('Audit Started', { description: 'Performance audit running' }) },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => toast.success('Report Ready', { description: 'Performance report loaded' }) },
-  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => toast.success('Comparison Ready', { description: 'Test results compared' }) },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: '⌘E', action: () => toast.success('Export Complete', { description: 'Performance data exported' }) },
+// Quick Actions - defined inside component to access state setters
+const getQuickActions = (
+  setShowRunDialog: (v: boolean) => void,
+  setShowViewReportDialog: (v: boolean) => void,
+  setShowCompareTestsDialog: (v: boolean) => void,
+  setShowExportDataDialog: (v: boolean) => void
+) => [
+  { id: '1', label: 'Run Audit', icon: 'Play', shortcut: '⌘R', action: () => setShowRunDialog(true) },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => setShowViewReportDialog(true) },
+  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => setShowCompareTestsDialog(true) },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: '⌘E', action: () => setShowExportDataDialog(true) },
 ]
 
 export default function PerformanceClient() {
@@ -463,6 +469,11 @@ export default function PerformanceClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showAddBudgetDialog, setShowAddBudgetDialog] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+
+  // Quick Action Dialog States
+  const [showViewReportDialog, setShowViewReportDialog] = useState(false)
+  const [showCompareTestsDialog, setShowCompareTestsDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
 
   // Data State
   const [performanceMetrics, setPerformanceMetrics] = useState<any[]>([])
@@ -2360,6 +2371,201 @@ export default function PerformanceClient() {
         </DialogContent>
       </Dialog>
 
+      {/* View Report Dialog */}
+      <Dialog open={showViewReportDialog} onOpenChange={setShowViewReportDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-emerald-600" />
+              Performance Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                <p className="text-sm text-gray-500 mb-1">Overall Score</p>
+                <p className="text-3xl font-bold text-emerald-600">{currentTest.scores.performance}</p>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                <p className="text-sm text-gray-500 mb-1">Last Tested</p>
+                <p className="text-lg font-medium text-gray-900 dark:text-white">
+                  {currentTest.timestamp.toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-900 dark:text-white">Score Breakdown</h4>
+              {[
+                { label: 'Performance', score: currentTest.scores.performance },
+                { label: 'Accessibility', score: currentTest.scores.accessibility },
+                { label: 'Best Practices', score: currentTest.scores.bestPractices },
+                { label: 'SEO', score: currentTest.scores.seo },
+              ].map(item => (
+                <div key={item.label} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{item.label}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-32 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${getScoreBg(item.score)}`}
+                        style={{ width: `${item.score}%` }}
+                      />
+                    </div>
+                    <span className={`text-sm font-medium ${getScoreColor(item.score)}`}>{item.score}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowViewReportDialog(false)}>
+                Close
+              </Button>
+              <Button onClick={handleExportReport} className="bg-emerald-600 hover:bg-emerald-700">
+                <Download className="h-4 w-4 mr-2" />
+                Download Report
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Compare Tests Dialog */}
+      <Dialog open={showCompareTestsDialog} onOpenChange={setShowCompareTestsDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5 text-emerald-600" />
+              Compare Test Results
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <p className="text-sm text-gray-500">Compare performance metrics across different test runs.</p>
+            {mockPageTests.length >= 2 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
+                      <th className="pb-3">Metric</th>
+                      {mockPageTests.slice(0, 3).map((test, idx) => (
+                        <th key={test.id} className="pb-3">
+                          Test {idx + 1} ({test.device})
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr>
+                      <td className="py-3 text-sm text-gray-600 dark:text-gray-400">Performance</td>
+                      {mockPageTests.slice(0, 3).map(test => (
+                        <td key={test.id} className={`py-3 font-medium ${getScoreColor(test.scores.performance)}`}>
+                          {test.scores.performance}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td className="py-3 text-sm text-gray-600 dark:text-gray-400">Accessibility</td>
+                      {mockPageTests.slice(0, 3).map(test => (
+                        <td key={test.id} className={`py-3 font-medium ${getScoreColor(test.scores.accessibility)}`}>
+                          {test.scores.accessibility}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td className="py-3 text-sm text-gray-600 dark:text-gray-400">LCP</td>
+                      {mockPageTests.slice(0, 3).map(test => (
+                        <td key={test.id} className="py-3 font-medium text-gray-900 dark:text-white">
+                          {test.vitals[0].value}{test.vitals[0].unit}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr>
+                      <td className="py-3 text-sm text-gray-600 dark:text-gray-400">CLS</td>
+                      {mockPageTests.slice(0, 3).map(test => (
+                        <td key={test.id} className="py-3 font-medium text-gray-900 dark:text-white">
+                          {test.vitals[2].value}
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <BarChart3 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>Need at least 2 tests to compare results.</p>
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowCompareTestsDialog(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Data Dialog */}
+      <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-emerald-600" />
+              Export Performance Data
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <p className="text-sm text-gray-500">
+              Export your performance data in various formats for analysis or reporting.
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  handleExportReport()
+                  setShowExportDataDialog(false)
+                }}
+                className="w-full flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+              >
+                <FileText className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">JSON Export</p>
+                  <p className="text-sm text-gray-500">Full data export in JSON format</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  toast.info('CSV export coming soon')
+                  setShowExportDataDialog(false)
+                }}
+                className="w-full flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+              >
+                <FileText className="h-5 w-5 text-green-600" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">CSV Export</p>
+                  <p className="text-sm text-gray-500">Spreadsheet-compatible format</p>
+                </div>
+              </button>
+              <button
+                onClick={() => {
+                  toast.info('PDF export coming soon')
+                  setShowExportDataDialog(false)
+                }}
+                className="w-full flex items-center gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-left"
+              >
+                <FileText className="h-5 w-5 text-red-600" />
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">PDF Report</p>
+                  <p className="text-sm text-gray-500">Formatted report document</p>
+                </div>
+              </button>
+            </div>
+            <div className="flex justify-end">
+              <Button variant="outline" onClick={() => setShowExportDataDialog(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* AI-Powered Performance Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
@@ -2379,7 +2585,7 @@ export default function PerformanceClient() {
       </div>
 
       {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={mockPerfQuickActions} />
+      <QuickActionsToolbar actions={getQuickActions(setShowRunDialog, setShowViewReportDialog, setShowCompareTestsDialog, setShowExportDataDialog)} />
     </div>
   )
 }

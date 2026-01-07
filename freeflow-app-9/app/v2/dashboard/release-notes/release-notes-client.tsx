@@ -342,12 +342,7 @@ const mockReleaseNotesActivities = [
   { id: '3', user: 'Marketing', action: 'scheduled', target: 'email announcement', timestamp: '1d ago', type: 'info' as const },
 ]
 
-const mockReleaseNotesQuickActions = [
-  { id: '1', label: 'New Release', icon: 'Rocket', shortcut: 'N', action: () => toast.success('New Release', { description: 'Release form ready' }) },
-  { id: '2', label: 'Schedule', icon: 'Calendar', shortcut: 'S', action: () => toast.success('Scheduler', { description: 'Release scheduler opened' }) },
-  { id: '3', label: 'Preview', icon: 'Eye', shortcut: 'P', action: () => toast.success('Preview Ready', { description: 'Release preview loaded' }) },
-  { id: '4', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.success('Analytics', { description: 'Release analytics loaded' }) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // Default form state for creating/editing release notes
 const defaultFormState: ReleaseNoteInput = {
@@ -388,6 +383,19 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   const [highlightsInput, setHighlightsInput] = useState('')
   const [featuresInput, setFeaturesInput] = useState('')
   const [tagsInput, setTagsInput] = useState('')
+
+  // Quick action dialog states
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const releaseNotesQuickActions = [
+    { id: '1', label: 'New Release', icon: 'Rocket', shortcut: 'N', action: () => handleOpenCreateModal() },
+    { id: '2', label: 'Schedule', icon: 'Calendar', shortcut: 'S', action: () => setShowScheduleDialog(true) },
+    { id: '3', label: 'Preview', icon: 'Eye', shortcut: 'P', action: () => setShowPreviewDialog(true) },
+    { id: '4', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => setShowAnalyticsDialog(true) },
+  ]
 
   const filteredReleases = useMemo(() => {
     let filtered = [...mockReleases]
@@ -2077,7 +2085,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockReleaseNotesQuickActions}
+            actions={releaseNotesQuickActions}
             variant="grid"
           />
         </div>
@@ -2539,6 +2547,272 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
               </ScrollArea>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Release Dialog */}
+      <Dialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-orange-600" />
+              Schedule Release
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Release</Label>
+              <Select defaultValue="">
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a draft release" />
+                </SelectTrigger>
+                <SelectContent>
+                  {releases.filter(r => r.status === 'draft').map(r => (
+                    <SelectItem key={r.id} value={r.id}>{r.version} - {r.title}</SelectItem>
+                  ))}
+                  <SelectItem value="new">Create new release...</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Schedule Date & Time</Label>
+              <Input type="datetime-local" />
+            </div>
+            <div className="space-y-2">
+              <Label>Timezone</Label>
+              <Select defaultValue="utc">
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="utc">UTC</SelectItem>
+                  <SelectItem value="pst">Pacific Time (PST)</SelectItem>
+                  <SelectItem value="est">Eastern Time (EST)</SelectItem>
+                  <SelectItem value="cet">Central European (CET)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
+              <div>
+                <Label className="font-medium">Send notification</Label>
+                <p className="text-sm text-gray-500">Notify subscribers when published</p>
+              </div>
+              <Switch defaultChecked />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowScheduleDialog(false)}>
+              Cancel
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Release Scheduled', { description: 'Your release has been scheduled for publication' })
+              setShowScheduleDialog(false)
+            }}>
+              Schedule Release
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Preview Release Dialog */}
+      <Dialog open={showPreviewDialog} onOpenChange={setShowPreviewDialog}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-orange-600" />
+              Release Preview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Release to Preview</Label>
+              <Select defaultValue="">
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a release" />
+                </SelectTrigger>
+                <SelectContent>
+                  {releases.map(r => (
+                    <SelectItem key={r.id} value={r.id}>{r.version} - {r.title}</SelectItem>
+                  ))}
+                  {mockReleases.map(r => (
+                    <SelectItem key={r.id} value={r.id}>{r.version} - {r.title}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="border rounded-lg p-6 bg-gray-50 min-h-[300px]">
+              <div className="text-center text-gray-500">
+                <Eye className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">Select a release to preview</p>
+                <p className="text-sm">Preview how your release notes will appear to users</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Label>Preview Mode:</Label>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Monitor className="w-4 h-4" />
+                  Desktop
+                </Button>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Smartphone className="w-4 h-4" />
+                  Mobile
+                </Button>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Mail className="w-4 h-4" />
+                  Email
+                </Button>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPreviewDialog(false)}>
+              Close
+            </Button>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
+              toast.success('Preview Link Generated', { description: 'Shareable preview link copied to clipboard' })
+            }}>
+              <Share2 className="w-4 h-4 mr-2" />
+              Share Preview
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Analytics Dialog */}
+      <Dialog open={showAnalyticsDialog} onOpenChange={setShowAnalyticsDialog}>
+        <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-orange-600" />
+              Release Analytics
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 py-4">
+            <div className="grid grid-cols-4 gap-4">
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Download className="w-6 h-6 mx-auto text-blue-500 mb-2" />
+                  <div className="text-2xl font-bold">{formatNumber(mockReleases.reduce((sum, r) => sum + r.metrics.downloads, 0))}</div>
+                  <div className="text-sm text-gray-500">Total Downloads</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Eye className="w-6 h-6 mx-auto text-green-500 mb-2" />
+                  <div className="text-2xl font-bold">{formatNumber(mockReleases.reduce((sum, r) => sum + r.metrics.views, 0))}</div>
+                  <div className="text-sm text-gray-500">Total Views</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <Heart className="w-6 h-6 mx-auto text-pink-500 mb-2" />
+                  <div className="text-2xl font-bold">{formatNumber(mockReleases.reduce((sum, r) => sum + r.metrics.likes, 0))}</div>
+                  <div className="text-sm text-gray-500">Total Likes</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4 text-center">
+                  <MessageSquare className="w-6 h-6 mx-auto text-purple-500 mb-2" />
+                  <div className="text-2xl font-bold">{formatNumber(mockReleases.reduce((sum, r) => sum + r.metrics.comments, 0))}</div>
+                  <div className="text-sm text-gray-500">Total Comments</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Release Performance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {mockReleases.slice(0, 4).map(release => (
+                    <div key={release.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Badge className={getTypeColor(release.releaseType)}>{release.version}</Badge>
+                        <span className="font-medium">{release.title}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Download className="w-4 h-4" />
+                          {formatNumber(release.metrics.downloads)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          {formatNumber(release.metrics.views)}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <TrendingUp className="w-4 h-4" />
+                          {release.metrics.adoptionRate}%
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Top Performing Release</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg text-white">
+                      <Rocket className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <div className="font-bold">v3.0.0</div>
+                      <div className="text-sm text-gray-500">The AI Revolution Update</div>
+                    </div>
+                  </div>
+                  <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+                    <div className="p-2 bg-green-50 rounded">
+                      <div className="font-semibold text-green-700">125K</div>
+                      <div className="text-gray-500">Downloads</div>
+                    </div>
+                    <div className="p-2 bg-blue-50 rounded">
+                      <div className="font-semibold text-blue-700">78%</div>
+                      <div className="text-gray-500">Adoption</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Engagement Trends</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Avg. Views per Release</span>
+                      <span className="font-semibold">171K</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Avg. Feedback Score</span>
+                      <span className="font-semibold">4.4 / 5.0</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">User Satisfaction</span>
+                      <span className="font-semibold text-green-600">+12% this month</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAnalyticsDialog(false)}>
+              Close
+            </Button>
+            <Button variant="outline" onClick={() => {
+              toast.success('Report Exported', { description: 'Analytics report downloaded as PDF' })
+            }}>
+              <Download className="w-4 h-4 mr-2" />
+              Export Report
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

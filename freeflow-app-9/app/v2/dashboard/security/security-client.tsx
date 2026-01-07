@@ -506,20 +506,7 @@ const mockSecurityActivities = [
   { id: '3', user: 'Security', action: 'Updated', target: 'master password policy', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockSecurityQuickActions = [
-  { id: '1', label: 'Add Password', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 700)),
-    { loading: 'Opening password form...', success: 'Password form ready', error: 'Failed to open form' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Security Audit', icon: 'shield', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Running security audit...', success: 'Security audit completed - no issues found', error: 'Audit failed' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Vault', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Encrypting and exporting vault...', success: 'Vault exported securely', error: 'Export failed' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to use state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -558,6 +545,18 @@ export default function SecurityClient() {
   const [typeFilter, setTypeFilter] = useState<string>('all')
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSaving, setIsSaving] = useState(false)
+
+  // Dialog states for quick actions
+  const [showAddPasswordDialog, setShowAddPasswordDialog] = useState(false)
+  const [showSecurityAuditDialog, setShowSecurityAuditDialog] = useState(false)
+  const [showExportVaultDialog, setShowExportVaultDialog] = useState(false)
+
+  // Quick actions array with proper dialog handlers
+  const securityQuickActions = useMemo(() => [
+    { id: '1', label: 'Add Password', icon: 'plus', action: () => setShowAddPasswordDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Security Audit', icon: 'shield', action: () => setShowSecurityAuditDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export Vault', icon: 'download', action: () => setShowExportVaultDialog(true), variant: 'outline' as const },
+  ], [])
 
   // Fetch data on mount
   useEffect(() => {

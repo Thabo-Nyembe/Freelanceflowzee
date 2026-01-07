@@ -102,12 +102,7 @@ const mockUserMgmtActivities = [
   { id: '3', user: 'System', action: 'flagged', target: 'suspicious login attempt', timestamp: '2h ago', type: 'warning' as const },
 ]
 
-const mockUserMgmtQuickActions = [
-  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => toast.success('Add User', { description: 'User form ready' }) },
-  { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => toast.success('Bulk Import', { description: 'Upload CSV or Excel file' }) },
-  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => toast.success('Audit Log', { description: 'User activity log loaded' }) },
-  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => toast.success('Roles', { description: 'Role management loaded' }) },
-]
+// Quick actions will be defined after state hooks are declared
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {
   const [activeView, setActiveView] = useState<'users' | 'roles' | 'connections' | 'security' | 'logs' | 'settings'>('users')
@@ -120,6 +115,20 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick Action Dialog States
+  const [showAddUserDialog, setShowAddUserDialog] = useState(false)
+  const [showBulkImportDialog, setShowBulkImportDialog] = useState(false)
+  const [showAuditLogDialog, setShowAuditLogDialog] = useState(false)
+  const [showRolesDialog, setShowRolesDialog] = useState(false)
+
+  // Quick Actions with proper dialog handlers
+  const quickActionsData = [
+    { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => setShowAddUserDialog(true) },
+    { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => setShowBulkImportDialog(true) },
+    { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => setShowAuditLogDialog(true) },
+    { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => setShowRolesDialog(true) },
+  ]
 
   const { users, loading, error, createUser, updateUser, deleteUser, refetch } = useUserManagement({ role: roleFilter, status: statusFilter })
   const displayUsers = users.length > 0 ? users : initialUsers
@@ -2025,7 +2034,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockUserMgmtQuickActions}
+            actions={quickActionsData}
             variant="grid"
           />
         </div>
@@ -2264,6 +2273,234 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                 </div>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Add User Quick Action Dialog */}
+        <Dialog open={showAddUserDialog} onOpenChange={setShowAddUserDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-blue-600" />
+                Add New User
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Email Address</Label>
+                <Input type="email" placeholder="user@company.com" />
+              </div>
+              <div className="space-y-2">
+                <Label>Full Name</Label>
+                <Input placeholder="John Doe" />
+              </div>
+              <div className="space-y-2">
+                <Label>Role</Label>
+                <Select defaultValue="user">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="member">Member</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Department</Label>
+                <Input placeholder="Engineering" />
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="sendWelcome" defaultChecked className="rounded" />
+                <Label htmlFor="sendWelcome" className="text-sm font-normal">Send welcome email with login instructions</Label>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddUserDialog(false)}>Cancel</Button>
+              <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                toast.success('User created successfully')
+                setShowAddUserDialog(false)
+              }}>
+                Add User
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Bulk Import Quick Action Dialog */}
+        <Dialog open={showBulkImportDialog} onOpenChange={setShowBulkImportDialog}>
+          <DialogContent className="sm:max-w-[600px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Upload className="w-5 h-5 text-green-600" />
+                Bulk Import Users
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl p-8 text-center">
+                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your CSV or Excel file here</p>
+                <p className="text-sm text-gray-500 mb-4">or</p>
+                <Button variant="outline">Browse Files</Button>
+              </div>
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                <h4 className="font-medium text-blue-800 dark:text-blue-300 mb-2">CSV Format Requirements</h4>
+                <ul className="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+                  <li>Required columns: email, full_name</li>
+                  <li>Optional columns: role, department, job_title</li>
+                  <li>Maximum 500 users per import</li>
+                </ul>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="link" className="text-blue-600 p-0 h-auto">
+                  <Download className="w-4 h-4 mr-1" />
+                  Download template CSV
+                </Button>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowBulkImportDialog(false)}>Cancel</Button>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+                toast.success('Import started', { description: 'Processing your file...' })
+                setShowBulkImportDialog(false)
+              }}>
+                Start Import
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Audit Log Quick Action Dialog */}
+        <Dialog open={showAuditLogDialog} onOpenChange={setShowAuditLogDialog}>
+          <DialogContent className="sm:max-w-[800px] max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-purple-600" />
+                User Audit Log
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex gap-3">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input placeholder="Search audit logs..." className="pl-10" />
+                </div>
+                <Select defaultValue="all">
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Event type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Events</SelectItem>
+                    <SelectItem value="login">Login</SelectItem>
+                    <SelectItem value="logout">Logout</SelectItem>
+                    <SelectItem value="password">Password Changes</SelectItem>
+                    <SelectItem value="role">Role Changes</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Button variant="outline">
+                  <Download className="w-4 h-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+              <ScrollArea className="h-[400px] border rounded-lg dark:border-gray-700">
+                <div className="p-4 space-y-3">
+                  {auditLogs.map(log => (
+                    <div key={log.id} className="flex items-start gap-3 p-3 border rounded-lg dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                      {getStatusIcon(log.status)}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{log.action}</span>
+                          <Badge variant="outline" className="text-xs">{log.type}</Badge>
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">
+                          {log.userName && <span className="mr-3">{log.userName}</span>}
+                          {log.ip && <span className="mr-3">{log.ip}</span>}
+                          {log.location && <span>{log.location}</span>}
+                        </div>
+                        {log.details && <p className="text-sm text-gray-400 mt-1">{log.details}</p>}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(log.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAuditLogDialog(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Roles Quick Action Dialog */}
+        <Dialog open={showRolesDialog} onOpenChange={setShowRolesDialog}>
+          <DialogContent className="sm:max-w-[700px] max-h-[80vh]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-indigo-600" />
+                Role Management
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex justify-between items-center">
+                <div className="relative flex-1 mr-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input placeholder="Search roles..." className="pl-10" />
+                </div>
+                <Button className="gap-2" onClick={() => {
+                  setShowRolesDialog(false)
+                  setShowRoleModal(true)
+                }}>
+                  <Plus className="w-4 h-4" />
+                  Create Role
+                </Button>
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="space-y-3">
+                  {roles.map(role => (
+                    <div key={role.id} className="p-4 border rounded-xl dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg ${role.isSystem ? 'bg-purple-100 dark:bg-purple-900/30' : 'bg-indigo-100 dark:bg-indigo-900/30'}`}>
+                            <Shield className={`w-4 h-4 ${role.isSystem ? 'text-purple-600' : 'text-indigo-600'}`} />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-semibold">{role.name}</h4>
+                              {role.isSystem && <Badge variant="secondary" className="text-xs">System</Badge>}
+                            </div>
+                            <p className="text-sm text-gray-500 mt-1">{role.description}</p>
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {role.permissions.slice(0, 3).map(perm => (
+                                <Badge key={perm} variant="outline" className="text-xs">{perm}</Badge>
+                              ))}
+                              {role.permissions.length > 3 && (
+                                <Badge variant="outline" className="text-xs">+{role.permissions.length - 3}</Badge>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <div className="text-right">
+                            <span className="text-sm font-medium">{role.userCount}</span>
+                            <span className="text-xs text-gray-500 ml-1">users</span>
+                          </div>
+                          <Button size="sm" variant="ghost" disabled={role.isSystem}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowRolesDialog(false)}>Close</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

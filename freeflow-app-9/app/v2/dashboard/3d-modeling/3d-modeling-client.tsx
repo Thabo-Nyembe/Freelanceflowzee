@@ -345,11 +345,7 @@ const mock3DActivities = [
   { id: '3', user: 'Rigger', action: 'Started', target: 'facial blend shapes', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mock3DQuickActions = [
-  { id: '1', label: 'New Model', icon: 'plus', action: () => toast.success('Model created successfully'), variant: 'default' as const },
-  { id: '2', label: 'Render', icon: 'play', action: () => toast.success('Render started successfully'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.success('Model exported successfully'), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function ThreeDModelingClient() {
   const [activeTab, setActiveTab] = useState('models')
@@ -360,6 +356,18 @@ export default function ThreeDModelingClient() {
   const [showRenderDialog, setShowRenderDialog] = useState(false)
   const [viewportMode, setViewportMode] = useState<'solid' | 'wireframe' | 'material'>('solid')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showNewModelDialog, setShowNewModelDialog] = useState(false)
+  const [showStartRenderDialog, setShowStartRenderDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+
+  // Quick actions with proper dialog triggers
+  const mock3DQuickActions = [
+    { id: '1', label: 'New Model', icon: 'plus', action: () => setShowNewModelDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Render', icon: 'play', action: () => setShowStartRenderDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
 
   // Stats calculation
   const stats = useMemo(() => {

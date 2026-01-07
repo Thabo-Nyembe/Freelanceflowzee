@@ -441,24 +441,7 @@ const mockMotionGraphicsActivities = [
   { id: '3', user: 'Art Director', action: 'approved', target: 'final composition', timestamp: '3h ago', type: 'success' as const },
 ]
 
-const mockMotionGraphicsQuickActions = [
-  { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new project...', success: 'New project created', error: 'Failed to create project' }
-  ) },
-  { id: '2', label: 'Render', icon: 'Play', shortcut: 'R', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2500)),
-    { loading: 'Rendering...', success: 'Render completed successfully', error: 'Render failed' }
-  ) },
-  { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading assets...', success: 'Assets loaded', error: 'Failed to load assets' }
-  ) },
-  { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading templates...', success: 'Templates loaded', error: 'Failed to load templates' }
-  ) },
-]
+// Quick actions will be defined inside component to access state
 
 // Database types
 interface DbProject {
@@ -544,6 +527,20 @@ export default function MotionGraphicsClient({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<ProjectFormState>(initialFormState)
+
+  // Dialog states for quick actions
+  const [showNewProjectDialog, setShowNewProjectDialog] = useState(false)
+  const [showRenderDialog, setShowRenderDialog] = useState(false)
+  const [showAssetsDialog, setShowAssetsDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const motionGraphicsQuickActions = [
+    { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => setShowNewProjectDialog(true) },
+    { id: '2', label: 'Render', icon: 'Play', shortcut: 'R', action: () => setShowRenderDialog(true) },
+    { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A', action: () => setShowAssetsDialog(true) },
+    { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => setShowTemplatesDialog(true) },
+  ]
 
   const stats = useMemo(() => {
     const total = initialAnimations.length
@@ -2091,7 +2088,7 @@ export default function MotionGraphicsClient({
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockMotionGraphicsQuickActions}
+            actions={motionGraphicsQuickActions}
             variant="grid"
           />
         </div>
@@ -2313,6 +2310,237 @@ export default function MotionGraphicsClient({
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Creating...' : 'Create Project'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* New Project Quick Action Dialog */}
+        <Dialog open={showNewProjectDialog} onOpenChange={setShowNewProjectDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Film className="w-5 h-5 text-cyan-500" />
+                New Project
+              </DialogTitle>
+              <DialogDescription>Create a new motion graphics project</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { label: 'Blank Project', desc: 'Start from scratch', icon: Plus },
+                  { label: 'From Template', desc: 'Use a template', icon: LayoutTemplate },
+                  { label: 'Import Project', desc: 'Import existing', icon: Upload },
+                  { label: 'Recent Projects', desc: 'Open recent', icon: Clock },
+                ].map((option) => (
+                  <button
+                    key={option.label}
+                    className="p-4 rounded-lg border hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all text-left"
+                    onClick={() => {
+                      setShowNewProjectDialog(false)
+                      setShowCreateDialog(true)
+                    }}
+                  >
+                    <option.icon className="w-6 h-6 text-cyan-500 mb-2" />
+                    <p className="font-medium text-sm">{option.label}</p>
+                    <p className="text-xs text-gray-500">{option.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowNewProjectDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white"
+                onClick={() => {
+                  setShowNewProjectDialog(false)
+                  setShowCreateDialog(true)
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Blank Project
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Render Quick Action Dialog */}
+        <Dialog open={showRenderDialog} onOpenChange={setShowRenderDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Clapperboard className="w-5 h-5 text-orange-500" />
+                Render Settings
+              </DialogTitle>
+              <DialogDescription>Configure render output settings</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Output Format</label>
+                <select className="w-full px-3 py-2 border rounded-lg">
+                  <option>MP4 (H.264)</option>
+                  <option>MOV (ProRes)</option>
+                  <option>WebM</option>
+                  <option>GIF</option>
+                  <option>PNG Sequence</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Resolution</label>
+                <select className="w-full px-3 py-2 border rounded-lg">
+                  <option>4K (3840x2160)</option>
+                  <option>1080p (1920x1080)</option>
+                  <option>720p (1280x720)</option>
+                  <option>Custom</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Quality</label>
+                <select className="w-full px-3 py-2 border rounded-lg">
+                  <option>Best (Lossless)</option>
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low (Fast)</option>
+                </select>
+              </div>
+              <div className="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                  <p className="font-medium text-sm">Include Audio</p>
+                  <p className="text-xs text-gray-500">Export with audio tracks</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowRenderDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-orange-500 to-red-600 text-white"
+                onClick={() => {
+                  setShowRenderDialog(false)
+                  toast.success('Render added to queue')
+                }}
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Start Render
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Assets Quick Action Dialog */}
+        <Dialog open={showAssetsDialog} onOpenChange={setShowAssetsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Folder className="w-5 h-5 text-blue-500" />
+                Asset Library
+              </DialogTitle>
+              <DialogDescription>Browse and manage your assets</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input placeholder="Search assets..." className="pl-9" />
+              </div>
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {['All', 'Images', 'Videos', 'Audio', 'Shapes', 'Text'].map((filter) => (
+                  <Button key={filter} variant="outline" size="sm" className="text-xs">
+                    {filter}
+                  </Button>
+                ))}
+              </div>
+              <ScrollArea className="h-64 border rounded-lg p-3">
+                <div className="grid grid-cols-3 gap-3">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+                    <div
+                      key={i}
+                      className="aspect-square rounded-lg bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center cursor-pointer hover:ring-2 ring-cyan-500 transition-all"
+                    >
+                      <Image className="w-8 h-8 text-gray-400" />
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-between gap-3">
+              <Button variant="outline">
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Asset
+              </Button>
+              <div className="flex gap-3">
+                <Button variant="outline" onClick={() => setShowAssetsDialog(false)}>
+                  Close
+                </Button>
+                <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add to Project
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Templates Quick Action Dialog */}
+        <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LayoutTemplate className="w-5 h-5 text-purple-500" />
+                Template Gallery
+              </DialogTitle>
+              <DialogDescription>Choose a template to start your project</DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <div className="flex gap-2 mb-4">
+                {['All', 'Intros', 'Titles', 'Transitions', 'Lower Thirds', 'Social Media'].map((cat) => (
+                  <Button key={cat} variant="outline" size="sm" className="text-xs">
+                    {cat}
+                  </Button>
+                ))}
+              </div>
+              <ScrollArea className="h-72">
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { name: 'Modern Intro', category: 'Intros', color: 'from-purple-500 to-pink-500' },
+                    { name: 'Minimal Titles', category: 'Titles', color: 'from-blue-500 to-cyan-500' },
+                    { name: 'Smooth Transitions', category: 'Transitions', color: 'from-green-500 to-emerald-500' },
+                    { name: 'Lower Third Pack', category: 'Lower Thirds', color: 'from-orange-500 to-red-500' },
+                    { name: 'Instagram Stories', category: 'Social Media', color: 'from-pink-500 to-rose-500' },
+                    { name: 'YouTube Intro', category: 'Intros', color: 'from-red-500 to-orange-500' },
+                  ].map((template) => (
+                    <div
+                      key={template.name}
+                      className="rounded-lg border overflow-hidden cursor-pointer hover:ring-2 ring-purple-500 transition-all"
+                    >
+                      <div className={`aspect-video bg-gradient-to-br ${template.color} flex items-center justify-center`}>
+                        <Film className="w-8 h-8 text-white/80" />
+                      </div>
+                      <div className="p-3">
+                        <p className="font-medium text-sm">{template.name}</p>
+                        <p className="text-xs text-gray-500">{template.category}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowTemplatesDialog(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-purple-500 to-pink-600 text-white"
+                onClick={() => {
+                  setShowTemplatesDialog(false)
+                  toast.success('Template applied to new project')
+                }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Use Template
               </Button>
             </div>
           </DialogContent>

@@ -148,24 +148,7 @@ const mockCanvasActivities = [
   { id: '3', user: 'Illustrator', action: 'exported', target: '15 icons to SVG', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockCanvasQuickActions = [
-  { id: '1', label: 'New Board', icon: 'Layout', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Creating new board...', success: 'New board created successfully', error: 'Failed to create board' }
-  ) },
-  { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading templates...', success: 'Templates loaded successfully', error: 'Failed to load templates' }
-  ) },
-  { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting canvas...', success: 'Canvas exported successfully', error: 'Failed to export canvas' }
-  ) },
-  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 700)),
-    { loading: 'Generating share link...', success: 'Share link copied to clipboard', error: 'Failed to generate share link' }
-  ) },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function CanvasClient({ initialCanvases }: { initialCanvases: Canvas[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -176,6 +159,22 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   const [showEditor, setShowEditor] = useState(false)
   const [selectedTool, setSelectedTool] = useState<ToolType>('select')
   const [zoom, setZoom] = useState(100)
+
+  // Dialog states for quick actions
+  const [showNewBoardDialog, setShowNewBoardDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showAIGenerateDialog, setShowAIGenerateDialog] = useState(false)
+
+  // Quick actions with proper dialog state setters
+  const canvasQuickActions = [
+    { id: '1', label: 'New Board', icon: 'Layout', shortcut: 'N', action: () => setShowNewBoardDialog(true) },
+    { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => setShowTemplatesDialog(true) },
+    { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => setShowShareDialog(true) },
+  ]
 
   const { canvases, loading, error, createCanvas, updateCanvas, refetch } = useCanvas({ canvasType: 'all', status: 'all' })
   const displayCanvases = canvases.length > 0 ? canvases : initialCanvases
@@ -1041,8 +1040,8 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 { label: 'Prototype', icon: Smartphone, color: 'from-green-500 to-emerald-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'prototype' })); setShowNewBoard(true) } },
                 { label: 'Diagram', icon: Workflow, color: 'from-orange-500 to-red-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'diagram' })); setShowNewBoard(true) } },
                 { label: 'Templates', icon: FileText, color: 'from-pink-500 to-rose-500', action: () => setActiveTab('templates') },
-                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500', action: () => toast.info('Import Coming Soon', { description: 'Support for .fig, .sketch and .psd files' }) },
-                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500', action: () => toast.info('AI Generate Coming Soon', { description: 'Generate designs with AI assistance' }) }
+                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500', action: () => setShowImportDialog(true) },
+                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500', action: () => setShowAIGenerateDialog(true) }
               ].map((action, i) => (
                 <button
                   key={i}
@@ -2055,7 +2054,7 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCanvasQuickActions}
+            actions={canvasQuickActions}
             variant="grid"
           />
         </div>
@@ -2218,6 +2217,212 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
               </div>
             </div>
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Board Dialog */}
+      <Dialog open={showNewBoardDialog} onOpenChange={setShowNewBoardDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Layout className="h-5 w-5 text-indigo-600" />
+              Create New Board
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Board Name</label>
+              <Input placeholder="Enter board name..." />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Board Type</label>
+              <div className="grid grid-cols-2 gap-2">
+                {['Whiteboard', 'Wireframe', 'Prototype', 'Diagram'].map(type => (
+                  <Button key={type} variant="outline" className="justify-start">
+                    {type}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowNewBoardDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { setShowNewBoardDialog(false); setShowNewBoard(true) }}>Create Board</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Templates Dialog */}
+      <Dialog open={showTemplatesDialog} onOpenChange={setShowTemplatesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Copy className="h-5 w-5 text-indigo-600" />
+              Template Gallery
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <Input placeholder="Search templates..." />
+            <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+              {['iOS App', 'Dashboard', 'User Flow', 'Wireframe Kit', 'Mind Map', 'Presentation'].map(template => (
+                <div key={template} className="p-4 border rounded-lg hover:border-indigo-500 cursor-pointer transition-colors">
+                  <div className="h-20 bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-lg mb-2 flex items-center justify-center">
+                    <FileText className="h-8 w-8 text-indigo-600" />
+                  </div>
+                  <p className="text-sm font-medium text-center">{template}</p>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowTemplatesDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { setShowTemplatesDialog(false); setActiveTab('templates') }}>Browse All</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-indigo-600" />
+              Export Canvas
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Export Format</label>
+              <div className="grid grid-cols-2 gap-2">
+                {['PNG', 'SVG', 'PDF', 'JSON'].map(format => (
+                  <Button key={format} variant="outline" className="justify-start">
+                    {format}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Quality</label>
+              <div className="flex gap-2">
+                {['1x', '2x', '3x'].map(scale => (
+                  <Button key={scale} variant="outline" size="sm">{scale}</Button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowExportDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { setShowExportDialog(false); toast.success('Export started') }}>Export</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Share2 className="h-5 w-5 text-indigo-600" />
+              Share Canvas
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Share Link</label>
+              <div className="flex gap-2">
+                <Input value="https://freeflow.app/canvas/share/abc123" readOnly className="flex-1" />
+                <Button variant="outline" onClick={() => toast.success('Link copied to clipboard')}>Copy</Button>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Invite People</label>
+              <Input placeholder="Enter email address..." />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Access Level</label>
+              <div className="flex gap-2">
+                {['View', 'Comment', 'Edit'].map(level => (
+                  <Button key={level} variant="outline" size="sm">{level}</Button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowShareDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600" onClick={() => { setShowShareDialog(false); toast.success('Invitation sent') }}>Send Invite</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-teal-600" />
+              Import Design Files
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center">
+              <Download className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Drag and drop files here, or click to browse</p>
+              <p className="text-xs text-gray-500">Supports .fig, .sketch, .psd, .svg, .png</p>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Supported Formats</label>
+              <div className="flex flex-wrap gap-2">
+                {['.fig', '.sketch', '.psd', '.svg', '.png'].map(format => (
+                  <Badge key={format} variant="outline">{format}</Badge>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowImportDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-teal-600 to-cyan-600" onClick={() => { setShowImportDialog(false); toast.success('Ready to import') }}>Import</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* AI Generate Dialog */}
+      <Dialog open={showAIGenerateDialog} onOpenChange={setShowAIGenerateDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wand2 className="h-5 w-5 text-violet-600" />
+              AI Design Generator
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Describe your design</label>
+              <textarea
+                className="w-full h-24 px-3 py-2 border rounded-lg resize-none focus:ring-2 focus:ring-violet-500 focus:border-transparent dark:bg-gray-800 dark:border-gray-700"
+                placeholder="E.g., Create a mobile app dashboard with analytics charts and user profile section..."
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Style</label>
+              <div className="grid grid-cols-3 gap-2">
+                {['Modern', 'Minimal', 'Playful', 'Corporate', 'Dark', 'Light'].map(style => (
+                  <Button key={style} variant="outline" size="sm">{style}</Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Output Type</label>
+              <div className="flex gap-2">
+                {['Wireframe', 'Mockup', 'Prototype'].map(type => (
+                  <Button key={type} variant="outline" size="sm">{type}</Button>
+                ))}
+              </div>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setShowAIGenerateDialog(false)}>Cancel</Button>
+              <Button className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600" onClick={() => { setShowAIGenerateDialog(false); toast.success('AI generation started') }}>Generate</Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

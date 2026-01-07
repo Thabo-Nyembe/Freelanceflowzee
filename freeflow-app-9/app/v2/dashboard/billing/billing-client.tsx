@@ -200,23 +200,7 @@ const mockBillingActivities = [
   { id: '3', user: 'Accountant', action: 'Reconciled', target: 'Q4 revenue report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockBillingQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'plus', action: () => toast.success('Invoice created successfully'), variant: 'default' as const },
-  { id: '2', label: 'Refund', icon: 'rotate-ccw', action: () => toast.success('Refund processed successfully'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => {
-    const billingData = { exported_at: new Date().toISOString(), summary: { total_subscriptions: 5, active: 3, pending: 1, cancelled: 1 } }
-    const blob = new Blob([JSON.stringify(billingData, null, 2)], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `billing-export-${new Date().toISOString().split('T')[0]}.json`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    toast.success('Billing data exported successfully')
-  }, variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -265,6 +249,33 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
     dueDate: '',
     description: ''
   })
+
+  // Refund dialog state
+  const [showRefundDialog, setShowRefundDialog] = useState(false)
+  const [refundForm, setRefundForm] = useState({
+    transactionId: '',
+    amount: '',
+    reason: 'requested_by_customer' as 'duplicate' | 'fraudulent' | 'requested_by_customer' | 'expired_uncaptured_charge'
+  })
+
+  // Quick actions with proper dialog handlers
+  const billingQuickActions = [
+    { id: '1', label: 'New Invoice', icon: 'plus', action: () => setShowNewInvoiceModal(true), variant: 'default' as const },
+    { id: '2', label: 'Refund', icon: 'rotate-ccw', action: () => setShowRefundDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export', icon: 'download', action: () => {
+      const billingData = { exported_at: new Date().toISOString(), summary: { total_subscriptions: 5, active: 3, pending: 1, cancelled: 1 } }
+      const blob = new Blob([JSON.stringify(billingData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `billing-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Billing data exported successfully')
+    }, variant: 'outline' as const },
+  ]
 
   // Form state for new subscription
   const [newSubscriptionForm, setNewSubscriptionForm] = useState({
@@ -2181,7 +2192,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBillingQuickActions}
+            actions={billingQuickActions}
             variant="grid"
           />
         </div>
@@ -2407,6 +2418,66 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
               className="bg-gradient-to-r from-blue-600 to-cyan-600"
             >
               {mutatingInvoice ? 'Creating...' : 'Create Invoice'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Refund Modal */}
+      <Dialog open={showRefundDialog} onOpenChange={setShowRefundDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg">
+                <RotateCcw className="h-5 w-5 text-white" />
+              </div>
+              Process Refund
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Transaction ID *</label>
+              <Input
+                placeholder="txn_1234567890"
+                value={refundForm.transactionId}
+                onChange={(e) => setRefundForm(prev => ({ ...prev, transactionId: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Refund Amount (USD) *</label>
+              <Input
+                type="number"
+                placeholder="99.00"
+                value={refundForm.amount}
+                onChange={(e) => setRefundForm(prev => ({ ...prev, amount: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reason</label>
+              <select
+                value={refundForm.reason}
+                onChange={(e) => setRefundForm(prev => ({ ...prev, reason: e.target.value as typeof refundForm.reason }))}
+                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800"
+              >
+                <option value="requested_by_customer">Requested by customer</option>
+                <option value="duplicate">Duplicate charge</option>
+                <option value="fraudulent">Fraudulent</option>
+                <option value="expired_uncaptured_charge">Expired uncaptured charge</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRefundDialog(false)}>Cancel</Button>
+            <Button
+              onClick={() => {
+                toast.success(`Refund of $${refundForm.amount} initiated for ${refundForm.transactionId}`)
+                setShowRefundDialog(false)
+                setRefundForm({ transactionId: '', amount: '', reason: 'requested_by_customer' })
+              }}
+              disabled={!refundForm.transactionId || !refundForm.amount}
+              className="bg-gradient-to-r from-orange-600 to-red-600"
+            >
+              Process Refund
             </Button>
           </DialogFooter>
         </DialogContent>

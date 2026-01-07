@@ -770,20 +770,7 @@ const mockBuildsActivities = [
   { id: '3', user: 'Release Manager', action: 'Approved', target: 'hotfix build #1234', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockBuildsQuickActions = [
-  { id: '1', label: 'New Build', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Initializing new build...', success: 'Build started successfully', error: 'Failed to start build' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Retry', icon: 'refresh-cw', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Retrying build...', success: 'Build retry initiated', error: 'Failed to retry build' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'file-text', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Fetching build logs...', success: 'Logs loaded', error: 'Failed to load logs' }
-  ), variant: 'outline' as const },
-]
+// Note: mockBuildsQuickActions moved inside component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -795,6 +782,18 @@ export default function BuildsClient() {
   const [statusFilter, setStatusFilter] = useState<BuildStatus | 'all'>('all')
   const [selectedBuild, setSelectedBuild] = useState<Build | null>(null)
   const [selectedWorkflow, setSelectedWorkflow] = useState<Workflow | null>(null)
+
+  // Dialog states for quick actions
+  const [showNewBuildDialog, setShowNewBuildDialog] = useState(false)
+  const [showRetryBuildDialog, setShowRetryBuildDialog] = useState(false)
+  const [showLogsDialog, setShowLogsDialog] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const buildsQuickActions = [
+    { id: '1', label: 'New Build', icon: 'plus', action: () => setShowNewBuildDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Retry', icon: 'refresh-cw', action: () => setShowRetryBuildDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Logs', icon: 'file-text', action: () => setShowLogsDialog(true), variant: 'outline' as const },
+  ]
 
   // Filtered data
   const filteredBuilds = useMemo(() => {
@@ -1716,7 +1715,7 @@ export default function BuildsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBuildsQuickActions}
+            actions={buildsQuickActions}
             variant="grid"
           />
         </div>

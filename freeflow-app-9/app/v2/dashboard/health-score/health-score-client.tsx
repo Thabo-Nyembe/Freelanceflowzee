@@ -645,11 +645,17 @@ const mockHealthScoreActivities = [
   { id: '3', user: 'Platform Eng', action: 'deployed', target: 'performance optimization', timestamp: '3h ago', type: 'info' as const },
 ]
 
-const mockHealthScoreQuickActions = [
-  { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: () => toast.success('Health check completed successfully') },
-  { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: () => toast.success('Metrics loaded successfully') },
-  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.success('Alerts loaded successfully') },
-  { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: () => toast.success('Reports generated successfully') },
+// Quick actions defined inside the component to use state setters
+const getHealthScoreQuickActions = (
+  setShowRunCheckDialog: (v: boolean) => void,
+  setShowViewMetricsDialog: (v: boolean) => void,
+  setShowAlertsDialog: (v: boolean) => void,
+  setShowReportsDialog: (v: boolean) => void
+) => [
+  { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: () => setShowRunCheckDialog(true) },
+  { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: () => setShowViewMetricsDialog(true) },
+  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => setShowAlertsDialog(true) },
+  { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: () => setShowReportsDialog(true) },
 ]
 
 export default function HealthScoreClient() {
@@ -663,6 +669,12 @@ export default function HealthScoreClient() {
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null)
   const [isLiveMode, setIsLiveMode] = useState(true)
   const [timeRange, setTimeRange] = useState<'1h' | '4h' | '1d' | '7d' | '30d'>('1d')
+
+  // Quick Action Dialog States
+  const [showRunCheckDialog, setShowRunCheckDialog] = useState(false)
+  const [showViewMetricsDialog, setShowViewMetricsDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
 
   // Database State
   const [dbHealthScores, setDbHealthScores] = useState<DbHealthScore[]>([])
@@ -1937,7 +1949,12 @@ export default function HealthScoreClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockHealthScoreQuickActions}
+            actions={getHealthScoreQuickActions(
+              setShowRunCheckDialog,
+              setShowViewMetricsDialog,
+              setShowAlertsDialog,
+              setShowReportsDialog
+            )}
             variant="grid"
           />
         </div>
@@ -2370,6 +2387,211 @@ export default function HealthScoreClient() {
                 <Button variant="outline" onClick={() => setShowCreateDialog(false)}>Cancel</Button>
                 <Button onClick={editingId ? handleUpdateHealthScore : handleCreateHealthScore} disabled={isSubmitting}>
                   {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Health Check Dialog */}
+        <Dialog open={showRunCheckDialog} onOpenChange={setShowRunCheckDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5 text-emerald-500" />
+                Run Health Check
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Run a comprehensive health check across all services and infrastructure.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <span className="text-sm">API Services</span>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <span className="text-sm">Database Connections</span>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <span className="text-sm">Cache Systems</span>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <span className="text-sm">External Integrations</span>
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowRunCheckDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Health check completed successfully')
+                  setShowRunCheckDialog(false)
+                }}>
+                  <Activity className="w-4 h-4 mr-2" />
+                  Run Check
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Metrics Dialog */}
+        <Dialog open={showViewMetricsDialog} onOpenChange={setShowViewMetricsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-blue-500" />
+                System Metrics
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Avg Response Time</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">45ms</div>
+                  <div className="text-xs text-green-500 flex items-center gap-1 mt-1">
+                    <TrendingDown className="w-3 h-3" /> -12% from last hour
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Request Rate</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">1.2K/s</div>
+                  <div className="text-xs text-green-500 flex items-center gap-1 mt-1">
+                    <TrendingUp className="w-3 h-3" /> +8% from last hour
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Error Rate</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">0.12%</div>
+                  <div className="text-xs text-green-500 flex items-center gap-1 mt-1">
+                    <TrendingDown className="w-3 h-3" /> -0.05% from last hour
+                  </div>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Uptime</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">99.98%</div>
+                  <div className="text-xs text-gray-500 mt-1">Last 30 days</div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowViewMetricsDialog(false)}>Close</Button>
+                <Button onClick={() => {
+                  toast.success('Opening detailed metrics dashboard')
+                  setShowViewMetricsDialog(false)
+                }}>
+                  View Full Dashboard
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Dialog */}
+        <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5 text-amber-500" />
+                Alert Configuration
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                    <div>
+                      <p className="text-sm font-medium">High Error Rate</p>
+                      <p className="text-xs text-gray-500">Triggers when error rate exceeds 5%</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" defaultChecked className="sr-only peer" />
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-4 h-4 text-yellow-500" />
+                    <div>
+                      <p className="text-sm font-medium">High Latency</p>
+                      <p className="text-xs text-gray-500">Triggers when p95 exceeds 500ms</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" defaultChecked className="sr-only peer" />
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Server className="w-4 h-4 text-orange-500" />
+                    <div>
+                      <p className="text-sm font-medium">Service Down</p>
+                      <p className="text-xs text-gray-500">Triggers on health check failures</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" defaultChecked className="sr-only peer" />
+                    <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Alert settings saved')
+                  setShowAlertsDialog(false)
+                }}>
+                  Save Settings
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Dialog */}
+        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-500" />
+                Generate Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select the type of health report to generate.
+              </p>
+              <div className="space-y-2">
+                <button className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <p className="font-medium text-gray-900 dark:text-white">Daily Summary</p>
+                  <p className="text-xs text-gray-500">Overview of the last 24 hours</p>
+                </button>
+                <button className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <p className="font-medium text-gray-900 dark:text-white">Weekly Analysis</p>
+                  <p className="text-xs text-gray-500">Trends and patterns over 7 days</p>
+                </button>
+                <button className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <p className="font-medium text-gray-900 dark:text-white">Monthly Report</p>
+                  <p className="text-xs text-gray-500">Comprehensive 30-day analysis</p>
+                </button>
+                <button className="w-full p-3 text-left bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                  <p className="font-medium text-gray-900 dark:text-white">Custom Report</p>
+                  <p className="text-xs text-gray-500">Select custom date range</p>
+                </button>
+              </div>
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Cancel</Button>
+                <Button onClick={() => {
+                  toast.success('Report generation started')
+                  setShowReportsDialog(false)
+                }}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Generate
                 </Button>
               </div>
             </div>

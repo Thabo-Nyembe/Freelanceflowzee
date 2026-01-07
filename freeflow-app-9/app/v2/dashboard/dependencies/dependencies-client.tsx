@@ -353,24 +353,7 @@ const mockDependenciesActivities = [
   { id: '3', user: 'Security Eng', action: 'patched', target: '3 critical packages', timestamp: '4h ago', type: 'success' as const },
 ]
 
-const mockDependenciesQuickActions = [
-  { id: '1', label: 'Run Scan', icon: 'Shield', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 2500)),
-    { loading: 'Scanning dependencies...', success: 'Security scan completed', error: 'Scan failed' }
-  ) },
-  { id: '2', label: 'Update All', icon: 'RefreshCw', shortcut: 'U', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 3000)),
-    { loading: 'Updating all dependencies...', success: 'All dependencies updated', error: 'Update failed' }
-  ) },
-  { id: '3', label: 'Lock File', icon: 'Lock', shortcut: 'L', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Generating lock file...', success: 'Lock file generated', error: 'Failed to generate lock file' }
-  ) },
-  { id: '4', label: 'Report', icon: 'FileText', shortcut: 'R', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Generating dependency report...', success: 'Report generated successfully', error: 'Failed to generate report' }
-  ) },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function DependenciesClient({ initialDependencies }: { initialDependencies: Dependency[] }) {
   const supabase = createClient()
@@ -420,6 +403,9 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
   const [showScanDialog, setShowScanDialog] = useState(false)
   const [showAddDependencyDialog, setShowAddDependencyDialog] = useState(false)
   const [showAddPolicyDialog, setShowAddPolicyDialog] = useState(false)
+  const [showUpdateAllDialog, setShowUpdateAllDialog] = useState(false)
+  const [showLockFileDialog, setShowLockFileDialog] = useState(false)
+  const [showReportDialog, setShowReportDialog] = useState(false)
   const [expandedDeps, setExpandedDeps] = useState<Set<string>>(new Set())
   const [settingsTab, setSettingsTab] = useState('general')
   const [isScanning, setIsScanning] = useState(false)
@@ -2267,7 +2253,12 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDependenciesQuickActions}
+            actions={[
+              { id: '1', label: 'Run Scan', icon: 'Shield', shortcut: 'S', action: () => setShowScanDialog(true) },
+              { id: '2', label: 'Update All', icon: 'RefreshCw', shortcut: 'U', action: () => setShowUpdateAllDialog(true) },
+              { id: '3', label: 'Lock File', icon: 'Lock', shortcut: 'L', action: () => setShowLockFileDialog(true) },
+              { id: '4', label: 'Report', icon: 'FileText', shortcut: 'R', action: () => setShowReportDialog(true) },
+            ]}
             variant="grid"
           />
         </div>
@@ -2615,6 +2606,197 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
               >
                 <Shield className="w-4 h-4" />
                 {policyMutation.isLoading ? 'Creating...' : 'Create Policy'}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Update All Dependencies Dialog */}
+      <Dialog open={showUpdateAllDialog} onOpenChange={setShowUpdateAllDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
+                <RefreshCw className="w-5 h-5" />
+              </div>
+              Update All Dependencies
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              This will update all dependencies to their latest compatible versions. This action may introduce breaking changes.
+            </p>
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">Warning</p>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">Make sure to review changes and run tests after updating.</p>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-gray-900 dark:text-white">Update Strategy</Label>
+              <Select defaultValue="compatible">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select strategy" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="compatible">Compatible Updates Only</SelectItem>
+                  <SelectItem value="minor">Minor Updates</SelectItem>
+                  <SelectItem value="major">Major Updates (Breaking)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowUpdateAllDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowUpdateAllDialog(false)
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 3000)),
+                    { loading: 'Updating all dependencies...', success: 'All dependencies updated', error: 'Update failed' }
+                  )
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Update All
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Lock File Dialog */}
+      <Dialog open={showLockFileDialog} onOpenChange={setShowLockFileDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white">
+                <Lock className="w-5 h-5" />
+              </div>
+              Generate Lock File
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              Generate a lock file to ensure consistent dependency versions across all environments.
+            </p>
+            <div className="space-y-2">
+              <Label className="text-gray-900 dark:text-white">Lock File Format</Label>
+              <Select defaultValue="auto">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Auto-detect</SelectItem>
+                  <SelectItem value="package-lock">package-lock.json (npm)</SelectItem>
+                  <SelectItem value="yarn-lock">yarn.lock (Yarn)</SelectItem>
+                  <SelectItem value="pnpm-lock">pnpm-lock.yaml (pnpm)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch id="include-dev" defaultChecked />
+              <Label htmlFor="include-dev" className="text-gray-900 dark:text-white">Include dev dependencies</Label>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowLockFileDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLockFileDialog(false)
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1000)),
+                    { loading: 'Generating lock file...', success: 'Lock file generated', error: 'Failed to generate lock file' }
+                  )
+                }}
+                className="px-4 py-2 bg-amber-600 text-white rounded-lg font-medium hover:bg-amber-700 flex items-center gap-2"
+              >
+                <Lock className="w-4 h-4" />
+                Generate
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dependency Report Dialog */}
+      <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white">
+                <FileText className="w-5 h-5" />
+              </div>
+              Generate Dependency Report
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-gray-600 dark:text-gray-300">
+              Generate a comprehensive report of all dependencies, vulnerabilities, and license information.
+            </p>
+            <div className="space-y-2">
+              <Label className="text-gray-900 dark:text-white">Report Format</Label>
+              <Select defaultValue="pdf">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                  <SelectItem value="html">HTML Report</SelectItem>
+                  <SelectItem value="json">JSON Export</SelectItem>
+                  <SelectItem value="csv">CSV Export</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-gray-900 dark:text-white">Include Sections</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch id="include-vulns" defaultChecked />
+                  <Label htmlFor="include-vulns" className="text-gray-700 dark:text-gray-300">Vulnerabilities</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="include-licenses" defaultChecked />
+                  <Label htmlFor="include-licenses" className="text-gray-700 dark:text-gray-300">License Analysis</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id="include-outdated" defaultChecked />
+                  <Label htmlFor="include-outdated" className="text-gray-700 dark:text-gray-300">Outdated Packages</Label>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowReportDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowReportDialog(false)
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 1500)),
+                    { loading: 'Generating dependency report...', success: 'Report generated successfully', error: 'Failed to generate report' }
+                  )
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+              >
+                <FileText className="w-4 h-4" />
+                Generate Report
               </button>
             </div>
           </div>

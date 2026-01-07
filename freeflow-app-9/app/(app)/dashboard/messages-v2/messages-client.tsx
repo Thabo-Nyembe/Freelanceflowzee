@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
 import { useMessages } from '@/lib/hooks/use-messages'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -266,6 +267,16 @@ export default function MessagesClient() {
     autoMarkRead: true
   })
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for quick actions
+  const [showAllThreadsDialog, setShowAllThreadsDialog] = useState(false)
+  const [showMyRepliesDialog, setShowMyRepliesDialog] = useState(false)
+  const [showArchivedThreadsDialog, setShowArchivedThreadsDialog] = useState(false)
+  const [showCallHistoryDialog, setShowCallHistoryDialog] = useState(false)
+  const [showBrowseFilesDialog, setShowBrowseFilesDialog] = useState(false)
+  const [showCodeFilesDialog, setShowCodeFilesDialog] = useState(false)
+  const [showAllMentionsDialog, setShowAllMentionsDialog] = useState(false)
+  const [showReactionsDialog, setShowReactionsDialog] = useState(false)
 
   // Stats
   const stats = useMemo(() => {
@@ -1105,12 +1116,12 @@ export default function MessagesClient() {
             {/* Threads Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.success('All threads', { description: `${mockThreads.length} total threads` }) },
+                { icon: MessageCircle, label: 'All Threads', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => setShowAllThreadsDialog(true) },
                 { icon: Star, label: 'Following', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => { const following = mockThreads.filter(t => t.isFollowing); toast.success('Following', { description: `${following.length} threads you are following` }) } },
                 { icon: Inbox, label: 'Unread', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { const unread = mockThreads.filter(t => t.isUnread); toast.success('Unread threads', { description: `${unread.length} unread threads` }) } },
-                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.success('Your replies', { description: 'Showing threads you have replied to' }) },
+                { icon: Reply, label: 'My Replies', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setShowMyRepliesDialog(true) },
                 { icon: AtSign, label: 'Mentions', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => { const mentionsTabEl = document.querySelector('[value="mentions"]') as HTMLElement; if (mentionsTabEl) mentionsTabEl.click(); toast.success('Mentions', { description: `${stats.mentions} mentions found` }) } },
-                { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => toast.success('Archived threads', { description: '0 archived threads' }) },
+                { icon: Archive, label: 'Archived', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => setShowArchivedThreadsDialog(true) },
                 { icon: Search, label: 'Search', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click(); toast.success('Search ready') } },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('notifications'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click(); toast.success('Thread settings ready') } },
               ].map((action, idx) => (
@@ -1201,7 +1212,7 @@ export default function MessagesClient() {
                 { icon: ScreenShare, label: 'Share', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => { if (activeCall) { toast.success('Screen share ready', { description: 'Select a window or screen to share' }) } else { toast.warning('Start a call first', { description: 'You need to be in a call to share your screen' }) } } },
                 { icon: Calendar, label: 'Schedule', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => { window.open('/dashboard/calendar', '_blank'); toast.success('Calendar opened', { description: 'Schedule a new call meeting' }) } },
                 { icon: PlayCircle, label: 'Recordings', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const recorded = mockCalls.filter(c => c.isRecorded); toast.success('Call recordings', { description: `${recorded.length} recorded calls available` }) } },
-                { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.success('Call history', { description: `${stats.totalCalls} calls today` }) },
+                { icon: Clock, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowCallHistoryDialog(true) },
                 { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { setSettingsTab('general'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click(); toast.success('Call settings ready') } },
               ].map((action, idx) => (
                 <Button
@@ -1346,11 +1357,11 @@ export default function MessagesClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Upload, label: 'Upload', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => { const input = document.createElement('input'); input.type = 'file'; input.multiple = true; input.onchange = () => toast.success('Files selected', { description: `${input.files?.length || 0} files ready to upload` }); input.click() } },
-                { icon: FolderOpen, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.success('All files', { description: `${mockFiles.length} files shared across channels` }) },
+                { icon: FolderOpen, label: 'Browse', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => setShowBrowseFilesDialog(true) },
                 { icon: Image, label: 'Images', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => { const images = mockFiles.filter(f => f.type.includes('image')); toast.success('Images', { description: `${images.length} images found` }) } },
                 { icon: Video, label: 'Videos', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => { const videos = mockFiles.filter(f => f.type.includes('video')); toast.success('Videos', { description: `${videos.length} videos found` }) } },
                 { icon: FileText, label: 'Documents', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => { const docs = mockFiles.filter(f => f.type.includes('pdf') || f.type.includes('doc')); toast.success('Documents', { description: `${docs.length} documents found` }) } },
-                { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => toast.success('Code files', { description: '0 code files found' }) },
+                { icon: Code, label: 'Code', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => setShowCodeFilesDialog(true) },
                 { icon: Search, label: 'Search', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => { setSearchQuery(''); const searchTabEl = document.querySelector('[value="search"]') as HTMLElement; if (searchTabEl) searchTabEl.click(); toast.success('Search files') } },
                 { icon: Settings, label: 'Settings', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => { setSettingsTab('advanced'); const settingsTabEl = document.querySelector('[value="settings"]') as HTMLElement; if (settingsTabEl) settingsTabEl.click(); toast.success('File settings ready') } },
               ].map((action, idx) => (
@@ -1455,9 +1466,9 @@ export default function MessagesClient() {
             {/* Mentions Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: AtSign, label: 'All Mentions', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => toast.success('All mentions', { description: `${mockMentions.length} mentions found` }) },
+                { icon: AtSign, label: 'All Mentions', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => setShowAllMentionsDialog(true) },
                 { icon: Inbox, label: 'Unread', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => { const unread = mockMentions.filter(m => !m.isRead); toast.success('Unread mentions', { description: `${unread.length} unread mentions` }) } },
-                { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => toast.success('Reactions', { description: '12 reactions to your messages' }) },
+                { icon: ThumbsUp, label: 'Reactions', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => setShowReactionsDialog(true) },
                 { icon: Star, label: 'Starred', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => { const starred = supabaseMessages?.filter(m => m.is_starred) || []; toast.success('Starred messages', { description: `${starred.length} starred messages` }) } },
                 { icon: Reply, label: 'Reply All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => { setMessageInput('@all '); toast.success('Reply to all', { description: 'Type your reply in the message input' }) } },
                 { icon: CheckCheck, label: 'Mark Read', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: handleMarkAllAsRead },
@@ -2294,6 +2305,317 @@ export default function MessagesClient() {
           />
         </div>
       </div>
+
+      {/* All Threads Dialog */}
+      <Dialog open={showAllThreadsDialog} onOpenChange={setShowAllThreadsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageCircle className="w-5 h-5 text-amber-600" />
+              All Threads
+            </DialogTitle>
+            <DialogDescription>
+              View and manage all threaded conversations
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {mockThreads.length > 0 ? mockThreads.map(thread => (
+              <div key={thread.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div className="flex items-start gap-3">
+                  <Avatar>
+                    <AvatarFallback>{thread.parentMessage.author.displayName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium">{thread.parentMessage.author.displayName}</span>
+                      <span className="text-xs text-gray-500">in #{thread.channel}</span>
+                      {thread.isUnread && <Badge className="bg-blue-500 text-white text-xs">New</Badge>}
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{thread.parentMessage.content}</p>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <span>{thread.replies} replies</span>
+                      <span>Last reply {formatTime(thread.lastReply)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <p className="text-center text-gray-500 py-8">No threads found</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAllThreadsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* My Replies Dialog */}
+      <Dialog open={showMyRepliesDialog} onOpenChange={setShowMyRepliesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Reply className="w-5 h-5 text-rose-600" />
+              My Replies
+            </DialogTitle>
+            <DialogDescription>
+              Threads you have replied to
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {mockThreads.filter(t => t.isFollowing).length > 0 ? mockThreads.filter(t => t.isFollowing).map(thread => (
+              <div key={thread.id} className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div className="flex items-start gap-3">
+                  <Avatar>
+                    <AvatarFallback>{thread.parentMessage.author.displayName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium">{thread.parentMessage.author.displayName}</span>
+                      <span className="text-xs text-gray-500">in #{thread.channel}</span>
+                    </div>
+                    <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">{thread.parentMessage.content}</p>
+                    <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                      <span>{thread.replies} replies</span>
+                      <span>Your last reply {formatTime(thread.lastReply)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <p className="text-center text-gray-500 py-8">You haven't replied to any threads yet</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowMyRepliesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Archived Threads Dialog */}
+      <Dialog open={showArchivedThreadsDialog} onOpenChange={setShowArchivedThreadsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Archive className="w-5 h-5 text-fuchsia-600" />
+              Archived Threads
+            </DialogTitle>
+            <DialogDescription>
+              Threads that have been archived
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="text-center py-12">
+              <Archive className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No archived threads</p>
+              <p className="text-sm text-gray-400 mt-2">Threads you archive will appear here</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowArchivedThreadsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Call History Dialog */}
+      <Dialog open={showCallHistoryDialog} onOpenChange={setShowCallHistoryDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Clock className="w-5 h-5 text-indigo-600" />
+              Call History
+            </DialogTitle>
+            <DialogDescription>
+              {stats.totalCalls} calls today
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {mockCalls.map(call => (
+              <div key={call.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 border">
+                <div className="flex items-center gap-3">
+                  {call.status === 'missed' ? <PhoneOff className="w-5 h-5 text-red-500" /> :
+                   call.status === 'ongoing' ? <Phone className="w-5 h-5 text-green-500 animate-pulse" /> :
+                   <Phone className="w-5 h-5 text-gray-500" />}
+                  <div>
+                    <p className="font-medium">{call.channelName}</p>
+                    <p className="text-sm text-gray-500">{formatTime(call.startTime)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  {call.duration && <span className="text-sm text-gray-500">{formatDuration(call.duration)}</span>}
+                  <Badge className={
+                    call.status === 'missed' ? 'bg-red-100 text-red-700' :
+                    call.status === 'ongoing' ? 'bg-green-100 text-green-700' :
+                    call.status === 'scheduled' ? 'bg-blue-100 text-blue-700' :
+                    'bg-gray-100 text-gray-700'
+                  }>{call.status}</Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCallHistoryDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Browse Files Dialog */}
+      <Dialog open={showBrowseFilesDialog} onOpenChange={setShowBrowseFilesDialog}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FolderOpen className="w-5 h-5 text-indigo-600" />
+              Browse All Files
+            </DialogTitle>
+            <DialogDescription>
+              {mockFiles.length} files shared across channels
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {mockFiles.map(file => (
+              <div key={file.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                    {file.type.includes('image') ? <Image className="w-5 h-5 text-blue-500" /> :
+                     file.type.includes('video') ? <Video className="w-5 h-5 text-purple-500" /> :
+                     file.type.includes('pdf') ? <FileText className="w-5 h-5 text-red-500" /> :
+                     <FolderOpen className="w-5 h-5 text-gray-500" />}
+                  </div>
+                  <div>
+                    <p className="font-medium">{file.name}</p>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <span>{formatFileSize(file.size)}</span>
+                      <span>-</span>
+                      <span>{file.channelName}</span>
+                    </div>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => {
+                  toast.success(`Downloaded ${file.name}`)
+                }}>
+                  <Download className="w-4 h-4" />
+                </Button>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBrowseFilesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Code Files Dialog */}
+      <Dialog open={showCodeFilesDialog} onOpenChange={setShowCodeFilesDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Code className="w-5 h-5 text-pink-600" />
+              Code Files
+            </DialogTitle>
+            <DialogDescription>
+              Code snippets and files shared in channels
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="text-center py-12">
+              <Code className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <p className="text-gray-500">No code files found</p>
+              <p className="text-sm text-gray-400 mt-2">Share code snippets in messages to see them here</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCodeFilesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* All Mentions Dialog */}
+      <Dialog open={showAllMentionsDialog} onOpenChange={setShowAllMentionsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AtSign className="w-5 h-5 text-cyan-600" />
+              All Mentions
+            </DialogTitle>
+            <DialogDescription>
+              {mockMentions.length} mentions found
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            {mockMentions.length > 0 ? mockMentions.map(mention => (
+              <div key={mention.id} className={`p-4 border rounded-lg ${mention.isRead ? '' : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200'}`}>
+                <div className="flex items-start gap-3">
+                  <Avatar>
+                    <AvatarFallback>{mention.message.author.displayName.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium">{mention.message.author.displayName}</span>
+                      <span className="text-xs text-gray-500">in {mention.channel}</span>
+                      {!mention.isRead && <Badge className="bg-blue-500 text-white text-xs">New</Badge>}
+                    </div>
+                    <p className="text-sm">{mention.message.content}</p>
+                    <p className="text-xs text-gray-500 mt-1">{formatTime(mention.mentionedAt)}</p>
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <p className="text-center text-gray-500 py-8">No mentions found</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowAllMentionsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reactions Dialog */}
+      <Dialog open={showReactionsDialog} onOpenChange={setShowReactionsDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ThumbsUp className="w-5 h-5 text-emerald-600" />
+              Reactions to Your Messages
+            </DialogTitle>
+            <DialogDescription>
+              12 reactions to your messages
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-4 gap-4 mb-6">
+              {[
+                { emoji: '👍', label: 'Thumbs Up', count: 5 },
+                { emoji: '❤️', label: 'Heart', count: 3 },
+                { emoji: '🔥', label: 'Fire', count: 2 },
+                { emoji: '🎉', label: 'Celebrate', count: 2 },
+              ].map((reaction, idx) => (
+                <div key={idx} className="text-center p-4 border rounded-lg">
+                  <span className="text-3xl">{reaction.emoji}</span>
+                  <p className="text-sm font-medium mt-2">{reaction.count}</p>
+                  <p className="text-xs text-gray-500">{reaction.label}</p>
+                </div>
+              ))}
+            </div>
+            <div className="border-t pt-4">
+              <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Recent Reactions</h4>
+              {mockMessages.filter(m => m.reactions.length > 0).slice(0, 3).map(message => (
+                <div key={message.id} className="p-3 border rounded-lg mb-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-1">{message.content}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    {message.reactions.map((reaction, idx) => (
+                      <span key={idx} className="text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                        {getReactionIcon(reaction.type)} {reaction.count}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowReactionsDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

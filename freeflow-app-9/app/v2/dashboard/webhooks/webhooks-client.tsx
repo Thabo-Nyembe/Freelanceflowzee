@@ -371,12 +371,7 @@ const mockWebhooksActivities = [
   { id: '3', user: 'Partner Dev', action: 'tested', target: 'order.created webhook', timestamp: '45m ago', type: 'info' as const },
 ]
 
-const mockWebhooksQuickActions = [
-  { id: '1', label: 'New Webhook', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Webhook', { description: 'Webhook configuration ready' }) },
-  { id: '2', label: 'Test Delivery', icon: 'Send', shortcut: 'T', action: () => toast.success('Test Delivery', { description: 'Webhook test sent successfully' }) },
-  { id: '3', label: 'View Logs', icon: 'FileJson', shortcut: 'L', action: () => toast.success('Logs Loaded', { description: 'Webhook delivery logs ready' }) },
-  { id: '4', label: 'Retry Failed', icon: 'RefreshCw', shortcut: 'R', action: () => toast.success('Retrying', { description: 'Failed deliveries queued for retry' }) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function WebhooksClient({
   initialWebhooks,
@@ -406,6 +401,7 @@ export default function WebhooksClient({
   const [showEndpointDialog, setShowEndpointDialog] = useState(false)
   const [showLogDialog, setShowLogDialog] = useState(false)
   const [showTestDialog, setShowTestDialog] = useState(false)
+  const [showRetryFailedDialog, setShowRetryFailedDialog] = useState(false)
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['Users', 'Orders', 'Payments']))
   const [settingsTab, setSettingsTab] = useState('general')
   const [isSaving, setIsSaving] = useState(false)
@@ -644,6 +640,14 @@ export default function WebhooksClient({
     URL.revokeObjectURL(url)
     toast.success('Exported', { description: 'Webhook configuration downloaded' })
   }
+
+  // Quick actions with proper dialog openers
+  const webhooksQuickActions = [
+    { id: '1', label: 'New Webhook', icon: 'Plus', shortcut: 'N', action: () => openCreateDialog() },
+    { id: '2', label: 'Test Delivery', icon: 'Send', shortcut: 'T', action: () => setShowTestDialog(true) },
+    { id: '3', label: 'View Logs', icon: 'FileJson', shortcut: 'L', action: () => setActiveTab('logs') },
+    { id: '4', label: 'Retry Failed', icon: 'RefreshCw', shortcut: 'R', action: () => setShowRetryFailedDialog(true) },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
@@ -1879,7 +1883,7 @@ export default function WebhooksClient({
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWebhooksQuickActions}
+            actions={webhooksQuickActions}
             variant="grid"
           />
         </div>
@@ -2120,6 +2124,89 @@ export default function WebhooksClient({
               <button className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2">
                 <Send className="w-4 h-4" />
                 Send Test
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Retry Failed Deliveries Dialog */}
+      <Dialog open={showRetryFailedDialog} onOpenChange={setShowRetryFailedDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-white">
+                <RefreshCw className="w-5 h-5" />
+              </div>
+              Retry Failed Deliveries
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                <div>
+                  <p className="font-medium text-orange-800 dark:text-orange-200">
+                    {mockDeliveryLogs.filter(log => log.status === 'failed' || log.status === 'retrying').length} Failed Deliveries
+                  </p>
+                  <p className="text-sm text-orange-600 dark:text-orange-300">
+                    Select which deliveries to retry
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Retry Options</Label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <input type="radio" name="retryOption" value="all" defaultChecked className="text-orange-600" />
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">Retry All Failed</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Retry all failed deliveries from the last 24 hours</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700">
+                  <input type="radio" name="retryOption" value="selected" className="text-orange-600" />
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">Retry Selected</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Choose specific webhooks to retry</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Retry Delay</Label>
+              <Select defaultValue="immediate">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select delay" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="immediate">Immediate</SelectItem>
+                  <SelectItem value="1min">1 minute</SelectItem>
+                  <SelectItem value="5min">5 minutes</SelectItem>
+                  <SelectItem value="15min">15 minutes</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowRetryFailedDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  toast.success('Retrying', { description: 'Failed deliveries have been queued for retry' })
+                  setShowRetryFailedDialog(false)
+                }}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg font-medium hover:bg-orange-700 flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry Deliveries
               </button>
             </div>
           </div>

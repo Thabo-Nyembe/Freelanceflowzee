@@ -245,12 +245,7 @@ const mockSystemInsightsActivities = [
   { id: '3', user: 'Platform Eng', action: 'scaled', target: 'API cluster to 8 nodes', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockSystemInsightsQuickActions = [
-  { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => toast.success('Deployment Started', { description: 'Deploying to production' }) },
-  { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => toast.success('Services Restarted', { description: 'All services restarted successfully' }) },
-  { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => toast.success('Logs Loaded', { description: 'System logs ready' }) },
-  { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => toast.success('Metrics Updated', { description: 'Latest metrics loaded' }) },
-]
+// Quick actions will be defined inside component to access state setters
 
 // Database types
 interface DbSystemAlert {
@@ -300,6 +295,20 @@ export default function SystemInsightsClient() {
   const [dbAlerts, setDbAlerts] = useState<DbSystemAlert[]>([])
   const [dbSettings, setDbSettings] = useState<DbSystemSettings | null>(null)
   const [showCreateAlertDialog, setShowCreateAlertDialog] = useState(false)
+
+  // Quick action dialog states
+  const [showDeployDialog, setShowDeployDialog] = useState(false)
+  const [showRestartDialog, setShowRestartDialog] = useState(false)
+  const [showLogsDialog, setShowLogsDialog] = useState(false)
+  const [showMetricsDialog, setShowMetricsDialog] = useState(false)
+
+  // Quick actions with dialog openers
+  const quickActions = [
+    { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => setShowDeployDialog(true) },
+    { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => setShowRestartDialog(true) },
+    { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => setShowLogsDialog(true) },
+    { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => setShowMetricsDialog(true) },
+  ]
 
   // Form state for creating alerts
   const [alertForm, setAlertForm] = useState({
@@ -2434,10 +2443,289 @@ docker run -d --name kazi-agent \\
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSystemInsightsQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
+
+        {/* Deploy Dialog */}
+        <Dialog open={showDeployDialog} onOpenChange={setShowDeployDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Deploy to Production</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Target Environment</Label>
+                <Select defaultValue="production">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="development">Development</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="production">Production</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Version/Tag</Label>
+                <Input placeholder="e.g., v2.4.1 or latest" defaultValue="latest" />
+              </div>
+              <div className="space-y-2">
+                <Label>Services to Deploy</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Services</SelectItem>
+                    <SelectItem value="api-gateway">API Gateway</SelectItem>
+                    <SelectItem value="auth-service">Auth Service</SelectItem>
+                    <SelectItem value="user-service">User Service</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Run Pre-deploy Checks</Label>
+                  <p className="text-sm text-gray-500">Execute health checks before deployment</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDeployDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Deployment Started', { description: 'Deploying to production environment' })
+                  setShowDeployDialog(false)
+                }}>
+                  Start Deployment
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Restart Dialog */}
+        <Dialog open={showRestartDialog} onOpenChange={setShowRestartDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Restart Services</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Services to Restart</Label>
+                <Select defaultValue="all">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Services</SelectItem>
+                    <SelectItem value="api-gateway">API Gateway</SelectItem>
+                    <SelectItem value="auth-service">Auth Service</SelectItem>
+                    <SelectItem value="user-service">User Service</SelectItem>
+                    <SelectItem value="payment-service">Payment Service</SelectItem>
+                    <SelectItem value="worker-service">Worker Service</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Restart Strategy</Label>
+                <Select defaultValue="rolling">
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="rolling">Rolling Restart</SelectItem>
+                    <SelectItem value="immediate">Immediate (All at once)</SelectItem>
+                    <SelectItem value="blue-green">Blue-Green</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>Drain Connections First</Label>
+                  <p className="text-sm text-gray-500">Wait for active connections to complete</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" className="flex-1" onClick={() => setShowRestartDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  toast.success('Services Restarted', { description: 'All services restarted successfully' })
+                  setShowRestartDialog(false)
+                }}>
+                  Restart Services
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Logs Dialog */}
+        <Dialog open={showLogsDialog} onOpenChange={setShowLogsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>System Logs Viewer</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex gap-4">
+                <div className="flex-1 space-y-2">
+                  <Label>Service</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Services</SelectItem>
+                      <SelectItem value="api-gateway">API Gateway</SelectItem>
+                      <SelectItem value="auth-service">Auth Service</SelectItem>
+                      <SelectItem value="user-service">User Service</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label>Log Level</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Levels</SelectItem>
+                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="warn">Warning</SelectItem>
+                      <SelectItem value="info">Info</SelectItem>
+                      <SelectItem value="debug">Debug</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label>Time Range</Label>
+                  <Select defaultValue="1h">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15m">Last 15 min</SelectItem>
+                      <SelectItem value="1h">Last 1 hour</SelectItem>
+                      <SelectItem value="6h">Last 6 hours</SelectItem>
+                      <SelectItem value="24h">Last 24 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm h-[300px] overflow-y-auto">
+                {mockLogs.map(log => (
+                  <div key={log.id} className="flex gap-2 py-1 hover:bg-gray-800">
+                    <span className="text-gray-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                    <Badge className={`${getLogLevelColor(log.level)} text-xs`}>{log.level}</Badge>
+                    <span className="text-cyan-400">[{log.service}]</span>
+                    <span className="text-gray-300">{log.message}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" onClick={() => setShowLogsDialog(false)}>
+                  Close
+                </Button>
+                <Button variant="outline" onClick={() => toast.success('Logs exported')}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Logs
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Metrics Dialog */}
+        <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>System Metrics</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="flex gap-4">
+                <div className="flex-1 space-y-2">
+                  <Label>Metric Type</Label>
+                  <Select defaultValue="all">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Metrics</SelectItem>
+                      <SelectItem value="cpu">CPU Usage</SelectItem>
+                      <SelectItem value="memory">Memory Usage</SelectItem>
+                      <SelectItem value="disk">Disk I/O</SelectItem>
+                      <SelectItem value="network">Network</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label>Time Range</Label>
+                  <Select defaultValue="1h">
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="15m">Last 15 min</SelectItem>
+                      <SelectItem value="1h">Last 1 hour</SelectItem>
+                      <SelectItem value="6h">Last 6 hours</SelectItem>
+                      <SelectItem value="24h">Last 24 hours</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {mockMetrics.slice(0, 4).map(metric => (
+                  <div key={metric.id} className={`p-4 rounded-lg border ${
+                    metric.status === 'critical' ? 'border-red-300 bg-red-50 dark:border-red-700 dark:bg-red-900/20' :
+                    metric.status === 'warning' ? 'border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-900/20' :
+                    'border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800'
+                  }`}>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-600 dark:text-gray-400">{metric.name}</span>
+                      <Badge className={getStatusColor(metric.status)}>{metric.status}</Badge>
+                    </div>
+                    <div className="text-2xl font-bold">{metric.value}{metric.unit}</div>
+                    <div className="flex items-end gap-1 h-8 mt-2">
+                      {metric.sparkline.map((val, idx) => (
+                        <div
+                          key={idx}
+                          className={`flex-1 rounded-t ${
+                            val >= metric.thresholds.critical ? 'bg-red-500' :
+                            val >= metric.thresholds.warning ? 'bg-amber-500' :
+                            'bg-blue-500'
+                          }`}
+                          style={{ height: `${(val / Math.max(...metric.sparkline)) * 100}%` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button variant="outline" onClick={() => setShowMetricsDialog(false)}>
+                  Close
+                </Button>
+                <Button variant="outline" onClick={() => {
+                  handleRefreshMetrics()
+                  toast.success('Metrics refreshed')
+                }}>
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button variant="outline" onClick={() => toast.success('Metrics exported')}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

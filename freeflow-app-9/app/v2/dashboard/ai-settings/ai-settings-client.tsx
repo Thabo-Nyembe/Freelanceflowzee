@@ -211,20 +211,7 @@ const aiSettingsActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const aiSettingsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Adding new AI provider...', success: 'AI provider added successfully', error: 'Failed to add AI provider' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting AI configuration...', success: 'AI configuration exported successfully', error: 'Failed to export configuration' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading AI settings...', success: 'AI settings loaded', error: 'Failed to load AI settings' }
-  ) },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function AiSettingsClient() {
   // A+++ STATE MANAGEMENT
@@ -305,6 +292,18 @@ export default function AiSettingsClient() {
   const [showFallbackDialog, setShowFallbackDialog] = useState(false)
   const [newPrimaryProvider, setNewPrimaryProvider] = useState('')
   const [newFallbackProvider, setNewFallbackProvider] = useState('')
+
+  // Quick Actions Dialog States
+  const [showAddProviderDialog, setShowAddProviderDialog] = useState(false)
+  const [showExportConfigDialog, setShowExportConfigDialog] = useState(false)
+  const [showAdvancedSettingsDialog, setShowAdvancedSettingsDialog] = useState(false)
+
+  // Quick Actions array - defined inside component to access state setters
+  const aiSettingsQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowAddProviderDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportConfigDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowAdvancedSettingsDialog(true) },
+  ]
 
   // ============================================
   // AI SETTINGS HANDLERS

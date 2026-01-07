@@ -23,6 +23,14 @@ import { ErrorEmptyState } from '@/components/ui/empty-state'
 import { useAnnouncer } from '@/lib/accessibility'
 import { createFeatureLogger } from '@/lib/logger'
 import { toast } from 'sonner'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { NumberFlow } from '@/components/ui/number-flow'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import {
@@ -77,11 +85,7 @@ const adminOverviewActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const adminOverviewQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Item Created', { description: 'New admin item ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Admin data exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Admin settings opened' }) },
-]
+// Quick actions will be defined inside the component to use state
 
 export default function AdminOverviewClient() {
   const router = useRouter()
@@ -93,6 +97,11 @@ export default function AdminOverviewClient() {
   const [error, setError] = useState<string | null>(null)
   const [showAllAlerts, setShowAllAlerts] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
+
+  // Dialog states for quick actions
+  const [showNewItemDialog, setShowNewItemDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
 
   // Dashboard data state
   const [dashboardStats, setDashboardStats] = useState<any>(null)

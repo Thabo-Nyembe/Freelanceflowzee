@@ -382,6 +382,20 @@ export default function ComponentLibraryClient() {
   const [iconSearch, setIconSearch] = useState('')
   const [settingsTab, setSettingsTab] = useState('display')
 
+  // Dialog states for quick actions
+  const [showNewComponentDialog, setShowNewComponentDialog] = useState(false)
+  const [showBrowseDialog, setShowBrowseDialog] = useState(false)
+  const [showPlaygroundDialog, setShowPlaygroundDialog] = useState(false)
+  const [showDocsDialog, setShowDocsDialog] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const quickActions = [
+    { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => setShowNewComponentDialog(true) },
+    { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => setShowBrowseDialog(true) },
+    { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => setShowPlaygroundDialog(true) },
+    { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => setShowDocsDialog(true) },
+  ]
+
   const filteredComponents = useMemo(() => {
     let filtered = [...mockComponents]
     if (searchQuery) {
@@ -1798,7 +1812,7 @@ export default function App() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockComponentLibQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>

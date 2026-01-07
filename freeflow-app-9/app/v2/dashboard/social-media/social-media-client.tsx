@@ -384,6 +384,31 @@ export default function SocialMediaClient() {
   const [platformFilter, setPlatformFilter] = useState<Platform | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states
+  const [showCreatePostDialog, setShowCreatePostDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showConnectAccountDialog, setShowConnectAccountDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showGenerateCaptionDialog, setShowGenerateCaptionDialog] = useState(false)
+  const [showHashtagsDialog, setShowHashtagsDialog] = useState(false)
+  const [showBestTimeDialog, setShowBestTimeDialog] = useState(false)
+  const [showCreateVisualDialog, setShowCreateVisualDialog] = useState(false)
+  const [showReplyDialog, setShowReplyDialog] = useState(false)
+  const [showNewCampaignDialog, setShowNewCampaignDialog] = useState(false)
+  const [showInviteTeamDialog, setShowInviteTeamDialog] = useState(false)
+  const [showIntegrationsDialog, setShowIntegrationsDialog] = useState(false)
+  const [showRegenerateKeyDialog, setShowRegenerateKeyDialog] = useState(false)
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [showDeleteDraftsDialog, setShowDeleteDraftsDialog] = useState(false)
+  const [showDisconnectDialog, setShowDisconnectDialog] = useState(false)
+  const [showResetAnalyticsDialog, setShowResetAnalyticsDialog] = useState(false)
+  const [showDuplicateDialog, setShowDuplicateDialog] = useState(false)
+  const [showPostAnalyticsDialog, setShowPostAnalyticsDialog] = useState(false)
+  const [showDeletePostDialog, setShowDeletePostDialog] = useState(false)
+  const [replyUsername, setReplyUsername] = useState('')
+  const [selectedPostId, setSelectedPostId] = useState('')
+
   // Stats
   const stats = useMemo(() => {
     const totalPosts = posts.length

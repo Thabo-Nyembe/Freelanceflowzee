@@ -408,20 +408,7 @@ const aiEnhancedActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const aiEnhancedQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new AI tool...', success: 'AI tool created successfully', error: 'Failed to create AI tool' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting AI tools data...', success: 'Export completed successfully', error: 'Failed to export data' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Opening AI settings...', success: 'Settings panel opened', error: 'Failed to open settings' }
-  ) },
-]
+// Quick actions will be defined inside component to access state setters
 
 export default function AiEnhancedClient() {
   logger.debug('Component mounting')
@@ -451,7 +438,15 @@ export default function AiEnhancedClient() {
   const [showConfigureModal, setShowConfigureModal] = useState(false)
   const [showExportModal, setShowExportModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const aiEnhancedQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowCreateModal(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportModal(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
 
   // FORM STATES
   const [toolName, setToolName] = useState('')
@@ -1773,6 +1768,120 @@ export default function AiEnhancedClient() {
                   className="bg-red-600 hover:bg-red-700"
                 >
                   {isSaving ? 'Deleting...' : 'Delete Tool'}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
+
+      {/* SETTINGS DIALOG */}
+      <AnimatePresence>
+        {showSettingsDialog && (
+          <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+            <DialogContent className="max-w-2xl bg-slate-900 border-gray-700">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-white">
+                  <Cpu className="w-5 h-5 text-blue-400" />
+                  AI Settings
+                </DialogTitle>
+                <DialogDescription>
+                  Configure your AI tools preferences and options
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6 py-4">
+                {/* General Settings */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-white">General Settings</h4>
+                  <div className="p-4 bg-slate-800 rounded-lg space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-white">Enable AI Suggestions</p>
+                        <p className="text-xs text-gray-400">Get smart suggestions while working</p>
+                      </div>
+                      <Checkbox defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-white">Auto-save Results</p>
+                        <p className="text-xs text-gray-400">Automatically save AI outputs</p>
+                      </div>
+                      <Checkbox defaultChecked />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-white">Usage Analytics</p>
+                        <p className="text-xs text-gray-400">Track AI tool usage metrics</p>
+                      </div>
+                      <Checkbox defaultChecked />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Model Preferences */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-white">Model Preferences</h4>
+                  <div className="p-4 bg-slate-800 rounded-lg space-y-4">
+                    <div>
+                      <Label className="text-sm text-white">Default Model</Label>
+                      <Select defaultValue="gpt-4o">
+                        <SelectTrigger className="mt-1 bg-slate-700 border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+                          <SelectItem value="claude-3.5">Claude 3.5</SelectItem>
+                          <SelectItem value="gemini-pro">Gemini Pro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label className="text-sm text-white">Response Quality</Label>
+                      <Select defaultValue="balanced">
+                        <SelectTrigger className="mt-1 bg-slate-700 border-gray-600">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="fast">Fast (Lower quality)</SelectItem>
+                          <SelectItem value="balanced">Balanced</SelectItem>
+                          <SelectItem value="quality">High Quality (Slower)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* API Configuration */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium text-white">API Configuration</h4>
+                  <div className="p-4 bg-slate-800 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-white">API Status</p>
+                        <p className="text-xs text-gray-400">All systems operational</p>
+                      </div>
+                      <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        Connected
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-gray-700">
+                <Button variant="outline" onClick={() => setShowSettingsDialog(false)} className="border-gray-700">
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => {
+                    toast.success('Settings saved successfully')
+                    setShowSettingsDialog(false)
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  Save Settings
                 </Button>
               </div>
             </DialogContent>

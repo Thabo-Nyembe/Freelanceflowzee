@@ -231,6 +231,22 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const [showNewEvent, setShowNewEvent] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
 
+  // Dialog states for quick actions
+  const [showQuickAddDialog, setShowQuickAddDialog] = useState(false)
+  const [showMeetNowDialog, setShowMeetNowDialog] = useState(false)
+  const [showBookRoomDialog, setShowBookRoomDialog] = useState(false)
+  const [showFindTimeDialog, setShowFindTimeDialog] = useState(false)
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showReminderDialog, setShowReminderDialog] = useState(false)
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSyncDialog, setShowSyncDialog] = useState(false)
+  const [showDeleteReminderDialog, setShowDeleteReminderDialog] = useState(false)
+  const [reminderToDelete, setReminderToDelete] = useState<Reminder | null>(null)
+  const [showCreateLinkDialog, setShowCreateLinkDialog] = useState(false)
+  const [showAddReminderDialog, setShowAddReminderDialog] = useState(false)
+  const [showAddCalendarDialog, setShowAddCalendarDialog] = useState(false)
+
   const { events, loading, error, createEvent, updateEvent, deleteEvent, refetch } = useCalendarEvents({ eventType: eventTypeFilter, status: statusFilter })
 
   // Form state for new event
@@ -458,15 +474,11 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   }
 
   const handleExportCalendar = () => {
-    toast.success('Export started', {
-      description: 'Your calendar is being exported'
-    })
+    setShowExportDialog(true)
   }
 
   const handleSyncCalendar = () => {
-    toast.success('Sync started', {
-      description: 'Syncing with external calendars...'
-    })
+    setShowSyncDialog(true)
   }
 
   // In demo mode, continue with empty events instead of showing error
@@ -693,17 +705,18 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { label: 'New Event', icon: Plus, color: 'from-teal-500 to-cyan-500' },
-                { label: 'Quick Add', icon: Zap, color: 'from-yellow-500 to-orange-500' },
-                { label: 'Meet Now', icon: Video, color: 'from-blue-500 to-indigo-500' },
-                { label: 'Book Room', icon: MapPin, color: 'from-purple-500 to-pink-500' },
-                { label: 'Find Time', icon: Search, color: 'from-green-500 to-emerald-500' },
-                { label: 'Schedule', icon: CalendarClock, color: 'from-orange-500 to-red-500' },
-                { label: 'Reminder', icon: Bell, color: 'from-pink-500 to-rose-500' },
-                { label: 'Share', icon: Share2, color: 'from-gray-500 to-gray-600' }
+                { label: 'New Event', icon: Plus, color: 'from-teal-500 to-cyan-500', action: () => setShowNewEvent(true) },
+                { label: 'Quick Add', icon: Zap, color: 'from-yellow-500 to-orange-500', action: () => setShowQuickAddDialog(true) },
+                { label: 'Meet Now', icon: Video, color: 'from-blue-500 to-indigo-500', action: () => setShowMeetNowDialog(true) },
+                { label: 'Book Room', icon: MapPin, color: 'from-purple-500 to-pink-500', action: () => setShowBookRoomDialog(true) },
+                { label: 'Find Time', icon: Search, color: 'from-green-500 to-emerald-500', action: () => setShowFindTimeDialog(true) },
+                { label: 'Schedule', icon: CalendarClock, color: 'from-orange-500 to-red-500', action: () => setShowScheduleDialog(true) },
+                { label: 'Reminder', icon: Bell, color: 'from-pink-500 to-rose-500', action: () => setShowReminderDialog(true) },
+                { label: 'Share', icon: Share2, color: 'from-gray-500 to-gray-600', action: () => setShowShareDialog(true) }
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.action}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
@@ -788,7 +801,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       <Switch checked={cal.enabled} className="scale-75" />
                     </label>
                   ))}
-                  <Button variant="outline" className="w-full mt-2" size="sm">
+                  <Button variant="outline" className="w-full mt-2" size="sm" onClick={() => setShowAddCalendarDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Calendar
                   </Button>

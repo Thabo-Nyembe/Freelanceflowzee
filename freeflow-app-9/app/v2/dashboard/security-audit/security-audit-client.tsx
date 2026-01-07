@@ -387,12 +387,7 @@ const mockSecurityActivities = [
   { id: '3', user: 'Sam Analyst', action: 'flagged', target: 'suspicious login attempt', timestamp: '1h ago', type: 'warning' as const },
 ]
 
-const mockSecurityQuickActions = [
-  { id: '1', label: 'Run Scan', icon: 'Scan', shortcut: 'S', action: () => toast.success('Scan Started', { description: 'Security scan in progress' }) },
-  { id: '2', label: 'View Alerts', icon: 'AlertTriangle', shortcut: 'A', action: () => toast.success('Alerts', { description: 'Security alerts loaded' }) },
-  { id: '3', label: 'Compliance Report', icon: 'FileText', shortcut: 'R', action: () => toast.success('Report Ready', { description: 'Compliance report generated' }) },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => toast.success('Settings', { description: 'Security settings loaded' }) },
-]
+// Quick actions will be defined inside the component to use setState functions
 
 export default function SecurityAuditClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -402,6 +397,20 @@ export default function SecurityAuditClient() {
   const [selectedAudit, setSelectedAudit] = useState<SecurityAudit | null>(null)
   const [showScanDialog, setShowScanDialog] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick action dialog states
+  const [showRunScanDialog, setShowRunScanDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showComplianceReportDialog, setShowComplianceReportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const securityQuickActions = [
+    { id: '1', label: 'Run Scan', icon: 'Scan', shortcut: 'S', action: () => setShowRunScanDialog(true) },
+    { id: '2', label: 'View Alerts', icon: 'AlertTriangle', shortcut: 'A', action: () => setShowAlertsDialog(true) },
+    { id: '3', label: 'Compliance Report', icon: 'FileText', shortcut: 'R', action: () => setShowComplianceReportDialog(true) },
+    { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => setShowSettingsDialog(true) },
+  ]
 
   // Compute stats
   const vulnerabilityStats = useMemo(() => {
@@ -1742,7 +1751,7 @@ export default function SecurityAuditClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSecurityQuickActions}
+            actions={securityQuickActions}
             variant="grid"
           />
         </div>
@@ -1885,6 +1894,216 @@ export default function SecurityAuditClient() {
                 <Button className="flex-1 bg-blue-600 hover:bg-blue-700">
                   <Play className="h-4 w-4 mr-2" />
                   Start Scan
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Run Scan Quick Action Dialog */}
+        <Dialog open={showRunScanDialog} onOpenChange={setShowRunScanDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Scan className="h-5 w-5 text-blue-600" />
+                Run Security Scan
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Choose a scan type to start a new security assessment.
+              </p>
+              <div className="space-y-2">
+                <div className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-3">
+                  <Bug className="h-5 w-5 text-red-600" />
+                  <div>
+                    <p className="font-medium">Quick Vulnerability Scan</p>
+                    <p className="text-xs text-gray-500">Fast scan of critical assets (5-10 min)</p>
+                  </div>
+                </div>
+                <div className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-3">
+                  <Radar className="h-5 w-5 text-purple-600" />
+                  <div>
+                    <p className="font-medium">Full Infrastructure Scan</p>
+                    <p className="text-xs text-gray-500">Comprehensive scan of all assets (1-2 hours)</p>
+                  </div>
+                </div>
+                <div className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center gap-3">
+                  <Cloud className="h-5 w-5 text-cyan-600" />
+                  <div>
+                    <p className="font-medium">Cloud Security Scan</p>
+                    <p className="text-xs text-gray-500">AWS/Azure/GCP configuration review (30 min)</p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowRunScanDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={() => {
+                  setShowRunScanDialog(false)
+                  toast.success('Scan initiated', { description: 'Security scan has been started' })
+                }}>
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Scan
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Alerts Quick Action Dialog */}
+        <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-600" />
+                Security Alerts
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-red-700 dark:text-red-400">Critical: CVE-2024-1234 Detected</p>
+                      <p className="text-sm text-red-600 dark:text-red-300">SQL injection vulnerability in prod-api-01</p>
+                      <p className="text-xs text-gray-500 mt-1">2 minutes ago</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-orange-700 dark:text-orange-400">High: Outdated TLS Configuration</p>
+                      <p className="text-sm text-orange-600 dark:text-orange-300">load-balancer-01 supports TLS 1.0</p>
+                      <p className="text-xs text-gray-500 mt-1">15 minutes ago</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-yellow-700 dark:text-yellow-400">Medium: Failed Login Attempts</p>
+                      <p className="text-sm text-yellow-600 dark:text-yellow-300">Multiple failed logins from IP 203.0.113.50</p>
+                      <p className="text-xs text-gray-500 mt-1">1 hour ago</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowAlertsDialog(false)}>
+                  Close
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  setShowAlertsDialog(false)
+                  setActiveTab('dashboard')
+                }}>
+                  View All Alerts
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Compliance Report Quick Action Dialog */}
+        <Dialog open={showComplianceReportDialog} onOpenChange={setShowComplianceReportDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-green-600" />
+                Generate Compliance Report
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Select a compliance framework to generate a detailed report.
+              </p>
+              <div className="space-y-2">
+                {[
+                  { name: 'SOC 2 Type II', icon: ShieldCheck, score: '94%' },
+                  { name: 'ISO 27001', icon: Shield, score: '88%' },
+                  { name: 'PCI-DSS', icon: CreditCard, score: '85%' },
+                  { name: 'GDPR', icon: Lock, score: '92%' },
+                ].map((framework, i) => (
+                  <div key={i} className="p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <framework.icon className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium">{framework.name}</span>
+                    </div>
+                    <Badge className="bg-green-100 text-green-700">{framework.score}</Badge>
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowComplianceReportDialog(false)}>
+                  Cancel
+                </Button>
+                <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => {
+                  setShowComplianceReportDialog(false)
+                  toast.success('Report generated', { description: 'Compliance report is ready for download' })
+                }}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Generate Report
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Quick Action Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5 text-gray-600" />
+                Quick Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Auto-Scanning</p>
+                    <p className="text-xs text-gray-500">Run scheduled scans automatically</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Critical Alerts</p>
+                    <p className="text-xs text-gray-500">Get notified for critical findings</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Daily Reports</p>
+                    <p className="text-xs text-gray-500">Receive daily security summaries</p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <p className="font-medium">Integration Sync</p>
+                    <p className="text-xs text-gray-500">Sync with Jira and Slack</p>
+                  </div>
+                  <Switch />
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowSettingsDialog(false)}>
+                  Close
+                </Button>
+                <Button className="flex-1" onClick={() => {
+                  setShowSettingsDialog(false)
+                  setActiveTab('settings')
+                }}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  All Settings
                 </Button>
               </div>
             </div>

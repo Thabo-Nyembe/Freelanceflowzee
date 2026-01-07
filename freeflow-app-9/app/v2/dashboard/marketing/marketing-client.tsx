@@ -760,14 +760,7 @@ const mockActivities = [
   },
 ]
 
-const mockQuickActions = [
-  { id: '1', label: 'New Campaign', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => toast.success('Campaign created successfully'), category: 'Create' },
-  { id: '2', label: 'Add Lead', icon: <Users className="h-5 w-5" />, shortcut: '⌘L', action: () => toast.success('Lead added successfully'), category: 'Create' },
-  { id: '3', label: 'AI Insights', icon: <Brain className="h-5 w-5" />, shortcut: '⌘I', action: () => toast.success('AI insights ready'), category: 'AI' },
-  { id: '4', label: 'Send Email', icon: <Mail className="h-5 w-5" />, shortcut: '⌘E', action: () => toast.success('Email sent successfully'), category: 'Actions' },
-  { id: '5', label: 'View Reports', icon: <BarChart3 className="h-5 w-5" />, shortcut: '⌘R', action: () => toast.success('Reports loaded'), category: 'Navigate' },
-  { id: '6', label: 'Schedule Post', icon: <Calendar className="h-5 w-5" />, shortcut: '⌘S', action: () => toast.success('Post scheduled successfully'), category: 'Create' },
-]
+// Quick actions are now defined inside the component to access state setters
 
 // Sparkline data for campaigns
 const campaignSparklineData: Record<string, number[]> = {
@@ -881,6 +874,24 @@ export default function MarketingClient() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [campaignFilter, setCampaignFilter] = useState<CampaignStatus | 'all'>('all')
   const [leadFilter, setLeadFilter] = useState<LeadStatus | 'all'>('all')
+
+  // Quick Actions Dialog States
+  const [showNewCampaignDialog, setShowNewCampaignDialog] = useState(false)
+  const [showAddLeadDialog, setShowAddLeadDialog] = useState(false)
+  const [showAIInsightsDialog, setShowAIInsightsDialog] = useState(false)
+  const [showSendEmailDialog, setShowSendEmailDialog] = useState(false)
+  const [showViewReportsDialog, setShowViewReportsDialog] = useState(false)
+  const [showSchedulePostDialog, setShowSchedulePostDialog] = useState(false)
+
+  // Quick Actions with dialog handlers
+  const quickActions = [
+    { id: '1', label: 'New Campaign', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => setShowNewCampaignDialog(true), category: 'Create' },
+    { id: '2', label: 'Add Lead', icon: <Users className="h-5 w-5" />, shortcut: '⌘L', action: () => setShowAddLeadDialog(true), category: 'Create' },
+    { id: '3', label: 'AI Insights', icon: <Brain className="h-5 w-5" />, shortcut: '⌘I', action: () => setShowAIInsightsDialog(true), category: 'AI' },
+    { id: '4', label: 'Send Email', icon: <Mail className="h-5 w-5" />, shortcut: '⌘E', action: () => setShowSendEmailDialog(true), category: 'Actions' },
+    { id: '5', label: 'View Reports', icon: <BarChart3 className="h-5 w-5" />, shortcut: '⌘R', action: () => setShowViewReportsDialog(true), category: 'Navigate' },
+    { id: '6', label: 'Schedule Post', icon: <Calendar className="h-5 w-5" />, shortcut: '⌘S', action: () => setShowSchedulePostDialog(true), category: 'Create' },
+  ]
 
   // Computed stats
   const stats = useMemo(() => {
@@ -1898,7 +1909,7 @@ export default function MarketingClient() {
         </Tabs>
 
         {/* Quick Actions Toolbar - Like Linear/Notion */}
-        <QuickActionsToolbar actions={mockQuickActions} position="bottom" />
+        <QuickActionsToolbar actions={quickActions} position="bottom" />
 
         {/* Campaign Detail Dialog */}
         <Dialog open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>
@@ -2123,6 +2134,270 @@ export default function MarketingClient() {
                 </div>
               </ScrollArea>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* New Campaign Dialog */}
+        <Dialog open={showNewCampaignDialog} onOpenChange={setShowNewCampaignDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-pink-500" />
+                Create New Campaign
+              </DialogTitle>
+              <DialogDescription>
+                Set up a new marketing campaign with multi-channel targeting.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Campaign Name</label>
+                <Input placeholder="Enter campaign name..." />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Campaign Type</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['Email', 'Social', 'PPC', 'Content', 'Event', 'Influencer'].map(type => (
+                    <Button key={type} variant="outline" size="sm">{type}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Budget</label>
+                <Input type="number" placeholder="Enter budget..." />
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowNewCampaignDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-pink-500 to-rose-600 text-white" onClick={() => {
+                  toast.success('Campaign created successfully')
+                  setShowNewCampaignDialog(false)
+                }}>Create Campaign</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Lead Dialog */}
+        <Dialog open={showAddLeadDialog} onOpenChange={setShowAddLeadDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-blue-500" />
+                Add New Lead
+              </DialogTitle>
+              <DialogDescription>
+                Capture a new lead for your marketing funnel.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">First Name</label>
+                  <Input placeholder="John" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Last Name</label>
+                  <Input placeholder="Doe" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Email</label>
+                <Input type="email" placeholder="john@company.com" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Company</label>
+                <Input placeholder="Company name..." />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Lead Source</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {['Website', 'Referral', 'Social', 'Event'].map(source => (
+                    <Button key={source} variant="outline" size="sm">{source}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowAddLeadDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-blue-500 to-cyan-600 text-white" onClick={() => {
+                  toast.success('Lead added successfully')
+                  setShowAddLeadDialog(false)
+                }}>Add Lead</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* AI Insights Dialog */}
+        <Dialog open={showAIInsightsDialog} onOpenChange={setShowAIInsightsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Brain className="w-5 h-5 text-purple-500" />
+                AI Marketing Insights
+              </DialogTitle>
+              <DialogDescription>
+                AI-powered recommendations to optimize your marketing performance.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid gap-3">
+                {[
+                  { title: 'Optimize Email Send Times', description: 'Your audience is most active between 9-11 AM. Consider scheduling emails during this window.', impact: 'High' },
+                  { title: 'Increase Social Engagement', description: 'Video content is performing 3x better than images. Shift focus to video-first strategy.', impact: 'High' },
+                  { title: 'Lead Scoring Opportunity', description: '15 leads have high engagement but low scores. Review scoring criteria.', impact: 'Medium' },
+                  { title: 'Budget Reallocation', description: 'Email campaigns show 245% ROI vs 180% for PPC. Consider reallocating 10% of PPC budget.', impact: 'Medium' },
+                ].map((insight, idx) => (
+                  <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-medium">{insight.title}</h4>
+                        <p className="text-sm text-gray-500 mt-1">{insight.description}</p>
+                      </div>
+                      <Badge variant={insight.impact === 'High' ? 'default' : 'secondary'}>{insight.impact}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowAIInsightsDialog(false)}>Close</Button>
+                <Button className="bg-gradient-to-r from-purple-500 to-violet-600 text-white" onClick={() => {
+                  toast.success('Insights applied to dashboard')
+                  setShowAIInsightsDialog(false)
+                }}>Apply Recommendations</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Send Email Dialog */}
+        <Dialog open={showSendEmailDialog} onOpenChange={setShowSendEmailDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Mail className="w-5 h-5 text-rose-500" />
+                Compose Email
+              </DialogTitle>
+              <DialogDescription>
+                Send a marketing email to your audience.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">To</label>
+                <Input placeholder="Select recipients or segment..." />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Subject</label>
+                <Input placeholder="Email subject line..." />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Template</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {['Newsletter', 'Promotion', 'Welcome', 'Follow-up', 'Announcement', 'Custom'].map(template => (
+                    <Button key={template} variant="outline" size="sm">{template}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowSendEmailDialog(false)}>Cancel</Button>
+                <Button variant="outline">Save Draft</Button>
+                <Button className="bg-gradient-to-r from-rose-500 to-pink-600 text-white" onClick={() => {
+                  toast.success('Email sent successfully')
+                  setShowSendEmailDialog(false)
+                }}>Send Email</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* View Reports Dialog */}
+        <Dialog open={showViewReportsDialog} onOpenChange={setShowViewReportsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-indigo-500" />
+                Marketing Reports
+              </DialogTitle>
+              <DialogDescription>
+                View and export your marketing performance reports.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { name: 'Campaign Performance', description: 'ROI, conversions, and engagement metrics', icon: Target },
+                  { name: 'Lead Analytics', description: 'Lead sources, scoring, and pipeline', icon: Users },
+                  { name: 'Email Metrics', description: 'Open rates, CTR, and deliverability', icon: Mail },
+                  { name: 'Social Analytics', description: 'Engagement, reach, and growth', icon: Share2 },
+                  { name: 'Revenue Attribution', description: 'Multi-touch attribution analysis', icon: DollarSign },
+                  { name: 'Content Performance', description: 'Views, shares, and engagement', icon: FileText },
+                ].map((report, idx) => (
+                  <Button key={idx} variant="outline" className="h-auto p-4 flex flex-col items-start gap-2">
+                    <report.icon className="w-5 h-5 text-indigo-500" />
+                    <div className="text-left">
+                      <p className="font-medium">{report.name}</p>
+                      <p className="text-xs text-gray-500">{report.description}</p>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowViewReportsDialog(false)}>Close</Button>
+                <Button className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white" onClick={() => {
+                  toast.success('Reports exported successfully')
+                  setShowViewReportsDialog(false)
+                }}>Export All Reports</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Schedule Post Dialog */}
+        <Dialog open={showSchedulePostDialog} onOpenChange={setShowSchedulePostDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Calendar className="w-5 h-5 text-green-500" />
+                Schedule Social Post
+              </DialogTitle>
+              <DialogDescription>
+                Schedule content across your social media channels.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Content</label>
+                <textarea
+                  className="w-full min-h-[100px] p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-green-500"
+                  placeholder="Write your post content..."
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Platforms</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {['Twitter', 'LinkedIn', 'Facebook', 'Instagram'].map(platform => (
+                    <Button key={platform} variant="outline" size="sm">{platform}</Button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Date</label>
+                  <Input type="date" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Time</label>
+                  <Input type="time" />
+                </div>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowSchedulePostDialog(false)}>Cancel</Button>
+                <Button className="bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => {
+                  toast.success('Post scheduled successfully')
+                  setShowSchedulePostDialog(false)
+                }}>Schedule Post</Button>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

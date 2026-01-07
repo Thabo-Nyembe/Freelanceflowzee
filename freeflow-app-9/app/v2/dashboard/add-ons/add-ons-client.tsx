@@ -472,6 +472,18 @@ export default function AddOnsClient() {
   const [statusFilter, setStatusFilter] = useState<AddOnStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
 
+  // Dialog states for quick actions
+  const [showBrowseDialog, setShowBrowseDialog] = useState(false)
+  const [showUpdateAllDialog, setShowUpdateAllDialog] = useState(false)
+  const [showQuickSettingsDialog, setShowQuickSettingsDialog] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const quickActionsWithDialogs = [
+    { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => setShowBrowseDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Update All', icon: 'refresh', action: () => setShowUpdateAllDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Settings', icon: 'settings', action: () => setShowQuickSettingsDialog(true), variant: 'outline' as const },
+  ]
+
   // Stats
   const stats: AddOnStats = useMemo(() => ({
     totalAddOns: mockAddOns.length,

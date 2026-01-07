@@ -432,24 +432,7 @@ const mockEscrowActivities = [
   { id: '3', user: 'Compliance Officer', action: 'flagged', target: 'transaction for review', timestamp: '1h ago', type: 'warning' as const },
 ]
 
-const mockEscrowQuickActions = [
-  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Initiating new transfer...', success: 'Transfer form ready', error: 'Failed to start transfer' }
-  ) },
-  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading payout history...', success: 'Payouts loaded', error: 'Failed to load payouts' }
-  ) },
-  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 700)),
-    { loading: 'Loading dispute cases...', success: 'Disputes loaded', error: 'Failed to load disputes' }
-  ) },
-  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 900)),
-    { loading: 'Generating escrow reports...', success: 'Reports generated', error: 'Failed to generate reports' }
-  ) },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function EscrowClient() {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -463,6 +446,11 @@ export default function EscrowClient() {
   const [showNewEscrowDialog, setShowNewEscrowDialog] = useState(false)
   const [showReleaseDialog, setShowReleaseDialog] = useState(false)
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
+  // Quick action dialogs
+  const [showNewTransferDialog, setShowNewTransferDialog] = useState(false)
+  const [showViewPayoutsDialog, setShowViewPayoutsDialog] = useState(false)
+  const [showDisputesDialog, setShowDisputesDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
   const [transactionFilter, setTransactionFilter] = useState<TransactionType | 'all'>('all')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedEscrowDeposit, setSelectedEscrowDeposit] = useState<EscrowDeposit | null>(null)
@@ -534,6 +522,14 @@ export default function EscrowClient() {
     .reduce((sum, t) => sum + t.platformFee, 0)
   const activeAccounts = mockConnectedAccounts.filter(a => a.status === 'active').length
   const pendingDisputes = mockDisputes.filter(d => d.status === 'needs_response').length
+
+  // Quick actions with proper dialog handlers
+  const escrowQuickActions = [
+    { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => setShowNewTransferDialog(true) },
+    { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => setShowViewPayoutsDialog(true) },
+    { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => setShowDisputesDialog(true) },
+    { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => setShowReportsDialog(true) },
+  ]
 
   // Filtered transactions
   const filteredTransactions = useMemo(() => {
@@ -2155,7 +2151,7 @@ export default function EscrowClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockEscrowQuickActions}
+            actions={escrowQuickActions}
             variant="grid"
           />
         </div>

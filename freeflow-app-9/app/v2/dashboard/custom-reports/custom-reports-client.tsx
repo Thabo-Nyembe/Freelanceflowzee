@@ -25,10 +25,18 @@ import {
   FileText, BarChart3, PieChart, TrendingUp, Users, Clock,
   DollarSign, Download, Calendar, Play,
   Star, CheckCircle, Info, Sparkles, ArrowRight,
-  LineChart, Table, Hash, Zap
+  LineChart, Table, Hash, Zap, X, Plus, Settings
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
 import { LiquidGlassCard } from '@/components/ui/liquid-glass-card'
 import { TextShimmer } from '@/components/ui/text-shimmer'
 import { ScrollReveal } from '@/components/ui/scroll-reveal'
@@ -86,11 +94,7 @@ const customReportsActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const customReportsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Report Created', { description: 'New custom report ready' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Report Exported', { description: 'Custom report exported' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Report settings opened' }) },
-]
+// Quick actions are now defined inside the component to use state setters
 
 export default function CustomReportsClient() {
   // A+++ STATE MANAGEMENT
@@ -98,6 +102,18 @@ export default function CustomReportsClient() {
   const [error, setError] = useState<string | null>(null)
   const { announce } = useAnnouncer()
   const { userId, loading: userLoading } = useCurrentUser()
+
+  // Dialog state for quick actions
+  const [showNewReportDialog, setShowNewReportDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+
+  // Quick actions with proper dialog handlers
+  const customReportsQuickActions = [
+    { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => setShowNewReportDialog(true) },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => setShowExportDialog(true) },
+    { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => setShowSettingsDialog(true) },
+  ]
 
   // Database state
   const [templates, setTemplates] = useState<any[]>([])
@@ -753,6 +769,167 @@ export default function CustomReportsClient() {
           </div>
         </div>
       </div>
+
+      {/* New Report Dialog */}
+      <Dialog open={showNewReportDialog} onOpenChange={setShowNewReportDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Plus className="w-5 h-5 text-blue-400" />
+              Create New Report
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Start building a new custom report from scratch or choose a template.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Report Name</label>
+              <input
+                type="text"
+                placeholder="Enter report name..."
+                className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Description</label>
+              <textarea
+                placeholder="Describe what this report will track..."
+                rows={3}
+                className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-blue-500 focus:outline-none resize-none"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowNewReportDialog(false)} className="border-slate-600">
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              setShowNewReportDialog(false)
+              toast.success('Report Created', { description: 'New custom report is ready to configure' })
+            }} className="bg-blue-600 hover:bg-blue-700">
+              Create Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Dialog */}
+      <Dialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Download className="w-5 h-5 text-green-400" />
+              Export Reports
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Choose a format and export your custom reports.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Export Format</label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button variant="outline" className="border-slate-600 hover:bg-slate-800">
+                  <FileText className="w-4 h-4 mr-2" />
+                  PDF
+                </Button>
+                <Button variant="outline" className="border-slate-600 hover:bg-slate-800">
+                  <Table className="w-4 h-4 mr-2" />
+                  Excel
+                </Button>
+                <Button variant="outline" className="border-slate-600 hover:bg-slate-800">
+                  <FileText className="w-4 h-4 mr-2" />
+                  CSV
+                </Button>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Select Reports</label>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {customReports.length > 0 ? customReports.map((report: any) => (
+                  <div key={report.id} className="flex items-center gap-2 p-2 bg-slate-800 rounded-lg">
+                    <input type="checkbox" className="rounded border-slate-600" />
+                    <span className="text-white text-sm">{report.name || 'Untitled Report'}</span>
+                  </div>
+                )) : (
+                  <p className="text-gray-500 text-sm">No reports available to export</p>
+                )}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportDialog(false)} className="border-slate-600">
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              setShowExportDialog(false)
+              toast.success('Export Started', { description: 'Your reports are being exported' })
+            }} className="bg-green-600 hover:bg-green-700">
+              Export Selected
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Settings Dialog */}
+      <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+        <DialogContent className="bg-slate-900 border-slate-700">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Settings className="w-5 h-5 text-purple-400" />
+              Report Settings
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure your custom reports preferences and defaults.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Default Date Range</label>
+              <select className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                <option value="last-7-days">Last 7 Days</option>
+                <option value="last-30-days">Last 30 Days</option>
+                <option value="last-90-days">Last 90 Days</option>
+                <option value="this-year">This Year</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm text-gray-400 mb-2 block">Default Export Format</label>
+              <select className="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white focus:border-purple-500 focus:outline-none">
+                <option value="pdf">PDF</option>
+                <option value="excel">Excel</option>
+                <option value="csv">CSV</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div>
+                <p className="text-white text-sm font-medium">Auto-refresh Reports</p>
+                <p className="text-gray-500 text-xs">Automatically update report data</p>
+              </div>
+              <input type="checkbox" className="rounded border-slate-600" defaultChecked />
+            </div>
+            <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+              <div>
+                <p className="text-white text-sm font-medium">Email Notifications</p>
+                <p className="text-gray-500 text-xs">Get notified when reports are ready</p>
+              </div>
+              <input type="checkbox" className="rounded border-slate-600" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSettingsDialog(false)} className="border-slate-600">
+              Cancel
+            </Button>
+            <Button onClick={() => {
+              setShowSettingsDialog(false)
+              toast.success('Settings Saved', { description: 'Your report preferences have been updated' })
+            }} className="bg-purple-600 hover:bg-purple-700">
+              Save Settings
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

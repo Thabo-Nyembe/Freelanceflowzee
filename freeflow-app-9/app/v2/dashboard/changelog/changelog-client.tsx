@@ -385,12 +385,7 @@ const mockChangelogActivities = [
   { id: '3', user: 'Tech Writer', action: 'updated', target: 'migration guide for v3.0', timestamp: '5h ago', type: 'info' as const },
 ]
 
-const mockChangelogQuickActions = [
-  { id: '1', label: 'New Release', icon: 'Tag', shortcut: 'N', action: () => toast.success('Release created') },
-  { id: '2', label: 'Draft', icon: 'Edit', shortcut: 'D', action: () => toast.success('Draft created') },
-  { id: '3', label: 'Compare', icon: 'GitBranch', shortcut: 'C', action: () => toast.success('Comparison complete') },
-  { id: '4', label: 'Notify', icon: 'Bell', shortcut: 'T', action: () => toast.success('Notifications sent') },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // Default form state for new changelog entry
 const defaultChangelogForm: Partial<Changelog> = {
@@ -436,6 +431,12 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   const [isDiscussionDialogOpen, setIsDiscussionDialogOpen] = useState(false)
   const [discussionForm, setDiscussionForm] = useState({ title: '', body: '', category: 'feedback' })
 
+  // Quick Action Dialog states
+  const [showCompareDialog, setShowCompareDialog] = useState(false)
+  const [showNotifyDialog, setShowNotifyDialog] = useState(false)
+  const [compareForm, setCompareForm] = useState({ baseVersion: '', targetVersion: '' })
+  const [notifyForm, setNotifyForm] = useState({ message: '', notifyAll: false, selectedUsers: [] as string[] })
+
   const { changelog, loading, error, createChange, updateChange, deleteChange, refetch } = useChangelog()
 
   // Filter releases
@@ -469,6 +470,44 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
       avgDownloads: Math.round(totalDownloads / mockReleases.length)
     }
   }, [])
+
+  // Quick Actions with proper dialog handlers
+  const quickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Release',
+      icon: 'Tag',
+      shortcut: 'N',
+      action: () => {
+        setChangelogForm(defaultChangelogForm)
+        setIsCreateDialogOpen(true)
+      }
+    },
+    {
+      id: '2',
+      label: 'Draft',
+      icon: 'Edit',
+      shortcut: 'D',
+      action: () => {
+        setChangelogForm({ ...defaultChangelogForm, release_status: 'draft' })
+        setIsCreateDialogOpen(true)
+      }
+    },
+    {
+      id: '3',
+      label: 'Compare',
+      icon: 'GitBranch',
+      shortcut: 'C',
+      action: () => setShowCompareDialog(true)
+    },
+    {
+      id: '4',
+      label: 'Notify',
+      icon: 'Bell',
+      shortcut: 'T',
+      action: () => setShowNotifyDialog(true)
+    },
+  ], [])
 
   // CRUD Handlers for Changelog/Release entries
   const handleCreateRelease = useCallback(async () => {
@@ -2433,7 +2472,7 @@ Thanks to all contributors!`}
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockChangelogQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>

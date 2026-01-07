@@ -207,12 +207,7 @@ const mockAutomationActivities = [
   { id: '3', user: 'Ops Manager', action: 'optimized', target: 'invoice processing flow', timestamp: '1d ago', type: 'info' as const },
 ]
 
-const mockAutomationQuickActions = [
-  { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => toast.success('Workflow Created', { description: 'New automation workflow ready' }) },
-  { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => toast.success('Templates Loaded', { description: 'Automation templates ready' }) },
-  { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => toast.success('History Loaded', { description: 'Workflow execution history ready' }) },
-  { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => toast.success('Connections Loaded', { description: 'App connections ready' }) },
-]
+// Quick actions are now defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT - ZAPIER/MAKE LEVEL AUTOMATION
@@ -234,6 +229,12 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
   const [selectedAutomation, setSelectedAutomation] = useState<Automation | null>(null)
   const [showRunHistory, setShowRunHistory] = useState(false)
   const [showTestMode, setShowTestMode] = useState(false)
+
+  // Quick action dialog states
+  const [showNewWorkflowDialog, setShowNewWorkflowDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showRunHistoryDialog, setShowRunHistoryDialog] = useState(false)
+  const [showConnectionsDialog, setShowConnectionsDialog] = useState(false)
 
   // New automation form state
   const [newName, setNewName] = useState('')
@@ -293,6 +294,14 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
       selectedCategory === 'all' || t.category.toLowerCase() === selectedCategory.toLowerCase()
     )
   }, [selectedCategory])
+
+  // Quick actions with dialog triggers
+  const automationQuickActions = useMemo(() => [
+    { id: '1', label: 'New Workflow', icon: 'GitBranch', shortcut: 'N', action: () => setShowNewWorkflowDialog(true) },
+    { id: '2', label: 'Templates', icon: 'Layers', shortcut: 'T', action: () => setShowTemplatesDialog(true) },
+    { id: '3', label: 'Run History', icon: 'History', shortcut: 'H', action: () => setShowRunHistoryDialog(true) },
+    { id: '4', label: 'Connections', icon: 'Plug', shortcut: 'C', action: () => setShowConnectionsDialog(true) },
+  ], [])
 
   // Handlers
   const handleCreateAutomation = useCallback(async () => {
@@ -2071,7 +2080,7 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAutomationQuickActions}
+            actions={automationQuickActions}
             variant="grid"
           />
         </div>

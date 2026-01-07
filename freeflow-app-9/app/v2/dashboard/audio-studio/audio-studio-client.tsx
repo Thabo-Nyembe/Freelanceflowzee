@@ -572,11 +572,7 @@ const mockAudioActivities = [
   { id: '3', user: 'Session Musician', action: 'Recorded', target: 'guitar overdub', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockAudioQuickActions = [
-  { id: '1', label: 'New Track', icon: 'plus', action: () => toast.success('New track created successfully'), variant: 'default' as const },
-  { id: '2', label: 'Record', icon: 'circle', action: () => toast.success('Recording started'), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.success('Audio exported successfully'), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to use state setters
 
 export default function AudioStudioClient({ initialTracks, initialStats }: AudioStudioClientProps) {
   const [activeTab, setActiveTab] = useState('tracks')
@@ -588,6 +584,16 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
   const [showTrackDialog, setShowTrackDialog] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick action dialog states
+  const [showNewTrackDialog, setShowNewTrackDialog] = useState(false)
+  const [showRecordDialog, setShowRecordDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
+  const [newTrackType, setNewTrackType] = useState<'audio' | 'midi' | 'bus'>('audio')
+  const [newTrackName, setNewTrackName] = useState('')
+  const [exportFormat, setExportFormat] = useState('WAV')
+  const [exportSampleRate, setExportSampleRate] = useState('48 kHz')
+  const [exportBitDepth, setExportBitDepth] = useState('24-bit')
 
   // Transport state
   const [isPlaying, setIsPlaying] = useState(false)
@@ -632,6 +638,13 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
   const totalCpuUsage = useMemo(() => {
     return effects.filter(e => e.active).reduce((sum, e) => sum + e.cpuUsage, 0)
   }, [effects])
+
+  // Quick actions with proper dialog handlers
+  const audioQuickActions = [
+    { id: '1', label: 'New Track', icon: 'plus', action: () => setShowNewTrackDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Record', icon: 'circle', action: () => setShowRecordDialog(true), variant: 'default' as const },
+    { id: '3', label: 'Export', icon: 'download', action: () => setShowExportDialog(true), variant: 'outline' as const },
+  ]
 
   // Track actions
   const toggleTrackMute = (trackId: string) => {
@@ -2116,7 +2129,7 @@ export default function AudioStudioClient({ initialTracks, initialStats }: Audio
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAudioQuickActions}
+            actions={audioQuickActions}
             variant="grid"
           />
         </div>

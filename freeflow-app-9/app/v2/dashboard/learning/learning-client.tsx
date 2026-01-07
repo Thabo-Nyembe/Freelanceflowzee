@@ -539,25 +539,6 @@ const mockLearningActivities = [
   { id: '3', user: 'Mike Johnson', action: 'shared', target: 'study notes', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockLearningQuickActions = [
-  { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading course...', success: 'Course loaded - Continue learning', error: 'Failed to load course' }
-  ) },
-  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Loading course catalog...', success: 'Course catalog loaded', error: 'Failed to load catalog' }
-  ) },
-  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading certificates...', success: 'Certificates loaded', error: 'Failed to load certificates' }
-  ) },
-  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading study plan...', success: 'Study plan loaded', error: 'Failed to load study plan' }
-  ) },
-]
-
 // ============================================================================
 // COMPONENT
 // ============================================================================
@@ -574,6 +555,12 @@ export default function LearningClient() {
   const [settingsTab, setSettingsTab] = useState('general')
   const [showCreatePathModal, setShowCreatePathModal] = useState(false)
   const [showCreateCollectionModal, setShowCreateCollectionModal] = useState(false)
+
+  // Quick action dialog states
+  const [showContinueLearningDialog, setShowContinueLearningDialog] = useState(false)
+  const [showBrowseCoursesDialog, setShowBrowseCoursesDialog] = useState(false)
+  const [showCertificatesDialog, setShowCertificatesDialog] = useState(false)
+  const [showStudyPlanDialog, setShowStudyPlanDialog] = useState(false)
 
   // Form state for new learning path
   const [newPathForm, setNewPathForm] = useState({
@@ -681,6 +668,14 @@ export default function LearningClient() {
       return matchesSearch && matchesCategory && matchesLevel
     })
   }, [courses, searchQuery, selectedCategory, selectedLevel])
+
+  // Quick actions with proper dialog triggers
+  const learningQuickActions = [
+    { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => setShowContinueLearningDialog(true) },
+    { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => setShowBrowseCoursesDialog(true) },
+    { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => setShowCertificatesDialog(true) },
+    { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => setShowStudyPlanDialog(true) },
+  ]
 
   const getProgressForCourse = (courseId: string) => {
     return progress.find(p => p.courseId === courseId)
@@ -2076,7 +2071,7 @@ export default function LearningClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockLearningQuickActions}
+            actions={learningQuickActions}
             variant="grid"
           />
         </div>
@@ -2330,6 +2325,276 @@ export default function LearningClient() {
               {pathsMutating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
               Create Path
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Continue Learning Dialog */}
+      <Dialog open={showContinueLearningDialog} onOpenChange={setShowContinueLearningDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg text-white">
+                <Play className="w-5 h-5" />
+              </div>
+              Continue Learning
+            </DialogTitle>
+            <DialogDescription>
+              Pick up where you left off
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {coursesInProgress.length > 0 ? (
+              <div className="space-y-3">
+                {coursesInProgress.slice(0, 5).map((course) => {
+                  const courseProgress = getProgressForCourse(course.id)
+                  return (
+                    <div
+                      key={course.id}
+                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                      onClick={() => {
+                        setSelectedCourse(course)
+                        setShowContinueLearningDialog(false)
+                      }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{course.title}</h4>
+                          <p className="text-sm text-gray-500">{course.category} - {course.level}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-sm font-medium text-emerald-600">{courseProgress?.progress || 0}%</span>
+                          <p className="text-xs text-gray-500">{courseProgress?.lessonsCompleted || 0} lessons</p>
+                        </div>
+                      </div>
+                      <div className="mt-2 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all"
+                          style={{ width: `${courseProgress?.progress || 0}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <GraduationCap className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                <p className="text-gray-500">No courses in progress</p>
+                <Button
+                  className="mt-4"
+                  onClick={() => {
+                    setShowContinueLearningDialog(false)
+                    setShowBrowseCoursesDialog(true)
+                  }}
+                >
+                  Browse Courses
+                </Button>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowContinueLearningDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Browse Courses Dialog */}
+      <Dialog open={showBrowseCoursesDialog} onOpenChange={setShowBrowseCoursesDialog}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg text-white">
+                <BookOpen className="w-5 h-5" />
+              </div>
+              Browse Courses
+            </DialogTitle>
+            <DialogDescription>
+              Explore our course catalog
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search courses..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3 pr-4">
+                {filteredCourses.slice(0, 10).map((course) => (
+                  <div
+                    key={course.id}
+                    className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                    onClick={() => {
+                      setSelectedCourse(course)
+                      setShowBrowseCoursesDialog(false)
+                    }}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center text-white flex-shrink-0">
+                        <BookOpen className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium truncate">{course.title}</h4>
+                        <p className="text-sm text-gray-500 line-clamp-2">{course.shortDescription}</p>
+                        <div className="flex items-center gap-3 mt-2">
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${getLevelColor(course.level)}`}>
+                            {course.level}
+                          </span>
+                          <span className="text-xs text-gray-500 flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {formatDuration(course.totalDuration)}
+                          </span>
+                          <span className="text-xs text-gray-500 flex items-center gap-1">
+                            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                            {course.rating}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowBrowseCoursesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Certificates Dialog */}
+      <Dialog open={showCertificatesDialog} onOpenChange={setShowCertificatesDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg text-white">
+                <Award className="w-5 h-5" />
+              </div>
+              My Certificates
+            </DialogTitle>
+            <DialogDescription>
+              View and download your earned certificates
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {progress.filter(p => p.certificateUrl).length > 0 ? (
+              <div className="space-y-3">
+                {progress.filter(p => p.certificateUrl).map((p) => {
+                  const course = courses.find(c => c.id === p.courseId)
+                  return course ? (
+                    <div
+                      key={p.courseId}
+                      className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{course.title}</h4>
+                          <p className="text-sm text-gray-500">
+                            Completed {p.completedAt ? new Date(p.completedAt).toLocaleDateString() : 'N/A'}
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={handleDownloadCertificate}
+                          className="flex items-center gap-2"
+                        >
+                          <Download className="w-4 h-4" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Award className="w-12 h-12 mx-auto text-gray-400 mb-3" />
+                <p className="text-gray-500">No certificates earned yet</p>
+                <p className="text-sm text-gray-400 mt-1">Complete courses to earn certificates</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCertificatesDialog(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Study Plan Dialog */}
+      <Dialog open={showStudyPlanDialog} onOpenChange={setShowStudyPlanDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg text-white">
+                <Calendar className="w-5 h-5" />
+              </div>
+              Study Plan
+            </DialogTitle>
+            <DialogDescription>
+              Manage your learning schedule
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <h4 className="font-medium mb-3">Weekly Goals</h4>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Learning time</span>
+                  <span className="text-sm font-medium">{stats.totalMinutes} / 300 minutes</span>
+                </div>
+                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                    style={{ width: `${Math.min((stats.totalMinutes / 300) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Courses completed</span>
+                  <span className="text-sm font-medium">{stats.completedCourses} / 2</span>
+                </div>
+                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"
+                    style={{ width: `${Math.min((stats.completedCourses / 2) * 100, 100)}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div className="flex items-center gap-3 mb-3">
+                <Flame className="w-5 h-5 text-orange-500" />
+                <span className="font-medium">Current Streak</span>
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl font-bold text-orange-500">{stats.streakDays}</span>
+                <span className="text-gray-500">days</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Keep learning daily to maintain your streak!</p>
+            </div>
+            <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <h4 className="font-medium mb-3">Upcoming</h4>
+              {coursesInProgress.length > 0 ? (
+                <div className="space-y-2">
+                  {coursesInProgress.slice(0, 3).map((course) => (
+                    <div key={course.id} className="flex items-center gap-3">
+                      <Play className="w-4 h-4 text-emerald-500" />
+                      <span className="text-sm truncate">{course.title}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500">No courses scheduled</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowStudyPlanDialog(false)}>Close</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

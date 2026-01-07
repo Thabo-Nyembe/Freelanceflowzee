@@ -419,20 +419,7 @@ const mockTemplatesActivities = [
   { id: '3', user: 'System', action: 'Updated', target: 'brand colors across 50 templates', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockTemplatesQuickActions = [
-  { id: '1', label: 'New Template', icon: 'plus', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 700)),
-    { loading: 'Creating new template...', success: 'Template created', error: 'Failed to create template' }
-  ), variant: 'default' as const },
-  { id: '2', label: 'Browse Gallery', icon: 'grid', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 600)),
-    { loading: 'Loading template gallery...', success: 'Gallery loaded', error: 'Failed to load gallery' }
-  ), variant: 'default' as const },
-  { id: '3', label: 'Export Assets', icon: 'download', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Exporting template assets...', success: 'Assets exported successfully', error: 'Failed to export assets' }
-  ), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function TemplatesClient() {
   const [activeTab, setActiveTab] = useState('gallery')

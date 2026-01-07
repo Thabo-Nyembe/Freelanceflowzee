@@ -127,12 +127,7 @@ const mockReportingActivities = [
   { id: '3', user: 'Data Engineer', action: 'connected', target: 'Snowflake data source', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mockReportingQuickActions = [
-  { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.success('Dashboard created successfully') },
-  { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W', action: () => toast.success('Worksheet created successfully') },
-  { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S', action: () => toast.success('Report scheduled successfully') },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => toast.success('Data exported successfully') },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function ReportingClient() {
   // Hooks for data
@@ -186,6 +181,7 @@ export default function ReportingClient() {
   const [showCreateWorksheet, setShowCreateWorksheet] = useState(false)
   const [showDataSourceDialog, setShowDataSourceDialog] = useState(false)
   const [showScheduleDialog, setShowScheduleDialog] = useState(false)
+  const [showExportDataDialog, setShowExportDataDialog] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [filterFavorites, setFilterFavorites] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
@@ -227,6 +223,14 @@ export default function ReportingClient() {
   const totalWorksheets = worksheets.length
   const totalDataSources = dataSources.filter(d => d.status === 'connected').length
   const totalViews = dashboards.reduce((sum, d) => sum + (d.views || 0), 0)
+
+  // Quick actions with proper dialog triggers
+  const reportingQuickActions = [
+    { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D', action: () => setShowCreateDashboard(true) },
+    { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W', action: () => setShowCreateWorksheet(true) },
+    { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S', action: () => setShowScheduleDialog(true) },
+    { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => setShowExportDataDialog(true) },
+  ]
 
   const filteredDashboards = useMemo(() => {
     return dashboards.filter(d => {
@@ -1670,7 +1674,7 @@ export default function ReportingClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockReportingQuickActions}
+            actions={reportingQuickActions}
             variant="grid"
           />
         </div>
@@ -2026,6 +2030,74 @@ export default function ReportingClient() {
                   className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50"
                 >
                   {isSubmitting ? 'Scheduling...' : 'Schedule Report'}
+                </button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Export Data Dialog */}
+        <Dialog open={showExportDataDialog} onOpenChange={setShowExportDataDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Export Data</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Select a format to export your dashboard data
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => {
+                    toast.success('Exporting as PDF...')
+                    setShowExportDataDialog(false)
+                  }}
+                  className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors flex flex-col items-center"
+                >
+                  <FileText className="w-8 h-8 text-red-500 mb-2" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">PDF</span>
+                  <span className="text-xs text-gray-500">Print-ready format</span>
+                </button>
+                <button
+                  onClick={() => {
+                    toast.success('Exporting as Excel...')
+                    setShowExportDataDialog(false)
+                  }}
+                  className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors flex flex-col items-center"
+                >
+                  <FileSpreadsheet className="w-8 h-8 text-green-500 mb-2" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">Excel</span>
+                  <span className="text-xs text-gray-500">Spreadsheet format</span>
+                </button>
+                <button
+                  onClick={() => {
+                    toast.success('Exporting as CSV...')
+                    setShowExportDataDialog(false)
+                  }}
+                  className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors flex flex-col items-center"
+                >
+                  <Table className="w-8 h-8 text-blue-500 mb-2" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">CSV</span>
+                  <span className="text-xs text-gray-500">Raw data format</span>
+                </button>
+                <button
+                  onClick={() => {
+                    toast.success('Exporting as PNG...')
+                    setShowExportDataDialog(false)
+                  }}
+                  className="p-4 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors flex flex-col items-center"
+                >
+                  <BarChart3 className="w-8 h-8 text-purple-500 mb-2" />
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">PNG</span>
+                  <span className="text-xs text-gray-500">Image format</span>
+                </button>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowExportDataDialog(false)}
+                  className="flex-1 px-4 py-2 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300"
+                >
+                  Cancel
                 </button>
               </div>
             </div>

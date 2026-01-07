@@ -123,12 +123,7 @@ const mockInvoicesActivities = [
   { id: '4', user: 'System', action: 'received', target: 'payment of $4,500 from TechCorp', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockInvoicesQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => toast.success('Invoice created') },
-  { id: '2', label: 'Send Reminders', icon: 'Mail', shortcut: 'R', action: () => toast.success('Reminders sent') },
-  { id: '3', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => toast.success('Report exported') },
-  { id: '4', label: 'Record Payment', icon: 'CreditCard', shortcut: 'P', action: () => toast.success('Payment recorded') },
-]
+// Quick actions - will be populated with state setters inside component
 
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
@@ -139,6 +134,11 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const [activeTab, setActiveTab] = useState('all')
   const [settingsTab, setSettingsTab] = useState('general')
   const [selectedInvoices, setSelectedInvoices] = useState<string[]>([])
+
+  // Quick Action Dialog States
+  const [showSendRemindersDialog, setShowSendRemindersDialog] = useState(false)
+  const [showExportReportDialog, setShowExportReportDialog] = useState(false)
+  const [showRecordPaymentDialog, setShowRecordPaymentDialog] = useState(false)
 
   // Invoice creation state
   const [newInvoice, setNewInvoice] = useState({
@@ -451,6 +451,14 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   }
 
   const getCurrencySymbol = (code: string) => currencies.find(c => c.code === code)?.symbol || '$'
+
+  // Quick Actions array with proper dialog openers
+  const invoicesQuickActions = [
+    { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => setShowCreateModal(true) },
+    { id: '2', label: 'Send Reminders', icon: 'Mail', shortcut: 'R', action: () => setShowSendRemindersDialog(true) },
+    { id: '3', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => setShowExportReportDialog(true) },
+    { id: '4', label: 'Record Payment', icon: 'CreditCard', shortcut: 'P', action: () => setShowRecordPaymentDialog(true) },
+  ]
 
   const handleDownloadInvoice = (invoice: Invoice) => {
     toast.success('Downloading invoice', {
@@ -1600,7 +1608,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockInvoicesQuickActions}
+            actions={invoicesQuickActions}
             variant="grid"
           />
         </div>
@@ -2206,6 +2214,241 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
               </div>
             </TabsContent>
           </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Reminders Dialog */}
+      <Dialog open={showSendRemindersDialog} onOpenChange={setShowSendRemindersDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Mail className="h-5 w-5 text-purple-600" />
+              Send Payment Reminders
+            </DialogTitle>
+            <DialogDescription>
+              Send payment reminders to clients with outstanding invoices
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Recipients</Label>
+              <Select defaultValue="overdue">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select invoices" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="overdue">All Overdue Invoices ({stats.overdue})</SelectItem>
+                  <SelectItem value="pending">All Pending Invoices ({stats.pending})</SelectItem>
+                  <SelectItem value="selected">Selected Invoices ({selectedInvoices.length})</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Reminder Template</Label>
+              <Select defaultValue="friendly">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="friendly">Friendly Reminder</SelectItem>
+                  <SelectItem value="formal">Formal Notice</SelectItem>
+                  <SelectItem value="urgent">Urgent Payment Request</SelectItem>
+                  <SelectItem value="final">Final Notice</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                This will send email reminders to {stats.overdue + stats.pending} clients with outstanding invoices totaling ${(stats.overdueAmount + stats.pendingRevenue).toLocaleString()}.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSendRemindersDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-purple-600 hover:bg-purple-700"
+              onClick={async () => {
+                const overdueInvoices = displayInvoices.filter(inv =>
+                  inv.status === 'overdue' || inv.status === 'sent'
+                )
+                for (const inv of overdueInvoices) {
+                  await handleSendReminder(inv)
+                }
+                setShowSendRemindersDialog(false)
+                toast.success(`Reminders sent to ${overdueInvoices.length} clients`)
+              }}
+              disabled={mutating}
+            >
+              <Mail className="h-4 w-4 mr-2" />
+              {mutating ? 'Sending...' : 'Send Reminders'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Export Report Dialog */}
+      <Dialog open={showExportReportDialog} onOpenChange={setShowExportReportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Download className="h-5 w-5 text-orange-600" />
+              Export Invoice Report
+            </DialogTitle>
+            <DialogDescription>
+              Export your invoice data in various formats
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Export Format</Label>
+              <Select defaultValue="csv">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select format" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="csv">CSV (Spreadsheet)</SelectItem>
+                  <SelectItem value="excel">Excel (.xlsx)</SelectItem>
+                  <SelectItem value="pdf">PDF Report</SelectItem>
+                  <SelectItem value="json">JSON Data</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Date Range</Label>
+              <Select defaultValue="all">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select date range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Time</SelectItem>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="90days">Last 90 Days</SelectItem>
+                  <SelectItem value="year">This Year</SelectItem>
+                  <SelectItem value="custom">Custom Range</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Include</Label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Invoice Details</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch defaultChecked />
+                  <span className="text-sm">Payment History</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch />
+                  <span className="text-sm">Client Information</span>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <p className="text-sm text-muted-foreground">
+                Exporting {stats.total} invoices with total revenue of ${stats.totalRevenue.toLocaleString()}.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowExportReportDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-orange-600 hover:bg-orange-700"
+              onClick={() => {
+                handleExportInvoices()
+                setShowExportReportDialog(false)
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Export Report
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Record Payment Dialog */}
+      <Dialog open={showRecordPaymentDialog} onOpenChange={setShowRecordPaymentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-emerald-600" />
+              Record Payment
+            </DialogTitle>
+            <DialogDescription>
+              Manually record a payment received for an invoice
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Select Invoice</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an invoice" />
+                </SelectTrigger>
+                <SelectContent>
+                  {displayInvoices
+                    .filter(inv => inv.status !== 'paid' && inv.status !== 'cancelled')
+                    .map(inv => (
+                      <SelectItem key={inv.id} value={inv.id}>
+                        #{inv.invoice_number} - {inv.client_name} (${inv.total_amount.toLocaleString()})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Payment Amount</Label>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">$</span>
+                <Input type="number" placeholder="0.00" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Payment Method</Label>
+              <Select defaultValue="bank">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bank">Bank Transfer</SelectItem>
+                  <SelectItem value="credit">Credit Card</SelectItem>
+                  <SelectItem value="check">Check</SelectItem>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Payment Date</Label>
+              <Input type="date" defaultValue={new Date().toISOString().split('T')[0]} />
+            </div>
+            <div className="space-y-2">
+              <Label>Reference / Notes (Optional)</Label>
+              <Input placeholder="Transaction ID, check number, etc." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowRecordPaymentDialog(false)}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={() => {
+                toast.success('Payment recorded', {
+                  description: 'The payment has been recorded successfully'
+                })
+                setShowRecordPaymentDialog(false)
+              }}
+            >
+              <CheckCircle2 className="h-4 w-4 mr-2" />
+              Record Payment
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
