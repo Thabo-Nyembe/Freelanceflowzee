@@ -46,14 +46,14 @@ export const DEFAULT_SHORTCUTS: ShortcutCategory[] = [
         key: 'm',
         altKey: true,
         description: 'Go to Messages',
-        action: () => { if (typeof window !== 'undefined') window.location.href = '/dashboard/messages' },
+        action: () => { if (typeof window !== 'undefined') window.location.href = '/dashboard/messages-v2' },
         category: 'navigation'
       },
       {
         key: 's',
         altKey: true,
         description: 'Go to Settings',
-        action: () => { if (typeof window !== 'undefined') window.location.href = '/dashboard/settings' },
+        action: () => { if (typeof window !== 'undefined') window.location.href = '/dashboard/settings-v2' },
         category: 'navigation'
       }
     ]

@@ -801,9 +801,9 @@ const DEFAULT_CATEGORIES: SidebarCategory[] = [
         name: 'Additional Pages',
         visible: true,
         items: [
-          { id: 'files', name: 'Files', href: '/dashboard/files', icon: FolderOpen, description: 'File manager', badge: 'New' },
-          { id: 'booking', name: 'Booking', href: '/dashboard/booking', icon: Calendar, description: 'Booking page', badge: 'New' },
-          { id: 'team-page', name: 'Team', href: '/dashboard/team', icon: Users, description: 'Team page', badge: 'New' },
+          { id: 'files', name: 'Files', href: '/dashboard/files-hub-v2', icon: FolderOpen, description: 'File manager', badge: 'New' },
+          { id: 'booking', name: 'Booking', href: '/dashboard/bookings-v2', icon: Calendar, description: 'Booking page', badge: 'New' },
+          { id: 'team-page', name: 'Team', href: '/dashboard/team-hub-v2', icon: Users, description: 'Team page', badge: 'New' },
           { id: 'features', name: 'Features', href: '/dashboard/features-v2', icon: Sparkles, description: 'Feature list', badge: 'New' },
           { id: 'coming-soon', name: 'Coming Soon', href: '/dashboard/coming-soon', icon: Rocket, description: 'Coming soon', badge: 'New' },
           { id: 'ai-enhanced', name: 'AI Enhanced', href: '/dashboard/ai-enhanced', icon: Brain, description: 'AI features', badge: 'New' },

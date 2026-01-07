@@ -1098,7 +1098,7 @@ export default function AccessLogsClient() {
                   <div className="divide-y dark:divide-gray-700">
                     {filteredLogs.map(log => {
                       const StatusIcon = getStatusIcon(log.status)
-                      const DeviceIcon = getDeviceIcon(log.device.type)
+                      const DeviceIcon = getDeviceIcon(log.device?.type || 'desktop')
                       return (
                         <div
                           key={log.id}
@@ -1144,7 +1144,7 @@ export default function AccessLogsClient() {
                                 )}
                                 <span className="flex items-center gap-1">
                                   <MapPin className="w-3 h-3" />
-                                  {log.location.city}, {log.location.country}
+                                  {log.location?.city || 'Unknown'}, {log.location?.country || 'Unknown'}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Globe className="w-3 h-3" />
@@ -1152,7 +1152,7 @@ export default function AccessLogsClient() {
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <DeviceIcon className="w-3 h-3" />
-                                  {log.device.browser}
+                                  {log.device?.browser || 'Unknown'}
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <Clock className="w-3 h-3" />

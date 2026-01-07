@@ -657,8 +657,8 @@ export default function InvoicingClient() {
     return invoices.filter(invoice => {
       const matchesSearch = !searchQuery ||
         invoice.invoiceNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        invoice.client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        invoice.client.company?.toLowerCase().includes(searchQuery.toLowerCase())
+        invoice.client?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        invoice.client?.company?.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter
       const matchesType = typeFilter === 'all' || invoice.type === typeFilter
       return matchesSearch && matchesStatus && matchesType
@@ -1015,7 +1015,7 @@ export default function InvoicingClient() {
                           <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <span className="flex items-center gap-1">
                               <Building2 className="w-4 h-4" />
-                              {invoice.client.company || invoice.client.name}
+                              {invoice.client?.company || invoice.client?.name || 'Unknown'}
                             </span>
                             <span className="flex items-center gap-1">
                               <Calendar className="w-4 h-4" />
@@ -1123,7 +1123,7 @@ export default function InvoicingClient() {
                       <div className="flex items-center gap-3">
                         <Avatar className="w-12 h-12">
                           <AvatarFallback className="bg-emerald-100 text-emerald-700">
-                            {client.name.split(' ').map(n => n[0]).join('')}
+                            {(client.name || 'U').split(' ').map(n => n[0]).join('')}
                           </AvatarFallback>
                         </Avatar>
                         <div>
@@ -1237,7 +1237,7 @@ export default function InvoicingClient() {
                           <div className="flex-1">
                             <p className="font-medium">{payment.invoice.invoiceNumber}</p>
                             <p className="text-sm text-muted-foreground">
-                              {payment.invoice.client.name} • {payment.method.replace('_', ' ')}
+                              {payment.invoice.client?.name || 'Unknown'} • {payment.method.replace('_', ' ')}
                             </p>
                           </div>
                           <div className="text-right">
@@ -1511,7 +1511,7 @@ export default function InvoicingClient() {
                         </div>
                         <div className="flex-1">
                           <p className="font-medium">{client.name}</p>
-                          <Progress value={(client.amount / report.topClients[0].amount) * 100} className="h-2 mt-1" />
+                          <Progress value={(client.amount / (report.topClients[0]?.amount || 1)) * 100} className="h-2 mt-1" />
                         </div>
                         <p className="font-semibold">{formatCurrency(client.amount)}</p>
                       </div>

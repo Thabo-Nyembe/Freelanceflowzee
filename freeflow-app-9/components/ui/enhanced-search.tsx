@@ -87,7 +87,7 @@ const defaultSuggestions: SearchSuggestion[] = [
     subtitle: 'View your time analytics',
     type: 'recent',
     icon: <Clock className="h-4 w-4" />,
-    href: '/dashboard/time-tracking'
+    href: '/dashboard/time-tracking-v2'
   },
   {
     id: '3',

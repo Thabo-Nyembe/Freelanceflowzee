@@ -167,7 +167,7 @@ const toolsAndResources: NavItem[] = [
 const quickActions: NavItem[] = [
   {
     title: 'New Project',
-    href: '/dashboard/projects/new',
+    href: '/dashboard/projects-hub-v2?action=new',
     description: 'Start a new project from scratch',
     icon: Sparkles,
   },

@@ -371,9 +371,9 @@ function MobileNavigationEnhancement() {
             <div className="grid grid-cols-2 gap-4">
               {[
                 { name: 'Dashboard', icon: <Monitor className="w-5 h-5" />, href: '/dashboard' },
-                { name: 'AI Create', icon: <Zap className="w-5 h-5" />, href: '/dashboard/ai-create' },
-                { name: 'Projects', icon: <Eye className="w-5 h-5" />, href: '/dashboard/projects-hub' },
-                { name: 'Analytics', icon: <Settings className="w-5 h-5" />, href: '/dashboard/analytics' }
+                { name: 'AI Create', icon: <Zap className="w-5 h-5" />, href: '/dashboard/ai-create-v2' },
+                { name: 'Projects', icon: <Eye className="w-5 h-5" />, href: '/dashboard/projects-hub-v2' },
+                { name: 'Analytics', icon: <Settings className="w-5 h-5" />, href: '/dashboard/analytics-v2' }
               ].map((item) => (
                 <motion.a
                   key={item.name}

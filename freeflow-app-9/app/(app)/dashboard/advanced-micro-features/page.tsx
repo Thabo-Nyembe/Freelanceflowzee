@@ -167,7 +167,7 @@ export default function AdvancedMicroFeaturesPage() {
   }), [])
 
   const mockQuickActions = useMemo(() => [
-    { id: '1', label: 'New Project', icon: Zap, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/projects-v2?action=new')), { loading: 'Opening new project...', success: 'New project opened', error: 'Failed to open' }), variant: 'primary' as const, shortcut: '⌘N' },
+    { id: '1', label: 'New Project', icon: Zap, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/projects-hub-v2?action=new')), { loading: 'Opening new project...', success: 'New project opened', error: 'Failed to open' }), variant: 'primary' as const, shortcut: '⌘N' },
     { id: '2', label: 'Upload Files', icon: Download, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/files-hub-v2?action=upload')), { loading: 'Opening file upload...', success: 'File upload opened', error: 'Failed to open' }), badge: '5' },
     { id: '3', label: 'Team Chat', icon: MessageSquare, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/messages-v2')), { loading: 'Opening team chat...', success: 'Team chat opened', error: 'Failed to open' }), badge: 3 },
     { id: '4', label: 'Analytics', icon: BarChart3, onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/analytics-v2')), { loading: 'Opening analytics...', success: 'Analytics opened', error: 'Failed to open' }) },
@@ -183,7 +183,7 @@ export default function AdvancedMicroFeaturesPage() {
       type: 'info' as const,
       timestamp: new Date(Date.now() - 5 * 60 * 1000),
       actions: [
-        { label: 'View Project', onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/projects-v2')), { loading: 'Opening project...', success: 'Project opened', error: 'Failed to open' }), variant: 'primary' as const },
+        { label: 'View Project', onClick: () => toast.promise(Promise.resolve(router.push('/dashboard/projects-hub-v2')), { loading: 'Opening project...', success: 'Project opened', error: 'Failed to open' }), variant: 'primary' as const },
         { label: 'Dismiss', onClick: () => toast.promise(Promise.resolve(), { loading: 'Dismissing...', success: 'Notification dismissed', error: 'Failed to dismiss' }) }
       ]
     },

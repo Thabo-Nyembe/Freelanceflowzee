@@ -142,7 +142,7 @@ const sidebarItems: SidebarItem[] = [
   },
   {
     name: 'Integrations',
-    href: '/dashboard/integrations/setup',
+    href: '/dashboard/integrations-v2',
     icon: Plug,
     description: 'Connect third-party services',
     badge: 'New'

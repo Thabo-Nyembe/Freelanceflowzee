@@ -42,49 +42,49 @@ const features = [
     title: 'Professional Video Studio',
     description: 'Edit videos with AI-powered transcription, screen recording, and timestamp comments. Collaborate with clients in real-time.',
     icon: Video,
-    href: '/dashboard/video-studio',
+    href: '/dashboard/video-studio-v2',
     gradient: 'from-red-500 to-red-600'
   },
   {
     title: 'Universal Pinpoint Feedback',
     description: 'Leave precise feedback on any file type—images, videos, PDFs, or code. Add voice notes and AI analysis.',
     icon: MessageSquare,
-    href: '/dashboard/collaboration',
+    href: '/dashboard/collaboration-v2',
     gradient: 'from-pink-500 to-pink-600'
   },
   {
     title: 'Secure Escrow Payments',
     description: 'Protect your income with milestone-based payments. Clients fund upfront, you deliver with confidence.',
     icon: Shield,
-    href: '/dashboard/escrow',
+    href: '/dashboard/escrow-v2',
     gradient: 'from-blue-500 to-blue-600'
   },
   {
     title: 'AI Daily Planning',
     description: 'Let AI organize your day. Get smart time estimates, productivity insights, and automated scheduling.',
     icon: Calendar,
-    href: '/dashboard/my-day',
+    href: '/dashboard/my-day-v2',
     gradient: 'from-orange-500 to-orange-600'
   },
   {
     title: 'Multi-Cloud Storage',
     description: 'Store unlimited files with 70% cost savings. Intelligent routing between Supabase and Wasabi.',
     icon: Upload,
-    href: '/dashboard/files-hub',
+    href: '/dashboard/files-hub-v2',
     gradient: 'from-cyan-500 to-cyan-600'
   },
   {
     title: 'Real-Time Collaboration',
     description: 'Work together like you\'re in the same room. See live cursors, instant updates, and presence indicators.',
     icon: Users,
-    href: '/dashboard/collaboration',
+    href: '/dashboard/collaboration-v2',
     gradient: 'from-green-500 to-green-600'
   },
   {
     title: 'Professional Invoicing',
     description: 'Create beautiful invoices in seconds. Track payments automatically and maintain financial records.',
     icon: DollarSign,
-    href: '/dashboard/financial-hub',
+    href: '/dashboard/financial-v2',
     gradient: 'from-emerald-500 to-emerald-600'
   },
   {

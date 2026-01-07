@@ -40,7 +40,7 @@ const features = [
     description:
       'Leave pixel-perfect feedback on any file type. Click, comment, and collaborate with voice notes and AI-powered analysis—no more endless email threads.',
     icon: MessageSquare,
-    href: '/dashboard/collaboration',
+    href: '/dashboard/collaboration-v2',
     color: 'from-pink-500 to-pink-700',
   },
   {
@@ -48,7 +48,7 @@ const features = [
     description:
       'Edit, transcribe, and collaborate on videos in real-time. Screen recording, timestamp comments, and client approval—all built in.',
     icon: Video,
-    href: '/dashboard/video-studio',
+    href: '/dashboard/video-studio-v2',
     color: 'from-red-500 to-red-700',
   },
   {
@@ -56,7 +56,7 @@ const features = [
     description:
       'Store unlimited files while saving 70% on costs. Intelligent routing between Supabase and Wasabi keeps your data safe and your budget happy.',
     icon: Cloud,
-    href: '/dashboard/files-hub',
+    href: '/dashboard/files-hub-v2',
     color: 'from-cyan-500 to-cyan-700',
   },
   {
@@ -64,7 +64,7 @@ const features = [
     description:
       'Get paid on time, every time. Clients fund milestones upfront, you deliver with confidence, and funds release automatically when work is approved.',
     icon: Shield,
-    href: '/dashboard/escrow',
+    href: '/dashboard/escrow-v2',
     color: 'from-blue-500 to-blue-700',
   },
   {
@@ -72,7 +72,7 @@ const features = [
     description:
       'Work together like you\'re in the same room. See live cursors, instant updates, and presence indicators that keep your team in perfect sync.',
     icon: Users,
-    href: '/dashboard/collaboration',
+    href: '/dashboard/collaboration-v2',
     color: 'from-green-500 to-green-700',
   },
   {
@@ -80,7 +80,7 @@ const features = [
     description:
       'Join 2,800+ verified creators. Network, find collaborators, showcase your work on the social wall, and discover opportunities in the marketplace.',
     icon: Globe,
-    href: '/dashboard/community',
+    href: '/dashboard/community-v2',
     color: 'from-indigo-500 to-indigo-700',
   },
   {
@@ -88,7 +88,7 @@ const features = [
     description:
       'Let AI organize your day. Get smart time estimates, productivity insights, and automated scheduling that learns how you actually work.',
     icon: Calendar,
-    href: '/dashboard/my-day',
+    href: '/dashboard/my-day-v2',
     color: 'from-orange-500 to-orange-700',
   },
   {
@@ -104,7 +104,7 @@ const features = [
     description:
       'Real-time business intelligence with revenue tracking, cost optimization, and performance predictions.',
     icon: Zap,
-    href: '/dashboard/analytics',
+    href: '/dashboard/analytics-v2',
     color: 'from-rose-500 to-rose-700',
   },
   {

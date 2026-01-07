@@ -635,7 +635,7 @@ export function NewUserChecklist({ userId, onDismiss, minimized: initialMinimize
       priority: 'required',
       isComplete: progress.completedTasks.includes('complete-profile'),
       action: () => {
-        window.location.href = '/dashboard/settings?tab=profile'
+        window.location.href = '/dashboard/settings-v2?tab=profile'
       }
     },
     {
@@ -691,7 +691,7 @@ export function NewUserChecklist({ userId, onDismiss, minimized: initialMinimize
       isComplete: progress.completedTasks.includes('view-calendar'),
       action: () => {
         completeTask('view-calendar', 15)
-        window.location.href = '/dashboard/calendar'
+        window.location.href = '/dashboard/calendar-v2'
       }
     },
     {

@@ -1323,7 +1323,7 @@ export default function CiCdClient() {
                           <p className="text-gray-500">{formatTimeAgo(run.startedAt)}</p>
                         </div>
                         <Avatar className="w-8 h-8">
-                          <AvatarFallback>{run.triggeredBy.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarFallback>{(run.triggeredBy || 'U').split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
                       </div>
                     </CardContent>
@@ -2291,7 +2291,7 @@ export default function CiCdClient() {
                             <span className="text-sm text-gray-500">{formatDuration(job.duration)}</span>
                           </div>
                           <div className="space-y-2 pl-7">
-                            {job.steps.map((step) => (
+                            {(job.steps || []).map((step) => (
                               <div key={step.id} className="flex items-center justify-between text-sm">
                                 <div className="flex items-center gap-2">
                                   {getStatusIcon(step.status)}
