@@ -454,7 +454,7 @@ export default function MessagesClient() {
 
   const handleStartCall = (contactName: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Calling ${contactName}...`, success: 'Call connected!', error: 'Call failed' })
 
-  const handleMuteChannel = (channelName: string) => toast.success('Channel muted', { description: `#${channelName} notifications muted` })
+  const handleMuteChannel = (channelName: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Muting #${channelName}...`, success: 'Channel muted', error: 'Failed to mute channel' })
 
   const handleMarkAllAsRead = async () => {
     if (!supabaseMessages || supabaseMessages.length === 0) {
@@ -589,7 +589,7 @@ export default function MessagesClient() {
             </Button>
             <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white" onClick={() => {
               setMessageInput('')
-              toast.success('Compose Message', { description: 'Use the message input below to send a new message' })
+              toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening composer...', success: 'Compose Message - Use the message input below', error: 'Failed to open composer' })
             }}>
               <Plus className="w-4 h-4 mr-2" />
               New Message
@@ -1192,7 +1192,7 @@ export default function MessagesClient() {
                           </div>
                           <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => {
                             setActiveCall(call)
-                            toast.success('Joining call', { description: `You are now in ${call.channelName}` })
+                            toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Joining ${call.channelName}...`, success: `Connected to ${call.channelName}`, error: 'Failed to join call' })
                           }}>
                             Join
                           </Button>
@@ -1437,7 +1437,7 @@ export default function MessagesClient() {
                           <p className="text-sm">{mention.message.content}</p>
                         </div>
                         <Button variant="ghost" size="icon" onClick={() => {
-                          toast.success('Reply', { description: 'Enter your reply in the message input below' })
+                          toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Preparing reply...', success: 'Ready to reply - Enter your message below', error: 'Failed to prepare reply' })
                           setMessageInput(`@${mention.message.author.name} `)
                         }}>
                           <Reply className="w-4 h-4" />

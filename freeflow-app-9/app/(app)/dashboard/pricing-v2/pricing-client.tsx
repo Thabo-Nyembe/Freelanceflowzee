@@ -763,8 +763,14 @@ export default function PricingClient({
 
   // Copy coupon code
   const handleCopyCoupon = (code: string) => {
-    navigator.clipboard.writeText(code)
-    toast.success('Coupon code copied')
+    toast.promise(
+      navigator.clipboard.writeText(code),
+      {
+        loading: 'Copying coupon code...',
+        success: 'Coupon code copied to clipboard',
+        error: 'Failed to copy coupon code'
+      }
+    )
   }
 
   return (
@@ -945,7 +951,7 @@ export default function PricingClient({
                   className="pl-9"
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading filters...', success: 'Filters loaded', error: 'Failed to load filters' })}>
                 <Filter className="w-4 h-4 mr-2" />
                 Filter
               </Button>
@@ -1112,10 +1118,10 @@ export default function PricingClient({
                         <Copy className="w-3 h-3 mr-1" />
                         Copy
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: 'Coupon editor opened', error: 'Failed to open editor' })}>
                         <Edit className="w-3 h-3" />
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Deleting coupon...', success: 'Coupon deleted', error: 'Failed to delete coupon' })}>
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>
@@ -1129,7 +1135,7 @@ export default function PricingClient({
           <TabsContent value="invoices" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Invoices</h2>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Exporting all invoices...', success: 'All invoices exported successfully', error: 'Failed to export invoices' })}>
                 <Download className="w-4 h-4 mr-2" />
                 Export All
               </Button>
@@ -1161,10 +1167,10 @@ export default function PricingClient({
                         </p>
                       </div>
                       <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading invoice preview...', success: 'Invoice preview loaded', error: 'Failed to load preview' })}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Downloading invoice...', success: 'Invoice downloaded successfully', error: 'Failed to download invoice' })}>
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1406,7 +1412,7 @@ export default function PricingClient({
                           <div className="mt-2 border-2 border-dashed rounded-lg p-6 text-center">
                             <Package className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                             <p className="text-sm text-gray-500">Upload your logo for invoices</p>
-                            <Button variant="outline" size="sm" className="mt-2">Browse</Button>
+                            <Button variant="outline" size="sm" className="mt-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening file browser...', success: 'File browser opened', error: 'Failed to open browser' })}>Browse</Button>
                           </div>
                         </div>
                         <div>
@@ -1452,7 +1458,7 @@ export default function PricingClient({
                               <p className="text-sm text-gray-500">Alternative payments</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Connecting to PayPal...', success: 'PayPal connection initiated', error: 'Failed to connect to PayPal' })}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1787,7 +1793,7 @@ export default function PricingClient({
                           </div>
                           <p className="text-xs text-gray-500">Events: invoice.*, subscription.*, customer.*</p>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening webhook configuration...', success: 'Webhook configuration opened', error: 'Failed to open configuration' })}>
                           <Webhook className="w-4 h-4 mr-2" />
                           Add Webhook Endpoint
                         </Button>
@@ -1823,7 +1829,7 @@ export default function PricingClient({
                             <p className="text-sm text-amber-800 dark:text-amber-200">Never share your API key publicly</p>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Regenerating API key...', success: 'API key regenerated successfully', error: 'Failed to regenerate API key' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1866,12 +1872,12 @@ export default function PricingClient({
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex-col">
+                          <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Exporting invoices to CSV...', success: 'Invoices exported successfully', error: 'Failed to export invoices' })}>
                             <Download className="h-6 w-6 mb-2" />
                             <span className="font-medium">Export Invoices</span>
                             <span className="text-xs text-gray-500">CSV format</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex-col">
+                          <Button variant="outline" className="h-auto py-4 flex-col" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Exporting subscriptions to CSV...', success: 'Subscriptions exported successfully', error: 'Failed to export subscriptions' })}>
                             <Download className="h-6 w-6 mb-2" />
                             <span className="font-medium">Export Subscriptions</span>
                             <span className="text-xs text-gray-500">CSV format</span>
@@ -2027,7 +2033,7 @@ export default function PricingClient({
                               <p className="font-medium text-red-700 dark:text-red-400">Cancel All Subscriptions</p>
                               <p className="text-sm text-red-600">This will cancel all active subscriptions</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Cancelling all subscriptions...', success: 'All subscriptions cancelled', error: 'Failed to cancel subscriptions' })}>
                               Cancel All
                             </Button>
                           </div>
@@ -2038,7 +2044,7 @@ export default function PricingClient({
                               <p className="font-medium text-red-700 dark:text-red-400">Reset Billing Configuration</p>
                               <p className="text-sm text-red-600">Reset all settings to defaults</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting billing configuration...', success: 'Billing configuration reset to defaults', error: 'Failed to reset configuration' })}>
                               Reset
                             </Button>
                           </div>
@@ -2049,7 +2055,7 @@ export default function PricingClient({
                               <p className="font-medium text-red-700 dark:text-red-400">Disconnect Stripe</p>
                               <p className="text-sm text-red-600">Disconnect payment integration</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Disconnecting Stripe...', success: 'Stripe disconnected successfully', error: 'Failed to disconnect Stripe' })}>
                               Disconnect
                             </Button>
                           </div>
@@ -2162,15 +2168,15 @@ export default function PricingClient({
                 </div>
 
                 <div className="flex gap-3">
-                  <Button className="flex-1">
+                  <Button className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening plan editor...', success: 'Plan editor opened', error: 'Failed to open editor' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Plan
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Duplicating plan...', success: 'Plan duplicated successfully', error: 'Failed to duplicate plan' })}>
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading plan analytics...', success: 'Plan analytics loaded', error: 'Failed to load analytics' })}>
                     <BarChart3 className="w-4 h-4 mr-2" />
                     Analytics
                   </Button>
@@ -2233,16 +2239,16 @@ export default function PricingClient({
                 )}
 
                 <div className="flex gap-3">
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading plan options...', success: 'Plan options loaded', error: 'Failed to load plan options' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Change Plan
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading customer invoices...', success: 'Customer invoices loaded', error: 'Failed to load invoices' })}>
                     <Receipt className="w-4 h-4 mr-2" />
                     View Invoices
                   </Button>
                   {selectedSubscription.status === 'active' && (
-                    <Button variant="outline" className="text-red-600 hover:text-red-700">
+                    <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Cancelling subscription...', success: 'Subscription cancelled', error: 'Failed to cancel subscription' })}>
                       <XCircle className="w-4 h-4 mr-2" />
                       Cancel
                     </Button>

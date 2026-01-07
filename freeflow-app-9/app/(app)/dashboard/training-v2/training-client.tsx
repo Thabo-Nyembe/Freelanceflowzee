@@ -727,14 +727,30 @@ export default function TrainingClient({ initialPrograms }: TrainingClientProps)
   }, [courseToEnroll, enrollmentForm, supabase, refetch])
 
   const handleStartLesson = useCallback((lessonName: string) => {
-    toast.info('Starting Lesson', { description: `Loading "${lessonName}"...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Loading "${lessonName}"...`,
+        success: `Lesson "${lessonName}" ready`,
+        error: 'Failed to load lesson'
+      }
+    )
     // In a real app, this would navigate to the lesson player
   }, [])
 
   const handleDownloadCertificate = useCallback(async (courseName: string, certificateUrl?: string) => {
     if (certificateUrl) {
-      window.open(certificateUrl, '_blank')
-      toast.success('Downloading Certificate', { description: `Certificate for "${courseName}" is downloading` })
+      toast.promise(
+        new Promise(resolve => {
+          window.open(certificateUrl, '_blank')
+          setTimeout(resolve, 600)
+        }),
+        {
+          loading: `Preparing certificate for "${courseName}"...`,
+          success: `Certificate for "${courseName}" is downloading`,
+          error: 'Failed to download certificate'
+        }
+      )
     } else {
       toast.error('Certificate Not Available', { description: 'No certificate available for this course' })
     }

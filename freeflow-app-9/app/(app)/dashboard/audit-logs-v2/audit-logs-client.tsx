@@ -1071,45 +1071,73 @@ export default function AuditLogsClient() {
   }
 
   const handleInvestigateLog = async (logId: string) => {
-    await createAuditLog({
-      log_type: 'security',
-      action: 'log.investigate',
-      description: `Investigating log ${logId}`,
-      status: 'success'
-    })
-    toast.info('Investigation started', {
-      description: `Opening investigation for log ${logId}...`
-    })
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'security',
+          action: 'log.investigate',
+          description: `Investigating log ${logId}`,
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 600))
+      })(),
+      {
+        loading: `Opening investigation for log ${logId}...`,
+        success: 'Investigation started',
+        error: 'Failed to start investigation'
+      }
+    )
   }
 
   const handleMarkResolved = async (alertId: string) => {
-    await createAuditLog({
-      log_type: 'admin',
-      action: 'alert.resolve',
-      description: `Resolved alert ${alertId}`,
-      status: 'success'
-    })
-    toast.success('Alert resolved', {
-      description: `Alert ${alertId} has been marked as resolved`
-    })
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'admin',
+          action: 'alert.resolve',
+          description: `Resolved alert ${alertId}`,
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 600))
+      })(),
+      {
+        loading: `Resolving alert ${alertId}...`,
+        success: `Alert ${alertId} has been marked as resolved`,
+        error: 'Failed to resolve alert'
+      }
+    )
   }
 
   const handleGenerateReport = async () => {
-    await createAuditLog({
-      log_type: 'data_access',
-      action: 'report.generate',
-      description: 'Generated compliance report',
-      status: 'success'
-    })
-    toast.success('Generating report', {
-      description: 'Compliance report is being generated...'
-    })
+    toast.promise(
+      (async () => {
+        await createAuditLog({
+          log_type: 'data_access',
+          action: 'report.generate',
+          description: 'Generated compliance report',
+          status: 'success'
+        })
+        await new Promise(r => setTimeout(r, 1500))
+      })(),
+      {
+        loading: 'Generating compliance report...',
+        success: 'Compliance report generated successfully',
+        error: 'Failed to generate report'
+      }
+    )
   }
 
   const handleRefresh = () => {
-    fetchAuditLogs()
-    fetchAlertRules()
-    toast.success('Data refreshed')
+    toast.promise(
+      (async () => {
+        await Promise.all([fetchAuditLogs(), fetchAlertRules()])
+      })(),
+      {
+        loading: 'Refreshing data...',
+        success: 'Data refreshed',
+        error: 'Failed to refresh data'
+      }
+    )
   }
 
   return (

@@ -445,8 +445,14 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
       label: 'Refresh Data',
       icon: <RefreshCw className="h-4 w-4" />,
       action: () => {
-        refetchBudgets()
-        toast.success('Data refreshed successfully')
+        toast.promise(
+          Promise.resolve(refetchBudgets()).then(() => new Promise(r => setTimeout(r, 600))),
+          {
+            loading: 'Refreshing budget data...',
+            success: 'Data refreshed successfully',
+            error: 'Failed to refresh data'
+          }
+        )
       },
       variant: 'outline' as const,
       description: 'Refresh budget data'

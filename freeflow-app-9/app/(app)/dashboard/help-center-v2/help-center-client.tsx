@@ -865,123 +865,123 @@ export default function HelpCenterClient() {
   }
 
   // Handlers
-  const handleCreateArticle = () => toast.success('Create', { description: 'Editor opened' })
-  const handlePublishArticle = (n: string) => toast.success('Published', { description: `"${n}" is live` })
-  const handleCreateCategory = () => toast.success('Create Category', { description: 'Adding new category' })
-  const handleSearch = () => toast.success('Searching', { description: 'Searching articles' })
+  const handleCreateArticle = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: 'Editor opened', error: 'Failed to open editor' })
+  const handlePublishArticle = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Publishing...', success: `"${n}" is live`, error: 'Failed to publish' })
+  const handleCreateCategory = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating category...', success: 'Adding new category', error: 'Failed to create category' })
+  const handleSearch = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Searching...', success: 'Searching articles', error: 'Search failed' })
   const handleSearchArticles = () => {
-    toast.success('Searching', { description: 'Searching help articles' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Searching...', success: 'Searching help articles', error: 'Search failed' })
   }
   const handleAnalytics = () => {
-    toast.success('Analytics', { description: 'Loading help center analytics' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading analytics...', success: 'Help center analytics loaded', error: 'Failed to load analytics' })
   }
   const handleImport = () => {
-    toast.success('Import', { description: 'Import wizard opened' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening import wizard...', success: 'Import wizard opened', error: 'Failed to open import wizard' })
   }
   const handleManageTags = () => {
-    toast.success('Manage Tags', { description: 'Tag manager opened' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening tag manager...', success: 'Tag manager opened', error: 'Failed to open tag manager' })
   }
   const handleTranslate = () => {
-    toast.success('Translate', { description: 'Translation center opened' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening translation center...', success: 'Translation center opened', error: 'Failed to open translation center' })
   }
   const handleArchives = () => {
-    toast.success('Archives', { description: 'Loading archived articles' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading archives...', success: 'Archived articles loaded', error: 'Failed to load archives' })
   }
   const handleSettings = () => {
-    toast.success('Settings', { description: 'Help center settings opened' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening settings...', success: 'Help center settings opened', error: 'Failed to open settings' })
   }
   const handleSubcategory = () => {
-    toast.success('Subcategory', { description: 'Creating new subcategory' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating subcategory...', success: 'Creating new subcategory', error: 'Failed to create subcategory' })
   }
   const handleOrganize = () => {
-    toast.success('Organize', { description: 'Content organizer opened' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening organizer...', success: 'Content organizer opened', error: 'Failed to open organizer' })
   }
   const handleAutoSort = () => {
-    toast.loading('Auto-Sort', { description: 'AI is sorting your content...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'AI is sorting your content...', success: 'Content sorted successfully', error: 'Failed to auto-sort' })
   }
   const handleCrossLink = () => {
-    toast.success('Cross-Link', { description: 'Link manager opened' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening link manager...', success: 'Link manager opened', error: 'Failed to open link manager' })
   }
   const handleCleanup = () => {
-    toast.loading('Cleanup', { description: 'Starting content cleanup...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Starting content cleanup...', success: 'Content cleanup complete', error: 'Cleanup failed' })
   }
   const handleViewCollection = (collectionName: string) => {
-    toast.success('View Collection', { description: `Opening "${collectionName}"` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening collection...', success: `Opening "${collectionName}"`, error: 'Failed to open collection' })
   }
   const handleNewCollection = () => {
-    toast.success('New Collection', { description: 'Creating new collection' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating collection...', success: 'Creating new collection', error: 'Failed to create collection' })
   }
   const handleAllFeedback = () => {
-    toast.success('All Feedback', { description: 'Loading all feedback' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading feedback...', success: 'All feedback loaded', error: 'Failed to load feedback' })
   }
   const handlePositiveFeedback = () => {
-    toast.success('Positive Feedback', { description: 'Filtering positive feedback' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Filtering feedback...', success: 'Positive feedback filtered', error: 'Failed to filter feedback' })
   }
   const handleNegativeFeedback = () => {
-    toast.success('Negative Feedback', { description: 'Filtering negative feedback' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Filtering feedback...', success: 'Negative feedback filtered', error: 'Failed to filter feedback' })
   }
   const handleIncorrectFeedback = () => {
-    toast.success('Incorrect Feedback', { description: 'Filtering incorrect reports' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Filtering feedback...', success: 'Incorrect reports filtered', error: 'Failed to filter feedback' })
   }
   const handleNeedsUpdate = () => {
-    toast.success('Needs Update', { description: 'Filtering update requests' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Filtering feedback...', success: 'Update requests filtered', error: 'Failed to filter feedback' })
   }
   const handleExport = () => {
-    toast.loading('Export', { description: 'Preparing export...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing export...', success: 'Export ready', error: 'Export failed' })
   }
   const handleReports = () => {
-    toast.success('Reports', { description: 'Loading reports' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading reports...', success: 'Reports loaded', error: 'Failed to load reports' })
   }
   const handleReviewNegative = () => {
-    toast.success('Review Negative', { description: 'Loading negative feedback for review' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading feedback...', success: 'Negative feedback loaded for review', error: 'Failed to load feedback' })
   }
   const handleUpdateRequested = () => {
-    toast.success('Update Requested', { description: 'Loading articles needing updates' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading articles...', success: 'Articles needing updates loaded', error: 'Failed to load articles' })
   }
   const handleFollowUp = () => {
-    toast.success('Follow Up', { description: 'Follow-up panel opened' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening follow-up panel...', success: 'Follow-up panel opened', error: 'Failed to open panel' })
   }
   const handleOverview = () => {
-    toast.success('Overview', { description: 'Loading analytics overview' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading overview...', success: 'Analytics overview loaded', error: 'Failed to load overview' })
   }
   const handleTrends = () => {
-    toast.success('Trends', { description: 'Loading trend analysis' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading trends...', success: 'Trend analysis loaded', error: 'Failed to load trends' })
   }
   const handleSearchTerms = () => {
-    toast.success('Search Terms', { description: 'Loading search analytics' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading search analytics...', success: 'Search analytics loaded', error: 'Failed to load search analytics' })
   }
   const handlePageViews = () => {
-    toast.success('Page Views', { description: 'Loading view statistics' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading view statistics...', success: 'View statistics loaded', error: 'Failed to load statistics' })
   }
   const handleTimeOnPage = () => {
-    toast.success('Time on Page', { description: 'Loading engagement metrics' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading engagement metrics...', success: 'Engagement metrics loaded', error: 'Failed to load metrics' })
   }
   const handleGaps = () => {
-    toast.loading('Content Gaps', { description: 'Analyzing content gaps...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Analyzing content gaps...', success: 'Content gaps analysis complete', error: 'Analysis failed' })
   }
   const handleSchedule = () => {
-    toast.success('Schedule', { description: 'Content calendar opened' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening calendar...', success: 'Content calendar opened', error: 'Failed to open calendar' })
   }
   const handleViewArticleExternal = (articleTitle: string) => {
-    toast.success('View Article', { description: `Opening "${articleTitle}"` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening article...', success: `Opening "${articleTitle}"`, error: 'Failed to open article' })
   }
   const handleEditArticle = (articleTitle: string) => {
-    toast.success('Edit Article', { description: `Editing "${articleTitle}"` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: `Editing "${articleTitle}"`, error: 'Failed to open editor' })
   }
   const handleViewLive = (articleTitle: string) => {
-    toast.success('View Live', { description: `Opening live preview of "${articleTitle}"` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening preview...', success: `Opening live preview of "${articleTitle}"`, error: 'Failed to open preview' })
   }
   const handleDuplicate = (articleTitle: string) => {
-    toast.success('Duplicated', { description: `"${articleTitle}" has been duplicated` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Duplicating article...', success: `"${articleTitle}" has been duplicated`, error: 'Failed to duplicate' })
   }
   const handleShare = (articleTitle: string) => {
-    toast.success('Share', { description: `Sharing "${articleTitle}"` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing share...', success: `Sharing "${articleTitle}"`, error: 'Failed to share' })
   }
   const handleArchive = (articleTitle: string) => {
-    toast.success('Archived', { description: `"${articleTitle}" has been archived` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Archiving article...', success: `"${articleTitle}" has been archived`, error: 'Failed to archive' })
   }
   const handleEditCategory = (categoryName: string) => {
-    toast.success('Edit Category', { description: `Editing "${categoryName}"` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: `Editing "${categoryName}"`, error: 'Failed to open editor' })
   }
 
   return (

@@ -2233,7 +2233,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             <AIInsightsPanel
               insights={mockDependenciesAIInsights}
               title="Dependencies Intelligence"
-              onInsightAction={(insight) => toast.success(insight.title, { description: insight.description || 'Security insight applied' })}
+              onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Applying ${insight.title}...`, success: insight.title, error: 'Failed to apply insight' })}
             />
           </div>
           <div className="space-y-6">

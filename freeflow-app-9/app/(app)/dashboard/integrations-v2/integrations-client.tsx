@@ -428,39 +428,48 @@ export default function IntegrationsClient() {
 
     setIsSubmitting(false)
     if (result) {
-      toast.success('Integration created successfully')
+      toast.promise(Promise.resolve(result), {
+        loading: 'Creating integration...',
+        success: 'Integration created successfully',
+        error: 'Failed to create integration'
+      })
       setShowCreateIntegrationDialog(false)
       setIntegrationForm({ name: '', provider: '', description: '', category: 'productivity', icon: '' })
     }
   }
 
   const handleConnectApp = async (app: Integration) => {
-    toast.loading('Connecting app', { description: `Setting up connection to ${app.name}...` })
-    const result = await connectIntegration(app.id)
-    if (result) {
-      toast.success('App connected', { description: `${app.name} is now connected` })
-    }
+    toast.promise(connectIntegration(app.id), {
+      loading: `Connecting ${app.name}...`,
+      success: `${app.name} is now connected`,
+      error: `Failed to connect ${app.name}`
+    })
   }
 
   const handleDisconnectApp = async (app: Integration) => {
-    const result = await disconnectIntegration(app.id)
-    if (result) {
-      toast.success('App disconnected', { description: `${app.name} has been disconnected` })
-    }
+    toast.promise(disconnectIntegration(app.id), {
+      loading: `Disconnecting ${app.name}...`,
+      success: `${app.name} has been disconnected`,
+      error: `Failed to disconnect ${app.name}`
+    })
     setSelectedApp(null)
   }
 
   const handleSyncApp = async (app: Integration) => {
-    toast.loading('Syncing', { description: `Synchronizing ${app.name} data...` })
-    await syncIntegration(app.id)
+    toast.promise(syncIntegration(app.id), {
+      loading: `Synchronizing ${app.name} data...`,
+      success: `${app.name} synced successfully`,
+      error: `Failed to sync ${app.name}`
+    })
   }
 
   const handleDeleteIntegration = async (app: Integration) => {
-    const result = await deleteIntegration(app.id)
-    if (result) {
-      toast.success('Integration removed', { description: `${app.name} has been removed` })
-      setSelectedApp(null)
-    }
+    toast.promise(deleteIntegration(app.id), {
+      loading: `Removing ${app.name}...`,
+      success: `${app.name} has been removed`,
+      error: `Failed to remove ${app.name}`
+    })
+    setSelectedApp(null)
   }
 
   // Workflow/Zap Handlers
@@ -491,34 +500,46 @@ export default function IntegrationsClient() {
 
     setIsSubmitting(false)
     if (result.success) {
-      toast.success('Zap created successfully')
+      toast.promise(Promise.resolve(result), {
+        loading: 'Creating zap...',
+        success: 'Zap created successfully',
+        error: 'Failed to create zap'
+      })
       setShowCreateZapDialog(false)
       setWorkflowForm({ name: '', description: '', type: 'integration', priority: 'medium' })
     } else {
-      toast.error('Failed to create zap', { description: result.error })
+      toast.promise(Promise.reject(new Error(result.error)), {
+        loading: 'Creating zap...',
+        success: 'Zap created',
+        error: result.error || 'Failed to create zap'
+      })
     }
   }
 
   const handleToggleZapStatus = async (zap: WorkflowType) => {
     if (zap.status === 'active') {
-      const result = await pauseWorkflow(zap.id)
-      if (result.success) {
-        toast.success('Zap paused', { description: `${zap.name} has been paused` })
-      }
+      toast.promise(pauseWorkflow(zap.id), {
+        loading: `Pausing ${zap.name}...`,
+        success: `${zap.name} has been paused`,
+        error: `Failed to pause ${zap.name}`
+      })
     } else if (zap.status === 'paused' || zap.status === 'draft') {
-      const result = zap.status === 'paused' ? await resumeWorkflow(zap.id) : await startWorkflow(zap.id)
-      if (result.success) {
-        toast.success('Zap activated', { description: `${zap.name} is now running` })
-      }
+      const action = zap.status === 'paused' ? resumeWorkflow(zap.id) : startWorkflow(zap.id)
+      toast.promise(action, {
+        loading: `Activating ${zap.name}...`,
+        success: `${zap.name} is now running`,
+        error: `Failed to activate ${zap.name}`
+      })
     }
   }
 
   const handleDeleteZap = async (zap: WorkflowType) => {
-    const result = await deleteWorkflow(zap.id)
-    if (result.success) {
-      toast.success('Zap deleted', { description: `${zap.name} has been removed` })
-      setSelectedZap(null)
-    }
+    toast.promise(deleteWorkflow(zap.id), {
+      loading: `Deleting ${zap.name}...`,
+      success: `${zap.name} has been removed`,
+      error: `Failed to delete ${zap.name}`
+    })
+    setSelectedZap(null)
   }
 
   // Webhook Handlers
@@ -552,43 +573,54 @@ export default function IntegrationsClient() {
 
     setIsSubmitting(false)
     if (result.success) {
-      toast.success('Webhook created successfully')
+      toast.promise(Promise.resolve(result), {
+        loading: 'Creating webhook...',
+        success: 'Webhook created successfully',
+        error: 'Failed to create webhook'
+      })
       setShowCreateWebhookDialog(false)
       setWebhookForm({ name: '', description: '', url: '', events: [] })
     } else {
-      toast.error('Failed to create webhook', { description: result.error })
+      toast.promise(Promise.reject(new Error(result.error)), {
+        loading: 'Creating webhook...',
+        success: 'Webhook created',
+        error: result.error || 'Failed to create webhook'
+      })
     }
   }
 
   const handleToggleWebhook = async (webhook: WebhookType) => {
     const newStatus = webhook.status === 'active' ? 'paused' : 'active'
-    const result = await toggleWebhookStatus(webhook.id, newStatus)
-    if (result.success) {
-      toast.success(`Webhook ${newStatus === 'active' ? 'activated' : 'paused'}`)
-    }
+    toast.promise(toggleWebhookStatus(webhook.id, newStatus), {
+      loading: `${newStatus === 'active' ? 'Activating' : 'Pausing'} webhook...`,
+      success: `Webhook ${newStatus === 'active' ? 'activated' : 'paused'}`,
+      error: `Failed to ${newStatus === 'active' ? 'activate' : 'pause'} webhook`
+    })
   }
 
   const handleTestWebhook = async (webhook: WebhookType) => {
-    toast.loading('Testing webhook', { description: `Sending test payload to ${webhook.name}` })
-    const result = await testWebhook(webhook.id)
-    if (result.success) {
-      toast.success('Test sent', { description: 'Check your endpoint for the test payload' })
-    } else {
-      toast.error('Test failed', { description: result.error })
-    }
+    toast.promise(testWebhook(webhook.id), {
+      loading: `Sending test payload to ${webhook.name}...`,
+      success: 'Test sent - check your endpoint for the payload',
+      error: 'Test failed - please check webhook configuration'
+    })
   }
 
   const handleDeleteWebhook = async (webhook: WebhookType) => {
-    const result = await deleteWebhook(webhook.id)
-    if (result.success) {
-      toast.success('Webhook deleted', { description: `${webhook.name} has been removed` })
-      setSelectedWebhook(null)
-    }
+    toast.promise(deleteWebhook(webhook.id), {
+      loading: `Deleting ${webhook.name}...`,
+      success: `${webhook.name} has been removed`,
+      error: `Failed to delete ${webhook.name}`
+    })
+    setSelectedWebhook(null)
   }
 
   const handleCopyUrl = (url: string) => {
-    navigator.clipboard.writeText(url)
-    toast.success('URL copied to clipboard')
+    toast.promise(navigator.clipboard.writeText(url), {
+      loading: 'Copying URL...',
+      success: 'URL copied to clipboard',
+      error: 'Failed to copy URL'
+    })
   }
 
   // Quick actions
@@ -795,7 +827,7 @@ export default function IntegrationsClient() {
                 { icon: Play, label: 'Run All', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: async () => {
                   const activeWorkflows = workflows.filter(w => w.status === 'active')
                   if (activeWorkflows.length === 0) {
-                    toast.warning('No active workflows to run')
+                    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Checking workflows...', success: 'No active workflows to run', error: 'Check failed' })
                     return
                   }
                   toast.promise(
@@ -806,7 +838,7 @@ export default function IntegrationsClient() {
                 { icon: Pause, label: 'Pause All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: async () => {
                   const activeWorkflows = workflows.filter(w => w.status === 'active')
                   if (activeWorkflows.length === 0) {
-                    toast.warning('No active workflows to pause')
+                    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Checking workflows...', success: 'No active workflows to pause', error: 'Check failed' })
                     return
                   }
                   toast.promise(
@@ -817,15 +849,17 @@ export default function IntegrationsClient() {
                 { icon: History, label: 'History', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('tasks') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
-                  const data = JSON.stringify(workflows, null, 2)
-                  const blob = new Blob([data], { type: 'application/json' })
-                  const url = URL.createObjectURL(blob)
-                  const a = document.createElement('a')
-                  a.href = url
-                  a.download = 'workflows-export.json'
-                  a.click()
-                  URL.revokeObjectURL(url)
-                  toast.success('Workflows exported successfully!')
+                  toast.promise(new Promise<void>((resolve) => {
+                    const data = JSON.stringify(workflows, null, 2)
+                    const blob = new Blob([data], { type: 'application/json' })
+                    const url = URL.createObjectURL(blob)
+                    const a = document.createElement('a')
+                    a.href = url
+                    a.download = 'workflows-export.json'
+                    a.click()
+                    URL.revokeObjectURL(url)
+                    setTimeout(resolve, 600)
+                  }), { loading: 'Exporting workflows...', success: 'Workflows exported successfully!', error: 'Failed to export workflows' })
                 } },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
@@ -1143,7 +1177,7 @@ export default function IntegrationsClient() {
                 { icon: RefreshCw, label: 'Retry Failed', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => {
                   const failedTasks = mockTasks.filter(t => t.status === 'failed')
                   if (failedTasks.length === 0) {
-                    toast.info('No failed tasks to retry')
+                    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Checking failed tasks...', success: 'No failed tasks to retry', error: 'Check failed' })
                     return
                   }
                   toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Retrying ${failedTasks.length} failed tasks...`, success: `${failedTasks.length} tasks queued for retry`, error: 'Failed to retry tasks' })
@@ -1286,7 +1320,7 @@ export default function IntegrationsClient() {
                 { icon: RefreshCw, label: 'Retry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {
                   const failedDeliveries = webhooks.filter(w => w.failed_deliveries > 0)
                   if (failedDeliveries.length === 0) {
-                    toast.info('No failed deliveries to retry')
+                    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Checking failed deliveries...', success: 'No failed deliveries to retry', error: 'Check failed' })
                     return
                   }
                   toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: `Retrying ${failedDeliveries.length} webhook deliveries...`, success: 'Failed deliveries queued for retry', error: 'Failed to retry deliveries' })
@@ -1751,7 +1785,7 @@ export default function IntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integrations Intelligence"
-              onInsightAction={(insight) => toast.success('Insight Action', { description: insight.title })}
+              onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Processing insight...', success: `Insight action: ${insight.title}`, error: 'Failed to process insight' })}
             />
           </div>
           <div className="space-y-6">
@@ -2304,7 +2338,7 @@ export default function IntegrationsClient() {
                     setShowTemplatesDialog(false)
                     setShowCreateZapDialog(true)
                     setWorkflowForm({ ...workflowForm, name: template.name, description: template.desc })
-                    toast.success(`Template "${template.name}" selected`)
+                    toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading template...', success: `Template "${template.name}" selected`, error: 'Failed to load template' })
                   }}
                 >
                   <template.icon className={`w-8 h-8 mb-2 ${template.color}`} />

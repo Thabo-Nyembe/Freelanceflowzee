@@ -497,11 +497,25 @@ export default function AnalyticsClient() {
   const handleNotifications = () => {
     setSettingsTab('notifications')
     setActiveTab('settings')
-    toast.info('Notifications', { description: 'Opening notification settings...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening notification settings...',
+        success: 'Notification settings opened',
+        error: 'Failed to open notification settings'
+      }
+    )
   }
 
   const handleExport = async () => {
-    toast.success('Export started', { description: 'Your analytics report is being generated' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Generating analytics report...',
+        success: 'Export completed successfully',
+        error: 'Failed to export analytics report'
+      }
+    )
     // In production, this would trigger a real export job
   }
 
@@ -515,7 +529,14 @@ export default function AnalyticsClient() {
   }
 
   const handleFilters = () => {
-    toast.info('Filters', { description: 'Opening filter panel...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening filter panel...',
+        success: 'Filter panel ready',
+        error: 'Failed to open filter panel'
+      }
+    )
   }
 
   const handleRefresh = async () => {

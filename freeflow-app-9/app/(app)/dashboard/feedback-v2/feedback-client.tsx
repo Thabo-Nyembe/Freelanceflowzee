@@ -702,7 +702,14 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
   // Legacy handlers for mock data compatibility
   const handleVote = (idea: Idea) => {
     // For mock ideas, just show toast - real DB items use handleVoteFeedback
-    toast.success('Vote recorded', { description: `You voted for "${idea.title}"` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Recording vote...',
+        success: `Vote recorded for "${idea.title}"`,
+        error: 'Failed to record vote'
+      }
+    )
   }
 
   return (

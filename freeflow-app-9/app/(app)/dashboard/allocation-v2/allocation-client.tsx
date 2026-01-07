@@ -916,13 +916,25 @@ export default function AllocationClient() {
   }
 
   const handleExportAllocations = () => {
-    toast.success('Exporting allocations', { description: 'Allocation report will be downloaded' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Exporting allocations...',
+        success: 'Allocation report downloaded',
+        error: 'Failed to export allocations'
+      }
+    )
   }
 
   const handleRefresh = async () => {
-    toast.info('Refreshing...', { description: 'Fetching latest data' })
-    await refetch()
-    toast.success('Refreshed', { description: 'Data updated successfully' })
+    toast.promise(
+      refetch(),
+      {
+        loading: 'Refreshing data...',
+        success: 'Data updated successfully',
+        error: 'Failed to refresh data'
+      }
+    )
   }
 
   return (

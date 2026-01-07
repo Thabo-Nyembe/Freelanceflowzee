@@ -298,66 +298,66 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const frameworks: Framework[] = ['react', 'vue', 'angular', 'nextjs', 'nuxt', 'universal']
 
   // Handlers
-  const handleInstallTheme = (n: string) => toast.info('Installing', { description: `Installing "${n}"...` })
-  const handlePreviewTheme = (n: string) => toast.info('Preview', { description: `Previewing "${n}"...` })
-  const handleActivateTheme = (n: string) => toast.success('Activated', { description: `"${n}" is now active` })
-  const handleCustomize = () => toast.info('Customize', { description: 'Opening customizer...' })
+  const handleInstallTheme = (n: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Installing "${n}"...`, success: `"${n}" installed successfully`, error: `Failed to install "${n}"` })
+  const handlePreviewTheme = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Loading preview for "${n}"...`, success: `Previewing "${n}"`, error: 'Failed to load preview' })
+  const handleActivateTheme = (n: string) => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: `Activating "${n}"...`, success: `"${n}" is now active`, error: `Failed to activate "${n}"` })
+  const handleCustomize = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening customizer...', success: 'Customizer ready', error: 'Failed to open customizer' })
   const handleWishlist = () => {
-    toast.info('Wishlist', { description: 'Opening your wishlist...' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening your wishlist...', success: 'Wishlist loaded', error: 'Failed to load wishlist' })
   }
   const handleMyThemes = () => {
-    toast.info('My Themes', { description: 'Opening your themes library...' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening your themes library...', success: 'Themes library loaded', error: 'Failed to load themes' })
   }
   const handleQuickAction = (label: string) => {
-    toast.info(label, { description: `Executing ${label.toLowerCase()} action...` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Executing ${label.toLowerCase()} action...`, success: `${label} action completed`, error: `${label} action failed` })
   }
   const handleDeactivateTheme = () => {
-    toast.warning('Deactivate', { description: 'Deactivating current theme...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Deactivating current theme...', success: 'Theme deactivated', error: 'Failed to deactivate theme' })
   }
   const handleThemeSettings = () => {
-    toast.info('Settings', { description: 'Opening theme settings...' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening theme settings...', success: 'Theme settings loaded', error: 'Failed to load settings' })
   }
   const handleRemoveTheme = (themeName: string) => {
-    toast.warning('Remove Theme', { description: `Removing "${themeName}"...` })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Removing "${themeName}"...`, success: `"${themeName}" removed`, error: `Failed to remove "${themeName}"` })
   }
   const handleSaveChanges = () => {
-    toast.success('Saved', { description: 'Theme changes saved successfully' })
+    toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Saving theme changes...', success: 'Theme changes saved successfully', error: 'Failed to save changes' })
   }
   const handleClearCache = () => {
-    toast.info('Clear Cache', { description: 'Clearing theme cache...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Clearing theme cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })
   }
   const handleOptimizeStorage = () => {
-    toast.info('Optimize', { description: 'Optimizing storage...' })
+    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Optimizing storage...', success: 'Storage optimized', error: 'Failed to optimize storage' })
   }
   const handleAddPaymentMethod = () => {
-    toast.info('Payment', { description: 'Opening payment method form...' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening payment method form...', success: 'Payment form ready', error: 'Failed to open payment form' })
   }
   const handleConnect = (integration: string) => {
-    toast.info('Connect', { description: `Connecting to ${integration}...` })
+    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Connecting to ${integration}...`, success: `Connected to ${integration}`, error: `Failed to connect to ${integration}` })
   }
   const handleRegenerateKey = () => {
-    toast.warning('Regenerate', { description: 'Regenerating API key...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Regenerating API key...', success: 'API key regenerated', error: 'Failed to regenerate key' })
   }
   const handleViewDocs = () => {
-    toast.info('Documentation', { description: 'Opening API documentation...' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening API documentation...', success: 'Documentation loaded', error: 'Failed to load documentation' })
   }
   const handleDownloadSDK = () => {
-    toast.info('Download', { description: 'Downloading SDK...' })
+    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Downloading SDK...', success: 'SDK downloaded successfully', error: 'Failed to download SDK' })
   }
   const handleRemoveAll = () => {
-    toast.error('Remove All', { description: 'Removing all installed themes...' })
+    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Removing all installed themes...', success: 'All themes removed', error: 'Failed to remove themes' })
   }
   const handleResetPreferences = () => {
-    toast.warning('Reset', { description: 'Resetting store preferences...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting store preferences...', success: 'Preferences reset to defaults', error: 'Failed to reset preferences' })
   }
   const handleAddToWishlist = (themeName: string) => {
-    toast.success('Added to Wishlist', { description: `"${themeName}" added to wishlist` })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Adding "${themeName}" to wishlist...`, success: `"${themeName}" added to wishlist`, error: 'Failed to add to wishlist' })
   }
   const handleVerifyLicense = () => {
-    toast.info('Verify', { description: 'Verifying license...' })
+    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Verifying license...', success: 'License verified', error: 'License verification failed' })
   }
   const handleViewReceipt = (invoice: string) => {
-    toast.info('Receipt', { description: `Opening receipt for ${invoice}...` })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Opening receipt for ${invoice}...`, success: `Receipt for ${invoice} loaded`, error: 'Failed to load receipt' })
   }
 
   const getCategoryIcon = (cat: ThemeCategory) => {

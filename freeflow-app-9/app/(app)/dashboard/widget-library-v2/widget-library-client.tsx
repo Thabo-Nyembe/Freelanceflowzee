@@ -527,8 +527,14 @@ export default function WidgetLibraryClient() {
   }
 
   const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code)
-    toast.success('Copied to clipboard')
+    toast.promise(
+      navigator.clipboard.writeText(code),
+      {
+        loading: 'Copying to clipboard...',
+        success: 'Copied to clipboard',
+        error: 'Failed to copy'
+      }
+    )
   }
 
   // Quick actions for toolbar

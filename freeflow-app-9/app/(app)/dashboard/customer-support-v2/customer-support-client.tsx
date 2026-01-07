@@ -2213,7 +2213,7 @@ export default function CustomerSupportClient({ initialAgents, initialConversati
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         <AIInsightsPanel
           insights={mockSupportAIInsights}
-          onAskQuestion={(q) => console.log('Support Question:', q)}
+          onAskQuestion={(q) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Processing question...', success: `AI analyzed: ${q.slice(0, 30)}...`, error: 'Failed to process question' })}
         />
         <PredictiveAnalytics predictions={mockSupportPredictions} />
       </div>

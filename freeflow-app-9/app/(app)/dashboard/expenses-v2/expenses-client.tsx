@@ -417,9 +417,14 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   }
 
   const handleExportExpenses = () => {
-    toast.success('Export started', {
-      description: 'Your expense data is being exported'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting expense data...',
+        success: 'Export complete! Your expense data has been exported',
+        error: 'Failed to export expense data'
+      }
+    )
   }
 
   const handleSubmitReport = async (expenseId: string, title: string) => {
@@ -440,9 +445,14 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
   }
 
   const handleAddReceipt = () => {
-    toast.info('Add Receipt', {
-      description: 'Opening receipt scanner...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: 'Opening receipt scanner...',
+        success: 'Receipt scanner ready - capture your receipt',
+        error: 'Failed to open receipt scanner'
+      }
+    )
   }
 
   return (

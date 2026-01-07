@@ -424,13 +424,26 @@ export default function FormsClient({ initialForms }: { initialForms: Form[] }) 
   }
 
   const handleExportResponses = (formTitle: string) => {
-    toast.success('Exporting Responses', { description: `Responses for "${formTitle}" will be downloaded` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: `Exporting responses for "${formTitle}"...`,
+        success: `Responses for "${formTitle}" exported successfully`,
+        error: 'Failed to export responses'
+      }
+    )
   }
 
   const handleShareForm = async (form: Form) => {
     const shareUrl = `${window.location.origin}/forms/${form.id}`
-    await navigator.clipboard.writeText(shareUrl)
-    toast.success('Link Copied', { description: `Share link for "${form.title}" copied to clipboard` })
+    toast.promise(
+      navigator.clipboard.writeText(shareUrl),
+      {
+        loading: 'Copying share link...',
+        success: `Share link for "${form.title}" copied to clipboard`,
+        error: 'Failed to copy link'
+      }
+    )
   }
 
   if (error) return (

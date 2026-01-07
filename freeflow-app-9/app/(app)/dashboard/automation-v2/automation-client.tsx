@@ -2198,9 +2198,14 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
                 onClick={() => {
-                  toast.success('Template Applied!', {
-                    description: `"${selectedTemplate?.name}" has been created`
-                  })
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 600)),
+                    {
+                      loading: 'Applying template...',
+                      success: `Template Applied! "${selectedTemplate?.name}" has been created`,
+                      error: 'Failed to apply template'
+                    }
+                  )
                   setShowTemplateDialog(false)
                 }}
               >
@@ -2255,9 +2260,14 @@ export default function AutomationClient({ initialAutomations }: { initialAutoma
               <Button
                 className="bg-gradient-to-r from-orange-500 to-amber-600 text-white"
                 onClick={() => {
-                  toast.success('Integration Connected!', {
-                    description: `${selectedIntegration?.name} is now ready to use`
-                  })
+                  toast.promise(
+                    new Promise(resolve => setTimeout(resolve, 600)),
+                    {
+                      loading: 'Connecting integration...',
+                      success: `Integration Connected! ${selectedIntegration?.name} is now ready to use`,
+                      error: 'Failed to connect integration'
+                    }
+                  )
                   setShowIntegrationDialog(false)
                 }}
               >

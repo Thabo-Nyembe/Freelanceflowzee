@@ -634,7 +634,14 @@ export default function PerformanceClient() {
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(testUrl)
     setCopiedUrl(true)
-    toast.success('URL copied to clipboard!')
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Copying URL...',
+        success: 'URL copied to clipboard!',
+        error: 'Failed to copy URL'
+      }
+    )
     setTimeout(() => setCopiedUrl(false), 2000)
   }
 
@@ -694,9 +701,14 @@ export default function PerformanceClient() {
       }
 
       // In production, this would create a scheduled job
-      toast.success('Test scheduled successfully!', {
-        description: 'You will receive notifications when tests complete'
-      })
+      toast.promise(
+        new Promise(resolve => setTimeout(resolve, 800)),
+        {
+          loading: 'Scheduling test...',
+          success: 'Test scheduled successfully! You will receive notifications when tests complete',
+          error: 'Failed to schedule test'
+        }
+      )
     } catch (err: any) {
       toast.error(err.message || 'Failed to schedule test')
     }
@@ -709,9 +721,14 @@ export default function PerformanceClient() {
       return
     }
 
-    toast.info('Opening comparison view', {
-      description: 'Comparing latest test results'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Loading comparison view...',
+        success: 'Comparison view ready! Comparing latest test results',
+        error: 'Failed to open comparison view'
+      }
+    )
   }
 
   // Add performance budget

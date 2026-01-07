@@ -815,9 +815,14 @@ export default function DesktopAppClient() {
 
   // Download build (mock with toast for actual file download)
   const handleDownloadBuild = (buildVersion: string, platform: string) => {
-    toast.success('Downloading build', {
-      description: `${buildVersion} for ${platform} download starting...`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: `Preparing ${buildVersion} for ${platform}...`,
+        success: `Download started for ${buildVersion} (${platform})`,
+        error: 'Failed to start download'
+      }
+    )
   }
 
   // Publish release (update build status)

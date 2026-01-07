@@ -515,7 +515,7 @@ export default function AdvancedMicroFeaturesPage() {
                       { name: 'Expenses', color: '#ef4444', value: '$28K', visible: true },
                       { name: 'Profit', color: '#10b981', value: '$17K', visible: false }
                     ]}
-                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.info(`Legend  toggled`) }}
+                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling legend...', success: `Legend ${name} toggled`, error: 'Failed to toggle' }) }}
                   >
                     <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
                       <div className="text-center text-muted-foreground">
@@ -537,7 +537,7 @@ export default function AdvancedMicroFeaturesPage() {
                     exportable={true}
                     pagination={true}
                     pageSize={3}
-                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.info(`Viewing details for `) }}
+                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading details...', success: `Viewing details for ${row.name || 'item'}`, error: 'Failed to load details' }) }}
                   />
                 </div>
               </div>
@@ -556,7 +556,7 @@ export default function AdvancedMicroFeaturesPage() {
                         maxDisplay={4}
                         showDetails={true}
                         size="lg"
-                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.info(`Viewing 's profile`) }}
+                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading profile...', success: `Viewing ${user.name}'s profile`, error: 'Failed to load profile' }) }}
                       />
                       <div className="text-sm text-muted-foreground">
                         Team members currently online and their status
@@ -607,7 +607,7 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedSettingsCategories
                     categories={mockSettingsCategories}
                     activeCategory="theme"
-                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.info(`Switched to  settings`) }}
+                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching category...', success: `Switched to ${categoryId} settings`, error: 'Failed to switch' }) }}
                   />
                 </div>
 

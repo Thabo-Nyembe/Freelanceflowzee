@@ -357,10 +357,19 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   }, [newMessage, selectedConversation, sendMessage])
 
   const handleUseSavedReply = useCallback((reply: SavedReply) => {
-    setNewMessage(reply.content)
-    setShowSavedReplies(false)
-    messageInputRef.current?.focus()
-    toast.success('Reply Inserted', { description: reply.name })
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setNewMessage(reply.content)
+        setShowSavedReplies(false)
+        messageInputRef.current?.focus()
+        setTimeout(resolve, 600)
+      }),
+      {
+        loading: 'Inserting reply...',
+        success: `Reply inserted: ${reply.name}`,
+        error: 'Failed to insert reply'
+      }
+    )
   }, [])
 
   const handleUseAISuggestion = useCallback(async (suggestion: AIsuggestion) => {

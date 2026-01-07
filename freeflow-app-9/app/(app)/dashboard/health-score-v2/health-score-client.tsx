@@ -847,11 +847,18 @@ export default function HealthScoreClient() {
   }
 
   // Refresh metrics handler
-  const handleRefreshMetrics = async () => {
-    toast.info('Refreshing metrics', { description: 'Fetching latest health data...' })
+  const handleRefreshMetrics = () => {
     setLoading(true)
-    await fetchHealthScores()
-    toast.success('Metrics refreshed')
+    toast.promise(
+      (async () => {
+        await fetchHealthScores()
+      })(),
+      {
+        loading: 'Refreshing metrics...',
+        success: 'Metrics refreshed successfully',
+        error: 'Failed to refresh metrics'
+      }
+    )
   }
 
   // Combined stats from DB + mock data
@@ -916,15 +923,36 @@ export default function HealthScoreClient() {
   }
 
   const handleRunDiagnostics = () => {
-    toast.info('Running diagnostics', { description: 'Performing system health check...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Running diagnostics...',
+        success: 'System health check completed',
+        error: 'Diagnostics failed'
+      }
+    )
   }
 
   const handleExportHealth = () => {
-    toast.success('Exporting health report', { description: 'Health metrics will be downloaded' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 700)),
+      {
+        loading: 'Exporting health report...',
+        success: 'Health metrics exported successfully',
+        error: 'Export failed'
+      }
+    )
   }
 
   const handleConfigureAlerts = () => {
-    toast.info('Configure Alerts', { description: 'Opening alert configuration...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening alert configuration...',
+        success: 'Alert configuration loaded',
+        error: 'Failed to load configuration'
+      }
+    )
   }
 
   return (

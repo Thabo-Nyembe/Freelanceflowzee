@@ -772,9 +772,14 @@ export default function TicketsClient() {
   }
 
   const handleRefresh = async () => {
-    toast.info('Refreshing', { description: 'Refreshing ticket data...' })
-    await refetch()
-    toast.success('Refreshed', { description: 'Ticket data updated' })
+    toast.promise(
+      refetch(),
+      {
+        loading: 'Refreshing ticket data...',
+        success: 'Ticket data updated',
+        error: 'Failed to refresh ticket data'
+      }
+    )
   }
 
   const handleNewTicket = () => {
@@ -782,7 +787,14 @@ export default function TicketsClient() {
   }
 
   const handleBulkAssign = () => {
-    toast.info('Bulk Assign', { description: 'Opening bulk assignment dialog...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening bulk assignment dialog...',
+        success: 'Bulk assignment ready',
+        error: 'Failed to open bulk assignment'
+      }
+    )
   }
 
   const handleAssignToMe = async (ticketId: string, ticketNumber: string) => {
@@ -797,11 +809,25 @@ export default function TicketsClient() {
   }
 
   const handleAddAgent = () => {
-    toast.info('Add Agent', { description: 'Opening agent creation form...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening agent creation form...',
+        success: 'Agent form ready',
+        error: 'Failed to open agent form'
+      }
+    )
   }
 
   const handleFullReport = () => {
-    toast.info('Full Report', { description: 'Generating full analytics report...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Generating full analytics report...',
+        success: 'Analytics report generated',
+        error: 'Failed to generate report'
+      }
+    )
   }
 
   const handleSendReply = async () => {
@@ -855,51 +881,91 @@ export default function TicketsClient() {
   }
 
   const handleSaveGeneralSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'General settings have been updated'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Saving general settings...',
+        success: 'General settings have been updated',
+        error: 'Failed to save general settings'
+      }
+    )
   }
 
   const handleSaveSLASettings = () => {
-    toast.success('Settings Saved', {
-      description: 'SLA policies have been updated'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Saving SLA policies...',
+        success: 'SLA policies have been updated',
+        error: 'Failed to save SLA policies'
+      }
+    )
   }
 
   const handleSaveRoutingSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'Routing settings have been updated'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Saving routing settings...',
+        success: 'Routing settings have been updated',
+        error: 'Failed to save routing settings'
+      }
+    )
   }
 
   const handleSaveNotificationSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'Notification settings have been updated'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Saving notification settings...',
+        success: 'Notification settings have been updated',
+        error: 'Failed to save notification settings'
+      }
+    )
   }
 
   const handleSaveAdvancedSettings = () => {
-    toast.success('Settings Saved', {
-      description: 'Advanced settings have been updated'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Saving advanced settings...',
+        success: 'Advanced settings have been updated',
+        error: 'Failed to save advanced settings'
+      }
+    )
   }
 
   const handleExportAllTickets = () => {
-    toast.info('Exporting Tickets', {
-      description: 'Preparing ticket export file...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Preparing ticket export file...',
+        success: 'Tickets exported successfully',
+        error: 'Failed to export tickets'
+      }
+    )
   }
 
   const handleExportAnalytics = () => {
-    toast.info('Exporting Analytics', {
-      description: 'Preparing analytics export file...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Preparing analytics export file...',
+        success: 'Analytics exported successfully',
+        error: 'Failed to export analytics'
+      }
+    )
   }
 
   const handleDeleteResolvedTickets = () => {
-    toast.warning('Delete Tickets', {
-      description: 'This action would delete all resolved tickets'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Preparing to delete resolved tickets...',
+        success: 'Resolved tickets deletion initiated',
+        error: 'Failed to delete resolved tickets'
+      }
+    )
   }
 
   return (

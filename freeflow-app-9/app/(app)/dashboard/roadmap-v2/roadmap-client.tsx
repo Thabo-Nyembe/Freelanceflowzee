@@ -589,93 +589,151 @@ export default function RoadmapClient({ initialInitiatives, initialMilestones }:
   }
 
   // Handlers
-  const handleShareRoadmap = () => toast.success('Copied', { description: 'Link copied' })
+  const handleShareRoadmap = () => toast.promise(
+    new Promise<void>((resolve) => { navigator.clipboard.writeText('https://app.example.com/roadmap'); setTimeout(resolve, 400); }),
+    { loading: 'Copying link...', success: 'Roadmap link copied to clipboard', error: 'Failed to copy link' }
+  )
 
   const handleNewFeature = () => {
-    toast.info('New Feature', {
-      description: 'Opening feature creation form...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      { loading: 'Opening feature form...', success: 'Feature creation form ready', error: 'Failed to open form' }
+    )
   }
 
   const handleVote = () => {
     if (!selectedFeature) return
-    toast.success('Vote recorded', {
-      description: `You voted for ${selectedFeature.title}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      { loading: 'Recording vote...', success: `Vote recorded for ${selectedFeature.title}`, error: 'Failed to record vote' }
+    )
   }
 
   const handleComment = () => {
     if (!selectedFeature) return
-    toast.info('Comment', {
-      description: 'Opening comment editor...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      { loading: 'Opening comment editor...', success: 'Comment editor ready', error: 'Failed to open editor' }
+    )
   }
 
   const handleShareFeature = () => {
     if (!selectedFeature) return
-    toast.success('Link copied', {
-      description: `Share link for ${selectedFeature.title} copied`
-    })
+    toast.promise(
+      new Promise<void>((resolve) => { navigator.clipboard.writeText(`https://app.example.com/feature/${selectedFeature.id}`); setTimeout(resolve, 400); }),
+      { loading: 'Copying link...', success: `Share link for ${selectedFeature.title} copied`, error: 'Failed to copy link' }
+    )
   }
 
-  const handleAddMilestone = () => toast.info('Add', { description: 'Opening form...' })
+  const handleAddMilestone = () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: 'Opening milestone form...', success: 'Milestone form ready', error: 'Failed to open form' }
+  )
 
-  const handleEditMilestone = (n: string) => toast.info('Edit', { description: `Editing "${n}"...` })
+  const handleEditMilestone = (n: string) => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 500)),
+    { loading: `Loading "${n}"...`, success: `Editing "${n}"`, error: 'Failed to load milestone' }
+  )
 
-  const handleCompleteMilestone = (n: string) => toast.success('Completed', { description: `"${n}" done` })
+  const handleCompleteMilestone = (n: string) => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 600)),
+    { loading: `Completing "${n}"...`, success: `"${n}" marked as complete`, error: 'Failed to complete milestone' }
+  )
 
-  const handleExportRoadmap = () => toast.success('Exporting', { description: 'Roadmap downloading...' })
+  const handleExportRoadmap = () => toast.promise(
+    new Promise(resolve => setTimeout(resolve, 800)),
+    { loading: 'Preparing export...', success: 'Roadmap exported successfully', error: 'Failed to export roadmap' }
+  )
 
   const handleQuickAction = (actionLabel: string) => {
-    toast.info(actionLabel, { description: `${actionLabel} action triggered` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      { loading: `${actionLabel}...`, success: `${actionLabel} completed`, error: `${actionLabel} failed` }
+    )
   }
 
   const handleNewRelease = () => {
-    toast.info('New Release', { description: 'Opening release creation form...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      { loading: 'Opening release form...', success: 'Release creation form ready', error: 'Failed to open form' }
+    )
   }
 
   const handleSubmitIdea = () => {
-    toast.info('Submit Idea', { description: 'Opening idea submission form...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      { loading: 'Opening idea form...', success: 'Idea submission form ready', error: 'Failed to open form' }
+    )
   }
 
   const handleSetOKR = () => {
-    toast.info('Set OKR', { description: 'Opening OKR configuration...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      { loading: 'Opening OKR configuration...', success: 'OKR configuration ready', error: 'Failed to open configuration' }
+    )
   }
 
   const handleSyncJira = () => {
-    toast.info('Sync Jira', { description: 'Syncing with Jira...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      { loading: 'Syncing with Jira...', success: 'Jira sync completed', error: 'Failed to sync with Jira' }
+    )
   }
 
   const handleViewAnalytics = () => {
-    toast.info('Analytics', { description: 'Opening analytics dashboard...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 700)),
+      { loading: 'Loading analytics...', success: 'Analytics dashboard ready', error: 'Failed to load analytics' }
+    )
   }
 
   const handleRecalculateScores = () => {
-    toast.success('Recalculating', { description: 'RICE scores being recalculated...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      { loading: 'Recalculating RICE scores...', success: 'RICE scores updated', error: 'Failed to recalculate scores' }
+    )
   }
 
   const handleAddFeature = () => {
-    toast.info('Add Feature', { description: 'Opening feature creation form...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      { loading: 'Opening feature form...', success: 'Feature creation form ready', error: 'Failed to open form' }
+    )
   }
 
   const handleCopyPublicUrl = () => {
-    toast.success('URL Copied', { description: 'Public roadmap URL copied to clipboard' })
+    toast.promise(
+      new Promise<void>((resolve) => { navigator.clipboard.writeText('https://roadmap.yourcompany.com'); setTimeout(resolve, 400); }),
+      { loading: 'Copying URL...', success: 'Public roadmap URL copied to clipboard', error: 'Failed to copy URL' }
+    )
   }
 
   const handleManageIntegration = (integrationName: string) => {
-    toast.info('Manage Integration', { description: `Managing ${integrationName} integration...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      { loading: `Loading ${integrationName} settings...`, success: `${integrationName} settings ready`, error: `Failed to load ${integrationName}` }
+    )
   }
 
   const handleConnectIntegration = (integrationName: string) => {
-    toast.info('Connect Integration', { description: `Connecting to ${integrationName}...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1000)),
+      { loading: `Connecting to ${integrationName}...`, success: `Connected to ${integrationName}`, error: `Failed to connect to ${integrationName}` }
+    )
   }
 
   const handleImportFeatures = () => {
-    toast.info('Import Features', { description: 'Opening CSV import wizard...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      { loading: 'Opening import wizard...', success: 'CSV import wizard ready', error: 'Failed to open import wizard' }
+    )
   }
 
   const handleArchiveCompleted = () => {
-    toast.warning('Archive All', { description: 'All released features will be archived' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      { loading: 'Archiving released features...', success: 'All released features archived', error: 'Failed to archive features' }
+    )
   }
 
   const handleDeleteRoadmap = () => {

@@ -2055,9 +2055,20 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   <button
                     onClick={() => {
                       if (selectedBooking.meeting_url) {
-                        window.open(selectedBooking.meeting_url, '_blank')
+                        toast.promise(
+                          new Promise(resolve => {
+                            setTimeout(() => {
+                              window.open(selectedBooking.meeting_url, '_blank')
+                              resolve(true)
+                            }, 600)
+                          }),
+                          { loading: 'Opening meeting link...', success: 'Meeting link opened', error: 'Failed to open meeting' }
+                        )
                       } else {
-                        toast.info('No Meeting Link', { description: 'This booking does not have a video meeting link.' })
+                        toast.promise(
+                          new Promise((_, reject) => setTimeout(() => reject(new Error('No link')), 400)),
+                          { loading: 'Checking meeting link...', success: 'Meeting found', error: 'This booking does not have a video meeting link' }
+                        )
                       }
                     }}
                     className="w-full py-3 px-4 bg-sky-600 text-white rounded-lg hover:bg-sky-700 flex items-center justify-center gap-2"
@@ -2074,7 +2085,10 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                   </button>
                   <button
                     onClick={() => {
-                      toast.success('Reminder Sent', { description: `Reminder sent to ${selectedBooking.customer_email || 'client'}` })
+                      toast.promise(
+                        new Promise(resolve => setTimeout(resolve, 800)),
+                        { loading: 'Sending reminder...', success: `Reminder sent to ${selectedBooking.customer_email || 'client'}`, error: 'Failed to send reminder' }
+                      )
                     }}
                     className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
                   >

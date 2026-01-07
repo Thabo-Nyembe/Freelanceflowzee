@@ -645,27 +645,47 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
   }, [])
 
   const handleDownloadRelease = useCallback((version: string) => {
-    toast.success('Downloading release', {
-      description: `${version} download starting...`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Preparing ${version} download...`,
+        success: `${version} download started successfully`,
+        error: 'Failed to start download'
+      }
+    )
   }, [])
 
   const handleCompareVersions = useCallback(() => {
-    toast.info('Compare Versions', {
-      description: 'Opening version comparison tool...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening version comparison tool...',
+        success: 'Version comparison tool ready',
+        error: 'Failed to open comparison tool'
+      }
+    )
   }, [])
 
   const handleSubscribeUpdates = useCallback(async () => {
-    toast.success('Subscribed to updates', {
-      description: 'You will receive notifications for new releases'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Subscribing to updates...',
+        success: 'Subscribed! You will receive notifications for new releases',
+        error: 'Failed to subscribe to updates'
+      }
+    )
   }, [])
 
   const handleViewReleaseNotes = useCallback((version: string) => {
-    toast.info('Loading release notes', {
-      description: `Opening notes for ${version}...`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Loading release notes for ${version}...`,
+        success: `Release notes for ${version} loaded`,
+        error: 'Failed to load release notes'
+      }
+    )
   }, [])
 
   // Form field update helper
@@ -1372,9 +1392,14 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                         Cancel
                       </Button>
                       <Button onClick={() => {
-                        toast.success('Discussion Created', {
-                          description: 'Your discussion has been posted'
-                        })
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 600)),
+                          {
+                            loading: 'Creating discussion...',
+                            success: 'Discussion created successfully',
+                            error: 'Failed to create discussion'
+                          }
+                        )
                         setIsDiscussionDialogOpen(false)
                         setDiscussionForm({ title: '', body: '', category: 'feedback' })
                       }}>
@@ -1532,9 +1557,15 @@ export default function ChangelogClient({ initialChangelog }: { initialChangelog
                           toast.error('Validation Error', { description: 'Name and URL are required' })
                           return
                         }
-                        toast.success('Webhook Created', {
-                          description: `${webhookForm.name} has been configured`
-                        })
+                        const webhookName = webhookForm.name
+                        toast.promise(
+                          new Promise(resolve => setTimeout(resolve, 600)),
+                          {
+                            loading: 'Creating webhook...',
+                            success: `${webhookName} webhook configured successfully`,
+                            error: 'Failed to create webhook'
+                          }
+                        )
                         setIsWebhookDialogOpen(false)
                         setWebhookForm({ name: '', url: '', events: [] })
                       }}>

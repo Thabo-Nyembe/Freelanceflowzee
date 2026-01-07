@@ -503,54 +503,54 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
   )
 
   // Handlers
-  const handleCreateTutorial = () => toast.success('Create', { description: 'Editor opened' })
-  const handlePublishTutorial = (n: string) => toast.success('Published', { description: `"${n}" is live` })
+  const handleCreateTutorial = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: 'Editor opened!', error: 'Failed to open editor' })
+  const handlePublishTutorial = (n: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Publishing "${n}"...`, success: `"${n}" is live!`, error: 'Failed to publish' })
   const handleStartTutorial = (n: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading "${n}"...`, success: `"${n}" ready!`, error: 'Failed to load' })
-  const handleCompleteTutorial = (n: string) => toast.success('Completed', { description: `Finished "${n}"!` })
+  const handleCompleteTutorial = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Saving progress...', success: `Finished "${n}"!`, error: 'Failed to save progress' })
   const handleMyList = () => {
-    toast.success('My List', { description: 'Your saved courses are ready' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading your list...', success: 'Your saved courses are ready!', error: 'Failed to load list' })
   }
   const handleQuickAction = (actionLabel: string) => {
-    toast.success(actionLabel, { description: `${actionLabel} action completed` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `${actionLabel}...`, success: `${actionLabel} completed!`, error: `${actionLabel} failed` })
   }
   const handleMarkAllRead = () => {
-    toast.success('Notifications', { description: 'All notifications marked as read' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Marking all as read...', success: 'All notifications marked as read!', error: 'Failed to mark as read' })
   }
   const handleChangePhoto = () => {
-    toast.success('Change Photo', { description: 'Photo upload dialog opened' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening upload dialog...', success: 'Photo upload dialog opened!', error: 'Failed to open dialog' })
   }
   const handleUpgradePlan = (planName: string) => {
     toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Upgrading to ${planName} plan...`, success: `Upgraded to ${planName}!`, error: 'Upgrade failed' })
   }
   const handleAddPaymentMethod = () => {
-    toast.success('Add Payment', { description: 'Payment method form opened' })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening payment form...', success: 'Payment method form opened!', error: 'Failed to open form' })
   }
   const handleConnectService = (serviceName: string) => {
     toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Connecting to ${serviceName}...`, success: `Connected to ${serviceName}!`, error: 'Connection failed' })
   }
   const handleCopyApiKey = () => {
-    toast.success('Copied', { description: 'API key copied to clipboard' })
+    toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'API key copied to clipboard!', error: 'Failed to copy' })
   }
   const handleRegenerateApiKey = () => {
-    toast.warning('Regenerate API Key', { description: 'Generating new API key...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Regenerating API key...', success: 'New API key generated!', error: 'Failed to regenerate key' })
   }
   const handleDownloadData = () => {
     toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing your data export...', success: 'Export ready!', error: 'Export failed' })
   }
   const handleClearHistory = () => {
-    toast.success('History Cleared', { description: 'Watch history has been cleared' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Clearing watch history...', success: 'Watch history cleared!', error: 'Failed to clear history' })
   }
   const handleResetProgress = () => {
-    toast.warning('Reset Progress', { description: 'Resetting all course progress...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting all progress...', success: 'All progress reset!', error: 'Failed to reset progress' })
   }
   const handleDeleteAccount = () => {
     toast.error('Delete Account', { description: 'Please confirm account deletion' })
   }
   const handleEnrollCourse = (courseName: string) => {
-    toast.success('Enrolled', { description: `Successfully enrolled in "${courseName}"` })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Enrolling in "${courseName}"...`, success: `Successfully enrolled in "${courseName}"!`, error: 'Enrollment failed' })
   }
   const handleCreateGoal = () => {
-    toast.success('Goal Created', { description: 'Your learning goal has been set' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating goal...', success: 'Goal created!', error: 'Failed to create goal' })
     setShowGoalDialog(false)
   }
 
@@ -1740,7 +1740,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
             <AIInsightsPanel
               insights={mockTutorialsAIInsights}
               title="Learning Intelligence"
-              onInsightAction={(insight) => toast.success(insight.title, { description: insight.description || 'Insight applied to your learning path' })}
+              onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Applying insight...', success: `${insight.title} applied!`, error: 'Failed to apply insight' })}
             />
           </div>
           <div className="space-y-6">

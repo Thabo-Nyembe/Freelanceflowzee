@@ -541,21 +541,36 @@ export default function WarehouseClient() {
 
   // Handlers
   const handleCreateShipment = () => {
-    toast.info('Create Shipment', {
-      description: 'Opening shipment form...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening shipment form...',
+        success: 'Create Shipment form ready',
+        error: 'Failed to open shipment form'
+      }
+    )
   }
 
   const handleReceiveInventory = () => {
-    toast.info('Receive Inventory', {
-      description: 'Opening receiving form...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening receiving form...',
+        success: 'Receive Inventory form ready',
+        error: 'Failed to open receiving form'
+      }
+    )
   }
 
   const handleStartInventoryCount = () => {
-    toast.success('Inventory count started', {
-      description: 'Count session is now active'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Starting inventory count...',
+        success: 'Inventory count started - Count session is now active',
+        error: 'Failed to start inventory count'
+      }
+    )
   }
 
   return (

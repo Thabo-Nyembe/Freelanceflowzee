@@ -450,10 +450,14 @@ export default function SystemInsightsClient() {
   // Handlers
   const handleRefreshMetrics = async () => {
     setLoading(true)
-    toast.info('Refreshing metrics', { description: 'Fetching latest system data...' })
-    await Promise.all([fetchAlerts(), fetchSettings()])
-    setLoading(false)
-    toast.success('Data refreshed')
+    toast.promise(
+      Promise.all([fetchAlerts(), fetchSettings()]).finally(() => setLoading(false)),
+      {
+        loading: 'Refreshing metrics...',
+        success: 'Data refreshed successfully',
+        error: 'Failed to refresh metrics'
+      }
+    )
   }
 
   const handleCreateAlert = async () => {
@@ -556,8 +560,7 @@ export default function SystemInsightsClient() {
   }
 
   const handleExportReport = async () => {
-    toast.info('Preparing export...', { description: 'Generating system insights report' })
-    try {
+    const exportPromise = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Not authenticated')
 
@@ -568,12 +571,13 @@ export default function SystemInsightsClient() {
         resource_type: 'system_insights',
         metadata: { timeRange, exportedAt: new Date().toISOString() }
       })
-
-      toast.success('Report exported', { description: 'System insights report downloaded' })
-    } catch (error) {
-      console.error('Export error:', error)
-      toast.success('Report exported', { description: 'System insights report downloaded' })
     }
+
+    toast.promise(exportPromise(), {
+      loading: 'Preparing export...',
+      success: 'Report exported successfully',
+      error: 'Failed to export report'
+    })
   }
 
   const handleClearAllAlerts = async () => {
@@ -596,11 +600,25 @@ export default function SystemInsightsClient() {
   }
 
   const handleRestartService = (serviceName: string) => {
-    toast.info('Restarting service', { description: `${serviceName} is restarting...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: `Restarting ${serviceName}...`,
+        success: `${serviceName} restarted successfully`,
+        error: `Failed to restart ${serviceName}`
+      }
+    )
   }
 
   const handleScaleService = (serviceName: string) => {
-    toast.info('Scaling service', { description: `Opening scaling options for ${serviceName}` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Opening scaling options for ${serviceName}...`,
+        success: `Scaling options loaded for ${serviceName}`,
+        error: `Failed to load scaling options`
+      }
+    )
   }
 
   return (

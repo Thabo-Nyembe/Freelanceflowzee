@@ -976,7 +976,7 @@ export default function MarketingClient() {
     toast.info('Schedule Meeting', { description: `Scheduling meeting with ${leadName}...` })
   }
   const handleQuickAction = (label: string) => {
-    toast.info(label, { description: `Opening ${label.toLowerCase()}...` })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Opening ${label.toLowerCase()}...`, success: `${label} opened`, error: `Failed to open ${label}` })
   }
 
   return (

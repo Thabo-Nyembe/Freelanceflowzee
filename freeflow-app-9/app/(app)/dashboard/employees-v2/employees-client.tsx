@@ -531,27 +531,47 @@ export default function EmployeesClient() {
 
   // Handlers
   const handleExportEmployees = () => {
-    toast.success('Export started', {
-      description: 'Employee data is being exported'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Exporting employee data...',
+        success: 'Export started - Employee data is being exported',
+        error: 'Failed to export employees'
+      }
+    )
   }
 
   const handleScheduleReview = (employee: Employee) => {
-    toast.success('Review scheduled', {
-      description: `Performance review scheduled for ${employee.name}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Scheduling review...',
+        success: `Review scheduled - Performance review scheduled for ${employee.name}`,
+        error: 'Failed to schedule review'
+      }
+    )
   }
 
   const handleApproveTimeOff = (request: typeof mockTimeOffRequests[0]) => {
-    toast.success('Time off approved', {
-      description: `Request from ${request.employeeName} has been approved`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Approving time off request...',
+        success: `Time off approved - Request from ${request.employeeName} has been approved`,
+        error: 'Failed to approve time off request'
+      }
+    )
   }
 
   const handleSendAnnouncement = () => {
-    toast.info('Send Announcement', {
-      description: 'Opening announcement composer...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Opening announcement composer...',
+        success: 'Announcement composer ready',
+        error: 'Failed to open announcement composer'
+      }
+    )
   }
 
   const renderOrgNode = (node: OrgNode, level: number = 0): JSX.Element => (

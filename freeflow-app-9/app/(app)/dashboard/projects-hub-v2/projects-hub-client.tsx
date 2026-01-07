@@ -420,16 +420,25 @@ export default function ProjectsHubClient() {
   }
 
   const handleExportProjects = async () => {
-    const csv = allProjects.map(p =>
-      `${p.name},${p.status},${p.priority},${p.progress}%,$${p.budget},$${p.spent}`
-    ).join('\n')
-    const blob = new Blob([`Name,Status,Priority,Progress,Budget,Spent\n${csv}`], { type: 'text/csv' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'projects-export.csv'
-    a.click()
-    toast.success('Projects exported to CSV')
+    toast.promise(
+      new Promise<void>((resolve) => {
+        const csv = allProjects.map(p =>
+          `${p.name},${p.status},${p.priority},${p.progress}%,$${p.budget},$${p.spent}`
+        ).join('\n')
+        const blob = new Blob([`Name,Status,Priority,Progress,Budget,Spent\n${csv}`], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'projects-export.csv'
+        a.click()
+        setTimeout(resolve, 600)
+      }),
+      {
+        loading: 'Exporting projects...',
+        success: 'Projects exported to CSV',
+        error: 'Failed to export projects'
+      }
+    )
   }
 
   return (

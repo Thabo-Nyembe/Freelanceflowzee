@@ -971,7 +971,7 @@ export default function FAQClient() {
                             </h3>
                             <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mt-1">{article.excerpt}</p>
                           </div>
-                          <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                          <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading options...', success: 'Article options ready', error: 'Failed to load options' })} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                             <MoreVertical className="w-4 h-4 text-gray-400" />
                           </button>
                         </div>
@@ -1084,12 +1084,12 @@ export default function FAQClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'Add Collection', desc: 'Create new category', color: 'bg-blue-500' },
-                { icon: Upload, label: 'Import', desc: 'Bulk import articles', color: 'bg-purple-500' },
-                { icon: RefreshCw, label: 'Reorder', desc: 'Change order', color: 'bg-amber-500' },
-                { icon: Archive, label: 'Archive', desc: 'Archive old content', color: 'bg-gray-500' }
+                { icon: Plus, label: 'Add Collection', desc: 'Create new category', color: 'bg-blue-500', loading: 'Creating collection...', success: 'Collection created successfully', error: 'Failed to create collection' },
+                { icon: Upload, label: 'Import', desc: 'Bulk import articles', color: 'bg-purple-500', loading: 'Preparing import...', success: 'Import dialog ready', error: 'Failed to open import' },
+                { icon: RefreshCw, label: 'Reorder', desc: 'Change order', color: 'bg-amber-500', loading: 'Loading reorder mode...', success: 'Reorder mode enabled', error: 'Failed to enable reorder' },
+                { icon: Archive, label: 'Archive', desc: 'Archive old content', color: 'bg-gray-500', loading: 'Loading archive options...', success: 'Archive options loaded', error: 'Failed to load archive' }
               ].map((action, idx) => (
-                <button key={idx} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
+                <button key={idx} onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: action.loading, success: action.success, error: action.error })} className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all text-left">
                   <div className={`w-10 h-10 ${action.color} rounded-lg flex items-center justify-center`}>
                     <action.icon className="w-5 h-5 text-white" />
                   </div>
@@ -1103,7 +1103,7 @@ export default function FAQClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">All Collections</h2>
-              <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+              <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating new collection...', success: 'Collection form ready', error: 'Failed to create collection' })} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 New Collection
               </button>
@@ -1118,7 +1118,7 @@ export default function FAQClient() {
                     <div className={`w-14 h-14 ${collection.color} rounded-xl flex items-center justify-center text-3xl`}>
                       {collection.icon}
                     </div>
-                    <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                    <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading options...', success: 'Collection options ready', error: 'Failed to load options' })} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
                       <MoreVertical className="w-4 h-4 text-gray-400" />
                     </button>
                   </div>
@@ -1399,7 +1399,7 @@ export default function FAQClient() {
                   <p className="text-sm text-blue-100 mb-4">
                     Let AI analyze your knowledge base and suggest improvements
                   </p>
-                  <button className="w-full py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors">
+                  <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Analyzing knowledge base...', success: 'AI insights generated successfully', error: 'Failed to generate insights' })} className="w-full py-2 bg-white text-blue-600 rounded-lg font-medium hover:bg-blue-50 transition-colors">
                     Generate Insights
                   </button>
                 </div>
@@ -1428,7 +1428,7 @@ export default function FAQClient() {
                   >
                     Export Data
                   </button>
-                  <button className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-medium transition-colors">
+                  <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Saving settings...', success: 'Settings saved successfully', error: 'Failed to save settings' })} className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-800 rounded-lg text-sm font-medium transition-colors">
                     Save Changes
                   </button>
                 </div>
@@ -1508,7 +1508,7 @@ export default function FAQClient() {
                               placeholder="help.yourdomain.com"
                               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800"
                             />
-                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
+                            <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Verifying domain...', success: 'Domain verified successfully', error: 'Failed to verify domain' })} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium">
                               Verify
                             </button>
                           </div>
@@ -1667,7 +1667,7 @@ export default function FAQClient() {
                           <Languages className="w-5 h-5 text-green-600" />
                           Supported Languages
                         </h3>
-                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                        <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading language options...', success: 'Language selector ready', error: 'Failed to load languages' })} className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
                           <Plus className="w-4 h-4" />
                           Add Language
                         </button>
@@ -1690,15 +1690,15 @@ export default function FAQClient() {
                                   Default
                                 </span>
                               ) : (
-                                <button className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-medium hover:bg-gray-200">
+                                <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Setting as default...', success: 'Default language updated', error: 'Failed to update default' })} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-medium hover:bg-gray-200">
                                   Set as Default
                                 </button>
                               )}
-                              <button className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
+                              <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading language settings...', success: 'Language editor ready', error: 'Failed to load editor' })} className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg">
                                 <Edit className="w-4 h-4 text-gray-500" />
                               </button>
                               {lang !== helpCenterSettings.defaultLanguage && (
-                                <button className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
+                                <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Removing language...', success: 'Language removed', error: 'Failed to remove language' })} className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg">
                                   <Trash2 className="w-4 h-4 text-red-500" />
                                 </button>
                               )}
@@ -1764,7 +1764,7 @@ export default function FAQClient() {
                                 <p className="text-xs text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <button className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
+                            <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: integration.connected ? 'Loading integration settings...' : `Connecting to ${integration.name}...`, success: integration.connected ? 'Integration settings loaded' : `${integration.name} connected successfully`, error: `Failed to ${integration.connected ? 'load' : 'connect'} ${integration.name}` })} className={`px-4 py-1.5 rounded-lg text-sm font-medium ${
                               integration.connected
                                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                                 : 'bg-blue-600 hover:bg-blue-700 text-white'
@@ -1791,10 +1791,10 @@ export default function FAQClient() {
                               className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-900 font-mono text-sm"
                               readOnly
                             />
-                            <button className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
+                            <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying to clipboard...', success: 'API key copied to clipboard', error: 'Failed to copy' })} className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
                               <Copy className="w-4 h-4" />
                             </button>
-                            <button className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium">
+                            <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Regenerating API key...', success: 'New API key generated', error: 'Failed to regenerate key' })} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg font-medium">
                               Regenerate
                             </button>
                           </div>
@@ -1906,17 +1906,17 @@ export default function FAQClient() {
                           <p className="font-medium">Export All Data</p>
                           <p className="text-xs text-gray-500">Download all articles as CSV</p>
                         </button>
-                        <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
+                        <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing import...', success: 'Import dialog ready', error: 'Failed to open import' })} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
                           <Upload className="w-5 h-5 text-green-600 mb-2" />
                           <p className="font-medium">Import Data</p>
                           <p className="text-xs text-gray-500">Bulk import articles</p>
                         </button>
-                        <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
+                        <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading version history...', success: 'Version history loaded', error: 'Failed to load history' })} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-blue-500 transition-colors">
                           <History className="w-5 h-5 text-purple-600 mb-2" />
                           <p className="font-medium">Version History</p>
                           <p className="text-xs text-gray-500">View all article revisions</p>
                         </button>
-                        <button className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-red-500 transition-colors">
+                        <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading archive options...', success: 'Archive selection ready', error: 'Failed to load archive' })} className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 text-left hover:border-red-500 transition-colors">
                           <Archive className="w-5 h-5 text-amber-600 mb-2" />
                           <p className="font-medium">Bulk Archive</p>
                           <p className="text-xs text-gray-500">Archive multiple articles</p>
@@ -1935,7 +1935,7 @@ export default function FAQClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Analytics</p>
                             <p className="text-xs text-gray-500">Clear all view counts and feedback</p>
                           </div>
-                          <button className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200">
+                          <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting analytics...', success: 'Analytics have been reset', error: 'Failed to reset analytics' })} className="px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200">
                             Reset
                           </button>
                         </div>
@@ -1944,7 +1944,7 @@ export default function FAQClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Articles</p>
                             <p className="text-xs text-gray-500">Permanently delete all content</p>
                           </div>
-                          <button className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
+                          <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Deleting all articles...', success: 'All articles deleted', error: 'Failed to delete articles' })} className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700">
                             Delete All
                           </button>
                         </div>

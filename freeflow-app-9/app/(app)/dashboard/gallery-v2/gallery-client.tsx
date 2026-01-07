@@ -622,10 +622,10 @@ export default function GalleryClient() {
     const newLiked = new Set(likedItems)
     if (newLiked.has(photoId)) {
       newLiked.delete(photoId)
-      toast.info('Unliked', { description: 'Removed from your likes' })
+      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Removing like...', success: 'Unliked - Removed from your likes', error: 'Failed to unlike' })
     } else {
       newLiked.add(photoId)
-      toast.success('Liked', { description: 'Added to your likes' })
+      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Adding like...', success: 'Liked - Added to your likes', error: 'Failed to like' })
     }
     setLikedItems(newLiked)
 
@@ -652,17 +652,17 @@ export default function GalleryClient() {
     const newSaved = new Set(savedItems)
     if (newSaved.has(photoId)) {
       newSaved.delete(photoId)
-      toast.info('Unsaved', { description: 'Removed from your saved items' })
+      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Removing from saved...', success: 'Unsaved - Removed from your saved items', error: 'Failed to unsave' })
     } else {
       newSaved.add(photoId)
-      toast.success('Saved', { description: 'Added to your saved items' })
+      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Saving item...', success: 'Saved - Added to your saved items', error: 'Failed to save' })
     }
     setSavedItems(newSaved)
   }
 
   const handleDownloadPhoto = async (photo: Photo | GalleryItem) => {
     const title = 'title' in photo ? photo.title : ''
-    toast.success('Download started', { description: `Downloading "${title}"...` })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Preparing download for "${title}"...`, success: `Download started - Downloading "${title}"`, error: 'Download failed' })
 
     // Track download for gallery items
     if ('download_count' in photo && photo.id) {
@@ -699,7 +699,7 @@ export default function GalleryClient() {
 
   const handleFollowPhotographer = async (photographerId: string, photographerName: string) => {
     // In a real implementation, this would update a follows table
-    toast.success('Following', { description: `You are now following ${photographerName}` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Following ${photographerName}...`, success: `Following - You are now following ${photographerName}`, error: 'Failed to follow' })
   }
 
   return (

@@ -738,9 +738,14 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   }
 
   const handleCreateDeal = (client: typeof mockClients[0]) => {
-    toast.info('Create Deal', {
-      description: `Opening deal form for ${client.company}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Opening deal form for ${client.company}...`,
+        success: 'Deal form ready',
+        error: 'Failed to open deal form'
+      }
+    )
     // TODO: Integrate with deals module when available
   }
 
@@ -759,9 +764,14 @@ export default function ClientsClient({ initialClients, initialStats }: ClientsC
   }
 
   const handleScheduleMeeting = (client: typeof mockClients[0]) => {
-    toast.success('Meeting scheduling', {
-      description: `Opening calendar for meeting with ${client.company}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Opening calendar for ${client.company}...`,
+        success: 'Calendar ready for scheduling',
+        error: 'Failed to open calendar'
+      }
+    )
     // TODO: Integrate with calendar module when available
   }
 

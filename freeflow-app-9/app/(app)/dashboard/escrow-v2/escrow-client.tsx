@@ -904,19 +904,14 @@ export default function EscrowClient() {
   }
 
   const handleSyncNow = async () => {
-    toast.info('Syncing...', {
-      description: 'Refreshing escrow data from the server'
-    })
-    try {
-      await fetchDeposits()
-      toast.success('Sync complete', {
-        description: 'All data has been refreshed'
-      })
-    } catch (error: any) {
-      toast.error('Sync failed', {
-        description: error.message || 'Please try again'
-      })
-    }
+    toast.promise(
+      fetchDeposits(),
+      {
+        loading: 'Syncing escrow data...',
+        success: 'Sync complete! All data has been refreshed',
+        error: 'Sync failed. Please try again'
+      }
+    )
   }
 
   const handleAddMilestone = () => {

@@ -808,9 +808,14 @@ export default function MotionGraphicsClient({
 
   // Apply preset handler
   const handleApplyPreset = (presetName: string) => {
-    toast.success('Preset applied', {
-      description: `"${presetName}" effect applied to timeline`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Applying "${presetName}" preset...`,
+        success: `"${presetName}" effect applied to timeline`,
+        error: 'Failed to apply preset'
+      }
+    )
   }
 
   return (

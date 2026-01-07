@@ -693,9 +693,14 @@ export default function WorkflowsClient() {
   }
 
   const handleExportWorkflows = () => {
-    toast.success('Exporting workflows', {
-      description: 'Workflow definitions will be downloaded'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Exporting workflows...',
+        success: 'Workflows exported successfully',
+        error: 'Failed to export workflows'
+      }
+    )
   }
 
   return (

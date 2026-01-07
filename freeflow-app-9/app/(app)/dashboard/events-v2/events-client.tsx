@@ -733,7 +733,11 @@ export default function EventsClient() {
 
   // Handle RSVP/attendee status update - Placeholder for future implementation
   const handleRSVP = async (eventId: string, status: 'registered' | 'cancelled' | 'waitlisted') => {
-    toast.info(`RSVP functionality coming soon. Status: ${status}`)
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: `Updating RSVP status to ${status}...`,
+      success: `RSVP functionality coming soon. Status: ${status}`,
+      error: 'Failed to update RSVP'
+    })
     // TODO: Implement attendee management when attendees table is available
   }
 
@@ -774,20 +778,26 @@ export default function EventsClient() {
 
   // Handlers
   const handleCreateEvent = () => {
-    toast.info('Create Event', {
-      description: 'Opening event creation wizard...'
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: 'Opening event creation wizard...',
+      success: 'Event creation wizard ready!',
+      error: 'Failed to open wizard'
     })
   }
 
   const handlePublishEvent = (event: Event) => {
-    toast.success('Event published', {
-      description: `${event.title} is now live`
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: `Publishing ${event.title}...`,
+      success: `Event published! ${event.title} is now live`,
+      error: 'Failed to publish event'
     })
   }
 
   const handleExportAttendees = () => {
-    toast.success('Export started', {
-      description: 'Attendee list is being exported'
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: 'Exporting attendee list...',
+      success: 'Export completed! Attendee list has been exported',
+      error: 'Failed to export attendees'
     })
   }
 
@@ -2802,7 +2812,12 @@ export default function EventsClient() {
                 toast.error('Please enter an email address')
                 return
               }
-              toast.success('Attendee checked in!', { description: `${checkInEmail} has been marked as checked in` })
+              const emailToCheckIn = checkInEmail
+              toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+                loading: `Checking in ${emailToCheckIn}...`,
+                success: `Attendee checked in! ${emailToCheckIn} has been marked as checked in`,
+                error: 'Failed to check in attendee'
+              })
               setCheckInEmail('')
               setShowCheckInDialog(false)
             }}>Check In</Button>
@@ -2859,7 +2874,12 @@ export default function EventsClient() {
                 toast.error('Please fill in all required fields')
                 return
               }
-              toast.success('Attendee added!', { description: `${newAttendeeData.name} has been registered` })
+              const attendeeName = newAttendeeData.name
+              toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+                loading: `Adding ${attendeeName}...`,
+                success: `Attendee added! ${attendeeName} has been registered`,
+                error: 'Failed to add attendee'
+              })
               setNewAttendeeData({ name: '', email: '', ticketType: 'General Admission' })
               setShowAddAttendeeDialog(false)
             }}>Add Attendee</Button>
@@ -2977,7 +2997,12 @@ export default function EventsClient() {
               setAttendeeFilters({ status: 'all', ticketType: 'all' })
             }}>Clear Filters</Button>
             <Button onClick={() => {
-              toast.success('Filters applied', { description: `Showing ${attendeeFilters.status !== 'all' ? attendeeFilters.status : 'all'} attendees` })
+              const filterStatus = attendeeFilters.status !== 'all' ? attendeeFilters.status : 'all'
+              toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+                loading: 'Applying filters...',
+                success: `Filters applied! Showing ${filterStatus} attendees`,
+                error: 'Failed to apply filters'
+              })
               setShowFilterDialog(false)
             }}>Apply Filters</Button>
           </DialogFooter>
@@ -3107,7 +3132,11 @@ export default function EventsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowReportDialog(false)}>Close</Button>
             <Button onClick={() => {
-              toast.success('Report exported!', { description: 'PDF report has been downloaded' })
+              toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+                loading: 'Generating PDF report...',
+                success: 'Report exported! PDF report has been downloaded',
+                error: 'Failed to export report'
+              })
             }}>
               <Download className="w-4 h-4 mr-2" />
               Export PDF

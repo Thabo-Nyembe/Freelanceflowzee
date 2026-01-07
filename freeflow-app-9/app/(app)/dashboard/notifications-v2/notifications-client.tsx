@@ -533,13 +533,27 @@ export default function NotificationsClient() {
   }
 
   const handleCreateAutomation = () => {
-    toast.info('Create Automation', { description: 'Opening automation builder...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening automation builder...',
+        success: 'Automation builder ready',
+        error: 'Failed to open automation builder'
+      }
+    )
     setShowCreateAutomation(true)
   }
 
   const handleToggleAutomation = (automation: (typeof mockAutomations)[0]) => {
     const newStatus = automation.status === 'active' ? 'paused' : 'active'
-    toast.success(`Automation ${newStatus}`, { description: `"${automation.name}" is now ${newStatus}` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `${newStatus === 'active' ? 'Activating' : 'Pausing'} automation...`,
+        success: `Automation ${newStatus} - "${automation.name}" is now ${newStatus}`,
+        error: `Failed to ${newStatus === 'active' ? 'activate' : 'pause'} automation`
+      }
+    )
   }
 
   const handleExportNotifications = async () => {

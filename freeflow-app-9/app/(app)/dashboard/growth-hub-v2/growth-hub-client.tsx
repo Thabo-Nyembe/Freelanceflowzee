@@ -715,7 +715,14 @@ export default function GrowthHubClient() {
   }
 
   const handleExportResults = async (expName: string) => {
-    toast.success('Exporting results', { description: `Results for "${expName}" will be downloaded` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: 'Preparing export...',
+        success: `Results for "${expName}" exported successfully`,
+        error: 'Failed to export results'
+      }
+    )
     // Export logic can be expanded
   }
 
@@ -794,16 +801,31 @@ export default function GrowthHubClient() {
   }
 
   const handleSaveSettings = async (section: string) => {
-    toast.success('Settings saved', { description: `${section} settings have been updated` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: `Saving ${section} settings...`,
+        success: `${section} settings saved successfully`,
+        error: `Failed to save ${section} settings`
+      }
+    )
   }
 
   const handleRefreshData = useCallback(() => {
-    refreshExperiments()
-    refreshMetrics()
-    refreshCohorts()
-    refreshFunnels()
-    refreshGoals()
-    toast.success('Data refreshed', { description: 'All analytics data has been updated' })
+    toast.promise(
+      Promise.all([
+        refreshExperiments(),
+        refreshMetrics(),
+        refreshCohorts(),
+        refreshFunnels(),
+        refreshGoals()
+      ]).then(() => new Promise(resolve => setTimeout(resolve, 400))),
+      {
+        loading: 'Refreshing analytics data...',
+        success: 'All analytics data has been updated',
+        error: 'Failed to refresh data'
+      }
+    )
   }, [refreshExperiments, refreshMetrics, refreshCohorts, refreshFunnels, refreshGoals])
 
   return (

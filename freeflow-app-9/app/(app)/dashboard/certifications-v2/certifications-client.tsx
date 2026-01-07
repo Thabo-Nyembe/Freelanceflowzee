@@ -937,23 +937,43 @@ export default function CertificationsClient() {
 
   // Legacy handlers (for mock data UI elements)
   const handleStartCertification = (certName: string) => {
-    toast.info('Starting certification', { description: `Beginning "${certName}" exam...` })
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: `Starting "${certName}" exam...`,
+      success: `"${certName}" exam started successfully`,
+      error: 'Failed to start certification'
+    })
   }
 
   const handleDownloadCertificate = (certName: string) => {
-    toast.success('Downloading certificate', { description: `"${certName}" certificate will be downloaded` })
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: `Downloading "${certName}" certificate...`,
+      success: `"${certName}" certificate downloaded`,
+      error: 'Failed to download certificate'
+    })
   }
 
   const handleShareCertification = (certName: string) => {
-    toast.success('Sharing certification', { description: `"${certName}" share link copied` })
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: `Generating share link for "${certName}"...`,
+      success: `"${certName}" share link copied to clipboard`,
+      error: 'Failed to generate share link'
+    })
   }
 
   const handleRenewCertification = (certName: string) => {
-    toast.info('Renewing certification', { description: `Starting renewal for "${certName}"...` })
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: `Starting renewal for "${certName}"...`,
+      success: `"${certName}" renewal process started`,
+      error: 'Failed to start renewal'
+    })
   }
 
   const handleViewCredential = (certName: string) => {
-    toast.info('Loading credential', { description: `Opening "${certName}" details...` })
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: `Loading "${certName}" details...`,
+      success: `"${certName}" credential loaded`,
+      error: 'Failed to load credential'
+    })
   }
 
   return (

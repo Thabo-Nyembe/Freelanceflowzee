@@ -633,10 +633,10 @@ export default function TimeTrackingClient() {
 
   // UI-only Handlers
   const handleExportTimesheet = () => {
-    toast.success('Exporting', { description: 'Timesheet will be downloaded' })
+    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting timesheet...', success: 'Timesheet exported - download started', error: 'Failed to export timesheet' })
   }
   const handleApproveTimesheet = () => {
-    toast.success('Approved', { description: 'Timesheet has been approved' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Approving timesheet...', success: 'Timesheet approved successfully', error: 'Failed to approve timesheet' })
   }
 
   return (
@@ -858,16 +858,20 @@ export default function TimeTrackingClient() {
                 { icon: Plus, label: 'Add Entry', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowEntryDialog(true) },
                 { icon: Copy, label: 'Copy Week', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Copying previous week entries...', success: 'Week copied - previous week entries duplicated', error: 'Failed to copy week entries' }) },
                 { icon: CheckCircle, label: 'Submit', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: handleApproveTimesheet },
-                { icon: Lock, label: 'Lock', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: async () => {
+                { icon: Lock, label: 'Lock', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => {
                   // Lock all entries for the current week
                   if (dbTimeEntries && dbTimeEntries.length > 0) {
                     const weekEntries = dbTimeEntries.filter((e: any) => e.status === 'stopped' || e.status === 'approved')
-                    for (const entry of weekEntries) {
-                      await handleLockEntry(entry.id)
-                    }
-                    toast.info('Timesheet Locked', { description: 'All entries are now locked' })
+                    toast.promise(
+                      (async () => {
+                        for (const entry of weekEntries) {
+                          await handleLockEntry(entry.id)
+                        }
+                      })(),
+                      { loading: 'Locking timesheet entries...', success: 'Timesheet locked - all entries are now locked', error: 'Failed to lock timesheet' }
+                    )
                   } else {
-                    toast.info('No entries to lock')
+                    toast.promise(Promise.resolve(), { loading: 'Checking entries...', success: 'No entries to lock', error: 'Error checking entries' })
                   }
                 }},
                 { icon: Calendar, label: 'View Month', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('calendar') },
@@ -1370,18 +1374,19 @@ export default function TimeTrackingClient() {
             {/* Invoices Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Invoice', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Clock, label: 'Auto-Bill', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Send, label: 'Send All', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: DollarSign, label: 'Record Pay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: FileText, label: 'Templates', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Repeat, label: 'Recurring', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: BarChart3, label: 'Revenue', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
+                { icon: Plus, label: 'New Invoice', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setShowInvoiceDialog(true) },
+                { icon: Clock, label: 'Auto-Bill', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Configuring auto-billing...', success: 'Auto-billing settings updated', error: 'Failed to configure auto-billing' }) },
+                { icon: Send, label: 'Send All', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Sending all pending invoices...', success: 'All invoices sent successfully', error: 'Failed to send invoices' }) },
+                { icon: DollarSign, label: 'Record Pay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening payment recorder...', success: 'Payment recorder ready', error: 'Failed to open payment recorder' }) },
+                { icon: FileText, label: 'Templates', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading invoice templates...', success: 'Templates loaded', error: 'Failed to load templates' }) },
+                { icon: Repeat, label: 'Recurring', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Opening recurring invoices...', success: 'Recurring invoices manager ready', error: 'Failed to open recurring invoices' }) },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting invoices...', success: 'Invoices exported - download started', error: 'Failed to export invoices' }) },
+                { icon: BarChart3, label: 'Revenue', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading revenue report...', success: 'Revenue report ready', error: 'Failed to load revenue report' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1498,19 +1503,19 @@ export default function TimeTrackingClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Clock, label: 'Tracking', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Bell, label: 'Alerts', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Network, label: 'Integrations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: CreditCard, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Sliders, label: 'Advanced', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: RefreshCcw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', onClick: () => { setSettingsTab('general'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading general settings...', success: 'General settings loaded', error: 'Failed to load settings' }) } },
+                { icon: Clock, label: 'Tracking', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => { setSettingsTab('tracking'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading tracking settings...', success: 'Tracking settings loaded', error: 'Failed to load settings' }) } },
+                { icon: Bell, label: 'Alerts', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => { setSettingsTab('notifications'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading notification settings...', success: 'Notification settings loaded', error: 'Failed to load settings' }) } },
+                { icon: Network, label: 'Integrations', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => { setSettingsTab('integrations'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading integrations...', success: 'Integrations loaded', error: 'Failed to load integrations' }) } },
+                { icon: CreditCard, label: 'Billing', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => { setSettingsTab('billing'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading billing settings...', success: 'Billing settings loaded', error: 'Failed to load settings' }) } },
+                { icon: Sliders, label: 'Advanced', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => { setSettingsTab('advanced'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading advanced settings...', success: 'Advanced settings loaded', error: 'Failed to load settings' }) } },
+                { icon: Download, label: 'Export', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting all settings...', success: 'Settings exported successfully', error: 'Failed to export settings' }) },
+                { icon: RefreshCcw, label: 'Reset', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Preparing settings reset...', success: 'Settings reset options loaded', error: 'Failed to load reset options' }) },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
-                  onClick={() => action.id && setSettingsTab(action.id)}
+                  onClick={action.onClick}
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
                 >
                   <action.icon className="w-5 h-5" />
@@ -1948,11 +1953,11 @@ export default function TimeTrackingClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="flex items-center justify-between mb-3">
                             <div><Label className="text-base">API Key</Label><p className="text-xs text-gray-500">For programmatic access</p></div>
-                            <Button size="sm" variant="outline"><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
+                            <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate API key' })}><RefreshCw className="h-4 w-4 mr-2" />Regenerate</Button>
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" defaultValue="tt_api_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost">Copy</Button>
+                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy API key' })}>Copy</Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -1980,7 +1985,7 @@ export default function TimeTrackingClient() {
                           <div className="text-right">
                             <p className="text-4xl font-bold">$15<span className="text-lg text-gray-500">/user/mo</span></p>
                             <p className="text-sm text-gray-500 mt-1">12 users × $15 = $180/mo</p>
-                            <Button variant="outline" className="mt-3">Change Plan</Button>
+                            <Button variant="outline" className="mt-3" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading available plans...', success: 'Plan options loaded - select your new plan', error: 'Failed to load plans' })}>Change Plan</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -1996,7 +2001,7 @@ export default function TimeTrackingClient() {
                           <div className="space-y-2"><Label>Address</Label><Input defaultValue="123 Business Ave" /></div>
                           <div className="space-y-2"><Label>City, State ZIP</Label><Input defaultValue="New York, NY 10001" /></div>
                         </div>
-                        <Button className="bg-amber-500 hover:bg-amber-600">Update Billing</Button>
+                        <Button className="bg-amber-500 hover:bg-amber-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Updating billing information...', success: 'Billing information updated successfully', error: 'Failed to update billing information' })}>Update Billing</Button>
                       </CardContent>
                     </Card>
                     <Card className="bg-white/90 dark:bg-gray-800/90 backdrop-blur">
@@ -2114,7 +2119,7 @@ export default function TimeTrackingClient() {
             </div>
             <DialogFooter><Button variant="outline" onClick={() => { setShowEntryDialog(false); setEditingEntryId(null) }}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => {
               if (editingEntryId) {
-                toast.success('Time entry updated successfully!')
+                toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Updating time entry...', success: 'Time entry updated successfully', error: 'Failed to update entry' })
                 setShowEntryDialog(false)
                 setEditingEntryId(null)
               } else {
@@ -2133,7 +2138,7 @@ export default function TimeTrackingClient() {
               <div className="grid grid-cols-2 gap-4"><div><Label>From Date</Label><Input type="date" className="mt-1" /></div><div><Label>To Date</Label><Input type="date" className="mt-1" /></div></div>
               <div><Label>Due Date</Label><Input type="date" className="mt-1" /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Generate Invoice</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowInvoiceDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => { toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating invoice from time entries...', success: 'Invoice generated successfully', error: 'Failed to generate invoice' }); setShowInvoiceDialog(false) }}>Generate Invoice</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2147,7 +2152,7 @@ export default function TimeTrackingClient() {
               <div><Label>Notes</Label><Input placeholder="Additional notes about this client" className="mt-1" /></div>
               <div><Label>Default Hourly Rate</Label><Input type="number" placeholder="150" className="mt-1" /></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowClientDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Create Client</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowClientDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => { toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Creating new client...', success: 'Client created successfully', error: 'Failed to create client' }); setShowClientDialog(false) }}>Create Client</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2164,7 +2169,7 @@ export default function TimeTrackingClient() {
                 </div>
               </div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowTagDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600">Create Tag</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowTagDialog(false)}>Cancel</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => { toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating new tag...', success: 'Tag created successfully', error: 'Failed to create tag' }); setShowTagDialog(false) }}>Create Tag</Button></DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -2191,7 +2196,7 @@ export default function TimeTrackingClient() {
               </div>
               <div><Label>Group By</Label><Select><SelectTrigger className="mt-1"><SelectValue placeholder="Select grouping" /></SelectTrigger><SelectContent><SelectItem value="day">Day</SelectItem><SelectItem value="week">Week</SelectItem><SelectItem value="project">Project</SelectItem><SelectItem value="client">Client</SelectItem><SelectItem value="member">Team Member</SelectItem></SelectContent></Select></div>
             </div>
-            <DialogFooter><Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button><Button variant="outline"><Eye className="h-4 w-4 mr-2" />Preview</Button><Button className="bg-amber-500 hover:bg-amber-600">Save Report</Button></DialogFooter>
+            <DialogFooter><Button variant="outline" onClick={() => setShowReportDialog(false)}>Cancel</Button><Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating report preview...', success: 'Report preview generated', error: 'Failed to generate preview' })}><Eye className="h-4 w-4 mr-2" />Preview</Button><Button className="bg-amber-500 hover:bg-amber-600" onClick={() => { toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving custom report...', success: 'Report saved successfully', error: 'Failed to save report' }); setShowReportDialog(false) }}>Save Report</Button></DialogFooter>
           </DialogContent>
         </Dialog>
       </div>

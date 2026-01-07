@@ -610,8 +610,14 @@ export default function WebhooksClient({
   }
 
   const handleCopyUrl = (url: string) => {
-    navigator.clipboard.writeText(url)
-    toast.success('URL copied', { description: 'Webhook URL copied to clipboard' })
+    toast.promise(
+      navigator.clipboard.writeText(url),
+      {
+        loading: 'Copying URL...',
+        success: 'URL copied to clipboard',
+        error: 'Failed to copy URL'
+      }
+    )
   }
 
   const handleRotateSecret = async (id: string) => {
@@ -634,15 +640,24 @@ export default function WebhooksClient({
   }
 
   const handleExportWebhooks = () => {
-    const exportData = JSON.stringify(webhooks, null, 2)
-    const blob = new Blob([exportData], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'webhooks-export.json'
-    a.click()
-    URL.revokeObjectURL(url)
-    toast.success('Exported', { description: 'Webhook configuration downloaded' })
+    toast.promise(
+      new Promise<void>((resolve) => {
+        const exportData = JSON.stringify(webhooks, null, 2)
+        const blob = new Blob([exportData], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'webhooks-export.json'
+        a.click()
+        URL.revokeObjectURL(url)
+        setTimeout(resolve, 500)
+      }),
+      {
+        loading: 'Exporting webhook configuration...',
+        success: 'Webhook configuration downloaded',
+        error: 'Failed to export webhooks'
+      }
+    )
   }
 
   return (

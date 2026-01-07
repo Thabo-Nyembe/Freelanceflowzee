@@ -779,8 +779,8 @@ export default function OnboardingClient() {
 
   const handleExportReport = async () => {
     if (!userId) return
-    toast.info('Exporting report', { description: 'Preparing your data export...' })
-    try {
+
+    const exportPromise = async () => {
       const { data: flowsData } = await supabase.from('onboarding_flows').select('*').eq('user_id', userId)
       const { data: checklistsData } = await supabase.from('onboarding_checklists').select('*').eq('user_id', userId)
 
@@ -792,11 +792,14 @@ export default function OnboardingClient() {
       a.download = `onboarding-export-${new Date().toISOString().split('T')[0]}.json`
       a.click()
       URL.revokeObjectURL(url)
-      toast.success('Report exported', { description: 'Your onboarding data has been downloaded' })
-    } catch (error) {
-      console.error('Error exporting:', error)
-      toast.error('Failed to export report')
+      return exportData
     }
+
+    toast.promise(exportPromise(), {
+      loading: 'Exporting report...',
+      success: 'Report exported! Your onboarding data has been downloaded',
+      error: 'Failed to export report'
+    })
   }
 
   if (isLoading) {

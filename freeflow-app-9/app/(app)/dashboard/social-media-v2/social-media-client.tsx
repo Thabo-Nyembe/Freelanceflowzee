@@ -517,58 +517,58 @@ export default function SocialMediaClient() {
   ]
 
   // Handlers
-  const handleCreatePost = () => toast.info('Create', { description: 'Opening composer...' })
-  const handleSchedulePost = (n: string) => toast.success('Scheduled', { description: `"${n}" scheduled` })
-  const handlePublishPost = (n: string) => toast.success('Published', { description: `"${n}" is live` })
-  const handleConnectAccount = (p: string) => toast.info('Connect', { description: `Connecting ${p}...` })
-  const handleExportAnalytics = () => toast.success('Exporting', { description: 'Data downloading...' })
+  const handleCreatePost = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening composer...', success: 'Composer ready!', error: 'Failed to open composer' })
+  const handleSchedulePost = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Scheduling post...', success: `"${n}" scheduled successfully`, error: 'Failed to schedule post' })
+  const handlePublishPost = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Publishing post...', success: `"${n}" is now live!`, error: 'Failed to publish post' })
+  const handleConnectAccount = (p: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Connecting ${p}...`, success: `${p} connected successfully!`, error: `Failed to connect ${p}` })
+  const handleExportAnalytics = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting analytics data...', success: 'Analytics data downloaded!', error: 'Failed to export data' })
   const handleGenerateCaption = () => {
-    toast.info('AI Caption', { description: 'Generating caption with AI...' })
+    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating caption with AI...', success: 'AI caption generated!', error: 'Failed to generate caption' })
   }
   const handleSuggestHashtags = () => {
-    toast.info('Hashtag Suggestions', { description: 'Analyzing trending hashtags...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Analyzing trending hashtags...', success: 'Hashtag suggestions ready!', error: 'Failed to analyze hashtags' })
   }
   const handleBestTimeToPost = () => {
-    toast.info('Optimal Timing', { description: 'Calculating best posting times...' })
+    toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Calculating best posting times...', success: 'Optimal times calculated!', error: 'Failed to calculate times' })
   }
   const handleCreateVisual = () => {
-    toast.info('Create Visual', { description: 'Opening visual editor...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening visual editor...', success: 'Visual editor ready!', error: 'Failed to open editor' })
   }
   const handleReplyMention = (username: string) => {
-    toast.info('Reply', { description: `Composing reply to ${username}...` })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Composing reply to ${username}...`, success: 'Reply composer opened!', error: 'Failed to open reply' })
   }
   const handleNewCampaign = () => {
-    toast.info('New Campaign', { description: 'Creating new campaign...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating new campaign...', success: 'Campaign created!', error: 'Failed to create campaign' })
   }
   const handleInviteTeamMember = () => {
-    toast.info('Invite', { description: 'Sending team invitation...' })
+    toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Sending team invitation...', success: 'Invitation sent!', error: 'Failed to send invitation' })
   }
   const handleBrowseIntegrations = () => {
-    toast.info('Integrations', { description: 'Loading available integrations...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading available integrations...', success: 'Integrations loaded!', error: 'Failed to load integrations' })
   }
   const handleRegenerateKey = () => {
-    toast.success('API Key', { description: 'New API key generated successfully' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating new API key...', success: 'New API key generated successfully!', error: 'Failed to generate API key' })
   }
   const handleImportData = () => {
-    toast.info('Import', { description: 'Opening data import wizard...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening data import wizard...', success: 'Import wizard ready!', error: 'Failed to open import wizard' })
   }
   const handleDeleteDrafts = () => {
-    toast.warning('Delete Drafts', { description: 'All draft posts will be deleted' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Deleting all draft posts...', success: 'All draft posts deleted!', error: 'Failed to delete drafts' })
   }
   const handleDisconnectAccounts = () => {
-    toast.warning('Disconnect', { description: 'All accounts will be disconnected' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Disconnecting all accounts...', success: 'All accounts disconnected!', error: 'Failed to disconnect accounts' })
   }
   const handleResetAnalytics = () => {
-    toast.warning('Reset Analytics', { description: 'All analytics data will be cleared' })
+    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Resetting analytics data...', success: 'All analytics data cleared!', error: 'Failed to reset analytics' })
   }
   const handleDuplicatePost = (postContent: string) => {
-    toast.success('Duplicated', { description: `Post duplicated to drafts` })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Duplicating post...', success: 'Post duplicated to drafts!', error: 'Failed to duplicate post' })
   }
   const handleViewPostAnalytics = (postId: string) => {
-    toast.info('Analytics', { description: 'Loading post analytics...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading post analytics...', success: 'Analytics loaded!', error: 'Failed to load analytics' })
   }
   const handleDeletePost = (postId: string) => {
-    toast.warning('Delete Post', { description: 'Post will be permanently deleted' })
+    toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Deleting post...', success: 'Post permanently deleted!', error: 'Failed to delete post' })
   }
 
   return (

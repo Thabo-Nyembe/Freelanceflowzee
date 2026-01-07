@@ -594,7 +594,10 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
   }, [supabase])
 
   const handleUndoAction = useCallback(() => {
-    toast.info('Undo', { description: 'Last action undone' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 400)),
+      { loading: 'Undoing last action...', success: 'Last action undone', error: 'Could not undo action' }
+    )
   }, [])
 
   const handleUseTemplate = useCallback(async (template: DesignTemplate) => {

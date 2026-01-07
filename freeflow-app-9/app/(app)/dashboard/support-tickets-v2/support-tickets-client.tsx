@@ -323,7 +323,14 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
     }
     if (!selectedTicket) return
     // In production, this would call an API to send the reply
-    toast.success(replyType === 'public' ? 'Reply sent!' : 'Internal note added!')
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: replyType === 'public' ? 'Sending reply...' : 'Adding internal note...',
+        success: replyType === 'public' ? 'Reply sent!' : 'Internal note added!',
+        error: 'Failed to send reply'
+      }
+    )
     setReplyContent('')
   }, [replyContent, selectedTicket, replyType])
 
@@ -333,27 +340,47 @@ export default function SupportTicketsClient({ initialTickets, initialStats }: S
   }
 
   const handleCloseTicket = (ticket: Ticket) => {
-    toast.success('Ticket closed', {
-      description: `Ticket #${ticket.id} has been closed`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Closing ticket...',
+        success: `Ticket #${ticket.id} has been closed`,
+        error: 'Failed to close ticket'
+      }
+    )
   }
 
   const handleEscalateTicket = (ticket: Ticket) => {
-    toast.info('Ticket escalated', {
-      description: `Ticket #${ticket.id} has been escalated`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Escalating ticket...',
+        success: `Ticket #${ticket.id} has been escalated`,
+        error: 'Failed to escalate ticket'
+      }
+    )
   }
 
   const handleMergeTickets = () => {
-    toast.success('Tickets merged', {
-      description: 'Selected tickets have been merged'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Merging tickets...',
+        success: 'Selected tickets have been merged',
+        error: 'Failed to merge tickets'
+      }
+    )
   }
 
   const handleExportTickets = () => {
-    toast.success('Export started', {
-      description: 'Ticket data is being exported'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Exporting tickets...',
+        success: 'Ticket data is being exported',
+        error: 'Failed to export tickets'
+      }
+    )
   }
 
   return (

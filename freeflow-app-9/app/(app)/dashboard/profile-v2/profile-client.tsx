@@ -894,12 +894,12 @@ export default function ProfileClient() {
   const handleShareProfile = () => {
     const profileUrl = `${window.location.origin}/profile/${user?.id}`
     navigator.clipboard.writeText(profileUrl)
-    toast.success('Link copied', { description: 'Profile link copied to clipboard' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Copying link...', success: 'Link copied! Profile link copied to clipboard', error: 'Failed to copy link' })
   }
 
   // Download profile as PDF (placeholder)
   const handleDownloadPDF = () => {
-    toast.info('Generating PDF...', { description: 'Your profile PDF will download shortly' })
+    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating PDF...', success: 'PDF ready! Your profile PDF will download shortly', error: 'Failed to generate PDF' })
   }
 
   const skillCategories = useMemo(() => {

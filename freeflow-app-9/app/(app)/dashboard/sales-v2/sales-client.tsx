@@ -674,38 +674,50 @@ export default function SalesClient() {
   }
 
   const handleExportSales = async () => {
-    toast.info('Preparing Export', { description: 'Your sales data is being prepared...' })
-    try {
-      const csvContent = [
-        ['Title', 'Company', 'Value', 'Stage', 'Probability', 'Close Date'].join(','),
-        ...deals.map(d => [
-          `"${d.title}"`,
-          `"${d.company_name || ''}"`,
-          d.deal_value,
-          d.stage,
-          d.probability,
-          d.expected_close_date || '',
-        ].join(','))
-      ].join('\n')
+    const exportPromise = new Promise<string>((resolve, reject) => {
+      try {
+        const csvContent = [
+          ['Title', 'Company', 'Value', 'Stage', 'Probability', 'Close Date'].join(','),
+          ...deals.map(d => [
+            `"${d.title}"`,
+            `"${d.company_name || ''}"`,
+            d.deal_value,
+            d.stage,
+            d.probability,
+            d.expected_close_date || '',
+          ].join(','))
+        ].join('\n')
 
-      const blob = new Blob([csvContent], { type: 'text/csv' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `sales-export-${new Date().toISOString().split('T')[0]}.csv`
-      a.click()
-      URL.revokeObjectURL(url)
+        const blob = new Blob([csvContent], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `sales-export-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
 
-      toast.success('Export Complete', { description: `Exported ${deals.length} deals` })
-    } catch (error) {
-      toast.error('Export Failed', { description: 'Could not export sales data' })
-    }
+        setTimeout(() => resolve(`Exported ${deals.length} deals`), 600)
+      } catch (error) {
+        reject(new Error('Could not export sales data'))
+      }
+    })
+
+    toast.promise(exportPromise, {
+      loading: 'Preparing export...',
+      success: (message) => `Export complete! ${message}`,
+      error: 'Export failed'
+    })
   }
 
   const handleRefresh = async () => {
-    toast.info('Refreshing', { description: 'Fetching latest sales data...' })
-    await fetchDeals()
-    toast.success('Refreshed', { description: 'Sales data is up to date' })
+    toast.promise(
+      fetchDeals(),
+      {
+        loading: 'Refreshing sales data...',
+        success: 'Sales data is up to date',
+        error: 'Failed to refresh sales data'
+      }
+    )
   }
 
   const openEditDialog = (deal: SalesDeal) => {
@@ -2748,9 +2760,18 @@ export default function SalesClient() {
                 toast.error('Please select an opportunity')
                 return
               }
-              toast.success('Quote created!', { description: 'Quote #Q-2025-001 has been generated' })
-              setQuoteForm({ opportunity: '', client: '', products: [], discount: 0, validDays: 30 })
-              setShowQuoteDialog(false)
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 600)),
+                {
+                  loading: 'Creating quote...',
+                  success: () => {
+                    setQuoteForm({ opportunity: '', client: '', products: [], discount: 0, validDays: 30 })
+                    setShowQuoteDialog(false)
+                    return 'Quote created! Quote #Q-2025-001 has been generated'
+                  },
+                  error: 'Failed to create quote'
+                }
+              )
             }}>Create Quote</Button>
           </DialogFooter>
         </DialogContent>
@@ -2806,9 +2827,19 @@ export default function SalesClient() {
                 toast.error('Please fill in required fields')
                 return
               }
-              toast.success('Product added!', { description: `${productForm.name} has been added to catalog` })
-              setProductForm({ name: '', code: '', price: 0, category: 'Software', description: '' })
-              setShowProductDialog(false)
+              const productName = productForm.name
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 600)),
+                {
+                  loading: 'Adding product...',
+                  success: () => {
+                    setProductForm({ name: '', code: '', price: 0, category: 'Software', description: '' })
+                    setShowProductDialog(false)
+                    return `Product added! ${productName} has been added to catalog`
+                  },
+                  error: 'Failed to add product'
+                }
+              )
             }}>Add Product</Button>
           </DialogFooter>
         </DialogContent>
@@ -2855,9 +2886,19 @@ export default function SalesClient() {
                 toast.error('Please enter a stage name')
                 return
               }
-              toast.success('Stage added!', { description: `"${stageForm.name}" added to pipeline` })
-              setStageForm({ name: '', probability: 50, color: 'blue' })
-              setShowStageDialog(false)
+              const stageName = stageForm.name
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 600)),
+                {
+                  loading: 'Adding stage...',
+                  success: () => {
+                    setStageForm({ name: '', probability: 50, color: 'blue' })
+                    setShowStageDialog(false)
+                    return `Stage added! "${stageName}" added to pipeline`
+                  },
+                  error: 'Failed to add stage'
+                }
+              )
             }}>Add Stage</Button>
           </DialogFooter>
         </DialogContent>
@@ -2908,8 +2949,18 @@ export default function SalesClient() {
                 toast.error('Please enter a webhook URL')
                 return
               }
-              toast.success('Webhooks configured!', { description: `${webhookConfig.events.length} events will be sent to your endpoint` })
-              setShowWebhookDialog(false)
+              const eventCount = webhookConfig.events.length
+              toast.promise(
+                new Promise(resolve => setTimeout(resolve, 600)),
+                {
+                  loading: 'Saving webhook configuration...',
+                  success: () => {
+                    setShowWebhookDialog(false)
+                    return `Webhooks configured! ${eventCount} events will be sent to your endpoint`
+                  },
+                  error: 'Failed to configure webhooks'
+                }
+              )
             }}>Save Configuration</Button>
           </DialogFooter>
         </DialogContent>

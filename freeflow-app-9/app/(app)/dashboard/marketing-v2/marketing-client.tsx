@@ -950,33 +950,33 @@ export default function MarketingClient() {
   }, [searchQuery, leadFilter])
 
   // Handlers
-  const handleCreateCampaign = () => toast.info('Create', { description: 'Opening builder...' })
-  const handleLaunchCampaign = (n: string) => toast.success('Launched', { description: `"${n}" is live` })
-  const handlePauseCampaign = (n: string) => toast.info('Paused', { description: `"${n}" paused` })
-  const handleExportAnalytics = () => toast.success('Exporting', { description: 'Data downloading...' })
+  const handleCreateCampaign = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening builder...', success: 'Campaign builder ready!', error: 'Failed to open builder' })
+  const handleLaunchCampaign = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Launching "${n}"...`, success: `"${n}" is live!`, error: 'Failed to launch campaign' })
+  const handlePauseCampaign = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Pausing "${n}"...`, success: `"${n}" paused`, error: 'Failed to pause campaign' })
+  const handleExportAnalytics = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Exporting analytics...', success: 'Analytics exported!', error: 'Failed to export analytics' })
   const handleAddLead = () => {
-    toast.info('Add Lead', { description: 'Opening lead capture form...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening lead capture form...', success: 'Lead form ready!', error: 'Failed to open form' })
   }
   const handleNewSequence = () => {
-    toast.info('New Sequence', { description: 'Opening email sequence builder...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening email sequence builder...', success: 'Sequence builder ready!', error: 'Failed to open builder' })
   }
   const handleCreateContent = () => {
-    toast.info('Create Content', { description: 'Opening content editor...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening content editor...', success: 'Content editor ready!', error: 'Failed to open editor' })
   }
   const handleCreateWorkflow = () => {
-    toast.info('Create Workflow', { description: 'Opening workflow builder...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening workflow builder...', success: 'Workflow builder ready!', error: 'Failed to open builder' })
   }
   const handleSendEmail = (leadName: string) => {
-    toast.info('Send Email', { description: `Composing email to ${leadName}...` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Composing email to ${leadName}...`, success: `Email composer ready for ${leadName}!`, error: 'Failed to open email' })
   }
   const handleLogCall = (leadName: string) => {
-    toast.info('Log Call', { description: `Recording call with ${leadName}...` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Recording call with ${leadName}...`, success: `Call logged for ${leadName}!`, error: 'Failed to log call' })
   }
   const handleScheduleMeeting = (leadName: string) => {
-    toast.info('Schedule Meeting', { description: `Scheduling meeting with ${leadName}...` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Scheduling meeting with ${leadName}...`, success: `Meeting scheduled with ${leadName}!`, error: 'Failed to schedule meeting' })
   }
   const handleQuickAction = (label: string) => {
-    toast.info(label, { description: `Opening ${label.toLowerCase()}...` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening ${label.toLowerCase()}...`, success: `${label} ready!`, error: `Failed to open ${label.toLowerCase()}` })
   }
 
   return (

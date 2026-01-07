@@ -843,16 +843,25 @@ export default function SprintsClient() {
   }
 
   const handleCopyApiKey = () => {
-    navigator.clipboard.writeText('sprint_xxxxxxxxxxxxxxxxxxxxx')
-    toast.success('Copied', {
-      description: 'API key copied to clipboard'
-    })
+    toast.promise(
+      navigator.clipboard.writeText('sprint_xxxxxxxxxxxxxxxxxxxxx'),
+      {
+        loading: 'Copying API key...',
+        success: 'API key copied to clipboard',
+        error: 'Failed to copy API key'
+      }
+    )
   }
 
   const handleRegenerateApiKey = () => {
-    toast.success('API Key Regenerated', {
-      description: 'New API key has been generated'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Regenerating API key...',
+        success: 'New API key has been generated',
+        error: 'Failed to regenerate API key'
+      }
+    )
   }
 
   return (
@@ -2096,10 +2105,10 @@ export default function SprintsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="sprint_xxxxxxxxxxxxxxxxxxxxx" readOnly />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={handleCopyApiKey}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={handleRegenerateApiKey}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>

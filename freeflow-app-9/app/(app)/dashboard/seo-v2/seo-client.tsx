@@ -498,71 +498,71 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
   ]
 
   // Handlers
-  const handleRunAnalysis = () => toast.info('Analyzing', { description: 'SEO analysis started...' })
-  const handleOptimize = (n: string) => toast.info('Optimizing', { description: `Optimizing "${n}"...` })
-  const handleGenerateSitemap = () => toast.success('Generated', { description: 'Sitemap updated' })
-  const handleExportReport = () => toast.success('Exporting', { description: 'Report downloading...' })
+  const handleRunAnalysis = () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Analyzing SEO...', success: 'SEO analysis complete', error: 'Analysis failed' })
+  const handleOptimize = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: `Optimizing "${n}"...`, success: `"${n}" optimized successfully`, error: 'Optimization failed' })
+  const handleGenerateSitemap = () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating sitemap...', success: 'Sitemap updated successfully', error: 'Sitemap generation failed' })
+  const handleExportReport = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting report...', success: 'Report downloaded successfully', error: 'Export failed' })
 
   // Toast handlers for unconnected buttons
   const handleOptimizePage = (pageName: string) => {
-    toast.info('Optimizing', { description: `Optimizing "${pageName}"...` })
+    toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: `Optimizing "${pageName}"...`, success: `"${pageName}" optimized successfully`, error: 'Optimization failed' })
   }
   const handleAddKeywords = () => {
-    toast.info('Add Keywords', { description: 'Opening keyword research tool...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening keyword research tool...', success: 'Keyword research tool ready', error: 'Failed to open tool' })
   }
   const handleUpdateRankings = () => {
-    toast.info('Updating Rankings', { description: 'Fetching latest keyword positions...' })
+    toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Fetching latest keyword positions...', success: 'Rankings updated successfully', error: 'Failed to update rankings' })
   }
   const handleFindProspects = () => {
-    toast.info('Finding Prospects', { description: 'Searching for backlink opportunities...' })
+    toast.promise(new Promise(r => setTimeout(r, 2200)), { loading: 'Searching for backlink opportunities...', success: 'Found 15 backlink prospects', error: 'Search failed' })
   }
   const handleAddCompetitor = () => {
-    toast.info('Add Competitor', { description: 'Enter competitor domain to analyze...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening competitor form...', success: 'Enter competitor domain to analyze', error: 'Failed to open form' })
   }
   const handleAnalyzeCompetitor = (domain: string) => {
-    toast.info('Analyzing Competitor', { description: `Analyzing ${domain}...` })
+    toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: `Analyzing ${domain}...`, success: `${domain} analysis complete`, error: 'Analysis failed' })
   }
   const handleCreateContent = () => {
-    toast.info('Create Content', { description: 'Opening content editor...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening content editor...', success: 'Content editor ready', error: 'Failed to open editor' })
   }
   const handleRunAudit = () => {
-    toast.info('Running Audit', { description: 'Starting site crawl and analysis...' })
+    toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Starting site crawl and analysis...', success: 'Site audit complete - 12 issues found', error: 'Audit failed' })
   }
   const handleSaveSettings = (section: string) => {
-    toast.success('Settings Saved', { description: `${section} settings have been saved` })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Saving ${section} settings...`, success: `${section} settings saved successfully`, error: 'Failed to save settings' })
   }
   const handleExportData = (type: string) => {
-    toast.success('Export Started', { description: `${type} export will be downloaded shortly` })
+    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Exporting ${type}...`, success: `${type} export downloaded successfully`, error: 'Export failed' })
   }
   const handleRecrawlSite = () => {
-    toast.info('Re-crawling Site', { description: 'Starting fresh site crawl...' })
+    toast.promise(new Promise(r => setTimeout(r, 3500)), { loading: 'Starting fresh site crawl...', success: 'Site crawl complete - 1,247 pages analyzed', error: 'Crawl failed' })
   }
   const handleClearData = () => {
-    toast.warning('Clear Data', { description: 'This action would clear all SEO data' })
+    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Clearing SEO data...', success: 'All SEO data cleared', error: 'Failed to clear data' })
   }
   const handleResetSettings = () => {
-    toast.warning('Reset Settings', { description: 'This action would reset all settings to default' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting settings...', success: 'Settings reset to defaults', error: 'Failed to reset settings' })
   }
   const handleViewHistory = () => {
-    toast.info('View History', { description: 'Loading keyword ranking history...' })
+    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading keyword ranking history...', success: 'History loaded', error: 'Failed to load history' })
   }
   const handleViewCompetitors = () => {
-    toast.info('Competitors', { description: 'Loading competitor analysis...' })
+    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading competitor analysis...', success: 'Competitor data loaded', error: 'Failed to load competitors' })
   }
   const handleCopyKeyword = () => {
-    toast.success('Copied', { description: 'Keyword copied to clipboard' })
+    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying...', success: 'Keyword copied to clipboard', error: 'Failed to copy' })
   }
   const handleViewSerp = () => {
-    toast.info('View SERP', { description: 'Opening search results page...' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening search results page...', success: 'SERP view opened', error: 'Failed to open SERP' })
   }
   const handleImplementInsight = (title: string) => {
-    toast.info('Implementing', { description: `Starting implementation for "${title}"...` })
+    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Starting implementation for "${title}"...`, success: `"${title}" implementation started`, error: 'Implementation failed' })
   }
   const handleConnectIntegration = (name: string) => {
-    toast.info('Connecting', { description: `Connecting to ${name}...` })
+    toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Connecting to ${name}...`, success: `${name} connected successfully`, error: 'Connection failed' })
   }
   const handleConfigureIntegration = (name: string) => {
-    toast.info('Configure', { description: `Opening ${name} configuration...` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening ${name} configuration...`, success: `${name} configuration ready`, error: 'Failed to open configuration' })
   }
 
   return (

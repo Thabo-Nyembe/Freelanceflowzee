@@ -710,11 +710,25 @@ export default function LearningClient() {
   }
 
   const handleDownloadCertificate = async () => {
-    toast.success('Certificate download started', { description: 'Your certificate is being generated' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Generating certificate...',
+        success: 'Certificate download started',
+        error: 'Failed to generate certificate'
+      }
+    )
   }
 
   const handleShareProgress = async () => {
-    toast.success('Progress shared', { description: 'Your learning progress has been shared' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Sharing progress...',
+        success: 'Progress shared successfully',
+        error: 'Failed to share progress'
+      }
+    )
   }
 
   const handleEnrollCourse = async (courseId: string, courseName: string) => {
@@ -727,7 +741,14 @@ export default function LearningClient() {
   }
 
   const handleBookmarkLesson = async (lessonId: string, lessonName: string) => {
-    toast.success('Lesson bookmarked', { description: `"${lessonName}" saved to bookmarks` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Saving bookmark...',
+        success: `"${lessonName}" saved to bookmarks`,
+        error: 'Failed to save bookmark'
+      }
+    )
   }
 
   const handleCreatePath = async () => {

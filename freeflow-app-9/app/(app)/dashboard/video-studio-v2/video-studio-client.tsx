@@ -499,33 +499,58 @@ export default function VideoStudioClient() {
 
   // Handlers
   const handleCreateProject = () => {
-    toast.info('Create Project', {
-      description: 'Opening video editor...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening video editor...',
+        success: 'Create Project - Video editor ready',
+        error: 'Failed to open editor'
+      }
+    )
   }
 
   const handleRenderVideo = (projectName: string) => {
-    toast.info('Rendering video', {
-      description: `"${projectName}" is being rendered...`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Rendering "${projectName}"...`,
+        success: `Video "${projectName}" rendered successfully`,
+        error: 'Failed to render video'
+      }
+    )
   }
 
   const handlePublishVideo = (projectName: string) => {
-    toast.success('Publishing video', {
-      description: `"${projectName}" is being published...`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Publishing "${projectName}"...`,
+        success: `Video "${projectName}" published successfully`,
+        error: 'Failed to publish video'
+      }
+    )
   }
 
   const handleExportVideo = (projectName: string) => {
-    toast.success('Exporting video', {
-      description: `"${projectName}" will be downloaded shortly`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Exporting "${projectName}"...`,
+        success: `Video "${projectName}" exported - download starting`,
+        error: 'Failed to export video'
+      }
+    )
   }
 
   const handleDuplicateProject = (projectName: string) => {
-    toast.success('Project duplicated', {
-      description: `Copy of "${projectName}" created`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Duplicating "${projectName}"...`,
+        success: `Project duplicated - Copy of "${projectName}" created`,
+        error: 'Failed to duplicate project'
+      }
+    )
   }
 
   return (

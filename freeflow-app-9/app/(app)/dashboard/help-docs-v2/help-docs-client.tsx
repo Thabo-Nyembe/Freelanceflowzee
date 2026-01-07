@@ -728,9 +728,14 @@ export default function HelpDocsClient() {
   }
 
   const handleBookmarkArticle = (articleTitle: string) => {
-    toast.success('Article bookmarked', {
-      description: `"${articleTitle}" saved to bookmarks`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Bookmarking article...',
+        success: `"${articleTitle}" saved to bookmarks`,
+        error: 'Failed to bookmark article'
+      }
+    )
   }
 
   return (

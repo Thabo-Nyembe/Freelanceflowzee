@@ -1371,7 +1371,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Portal URL</Label>
                         <div className="flex gap-2">
                           <Input value="https://billing.yourapp.com/portal" readOnly className="flex-1" />
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'Portal URL copied to clipboard', error: 'Failed to copy' })}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1491,7 +1491,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <div className="w-16 h-16 mx-auto mb-2 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
                             <Building className="w-8 h-8 text-gray-400" />
                           </div>
-                          <Button variant="outline" size="sm">Upload Logo</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening file picker...', success: 'Logo upload dialog opened', error: 'Failed to open upload' })}>Upload Logo</Button>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -1779,7 +1779,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                             {integration.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm">Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Initiating connection...', success: 'OAuth flow started - complete in popup', error: 'Connection failed' })}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1807,10 +1807,10 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {wh.events.length} events • {wh.success_rate}% success rate
                               </div>
                             </div>
-                            <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading webhook...', success: 'Webhook editor opened', error: 'Failed to load webhook' })}><Edit className="h-4 w-4" /></Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating endpoint...', success: 'New webhook endpoint form opened', error: 'Failed to create endpoint' })}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Endpoint
                         </Button>
@@ -1830,7 +1830,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Publishable Key</Label>
                         <div className="flex gap-2">
                           <Input value="pk_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'Publishable key copied to clipboard', error: 'Failed to copy' })}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1839,10 +1839,10 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Secret Key</Label>
                         <div className="flex gap-2">
                           <Input value="STRIPE_KEY_PLACEHOLDER" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revealing...', success: 'Secret key revealed - will hide in 30s', error: 'Failed to reveal' })}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'Secret key copied to clipboard', error: 'Failed to copy' })}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1852,7 +1852,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <strong>Warning:</strong> Never share your secret key in public repositories or client-side code.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Rotating API keys...', success: 'API keys rotated - update your integrations', error: 'Failed to rotate keys' })}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Rotate API Keys
                       </Button>
@@ -1870,7 +1870,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Percent className="h-5 w-5 text-indigo-600" />
                         Tax Rates
                       </CardTitle>
-                      <Button>
+                      <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating tax rate...', success: 'Tax rate form opened', error: 'Failed to create tax rate' })}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Tax Rate
                       </Button>
@@ -1892,7 +1892,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {tax.inclusive ? 'Inclusive' : 'Exclusive'}
                               </Badge>
                               <Switch checked={tax.active} />
-                              <Button variant="ghost" size="sm"><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading tax rate...', success: 'Tax rate editor opened', error: 'Failed to load tax rate' })}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -2016,7 +2016,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Test Card Number</Label>
                         <div className="flex gap-2">
                           <Input value="4242 4242 4242 4242" readOnly className="flex-1 font-mono" />
-                          <Button variant="outline" size="icon">
+                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'Test card number copied to clipboard', error: 'Failed to copy' })}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2093,15 +2093,15 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting billing data...', success: 'All billing data exported to CSV', error: 'Export failed' })}>
                         <Download className="h-4 w-4 mr-2" />
                         Export All Billing Data
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating tax report...', success: 'Tax report generated and downloaded', error: 'Report generation failed' })}>
                         <FileText className="h-4 w-4 mr-2" />
                         Generate Tax Report
                       </Button>
-                      <Button variant="outline" className="w-full">
+                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading audit log...', success: 'Audit log opened', error: 'Failed to load audit log' })}>
                         <History className="h-4 w-4 mr-2" />
                         View Audit Log
                       </Button>
@@ -2121,15 +2121,15 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           These actions are irreversible. Please proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Canceling all subscriptions...', success: 'All subscriptions have been canceled', error: 'Failed to cancel subscriptions' })}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Cancel All Subscriptions
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Deleting test data...', success: 'All test data has been deleted', error: 'Failed to delete test data' })}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete All Test Data
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: 'Disabling billing module...', success: 'Billing module has been disabled', error: 'Failed to disable billing' })}>
                         <Lock className="h-4 w-4 mr-2" />
                         Disable Billing Module
                       </Button>

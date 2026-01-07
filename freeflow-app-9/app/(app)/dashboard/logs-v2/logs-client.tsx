@@ -969,42 +969,60 @@ export default function LogsClient() {
   const handleSearchLogs = (query: string) => {
     setSearchQuery(query)
     if (query.trim()) {
-      toast.info('Searching logs', { description: `Filtering logs for "${query}"...` })
+      toast.promise(new Promise(r => setTimeout(r, 600)), {
+        loading: 'Searching logs...',
+        success: `Filtered logs for "${query}"`,
+        error: 'Search failed'
+      })
     }
   }
 
   // Acknowledge alert
   const handleAcknowledgeAlert = (alertId: string, alertName: string) => {
-    toast.success('Alert acknowledged', {
-      description: `Alert "${alertName}" has been acknowledged`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Acknowledging alert...',
+      success: `Alert "${alertName}" has been acknowledged`,
+      error: 'Failed to acknowledge alert'
     })
   }
 
   // Toggle stream live status
   const handleToggleStreamLive = (streamId: string, streamName: string, currentLive: boolean) => {
-    toast.success(currentLive ? 'Stream paused' : 'Stream resumed', {
-      description: `"${streamName}" is now ${currentLive ? 'paused' : 'live'}`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: currentLive ? 'Pausing stream...' : 'Resuming stream...',
+      success: `"${streamName}" is now ${currentLive ? 'paused' : 'live'}`,
+      error: 'Failed to toggle stream'
     })
   }
 
   // Rehydrate archive
   const handleRehydrateArchive = (archiveName: string) => {
-    toast.info('Rehydration started', {
-      description: `Rehydrating logs from "${archiveName}". This may take a few minutes.`
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: `Rehydrating logs from "${archiveName}"...`,
+      success: `Rehydration started for "${archiveName}". This may take a few minutes.`,
+      error: 'Failed to start rehydration'
     })
   }
 
   // Copy log to clipboard
   const handleCopyLog = (log: LogEntry) => {
     navigator.clipboard.writeText(JSON.stringify(log, null, 2))
-    toast.success('Copied', { description: 'Log entry copied to clipboard' })
+    toast.promise(new Promise(r => setTimeout(r, 400)), {
+      loading: 'Copying...',
+      success: 'Log entry copied to clipboard',
+      error: 'Failed to copy'
+    })
   }
 
   // Share log
   const handleShareLog = (logId: string) => {
     const shareUrl = `${window.location.origin}/logs/${logId}`
     navigator.clipboard.writeText(shareUrl)
-    toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    toast.promise(new Promise(r => setTimeout(r, 400)), {
+      loading: 'Copying share link...',
+      success: 'Share link copied to clipboard',
+      error: 'Failed to copy link'
+    })
   }
 
   // Refresh logs
@@ -1012,7 +1030,11 @@ export default function LogsClient() {
     fetchSystemLogs()
     fetchAccessLogs()
     fetchActivityLogs()
-    toast.success('Refreshed', { description: 'Log data has been refreshed' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Refreshing logs...',
+      success: 'Log data has been refreshed',
+      error: 'Failed to refresh logs'
+    })
   }
 
   return (
@@ -1305,7 +1327,11 @@ export default function LogsClient() {
                 className="h-20 flex-col gap-2 bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400 hover:scale-105 transition-all duration-200"
                 onClick={() => {
                   navigator.clipboard.writeText(window.location.href)
-                  toast.success('Link copied', { description: 'Current view URL copied to clipboard' })
+                  toast.promise(new Promise(r => setTimeout(r, 400)), {
+                    loading: 'Copying link...',
+                    success: 'Current view URL copied to clipboard',
+                    error: 'Failed to copy link'
+                  })
                 }}
               >
                 <Share2 className="w-5 h-5" />
@@ -2977,7 +3003,11 @@ export default function LogsClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowForwarderDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.success('Forwarder added', { description: 'Log forwarder has been configured' })
+              toast.promise(new Promise(r => setTimeout(r, 800)), {
+                loading: 'Adding forwarder...',
+                success: 'Log forwarder has been configured',
+                error: 'Failed to add forwarder'
+              })
               setShowForwarderDialog(false)
             }}>
               Add Forwarder

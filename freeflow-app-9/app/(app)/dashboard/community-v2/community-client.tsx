@@ -1979,8 +1979,15 @@ export default function CommunityClient() {
                           variant="outline"
                           className="w-full"
                           disabled={isSubmitting}
-                          onClick={async () => {
-                            toast.info('Bot Store', { description: 'Opening bot marketplace...' })
+                          onClick={() => {
+                            toast.promise(
+                              new Promise(resolve => setTimeout(resolve, 600)),
+                              {
+                                loading: 'Opening bot marketplace...',
+                                success: 'Bot marketplace ready',
+                                error: 'Failed to open bot marketplace'
+                              }
+                            )
                           }}
                         >
                           <Plus className="w-4 h-4 mr-2" />

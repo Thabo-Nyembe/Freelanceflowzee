@@ -666,26 +666,34 @@ export default function OrdersClient() {
 
   // Handlers
   const handleCreateOrder = () => {
-    toast.info('Create Order', {
-      description: 'Opening order form...'
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: 'Opening order form...',
+      success: 'Order form ready',
+      error: 'Failed to open order form'
     })
   }
 
   const handleRefreshOrders = () => {
-    toast.success('Orders refreshed', {
-      description: 'Order data updated'
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: 'Refreshing orders...',
+      success: 'Orders refreshed',
+      error: 'Failed to refresh orders'
     })
   }
 
   const handleFulfillOrder = (order: Order) => {
-    toast.success('Order fulfilled', {
-      description: `Order ${order.order_number} marked as fulfilled`
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: `Fulfilling order ${order.order_number}...`,
+      success: `Order ${order.order_number} marked as fulfilled`,
+      error: `Failed to fulfill order ${order.order_number}`
     })
   }
 
   const handleExportOrders = () => {
-    toast.success('Export started', {
-      description: 'Your orders are being exported'
+    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+      loading: 'Exporting orders...',
+      success: 'Orders exported successfully',
+      error: 'Failed to export orders'
     })
   }
 

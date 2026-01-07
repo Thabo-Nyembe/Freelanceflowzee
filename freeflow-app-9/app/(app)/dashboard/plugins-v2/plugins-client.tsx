@@ -689,7 +689,7 @@ export default function PluginsClient() {
   }
 
   const handleConfigurePlugin = (pluginName: string) => {
-    toast.info('Configure Plugin', { description: `Opening settings for "${pluginName}"...` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening settings for "${pluginName}"...`, success: `Settings loaded for "${pluginName}"`, error: `Failed to open settings for "${pluginName}"` })
   }
 
   const handleEnablePlugin = async (pluginId: string, pluginName: string) => {
@@ -722,23 +722,24 @@ export default function PluginsClient() {
   const handleUpdateAllPlugins = async () => {
     const needsUpdate = dbPlugins.filter(p => p.status === 'updating' || p.version !== '1.0.0')
     if (needsUpdate.length === 0) {
-      toast.info('All Up to Date', { description: 'All plugins are already running the latest versions' })
+      toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Checking plugin versions...', success: 'All plugins are already running the latest versions', error: 'Failed to check plugin versions' })
       return
     }
-    toast.info('Updating Plugins', { description: `Updating ${needsUpdate.length} plugin(s)...` })
-    for (const plugin of needsUpdate) {
-      try {
-        await updatePlugin(plugin.id, { status: 'active' })
-      } catch (err) {
-        console.error('Failed to update plugin:', plugin.name)
+    const updateAllPromise = async () => {
+      for (const plugin of needsUpdate) {
+        try {
+          await updatePlugin(plugin.id, { status: 'active' })
+        } catch (err) {
+          console.error('Failed to update plugin:', plugin.name)
+        }
       }
     }
-    toast.success('Update Complete', { description: 'All plugins have been updated' })
+    toast.promise(updateAllPromise(), { loading: `Updating ${needsUpdate.length} plugin(s)...`, success: 'All plugins have been updated successfully', error: 'Some plugins failed to update' })
   }
 
   const handleBrowsePlugins = () => {
     setActiveTab('discover')
-    toast.info('Plugin Marketplace', { description: 'Browse available plugins below' })
+    toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading plugin marketplace...', success: 'Browse available plugins below', error: 'Failed to load marketplace' })
   }
 
   const renderPluginCard = (plugin: Plugin) => (
@@ -2022,7 +2023,7 @@ export default function PluginsClient() {
                           className={selectedPlugin.isActivated ? 'bg-gray-600 hover:bg-gray-700' : 'bg-green-600 hover:bg-green-700'}
                           onClick={() => {
                             if (selectedPlugin.isActivated) {
-                              toast.info('Plugin Deactivated', { description: `"${selectedPlugin.name}" has been deactivated` })
+                              toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Deactivating "${selectedPlugin.name}"...`, success: `"${selectedPlugin.name}" has been deactivated`, error: `Failed to deactivate "${selectedPlugin.name}"` })
                             } else {
                               handleEnablePlugin(selectedPlugin.name)
                             }

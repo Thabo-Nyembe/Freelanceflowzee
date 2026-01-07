@@ -434,9 +434,14 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   }
 
   const handleExportInvoices = () => {
-    toast.success('Export started', {
-      description: 'Your invoices are being exported'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting invoices...',
+        success: 'Export completed - Your invoices have been exported',
+        error: 'Failed to export invoices'
+      }
+    )
   }
 
   const getStatusColor = (status: string) => {
@@ -453,9 +458,14 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
   const getCurrencySymbol = (code: string) => currencies.find(c => c.code === code)?.symbol || '$'
 
   const handleDownloadInvoice = (invoice: Invoice) => {
-    toast.success('Downloading invoice', {
-      description: `PDF for invoice #${invoice.invoice_number} will be ready shortly`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1200)),
+      {
+        loading: `Generating PDF for invoice #${invoice.invoice_number}...`,
+        success: `Invoice #${invoice.invoice_number} PDF downloaded successfully`,
+        error: 'Failed to download invoice PDF'
+      }
+    )
   }
 
   if (error) {

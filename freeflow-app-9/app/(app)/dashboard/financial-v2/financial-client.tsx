@@ -744,7 +744,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                       onClick={() => {
                         setActiveTab('settings')
                         setSettingsTab('accounting')
-                        toast.info('Navigate to budget settings to edit budgets')
+                        toast.promise(new Promise(r => setTimeout(r, 600)), {
+                          loading: 'Navigating to budget settings...',
+                          success: 'Navigate to budget settings to edit budgets',
+                          error: 'Failed to navigate'
+                        })
                       }}
                       className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                     >
@@ -796,7 +800,11 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     onClick={() => {
                       setActiveTab('settings')
                       setSettingsTab('banking')
-                      toast.info('Connect your bank accounts in settings')
+                      toast.promise(new Promise(r => setTimeout(r, 600)), {
+                        loading: 'Navigating to banking settings...',
+                        success: 'Connect your bank accounts in settings',
+                        error: 'Failed to navigate'
+                      })
                     }}
                     className="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                   >
@@ -870,8 +878,14 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     </button>
                     <button
                       onClick={() => {
-                        navigator.clipboard.writeText(window.location.href)
-                        toast.success('Link copied to clipboard!')
+                        toast.promise(
+                          navigator.clipboard.writeText(window.location.href),
+                          {
+                            loading: 'Copying link...',
+                            success: 'Link copied to clipboard!',
+                            error: 'Failed to copy link'
+                          }
+                        )
                       }}
                       className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg"
                       title="Share"

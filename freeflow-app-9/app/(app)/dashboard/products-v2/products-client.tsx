@@ -376,29 +376,49 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
   // Handlers
   const handleCreateProduct = () => {
-    toast.info('Create Product', {
-      description: 'Opening product form...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening product form...',
+        success: 'Create Product form ready',
+        error: 'Failed to open form'
+      }
+    )
     setShowCreateProduct(true)
   }
 
   const handleCreateCoupon = () => {
-    toast.info('Create Coupon', {
-      description: 'Opening coupon form...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening coupon form...',
+        success: 'Create Coupon form ready',
+        error: 'Failed to open form'
+      }
+    )
     setShowCreateCoupon(true)
   }
 
   const handleExportProducts = () => {
-    toast.success('Export started', {
-      description: 'Your product catalog is being exported'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 1500)),
+      {
+        loading: 'Exporting product catalog...',
+        success: 'Product catalog exported successfully',
+        error: 'Failed to export products'
+      }
+    )
   }
 
   const handleArchiveProduct = (product: StripeProduct) => {
-    toast.success('Product archived', {
-      description: `${product.name} has been archived`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: `Archiving ${product.name}...`,
+        success: `${product.name} has been archived`,
+        error: `Failed to archive ${product.name}`
+      }
+    )
   }
 
   const getStatusColor = (status: ProductStatus) => {

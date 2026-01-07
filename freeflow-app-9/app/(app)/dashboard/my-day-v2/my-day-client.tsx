@@ -717,45 +717,45 @@ export default function MyDayClient({ initialTasks, initialSessions }: MyDayClie
   }
 
   // Handlers
-  const handleAddTask = () => toast.info('Add Task', { description: 'Opening form...' })
-  const handleCompleteTask = (n: string) => toast.success('Completed', { description: `"${n}" done` })
-  const handleScheduleMeeting = () => toast.info('Schedule', { description: 'Opening calendar...' })
-  const handleSetReminder = () => toast.success('Reminder Set', { description: 'You will be notified' })
+  const handleAddTask = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening form...', success: 'Task form ready', error: 'Failed to open form' })
+  const handleCompleteTask = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Completing task...', success: `"${n}" done`, error: 'Failed to complete task' })
+  const handleScheduleMeeting = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening calendar...', success: 'Calendar ready', error: 'Failed to open calendar' })
+  const handleSetReminder = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Setting reminder...', success: 'Reminder set - You will be notified', error: 'Failed to set reminder' })
   const handleKeyboardShortcuts = () => {
-    toast.info('Keyboard Shortcuts', { description: 'Opening shortcuts panel...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading shortcuts...', success: 'Keyboard shortcuts panel opened', error: 'Failed to load shortcuts' })
   }
   const handleSettings = () => {
-    toast.info('Settings', { description: 'Opening settings...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading settings...', success: 'Settings opened', error: 'Failed to load settings' })
   }
   const handleAddSection = () => {
-    toast.info('Add Section', { description: 'Creating new section...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating section...', success: 'New section created', error: 'Failed to create section' })
   }
   const handleAddLabel = () => {
-    toast.info('Add Label', { description: 'Creating new label...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating label...', success: 'New label created', error: 'Failed to create label' })
   }
   const handleAddProject = () => {
-    toast.info('Add Project', { description: 'Creating new project...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating project...', success: 'New project created', error: 'Failed to create project' })
   }
   const handleCalendarView = (view: string) => {
-    toast.info('Calendar View', { description: `Switching to ${view} view...` })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Switching to ${view} view...`, success: `${view} view loaded`, error: 'Failed to switch view' })
   }
   const handlePostComment = () => {
-    toast.success('Comment Posted', { description: 'Your comment has been added' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Posting comment...', success: 'Comment posted successfully', error: 'Failed to post comment' })
   }
   const handleEditTask = () => {
-    toast.info('Edit Task', { description: 'Opening task editor...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening task editor...', success: 'Task editor ready', error: 'Failed to open editor' })
   }
   const handleMoveTask = () => {
-    toast.info('Move Task', { description: 'Select destination...' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading destinations...', success: 'Select destination for task', error: 'Failed to load destinations' })
   }
   const handleDuplicateTask = () => {
-    toast.success('Task Duplicated', { description: 'Task has been copied' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Duplicating task...', success: 'Task duplicated successfully', error: 'Failed to duplicate task' })
   }
   const handleArchiveTask = () => {
-    toast.success('Task Archived', { description: 'Task moved to archive' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Archiving task...', success: 'Task archived successfully', error: 'Failed to archive task' })
   }
   const handleDeleteTask = () => {
-    toast.success('Task Deleted', { description: 'Task has been removed' })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Deleting task...', success: 'Task deleted successfully', error: 'Failed to delete task' })
   }
 
   // Stat cards

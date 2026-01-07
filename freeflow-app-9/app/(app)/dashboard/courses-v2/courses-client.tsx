@@ -1493,7 +1493,14 @@ export default function CoursesClient() {
                             if (course.status === 'draft') {
                               handlePublishCourse(course)
                             } else {
-                              toast.info('Opening preview...', { description: `Previewing "${course.title}"` })
+                              toast.promise(
+                                new Promise(resolve => setTimeout(resolve, 600)),
+                                {
+                                  loading: 'Opening preview...',
+                                  success: `Previewing "${course.title}"`,
+                                  error: 'Failed to open preview'
+                                }
+                              )
                             }
                           }}
                           disabled={isSubmitting}

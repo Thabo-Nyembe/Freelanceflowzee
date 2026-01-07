@@ -1117,7 +1117,7 @@ export default function CampaignsClient() {
                   onClick={() => {
                     setNewCampaignForm(prev => ({ ...prev, type: 'email' }))
                     setShowNewCampaignDialog(true)
-                    toast.info('A/B Test Campaign', { description: 'Create your campaign and enable A/B testing in settings' })
+                    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Setting up A/B Test...', success: 'A/B Test Campaign ready - enable A/B testing in settings', error: 'Failed to set up A/B test' })
                   }}
                 >
                   <Split className="w-5 h-5 text-purple-500" />
@@ -2333,7 +2333,7 @@ export default function CampaignsClient() {
                             variant="outline"
                             className="h-auto py-4 flex flex-col items-center gap-2"
                             onClick={() => {
-                              toast.info('Reset Statistics', { description: 'This feature resets campaign analytics data' })
+                              toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting statistics...', success: 'Statistics reset successfully', error: 'Failed to reset statistics' })
                             }}
                           >
                             <RefreshCw className="w-5 h-5" />

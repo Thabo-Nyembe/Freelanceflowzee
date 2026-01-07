@@ -1089,7 +1089,14 @@ export default function RecruitmentClient() {
   }
 
   const handleScheduleInterview = (candidateName: string) => {
-    toast.info('Schedule Interview', { description: `Opening scheduler for ${candidateName}...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Opening scheduler for ${candidateName}...`,
+        success: 'Interview scheduler opened',
+        error: 'Failed to open scheduler'
+      }
+    )
   }
 
   const handleExportCandidates = () => {
@@ -1120,23 +1127,58 @@ export default function RecruitmentClient() {
   }
 
   const handleViewOffer = (candidateName: string) => {
-    toast.info('View Offer', { description: `Opening offer details for ${candidateName}...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Opening offer details for ${candidateName}...`,
+        success: 'Offer details loaded',
+        error: 'Failed to load offer details'
+      }
+    )
   }
 
   const handleEditOffer = (candidateName: string) => {
-    toast.info('Edit Offer', { description: `Opening offer editor for ${candidateName}...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Opening offer editor for ${candidateName}...`,
+        success: 'Offer editor opened',
+        error: 'Failed to open offer editor'
+      }
+    )
   }
 
   const handleSendOffer = (candidateName: string) => {
-    toast.success('Send Offer', { description: `Offer sent to ${candidateName}` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Sending offer to ${candidateName}...`,
+        success: `Offer sent to ${candidateName}`,
+        error: 'Failed to send offer'
+      }
+    )
   }
 
   const handleFilterTalentPool = () => {
-    toast.info('Filter', { description: 'Opening filter options...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening filter options...',
+        success: 'Filter options loaded',
+        error: 'Failed to open filter options'
+      }
+    )
   }
 
   const handleImportCandidates = () => {
-    toast.info('Import', { description: 'Opening import dialog...' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening import dialog...',
+        success: 'Import dialog opened',
+        error: 'Failed to open import dialog'
+      }
+    )
   }
 
   const handleReachOut = (email: string | null, candidateName: string) => {
@@ -1148,7 +1190,14 @@ export default function RecruitmentClient() {
   }
 
   const handleMatchJobs = (candidateName: string) => {
-    toast.info('Match Jobs', { description: `Finding matching jobs for ${candidateName}...` })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Finding matching jobs for ${candidateName}...`,
+        success: 'Matching jobs found',
+        error: 'Failed to find matching jobs'
+      }
+    )
   }
 
   return (

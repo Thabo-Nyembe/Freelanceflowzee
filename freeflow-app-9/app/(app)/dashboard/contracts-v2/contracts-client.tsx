@@ -512,9 +512,14 @@ export default function ContractsClient({ initialContracts }: { initialContracts
   }
 
   const handleDownloadContract = (contractName: string) => {
-    toast.success('Downloading contract', {
-      description: `"${contractName}" will be downloaded`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: `Preparing download for "${contractName}"...`,
+        success: `Contract "${contractName}" downloaded successfully`,
+        error: `Failed to download "${contractName}"`
+      }
+    )
   }
 
   if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>

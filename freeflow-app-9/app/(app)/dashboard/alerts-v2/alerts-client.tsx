@@ -553,11 +553,12 @@ export default function AlertsClient() {
   // Handlers - Real Supabase operations
   const handleCreateAlert = async () => {
     if (!newAlertForm.title.trim()) {
-      toast.error('Validation Error', { description: 'Alert title is required' })
+      toast.promise(Promise.reject(new Error('Alert title is required')), { loading: 'Validating...', success: 'Validated', error: 'Alert title is required' })
       return
     }
-    try {
-      await createAlert({
+    const alertTitle = newAlertForm.title
+    toast.promise(
+      createAlert({
         title: newAlertForm.title,
         description: newAlertForm.description || null,
         severity: newAlertForm.severity,
@@ -566,79 +567,66 @@ export default function AlertsClient() {
         tags: newAlertForm.tags,
         status: 'active',
         triggered_at: new Date().toISOString()
-      })
-      toast.success('Alert Created', { description: `"${newAlertForm.title}" has been created` })
-      setShowCreateDialog(false)
-      setNewAlertForm({
-        title: '',
-        description: '',
-        severity: 'info',
-        category: 'other',
-        source: 'manual',
-        tags: [],
-        tagInput: ''
-      })
-    } catch (err) {
-      toast.error('Failed to Create Alert', { description: err instanceof Error ? err.message : 'Unknown error' })
-    }
+      }).then(() => {
+        setShowCreateDialog(false)
+        setNewAlertForm({
+          title: '',
+          description: '',
+          severity: 'info',
+          category: 'other',
+          source: 'manual',
+          tags: [],
+          tagInput: ''
+        })
+      }),
+      { loading: 'Creating alert...', success: `Alert "${alertTitle}" has been created`, error: 'Failed to create alert' }
+    )
   }
 
   const handleAcknowledgeAlert = async (alertId: string) => {
-    try {
-      await acknowledgeAlert(alertId)
-      toast.success('Alert Acknowledged', { description: `Alert has been acknowledged` })
-    } catch (err) {
-      toast.error('Failed to Acknowledge', { description: err instanceof Error ? err.message : 'Unknown error' })
-    }
+    toast.promise(
+      acknowledgeAlert(alertId),
+      { loading: 'Acknowledging alert...', success: 'Alert has been acknowledged', error: 'Failed to acknowledge alert' }
+    )
   }
 
   const handleResolveAlert = async (alertId: string) => {
-    try {
-      await resolveAlert(alertId)
-      toast.success('Alert Resolved', { description: `Alert has been resolved` })
-    } catch (err) {
-      toast.error('Failed to Resolve', { description: err instanceof Error ? err.message : 'Unknown error' })
-    }
+    toast.promise(
+      resolveAlert(alertId),
+      { loading: 'Resolving alert...', success: 'Alert has been resolved', error: 'Failed to resolve alert' }
+    )
   }
 
   const handleEscalateAlert = async (alertId: string) => {
-    try {
-      await escalateAlert(alertId)
-      toast.success('Alert Escalated', { description: `Alert has been escalated to the next tier` })
-    } catch (err) {
-      toast.error('Failed to Escalate', { description: err instanceof Error ? err.message : 'Unknown error' })
-    }
+    toast.promise(
+      escalateAlert(alertId),
+      { loading: 'Escalating alert...', success: 'Alert has been escalated to the next tier', error: 'Failed to escalate alert' }
+    )
   }
 
   const handleMuteAlert = async (alertId: string, alertName: string) => {
-    try {
-      await snoozeAlert(alertId, 60) // 60 minutes
-      toast.success('Alert Snoozed', { description: `"${alertName}" snoozed for 1 hour` })
-    } catch (err) {
-      toast.error('Failed to Snooze', { description: err instanceof Error ? err.message : 'Unknown error' })
-    }
+    toast.promise(
+      snoozeAlert(alertId, 60), // 60 minutes
+      { loading: 'Snoozing alert...', success: `"${alertName}" snoozed for 1 hour`, error: 'Failed to snooze alert' }
+    )
   }
 
   const handleDeleteAlert = async (alertId: string) => {
-    try {
-      await deleteAlert(alertId)
-      toast.success('Alert Deleted', { description: `Alert has been removed` })
-    } catch (err) {
-      toast.error('Failed to Delete', { description: err instanceof Error ? err.message : 'Unknown error' })
-    }
+    toast.promise(
+      deleteAlert(alertId),
+      { loading: 'Deleting alert...', success: 'Alert has been removed', error: 'Failed to delete alert' }
+    )
   }
 
   const handleDismissAlert = async (alertId: string) => {
-    try {
-      await updateAlert(alertId, { status: 'resolved', resolved_at: new Date().toISOString() })
-      toast.success('Alert Dismissed', { description: 'Alert has been dismissed' })
-    } catch (err) {
-      toast.error('Failed to Dismiss', { description: err instanceof Error ? err.message : 'Unknown error' })
-    }
+    toast.promise(
+      updateAlert(alertId, { status: 'resolved', resolved_at: new Date().toISOString() }),
+      { loading: 'Dismissing alert...', success: 'Alert has been dismissed', error: 'Failed to dismiss alert' }
+    )
   }
 
   const handleExportAlerts = () => {
-    toast.success('Exporting Alerts', { description: 'Alert history will be downloaded' })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Exporting alerts...', success: 'Alert history will be downloaded', error: 'Failed to export' })
   }
 
   return (
@@ -1117,7 +1105,7 @@ export default function AlertsClient() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Switch checked={integration.status === 'active'} onCheckedChange={(checked) => toast.success(checked ? 'Integration Enabled' : 'Integration Disabled', { description: `${integration.name} has been ${checked ? 'enabled' : 'disabled'}` })} />
+                        <Switch checked={integration.status === 'active'} onCheckedChange={(checked) => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: checked ? 'Enabling integration...' : 'Disabling integration...', success: checked ? `${integration.name} has been enabled` : `${integration.name} has been disabled`, error: 'Failed to update integration' })} />
                         <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: `Configure ${integration.name}`, error: 'Failed' })}>
                           <Settings className="h-4 w-4" />
                         </Button>
@@ -1362,7 +1350,7 @@ export default function AlertsClient() {
                               <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: `Configure ${channel.name}`, error: 'Failed' })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Switch defaultChecked={channel.enabled} onCheckedChange={(checked) => toast.success(checked ? 'Channel Enabled' : 'Channel Disabled', { description: `${channel.name} notifications ${checked ? 'enabled' : 'disabled'}` })} />
+                              <Switch defaultChecked={channel.enabled} onCheckedChange={(checked) => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: checked ? 'Enabling channel...' : 'Disabling channel...', success: checked ? `${channel.name} notifications enabled` : `${channel.name} notifications disabled`, error: 'Failed to update channel' })} />
                             </div>
                           </div>
                         ))}
@@ -1732,7 +1720,7 @@ export default function AlertsClient() {
                               <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening...', success: `Editing "${rule.name}"`, error: 'Failed' })}>
                                 <Edit className="h-4 w-4" />
                               </Button>
-                              <Switch defaultChecked={rule.enabled} onCheckedChange={(checked) => toast.success(checked ? 'Rule Enabled' : 'Rule Disabled', { description: `"${rule.name}" has been ${checked ? 'enabled' : 'disabled'}` })} />
+                              <Switch defaultChecked={rule.enabled} onCheckedChange={(checked) => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: checked ? 'Enabling rule...' : 'Disabling rule...', success: checked ? `"${rule.name}" has been enabled` : `"${rule.name}" has been disabled`, error: 'Failed to update rule' })} />
                             </div>
                           </div>
                         ))}

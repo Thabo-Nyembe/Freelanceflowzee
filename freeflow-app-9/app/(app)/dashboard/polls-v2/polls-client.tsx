@@ -964,13 +964,13 @@ export default function PollsClient() {
                       )}
                     </div>
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                      <button className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening preview...', success: 'Preview ready', error: 'Failed to load preview' })} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Editor ready', error: 'Failed to open editor' })} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
                         <Edit2 className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Preparing share link...', success: 'Share link copied!', error: 'Failed to copy link' })} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
                         <Share2 className="w-4 h-4 text-gray-600" />
                       </button>
                     </div>
@@ -1012,18 +1012,18 @@ export default function PollsClient() {
                   {/* Actions */}
                   <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <button className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading results...', success: 'Results loaded', error: 'Failed to load results' })} className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         Results
                       </button>
-                      <button className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading settings...', success: 'Settings ready', error: 'Failed to load settings' })} className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         Settings
                       </button>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Duplicating form...', success: 'Form duplicated!', error: 'Failed to duplicate form' })} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         <Copy className="w-4 h-4 text-gray-400" />
                       </button>
-                      <button className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading options...', success: 'Options menu ready', error: 'Failed to load options' })} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         <MoreVertical className="w-4 h-4 text-gray-400" />
                       </button>
                     </div>
@@ -1166,7 +1166,7 @@ export default function PollsClient() {
                           </div>
                         </div>
                       </div>
-                      <button className="px-3 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading response details...', success: 'Response details loaded', error: 'Failed to load details' })} className="px-3 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
                         View Details
                       </button>
                     </div>
@@ -1305,7 +1305,7 @@ export default function PollsClient() {
                   </div>
                   <h3 className="font-semibold mb-1">{integration.name}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{integration.description}</p>
-                  <button className={`w-full py-2 rounded-lg text-sm font-medium transition-colors ${
+                  <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: integration.connected ? 'Loading configuration...' : 'Connecting integration...', success: integration.connected ? 'Configuration loaded' : 'Integration connected!', error: integration.connected ? 'Failed to load configuration' : 'Failed to connect' })} className={`w-full py-2 rounded-lg text-sm font-medium transition-colors ${
                     integration.connected
                       ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       : 'bg-emerald-600 text-white hover:bg-emerald-700'
@@ -1910,7 +1910,7 @@ export default function PollsClient() {
                           </div>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating webhook endpoint...', success: 'Webhook endpoint created!', error: 'Failed to create endpoint' })}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook Endpoint
                         </Button>
@@ -1930,10 +1930,10 @@ export default function PollsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating API key...', success: 'New API key generated!', error: 'Failed to regenerate API key' })}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2097,7 +2097,7 @@ export default function PollsClient() {
                           </Select>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting all data...', success: 'Data export completed!', error: 'Failed to export data' })}>
                           <Download className="w-4 h-4 mr-2" />
                           Export All Data
                         </Button>
@@ -2137,10 +2137,10 @@ export default function PollsClient() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading subscription details...', success: 'Subscription management ready', error: 'Failed to load subscription' })}>
                             Manage Subscription
                           </Button>
-                          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading upgrade options...', success: 'Upgrade options available!', error: 'Failed to load upgrade options' })}>
                             Upgrade Plan
                           </Button>
                         </div>
@@ -2360,7 +2360,7 @@ export default function PollsClient() {
                     <p className="text-sm text-gray-500 line-clamp-2">{template.description}</p>
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <span className="text-xs text-gray-500">{template.usageCount.toLocaleString()} uses</span>
-                      <button className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg">
+                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading template...', success: 'Template applied! Form ready to customize', error: 'Failed to load template' })} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg">
                         Use Template
                       </button>
                     </div>

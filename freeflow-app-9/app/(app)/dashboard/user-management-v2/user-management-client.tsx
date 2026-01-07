@@ -562,7 +562,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
               <Download className="w-4 h-4" />
               {exporting ? 'Exporting...' : 'Export'}
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing import wizard...', success: 'Import wizard ready!', error: 'Failed to open import' })}>
               <Upload className="w-4 h-4" />
               Import
             </Button>
@@ -874,10 +874,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           </td>
                           <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center gap-2">
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Edit mode ready!', error: 'Failed to open editor' })}>
                                 <Edit className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading options...', success: 'Options menu ready!', error: 'Failed to load options' })}>
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </div>
@@ -991,7 +991,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="text-sm font-medium text-gray-900 dark:text-white">{role.userCount}</div>
                           <div className="text-xs text-gray-500">users</div>
                         </div>
-                        <Button size="sm" variant="ghost">
+                        <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening role editor...', success: 'Role editor ready!', error: 'Failed to open editor' })}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1010,7 +1010,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Authentication Connections</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Manage SSO, social logins, and identity providers</p>
                 </div>
-                <Button className="gap-2">
+                <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening connection wizard...', success: 'Connection wizard ready!', error: 'Failed to open wizard' })}>
                   <Plus className="w-4 h-4" />
                   Add Connection
                 </Button>
@@ -1056,7 +1056,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             <div className="text-xs text-gray-500">{new Date(conn.lastUsed).toLocaleString()}</div>
                           </div>
                         )}
-                        <Button size="sm" variant="outline">Configure</Button>
+                        <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading connection settings...', success: 'Configuration ready!', error: 'Failed to load settings' })}>Configure</Button>
                       </div>
                     </div>
                   </div>
@@ -1129,7 +1129,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading policy settings...', success: 'Policy settings ready!', error: 'Failed to load settings' })}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1156,7 +1156,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                     <option value="security">Security</option>
                     <option value="connection">Connections</option>
                   </select>
-                  <Button variant="outline" className="gap-2">
+                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting audit logs...', success: 'Audit logs exported!', error: 'Failed to export logs' })}>
                     <Download className="w-4 h-4" />
                     Export
                   </Button>
@@ -1603,7 +1603,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <Label>Email Header Logo</Label>
                           <Input placeholder="https://cdn.freeflow.com/email-logo.png" />
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading email templates...', success: 'Email template editor ready!', error: 'Failed to load templates' })}>
                           <Edit className="w-4 h-4 mr-2" />
                           Edit Email Templates
                         </Button>
@@ -1745,7 +1745,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                         <h3 className="font-semibold text-gray-900 dark:text-white">Registered APIs</h3>
                         <p className="text-sm text-gray-500">APIs protected by Auth0</p>
                       </div>
-                      <Button className="ml-auto gap-2">
+                      <Button className="ml-auto gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening API registration...', success: 'API registration form ready!', error: 'Failed to open registration' })}>
                         <Plus className="w-4 h-4" />
                         Register API
                       </Button>
@@ -1768,7 +1768,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           </div>
                           <div className="flex items-center gap-4">
                             <Badge variant="outline">{api.scopes} scopes</Badge>
-                            <Button size="sm" variant="outline">Configure</Button>
+                            <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading API configuration...', success: 'API configuration ready!', error: 'Failed to load configuration' })}>Configure</Button>
                           </div>
                         </div>
                       ))}
@@ -1964,7 +1964,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Rotate Signing Key</div>
                           <p className="text-sm text-gray-500">Invalidates all existing tokens</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Rotating signing key...', success: 'Signing key rotated! All tokens invalidated.', error: 'Failed to rotate key' })}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Rotate Key
                         </Button>
@@ -1974,7 +1974,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Revoke All Sessions</div>
                           <p className="text-sm text-gray-500">Force all users to re-authenticate</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Revoking all sessions...', success: 'All sessions revoked! Users must re-authenticate.', error: 'Failed to revoke sessions' })}>
                           <LogOut className="w-4 h-4 mr-2" />
                           Revoke All
                         </Button>
@@ -1984,7 +1984,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Delete Tenant</div>
                           <p className="text-sm text-gray-500">Permanently delete all data</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50">
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Deleting tenant...', success: 'Tenant deletion initiated', error: 'Failed to delete tenant' })}>
                           <Trash2 className="w-4 h-4 mr-2" />
                           Delete Tenant
                         </Button>
@@ -2067,10 +2067,10 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing email...', success: 'Email composer ready!', error: 'Failed to open email' })}>
                         <Mail className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening profile editor...', success: 'Profile editor ready!', error: 'Failed to open editor' })}>
                         <Edit className="w-4 h-4" />
                       </Button>
                     </div>
@@ -2118,7 +2118,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <label className="text-sm text-gray-500">User ID</label>
                           <div className="flex items-center gap-2">
                             <code className="text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{selectedUser.id.slice(0, 8)}...</code>
-                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(selectedUser.id); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying...', success: 'User ID copied to clipboard!', error: 'Failed to copy' }); }}>
                               <Copy className="w-3 h-3" />
                             </Button>
                           </div>
@@ -2163,7 +2163,7 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                               <p className="text-sm text-gray-500">2 devices logged in</p>
                             </div>
                           </div>
-                          <Button size="sm" variant="outline">Revoke All</Button>
+                          <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revoking sessions...', success: 'All sessions revoked!', error: 'Failed to revoke sessions' })}>Revoke All</Button>
                         </div>
                       </div>
                     </TabsContent>

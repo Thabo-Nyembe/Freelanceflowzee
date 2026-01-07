@@ -700,11 +700,11 @@ export default function ConnectorsClient() {
   const categories = [...new Set(mockApps.map(a => a.category))]
 
   // Handlers
-  const handleAddConnector = () => toast.success('Add', { description: 'Setup wizard opened' })
-  const handleConfigureConnector = (n: string) => toast.success('Configure', { description: `Opening settings for "${n}"` })
+  const handleAddConnector = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening setup wizard...', success: 'Setup wizard opened', error: 'Failed to open wizard' })
+  const handleConfigureConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening settings for "${n}"...`, success: `Settings opened for "${n}"`, error: 'Failed to open settings' })
   const handleTestConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Testing "${n}"...`, success: `"${n}" connection verified!`, error: 'Test failed' })
-  const handleDisconnect = (n: string) => toast.success('Disconnected', { description: `"${n}" has been disconnected` })
-  const handleRefreshConnector = (n: string) => toast.success('Refreshed', { description: `"${n}" refreshed` })
+  const handleDisconnect = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Disconnecting "${n}"...`, success: `"${n}" has been disconnected`, error: 'Failed to disconnect' })
+  const handleRefreshConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Refreshing "${n}"...`, success: `"${n}" refreshed`, error: 'Failed to refresh' })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-8">

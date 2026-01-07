@@ -532,8 +532,8 @@ export default function AdvancedMicroFeaturesClient() {
                     data={mockWidgetData}
                     size="large"
                     variant="detailed"
-                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.info('Refreshing widget data...') }}
-                    onSettings={() => { logger.info('Opening widget settings'); toast.info('Opening widget settings...') }}
+                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Refreshing widget data...', success: 'Widget data refreshed', error: 'Failed to refresh' }) }}
+                    onSettings={() => { logger.info('Opening widget settings'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening widget settings...', success: 'Widget settings opened', error: 'Failed to open settings' }) }}
                     onMaximize={() => { logger.info('Maximizing widget'); toast.success('Widget maximized') }}
                   />
                 </div>
@@ -573,13 +573,13 @@ export default function AdvancedMicroFeaturesClient() {
                     dateRange="Last 6 months"
                     onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully', { description: 'Revenue Trends - CSV format' }) }}
                     onShare={() => { logger.info('Sharing chart'); toast.success('Share link copied to clipboard') }}
-                    onSettings={() => { logger.info('Opening chart settings'); toast.info('Opening chart settings...') }}
+                    onSettings={() => { logger.info('Opening chart settings'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening chart settings...', success: 'Chart settings opened', error: 'Failed to open settings' }) }}
                     legend={[
                       { name: 'Revenue', color: '#3b82f6', value: '$45K', visible: true },
                       { name: 'Expenses', color: '#ef4444', value: '$28K', visible: true },
                       { name: 'Profit', color: '#10b981', value: '$17K', visible: false }
                     ]}
-                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.info(`Legend  toggled`) }}
+                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling legend...', success: `Legend ${name} toggled`, error: 'Failed to toggle' }) }}
                   >
                     <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
                       <div className="text-center text-muted-foreground">
@@ -601,7 +601,7 @@ export default function AdvancedMicroFeaturesClient() {
                     exportable={true}
                     pagination={true}
                     pageSize={3}
-                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.info(`Viewing details for `) }}
+                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading details...', success: `Viewing details for ${row.name || 'item'}`, error: 'Failed to load details' }) }}
                   />
                 </div>
               </div>
@@ -620,7 +620,7 @@ export default function AdvancedMicroFeaturesClient() {
                         maxDisplay={4}
                         showDetails={true}
                         size="lg"
-                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.info(`Viewing 's profile`) }}
+                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading profile...', success: `Viewing ${user.name}'s profile`, error: 'Failed to load profile' }) }}
                       />
                       <div className="text-sm text-muted-foreground">
                         Team members currently online and their status
@@ -636,7 +636,7 @@ export default function AdvancedMicroFeaturesClient() {
                     activities={mockActivities}
                     maxItems={5}
                     showTimestamps={true}
-                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.info('Opening activity details...') }}
+                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening activity details...', success: 'Activity details opened', error: 'Failed to open details' }) }}
                   />
                 </div>
 
@@ -671,7 +671,7 @@ export default function AdvancedMicroFeaturesClient() {
                   <EnhancedSettingsCategories
                     categories={mockSettingsCategories}
                     activeCategory="theme"
-                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.info(`Switched to  settings`) }}
+                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching category...', success: `Switched to ${categoryId} settings`, error: 'Failed to switch' }) }}
                   />
                 </div>
 

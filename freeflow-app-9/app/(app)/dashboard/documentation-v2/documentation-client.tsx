@@ -576,75 +576,99 @@ export default function DocumentationClient() {
   }
 
   const handleEditPage = (pageTitle: string) => {
-    toast.info('Edit Page', {
-      description: `Opening "${pageTitle}" for editing...`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: `Opening "${pageTitle}" for editing...`,
+      success: `Edit Page: "${pageTitle}" opened for editing`,
+      error: 'Failed to open page for editing'
     })
   }
 
   const handlePublishPage = (pageTitle: string) => {
-    toast.success('Page Published', {
-      description: `"${pageTitle}" is now live`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: `Publishing "${pageTitle}"...`,
+      success: `Page Published: "${pageTitle}" is now live`,
+      error: 'Failed to publish page'
     })
   }
 
   const handleTranslatePage = (pageTitle: string) => {
-    toast.info('Translate Page', {
-      description: `Opening translation tools for "${pageTitle}"...`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: `Opening translation tools for "${pageTitle}"...`,
+      success: `Translate Page: Translation tools opened for "${pageTitle}"`,
+      error: 'Failed to open translation tools'
     })
   }
 
   const handleExportDocs = () => {
-    toast.success('Exporting Documentation', {
-      description: 'Documentation will be downloaded as PDF'
+    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+      loading: 'Exporting documentation...',
+      success: 'Exporting Documentation: Documentation will be downloaded as PDF',
+      error: 'Failed to export documentation'
     })
   }
 
   const handleNewSpace = () => {
-    toast.info('New Space', {
-      description: 'Opening space creation wizard...'
+    toast.promise(new Promise(r => setTimeout(r, 400)), {
+      loading: 'Opening space creation wizard...',
+      success: 'New Space: Space creation wizard opened',
+      error: 'Failed to open space wizard'
     })
     setShowNewSpace(true)
   }
 
   const handleImportFromGit = () => {
-    toast.info('Import from Git', {
-      description: 'Connecting to Git repository...'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Connecting to Git repository...',
+      success: 'Import from Git: Connected to repository',
+      error: 'Failed to connect to Git repository'
     })
   }
 
   const handleImportMarkdown = () => {
-    toast.info('Import Markdown', {
-      description: 'Opening file selector...'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Opening file selector...',
+      success: 'Import Markdown: File selector opened',
+      error: 'Failed to open file selector'
     })
   }
 
   const handleNewChangelog = () => {
-    toast.info('New Changelog', {
-      description: 'Opening changelog editor...'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Opening changelog editor...',
+      success: 'New Changelog: Changelog editor opened',
+      error: 'Failed to open changelog editor'
     })
   }
 
   const handleSharePage = () => {
-    toast.info('Share Page', {
-      description: 'Generating share link...'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Generating share link...',
+      success: 'Share Page: Share link generated',
+      error: 'Failed to generate share link'
     })
   }
 
   const handleLikePage = () => {
-    toast.success('Page Liked', {
-      description: 'Thanks for your feedback!'
+    toast.promise(new Promise(r => setTimeout(r, 400)), {
+      loading: 'Liking page...',
+      success: 'Page Liked: Thanks for your feedback!',
+      error: 'Failed to like page'
     })
   }
 
   const handleViewComments = () => {
-    toast.info('Comments', {
-      description: 'Loading comments...'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Loading comments...',
+      success: 'Comments: Comments loaded',
+      error: 'Failed to load comments'
     })
   }
 
   const handleCreateTemplate = () => {
-    toast.info('Create Template', {
-      description: 'Opening template editor...'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Opening template editor...',
+      success: 'Create Template: Template editor opened',
+      error: 'Failed to open template editor'
     })
   }
 
@@ -662,56 +686,74 @@ export default function DocumentationClient() {
   }
 
   const handleEditChangelog = (changelogTitle: string) => {
-    toast.info('Edit Changelog', {
-      description: `Opening "${changelogTitle}" for editing...`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: `Opening "${changelogTitle}" for editing...`,
+      success: `Edit Changelog: "${changelogTitle}" opened for editing`,
+      error: 'Failed to open changelog for editing'
     })
   }
 
   const handleAddLanguage = () => {
-    toast.info('Add Language', {
-      description: 'Opening language configuration...'
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: 'Opening language configuration...',
+      success: 'Add Language: Language configuration opened',
+      error: 'Failed to open language configuration'
     })
   }
 
   const handleManageLocale = (localeName: string) => {
-    toast.info('Manage Locale', {
-      description: `Opening settings for ${localeName}...`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: `Opening settings for ${localeName}...`,
+      success: `Manage Locale: Settings opened for ${localeName}`,
+      error: 'Failed to open locale settings'
     })
   }
 
   const handleExportReport = () => {
-    toast.success('Export Report', {
-      description: 'Generating analytics report...'
+    toast.promise(new Promise(r => setTimeout(r, 1000)), {
+      loading: 'Generating analytics report...',
+      success: 'Export Report: Analytics report generated',
+      error: 'Failed to generate report'
     })
   }
 
   const handleExportConfig = () => {
-    toast.success('Export Config', {
-      description: 'Downloading configuration file...'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Downloading configuration file...',
+      success: 'Export Config: Configuration file downloaded',
+      error: 'Failed to download configuration'
     })
   }
 
   const handleConfigureIntegration = (integrationName: string) => {
-    toast.info('Configure Integration', {
-      description: `Opening settings for ${integrationName}...`
+    toast.promise(new Promise(r => setTimeout(r, 500)), {
+      loading: `Opening settings for ${integrationName}...`,
+      success: `Configure Integration: Settings opened for ${integrationName}`,
+      error: 'Failed to open integration settings'
     })
   }
 
   const handleAddIntegration = () => {
-    toast.info('Add Integration', {
-      description: 'Opening integration marketplace...'
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: 'Opening integration marketplace...',
+      success: 'Add Integration: Integration marketplace opened',
+      error: 'Failed to open integration marketplace'
     })
   }
 
   const handleRegenerateApiKey = () => {
-    toast.success('API Key Regenerated', {
-      description: 'New API key generated successfully'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Regenerating API key...',
+      success: 'API Key Regenerated: New API key generated successfully',
+      error: 'Failed to regenerate API key'
     })
   }
 
   const handleExportAllData = () => {
-    toast.success('Export Data', {
-      description: 'Preparing complete documentation backup...'
+    toast.promise(new Promise(r => setTimeout(r, 1500)), {
+      loading: 'Preparing complete documentation backup...',
+      success: 'Export Data: Complete documentation backup ready',
+      error: 'Failed to export data'
     })
   }
 
@@ -722,20 +764,26 @@ export default function DocumentationClient() {
   }
 
   const handleViewVersion = (versionNumber: number) => {
-    toast.info('View Version', {
-      description: `Loading version ${versionNumber}...`
+    toast.promise(new Promise(r => setTimeout(r, 600)), {
+      loading: `Loading version ${versionNumber}...`,
+      success: `View Version: Version ${versionNumber} loaded`,
+      error: 'Failed to load version'
     })
   }
 
   const handleRestoreVersion = (versionNumber: number) => {
-    toast.success('Restore Version', {
-      description: `Restoring to version ${versionNumber}...`
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: `Restoring to version ${versionNumber}...`,
+      success: `Restore Version: Restored to version ${versionNumber}`,
+      error: 'Failed to restore version'
     })
   }
 
   const handleCreateSpaceSubmit = () => {
-    toast.success('Space Created', {
-      description: 'New documentation space created successfully'
+    toast.promise(new Promise(r => setTimeout(r, 800)), {
+      loading: 'Creating documentation space...',
+      success: 'Space Created: New documentation space created successfully',
+      error: 'Failed to create space'
     })
     setShowNewSpace(false)
   }

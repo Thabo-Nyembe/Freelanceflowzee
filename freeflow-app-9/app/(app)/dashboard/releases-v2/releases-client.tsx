@@ -1309,13 +1309,13 @@ export default function ReleasesClient() {
                 { icon: Rocket, label: 'Deploy', desc: 'Deploy now', color: 'green', onClick: () => {
                   const scheduledRelease = releases.find(r => r.status === 'scheduled' || r.status === 'draft')
                   if (scheduledRelease) openDeployDialog(scheduledRelease)
-                  else toast.info('No releases to deploy', { description: 'Create a new release first' })
+                  else toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking releases...', success: 'No releases to deploy - create a new release first', error: 'Check failed' })
                 }},
                 { icon: Calendar, label: 'Schedule', desc: 'Plan release', color: 'purple', onClick: () => setShowCreateDialog(true) },
                 { icon: RotateCcw, label: 'Rollback', desc: 'Revert changes', color: 'orange', onClick: () => {
                   const deployedRelease = releases.find(r => r.status === 'deployed')
                   if (deployedRelease) openRollbackDialog(deployedRelease)
-                  else toast.info('No deployed releases', { description: 'There are no deployed releases to rollback' })
+                  else toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking deployments...', success: 'No deployed releases available to rollback', error: 'Check failed' })
                 }},
                 { icon: Download, label: 'Assets', desc: 'Manage files', color: 'blue', onClick: () => setActiveTab('assets') },
                 { icon: BarChart3, label: 'Analytics', desc: 'View stats', color: 'cyan', onClick: () => setActiveTab('analytics') }
@@ -1582,7 +1582,7 @@ export default function ReleasesClient() {
                       if (scheduledRelease) {
                         openDeployDialog(scheduledRelease)
                       } else {
-                        toast.info('No releases to deploy', { description: 'Create a new release or schedule one first' })
+                        toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking releases...', success: 'No releases to deploy - create a new release or schedule one first', error: 'Check failed' })
                       }
                     }}
                   >
@@ -1745,7 +1745,7 @@ export default function ReleasesClient() {
                     if (deployedRelease) {
                       openRollbackDialog(deployedRelease)
                     } else {
-                      toast.info('No deployed releases', { description: 'There are no deployed releases to rollback' })
+                      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking deployments...', success: 'No deployed releases available to rollback', error: 'Check failed' })
                     }
                   }}
                 >
@@ -2540,8 +2540,10 @@ export default function ReleasesClient() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      navigator.clipboard.writeText(`${window.location.origin}/releases/${selectedRelease.id}`)
-                      toast.success('Link copied to clipboard')
+                      toast.promise(
+                        navigator.clipboard.writeText(`${window.location.origin}/releases/${selectedRelease.id}`),
+                        { loading: 'Copying link...', success: 'Link copied to clipboard!', error: 'Failed to copy link' }
+                      )
                     }}
                   >
                     <Copy className="w-4 h-4 mr-2" />
@@ -2550,7 +2552,7 @@ export default function ReleasesClient() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      toast.info('Opening Git', { description: 'Redirecting to repository...' })
+                      toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening Git...', success: 'Redirecting to repository...', error: 'Failed to open' })
                     }}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />

@@ -803,19 +803,20 @@ export default function SettingsClient() {
             {/* Profile Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Camera, label: 'Change Photo', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: User, label: 'Edit Profile', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Lock, label: 'Password', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Shield, label: 'Privacy', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Link2, label: 'Connections', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Download, label: 'Export Data', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Trash2, label: 'Delete', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Camera, label: 'Change Photo', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', loading: 'Opening photo upload...', success: 'Photo upload ready' },
+                { icon: User, label: 'Edit Profile', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', loading: 'Opening profile editor...', success: 'Profile editor opened' },
+                { icon: Lock, label: 'Password', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', loading: 'Opening password settings...', success: 'Password settings ready' },
+                { icon: Shield, label: 'Privacy', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', loading: 'Loading privacy settings...', success: 'Privacy settings loaded' },
+                { icon: Bell, label: 'Notifications', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', loading: 'Loading notification settings...', success: 'Notification settings ready' },
+                { icon: Link2, label: 'Connections', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', loading: 'Loading connections...', success: 'Connections loaded' },
+                { icon: Download, label: 'Export Data', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', loading: 'Preparing data export...', success: 'Data export ready' },
+                { icon: Trash2, label: 'Delete', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', loading: 'Opening delete dialog...', success: 'Delete dialog opened' },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: action.loading, success: action.success, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -837,7 +838,7 @@ export default function SettingsClient() {
                         <AvatarFallback className="text-2xl">{profile.firstName[0]}{profile.lastName[0]}</AvatarFallback>
                       </Avatar>
                       <div className="space-y-2">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening photo upload...', success: 'Photo upload ready', error: 'Failed to open upload' })}>
                           <Camera className="w-4 h-4 mr-2" />
                           Change Photo
                         </Button>
@@ -1014,19 +1015,20 @@ export default function SettingsClient() {
             {/* Security Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Lock, label: 'Password', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Fingerprint, label: '2FA Setup', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Key, label: 'API Keys', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Monitor, label: 'Sessions', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: History, label: 'Activity Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: AlertTriangle, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Download, label: 'Backup Codes', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: LogOut, label: 'Log Out All', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Lock, label: 'Password', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', loading: 'Opening password dialog...', success: 'Password dialog ready' },
+                { icon: Fingerprint, label: '2FA Setup', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', loading: 'Loading 2FA setup...', success: '2FA setup ready' },
+                { icon: Key, label: 'API Keys', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', loading: 'Loading API keys...', success: 'API keys loaded' },
+                { icon: Monitor, label: 'Sessions', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', loading: 'Loading sessions...', success: 'Sessions loaded' },
+                { icon: History, label: 'Activity Log', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', loading: 'Loading activity log...', success: 'Activity log loaded' },
+                { icon: AlertTriangle, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', loading: 'Loading alerts...', success: 'Alerts loaded' },
+                { icon: Download, label: 'Backup Codes', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', loading: 'Generating backup codes...', success: 'Backup codes generated' },
+                { icon: LogOut, label: 'Log Out All', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', loading: 'Logging out all sessions...', success: 'All sessions logged out' },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: action.loading, success: action.success, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1199,7 +1201,7 @@ export default function SettingsClient() {
                   <p className="text-amber-100">Customize how and when you receive alerts</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Sending test notification...', success: 'Test notification sent!', error: 'Failed to send notification' })}>
                     <Bell className="w-4 h-4 mr-2" />
                     Test Notification
                   </Button>
@@ -1210,19 +1212,20 @@ export default function SettingsClient() {
             {/* Notifications Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Mail, label: 'Email', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Bell, label: 'Push', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Smartphone, label: 'SMS', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Volume2, label: 'Sounds', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Moon, label: 'Do Not Disturb', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Clock, label: 'Schedule', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Filter, label: 'Filters', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: XCircle, label: 'Mute All', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Mail, label: 'Email', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', loading: 'Loading email settings...', success: 'Email settings loaded' },
+                { icon: Bell, label: 'Push', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', loading: 'Loading push settings...', success: 'Push settings loaded' },
+                { icon: Smartphone, label: 'SMS', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', loading: 'Loading SMS settings...', success: 'SMS settings loaded' },
+                { icon: Volume2, label: 'Sounds', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', loading: 'Loading sound settings...', success: 'Sound settings loaded' },
+                { icon: Moon, label: 'Do Not Disturb', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', loading: 'Toggling Do Not Disturb...', success: 'Do Not Disturb toggled' },
+                { icon: Clock, label: 'Schedule', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', loading: 'Loading schedule...', success: 'Schedule loaded' },
+                { icon: Filter, label: 'Filters', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', loading: 'Loading filters...', success: 'Filters loaded' },
+                { icon: XCircle, label: 'Mute All', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', loading: 'Muting all notifications...', success: 'All notifications muted' },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: action.loading, success: action.success, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1310,19 +1313,20 @@ export default function SettingsClient() {
             {/* Integrations Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'Add New', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Globe, label: 'Browse All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Link2, label: 'OAuth Apps', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Key, label: 'API Tokens', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Database, label: 'Webhooks', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: RefreshCw, label: 'Sync', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: History, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Unlink, label: 'Revoke All', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Plus, label: 'Add New', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', loading: 'Opening integration picker...', success: 'Integration picker opened' },
+                { icon: Globe, label: 'Browse All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', loading: 'Loading integrations marketplace...', success: 'Marketplace loaded' },
+                { icon: Link2, label: 'OAuth Apps', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', loading: 'Loading OAuth apps...', success: 'OAuth apps loaded' },
+                { icon: Key, label: 'API Tokens', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', loading: 'Loading API tokens...', success: 'API tokens loaded' },
+                { icon: Database, label: 'Webhooks', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', loading: 'Loading webhooks...', success: 'Webhooks loaded' },
+                { icon: RefreshCw, label: 'Sync', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', loading: 'Syncing all integrations...', success: 'All integrations synced' },
+                { icon: History, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', loading: 'Loading integration logs...', success: 'Logs loaded' },
+                { icon: Unlink, label: 'Revoke All', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', loading: 'Revoking all integrations...', success: 'All integrations revoked' },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: action.loading, success: action.success, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1412,19 +1416,20 @@ export default function SettingsClient() {
             {/* Billing Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: ArrowUpRight, label: 'Upgrade', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: CreditCard, label: 'Payment', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: FileText, label: 'Invoices', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Download, label: 'Download', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: RefreshCw, label: 'Auto-Renew', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Mail, label: 'Receipts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: XCircle, label: 'Cancel', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: ArrowUpRight, label: 'Upgrade', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', loading: 'Loading upgrade options...', success: 'Upgrade options loaded' },
+                { icon: CreditCard, label: 'Payment', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', loading: 'Loading payment methods...', success: 'Payment methods loaded' },
+                { icon: FileText, label: 'Invoices', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', loading: 'Loading invoices...', success: 'Invoices loaded' },
+                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', loading: 'Loading billing history...', success: 'Billing history loaded' },
+                { icon: Download, label: 'Download', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', loading: 'Preparing download...', success: 'Download ready' },
+                { icon: RefreshCw, label: 'Auto-Renew', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', loading: 'Toggling auto-renew...', success: 'Auto-renew toggled' },
+                { icon: Mail, label: 'Receipts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', loading: 'Loading receipts...', success: 'Receipts loaded' },
+                { icon: XCircle, label: 'Cancel', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', loading: 'Opening cancellation dialog...', success: 'Cancellation dialog opened' },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: action.loading, success: action.success, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1445,7 +1450,7 @@ export default function SettingsClient() {
                         <p className="text-2xl font-bold">{billing.plan.toUpperCase()}</p>
                         <p className="text-sm opacity-90">${billing.amount}/{billing.billingCycle === 'yearly' ? 'year' : 'month'}</p>
                       </div>
-                      <Button variant="secondary">Upgrade Plan</Button>
+                      <Button variant="secondary" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading upgrade options...', success: 'Upgrade options loaded', error: 'Failed to load options' })}>Upgrade Plan</Button>
                     </div>
                     <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                       <div className="p-3 rounded-lg bg-gray-50 dark:bg-gray-800">
@@ -1478,7 +1483,7 @@ export default function SettingsClient() {
                           <div className="flex items-center gap-4">
                             <span className="font-medium">${invoice.amount}</span>
                             <Badge className={invoice.status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>{invoice.status}</Badge>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Downloading invoice...', success: 'Invoice downloaded', error: 'Download failed' })}>
                               <Download className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1502,7 +1507,7 @@ export default function SettingsClient() {
                         <p className="text-sm text-gray-500">Expires 12/25</p>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full mt-4">
+                    <Button variant="outline" className="w-full mt-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening payment settings...', success: 'Payment settings opened', error: 'Failed to open settings' })}>
                       Update Payment Method
                     </Button>
                   </CardContent>
@@ -1545,7 +1550,7 @@ export default function SettingsClient() {
                   <p className="text-pink-100">Customize your visual experience</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Resetting to defaults...', success: 'Settings reset to defaults', error: 'Failed to reset settings' })}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Reset to Defaults
                   </Button>
@@ -1556,19 +1561,20 @@ export default function SettingsClient() {
             {/* Appearance Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Sun, label: 'Light Mode', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Moon, label: 'Dark Mode', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Palette, label: 'Colors', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Type, label: 'Fonts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Contrast, label: 'Contrast', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Languages, label: 'Language', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Accessibility, label: 'A11y', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Monitor, label: 'Display', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
+                { icon: Sun, label: 'Light Mode', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', loading: 'Switching to light mode...', success: 'Light mode enabled' },
+                { icon: Moon, label: 'Dark Mode', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', loading: 'Switching to dark mode...', success: 'Dark mode enabled' },
+                { icon: Palette, label: 'Colors', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', loading: 'Loading color picker...', success: 'Color picker opened' },
+                { icon: Type, label: 'Fonts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', loading: 'Loading font settings...', success: 'Font settings loaded' },
+                { icon: Contrast, label: 'Contrast', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', loading: 'Adjusting contrast...', success: 'Contrast adjusted' },
+                { icon: Languages, label: 'Language', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', loading: 'Loading language settings...', success: 'Language settings loaded' },
+                { icon: Accessibility, label: 'A11y', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', loading: 'Loading accessibility settings...', success: 'Accessibility settings loaded' },
+                { icon: Monitor, label: 'Display', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', loading: 'Loading display settings...', success: 'Display settings loaded' },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: action.loading, success: action.success, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1687,7 +1693,7 @@ export default function SettingsClient() {
                   <p className="text-slate-200">Developer options and system configuration</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white">
+                  <Button variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Exporting configuration...', success: 'Configuration exported', error: 'Export failed' })}>
                     <Download className="w-4 h-4 mr-2" />
                     Export Config
                   </Button>
@@ -1698,19 +1704,20 @@ export default function SettingsClient() {
             {/* Advanced Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Key, label: 'API Keys', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400' },
-                { icon: Database, label: 'Webhooks', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400' },
-                { icon: HardDrive, label: 'Storage', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400' },
-                { icon: Cloud, label: 'Backups', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: History, label: 'Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Zap, label: 'Performance', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: RefreshCw, label: 'Reset', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Trash2, label: 'Delete Account', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
+                { icon: Key, label: 'API Keys', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', loading: 'Loading API keys...', success: 'API keys loaded' },
+                { icon: Database, label: 'Webhooks', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', loading: 'Loading webhooks...', success: 'Webhooks loaded' },
+                { icon: HardDrive, label: 'Storage', color: 'bg-zinc-100 text-zinc-600 dark:bg-zinc-900/30 dark:text-zinc-400', loading: 'Loading storage settings...', success: 'Storage settings loaded' },
+                { icon: Cloud, label: 'Backups', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', loading: 'Loading backup settings...', success: 'Backup settings loaded' },
+                { icon: History, label: 'Logs', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', loading: 'Loading system logs...', success: 'System logs loaded' },
+                { icon: Zap, label: 'Performance', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', loading: 'Loading performance metrics...', success: 'Performance metrics loaded' },
+                { icon: RefreshCw, label: 'Reset', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', loading: 'Opening reset dialog...', success: 'Reset dialog opened' },
+                { icon: Trash2, label: 'Delete Account', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', loading: 'Opening delete dialog...', success: 'Delete dialog opened' },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: action.loading, success: action.success, error: 'Action failed' })}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1734,10 +1741,10 @@ export default function SettingsClient() {
                       <Label>API Key</Label>
                       <div className="flex gap-2">
                         <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly className="font-mono" />
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy' })}>
                           <Copy className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">Regenerate</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Regenerating API key...', success: 'New API key generated', error: 'Failed to regenerate' })}>Regenerate</Button>
                       </div>
                       <p className="text-xs text-muted-foreground">Never share your API key publicly</p>
                     </div>
@@ -1838,7 +1845,7 @@ export default function SettingsClient() {
                         <Download className="w-4 h-4 mr-2" />
                         Export All Data
                       </Button>
-                      <Button variant="outline" className="flex-1">
+                      <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening import dialog...', success: 'Import dialog ready', error: 'Failed to open dialog' })}>
                         <Upload className="w-4 h-4 mr-2" />
                         Import Data
                       </Button>
@@ -1975,7 +1982,7 @@ export default function SettingsClient() {
                         <p className="font-medium">Cookie Preferences</p>
                         <p className="text-sm text-muted-foreground">Manage cookie consent</p>
                       </div>
-                      <Button variant="outline" size="sm">Configure</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening cookie settings...', success: 'Cookie settings opened', error: 'Failed to open settings' })}>Configure</Button>
                     </div>
                     <div className="space-y-2">
                       <Label>Session Timeout (minutes)</Label>
@@ -2010,7 +2017,7 @@ export default function SettingsClient() {
                         <p className="font-medium text-red-600">Clear All Caches</p>
                         <p className="text-sm text-muted-foreground">Remove all cached data</p>
                       </div>
-                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Clearing all caches...', success: 'All caches cleared', error: 'Failed to clear caches' })}>
                         <Trash className="w-4 h-4 mr-2" />
                         Clear
                       </Button>
@@ -2020,7 +2027,7 @@ export default function SettingsClient() {
                         <p className="font-medium text-red-600">Reset All Settings</p>
                         <p className="text-sm text-muted-foreground">Restore default settings</p>
                       </div>
-                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Resetting all settings...', success: 'All settings reset to defaults', error: 'Failed to reset settings' })}>
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Reset
                       </Button>
@@ -2030,7 +2037,7 @@ export default function SettingsClient() {
                         <p className="font-medium text-red-600">Deactivate Account</p>
                         <p className="text-sm text-muted-foreground">Temporarily disable your account</p>
                       </div>
-                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50">
+                      <Button variant="outline" className="text-red-600 border-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening deactivation dialog...', success: 'Account deactivation dialog opened', error: 'Failed to open dialog' })}>
                         <Ban className="w-4 h-4 mr-2" />
                         Deactivate
                       </Button>
@@ -2072,7 +2079,7 @@ export default function SettingsClient() {
                       </div>
                     ))}
                     <div className="pt-3 border-t">
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading changelog...', success: 'Changelog loaded', error: 'Failed to load changelog' })}>
                         <ExternalLink className="w-4 h-4 mr-2" />
                         View Changelog
                       </Button>

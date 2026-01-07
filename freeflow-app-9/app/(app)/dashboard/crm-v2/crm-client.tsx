@@ -674,51 +674,48 @@ export default function CrmClient() {
   }
 
   const handleExportCRM = async () => {
-    toast.info('Preparing export...', {
-      description: 'Your CRM data is being prepared for download'
+    const exportPromise = new Promise<void>((resolve, reject) => {
+      try {
+        const exportData = {
+          contacts: contacts,
+          deals: deals,
+          activities: activities,
+          exportedAt: new Date().toISOString()
+        }
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `crm-export-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
     })
 
-    try {
-      const exportData = {
-        contacts: contacts,
-        deals: deals,
-        activities: activities,
-        exportedAt: new Date().toISOString()
-      }
-
-      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `crm-export-${new Date().toISOString().split('T')[0]}.json`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-      URL.revokeObjectURL(url)
-
-      toast.success('Export complete', {
-        description: 'Your CRM data has been downloaded'
-      })
-    } catch (error) {
-      toast.error('Export failed', {
-        description: 'Unable to export CRM data'
-      })
-    }
+    toast.promise(exportPromise, {
+      loading: 'Preparing export... Your CRM data is being prepared for download',
+      success: 'Export complete! Your CRM data has been downloaded',
+      error: 'Export failed. Unable to export CRM data'
+    })
   }
 
   const handleSyncData = async () => {
-    toast.info('Syncing data...', {
-      description: 'Refreshing from database'
-    })
-
-    await Promise.all([
+    const syncPromise = Promise.all([
       refetchContacts(),
       refetchDeals(),
       refetchActivities()
     ])
 
-    toast.success('Sync complete', {
-      description: 'CRM data has been refreshed'
+    toast.promise(syncPromise, {
+      loading: 'Syncing data... Refreshing from database',
+      success: 'Sync complete! CRM data has been refreshed',
+      error: 'Sync failed. Unable to refresh CRM data'
     })
   }
 
@@ -738,9 +735,14 @@ export default function CrmClient() {
   }
 
   const handleImportContacts = () => {
-    toast.info('Import feature', {
-      description: 'CSV import coming soon'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 800)),
+      {
+        loading: 'Preparing import wizard...',
+        success: 'Import feature coming soon! CSV import will be available in the next release',
+        error: 'Failed to load import wizard'
+      }
+    )
   }
 
   // Filtered contacts

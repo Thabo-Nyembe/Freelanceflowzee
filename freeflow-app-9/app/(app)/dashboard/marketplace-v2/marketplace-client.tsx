@@ -681,9 +681,7 @@ export default function MarketplaceClient() {
   }
 
   const handleContactSeller = (product: Product) => {
-    toast.info('Contact Seller', {
-      description: `Opening chat with seller of "${product.name}"`
-    })
+    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening chat...', success: `Opening chat with seller of "${product.name}"`, error: 'Failed to connect' })
   }
 
   return (

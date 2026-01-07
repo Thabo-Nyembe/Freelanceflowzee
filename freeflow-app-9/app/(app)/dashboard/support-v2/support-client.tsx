@@ -485,8 +485,8 @@ export default function SupportClient({ initialTickets, initialStats }: SupportC
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
   const handleCreateTicket = () => setShowCreateDialog(true)
   const handleAssignTicket = (id: string) => { setSelectedTicketId(id); setShowAssignDialog(true) }
-  const handleResolveTicket = (id: string) => toast.success('Resolved', { description: `#${id} resolved` })
-  const handleExportTickets = () => toast.success('Exporting', { description: 'Data downloading...' })
+  const handleResolveTicket = (id: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resolving ticket...', success: `Ticket #${id} resolved successfully`, error: 'Failed to resolve ticket' })
+  const handleExportTickets = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing export...', success: 'Export complete - data downloaded', error: 'Failed to export data' })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">

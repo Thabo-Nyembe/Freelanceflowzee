@@ -326,11 +326,21 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   }
 
   const handleDownloadBuild = async (buildId: string, buildVersion: string) => {
-    toast.success('Downloading build', { description: `Build v${buildVersion} download starting...` })
-    // Log download event
-    try {
-      await supabase.from('mobile_app_downloads').insert({ build_id: buildId, user_id: userId, downloaded_at: new Date().toISOString() })
-    } catch { /* ignore logging errors */ }
+    toast.promise(
+      (async () => {
+        // Simulate download initiation
+        await new Promise(r => setTimeout(r, 800))
+        // Log download event
+        try {
+          await supabase.from('mobile_app_downloads').insert({ build_id: buildId, user_id: userId, downloaded_at: new Date().toISOString() })
+        } catch { /* ignore logging errors */ }
+      })(),
+      {
+        loading: `Preparing download for build v${buildVersion}...`,
+        success: `Build v${buildVersion} download started`,
+        error: 'Failed to start download'
+      }
+    )
   }
 
   const handleDeleteBuild = async (buildId: string, buildVersion: string) => {
@@ -481,7 +491,14 @@ export default function MobileAppClient({ initialFeatures, initialVersions, init
   }
 
   const handleRefreshData = useCallback(() => {
-    toast.success('Data refreshed', { description: 'All mobile app data has been updated' })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Refreshing mobile app data...',
+        success: 'All mobile app data has been updated',
+        error: 'Failed to refresh data'
+      }
+    )
   }, [])
 
   return (

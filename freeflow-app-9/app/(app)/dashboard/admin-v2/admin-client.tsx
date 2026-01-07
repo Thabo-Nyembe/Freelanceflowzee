@@ -678,24 +678,32 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
 
   // Run Diagnostics
   const handleRunDiagnostics = useCallback(async () => {
-    toast.info('Running diagnostics', { description: 'System health check in progress...' })
     setIsLoading(true)
-    try {
-      // Check database connectivity
-      const { error: dbError } = await supabase.from('admin_settings').select('id').limit(1)
-      if (dbError) throw new Error('Database connectivity issue')
-      toast.success('Diagnostics complete', { description: 'All systems operational' })
-    } catch (err) {
-      toast.error('Diagnostics failed', { description: (err as Error).message })
-    } finally {
-      setIsLoading(false)
-    }
+    toast.promise(
+      (async () => {
+        // Check database connectivity
+        const { error: dbError } = await supabase.from('admin_settings').select('id').limit(1)
+        if (dbError) throw new Error('Database connectivity issue')
+        return true
+      })().finally(() => setIsLoading(false)),
+      {
+        loading: 'Running diagnostics...',
+        success: 'Diagnostics complete - All systems operational',
+        error: (err) => `Diagnostics failed: ${(err as Error).message}`
+      }
+    )
   }, [supabase])
 
   // Copy Setting Key to clipboard
   const handleCopySetting = useCallback((setting: AdminSetting) => {
-    navigator.clipboard.writeText(setting.setting_key)
-    toast.success('Copied to clipboard', { description: setting.setting_key })
+    toast.promise(
+      navigator.clipboard.writeText(setting.setting_key),
+      {
+        loading: 'Copying to clipboard...',
+        success: `Copied: ${setting.setting_key}`,
+        error: 'Failed to copy to clipboard'
+      }
+    )
   }, [])
 
   return (

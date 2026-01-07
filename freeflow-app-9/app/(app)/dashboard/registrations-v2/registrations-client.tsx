@@ -1551,13 +1551,13 @@ export default function RegistrationsClient() {
                           {getPaymentBadge(registration.paymentStatus)}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating QR code...', success: 'QR code ready', error: 'Failed to generate QR code' })}>
                             <QrCode className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing email...', success: 'Email draft created', error: 'Failed to create email' })}>
                             <Mail className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options loaded', error: 'Failed to load options' })}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1620,7 +1620,7 @@ export default function RegistrationsClient() {
                       </div>
                     </div>
 
-                    <Button variant="outline" size="sm" className="w-full mt-4">
+                    <Button variant="outline" size="sm" className="w-full mt-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading event details...', success: 'Event details loaded', error: 'Failed to load details' })}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
@@ -1645,7 +1645,7 @@ export default function RegistrationsClient() {
                   <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-xl flex flex-col items-center justify-center">
                     <QrCode className="w-24 h-24 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">Point camera at QR code</p>
-                    <Button>
+                    <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Initializing scanner...', success: 'Scanner ready', error: 'Failed to initialize scanner' })}>
                       <QrCode className="w-4 h-4 mr-2" />
                       Start Scanning
                     </Button>
@@ -1752,7 +1752,7 @@ export default function RegistrationsClient() {
                             <p className="font-semibold">{template.openRate}%</p>
                             <p className="text-xs text-muted-foreground">Open Rate</p>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Sending template...', success: 'Template sent successfully', error: 'Failed to send template' })}>
                             <Send className="w-4 h-4 mr-2" />
                             Send
                           </Button>
@@ -1788,15 +1788,15 @@ export default function RegistrationsClient() {
                     <CardTitle>Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Preparing bulk email...', success: 'Bulk email sent to all registrants', error: 'Failed to send bulk email' })}>
                       <Mail className="w-4 h-4 mr-2" />
                       Send Bulk Email
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending reminders...', success: 'Reminders sent successfully', error: 'Failed to send reminders' })}>
                       <Send className="w-4 h-4 mr-2" />
                       Send Reminders
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating template...', success: 'Template created successfully', error: 'Failed to create template' })}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Template
                     </Button>
@@ -2128,7 +2128,7 @@ export default function RegistrationsClient() {
                                 <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm">
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: integration.connected ? 'Disconnecting integration...' : 'Connecting integration...', success: integration.connected ? 'Integration disconnected' : 'Integration connected successfully', error: integration.connected ? 'Failed to disconnect' : 'Failed to connect' })}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -2197,11 +2197,11 @@ export default function RegistrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Export All Data</p><p className="text-sm text-gray-500">Download CSV/Excel</p></div>
-                          <Button variant="outline" size="sm">Export</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting all data...', success: 'Data exported successfully', error: 'Failed to export data' })}>Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Clear Cache</p><p className="text-sm text-gray-500">128 MB used</p></div>
-                          <Button variant="outline" size="sm">Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Clearing cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2386,24 +2386,24 @@ export default function RegistrationsClient() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
                   {selectedRegistration.status === 'confirmed' && (
-                    <Button className="flex-1 bg-green-600 hover:bg-green-700">
+                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Processing check-in...', success: 'Attendee checked in successfully', error: 'Check-in failed' })}>
                       <UserCheck className="w-4 h-4 mr-2" />
                       Check In
                     </Button>
                   )}
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating QR code...', success: 'QR code displayed', error: 'Failed to generate QR code' })}>
                     <QrCode className="w-4 h-4 mr-2" />
                     View QR Code
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Preparing badge...', success: 'Badge sent to printer', error: 'Failed to print badge' })}>
                     <Printer className="w-4 h-4 mr-2" />
                     Print Badge
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Preparing email...', success: 'Email sent successfully', error: 'Failed to send email' })}>
                     <Mail className="w-4 h-4 mr-2" />
                     Send Email
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading editor...', success: 'Editor ready', error: 'Failed to load editor' })}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

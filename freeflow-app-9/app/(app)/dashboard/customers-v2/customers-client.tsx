@@ -638,9 +638,14 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
   // Handle refresh
   const handleRefresh = async () => {
-    toast.info('Refreshing', { description: 'Refreshing customer data...' })
-    await refetch()
-    toast.success('Refreshed', { description: 'Customer data updated' })
+    toast.promise(
+      refetch(),
+      {
+        loading: 'Refreshing customer data...',
+        success: 'Customer data updated',
+        error: 'Failed to refresh customer data'
+      }
+    )
   }
 
   // Stats
@@ -739,28 +744,48 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }
 
   const handleCreateOpportunity = () => {
-    toast.info('Create Opportunity', {
-      description: 'Opening opportunity form...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Opening opportunity form...',
+        success: 'Opportunity form ready',
+        error: 'Failed to open opportunity form'
+      }
+    )
     setShowAddOpportunity(true)
   }
 
   const handleConvertLead = (contact: Contact) => {
-    toast.success('Lead converted', {
-      description: `${contact.firstName} ${contact.lastName} converted to customer`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Converting ${contact.firstName} ${contact.lastName} to customer...`,
+        success: `${contact.firstName} ${contact.lastName} converted to customer`,
+        error: 'Failed to convert lead'
+      }
+    )
   }
 
   const handleSendEmail = (contact: Contact) => {
-    toast.info('Compose Email', {
-      description: `Opening email composer for ${contact.email}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Opening email composer for ${contact.email}...`,
+        success: 'Email composer opened',
+        error: 'Failed to open email composer'
+      }
+    )
   }
 
   const handleLogActivity = () => {
-    toast.success('Activity logged', {
-      description: 'Your activity has been recorded'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Logging activity...',
+        success: 'Activity logged successfully',
+        error: 'Failed to log activity'
+      }
+    )
   }
 
   return (

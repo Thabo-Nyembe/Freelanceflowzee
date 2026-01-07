@@ -641,13 +641,19 @@ export default function InvestorMetricsClient() {
   }
 
   const handleRefreshData = async () => {
-    toast.info('Refreshing data...')
-    await fetchMetrics()
-    toast.success('Data refreshed', { description: 'Latest metrics loaded' })
+    await toast.promise(fetchMetrics(), {
+      loading: 'Refreshing data...',
+      success: 'Data refreshed - Latest metrics loaded',
+      error: 'Failed to refresh data'
+    })
   }
 
   const handleGenerateReport = () => {
-    toast.success('Generating report', { description: 'Investor presentation is being created' })
+    toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), {
+      loading: 'Generating report...',
+      success: 'Report generated - Investor presentation is ready',
+      error: 'Failed to generate report'
+    })
   }
 
   const handleSetAlert = async (metric: string) => {

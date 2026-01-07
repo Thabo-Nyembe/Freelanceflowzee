@@ -597,9 +597,14 @@ export default function AIAssistantClient() {
   const handleCopy = (id: string, content: string) => {
     navigator.clipboard.writeText(content)
     setCopiedId(id)
-    toast.success('Copied to clipboard', {
-      description: 'Message content has been copied'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 400)),
+      {
+        loading: 'Copying to clipboard...',
+        success: 'Copied to clipboard!',
+        error: 'Failed to copy'
+      }
+    )
     setTimeout(() => setCopiedId(null), 2000)
   }
 
@@ -671,9 +676,14 @@ export default function AIAssistantClient() {
     setInputMessage(prompt.prompt)
     setActiveTab('chat')
     inputRef.current?.focus()
-    toast.info('Prompt loaded', {
-      description: 'Prompt template has been loaded into the input'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 500)),
+      {
+        loading: 'Loading prompt template...',
+        success: 'Prompt loaded into input!',
+        error: 'Failed to load prompt'
+      }
+    )
   }
 
   // Handle create assistant - Supabase operation

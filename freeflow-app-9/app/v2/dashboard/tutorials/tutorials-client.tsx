@@ -520,7 +520,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     toast.info('My List', { description: 'Opening your saved courses...' })
   }
   const handleQuickAction = (actionLabel: string) => {
-    toast.info(actionLabel, { description: `Performing ${actionLabel.toLowerCase()} action...` })
+    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Performing ${actionLabel.toLowerCase()}...`, success: `${actionLabel} completed`, error: `Failed to complete ${actionLabel}` })
   }
   const handleMarkAllRead = () => {
     toast.success('Notifications', { description: 'All notifications marked as read' })

@@ -812,21 +812,39 @@ export default function ContentClient() {
   // Asset handlers
   const handleUploadAsset = async () => {
     // In a real implementation, this would handle file upload
-    toast.info('Upload Asset', {
-      description: 'Asset upload functionality - connect to your storage solution'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Preparing upload...',
+        success: 'Upload ready - connect to your storage solution',
+        error: 'Upload preparation failed'
+      }
+    )
   }
 
   const handleCopyAssetUrl = (asset: Asset) => {
-    navigator.clipboard.writeText(asset.url)
-    toast.success('URL copied to clipboard')
+    toast.promise(
+      navigator.clipboard.writeText(asset.url),
+      {
+        loading: 'Copying URL...',
+        success: 'URL copied to clipboard',
+        error: 'Failed to copy URL'
+      }
+    )
   }
 
   const handleDownloadAsset = (asset: Asset) => {
-    window.open(asset.url, '_blank')
-    toast.success('Starting download', {
-      description: asset.filename
-    })
+    toast.promise(
+      new Promise(resolve => {
+        window.open(asset.url, '_blank')
+        setTimeout(resolve, 600)
+      }),
+      {
+        loading: 'Starting download...',
+        success: `Download started: ${asset.filename}`,
+        error: 'Failed to start download'
+      }
+    )
   }
 
   const handleDeleteAsset = async (asset: Asset) => {

@@ -827,27 +827,47 @@ export default function BuildsClient() {
 
   // Handlers
   const handleTriggerBuild = () => {
-    toast.info('Build triggered', {
-      description: 'Starting new build...'
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: 'Starting new build...',
+        success: 'Build triggered successfully',
+        error: 'Failed to trigger build'
+      }
+    )
   }
 
   const handleCancelBuild = (build: Build) => {
-    toast.success('Build cancelled', {
-      description: `Build #${build.number} has been cancelled`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Cancelling build #${build.number}...`,
+        success: `Build #${build.number} has been cancelled`,
+        error: `Failed to cancel build #${build.number}`
+      }
+    )
   }
 
   const handleRetryBuild = (build: Build) => {
-    toast.info('Retrying build', {
-      description: `Restarting build #${build.number}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Restarting build #${build.number}...`,
+        success: `Build #${build.number} restarted successfully`,
+        error: `Failed to restart build #${build.number}`
+      }
+    )
   }
 
   const handleDownloadArtifact = (artifactName: string) => {
-    toast.success('Download started', {
-      description: `Downloading ${artifactName}`
-    })
+    toast.promise(
+      new Promise(resolve => setTimeout(resolve, 600)),
+      {
+        loading: `Downloading ${artifactName}...`,
+        success: `${artifactName} downloaded successfully`,
+        error: `Failed to download ${artifactName}`
+      }
+    )
   }
 
   return (
