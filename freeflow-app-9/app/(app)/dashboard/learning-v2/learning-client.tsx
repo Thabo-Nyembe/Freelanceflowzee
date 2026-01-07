@@ -541,9 +541,9 @@ const mockLearningActivities = [
 
 const mockLearningQuickActions = [
   { id: '1', label: 'Continue', icon: 'Play', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading your course...', success: 'Resuming: React Advanced Patterns - Chapter 4', error: 'Failed to load' }) },
-  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => toast.success('Course Library', { description: 'Browse 150+ courses across 12 categories' }) },
-  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => toast.success('Certificates', { description: 'You have earned 3 certificates' }) },
-  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => toast.success('Study Plan', { description: 'Next: Complete 2 chapters by Friday' }) },
+  { id: '2', label: 'Browse', icon: 'BookOpen', shortcut: 'B', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening course library...', success: 'Course library ready - browse 150+ courses across 12 categories', error: 'Failed to open course library' }) },
+  { id: '3', label: 'Certificates', icon: 'Award', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading certificates...', success: 'Certificates loaded - you have earned 3 certificates', error: 'Failed to load certificates' }) },
+  { id: '4', label: 'Study Plan', icon: 'Calendar', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading study plan...', success: 'Study plan loaded - next: Complete 2 chapters by Friday', error: 'Failed to load study plan' }) },
 ]
 
 // ============================================================================

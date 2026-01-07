@@ -248,7 +248,7 @@ const mockPermissionsActivities = [
 const mockPermissionsQuickActions = [
   { id: '1', label: 'Add User', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new user...', success: 'User invitation sent', error: 'Failed to add user' }), variant: 'default' as const },
   { id: '2', label: 'Create Role', icon: 'shield', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating new role...', success: 'New role created successfully', error: 'Failed to create role' }), variant: 'default' as const },
-  { id: '3', label: 'Audit Log', icon: 'file', action: () => toast.success('Audit Log', { description: 'Opening security audit log' }), variant: 'outline' as const },
+  { id: '3', label: 'Audit Log', icon: 'file', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening security audit log...', success: 'Audit log loaded', error: 'Failed to load audit log' }), variant: 'outline' as const },
 ]
 
 export default function PermissionsClient({ initialRoles, initialPermissions }: PermissionsClientProps) {

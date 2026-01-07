@@ -468,9 +468,9 @@ const mockIntegrationsActivities = [
 ]
 
 const mockIntegrationsQuickActions = [
-  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.success('App Marketplace', { description: 'Browse 200+ integrations across 15 categories' }), variant: 'default' as const },
+  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading marketplace...', success: 'App Marketplace - Browse 200+ integrations across 15 categories', error: 'Failed to load marketplace' }), variant: 'default' as const },
   { id: '2', label: 'Install App', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening installer...', success: 'Select an app from the marketplace to install', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.success('Integration Logs', { description: 'View sync history and troubleshoot issues' }), variant: 'outline' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading integration logs...', success: 'Integration Logs - View sync history and troubleshoot issues', error: 'Failed to load logs' }), variant: 'outline' as const },
 ]
 
 export default function IntegrationsMarketplaceClient({ initialIntegrations, initialStats }: IntegrationsMarketplaceClientProps) {

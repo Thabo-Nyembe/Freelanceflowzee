@@ -314,7 +314,7 @@ const mockPerfAnalyticsActivities = [
 
 const mockPerfAnalyticsQuickActions = [
   { id: '1', label: 'New Alert', icon: 'bell', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening alert builder...', success: 'Set thresholds for latency, error rate, and throughput', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'Dashboard', icon: 'layout', action: () => toast.success('Dashboard', { description: 'Real-time performance metrics loaded' }), variant: 'default' as const },
+  { id: '2', label: 'Dashboard', icon: 'layout', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading dashboard...', success: 'Dashboard: Real-time performance metrics loaded', error: 'Failed to load dashboard' }), variant: 'default' as const },
   { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting performance report...', success: 'Report exported to CSV', error: 'Export failed' }), variant: 'outline' as const },
 ]
 

@@ -1986,7 +1986,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
           <QuickActionsToolbar
             actions={[
               { id: '1', label: 'New Contract', icon: 'file-plus', action: () => setShowNewContract(true), variant: 'default' as const },
-              { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.info('Select a contract to send for signing'), variant: 'default' as const },
+              { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing signing request...', success: 'Select a contract to send for signing', error: 'Failed to prepare signing' }), variant: 'default' as const },
               { id: '3', label: 'Templates', icon: 'copy', action: () => setActiveTab('templates'), variant: 'outline' as const },
             ]}
             variant="grid"

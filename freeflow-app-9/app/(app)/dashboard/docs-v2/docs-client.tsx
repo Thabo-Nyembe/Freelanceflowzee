@@ -404,7 +404,7 @@ const mockDocsActivities = [
 
 const mockDocsQuickActions = [
   { id: '1', label: 'New Doc', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating document...', success: 'Document created! Start writing', error: 'Failed to create document' }), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.success('Preview Mode', { description: 'See how users will view your documentation' }), variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading preview...', success: 'Preview Mode - See how users will view your documentation', error: 'Failed to load preview' }), variant: 'default' as const },
   { id: '3', label: 'Publish', icon: 'send', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Publishing documentation...', success: 'Documentation published to production!', error: 'Publish failed' }), variant: 'outline' as const },
 ]
 

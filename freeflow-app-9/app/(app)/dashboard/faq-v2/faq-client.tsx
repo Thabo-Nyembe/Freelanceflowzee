@@ -414,9 +414,9 @@ const mockFAQActivities = [
 
 const mockFAQQuickActions = [
   { id: '1', label: 'New Article', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening article editor...', success: 'Create a new FAQ article with rich formatting', error: 'Failed to open' }) },
-  { id: '2', label: 'Search', icon: 'Search', shortcut: 'S', action: () => toast.success('Search', { description: 'Search across 150+ articles in your knowledge base' }) },
-  { id: '3', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.success('Analytics', { description: 'View article views, helpfulness ratings, and search trends' }) },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => toast.success('FAQ Settings', { description: 'Configure categories, SEO, and display options' }) },
+  { id: '2', label: 'Search', icon: 'Search', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening search...', success: 'Search ready - browse 150+ articles in your knowledge base', error: 'Failed to open search' }) },
+  { id: '3', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading analytics...', success: 'Analytics loaded - view article views, helpfulness ratings, and search trends', error: 'Failed to load analytics' }) },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading FAQ settings...', success: 'FAQ settings loaded - configure categories, SEO, and display options', error: 'Failed to load settings' }) },
 ]
 
 // ============================================================================

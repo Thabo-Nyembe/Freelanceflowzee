@@ -439,8 +439,8 @@ const mockPerfActivities = [
 
 const mockPerfQuickActions = [
   { id: '1', label: 'Run Audit', icon: 'Play', shortcut: '⌘R', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Running performance audit...', success: 'Audit completed successfully!', error: 'Audit failed' }) },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => toast.success('Performance Report', { description: 'Opening performance report...' }) },
-  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => toast.success('Compare Tests', { description: 'Opening test comparison tool...' }) },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening performance report...', success: 'Performance report loaded!', error: 'Failed to load performance report' }) },
+  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening test comparison tool...', success: 'Test comparison tool ready!', error: 'Failed to open comparison tool' }) },
   { id: '4', label: 'Export Data', icon: 'Download', shortcut: '⌘E', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting data...', success: 'Data exported successfully!', error: 'Export failed' }) },
 ]
 

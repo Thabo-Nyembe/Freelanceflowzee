@@ -347,9 +347,9 @@ const mockAlertsActivities = [
 ]
 
 const mockAlertsQuickActions = [
-  { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => toast.success('Alert Acknowledged', { description: 'Team has been notified' }) },
+  { id: '1', label: 'Acknowledge', icon: 'Check', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Acknowledging alert...', success: 'Alert Acknowledged: Team has been notified', error: 'Failed to acknowledge' }) },
   { id: '2', label: 'Escalate', icon: 'ArrowUp', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Escalating to on-call team...', success: 'Alert escalated to L2 support', error: 'Escalation failed' }) },
-  { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => toast.success('Alert Silenced', { description: 'Notifications muted for 4 hours' }) },
+  { id: '3', label: 'Silence', icon: 'BellOff', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Silencing alert...', success: 'Alert Silenced: Notifications muted for 4 hours', error: 'Failed to silence' }) },
   { id: '4', label: 'Create Rule', icon: 'Plus', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening rule builder...', success: 'Define conditions and actions for automatic responses', error: 'Failed to open' }) },
 ]
 

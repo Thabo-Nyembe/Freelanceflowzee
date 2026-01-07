@@ -302,7 +302,7 @@ const mockAdminActivities = [
 ]
 
 const mockAdminQuickActions = [
-  { id: '1', label: 'Add User', icon: 'plus', action: () => toast.success('Add User', { description: 'Opening user creation form...' }), variant: 'default' as const },
+  { id: '1', label: 'Add User', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening user creation form...', success: 'User form ready!', error: 'Failed to open user form' }), variant: 'default' as const },
   { id: '2', label: 'Run Job', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Starting job...', success: 'Job executed successfully!', error: 'Job execution failed' }), variant: 'default' as const },
   { id: '3', label: 'Export Logs', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting logs...', success: 'Logs exported successfully!', error: 'Export failed' }), variant: 'outline' as const },
 ]

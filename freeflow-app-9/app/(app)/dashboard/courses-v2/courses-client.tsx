@@ -553,10 +553,10 @@ const mockCoursesActivities = [
 ]
 
 const mockCoursesQuickActions = [
-  { id: '1', label: 'New Course', icon: 'BookOpen', shortcut: 'C', action: () => toast.success('New Course', { description: 'Opening course creation wizard...' }) },
-  { id: '2', label: 'Add Lecture', icon: 'PlayCircle', shortcut: 'L', action: () => toast.success('Add Lecture', { description: 'Opening lecture editor...' }) },
-  { id: '3', label: 'Create Quiz', icon: 'FileText', shortcut: 'Q', action: () => toast.success('Create Quiz', { description: 'Opening quiz builder...' }) },
-  { id: '4', label: 'View Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.success('Course Analytics', { description: 'Opening analytics dashboard...' }) },
+  { id: '1', label: 'New Course', icon: 'BookOpen', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening course creation wizard...', success: 'Course wizard ready!', error: 'Failed to open wizard' }) },
+  { id: '2', label: 'Add Lecture', icon: 'PlayCircle', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening lecture editor...', success: 'Lecture editor opened!', error: 'Failed to open editor' }) },
+  { id: '3', label: 'Create Quiz', icon: 'FileText', shortcut: 'Q', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening quiz builder...', success: 'Quiz builder ready!', error: 'Failed to open quiz builder' }) },
+  { id: '4', label: 'View Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading course analytics...', success: 'Analytics dashboard opened!', error: 'Failed to load analytics' }) },
 ]
 
 export default function CoursesClient() {

@@ -420,10 +420,10 @@ const mockGalleryActivities = [
 ]
 
 const mockGalleryQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.success('Upload Media', { description: 'Opening file uploader...' }) },
-  { id: '2', label: 'New Album', icon: 'FolderPlus', shortcut: 'A', action: () => toast.success('New Album', { description: 'Creating new album...' }) },
-  { id: '3', label: 'Bulk Edit', icon: 'Edit', shortcut: 'E', action: () => toast.success('Bulk Edit', { description: 'Opening bulk editor...' }) },
-  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.success('Share Gallery', { description: 'Opening sharing options...' }) },
+  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening file uploader...', success: 'File uploader ready!', error: 'Failed to open uploader' }) },
+  { id: '2', label: 'New Album', icon: 'FolderPlus', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new album...', success: 'New album created!', error: 'Failed to create album' }) },
+  { id: '3', label: 'Bulk Edit', icon: 'Edit', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening bulk editor...', success: 'Bulk editor ready!', error: 'Failed to open bulk editor' }) },
+  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening sharing options...', success: 'Sharing options ready!', error: 'Failed to open sharing options' }) },
 ]
 
 export default function GalleryClient() {

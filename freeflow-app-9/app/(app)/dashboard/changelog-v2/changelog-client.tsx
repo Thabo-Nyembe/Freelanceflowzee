@@ -386,9 +386,9 @@ const mockChangelogActivities = [
 ]
 
 const mockChangelogQuickActions = [
-  { id: '1', label: 'New Release', icon: 'Tag', shortcut: 'N', action: () => toast.success('New Release', { description: 'Opening release creation form...' }) },
-  { id: '2', label: 'Draft', icon: 'Edit', shortcut: 'D', action: () => toast.success('Create Draft', { description: 'Starting new changelog draft...' }) },
-  { id: '3', label: 'Compare', icon: 'GitBranch', shortcut: 'C', action: () => toast.success('Compare Versions', { description: 'Opening version comparison tool...' }) },
+  { id: '1', label: 'New Release', icon: 'Tag', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening release creation form...', success: 'Release form ready!', error: 'Failed to open release form' }) },
+  { id: '2', label: 'Draft', icon: 'Edit', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Starting new changelog draft...', success: 'Draft created!', error: 'Failed to create draft' }) },
+  { id: '3', label: 'Compare', icon: 'GitBranch', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening version comparison tool...', success: 'Comparison ready!', error: 'Failed to open comparison tool' }) },
   { id: '4', label: 'Notify', icon: 'Bell', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending notifications...', success: 'Notifications sent to subscribers!', error: 'Failed to send notifications' }) },
 ]
 

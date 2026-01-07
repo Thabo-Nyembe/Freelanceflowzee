@@ -389,9 +389,9 @@ const mockSecurityActivities = [
 
 const mockSecurityQuickActions = [
   { id: '1', label: 'Run Scan', icon: 'Scan', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Running security scan...', success: 'Security scan completed!', error: 'Scan failed' }) },
-  { id: '2', label: 'View Alerts', icon: 'AlertTriangle', shortcut: 'A', action: () => toast.success('Security Alerts', { description: 'Opening alerts dashboard...' }) },
+  { id: '2', label: 'View Alerts', icon: 'AlertTriangle', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening alerts dashboard...', success: 'Security alerts loaded!', error: 'Failed to load alerts' }) },
   { id: '3', label: 'Compliance Report', icon: 'FileText', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating compliance report...', success: 'Report generated!', error: 'Report generation failed' }) },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => toast.success('Security Settings', { description: 'Opening security configuration...' }) },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening security configuration...', success: 'Security settings loaded!', error: 'Failed to load security settings' }) },
 ]
 
 export default function SecurityAuditClient() {

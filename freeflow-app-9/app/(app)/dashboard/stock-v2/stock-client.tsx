@@ -699,7 +699,7 @@ const mockStockActivities = [
 const mockStockQuickActions = [
   { id: '1', label: 'Add Stock', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Adding stock...', success: 'Stock added successfully', error: 'Failed to add stock' }), variant: 'default' as const },
   { id: '2', label: 'Transfer', icon: 'arrow-right', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Processing transfer...', success: 'Stock transferred successfully', error: 'Failed to transfer stock' }), variant: 'default' as const },
-  { id: '3', label: 'Count', icon: 'clipboard', action: () => toast.success('Stock Count', { description: 'Opening inventory count wizard' }), variant: 'outline' as const },
+  { id: '3', label: 'Count', icon: 'clipboard', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening stock count wizard...', success: 'Stock Count wizard opened successfully', error: 'Failed to open stock count wizard' }), variant: 'outline' as const },
 ]
 
 export default function StockClient() {

@@ -419,8 +419,8 @@ const mockHelpDocsActivities = [
 
 const mockHelpDocsQuickActions = [
   { id: '1', label: 'New Article', icon: 'file-plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new article...', success: 'Article draft created', error: 'Failed to create article' }), variant: 'default' as const },
-  { id: '2', label: 'Review Queue', icon: 'list', action: () => toast.success('Review Queue', { description: 'Opening 5 articles pending review' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.success('Analytics', { description: 'Opening documentation analytics' }), variant: 'outline' as const },
+  { id: '2', label: 'Review Queue', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading review queue...', success: '5 articles pending review', error: 'Failed to load review queue' }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading analytics...', success: 'Documentation analytics ready', error: 'Failed to load analytics' }), variant: 'outline' as const },
 ]
 
 export default function HelpDocsClient() {

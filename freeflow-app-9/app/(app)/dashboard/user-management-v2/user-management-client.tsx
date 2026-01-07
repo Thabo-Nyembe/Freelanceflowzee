@@ -103,10 +103,10 @@ const mockUserMgmtActivities = [
 ]
 
 const mockUserMgmtQuickActions = [
-  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => toast.success('Add User', { description: 'Opening user creation form...' }) },
+  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening user creation form...', success: 'Add User form ready!', error: 'Failed to open form' }) },
   { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing bulk import...', success: 'Import wizard ready!', error: 'Import preparation failed' }) },
-  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => toast.success('Audit Log', { description: 'Opening audit log viewer...' }) },
-  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => toast.success('Role Management', { description: 'Opening roles configuration...' }) },
+  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening audit log viewer...', success: 'Audit Log viewer ready!', error: 'Failed to open audit log' }) },
+  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening roles configuration...', success: 'Role Management ready!', error: 'Failed to open roles' }) },
 ]
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {

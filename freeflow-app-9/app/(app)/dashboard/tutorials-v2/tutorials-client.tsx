@@ -437,7 +437,7 @@ const mockTutorialsActivities = [
 const mockTutorialsQuickActions = [
   { id: '1', label: 'New Course', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening course creator...', success: 'Course editor ready! Start building your curriculum', error: 'Failed to open' }), variant: 'default' as const },
   { id: '2', label: 'Upload', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing upload...', success: 'Select video files to upload', error: 'Upload cancelled' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.success('Tutorial Analytics', { description: '2,450 views this month • 89% completion rate' }), variant: 'outline' as const },
+  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading tutorial analytics...', success: 'Tutorial Analytics: 2,450 views this month • 89% completion rate', error: 'Failed to load analytics' }), variant: 'outline' as const },
 ]
 
 export default function TutorialsClient({ initialTutorials, initialStats }: TutorialsClientProps) {

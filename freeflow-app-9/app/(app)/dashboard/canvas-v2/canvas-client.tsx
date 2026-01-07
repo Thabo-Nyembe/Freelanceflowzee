@@ -150,7 +150,7 @@ const mockCanvasActivities = [
 
 const mockCanvasQuickActions = [
   { id: '1', label: 'New Board', icon: 'Layout', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating canvas board...', success: 'New canvas ready! Start designing', error: 'Failed to create board' }) },
-  { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => toast.success('Canvas Templates', { description: '47 templates available • Wireframes, flowcharts, diagrams & more' }) },
+  { id: '2', label: 'Templates', icon: 'Copy', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading templates...', success: 'Canvas Templates: 47 templates available - Wireframes, flowcharts, diagrams & more', error: 'Failed to load templates' }) },
   { id: '3', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting canvas...', success: 'Exported to PNG, SVG, and PDF formats', error: 'Export failed' }) },
   { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Generating share link...', success: 'Share link copied! Anyone with link can view', error: 'Failed to share' }) },
 ]

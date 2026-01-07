@@ -194,7 +194,7 @@ const mockMobileAppActivities = [
 const mockMobileAppQuickActions = [
   { id: '1', label: 'New Build', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Starting mobile build...', success: 'Build queued successfully', error: 'Failed to start build' }), variant: 'default' as const },
   { id: '2', label: 'Submit Review', icon: 'send', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Submitting for app review...', success: 'Submitted for App Store review', error: 'Failed to submit for review' }), variant: 'default' as const },
-  { id: '3', label: 'View Analytics', icon: 'chart', action: () => toast.success('Analytics', { description: 'Opening mobile app analytics' }), variant: 'outline' as const },
+  { id: '3', label: 'View Analytics', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening mobile app analytics...', success: 'Analytics dashboard loaded', error: 'Failed to load analytics' }), variant: 'outline' as const },
 ]
 
 export default function MobileAppClient({ initialFeatures, initialVersions, initialStats }: MobileAppClientProps) {

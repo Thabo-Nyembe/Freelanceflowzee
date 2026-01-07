@@ -677,13 +677,13 @@ export default function WebinarsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Plus, label: 'New Webinar', color: 'bg-purple-500', action: () => handleCreateWebinar() },
-                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', action: () => toast.info('Schedule', { description: 'Opening scheduling options...' }) },
-                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => toast.info('Go Live', { description: 'Starting live broadcast...' }) },
-                { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => toast.info('Attendees', { description: 'Viewing attendee list...' }) },
-                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500', action: () => toast.info('Recordings', { description: 'Opening recording library...' }) },
-                { icon: Mail, label: 'Invites', color: 'bg-pink-500', action: () => toast.info('Invites', { description: 'Opening invite manager...' }) },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500', action: () => toast.info('Analytics', { description: 'Loading analytics dashboard...' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-500', action: () => toast.info('Settings', { description: 'Opening webinar settings...' }) }
+                { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening scheduling options...', success: 'Schedule ready', error: 'Failed to open schedule' }) },
+                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Starting live broadcast...', success: 'Live broadcast started', error: 'Failed to go live' }) },
+                { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Viewing attendee list...', success: 'Attendees loaded', error: 'Failed to load attendees' }) },
+                { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening recording library...', success: 'Recordings loaded', error: 'Failed to load recordings' }) },
+                { icon: Mail, label: 'Invites', color: 'bg-pink-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening invite manager...', success: 'Invite manager ready', error: 'Failed to open invites' }) },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading analytics dashboard...', success: 'Analytics loaded', error: 'Failed to load analytics' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-gray-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening webinar settings...', success: 'Settings opened', error: 'Failed to open settings' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1017,14 +1017,14 @@ export default function WebinarsClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => toast.info('Reports', { description: 'Generating analytics reports...' }) },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => toast.info('Trends', { description: 'Loading trend analysis...' }) },
-                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => toast.info('Breakdown', { description: 'Loading breakdown charts...' }) },
-                { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => toast.info('Attendees', { description: 'Loading attendee analytics...' }) },
-                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => toast.info('Q&A Stats', { description: 'Loading Q&A statistics...' }) },
-                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => toast.info('Polls', { description: 'Loading poll results...' }) },
-                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => toast.success('Export', { description: 'Analytics report will be downloaded' }) },
-                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => toast.info('Date Range', { description: 'Opening date range picker...' }) }
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Generating analytics reports...', success: 'Reports generated', error: 'Failed to generate reports' }) },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading trend analysis...', success: 'Trends loaded', error: 'Failed to load trends' }) },
+                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading breakdown charts...', success: 'Breakdown loaded', error: 'Failed to load breakdown' }) },
+                { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading attendee analytics...', success: 'Attendee analytics loaded', error: 'Failed to load attendee analytics' }) },
+                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading Q&A statistics...', success: 'Q&A stats loaded', error: 'Failed to load Q&A stats' }) },
+                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading poll results...', success: 'Poll results loaded', error: 'Failed to load polls' }) },
+                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Downloading analytics report...', success: 'Analytics report downloaded', error: 'Failed to download report' }) },
+                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening date range picker...', success: 'Date range picker opened', error: 'Failed to open date range picker' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1200,14 +1200,14 @@ export default function WebinarsClient() {
             {/* Recordings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => toast.info('Play All', { description: 'Playing all recordings...' }) },
-                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => toast.success('Download', { description: 'Recordings will be downloaded' }) },
-                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => toast.info('Share', { description: 'Opening share options...' }) },
-                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => toast.info('Upload', { description: 'Opening upload dialog...' }) },
-                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => toast.info('Transcripts', { description: 'Loading transcripts...' }) },
-                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => toast.info('Audio Only', { description: 'Filtering audio recordings...' }) },
-                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => toast.info('Delete', { description: 'Select recordings to delete' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => toast.info('Settings', { description: 'Opening recording settings...' }) }
+                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Playing all recordings...', success: 'Playback started', error: 'Failed to play recordings' }) },
+                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Downloading recordings...', success: 'Recordings downloaded', error: 'Failed to download recordings' }) },
+                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening share options...', success: 'Share options ready', error: 'Failed to open share options' }) },
+                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening upload dialog...', success: 'Upload dialog ready', error: 'Failed to open upload dialog' }) },
+                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading transcripts...', success: 'Transcripts loaded', error: 'Failed to load transcripts' }) },
+                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Filtering audio recordings...', success: 'Audio recordings filtered', error: 'Failed to filter recordings' }) },
+                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing delete...', success: 'Select recordings to delete', error: 'Failed to prepare delete' }) },
+                { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening recording settings...', success: 'Recording settings opened', error: 'Failed to open settings' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}

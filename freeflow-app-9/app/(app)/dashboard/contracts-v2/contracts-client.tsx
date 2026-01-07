@@ -168,7 +168,7 @@ const mockContractsActivities = [
 const mockContractsQuickActions = [
   { id: '1', label: 'New Contract', icon: 'file-plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new contract...', success: 'Contract draft created', error: 'Failed to create contract' }), variant: 'default' as const },
   { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Sending for signature...', success: 'Contract sent for signing', error: 'Failed to send contract' }), variant: 'default' as const },
-  { id: '3', label: 'Templates', icon: 'copy', action: () => toast.success('Templates', { description: 'Opening contract templates library' }), variant: 'outline' as const },
+  { id: '3', label: 'Templates', icon: 'copy', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading templates...', success: 'Templates: Opening contract templates library', error: 'Failed to load templates' }), variant: 'outline' as const },
 ]
 
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {
@@ -1977,7 +1977,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
           <QuickActionsToolbar
             actions={[
               { id: '1', label: 'New Contract', icon: 'file-plus', action: () => setShowNewContract(true), variant: 'default' as const },
-              { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.info('Select a contract to send for signing'), variant: 'default' as const },
+              { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing...', success: 'Select a contract to send for signing', error: 'Action unavailable' }), variant: 'default' as const },
               { id: '3', label: 'Templates', icon: 'copy', action: () => setActiveTab('templates'), variant: 'outline' as const },
             ]}
             variant="grid"

@@ -477,9 +477,9 @@ const mockAuditActivities = [
 ]
 
 const mockAuditQuickActions = [
-  { id: '1', label: 'Run Audit', icon: 'play', action: () => toast.info('Running', { description: 'Audit started...' }), variant: 'default' as const },
-  { id: '2', label: 'Export', icon: 'download', action: () => toast.success('Exporting', { description: 'Report downloading...' }), variant: 'outline' as const },
-  { id: '3', label: 'Schedule', icon: 'calendar', action: () => toast.info('Schedule', { description: 'Opening scheduler...' }), variant: 'default' as const },
+  { id: '1', label: 'Run Audit', icon: 'play', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Starting audit...', success: 'Audit started successfully', error: 'Failed to start audit' }), variant: 'default' as const },
+  { id: '2', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Exporting report...', success: 'Report downloaded successfully', error: 'Failed to export report' }), variant: 'outline' as const },
+  { id: '3', label: 'Schedule', icon: 'calendar', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening scheduler...', success: 'Scheduler opened', error: 'Failed to open scheduler' }), variant: 'default' as const },
 ]
 
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {

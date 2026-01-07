@@ -1101,7 +1101,7 @@ export default function MilestonesClient() {
                 { icon: CalendarDays, label: 'Timeline', color: 'text-blue-500', action: () => setActiveTab('timeline') },
                 { icon: Package, label: 'Deliverables', color: 'text-green-500', action: () => setActiveTab('deliverables') },
                 { icon: Link2, label: 'Dependencies', color: 'text-purple-500', action: () => setActiveTab('dependencies') },
-                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => toast.info('Viewing risks') },
+                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading risks...', success: 'Risks loaded', error: 'Failed to load risks' }) },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-500', action: () => setActiveTab('reports') },
                 { icon: Download, label: 'Export', color: 'text-cyan-500', action: handleExportReport },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-pink-500', action: handleSync },

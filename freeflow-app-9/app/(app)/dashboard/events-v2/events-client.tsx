@@ -1416,7 +1416,7 @@ export default function EventsClient() {
                   { icon: Download, label: 'Export List', color: 'from-cyan-500 to-blue-600', action: handleExportAttendees },
                   { icon: Filter, label: 'Filter', color: 'from-pink-500 to-rose-600', action: () => setShowFilterDialog(true) },
                   { icon: Search, label: 'Search', color: 'from-indigo-500 to-purple-600', action: () => document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus() },
-                  { icon: CreditCard, label: 'Refunds', color: 'from-gray-500 to-gray-600', action: () => toast.info('Process refunds via Stripe Dashboard', { description: 'For security, refunds are processed through Stripe directly' }) },
+                  { icon: CreditCard, label: 'Refunds', color: 'from-gray-500 to-gray-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading refund options...', success: 'Process refunds via Stripe Dashboard - For security, refunds are processed through Stripe directly', error: 'Failed to load refund options' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1618,7 +1618,7 @@ export default function EventsClient() {
                   { icon: Ticket, label: 'Ticket Sales', color: 'from-orange-500 to-amber-600', action: () => setActiveTab('orders') },
                   { icon: Users, label: 'Demographics', color: 'from-cyan-500 to-blue-600', action: () => { setReportType('demographics'); setShowReportDialog(true); } },
                   { icon: Globe, label: 'Geo Data', color: 'from-pink-500 to-rose-600', action: () => { setReportType('geo'); setShowReportDialog(true); } },
-                  { icon: Eye, label: 'Page Views', color: 'from-indigo-500 to-purple-600', action: () => toast.success('Page views tracked', { description: '2,847 views this month (+18% vs last month)' }) },
+                  { icon: Eye, label: 'Page Views', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading page view analytics...', success: 'Page views tracked: 2,847 views this month (+18% vs last month)', error: 'Failed to load page view data' }) },
                 ].map((action, i) => (
                   <Button
                     key={i}

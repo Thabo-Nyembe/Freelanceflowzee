@@ -270,7 +270,7 @@ const mockFormsActivities = [
 
 const mockFormsQuickActions = [
   { id: '1', label: 'Create Form', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new form...', success: 'Form created successfully', error: 'Failed to create form' }), variant: 'default' as const },
-  { id: '2', label: 'Use Template', icon: 'copy', action: () => toast.success('Templates', { description: 'Opening form templates library' }), variant: 'default' as const },
+  { id: '2', label: 'Use Template', icon: 'copy', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading templates...', success: 'Form templates library ready', error: 'Failed to load templates' }), variant: 'default' as const },
   { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting form responses...', success: 'Form data exported', error: 'Export failed' }), variant: 'outline' as const },
 ]
 

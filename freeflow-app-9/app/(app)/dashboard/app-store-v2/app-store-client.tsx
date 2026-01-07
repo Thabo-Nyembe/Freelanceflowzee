@@ -593,9 +593,9 @@ const mockAppStoreActivities = [
 ]
 
 const mockAppStoreQuickActions = [
-  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.success('App Store', { description: 'Browsing available applications' }), variant: 'default' as const },
+  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Browsing available applications...', success: 'App Store loaded successfully', error: 'Failed to browse apps' }), variant: 'default' as const },
   { id: '2', label: 'Install App', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Installing application...', success: 'Application installed successfully', error: 'Installation failed' }), variant: 'default' as const },
-  { id: '3', label: 'Manage Apps', icon: 'settings', action: () => toast.success('Manage Apps', { description: 'Opening app management panel' }), variant: 'outline' as const },
+  { id: '3', label: 'Manage Apps', icon: 'settings', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app management panel...', success: 'App management panel opened', error: 'Failed to open management panel' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

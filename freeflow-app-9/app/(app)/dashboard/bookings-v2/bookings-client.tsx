@@ -96,7 +96,7 @@ const mockBookingsActivities = [
 const mockBookingsQuickActions = [
   { id: '1', label: 'New Booking', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening booking form...', success: 'Select service, time, and client details', error: 'Failed to open' }), variant: 'default' as const },
   { id: '2', label: 'Block Time', icon: 'clock', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening time blocker...', success: 'Block off unavailable hours on your calendar', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '3', label: 'View Calendar', icon: 'calendar', action: () => toast.success('Calendar View', { description: 'Showing weekly booking calendar' }), variant: 'outline' as const },
+  { id: '3', label: 'View Calendar', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading calendar...', success: 'Weekly booking calendar displayed', error: 'Failed to load calendar' }), variant: 'outline' as const },
 ]
 
 export default function BookingsClient({ initialBookings }: { initialBookings: Booking[] }) {

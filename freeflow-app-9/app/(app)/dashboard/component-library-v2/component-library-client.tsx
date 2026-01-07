@@ -364,9 +364,9 @@ const mockComponentLibActivities = [
 
 const mockComponentLibQuickActions = [
   { id: '1', label: 'New Component', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating component...', success: 'Component scaffold created! Add props and variants', error: 'Failed to create' }) },
-  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => toast.success('Component Browser', { description: '47 components • 12 categories • Filter by type' }) },
-  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => toast.success('Playground Mode', { description: 'Interactive testing environment ready' }) },
-  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => toast.success('Component Docs', { description: 'Full API reference, examples, and guidelines' }) },
+  { id: '2', label: 'Browse', icon: 'Layers', shortcut: 'B', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading component browser...', success: 'Component Browser - 47 components, 12 categories', error: 'Failed to load browser' }) },
+  { id: '3', label: 'Playground', icon: 'Play', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Starting playground...', success: 'Playground Mode - Interactive testing environment ready', error: 'Failed to start playground' }) },
+  { id: '4', label: 'Docs', icon: 'BookOpen', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading documentation...', success: 'Component Docs - Full API reference, examples, and guidelines', error: 'Failed to load docs' }) },
 ]
 
 export default function ComponentLibraryClient() {

@@ -417,7 +417,7 @@ const mockDataExportActivities = [
 const mockDataExportQuickActions = [
   { id: '1', label: 'New Pipeline', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating data pipeline...', success: 'Configure source, transformations, and destination', error: 'Failed to create' }), variant: 'default' as const },
   { id: '2', label: 'Run All Syncs', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Running all data syncs...', success: '12 pipelines synced successfully!', error: 'Some syncs failed' }), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'terminal', action: () => toast.success('Pipeline Logs', { description: 'View sync history, errors, and row counts' }), variant: 'outline' as const },
+  { id: '3', label: 'View Logs', icon: 'terminal', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading pipeline logs...', success: 'View sync history, errors, and row counts', error: 'Failed to load logs' }), variant: 'outline' as const },
 ]
 
 // Database export type

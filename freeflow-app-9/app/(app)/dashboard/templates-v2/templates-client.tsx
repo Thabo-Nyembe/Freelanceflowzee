@@ -418,7 +418,7 @@ const mockTemplatesActivities = [
 
 const mockTemplatesQuickActions = [
   { id: '1', label: 'New Template', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating template...', success: 'Template created! Start customizing', error: 'Failed to create template' }), variant: 'default' as const },
-  { id: '2', label: 'Browse Gallery', icon: 'grid', action: () => toast.success('Template Gallery', { description: '234 templates • 12 categories • Filter by use case' }), variant: 'default' as const },
+  { id: '2', label: 'Browse Gallery', icon: 'grid', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening gallery...', success: 'Template Gallery: 234 templates in 12 categories', error: 'Failed to load gallery' }), variant: 'default' as const },
   { id: '3', label: 'Export Assets', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Packaging assets...', success: 'Assets exported to templates-assets.zip', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
@@ -1041,10 +1041,10 @@ export default function TemplatesClient() {
             <div className="grid grid-cols-4 gap-4">
               {[
                 { icon: Plus, label: 'Create New', desc: 'Start fresh', color: 'text-blue-500', action: () => setIsCreateDialogOpen(true) },
-                { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500', action: () => { setShowFavoritesOnly(!showFavoritesOnly); toast.success(showFavoritesOnly ? 'Showing all templates' : 'Showing favorites only'); } },
-                { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500', action: () => toast.info('Recent templates shown below') },
+                { icon: Heart, label: 'Favorites', desc: 'Saved items', color: 'text-pink-500', action: () => { setShowFavoritesOnly(!showFavoritesOnly); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Filtering...', success: showFavoritesOnly ? 'Showing all templates' : 'Showing favorites only', error: 'Filter failed' }); } },
+                { icon: Clock, label: 'Recent', desc: 'Last edited', color: 'text-amber-500', action: () => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading recent...', success: 'Recent templates shown below', error: 'Failed to load recent' }) },
                 { icon: Upload, label: 'Import', desc: 'Upload file', color: 'text-green-500', action: () => setShowImportDialog(true) },
-                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500', action: () => toast.info('Select a template to duplicate') },
+                { icon: Copy, label: 'Duplicate', desc: 'Copy template', color: 'text-purple-500', action: () => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Preparing...', success: 'Select a template to duplicate', error: 'Action failed' }) },
                 { icon: Download, label: 'Export All', desc: 'Download all', color: 'text-cyan-500', action: () => setShowExportDialog(true) },
                 { icon: FolderPlus, label: 'Organize', desc: 'Add to folder', color: 'text-orange-500', action: () => setShowOrganizeDialog(true) },
                 { icon: Trash2, label: 'Cleanup', desc: 'Remove unused', color: 'text-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Scanning for unused templates...', success: 'Cleanup complete! 3 unused templates archived', error: 'Cleanup failed' }) },

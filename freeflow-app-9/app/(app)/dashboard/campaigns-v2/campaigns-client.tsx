@@ -596,8 +596,8 @@ const mockCampaignActivities = [
 const mockCampaignQuickActions = [
   { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating campaign...', success: 'Campaign created successfully', error: 'Failed to create campaign' }) },
   { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Sending test email...', success: 'Test email sent successfully', error: 'Failed to send test email' }) },
-  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => toast.success('Analytics', { description: 'Opening campaign analytics dashboard' }) },
-  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => toast.success('Audience Manager', { description: 'Opening audience management panel' }) },
+  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening analytics dashboard...', success: 'Analytics Dashboard loaded successfully', error: 'Failed to load analytics' }) },
+  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening audience manager...', success: 'Audience Manager loaded successfully', error: 'Failed to load audience manager' }) },
 ]
 
 // ============== MAIN COMPONENT ==============

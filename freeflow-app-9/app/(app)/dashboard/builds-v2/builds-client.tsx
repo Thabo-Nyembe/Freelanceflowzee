@@ -773,7 +773,7 @@ const mockBuildsActivities = [
 const mockBuildsQuickActions = [
   { id: '1', label: 'New Build', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Triggering new build...', success: 'Build #1245 started! ETA: 3 minutes', error: 'Build trigger failed' }), variant: 'default' as const },
   { id: '2', label: 'Retry', icon: 'refresh-cw', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Retrying failed build...', success: 'Build #1244 restarted!', error: 'Retry failed' }), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'file-text', action: () => toast.success('Build Logs', { description: 'Viewing logs for build #1244 • 234 lines' }), variant: 'outline' as const },
+  { id: '3', label: 'Logs', icon: 'file-text', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading build logs...', success: 'Build Logs - Viewing logs for build #1244 • 234 lines', error: 'Failed to load logs' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

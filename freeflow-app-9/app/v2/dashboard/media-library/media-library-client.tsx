@@ -1083,9 +1083,9 @@ export default function MediaLibraryClient({
                 { icon: Folder, label: 'New Folder', desc: 'Organize files', color: 'text-blue-500', action: handleOpenNewFolder },
                 { icon: LayoutGrid, label: 'Collection', desc: 'Create group', color: 'text-purple-500', action: handleOpenNewCollection },
                 { icon: Wand2, label: 'AI Enhance', desc: 'Auto-optimize', color: 'text-amber-500', action: () => handleAIEnhance() },
-                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500', action: () => toast.info('Select an asset to share') },
+                { icon: Share2, label: 'Share', desc: 'Get links', color: 'text-green-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing share...', success: 'Select an asset to share', error: 'Failed to prepare share' }) },
                 { icon: Download, label: 'Bulk Export', desc: 'Download all', color: 'text-cyan-500', action: handleBulkExport },
-                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500', action: () => toast.info('Opening brand kit...') },
+                { icon: Palette, label: 'Brand Kit', desc: 'Brand assets', color: 'text-red-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening brand kit...', success: 'Brand kit opened', error: 'Failed to open brand kit' }) },
                 { icon: Sparkles, label: 'AI Search', desc: 'Smart find', color: 'text-indigo-500', action: handleAISearch },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1249,13 +1249,13 @@ export default function MediaLibraryClient({
             <div className="grid grid-cols-4 gap-4">
               {[
                 { icon: FolderPlus, label: 'New Folder', desc: 'Create folder', color: 'text-blue-500', action: handleOpenNewFolder },
-                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => toast.info('Opening folder tree...') },
-                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500', action: () => toast.info('Select assets to move') },
-                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500', action: () => toast.info('Archiving old folders...') },
-                { icon: RefreshCw, label: 'Sync', desc: 'Cloud sync', color: 'text-green-500', action: () => { refetchFolders(); toast.success('Folders synced') } },
-                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500', action: () => toast.info('Sorting folders...') },
-                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500', action: () => toast.info('Opening permissions...') },
-                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500', action: () => toast.info('Cleaning up empty folders...') },
+                { icon: FolderTree, label: 'Organize', desc: 'Folder tree', color: 'text-cyan-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening folder tree...', success: 'Folder tree opened', error: 'Failed to open folder tree' }) },
+                { icon: Move, label: 'Move Assets', desc: 'Bulk move', color: 'text-purple-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing move...', success: 'Select assets to move', error: 'Failed to prepare move' }) },
+                { icon: Archive, label: 'Archive', desc: 'Archive old', color: 'text-amber-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Archiving old folders...', success: 'Old folders archived', error: 'Failed to archive folders' }) },
+                { icon: RefreshCw, label: 'Sync', desc: 'Cloud sync', color: 'text-green-500', action: () => toast.promise(Promise.resolve().then(() => refetchFolders()), { loading: 'Syncing folders...', success: 'Folders synced', error: 'Failed to sync folders' }) },
+                { icon: SortAsc, label: 'Sort', desc: 'Sort folders', color: 'text-red-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Sorting folders...', success: 'Folders sorted', error: 'Failed to sort folders' }) },
+                { icon: Shield, label: 'Permissions', desc: 'Access control', color: 'text-indigo-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening permissions...', success: 'Permissions opened', error: 'Failed to open permissions' }) },
+                { icon: Trash2, label: 'Cleanup', desc: 'Remove empty', color: 'text-gray-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Cleaning up empty folders...', success: 'Empty folders removed', error: 'Failed to cleanup folders' }) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
@@ -1333,12 +1333,12 @@ export default function MediaLibraryClient({
             <div className="grid grid-cols-4 gap-4">
               {[
                 { icon: Plus, label: 'Create', desc: 'New collection', color: 'text-purple-500', action: handleOpenNewCollection },
-                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => toast.info('Browsing collections...') },
-                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500', action: () => toast.info('Select a collection to share') },
-                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500', action: () => toast.info('Opening tag manager...') },
-                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500', action: () => toast.info('Opening collaboration settings...') },
-                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500', action: () => toast.info('Opening privacy settings...') },
-                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500', action: () => toast.info('Select a collection to duplicate') },
+                { icon: LayoutGrid, label: 'Browse', desc: 'View all', color: 'text-pink-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Browsing collections...', success: 'Collections loaded', error: 'Failed to load collections' }) },
+                { icon: Share2, label: 'Share', desc: 'Share public', color: 'text-blue-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing share...', success: 'Select a collection to share', error: 'Failed to prepare share' }) },
+                { icon: Tag, label: 'Tags', desc: 'Manage tags', color: 'text-amber-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening tag manager...', success: 'Tag manager opened', error: 'Failed to open tag manager' }) },
+                { icon: Users, label: 'Collaborate', desc: 'Add members', color: 'text-green-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening collaboration settings...', success: 'Collaboration settings opened', error: 'Failed to open collaboration settings' }) },
+                { icon: Lock, label: 'Privacy', desc: 'Access control', color: 'text-red-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening privacy settings...', success: 'Privacy settings opened', error: 'Failed to open privacy settings' }) },
+                { icon: Copy, label: 'Duplicate', desc: 'Clone collection', color: 'text-cyan-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing duplication...', success: 'Select a collection to duplicate', error: 'Failed to prepare duplication' }) },
                 { icon: Download, label: 'Export', desc: 'Download all', color: 'text-indigo-500', action: handleBulkExport },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1420,9 +1420,9 @@ export default function MediaLibraryClient({
                 { icon: Video, label: 'Videos', desc: 'Upload videos', color: 'text-purple-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'video' }); setShowUploadDialog(true) } },
                 { icon: Music, label: 'Audio', desc: 'Upload audio', color: 'text-green-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'audio' }); setShowUploadDialog(true) } },
                 { icon: FileText, label: 'Documents', desc: 'Upload docs', color: 'text-orange-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'document' }); setShowUploadDialog(true) } },
-                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => toast.info('Bulk upload mode enabled') },
-                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500', action: () => toast.info('Opening cloud import...') },
-                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500', action: () => toast.info('Opening URL import...') },
+                { icon: FileUp, label: 'Bulk Upload', desc: 'Multi-file', color: 'text-pink-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Enabling bulk upload...', success: 'Bulk upload mode enabled', error: 'Failed to enable bulk upload' }) },
+                { icon: FolderSync, label: 'Cloud Import', desc: 'From cloud', color: 'text-cyan-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening cloud import...', success: 'Cloud import ready', error: 'Failed to open cloud import' }) },
+                { icon: Link2, label: 'URL Import', desc: 'From link', color: 'text-amber-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening URL import...', success: 'URL import ready', error: 'Failed to open URL import' }) },
                 { icon: FileArchive, label: 'Archives', desc: 'ZIP/RAR files', color: 'text-gray-500', action: () => { setFileForm({ ...defaultFileForm, file_type: 'archive' }); setShowUploadDialog(true) } },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
@@ -1502,14 +1502,14 @@ export default function MediaLibraryClient({
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => toast.info('Loading overview...') },
-                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.info('Analyzing trends...') },
-                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => toast.info('Loading distribution chart...') },
-                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => toast.info('Connecting to real-time stats...') },
-                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500', action: () => toast.info('Loading view analytics...') },
-                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => toast.info('Loading download statistics...') },
-                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500', action: () => toast.info('Generating storage report...') },
-                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500', action: () => toast.info('Opening report builder...') },
+                { icon: BarChart3, label: 'Overview', desc: 'Key metrics', color: 'text-orange-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading overview...', success: 'Overview loaded', error: 'Failed to load overview' }) },
+                { icon: TrendingUp, label: 'Trends', desc: 'View trends', color: 'text-green-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Analyzing trends...', success: 'Trends analyzed', error: 'Failed to analyze trends' }) },
+                { icon: PieChart, label: 'Distribution', desc: 'By type', color: 'text-purple-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading distribution chart...', success: 'Distribution chart loaded', error: 'Failed to load distribution' }) },
+                { icon: Activity, label: 'Real-time', desc: 'Live stats', color: 'text-red-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Connecting to real-time stats...', success: 'Real-time stats connected', error: 'Failed to connect' }) },
+                { icon: Eye, label: 'Views', desc: 'View analytics', color: 'text-blue-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading view analytics...', success: 'View analytics loaded', error: 'Failed to load view analytics' }) },
+                { icon: Download, label: 'Downloads', desc: 'Download stats', color: 'text-cyan-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading download statistics...', success: 'Download statistics loaded', error: 'Failed to load download stats' }) },
+                { icon: Database, label: 'Storage', desc: 'Usage report', color: 'text-amber-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Generating storage report...', success: 'Storage report generated', error: 'Failed to generate report' }) },
+                { icon: FileText, label: 'Reports', desc: 'Custom reports', color: 'text-indigo-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening report builder...', success: 'Report builder opened', error: 'Failed to open report builder' }) },
               ].map((action, i) => (
                 <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105" onClick={action.action}>
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />

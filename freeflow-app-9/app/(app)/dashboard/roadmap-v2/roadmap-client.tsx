@@ -531,8 +531,8 @@ const mockRoadmapActivities = [
 
 const mockRoadmapQuickActions = [
   { id: '1', label: 'New Initiative', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening initiative form...', success: 'Define objectives, timeline, and key results', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'Timeline', icon: 'calendar', action: () => toast.success('Timeline View', { description: 'Viewing Q1-Q4 roadmap with milestones' }), variant: 'default' as const },
-  { id: '3', label: 'Share', icon: 'share', action: () => { navigator.clipboard.writeText('https://kazi.app/roadmap/2024'); toast.success('Link Copied', { description: 'Roadmap link copied to clipboard' }); }, variant: 'outline' as const },
+  { id: '2', label: 'Timeline', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading timeline view...', success: 'Timeline View - Viewing Q1-Q4 roadmap with milestones', error: 'Failed to load timeline' }), variant: 'default' as const },
+  { id: '3', label: 'Share', icon: 'share', action: () => toast.promise(new Promise((resolve) => { navigator.clipboard.writeText('https://kazi.app/roadmap/2024'); setTimeout(resolve, 300); }), { loading: 'Copying link...', success: 'Link Copied - Roadmap link copied to clipboard', error: 'Failed to copy link' }), variant: 'outline' as const },
 ]
 
 export default function RoadmapClient({ initialInitiatives, initialMilestones }: RoadmapClientProps) {

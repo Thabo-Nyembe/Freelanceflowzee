@@ -392,10 +392,10 @@ const mockLogsActivities = [
 ]
 
 const mockLogsQuickActions = [
-  { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: () => toast.success('Log Search', { description: 'Use advanced queries to filter logs' }) },
+  { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening log search...', success: 'Log search ready - use advanced queries to filter logs', error: 'Failed to open log search' }) },
   { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting logs...', success: 'Logs exported to activity-logs.csv', error: 'Export failed' }) },
   { id: '3', label: 'Set Alert', icon: 'Bell', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening alert builder...', success: 'Create alerts for error patterns', error: 'Failed to open' }) },
-  { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: () => toast.success('Live Tail Enabled', { description: 'Streaming logs in real-time...' }) },
+  { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Enabling live tail...', success: 'Live tail enabled - streaming logs in real-time', error: 'Failed to enable live tail' }) },
 ]
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {

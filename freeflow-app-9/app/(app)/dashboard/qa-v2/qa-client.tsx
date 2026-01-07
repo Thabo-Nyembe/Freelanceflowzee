@@ -316,8 +316,8 @@ const mockQAActivities = [
 const mockQAQuickActions = [
   { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Running test suite...', success: '156 tests passed • 2 failed • 1 skipped', error: 'Test run failed - check logs' }) },
   { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating test case...', success: 'Test case created! Add steps and expected results', error: 'Failed to create case' }) },
-  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => toast.success('QA Reports', { description: '94% pass rate • 12 open defects • 3 critical issues' }) },
-  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => toast.success('Defect Tracker', { description: '12 open • 47 resolved this week • 3 P1 issues' }) },
+  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading QA reports...', success: 'QA Reports: 94% pass rate - 12 open defects - 3 critical issues', error: 'Failed to load reports' }) },
+  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading defect tracker...', success: 'Defect Tracker: 12 open - 47 resolved this week - 3 P1 issues', error: 'Failed to load defects' }) },
 ]
 
 export default function QAClient({ initialTestCases }: QAClientProps) {

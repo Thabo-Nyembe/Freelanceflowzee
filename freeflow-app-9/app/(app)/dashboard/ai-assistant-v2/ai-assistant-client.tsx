@@ -439,9 +439,9 @@ const mockAIAssistantActivities = [
 
 const mockAIAssistantQuickActions = [
   { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Starting new conversation...', success: 'Chat started! How can I help?', error: 'Failed to start' }) },
-  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => toast.success('Prompt Templates', { description: 'Browse 50+ pre-built prompts for common tasks' }) },
-  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => toast.success('Knowledge Base', { description: 'Access your uploaded documents and data sources' }) },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('AI Settings', { description: 'Configure model, temperature, and response preferences' }) },
+  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading prompt templates...', success: '50+ pre-built prompts ready to use!', error: 'Failed to load templates' }) },
+  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Accessing knowledge base...', success: 'Documents and data sources loaded!', error: 'Failed to access knowledge base' }) },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening AI settings...', success: 'Settings panel opened!', error: 'Failed to open settings' }) },
 ]
 
 export default function AIAssistantClient() {

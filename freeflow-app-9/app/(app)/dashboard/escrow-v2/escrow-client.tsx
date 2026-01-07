@@ -433,10 +433,10 @@ const mockEscrowActivities = [
 ]
 
 const mockEscrowQuickActions = [
-  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => toast.success('New Transfer', { description: 'Opening transfer form...' }) },
-  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => toast.success('Payouts', { description: 'Opening payouts dashboard...' }) },
-  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => toast.success('Disputes', { description: 'Opening dispute center...' }) },
-  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => toast.success('Financial Reports', { description: 'Opening reports viewer...' }) },
+  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening transfer form...', success: 'Transfer form ready!', error: 'Failed to open transfer form' }) },
+  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading payouts dashboard...', success: 'Payouts dashboard opened!', error: 'Failed to load payouts' }) },
+  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening dispute center...', success: 'Dispute center ready!', error: 'Failed to open disputes' }) },
+  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading financial reports...', success: 'Reports viewer opened!', error: 'Failed to load reports' }) },
 ]
 
 export default function EscrowClient() {

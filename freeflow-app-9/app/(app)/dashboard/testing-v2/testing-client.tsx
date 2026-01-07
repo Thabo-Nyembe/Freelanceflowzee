@@ -521,9 +521,9 @@ const mockTestingActivities = [
 
 const mockTestingQuickActions = [
   { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Running tests...', success: 'All tests passed!', error: 'Some tests failed' }) },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V', action: () => toast.success('Test Report', { description: 'Opening test report viewer...' }) },
-  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D', action: () => toast.success('Debug Mode', { description: 'Opening debugger for failed tests...' }) },
-  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N', action: () => toast.success('Add Test', { description: 'Opening test creation form...' }) },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening test report viewer...', success: 'Test report loaded!', error: 'Failed to load test report' }) },
+  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening debugger for failed tests...', success: 'Debug mode activated!', error: 'Failed to open debugger' }) },
+  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening test creation form...', success: 'Test creation form ready!', error: 'Failed to open test form' }) },
 ]
 
 export default function TestingClient() {

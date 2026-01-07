@@ -533,7 +533,7 @@ const mockMaintenanceActivities = [
 const mockMaintenanceQuickActions = [
   { id: '1', label: 'New Work Order', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating work order...', success: 'Work order created successfully', error: 'Failed to create work order' }), variant: 'default' as const },
   { id: '2', label: 'Schedule PM', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Scheduling preventive maintenance...', success: 'PM scheduled successfully', error: 'Failed to schedule PM' }), variant: 'default' as const },
-  { id: '3', label: 'Asset List', icon: 'list', action: () => toast.success('Asset List', { description: 'Opening asset management view' }), variant: 'outline' as const },
+  { id: '3', label: 'Asset List', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading asset list...', success: 'Asset List loaded successfully', error: 'Failed to load asset list' }), variant: 'outline' as const },
 ]
 
 // Database types

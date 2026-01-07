@@ -423,7 +423,7 @@ const mockSupportActivities = [
 const mockSupportQuickActions = [
   { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening ticket form...', success: 'Ticket form ready! Describe your issue', error: 'Failed to open form' }), variant: 'default' as const },
   { id: '2', label: 'Live Chat', icon: 'messageSquare', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Connecting to support agent...', success: 'Connected! Agent Sarah is ready to help', error: 'All agents busy - try again later' }), variant: 'default' as const },
-  { id: '3', label: 'Knowledge', icon: 'book', action: () => toast.success('Knowledge Base', { description: '1,247 articles • Search or browse by category' }), variant: 'outline' as const },
+  { id: '3', label: 'Knowledge', icon: 'book', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading knowledge base...', success: 'Knowledge Base ready! 1,247 articles • Search or browse by category', error: 'Failed to load knowledge base' }), variant: 'outline' as const },
 ]
 
 export default function SupportClient({ initialTickets, initialStats }: SupportClientProps) {

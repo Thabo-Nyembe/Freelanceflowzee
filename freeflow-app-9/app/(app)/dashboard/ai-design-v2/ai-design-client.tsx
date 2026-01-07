@@ -359,10 +359,10 @@ const mockAIDesignActivities = [
 ]
 
 const mockAIDesignQuickActions = [
-  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => toast.success('New Generation', { description: 'Opening AI generation studio...' }) },
-  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => toast.success('AI Gallery', { description: 'Opening generated images gallery...' }) },
+  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening AI generation studio...', success: 'AI generation studio ready!', error: 'Failed to open generation studio' }) },
+  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening generated images gallery...', success: 'AI Gallery loaded!', error: 'Failed to load gallery' }) },
   { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Upscaling image...', success: 'Image upscaled successfully!', error: 'Upscale failed' }) },
-  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => toast.success('Style Editor', { description: 'Opening style customization panel...' }) },
+  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening style customization panel...', success: 'Style Editor ready!', error: 'Failed to open style editor' }) },
 ]
 
 export default function AIDesignClient() {

@@ -562,8 +562,8 @@ const mockMyDayActivities = [
 
 const mockMyDayQuickActions = [
   { id: '1', label: 'Add Task', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating task...', success: 'Task added to your day! Set priority and due time', error: 'Failed to add task' }), variant: 'default' as const },
-  { id: '2', label: 'Focus', icon: 'target', action: () => toast.success('Focus Mode Activated', { description: 'Notifications paused • Timer started • Stay productive!' }), variant: 'default' as const },
-  { id: '3', label: 'Review', icon: 'check', action: () => toast.success('Daily Review', { description: '8 tasks completed • 2 remaining • Great progress!' }), variant: 'outline' as const },
+  { id: '2', label: 'Focus', icon: 'target', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating focus mode...', success: 'Focus Mode Activated! Notifications paused • Timer started • Stay productive!', error: 'Failed to activate focus mode' }), variant: 'default' as const },
+  { id: '3', label: 'Review', icon: 'check', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Generating daily review...', success: 'Daily Review: 8 tasks completed • 2 remaining • Great progress!', error: 'Failed to generate review' }), variant: 'outline' as const },
 ]
 
 export default function MyDayClient({ initialTasks, initialSessions }: MyDayClientProps) {

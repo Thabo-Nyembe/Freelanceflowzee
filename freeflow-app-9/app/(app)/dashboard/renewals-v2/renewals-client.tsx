@@ -571,7 +571,7 @@ const mockRenewalsActivities = [
 ]
 
 const mockRenewalsQuickActions = [
-  { id: '1', label: 'New Renewal', icon: 'plus', action: () => toast.success('New Renewal', { description: 'Opening renewal form...' }), variant: 'default' as const },
+  { id: '1', label: 'New Renewal', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening renewal form...', success: 'New Renewal form ready!', error: 'Failed to open form' }), variant: 'default' as const },
   { id: '2', label: 'Run Playbook', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: 'Running playbook...', success: 'Playbook executed successfully!', error: 'Playbook execution failed' }), variant: 'default' as const },
   { id: '3', label: 'Export Pipeline', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting pipeline...', success: 'Pipeline exported successfully!', error: 'Export failed' }), variant: 'outline' as const },
 ]

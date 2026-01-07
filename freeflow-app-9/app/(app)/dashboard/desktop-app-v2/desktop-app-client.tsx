@@ -496,7 +496,7 @@ const mockDesktopAppActivities = [
 const mockDesktopAppQuickActions = [
   { id: '1', label: 'New Build', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Starting new build...', success: 'Build started successfully', error: 'Failed to start build' }), variant: 'default' as const },
   { id: '2', label: 'Deploy Update', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Deploying update...', success: 'Update deployed to production', error: 'Deployment failed' }), variant: 'default' as const },
-  { id: '3', label: 'View Analytics', icon: 'chart', action: () => toast.success('Analytics', { description: 'Opening desktop app analytics' }), variant: 'outline' as const },
+  { id: '3', label: 'View Analytics', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading analytics...', success: 'Analytics: Opening desktop app analytics', error: 'Failed to load analytics' }), variant: 'outline' as const },
 ]
 
 export default function DesktopAppClient() {

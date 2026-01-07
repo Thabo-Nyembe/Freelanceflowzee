@@ -444,7 +444,7 @@ const mockFeedbackActivities = [
 
 const mockFeedbackQuickActions = [
   { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating idea...', success: 'Idea submitted successfully', error: 'Failed to submit idea' }) },
-  { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => toast.success('Respond', { description: 'Opening response composer' }) },
+  { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening response composer...', success: 'Response composer ready', error: 'Failed to open response composer' }) },
   { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Merging feedback...', success: 'Feedback merged successfully', error: 'Failed to merge feedback' }) },
   { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Exporting feedback...', success: 'Feedback exported successfully', error: 'Failed to export feedback' }) },
 ]

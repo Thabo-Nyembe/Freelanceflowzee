@@ -903,7 +903,7 @@ export default function TeamHubClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: UserPlus, label: 'Invite', color: 'bg-purple-500', onClick: handleInviteMember },
-                { icon: Mail, label: 'Email All', color: 'bg-blue-500', onClick: () => toast.info('Email feature coming soon') },
+                { icon: Mail, label: 'Email All', color: 'bg-blue-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Preparing email composer...', success: 'Email feature coming soon - we are working on it!', error: 'Email action unavailable' }) },
                 { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: () => toast.info('Approval queue is empty') },
                 { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => toast.info('Opening role management...') },
                 { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => toast.info('Admin settings') },

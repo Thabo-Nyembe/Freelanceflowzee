@@ -795,7 +795,7 @@ const mockHelpCenterActivities = [
 const mockHelpCenterQuickActions = [
   { id: '1', label: 'New Article', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening article editor...', success: 'Article editor ready! Start writing your help content', error: 'Failed to open editor' }), variant: 'default' as const },
   { id: '2', label: 'Preview', icon: 'eye', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Generating preview...', success: 'Preview mode active - see how users will view your help center', error: 'Preview failed' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => toast.success('Help Center Analytics', { description: '2,450 article views • 89% helpful ratings • 12 most-searched terms' }), variant: 'outline' as const },
+  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading analytics...', success: 'Help Center Analytics - 2,450 article views, 89% helpful ratings', error: 'Failed to load analytics' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

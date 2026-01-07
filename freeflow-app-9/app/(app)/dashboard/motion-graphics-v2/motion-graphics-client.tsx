@@ -442,10 +442,10 @@ const mockMotionGraphicsActivities = [
 ]
 
 const mockMotionGraphicsQuickActions = [
-  { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => toast.success('New Project', { description: 'Creating new motion graphics project...' }) },
+  { id: '1', label: 'New Project', icon: 'Film', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating new motion graphics project...', success: 'New project created!', error: 'Failed to create project' }) },
   { id: '2', label: 'Render', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Starting render...', success: 'Render queued successfully!', error: 'Render failed to start' }) },
-  { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A', action: () => toast.success('Asset Library', { description: 'Opening asset manager...' }) },
-  { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.success('Templates', { description: 'Opening template gallery...' }) },
+  { id: '3', label: 'Assets', icon: 'Folder', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading asset library...', success: 'Asset manager opened!', error: 'Failed to load assets' }) },
+  { id: '4', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading template gallery...', success: 'Template gallery opened!', error: 'Failed to load templates' }) },
 ]
 
 // Database types

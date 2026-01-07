@@ -1041,8 +1041,8 @@ export default function CanvasClient({ initialCanvases }: { initialCanvases: Can
                 { label: 'Prototype', icon: Smartphone, color: 'from-green-500 to-emerald-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'prototype' })); setShowNewBoard(true) } },
                 { label: 'Diagram', icon: Workflow, color: 'from-orange-500 to-red-500', action: () => { setNewCanvasForm(prev => ({ ...prev, canvas_type: 'diagram' })); setShowNewBoard(true) } },
                 { label: 'Templates', icon: FileText, color: 'from-pink-500 to-rose-500', action: () => setActiveTab('templates') },
-                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500', action: () => toast.info('Import feature', { description: 'Coming soon - upload .fig, .sketch or .psd files' }) },
-                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500', action: () => toast.info('AI Generate', { description: 'Coming soon - generate designs with AI' }) }
+                { label: 'Import', icon: Download, color: 'from-teal-500 to-cyan-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing import...', success: 'Coming soon - upload .fig, .sketch or .psd files', error: 'Failed to prepare import' }) },
+                { label: 'AI Generate', icon: Wand2, color: 'from-violet-500 to-purple-500', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Initializing AI...', success: 'Coming soon - generate designs with AI', error: 'Failed to initialize AI' }) }
               ].map((action, i) => (
                 <button
                   key={i}

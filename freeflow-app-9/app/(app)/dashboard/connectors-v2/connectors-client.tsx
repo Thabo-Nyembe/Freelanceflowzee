@@ -649,7 +649,7 @@ const mockConnectorsActivities = [
 const mockConnectorsQuickActions = [
   { id: '1', label: 'New Zap', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating automation...', success: 'Connect apps and create your workflow trigger', error: 'Failed to create' }), variant: 'default' as const },
   { id: '2', label: 'Test', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Testing connections...', success: 'All 8 connectors responding normally!', error: 'Some connections failed' }), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: () => toast.success('Task Logs', { description: 'View execution history and error details' }), variant: 'outline' as const },
+  { id: '3', label: 'Logs', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading task logs...', success: 'Task Logs ready! View execution history and error details', error: 'Failed to load logs' }), variant: 'outline' as const },
 ]
 
 // ============================================================================

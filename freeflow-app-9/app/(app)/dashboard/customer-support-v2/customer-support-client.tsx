@@ -266,9 +266,9 @@ const mockSupportActivities = [
 
 const mockSupportQuickActions = [
   { id: '1', label: 'New Ticket', icon: 'Plus', shortcut: '⌘N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new ticket...', success: 'Ticket created successfully', error: 'Failed to create ticket' }) },
-  { id: '2', label: 'Quick Reply', icon: 'Send', shortcut: '⌘R', action: () => toast.success('Quick Reply', { description: 'Reply template loaded and ready to send' }) },
+  { id: '2', label: 'Quick Reply', icon: 'Send', shortcut: '⌘R', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading template...', success: 'Quick Reply: Reply template loaded and ready to send', error: 'Failed to load template' }) },
   { id: '3', label: 'Escalate', icon: 'AlertTriangle', shortcut: '⌘E', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Escalating ticket...', success: 'Ticket escalated to supervisor', error: 'Failed to escalate ticket' }) },
-  { id: '4', label: 'View Queue', icon: 'Inbox', shortcut: '⌘Q', action: () => toast.success('Support Queue', { description: 'Viewing 12 tickets in queue' }) },
+  { id: '4', label: 'View Queue', icon: 'Inbox', shortcut: '⌘Q', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading queue...', success: 'Support Queue: Viewing 12 tickets in queue', error: 'Failed to load queue' }) },
 ]
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {

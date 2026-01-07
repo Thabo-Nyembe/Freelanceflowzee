@@ -509,9 +509,9 @@ const mockPollsActivities = [
 ]
 
 const mockPollsQuickActions = [
-  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Survey', { description: 'Opening survey builder...' }) },
-  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => toast.success('Survey Results', { description: 'Opening results dashboard...' }) },
-  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.success('Survey Templates', { description: 'Opening template library...' }) },
+  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening survey builder...', success: 'Survey builder ready - create your new survey', error: 'Failed to open survey builder' }) },
+  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading results dashboard...', success: 'Results dashboard ready - view survey analytics', error: 'Failed to load results' }) },
+  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading template library...', success: 'Template library ready - choose from pre-built survey templates', error: 'Failed to load templates' }) },
   { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting survey data...', success: 'Export completed!', error: 'Export failed' }) },
 ]
 

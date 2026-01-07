@@ -411,7 +411,7 @@ const mockFilesHubQuickActions = [
   { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening file picker...', success: 'Select files to upload', error: 'Upload cancelled' }) },
   { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating folder...', success: 'New folder created! Enter a name', error: 'Failed to create folder' }) },
   { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing share link...', success: 'Share link copied to clipboard!', error: 'Failed to generate share link' }) },
-  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => toast.success('Search Files', { description: 'Type to search across 1,247 files in your library' }) },
+  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Initializing search...', success: 'Search ready - Type to search across 1,247 files', error: 'Search unavailable' }) },
 ]
 
 // Database types matching schema
