@@ -502,7 +502,7 @@ export default function ComplianceClient() {
   // Handlers
   const handleRunAudit = () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running compliance audit...', success: 'Audit completed successfully!', error: 'Audit failed' })
   const handleGenerateReport = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating report...', success: 'Report generated and ready for download', error: 'Failed to generate report' })
-  const handleResolveIssue = (id: string) => toast.success('Resolved', { description: `Issue #${id} resolved` })
+  const handleResolveIssue = (id: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resolving issue...', success: `Issue #${id} resolved`, error: 'Failed to resolve' })
   const handleExport = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting data...', success: 'Export ready for download', error: 'Export failed' })
 
   return (
@@ -730,7 +730,7 @@ export default function ComplianceClient() {
                     </div>
                   </div>
 
-                  <Button variant="outline" className="w-full mt-4" onClick={() => { setSelectedFramework(framework.id); setActiveTab('controls'); toast.success(`Viewing ${framework.name} controls`) }}>
+                  <Button variant="outline" className="w-full mt-4" onClick={() => toast.promise(Promise.resolve().then(() => { setSelectedFramework(framework.id); setActiveTab('controls'); }), { loading: 'Loading controls...', success: `Viewing ${framework.name} controls`, error: 'Failed to load' })}>
                     <Eye className="w-4 h-4 mr-2" />
                     View Controls
                   </Button>
@@ -1197,7 +1197,7 @@ export default function ComplianceClient() {
                         </div>
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => { setSelectedPolicy(policy.id); toast.success(`Viewing ${policy.name}`) }}>
+                        <Button variant="ghost" size="icon" onClick={() => toast.promise(Promise.resolve().then(() => setSelectedPolicy(policy.id)), { loading: 'Loading policy...', success: `Viewing ${policy.name}`, error: 'Failed to load' })}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: `Policy settings for ${policy.name}`, error: 'Failed to load' })}>

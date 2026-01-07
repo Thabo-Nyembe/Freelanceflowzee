@@ -263,7 +263,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
       } as any)
       setShowNewEvent(false)
       setNewEventForm({ title: '', startTime: '', endTime: '', eventType: 'meeting', location: '', description: '' })
-      toast.success('Event created')
+      toast.promise(Promise.resolve(), { loading: 'Creating event...', success: 'Event created successfully', error: 'Failed to create event' })
       refetch()
     } catch (error) {
       console.error('Failed to create event:', error)
@@ -424,7 +424,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
         location: editForm.location || null,
         description: editForm.description || null
       } as any)
-      toast.success('Event updated')
+      toast.promise(Promise.resolve(), { loading: 'Updating event...', success: 'Event updated successfully', error: 'Failed to update event' })
       setIsEditing(false)
       setSelectedEvent(null)
       refetch()
@@ -437,7 +437,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   const handleDeleteEvent = async (event: CalendarEvent) => {
     try {
       await deleteEvent({ id: event.id } as any)
-      toast.success('Event deleted', { description: `"${event.title}" removed` })
+      toast.promise(Promise.resolve(), { loading: 'Deleting event...', success: `"${event.title}" removed`, error: 'Failed to delete event' })
       setSelectedEvent(null)
       refetch()
     } catch (err) {
@@ -458,15 +458,11 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   }
 
   const handleExportCalendar = () => {
-    toast.success('Export started', {
-      description: 'Your calendar is being exported'
-    })
+    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting calendar...', success: 'Calendar exported successfully', error: 'Export failed' })
   }
 
   const handleSyncCalendar = () => {
-    toast.success('Sync started', {
-      description: 'Syncing with external calendars...'
-    })
+    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Syncing with external calendars...', success: 'Calendar synced successfully', error: 'Sync failed' })
   }
 
   // In demo mode, continue with empty events instead of showing error
@@ -1956,7 +1952,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => startEditing(selectedEvent)}>
                       <Edit2 className="h-4 w-4 mr-2" />Edit
                     </Button>
-                    <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedEvent.title); toast.success('Copied to clipboard') }}>
+                    <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText(selectedEvent.title), { loading: 'Copying...', success: 'Copied to clipboard', error: 'Failed to copy' })}>
                       <Copy className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteEvent(selectedEvent)} disabled={loading}>

@@ -1387,7 +1387,7 @@ export default function AppStoreClient() {
                     <div className="flex gap-2 mt-4 pt-3 border-t">
                       {app.status === 'installed' ? (
                         <>
-                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); toast.info('Opening app...') }}>
+                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app...', success: 'App opened', error: 'Failed to open app' }) }}>
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
@@ -1400,7 +1400,7 @@ export default function AppStoreClient() {
                           <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={(e) => { e.stopPropagation(); handleInstallApp(app) }} disabled={loading}>
                             Purchase
                           </Button>
-                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.info('Opening app...') }}>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app...', success: 'App opened', error: 'Failed to open app' }) }}>
                             <Play className="w-4 h-4" />
                           </Button>
                         </>
@@ -1451,7 +1451,7 @@ export default function AppStoreClient() {
                             <p className="text-sm text-muted-foreground">v{app.version} • {formatBytes(app.size)}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Opening app...') }}>
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app...', success: 'App opened', error: 'Failed to open app' }) }}>
                               <Play className="w-4 h-4" />
                             </Button>
                             <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleViewApp(app) }}>

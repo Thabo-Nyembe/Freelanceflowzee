@@ -114,13 +114,13 @@ const DesktopWindow = ({ app, os, width, height }: DesktopWindowProps) => {
     } else {
       return (
         <div className="flex items-center gap-1 p-2">
-          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" onClick={() => { logger.info(isMinimized ? 'Restoring window' : 'Minimizing window', { os, app, state: isMinimized ? 'minimized' : 'normal' }); setIsMinimized(!isMinimized); toast.info(isMinimized ? 'Window restored' : 'Window minimized', { description: `${app} - ${os}` }); }} data-testid="toggle-minimize-btn">
+          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" onClick={() => { logger.info(isMinimized ? 'Restoring window' : 'Minimizing window', { os, app, state: isMinimized ? 'minimized' : 'normal' }); const action = isMinimized ? 'restored' : 'minimized'; setIsMinimized(!isMinimized); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: `${isMinimized ? 'Restoring' : 'Minimizing'} window...`, success: `Window ${action} - ${app} - ${os}`, error: 'Failed to toggle window' }); }} data-testid="toggle-minimize-btn">
             <Minus className="w-3 h-3" />
           </button>
-          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" onClick={() => { logger.info(isMaximized ? 'Restoring window' : 'Maximizing window', { os, app, state: isMaximized ? 'maximized' : 'normal' }); setIsMaximized(!isMaximized); toast.info(isMaximized ? 'Window restored' : 'Window maximized', { description: `${app} - ${os}` }); }} data-testid="toggle-maximize-btn">
+          <button className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" onClick={() => { logger.info(isMaximized ? 'Restoring window' : 'Maximizing window', { os, app, state: isMaximized ? 'maximized' : 'normal' }); const action = isMaximized ? 'restored' : 'maximized'; setIsMaximized(!isMaximized); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: `${isMaximized ? 'Restoring' : 'Maximizing'} window...`, success: `Window ${action} - ${app} - ${os}`, error: 'Failed to toggle window' }); }} data-testid="toggle-maximize-btn">
             <Square className="w-3 h-3" />
           </button>
-          <button className="p-1 hover:bg-red-500 hover:text-white rounded" onClick={() => { logger.info('Minimizing window', { os, app }); setIsMinimized(true); toast.info('Window minimized', { description: `${app} - ${os}` }); }} data-testid="minimize-window-btn">
+          <button className="p-1 hover:bg-red-500 hover:text-white rounded" onClick={() => { logger.info('Minimizing window', { os, app }); setIsMinimized(true); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Minimizing window...', success: `Window minimized - ${app} - ${os}`, error: 'Failed to minimize window' }); }} data-testid="minimize-window-btn">
             <X className="w-3 h-3" />
           </button>
         </div>

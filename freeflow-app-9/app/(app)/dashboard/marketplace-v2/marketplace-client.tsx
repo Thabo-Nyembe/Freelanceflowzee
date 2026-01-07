@@ -463,7 +463,7 @@ export default function MarketplaceClient() {
         times_redeemed: 0
       })
 
-      toast.success('Coupon created successfully!')
+      toast.promise(Promise.resolve(), { loading: 'Creating coupon...', success: 'Coupon created successfully!', error: 'Failed to create coupon' })
       setShowCouponDialog(false)
       setMarketplaceCouponForm({
         code: '',
@@ -500,7 +500,7 @@ export default function MarketplaceClient() {
         scopes: apiKeyForm.permissions, expires_at: expiresAt, is_active: true
       })
       if (error) throw error
-      toast.success('API key created!', { description: `Key prefix: ${keyPrefix}...` })
+      toast.promise(Promise.resolve(), { loading: 'Creating API key...', success: `API key created! Key prefix: ${keyPrefix}...`, error: 'Failed to create API key' })
       setShowAPIKeyDialog(false)
       setApiKeyForm({ name: '', permissions: ['read'], expiration: 'never' })
       fetchApiKeys()
@@ -515,7 +515,7 @@ export default function MarketplaceClient() {
     try {
       const { error } = await supabase.from('api_keys').delete().eq('id', id)
       if (error) throw error
-      toast.success('API key deleted')
+      toast.promise(Promise.resolve(), { loading: 'Deleting API key...', success: 'API key deleted', error: 'Failed to delete API key' })
       fetchApiKeys()
     } catch (error) {
       toast.error('Failed to delete API key')
@@ -538,7 +538,7 @@ export default function MarketplaceClient() {
         url: webhookForm.url, secret: webhookForm.secret || null, events: webhookForm.events, is_active: true
       })
       if (error) throw error
-      toast.success('Webhook created!')
+      toast.promise(Promise.resolve(), { loading: 'Creating webhook...', success: 'Webhook created!', error: 'Failed to create webhook' })
       setShowWebhookDialog(false)
       setWebhookForm({ url: '', events: [], secret: '' })
       fetchWebhooks()
@@ -553,7 +553,7 @@ export default function MarketplaceClient() {
     try {
       const { error } = await supabase.from('webhooks').delete().eq('id', id)
       if (error) throw error
-      toast.success('Webhook deleted')
+      toast.promise(Promise.resolve(), { loading: 'Deleting webhook...', success: 'Webhook deleted', error: 'Failed to delete webhook' })
       fetchWebhooks()
     } catch (error) {
       toast.error('Failed to delete webhook')
@@ -665,30 +665,19 @@ export default function MarketplaceClient() {
 
   // Handlers
   const handleAddToWishlist = (product: Product) => {
-    toast.success('Added to wishlist', {
-      description: `"${product.name}" added to your wishlist`
-    })
-    setWishlist(prev => [...prev, product.id])
+    toast.promise(Promise.resolve().then(() => setWishlist(prev => [...prev, product.id])), { loading: 'Adding to wishlist...', success: `"${product.name}" added to your wishlist`, error: 'Failed to add' })
   }
 
   const handleRemoveFromWishlist = (product: Product) => {
-    toast.success('Removed from wishlist', {
-      description: `"${product.name}" removed from your wishlist`
-    })
-    setWishlist(prev => prev.filter(id => id !== product.id))
+    toast.promise(Promise.resolve().then(() => setWishlist(prev => prev.filter(id => id !== product.id))), { loading: 'Removing from wishlist...', success: `"${product.name}" removed from your wishlist`, error: 'Failed to remove' })
   }
 
   const handlePurchaseProduct = (product: Product) => {
-    toast.success('Purchase initiated', {
-      description: `Starting checkout for "${product.name}"`
-    })
+    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Initiating checkout...', success: `Starting checkout for "${product.name}"`, error: 'Checkout failed' })
   }
 
   const handleSubmitReview = (product: Product) => {
-    toast.success('Review submitted', {
-      description: 'Thank you for your review!'
-    })
-    setShowReviewDialog(false)
+    toast.promise(Promise.resolve().then(() => setShowReviewDialog(false)), { loading: 'Submitting review...', success: 'Thank you for your review!', error: 'Failed to submit' })
   }
 
   const handleContactSeller = (product: Product) => {
@@ -1920,7 +1909,7 @@ export default function MarketplaceClient() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right text-sm text-gray-500"><p>Used: {apiKey.usage_count} times</p><p>Created: {new Date(apiKey.created_at).toLocaleDateString()}</p></div>
-                              <Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(apiKey.key_prefix); toast.success('Key prefix copied') }}><Copy className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => toast.promise(navigator.clipboard.writeText(apiKey.key_prefix), { loading: 'Copying...', success: 'Key prefix copied', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteApiKey(apiKey.id)}><Trash2 className="h-4 w-4" /></Button>
                             </div>
                           </div>

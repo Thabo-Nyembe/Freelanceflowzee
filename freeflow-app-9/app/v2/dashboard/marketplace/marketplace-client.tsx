@@ -1920,7 +1920,7 @@ export default function MarketplaceClient() {
                             </div>
                             <div className="flex items-center gap-4">
                               <div className="text-right text-sm text-gray-500"><p>Used: {apiKey.usage_count} times</p><p>Created: {new Date(apiKey.created_at).toLocaleDateString()}</p></div>
-                              <Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(apiKey.key_prefix); toast.success('Key prefix copied') }}><Copy className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => toast.promise(navigator.clipboard.writeText(apiKey.key_prefix), { loading: 'Copying key prefix...', success: 'Key prefix copied to clipboard', error: 'Failed to copy key prefix' })}><Copy className="h-4 w-4" /></Button>
                               <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleDeleteApiKey(apiKey.id)}><Trash2 className="h-4 w-4" /></Button>
                             </div>
                           </div>

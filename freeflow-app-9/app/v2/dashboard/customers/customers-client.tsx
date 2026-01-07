@@ -654,9 +654,14 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
 
   // Handle refresh
   const handleRefresh = async () => {
-    toast.info('Refreshing', { description: 'Refreshing customer data...' })
-    await refetch()
-    toast.success('Refreshed', { description: 'Customer data updated' })
+    toast.promise(
+      refetch(),
+      {
+        loading: 'Refreshing customer data...',
+        success: 'Customer data updated',
+        error: 'Failed to refresh customer data'
+      }
+    )
   }
 
   // Stats
@@ -755,10 +760,15 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }
 
   const handleCreateOpportunity = () => {
-    toast.info('Create Opportunity', {
-      description: 'Opening opportunity form...'
-    })
     setShowAddOpportunity(true)
+    toast.promise(
+      new Promise(r => setTimeout(r, 300)),
+      {
+        loading: 'Opening opportunity form...',
+        success: 'Opportunity form ready',
+        error: 'Failed to open opportunity form'
+      }
+    )
   }
 
   const handleConvertLead = (contact: Contact) => {
@@ -768,9 +778,14 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
   }
 
   const handleSendEmail = (contact: Contact) => {
-    toast.info('Compose Email', {
-      description: `Opening email composer for ${contact.email}`
-    })
+    toast.promise(
+      new Promise(r => setTimeout(r, 300)),
+      {
+        loading: `Opening email composer for ${contact.email}...`,
+        success: `Email composer ready for ${contact.email}`,
+        error: 'Failed to open email composer'
+      }
+    )
   }
 
   const handleLogActivity = () => {
@@ -900,10 +915,10 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(customer) }}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.info('Compose Email', { description: `Opening email composer for ${customer.email}` }) }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: `Opening email composer for ${customer.email}...`, success: `Email composer ready for ${customer.email}`, error: 'Failed to open email composer' }) }}>
                               <Mail className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.info('Log Call', { description: 'Opening call log form...' }) }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Opening call log form...', success: 'Call log form ready', error: 'Failed to open call log form' }) }}>
                               <PhoneCall className="h-4 w-4" />
                             </Button>
                             <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(customer.id) }}>

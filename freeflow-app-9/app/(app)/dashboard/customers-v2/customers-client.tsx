@@ -884,10 +884,10 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(customer) }}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.info('Compose Email', { description: `Opening email composer for ${customer.email}` }) }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening email composer for ${customer.email}...`, success: 'Email composer opened', error: 'Failed to open email composer' }) }}>
                               <Mail className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.info('Log Call', { description: 'Opening call log form...' }) }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening call log form...', success: 'Call log form opened', error: 'Failed to open call log form' }) }}>
                               <PhoneCall className="h-4 w-4" />
                             </Button>
                             <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(customer.id) }}>

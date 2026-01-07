@@ -960,7 +960,7 @@ export default function AlertsClient() {
                             <Phone className="h-3 w-3 mr-1" />
                             Call
                           </Button>
-                          <Button size="sm" variant="outline" onClick={() => { window.open(`mailto:${schedule.currentOnCall.email}`, '_blank'); toast.success('Email client opened', { description: `Composing email to ${schedule.currentOnCall.email}` }) }}>
+                          <Button size="sm" variant="outline" onClick={() => toast.promise(Promise.resolve(window.open(`mailto:${schedule.currentOnCall.email}`, '_blank')), { loading: 'Opening email client...', success: `Email client opened - composing email to ${schedule.currentOnCall.email}`, error: 'Failed to open email client' })}>
                             <Mail className="h-3 w-3 mr-1" />
                             Email
                           </Button>
@@ -1681,7 +1681,7 @@ export default function AlertsClient() {
                           <Label>API Key</Label>
                           <div className="flex items-center gap-2">
                             <Input type="password" value="kazi-alerts-xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText('kazi-alerts-xxxxxxxxxxxxxxxxxxxxx'); toast.success('API Key Copied', { description: 'API key copied to clipboard' }) }}>
+                            <Button variant="outline" size="sm" onClick={() => toast.promise(navigator.clipboard.writeText('kazi-alerts-xxxxxxxxxxxxxxxxxxxxx'), { loading: 'Copying API key...', success: 'API Key Copied to clipboard', error: 'Failed to copy API key' })}>
                               <Copy className="h-4 w-4" />
                             </Button>
                             <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate API key' })}>

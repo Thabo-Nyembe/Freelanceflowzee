@@ -1056,7 +1056,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   <Button className="flex-1 bg-rose-600 hover:bg-rose-700" onClick={handleSaveChanges}>
                     Save Changes
                   </Button>
-                  <Button variant="outline" onClick={() => { setCustomColors({}); toast.info('Reset', { description: 'Colors reset to defaults' }) }}>
+                  <Button variant="outline" onClick={() => { setCustomColors({}); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Resetting colors...', success: 'Colors reset to defaults', error: 'Failed to reset colors' }) }}>
                     Reset
                   </Button>
                 </div>

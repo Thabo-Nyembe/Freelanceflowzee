@@ -1127,7 +1127,7 @@ export default function IntegrationsClient() {
                 { icon: Filter, label: 'Filter', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading filters...', success: 'Filter options loaded', error: 'Failed to load filters' }) },
                 { icon: Search, label: 'Search', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Initializing search...', success: 'Use the search bar above to search tasks', error: 'Failed to initialize search' }) },
                 { icon: Eye, label: 'Details', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading details view...', success: 'Click on any task to view details', error: 'Failed to load details' }) },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => { setActiveTab('analytics'); toast.success('Switched to Analytics view') } },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(Promise.resolve(setActiveTab('analytics')), { loading: 'Switching to Analytics...', success: 'Switched to Analytics view', error: 'Failed to switch view' }) },
                 { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting task history...', success: `Exported ${filteredTasks.length} tasks to CSV`, error: 'Failed to export tasks' }) },
                 { icon: Trash2, label: 'Clear', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing task history...', success: 'Task history cleared', error: 'Failed to clear history' }) }
               ].map((action, idx) => (
@@ -1389,7 +1389,7 @@ export default function IntegrationsClient() {
                 { icon: AlertCircle, label: 'Errors', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Fetching error reports...', success: `Found ${webhookStats.totalDeliveries - webhookStats.successfulDeliveries} errors in the last 24h`, error: 'Failed to fetch errors' }) },
                 { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating reports...', success: 'Analytics reports generated', error: 'Failed to generate reports' }) },
                 { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting analytics data...', success: 'Analytics data exported to CSV', error: 'Failed to export data' }) },
-                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => { setActiveTab('settings'); toast.success('Opened settings') } }
+                { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.promise(Promise.resolve(setActiveTab('settings')), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' }) }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1545,7 +1545,7 @@ export default function IntegrationsClient() {
                         <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Decrypting key...', success: 'Production key revealed (auto-hides in 10s)', error: 'Failed to reveal key' })}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_live_xxx'); toast.success('Production key copied to clipboard') }}>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(navigator.clipboard.writeText('zk_live_xxx'), { loading: 'Copying production key...', success: 'Production key copied to clipboard', error: 'Failed to copy key' })}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1561,7 +1561,7 @@ export default function IntegrationsClient() {
                         <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Decrypting key...', success: 'Test key revealed (auto-hides in 10s)', error: 'Failed to reveal key' })}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_test_xxx'); toast.success('Test key copied to clipboard') }}>
+                        <Button variant="ghost" size="sm" onClick={() => toast.promise(navigator.clipboard.writeText('zk_test_xxx'), { loading: 'Copying test key...', success: 'Test key copied to clipboard', error: 'Failed to copy key' })}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>

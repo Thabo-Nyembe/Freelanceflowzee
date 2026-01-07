@@ -1056,7 +1056,14 @@ export default function RecruitmentClient() {
     const stageOrder = ['Applied', 'Screening', 'Phone Interview', 'Technical', 'Onsite', 'Offer', 'Hired']
     const currentIndex = stageOrder.indexOf(currentStage)
     if (currentIndex === -1 || currentIndex >= stageOrder.length - 1) {
-      toast.info('Stage Complete', { description: `${candidateName} is already at the final stage` })
+      toast.promise(
+        new Promise(r => setTimeout(r, 300)),
+        {
+          loading: 'Checking stage status...',
+          success: `${candidateName} is already at the final stage`,
+          error: 'Failed to check stage'
+        }
+      )
       return
     }
 
@@ -1089,7 +1096,14 @@ export default function RecruitmentClient() {
   }
 
   const handleScheduleInterview = (candidateName: string) => {
-    toast.info('Schedule Interview', { description: `Opening scheduler for ${candidateName}...` })
+    toast.promise(
+      new Promise(r => setTimeout(r, 300)),
+      {
+        loading: `Opening scheduler for ${candidateName}...`,
+        success: `Scheduler ready for ${candidateName}`,
+        error: 'Failed to open scheduler'
+      }
+    )
   }
 
   const handleExportCandidates = () => {
@@ -1107,7 +1121,14 @@ export default function RecruitmentClient() {
     if (resumeUrl) {
       window.open(resumeUrl, '_blank')
     } else {
-      toast.info('No Resume', { description: `No resume file available for ${candidateName}` })
+      toast.promise(
+        new Promise(r => setTimeout(r, 300)),
+        {
+          loading: 'Checking for resume...',
+          success: `No resume file available for ${candidateName}`,
+          error: 'Failed to check resume'
+        }
+      )
     }
   }
 
@@ -1115,16 +1136,37 @@ export default function RecruitmentClient() {
     if (email) {
       window.location.href = `mailto:${email}`
     } else {
-      toast.info('No Email', { description: `No email address available for ${candidateName}` })
+      toast.promise(
+        new Promise(r => setTimeout(r, 300)),
+        {
+          loading: 'Checking email address...',
+          success: `No email address available for ${candidateName}`,
+          error: 'Failed to check email'
+        }
+      )
     }
   }
 
   const handleViewOffer = (candidateName: string) => {
-    toast.info('View Offer', { description: `Opening offer details for ${candidateName}...` })
+    toast.promise(
+      new Promise(r => setTimeout(r, 300)),
+      {
+        loading: `Opening offer details for ${candidateName}...`,
+        success: `Offer details loaded for ${candidateName}`,
+        error: 'Failed to load offer details'
+      }
+    )
   }
 
   const handleEditOffer = (candidateName: string) => {
-    toast.info('Edit Offer', { description: `Opening offer editor for ${candidateName}...` })
+    toast.promise(
+      new Promise(r => setTimeout(r, 300)),
+      {
+        loading: `Opening offer editor for ${candidateName}...`,
+        success: `Offer editor ready for ${candidateName}`,
+        error: 'Failed to open offer editor'
+      }
+    )
   }
 
   const handleSendOffer = (candidateName: string) => {
@@ -1132,23 +1174,51 @@ export default function RecruitmentClient() {
   }
 
   const handleFilterTalentPool = () => {
-    toast.info('Filter', { description: 'Opening filter options...' })
+    toast.promise(
+      new Promise(r => setTimeout(r, 300)),
+      {
+        loading: 'Opening filter options...',
+        success: 'Filter options ready',
+        error: 'Failed to open filter options'
+      }
+    )
   }
 
   const handleImportCandidates = () => {
-    toast.info('Import', { description: 'Opening import dialog...' })
+    toast.promise(
+      new Promise(r => setTimeout(r, 300)),
+      {
+        loading: 'Opening import dialog...',
+        success: 'Import dialog ready',
+        error: 'Failed to open import dialog'
+      }
+    )
   }
 
   const handleReachOut = (email: string | null, candidateName: string) => {
     if (email) {
       window.location.href = `mailto:${email}?subject=Opportunity at Our Company`
     } else {
-      toast.info('No Email', { description: `No email address available for ${candidateName}` })
+      toast.promise(
+        new Promise(r => setTimeout(r, 300)),
+        {
+          loading: 'Checking contact info...',
+          success: `No email address available for ${candidateName}`,
+          error: 'Failed to check contact info'
+        }
+      )
     }
   }
 
   const handleMatchJobs = (candidateName: string) => {
-    toast.info('Match Jobs', { description: `Finding matching jobs for ${candidateName}...` })
+    toast.promise(
+      new Promise(r => setTimeout(r, 300)),
+      {
+        loading: `Finding matching jobs for ${candidateName}...`,
+        success: `Found matching jobs for ${candidateName}`,
+        error: 'Failed to find matching jobs'
+      }
+    )
   }
 
   return (
@@ -1400,7 +1470,7 @@ export default function RecruitmentClient() {
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.info('Edit Job', { description: `Opening editor for ${job.title}...` }) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: `Opening editor for ${job.title}...`, success: `Editor ready for ${job.title}`, error: 'Failed to open editor' }) }}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>

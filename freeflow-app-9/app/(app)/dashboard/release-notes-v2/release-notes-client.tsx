@@ -606,7 +606,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
       if (editingReleaseNote) {
         const result = await updateReleaseNote(editingReleaseNote.id, releaseData)
         if (result.success) {
-          toast.success('Release Note Updated', { description: `${formData.version} has been updated successfully` })
+          toast.promise(Promise.resolve(), { loading: 'Updating release note...', success: `${formData.version} has been updated successfully`, error: 'Failed to update' })
           setShowCreateModal(false)
           resetForm()
         } else {
@@ -615,7 +615,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
       } else {
         const result = await createReleaseNote(releaseData)
         if (result.success) {
-          toast.success('Release Note Created', { description: `${formData.version} has been created successfully` })
+          toast.promise(Promise.resolve(), { loading: 'Creating release note...', success: `${formData.version} has been created successfully`, error: 'Failed to create' })
           setShowCreateModal(false)
           resetForm()
         } else {
@@ -635,7 +635,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await publishReleaseNote(noteId)
       if (result.success) {
-        toast.success('Published', { description: `Release note ${noteVersion} is now live` })
+        toast.promise(Promise.resolve(), { loading: 'Publishing...', success: `Release note ${noteVersion} is now live`, error: 'Failed to publish' })
       } else {
         toast.error('Publish Failed', { description: result.error || 'Failed to publish release note' })
       }
@@ -652,7 +652,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await archiveReleaseNote(noteId)
       if (result.success) {
-        toast.success('Archived', { description: `Release note ${noteVersion} has been archived` })
+        toast.promise(Promise.resolve(), { loading: 'Archiving...', success: `Release note ${noteVersion} has been archived`, error: 'Failed to archive' })
       } else {
         toast.error('Archive Failed', { description: result.error || 'Failed to archive release note' })
       }
@@ -668,7 +668,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await likeReleaseNote(noteId)
       if (result.success) {
-        toast.success('Liked', { description: 'You liked this release note' })
+        toast.promise(Promise.resolve(), { loading: 'Liking...', success: 'You liked this release note', error: 'Failed to like' })
       } else {
         toast.error('Like Failed', { description: result.error || 'Failed to like release note' })
       }
@@ -691,7 +691,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     try {
       const result = await deleteReleaseNote(deleteTargetId)
       if (result.success) {
-        toast.success('Deleted', { description: 'Release note has been deleted' })
+        toast.promise(Promise.resolve(), { loading: 'Deleting...', success: 'Release note has been deleted', error: 'Failed to delete' })
         setShowDeleteConfirm(false)
         setDeleteTargetId(null)
         setSelectedRelease(null)
@@ -708,17 +708,16 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
   // Share release note link
   const handleShareReleaseNote = (noteVersion: string) => {
     const shareUrl = `${window.location.origin}/releases/${noteVersion}`
-    navigator.clipboard.writeText(shareUrl)
-    toast.success('Link Copied', { description: `Share link for ${noteVersion} copied to clipboard` })
+    toast.promise(navigator.clipboard.writeText(shareUrl), { loading: 'Copying link...', success: `Share link for ${noteVersion} copied to clipboard`, error: 'Failed to copy' })
   }
 
   // Subscribe to notifications
   const handleSubscribeNotes = () => {
     setSubscribed(!subscribed)
     if (!subscribed) {
-      toast.success('Subscribed', { description: 'You will receive updates for new release notes' })
+      toast.promise(Promise.resolve(), { loading: 'Subscribing...', success: 'You will receive updates for new release notes', error: 'Failed to subscribe' })
     } else {
-      toast.info('Unsubscribed', { description: 'You will no longer receive release note updates' })
+      toast.promise(Promise.resolve(), { loading: 'Unsubscribing...', success: 'You will no longer receive release note updates', error: 'Failed to unsubscribe' })
     }
   }
 
@@ -742,7 +741,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
     a.download = 'release-notes-export.json'
     a.click()
     URL.revokeObjectURL(url)
-    toast.success('Exported', { description: 'Release notes have been downloaded' })
+    toast.promise(Promise.resolve(), { loading: 'Exporting...', success: 'Release notes have been downloaded', error: 'Export failed' })
   }
 
   return (
@@ -1089,7 +1088,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                     <Flag className="w-5 h-5" />
                     Feature Flags
                   </CardTitle>
-                  <Button size="sm" className="bg-orange-600" onClick={() => { setShowFlagDialog(true); toast.success('Opening feature flag creator') }}>
+                  <Button size="sm" className="bg-orange-600" onClick={() => toast.promise(Promise.resolve().then(() => setShowFlagDialog(true)), { loading: 'Opening...', success: 'Feature flag creator ready', error: 'Failed to open' })}>
                     <Plus className="w-4 h-4 mr-1" />
                     New Flag
                   </Button>
@@ -2578,10 +2577,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowFlagDialog(false)}>Cancel</Button>
-            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => {
-              toast.success('Feature flag created successfully!')
-              setShowFlagDialog(false)
-            }}>
+            <Button className="bg-orange-600 hover:bg-orange-700" onClick={() => toast.promise(Promise.resolve().then(() => setShowFlagDialog(false)), { loading: 'Creating flag...', success: 'Feature flag created successfully!', error: 'Failed to create flag' })}>
               Create Flag
             </Button>
           </DialogFooter>
