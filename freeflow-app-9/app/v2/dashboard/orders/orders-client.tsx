@@ -616,21 +616,9 @@ const mockOrdersActivities = [
 ]
 
 const mockOrdersQuickActions = [
-  { id: '1', label: 'New Order', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Creating new order...',
-    success: 'Order created successfully',
-    error: 'Failed to create order'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Bulk Ship', icon: 'truck', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: 'Processing bulk shipment...',
-    success: 'Bulk shipment processed successfully',
-    error: 'Bulk shipment failed'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Exporting orders...',
-    success: 'Orders exported successfully',
-    error: 'Export failed'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'New Order', icon: 'plus', action: () => toast.success('Order Created', { description: 'New order ready for fulfillment' }), variant: 'default' as const },
+  { id: '2', label: 'Bulk Ship', icon: 'truck', action: () => toast.success('Bulk Shipment', { description: 'Shipments processed successfully' }), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => toast.success('Orders Exported', { description: 'Order data exported to CSV' }), variant: 'outline' as const },
 ]
 
 export default function OrdersClient() {

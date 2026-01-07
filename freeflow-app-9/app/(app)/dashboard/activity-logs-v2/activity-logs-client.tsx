@@ -391,12 +391,7 @@ const mockLogsActivities = [
   { id: '3', user: 'SRE Team', action: 'resolved', target: 'database connection issue', timestamp: '30m ago', type: 'success' as const },
 ]
 
-const mockLogsQuickActions = [
-  { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening log search...', success: 'Log search ready - use advanced queries to filter logs', error: 'Failed to open log search' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting logs...', success: 'Logs exported to activity-logs.csv', error: 'Export failed' }) },
-  { id: '3', label: 'Set Alert', icon: 'Bell', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening alert builder...', success: 'Create alerts for error patterns', error: 'Failed to open' }) },
-  { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Enabling live tail...', success: 'Live tail enabled - streaming logs in real-time', error: 'Failed to enable live tail' }) },
-]
+// Quick actions are now defined inside the component to access state setters
 
 export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientProps) {
   const [activeTab, setActiveTab] = useState('logs')
@@ -468,30 +463,255 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
     return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 })
   }
 
-  // Handlers
-  const handleExportLogs = () => {
-    toast.success('Export started', {
-      description: 'Activity logs are being exported'
-    })
+  // Handlers with real functionality
+  const handleSearchLogs = async () => {
+    await toast.promise(
+      (async () => {
+        // Focus on the search input
+        const searchInput = document.querySelector('input[placeholder*="Search"]') as HTMLInputElement
+        if (searchInput) {
+          searchInput.focus()
+          searchInput.select()
+        }
+        setShowQueryDialog(true)
+      })(),
+      {
+        loading: 'Opening log search...',
+        success: 'Log search ready - use advanced queries to filter logs',
+        error: 'Failed to open log search'
+      }
+    )
   }
 
-  const handleClearFilters = () => {
+  const handleExportLogs = async () => {
+    await toast.promise(
+      (async () => {
+        const response = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'export',
+            format: 'csv',
+            startDate: null,
+            endDate: null
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Export failed')
+        }
+
+        const data = await response.json()
+
+        if (data.success && data.exportData) {
+          // Create and download CSV file
+          const csvContent = data.exportData.content
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `activity-logs-${new Date().toISOString().split('T')[0]}.csv`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          URL.revokeObjectURL(url)
+        } else {
+          // Fallback: export filtered logs from current view
+          const headers = ['timestamp', 'level', 'source', 'service', 'message', 'traceId', 'statusCode', 'duration']
+          const rows = filteredLogs.map(log =>
+            headers.map(h => {
+              const val = log[h as keyof typeof log]
+              return typeof val === 'string' ? `"${val}"` : val ?? ''
+            }).join(',')
+          )
+          const csvContent = [headers.join(','), ...rows].join('\n')
+          const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.href = url
+          link.download = `activity-logs-${new Date().toISOString().split('T')[0]}.csv`
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+          URL.revokeObjectURL(url)
+        }
+      })(),
+      {
+        loading: 'Exporting logs...',
+        success: 'Logs exported to activity-logs.csv',
+        error: 'Export failed'
+      }
+    )
+  }
+
+  const handleSetAlert = async () => {
+    await toast.promise(
+      (async () => {
+        const response = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create-alert',
+            level: levelFilter !== 'all' ? levelFilter : 'error',
+            source: sourceFilter !== 'all' ? sourceFilter : undefined,
+            keyword: searchQuery || undefined,
+            threshold: 10,
+            window: 60,
+            notifyEmail: undefined
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create alert')
+        }
+
+        return response.json()
+      })(),
+      {
+        loading: 'Creating alert rule...',
+        success: 'Alert created for error patterns',
+        error: 'Failed to create alert'
+      }
+    )
+  }
+
+  const handleLiveTail = async () => {
+    await toast.promise(
+      (async () => {
+        setIsLiveMode(!isLiveMode)
+      })(),
+      {
+        loading: isLiveMode ? 'Pausing live tail...' : 'Enabling live tail...',
+        success: isLiveMode ? 'Live tail paused' : 'Live tail enabled - streaming logs in real-time',
+        error: 'Failed to toggle live tail'
+      }
+    )
+  }
+
+  const handleClearFilters = async () => {
+    setSearchQuery('')
+    setLevelFilter('all')
+    setSourceFilter('all')
+    setTimeRange('1h')
     toast.success('Filters cleared', {
       description: 'All log filters have been reset'
     })
   }
 
-  const handleBookmarkLog = (log: ActivityLog) => {
-    toast.success('Log bookmarked', {
-      description: 'Activity log has been bookmarked'
-    })
+  const handleClearLogs = async () => {
+    if (!confirm('Are you sure you want to clear all logs? This action cannot be undone.')) {
+      return
+    }
+
+    await toast.promise(
+      (async () => {
+        const response = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'clear',
+            before: new Date().toISOString()
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to clear logs')
+        }
+
+        return response.json()
+      })(),
+      {
+        loading: 'Clearing logs...',
+        success: 'Logs cleared successfully',
+        error: 'Failed to clear logs'
+      }
+    )
   }
 
-  const handleCreateAlert = (log: ActivityLog) => {
-    toast.success('Alert created', {
-      description: 'Alert rule created for this activity type'
-    })
+  const handleRefreshLogs = async () => {
+    await toast.promise(
+      (async () => {
+        const params = new URLSearchParams()
+        if (levelFilter !== 'all') params.append('level', levelFilter)
+        if (sourceFilter !== 'all') params.append('source', sourceFilter)
+        if (searchQuery) params.append('search', searchQuery)
+        params.append('limit', '50')
+
+        const response = await fetch(`/api/logs?${params.toString()}`)
+
+        if (!response.ok) {
+          throw new Error('Failed to refresh logs')
+        }
+
+        return response.json()
+      })(),
+      {
+        loading: 'Refreshing logs...',
+        success: 'Logs refreshed',
+        error: 'Failed to refresh logs'
+      }
+    )
   }
+
+  const handleBookmarkLog = async (log: LogEntry) => {
+    await toast.promise(
+      (async () => {
+        // Store bookmark in localStorage for now
+        const bookmarks = JSON.parse(localStorage.getItem('log-bookmarks') || '[]')
+        bookmarks.push({
+          id: log.id,
+          message: log.message,
+          timestamp: log.timestamp,
+          level: log.level,
+          bookmarkedAt: new Date().toISOString()
+        })
+        localStorage.setItem('log-bookmarks', JSON.stringify(bookmarks))
+      })(),
+      {
+        loading: 'Bookmarking log...',
+        success: 'Log bookmarked',
+        error: 'Failed to bookmark log'
+      }
+    )
+  }
+
+  const handleCreateAlert = async (log: LogEntry) => {
+    await toast.promise(
+      (async () => {
+        const response = await fetch('/api/logs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create-alert',
+            level: log.level,
+            source: log.source,
+            keyword: log.message.substring(0, 50),
+            threshold: 5,
+            window: 30
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to create alert')
+        }
+
+        return response.json()
+      })(),
+      {
+        loading: 'Creating alert rule...',
+        success: 'Alert rule created for this activity type',
+        error: 'Failed to create alert'
+      }
+    )
+  }
+
+  // Quick actions with real functionality
+  const logsQuickActions = [
+    { id: '1', label: 'Search Logs', icon: 'Search', shortcut: 'S', action: handleSearchLogs },
+    { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: handleExportLogs },
+    { id: '3', label: 'Set Alert', icon: 'Bell', shortcut: 'A', action: handleSetAlert },
+    { id: '4', label: 'Live Tail', icon: 'Activity', shortcut: 'L', action: handleLiveTail },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
@@ -1741,7 +1961,7 @@ export default function ActivityLogsClient({ initialLogs }: ActivityLogsClientPr
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockLogsQuickActions}
+            actions={logsQuickActions}
             variant="grid"
           />
         </div>

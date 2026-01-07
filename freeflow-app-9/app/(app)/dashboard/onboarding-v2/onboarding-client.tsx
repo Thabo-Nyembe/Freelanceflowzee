@@ -447,6 +447,111 @@ export default function OnboardingClient() {
     status: 'draft' as FlowStatus
   })
 
+  // API helper functions for real functionality
+  const completeOnboardingStep = async (stepId: string, stepData?: Record<string, unknown>) => {
+    const response = await fetch('/api/onboarding/progress', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stepId, stepData, completed: true })
+    })
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to complete step')
+    }
+    return response.json()
+  }
+
+  const skipOnboardingStep = async (stepId: string) => {
+    const response = await fetch('/api/onboarding/skip', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stepId, skipped: true })
+    })
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to skip step')
+    }
+    return response.json()
+  }
+
+  const savePreferences = async (category: string, preferences: Record<string, unknown>) => {
+    const response = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'save-preferences', category, ...preferences })
+    })
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to save preferences')
+    }
+    return response.json()
+  }
+
+  const inviteTeamMembers = async (emails: string[]) => {
+    const response = await fetch('/api/team/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ emails })
+    })
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to send invites')
+    }
+    return response.json()
+  }
+
+  const connectIntegration = (provider: string) => {
+    // Redirect to OAuth flow for the integration
+    window.location.href = `/api/integrations/${provider}/auth`
+  }
+
+  const importFlowsFromFile = async (file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await fetch('/api/onboarding/import', {
+      method: 'POST',
+      body: formData
+    })
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to import flows')
+    }
+    return response.json()
+  }
+
+  const fetchArchivedFlows = async () => {
+    const response = await fetch('/api/onboarding/flows?status=archived')
+    if (!response.ok) {
+      throw new Error('Failed to load archived flows')
+    }
+    return response.json()
+  }
+
+  const fetchAnalytics = async (type: string, dateRange?: { start: string; end: string }) => {
+    const params = new URLSearchParams({ type })
+    if (dateRange) {
+      params.append('startDate', dateRange.start)
+      params.append('endDate', dateRange.end)
+    }
+    const response = await fetch(`/api/onboarding/analytics?${params}`)
+    if (!response.ok) {
+      throw new Error('Failed to load analytics')
+    }
+    return response.json()
+  }
+
+  const sendBulkEmail = async (userIds: string[], template: string) => {
+    const response = await fetch('/api/notifications/email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userIds, template })
+    })
+    if (!response.ok) {
+      throw new Error('Failed to send emails')
+    }
+    return response.json()
+  }
+
   // Fetch user and data on mount
   useEffect(() => {
     const fetchUserAndData = async () => {
@@ -980,11 +1085,38 @@ export default function OnboardingClient() {
                 { icon: Plus, label: 'New Flow', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateFlow },
                 { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { flows.filter(f => f.status !== 'active').forEach(f => handleUpdateFlowStatus(f, 'active')) } },
                 { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { flows.filter(f => f.status === 'active').forEach(f => handleUpdateFlowStatus(f, 'paused')) } },
-                { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading...', success: 'Select a flow to duplicate', error: 'Action failed' }) },
+                { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: async () => {
+                  if (selectedFlow) {
+                    await handleDuplicateFlow(selectedFlow)
+                  } else {
+                    toast.info('Select a flow to duplicate')
+                  }
+                } },
                 { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
-                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading import dialog...', success: 'Import - Import flows from file', error: 'Failed to open import' }) },
+                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: async () => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = '.json'
+                  input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0]
+                    if (file) {
+                      toast.promise(importFlowsFromFile(file), {
+                        loading: 'Importing flows...',
+                        success: 'Flows imported successfully',
+                        error: 'Failed to import flows'
+                      })
+                    }
+                  }
+                  input.click()
+                } },
                 { icon: BarChart3, label: 'Analytics', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setActiveTab('analytics') },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading archive...', success: 'Archive - View archived flows', error: 'Failed to load archive' }) },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: async () => {
+                  toast.promise(fetchArchivedFlows(), {
+                    loading: 'Loading archived flows...',
+                    success: (data) => `Found ${data.flows?.length || 0} archived flows`,
+                    error: 'Failed to load archived flows'
+                  })
+                } },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1142,13 +1274,85 @@ export default function OnboardingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateChecklist },
-                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading active checklists...', success: `Active checklists - ${checklists.filter(c => c.status === 'active').length} active checklists`, error: 'Failed to load checklists' }) },
-                { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading...', success: 'Select a checklist to edit', error: 'Action failed' }) },
-                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading...', success: 'Select a checklist to duplicate', error: 'Action failed' }) },
-                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading assignment options...', success: 'Assign - Assign checklists to users', error: 'Failed to load assignment' }) },
+                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: async () => {
+                  const activeCount = checklists.filter(c => c.status === 'active').length
+                  toast.success(`${activeCount} active checklists`)
+                } },
+                { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: async () => {
+                  if (selectedChecklist) {
+                    setSelectedChecklist(selectedChecklist)
+                  } else {
+                    toast.info('Select a checklist to edit')
+                  }
+                } },
+                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: async () => {
+                  if (selectedChecklist && userId) {
+                    toast.promise(
+                      (async () => {
+                        const { data, error } = await supabase.from('onboarding_checklists').insert({
+                          user_id: userId,
+                          name: `${selectedChecklist.name} (Copy)`,
+                          description: selectedChecklist.description,
+                          items: selectedChecklist.items,
+                          status: 'active'
+                        }).select().single()
+                        if (error) throw error
+                        setChecklists(prev => [{
+                          ...selectedChecklist,
+                          id: data.id,
+                          name: `${selectedChecklist.name} (Copy)`,
+                          createdAt: data.created_at
+                        }, ...prev])
+                        return data
+                      })(),
+                      {
+                        loading: 'Duplicating checklist...',
+                        success: 'Checklist duplicated successfully',
+                        error: 'Failed to duplicate checklist'
+                      }
+                    )
+                  } else {
+                    toast.info('Select a checklist to duplicate')
+                  }
+                } },
+                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: async () => {
+                  if (selectedChecklist) {
+                    toast.promise(
+                      (async () => {
+                        const response = await fetch('/api/onboarding/checklists/assign', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ checklistId: selectedChecklist.id })
+                        })
+                        if (!response.ok) throw new Error('Failed to load assignment options')
+                        return response.json()
+                      })(),
+                      {
+                        loading: 'Loading assignment options...',
+                        success: 'Assignment options loaded',
+                        error: 'Failed to load assignment options'
+                      }
+                    )
+                  } else {
+                    toast.info('Select a checklist to assign')
+                  }
+                } },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: handleExportReport },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading archive...', success: 'Archive - View archived checklists', error: 'Failed to load archive' }) },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: async () => {
+                  toast.promise(
+                    (async () => {
+                      const response = await fetch('/api/onboarding/checklists?status=archived')
+                      if (!response.ok) throw new Error('Failed to load archived checklists')
+                      return response.json()
+                    })(),
+                    {
+                      loading: 'Loading archived checklists...',
+                      success: (data) => `Found ${data.checklists?.length || 0} archived checklists`,
+                      error: 'Failed to load archived checklists'
+                    }
+                  )
+                } },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1255,14 +1459,54 @@ export default function OnboardingClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading analytics overview...', success: 'Analytics overview loaded', error: 'Failed to load overview' }) },
-                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Analyzing performance trends...', success: 'Trends - Performance trends loaded', error: 'Failed to load trends' }) },
-                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading detailed breakdown...', success: 'Breakdown - View detailed breakdown', error: 'Failed to load breakdown' }) },
-                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading goals...', success: 'Goals - Set and track goals', error: 'Failed to load goals' }) },
+                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: async () => {
+                  toast.promise(fetchAnalytics('overview'), {
+                    loading: 'Loading analytics overview...',
+                    success: 'Analytics overview loaded',
+                    error: 'Failed to load overview'
+                  })
+                } },
+                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: async () => {
+                  toast.promise(fetchAnalytics('trends'), {
+                    loading: 'Analyzing performance trends...',
+                    success: 'Performance trends loaded',
+                    error: 'Failed to load trends'
+                  })
+                } },
+                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: async () => {
+                  toast.promise(fetchAnalytics('breakdown'), {
+                    loading: 'Loading detailed breakdown...',
+                    success: 'Detailed breakdown loaded',
+                    error: 'Failed to load breakdown'
+                  })
+                } },
+                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: async () => {
+                  toast.promise(fetchAnalytics('goals'), {
+                    loading: 'Loading goals...',
+                    success: 'Goals data loaded',
+                    error: 'Failed to load goals'
+                  })
+                } },
                 { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { setIsLoading(true); window.location.reload() } },
-                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading filter options...', success: 'Filter - Filter analytics data', error: 'Failed to load filters' }) },
-                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading date picker...', success: 'Date range - Select date range', error: 'Failed to load date picker' }) },
+                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: async () => {
+                  toast.promise(
+                    (async () => {
+                      const response = await fetch('/api/onboarding/analytics/filters')
+                      if (!response.ok) throw new Error('Failed to load filters')
+                      return response.json()
+                    })(),
+                    {
+                      loading: 'Loading filter options...',
+                      success: 'Filter options loaded',
+                      error: 'Failed to load filters'
+                    }
+                  )
+                } },
+                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: async () => {
+                  // Show date range picker (this would normally open a modal/dialog)
+                  toast.info('Select a date range from the chart controls')
+                } },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1402,13 +1646,44 @@ export default function OnboardingClient() {
             {/* Users Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading all users...', success: `All users - ${users.length} users total`, error: 'Failed to load users' }) },
-                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading completed users...', success: `Completed - ${users.filter(u => u.flowsCompleted === u.totalFlows).length} users completed onboarding`, error: 'Failed to load data' }) },
-                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading at-risk users...', success: `At Risk - ${users.filter(u => u.status === 'at_risk').length} users at risk`, error: 'Failed to load data' }) },
-                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading churned users...', success: `Churned - ${users.filter(u => u.status === 'churned').length} users churned`, error: 'Failed to load data' }) },
-                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading email options...', success: 'Email - Send bulk email to users', error: 'Failed to load email' }) },
+                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: async () => {
+                  toast.success(`${users.length} users total`)
+                } },
+                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: async () => {
+                  const completedCount = users.filter(u => u.flowsCompleted === u.totalFlows).length
+                  toast.success(`${completedCount} users completed onboarding`)
+                } },
+                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: async () => {
+                  const atRiskCount = users.filter(u => u.status === 'at_risk').length
+                  toast.warning(`${atRiskCount} users at risk`)
+                } },
+                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: async () => {
+                  const churnedCount = users.filter(u => u.status === 'churned').length
+                  toast.error(`${churnedCount} users churned`)
+                } },
+                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: async () => {
+                  const userIds = users.map(u => u.userId)
+                  toast.promise(sendBulkEmail(userIds, 'onboarding_reminder'), {
+                    loading: 'Preparing bulk email...',
+                    success: 'Email campaign started',
+                    error: 'Failed to send emails'
+                  })
+                } },
                 { icon: Download, label: 'Export', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: handleExportReport },
-                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading filter options...', success: 'Filter - Filter user list', error: 'Failed to load filters' }) },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: async () => {
+                  toast.promise(
+                    (async () => {
+                      const response = await fetch('/api/onboarding/users/filters')
+                      if (!response.ok) throw new Error('Failed to load filters')
+                      return response.json()
+                    })(),
+                    {
+                      loading: 'Loading filter options...',
+                      success: 'Filter options loaded',
+                      error: 'Failed to load filters'
+                    }
+                  )
+                } },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { setIsLoading(true); window.location.reload() } },
               ].map((action, i) => (
                 <button
@@ -2081,7 +2356,20 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening flow editor...', success: 'Flow editor ready! Edit your onboarding flow', error: 'Failed to load editor' })}>
+                  <Button className="gap-2" onClick={async () => {
+                    toast.promise(
+                      (async () => {
+                        const response = await fetch(`/api/onboarding/flows/${selectedFlow.id}/editor`)
+                        if (!response.ok) throw new Error('Failed to load editor')
+                        return response.json()
+                      })(),
+                      {
+                        loading: 'Opening flow editor...',
+                        success: 'Flow editor ready',
+                        error: 'Failed to load editor'
+                      }
+                    )
+                  }}>
                     <Edit className="w-4 h-4" />
                     Edit Flow
                   </Button>
@@ -2089,7 +2377,13 @@ export default function OnboardingClient() {
                     <Copy className="w-4 h-4" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading flow analytics...', success: 'Analytics dashboard ready! Viewing detailed metrics', error: 'Failed to load analytics' })}>
+                  <Button variant="outline" className="gap-2" onClick={async () => {
+                    toast.promise(fetchAnalytics('flow', { start: '', end: '' }), {
+                      loading: 'Loading flow analytics...',
+                      success: 'Analytics loaded',
+                      error: 'Failed to load analytics'
+                    })
+                  }}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
@@ -2174,15 +2468,56 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening checklist editor...', success: 'Checklist editor ready! Customize your onboarding steps', error: 'Failed to load editor' })}>
+                  <Button className="gap-2" onClick={async () => {
+                    toast.promise(
+                      (async () => {
+                        const response = await fetch(`/api/onboarding/checklists/${selectedChecklist.id}/editor`)
+                        if (!response.ok) throw new Error('Failed to load editor')
+                        return response.json()
+                      })(),
+                      {
+                        loading: 'Opening checklist editor...',
+                        success: 'Checklist editor ready',
+                        error: 'Failed to load editor'
+                      }
+                    )
+                  }}>
                     <Edit className="w-4 h-4" />
                     Edit Checklist
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing item form...', success: 'Ready to add new checklist item', error: 'Failed to open form' })}>
+                  <Button variant="outline" className="gap-2" onClick={async () => {
+                    toast.promise(
+                      (async () => {
+                        const response = await fetch(`/api/onboarding/checklists/${selectedChecklist.id}/items`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            title: 'New Item',
+                            description: '',
+                            isRequired: false,
+                            order: selectedChecklist.items.length + 1
+                          })
+                        })
+                        if (!response.ok) throw new Error('Failed to add item')
+                        return response.json()
+                      })(),
+                      {
+                        loading: 'Adding new item...',
+                        success: 'New item added',
+                        error: 'Failed to add item'
+                      }
+                    )
+                  }}>
                     <Plus className="w-4 h-4" />
                     Add Item
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading checklist analytics...', success: 'Analytics ready! Viewing completion metrics', error: 'Failed to load analytics' })}>
+                  <Button variant="outline" className="gap-2" onClick={async () => {
+                    toast.promise(fetchAnalytics('checklist'), {
+                      loading: 'Loading checklist analytics...',
+                      success: 'Analytics loaded',
+                      error: 'Failed to load analytics'
+                    })
+                  }}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>

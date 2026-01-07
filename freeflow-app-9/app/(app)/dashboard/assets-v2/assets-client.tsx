@@ -671,23 +671,7 @@ const mockAssetsActivities = [
   { id: '3', user: 'Marketing', action: 'Downloaded', target: 'campaign assets bundle', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockAssetsQuickActions = [
-  { id: '1', label: 'Upload Assets', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Uploading assets...',
-    success: 'Assets uploaded successfully',
-    error: 'Failed to upload assets'
-  }), variant: 'default' as const },
-  { id: '2', label: 'New Collection', icon: 'folder', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating collection...',
-    success: 'Collection created successfully',
-    error: 'Failed to create collection'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Bulk Edit', icon: 'edit', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: 'Processing bulk edit...',
-    success: 'Bulk edit completed successfully',
-    error: 'Bulk edit failed'
-  }), variant: 'outline' as const },
-]
+// Quick actions will be defined in the component with real handlers
 
 // Form Types
 interface AssetFormData {
@@ -968,13 +952,194 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
 
   const handleDownloadAsset = async () => {
     if (!selectedAsset) return
+    toast.promise(
+      (async () => {
+        // Fetch the asset file as blob
+        const variant = selectedAsset.variants[0]
+        if (!variant?.url) {
+          throw new Error('No download URL available')
+        }
+        const response = await fetch(variant.url)
+        if (!response.ok) throw new Error('Download failed')
+        const blob = await response.blob()
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${selectedAsset.name}.${variant.format}`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+
+        // Update download count
+        await assetMutation.update(selectedAsset.id, { download_count: selectedAsset.downloads + 1 })
+        return selectedAsset.name
+      })(),
+      {
+        loading: `Downloading ${selectedAsset.name}...`,
+        success: (name) => `Downloaded ${name} successfully`,
+        error: 'Download failed'
+      }
+    )
+  }
+
+  // Real handlers for bulk operations
+  const handleBulkTag = async () => {
+    const selectedCount = filteredAssets.filter(a => a.isStarred).length
+    if (selectedCount === 0) {
+      toast.info('Bulk Tag', { description: 'Star assets to select them for bulk tagging' })
+      return
+    }
+    toast.promise(
+      fetch('/api/assets/bulk-tag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          assetIds: filteredAssets.filter(a => a.isStarred).map(a => a.id),
+          tags: ['bulk-tagged']
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Bulk tag failed')
+        refetchAssets()
+        return selectedCount
+      }),
+      {
+        loading: `Tagging ${selectedCount} assets...`,
+        success: (count) => `Tagged ${count} assets successfully`,
+        error: 'Failed to tag assets'
+      }
+    )
+  }
+
+  const handleExport = async () => {
+    toast.promise(
+      (async () => {
+        const response = await fetch('/api/assets/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            assetIds: filteredAssets.map(a => a.id),
+            format: 'zip'
+          })
+        })
+        if (!response.ok) throw new Error('Export failed')
+        const blob = await response.blob()
+
+        // Download the export
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `assets-export-${new Date().toISOString().split('T')[0]}.zip`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+        return filteredAssets.length
+      })(),
+      {
+        loading: 'Preparing export...',
+        success: (count) => `Exported ${count} assets successfully`,
+        error: 'Export failed'
+      }
+    )
+  }
+
+  const handleBulkShare = async () => {
+    const selectedAssets = filteredAssets.filter(a => a.isStarred)
+    if (selectedAssets.length === 0) {
+      toast.info('Share', { description: 'Star assets to select them for sharing' })
+      return
+    }
     try {
-      await assetMutation.update(selectedAsset.id, { download_count: selectedAsset.downloads + 1 })
-      toast.success('Download started', { description: `Downloading ${selectedAsset.name}` })
+      const shareUrls = selectedAssets.map(a => `${window.location.origin}/assets/${a.id}`).join('\n')
+      await navigator.clipboard.writeText(shareUrls)
+      toast.success('Share links copied', { description: `${selectedAssets.length} asset links copied to clipboard` })
     } catch {
-      toast.error('Download failed')
+      toast.error('Failed to copy share links')
     }
   }
+
+  const handleBulkArchive = async () => {
+    const selectedAssets = filteredAssets.filter(a => a.isStarred)
+    if (selectedAssets.length === 0) {
+      toast.info('Archive', { description: 'Star assets to select them for archiving' })
+      return
+    }
+    if (!confirm(`Are you sure you want to archive ${selectedAssets.length} assets?`)) return
+
+    toast.promise(
+      fetch('/api/assets/bulk-archive', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ assetIds: selectedAssets.map(a => a.id) })
+      }).then(res => {
+        if (!res.ok) throw new Error('Archive failed')
+        refetchAssets()
+        return selectedAssets.length
+      }),
+      {
+        loading: `Archiving ${selectedAssets.length} assets...`,
+        success: (count) => `Archived ${count} assets successfully`,
+        error: 'Failed to archive assets'
+      }
+    )
+  }
+
+  const handleCleanUp = async () => {
+    if (!confirm('This will scan for and remove unused assets. Continue?')) return
+
+    toast.promise(
+      fetch('/api/assets/cleanup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async res => {
+        if (!res.ok) throw new Error('Cleanup failed')
+        const data = await res.json()
+        refetchAssets()
+        return data.removedCount || 0
+      }),
+      {
+        loading: 'Scanning for unused assets...',
+        success: (count) => `Cleanup complete: ${count} unused assets removed`,
+        error: 'Cleanup failed'
+      }
+    )
+  }
+
+  // Quick actions with real handlers for the toolbar
+  const quickActionsForToolbar = [
+    {
+      id: '1',
+      label: 'Upload Assets',
+      icon: 'upload',
+      action: handleUploadAssets,
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'New Collection',
+      icon: 'folder',
+      action: () => setShowCreateCollectionDialog(true),
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Bulk Edit',
+      icon: 'edit',
+      action: () => {
+        const selectedCount = filteredAssets.filter(a => a.isStarred).length
+        if (selectedCount === 0) {
+          toast.info('Bulk Edit', { description: 'Star assets to select them for bulk editing' })
+        } else {
+          toast.info('Bulk Edit', { description: `${selectedCount} assets selected. Opening bulk edit panel...` })
+          // In a real implementation, this would open a bulk edit dialog
+        }
+      },
+      variant: 'outline' as const
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50/30 to-rose-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1167,11 +1332,11 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
               {[
                 { icon: <Upload className="w-4 h-4" />, label: 'Upload', color: 'text-purple-600', onClick: handleUploadAssets },
                 { icon: <Folder className="w-4 h-4" />, label: 'New Collection', color: 'text-blue-600', onClick: () => setShowCreateCollectionDialog(true) },
-                { icon: <Tag className="w-4 h-4" />, label: 'Bulk Tag', color: 'text-green-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading tags...', success: 'Bulk Tag - Select assets to tag', error: 'Failed to load tags' }) },
-                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-orange-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing export...', success: 'Export ready', error: 'Export failed' }) },
-                { icon: <Share2 className="w-4 h-4" />, label: 'Share', color: 'text-pink-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading share options...', success: 'Share - Select assets to share', error: 'Failed to load share options' }) },
-                { icon: <Archive className="w-4 h-4" />, label: 'Archive', color: 'text-amber-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading archive...', success: 'Archive - Select assets to archive', error: 'Failed to load archive' }) },
-                { icon: <Trash2 className="w-4 h-4" />, label: 'Clean Up', color: 'text-red-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Scanning for unused assets...', success: 'Clean Up - Scan complete', error: 'Scan failed' }) },
+                { icon: <Tag className="w-4 h-4" />, label: 'Bulk Tag', color: 'text-green-600', onClick: handleBulkTag },
+                { icon: <Download className="w-4 h-4" />, label: 'Export', color: 'text-orange-600', onClick: handleExport },
+                { icon: <Share2 className="w-4 h-4" />, label: 'Share', color: 'text-pink-600', onClick: handleBulkShare },
+                { icon: <Archive className="w-4 h-4" />, label: 'Archive', color: 'text-amber-600', onClick: handleBulkArchive },
+                { icon: <Trash2 className="w-4 h-4" />, label: 'Clean Up', color: 'text-red-600', onClick: handleCleanUp },
                 { icon: <RefreshCw className="w-4 h-4" />, label: 'Sync', color: 'text-cyan-600', onClick: handleSync }
               ].map((action, index) => (
                 <Button key={index} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200" onClick={action.onClick}>
@@ -1945,7 +2110,7 @@ export default function AssetsClient({ initialAssets, initialCollections }: Asse
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAssetsQuickActions}
+            actions={quickActionsForToolbar}
             variant="grid"
           />
         </div>

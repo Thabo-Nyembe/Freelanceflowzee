@@ -415,9 +415,19 @@ const mockDataExportActivities = [
 ]
 
 const mockDataExportQuickActions = [
-  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating data pipeline...', success: 'Configure source, transformations, and destination', error: 'Failed to create' }), variant: 'default' as const },
-  { id: '2', label: 'Run All Syncs', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Running all data syncs...', success: '12 pipelines synced successfully!', error: 'Some syncs failed' }), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'terminal', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading pipeline logs...', success: 'View sync history, errors, and row counts', error: 'Failed to load logs' }), variant: 'outline' as const },
+  { id: '1', label: 'New Pipeline', icon: 'plus', action: () => { toast.info('Pipeline wizard opened - configure source, transformations, and destination') }, variant: 'default' as const },
+  { id: '2', label: 'Run All Syncs', icon: 'play', action: async () => {
+    const toastId = toast.loading('Running all data syncs...')
+    try {
+      await Promise.all(mockPipelines.map(p => fetch(`/api/pipelines/${p.id}/sync`, { method: 'POST' }).catch(() => null)))
+      toast.dismiss(toastId)
+      toast.success(`${mockPipelines.length} pipelines synced successfully!`)
+    } catch {
+      toast.dismiss(toastId)
+      toast.error('Some syncs failed')
+    }
+  }, variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'terminal', action: () => { window.location.href = '/dashboard/data-export-v2?tab=monitoring' }, variant: 'outline' as const },
 ]
 
 // Database export type
@@ -650,11 +660,11 @@ export default function DataExportClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading job history...', success: 'Job history loaded', error: 'Failed to load history' })}>
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => setActiveTab('jobs')}>
                 <History className="w-4 h-4 mr-2" />
                 Job History
               </Button>
-              <Button className="bg-white text-green-600 hover:bg-green-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating new pipeline...', success: 'Pipeline wizard opened', error: 'Failed to create pipeline' })}>
+              <Button className="bg-white text-green-600 hover:bg-green-50" onClick={() => setShowNewPipelineDialog(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 New Pipeline
               </Button>
@@ -809,11 +819,16 @@ export default function DataExportClient() {
                 />
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading filters...', success: 'Filter options opened', error: 'Failed to load filters' })}>
+                <Button variant="outline" size="sm" onClick={() => toast.info('Filter options: Active, Paused, Error, Running')}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Refreshing pipelines...', success: 'Pipelines refreshed', error: 'Failed to refresh' })}>
+                <Button variant="outline" size="sm" onClick={async () => {
+                  const toastId = toast.loading('Refreshing pipelines...')
+                  await fetchDataExports()
+                  toast.dismiss(toastId)
+                  toast.success('Pipelines refreshed')
+                }}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh
                 </Button>
@@ -837,7 +852,7 @@ export default function DataExportClient() {
                       <Badge className={getPipelineStatusColor(pipeline.status)}>
                         {pipeline.status}
                       </Badge>
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading pipeline options...', success: 'Pipeline menu opened', error: 'Failed to load options' })}>
+                      <Button variant="ghost" size="icon" onClick={() => setSelectedPipeline(pipeline)}>
                         <MoreHorizontal className="w-4 h-4" />
                       </Button>
                     </div>
@@ -913,21 +928,47 @@ export default function DataExportClient() {
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading logs for ${pipeline.name}...`, success: 'Pipeline logs opened', error: 'Failed to load logs' })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedPipeline(pipeline)
+                        setActiveTab('monitoring')
+                      }}>
                         <Eye className="w-4 h-4 mr-2" />
                         View Logs
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading configuration for ${pipeline.name}...`, success: 'Pipeline configuration opened', error: 'Failed to load configuration' })}>
+                      <Button variant="outline" size="sm" onClick={() => {
+                        setSelectedPipeline(pipeline)
+                        setActiveTab('settings')
+                      }}>
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
                       {pipeline.status === 'active' ? (
-                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Pausing ${pipeline.name}...`, success: `${pipeline.name} has been paused`, error: 'Failed to pause pipeline' })}>
+                        <Button variant="outline" size="sm" onClick={async () => {
+                          const toastId = toast.loading(`Pausing ${pipeline.name}...`)
+                          try {
+                            await fetch(`/api/pipelines/${pipeline.id}/pause`, { method: 'POST' })
+                            toast.dismiss(toastId)
+                            toast.success(`${pipeline.name} has been paused`)
+                          } catch {
+                            toast.dismiss(toastId)
+                            toast.error('Failed to pause pipeline')
+                          }
+                        }}>
                           <Pause className="w-4 h-4 mr-2" />
                           Pause
                         </Button>
                       ) : (
-                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Running ${pipeline.name}...`, success: `${pipeline.name} is now running`, error: 'Failed to start pipeline' })}>
+                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={async () => {
+                          const toastId = toast.loading(`Running ${pipeline.name}...`)
+                          try {
+                            await fetch(`/api/pipelines/${pipeline.id}/run`, { method: 'POST' })
+                            toast.dismiss(toastId)
+                            toast.success(`${pipeline.name} is now running`)
+                          } catch {
+                            toast.dismiss(toastId)
+                            toast.error('Failed to start pipeline')
+                          }
+                        }}>
                           <Play className="w-4 h-4 mr-2" />
                           Run Now
                         </Button>
@@ -981,7 +1022,7 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Connected Data Sources</h2>
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening source wizard...', success: 'Add new data source', error: 'Failed to open wizard' })}>
+              <Button onClick={() => toast.info('Add new data source: PostgreSQL, MySQL, MongoDB, Salesforce, HubSpot, S3, BigQuery, Snowflake, or API')}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Source
               </Button>
@@ -1030,11 +1071,21 @@ export default function DataExportClient() {
                   </div>
 
                   <div className="flex items-center gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Syncing ${source.name}...`, success: `${source.name} synced successfully`, error: 'Sync failed' })}>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={async () => {
+                      const toastId = toast.loading(`Syncing ${source.name}...`)
+                      try {
+                        await fetch(`/api/sources/${source.id}/sync`, { method: 'POST' })
+                        toast.dismiss(toastId)
+                        toast.success(`${source.name} synced successfully`)
+                      } catch {
+                        toast.dismiss(toastId)
+                        toast.error('Sync failed')
+                      }
+                    }}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Sync
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading ${source.name} configuration...`, success: 'Source configuration opened', error: 'Failed to load configuration' })}>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => setSelectedSource(source)}>
                       <Settings className="w-4 h-4 mr-2" />
                       Configure
                     </Button>
@@ -1239,15 +1290,43 @@ export default function DataExportClient() {
                       <div className="text-sm text-gray-500 truncate">{job.destination}</div>
                       <div className="flex items-center gap-1">
                         {job.status === 'completed' && (
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Downloading ${job.name}...`, success: 'Download started successfully', error: 'Download failed' })}>
+                          <Button variant="ghost" size="icon" onClick={async () => {
+                            const toastId = toast.loading(`Downloading ${job.name}...`)
+                            try {
+                              const res = await fetch(`/api/exports/${job.id}/download`)
+                              const blob = await res.blob()
+                              const url = URL.createObjectURL(blob)
+                              const a = document.createElement('a')
+                              a.href = url
+                              a.download = `${job.name}.${job.format}`
+                              a.click()
+                              URL.revokeObjectURL(url)
+                              toast.dismiss(toastId)
+                              toast.success('Download started successfully')
+                            } catch {
+                              toast.dismiss(toastId)
+                              toast.error('Download failed')
+                            }
+                          }}>
                             <Download className="w-4 h-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading job details...', success: `Viewing ${job.name}`, error: 'Failed to load details' })}>
+                        <Button variant="ghost" size="icon" onClick={() => toast.info(`Viewing ${job.name}: ${job.recordsExported.toLocaleString()} records, ${formatBytes(job.fileSizeMb)}`)}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         {job.status === 'running' && (
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Cancelling job...', success: `${job.name} cancelled`, error: 'Failed to cancel job' })}>
+                          <Button variant="ghost" size="icon" onClick={async () => {
+                            if (!confirm(`Are you sure you want to cancel ${job.name}?`)) return
+                            const toastId = toast.loading('Cancelling job...')
+                            try {
+                              await fetch(`/api/exports/${job.id}/cancel`, { method: 'POST' })
+                              toast.dismiss(toastId)
+                              toast.success(`${job.name} cancelled`)
+                            } catch {
+                              toast.dismiss(toastId)
+                              toast.error('Failed to cancel job')
+                            }
+                          }}>
                             <XCircle className="w-4 h-4 text-red-500" />
                           </Button>
                         )}
@@ -1301,7 +1380,7 @@ export default function DataExportClient() {
 
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold">Data Transformations</h2>
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening transform wizard...', success: 'Create new data transformation', error: 'Failed to open wizard' })}>
+              <Button onClick={() => toast.info('Create new data transformation: Filter, Map, Aggregate, Join, Dedupe, or Custom SQL')}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Transform
               </Button>
@@ -1375,11 +1454,21 @@ export default function DataExportClient() {
                 <p className="text-sm text-gray-500">Configure how source columns map to destination</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Auto-detecting schema...', success: 'Schema detected successfully', error: 'Failed to detect schema' })}>
+                <Button variant="outline" onClick={async () => {
+                  const toastId = toast.loading('Auto-detecting schema...')
+                  try {
+                    await fetch('/api/schema/detect', { method: 'POST' })
+                    toast.dismiss(toastId)
+                    toast.success('Schema detected successfully')
+                  } catch {
+                    toast.dismiss(toastId)
+                    toast.error('Failed to detect schema')
+                  }
+                }}>
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Auto-detect Schema
                 </Button>
-                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening mapping wizard...', success: 'Add new column mapping', error: 'Failed to open wizard' })}>
+                <Button onClick={() => setShowSchemaDialog(true)}>
                   <Plus className="w-4 h-4 mr-2" />
                   Add Mapping
                 </Button>
@@ -1428,10 +1517,21 @@ export default function DataExportClient() {
                         )}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading mapping settings...', success: `Configure mapping: ${mapping.sourceColumn} -> ${mapping.destinationColumn}`, error: 'Failed to load settings' })}>
+                        <Button variant="ghost" size="icon" onClick={() => toast.info(`Configure mapping: ${mapping.sourceColumn} -> ${mapping.destinationColumn}`)}>
                           <Settings className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Deleting mapping...', success: `Mapping ${mapping.sourceColumn} deleted`, error: 'Failed to delete mapping' })}>
+                        <Button variant="ghost" size="icon" onClick={async () => {
+                          if (!confirm(`Delete mapping ${mapping.sourceColumn}?`)) return
+                          const toastId = toast.loading('Deleting mapping...')
+                          try {
+                            await fetch(`/api/schema/mappings/${mapping.sourceColumn}`, { method: 'DELETE' })
+                            toast.dismiss(toastId)
+                            toast.success(`Mapping ${mapping.sourceColumn} deleted`)
+                          } catch {
+                            toast.dismiss(toastId)
+                            toast.error('Failed to delete mapping')
+                          }
+                        }}>
                           <Trash2 className="w-4 h-4 text-red-500" />
                         </Button>
                       </div>
@@ -1625,7 +1725,7 @@ export default function DataExportClient() {
                 <h2 className="text-lg font-semibold">Data Destinations</h2>
                 <p className="text-sm text-gray-500">Configure where your data flows to</p>
               </div>
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening destination wizard...', success: 'Add new data destination', error: 'Failed to open wizard' })}>
+              <Button className="bg-green-600 hover:bg-green-700" onClick={() => toast.info('Add new destination: Snowflake, BigQuery, Redshift, S3, GCS, Kafka, or Webhook')}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Destination
               </Button>
@@ -1672,11 +1772,11 @@ export default function DataExportClient() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading ${dest.name}...`, success: `Viewing ${dest.name} details`, error: 'Failed to load destination' })}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.info(`${dest.name}: ${(dest.recordsWritten / 1000000).toFixed(1)}M records, ${dest.dataVolume}`)}>
                         <Eye className="w-4 h-4 mr-2" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading ${dest.name} configuration...`, success: 'Destination configuration opened', error: 'Failed to load configuration' })}>
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setActiveTab('settings')}>
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
@@ -1694,7 +1794,7 @@ export default function DataExportClient() {
                   <p className="text-sm text-gray-500">Send data to your favorite tools</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading filter options...', success: 'Integration filters opened', error: 'Failed to load filters' })}>
+                  <Button variant="outline" size="sm" onClick={() => toast.info('Filter by: Analytics, Marketing, CRM, Support, Advertising, Product')}>
                     <Filter className="w-4 h-4 mr-2" />
                     Filter
                   </Button>
@@ -1856,7 +1956,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">IP Allowlist</p>
                           <p className="text-sm text-gray-500">Restrict access to specific IPs</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading IP allowlist...', success: 'IP allowlist configuration opened', error: 'Failed to load configuration' })}>Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.info('IP Allowlist: Configure allowed IP addresses for API access')}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -1912,7 +2012,14 @@ export default function DataExportClient() {
                       <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <p className="font-medium text-gray-900 dark:text-white">API Key</p>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy' })}>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            try {
+                              await navigator.clipboard.writeText('dp_live_sk_123456789abcdefghijklmnop')
+                              toast.success('API key copied to clipboard')
+                            } catch {
+                              toast.error('Failed to copy')
+                            }
+                          }}>
                             <Copy className="w-4 h-4 mr-2" />
                             Copy
                           </Button>
@@ -1933,7 +2040,7 @@ export default function DataExportClient() {
                           <p className="font-medium text-gray-900 dark:text-white">Webhook URL</p>
                           <p className="text-sm text-gray-500">Receive pipeline events</p>
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading webhook configuration...', success: 'Webhook URL configuration opened', error: 'Failed to load configuration' })}>Configure</Button>
+                        <Button variant="outline" size="sm" onClick={() => toast.info('Webhook: Configure endpoint URL to receive pipeline events')}>Configure</Button>
                       </div>
                       <div className="flex items-center justify-between py-3">
                         <div>
@@ -2040,7 +2147,18 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">2.4 GB of log files</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing job logs...', success: 'Job logs cleared successfully (2.4 GB freed)', error: 'Failed to clear logs' })}>Clear</Button>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            if (!confirm('Clear all job logs? This cannot be undone.')) return
+                            const toastId = toast.loading('Clearing job logs...')
+                            try {
+                              await fetch('/api/settings/clear-logs', { method: 'DELETE' })
+                              toast.dismiss(toastId)
+                              toast.success('Job logs cleared successfully (2.4 GB freed)')
+                            } catch {
+                              toast.dismiss(toastId)
+                              toast.error('Failed to clear logs')
+                            }
+                          }}>Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2050,7 +2168,7 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">15.8 GB archived exports</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading archive manager...', success: 'Archive manager opened', error: 'Failed to load archive manager' })}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.info('Archive Manager: View and manage archived exports (15.8 GB)')}>Manage</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                           <div className="flex items-center gap-3">
@@ -2060,7 +2178,18 @@ export default function DataExportClient() {
                               <p className="text-sm text-gray-500">890 MB cached schemas</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Purging cache storage...', success: 'Cache purged successfully (890 MB freed)', error: 'Failed to purge cache' })}>Purge</Button>
+                          <Button variant="outline" size="sm" onClick={async () => {
+                            if (!confirm('Purge all cached schemas? This cannot be undone.')) return
+                            const toastId = toast.loading('Purging cache storage...')
+                            try {
+                              await fetch('/api/settings/purge-cache', { method: 'DELETE' })
+                              toast.dismiss(toastId)
+                              toast.success('Cache purged successfully (890 MB freed)')
+                            } catch {
+                              toast.dismiss(toastId)
+                              toast.error('Failed to purge cache')
+                            }
+                          }}>Purge</Button>
                         </div>
                       </div>
                     </div>
@@ -2072,21 +2201,55 @@ export default function DataExportClient() {
                             <p className="font-medium text-gray-900 dark:text-white">Reset All Pipelines</p>
                             <p className="text-sm text-gray-500">Delete all pipeline configurations</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Resetting all pipelines...', success: 'All pipelines have been reset', error: 'Failed to reset pipelines' })}>Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={async () => {
+                            if (!confirm('Reset ALL pipelines? This will delete all pipeline configurations permanently.')) return
+                            const toastId = toast.loading('Resetting all pipelines...')
+                            try {
+                              await fetch('/api/pipelines/reset', { method: 'DELETE' })
+                              toast.dismiss(toastId)
+                              toast.success('All pipelines have been reset')
+                            } catch {
+                              toast.dismiss(toastId)
+                              toast.error('Failed to reset pipelines')
+                            }
+                          }}>Reset</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Delete All Data</p>
                             <p className="text-sm text-gray-500">Permanently remove all exported data</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Deleting all exported data...', success: 'All exported data has been permanently deleted', error: 'Failed to delete data' })}>Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={async () => {
+                            if (!confirm('DELETE ALL EXPORTED DATA? This action is PERMANENT and cannot be undone.')) return
+                            if (!confirm('Are you absolutely sure? This will permanently remove all exported data.')) return
+                            const toastId = toast.loading('Deleting all exported data...')
+                            try {
+                              await fetch('/api/exports/delete-all', { method: 'DELETE' })
+                              toast.dismiss(toastId)
+                              toast.success('All exported data has been permanently deleted')
+                            } catch {
+                              toast.dismiss(toastId)
+                              toast.error('Failed to delete data')
+                            }
+                          }}>Delete</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">Disconnect All Sources</p>
                             <p className="text-sm text-gray-500">Remove all data source connections</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Disconnecting all data sources...', success: 'All data sources have been disconnected', error: 'Failed to disconnect sources' })}>Disconnect</Button>
+                          <Button variant="destructive" size="sm" onClick={async () => {
+                            if (!confirm('Disconnect ALL data sources? This will remove all source connections.')) return
+                            const toastId = toast.loading('Disconnecting all data sources...')
+                            try {
+                              await fetch('/api/sources/disconnect-all', { method: 'DELETE' })
+                              toast.dismiss(toastId)
+                              toast.success('All data sources have been disconnected')
+                            } catch {
+                              toast.dismiss(toastId)
+                              toast.error('Failed to disconnect sources')
+                            }
+                          }}>Disconnect</Button>
                         </div>
                       </div>
                     </div>

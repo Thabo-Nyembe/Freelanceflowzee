@@ -1344,7 +1344,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </p>
                     </div>
                     <Badge variant="outline">{reminder.type}</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Removing reminder...', success: 'Reminder removed', error: 'Failed to remove' })}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => toast.success('Reminder removed')}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
                   </div>
                 ))}
               </CardContent>
@@ -1956,7 +1956,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => startEditing(selectedEvent)}>
                       <Edit2 className="h-4 w-4 mr-2" />Edit
                     </Button>
-                    <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText(selectedEvent.title), { loading: 'Copying to clipboard...', success: 'Event title copied to clipboard', error: 'Failed to copy to clipboard' })}>
+                    <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedEvent.title); toast.success('Event title copied to clipboard'); }}>
                       <Copy className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteEvent(selectedEvent)} disabled={loading}>

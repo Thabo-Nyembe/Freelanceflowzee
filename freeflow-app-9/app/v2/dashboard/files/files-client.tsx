@@ -199,19 +199,39 @@ const filesActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const filesQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Creating new file...', success: 'File created successfully', error: 'Failed to create file' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting files...', success: 'Files exported successfully', error: 'Failed to export files' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Opening file settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
+// Quick actions will be defined inside component to access handlers
+const getFilesQuickActions = (
+  handleUploadFile: () => Promise<void>,
+  handleExportFiles: () => Promise<void>,
+  router: ReturnType<typeof useRouter>
+) => [
+  {
+    id: '1',
+    label: 'New Item',
+    icon: 'Plus',
+    shortcut: 'N',
+    action: async () => {
+      await handleUploadFile()
+    }
+  },
+  {
+    id: '2',
+    label: 'Export',
+    icon: 'Download',
+    shortcut: 'E',
+    action: async () => {
+      await handleExportFiles()
+    }
+  },
+  {
+    id: '3',
+    label: 'Settings',
+    icon: 'Settings',
+    shortcut: 'S',
+    action: async () => {
+      router.push('/v2/settings')
+    }
+  },
 ]
 
 export default function FilesClient() {
@@ -301,221 +321,298 @@ export default function FilesClient() {
   }, [searchQuery, filterType, files, sortBy])
 
   // ============================================================================
-  // HANDLER 1: DOWNLOAD FILE
+  // HANDLER 1: DOWNLOAD FILE - Real blob download
   // ============================================================================
 
   const handleDownloadFile = useCallback(async (file: ExtendedFile) => {
-    try {
-      logger.info('File download initiated', {
-        fileName: file.name,
-        fileSize: file.size,
-        project: file.project
-      })
-
-      // Simulate API call
-      const response = await fetch('/api/client-zone/files/download', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileId: file.id,
+    toast.promise(
+      (async () => {
+        logger.info('File download initiated', {
           fileName: file.name,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
+          fileSize: file.size,
+          project: file.project
         })
-      })
 
-      if (!response.ok) {
-        throw new Error('Failed to download file')
+        // Real API call to get file blob
+        const response = await fetch(`/api/files/${file.id}/download`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/octet-stream'
+          }
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to download file')
+        }
+
+        // Get the blob from response
+        const blob = await response.blob()
+
+        // Create object URL for the blob
+        const blobUrl = window.URL.createObjectURL(blob)
+
+        // Create download link and trigger download
+        const link = document.createElement('a')
+        link.href = blobUrl
+        link.download = file.name
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+
+        // Cleanup
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(blobUrl)
+
+        logger.info('File download completed', { fileName: file.name })
+
+        // Update download count
+        setFiles(prevFiles => prevFiles.map(f =>
+          f.id === file.id
+            ? { ...f, downloads: (f.downloads || 0) + 1 }
+            : f
+        ))
+
+        return file.name
+      })(),
+      {
+        loading: `Downloading ${file.name}...`,
+        success: (name) => `${name} downloaded successfully`,
+        error: (err) => err.message || 'Failed to download file'
       }
-
-      logger.info('File download completed', { fileName: file.name })
-
-      // Simulate download
-      const element = document.createElement('a')
-      element.setAttribute('href', '#')
-      element.setAttribute('download', file.name)
-      element.style.display = 'none'
-      document.body.appendChild(element)
-      element.click()
-      document.body.removeChild(element)
-
-      // Update download count
-      setFiles(files.map(f =>
-        f.id === file.id
-          ? { ...f, downloads: (f.downloads || 0) + 1 }
-          : f
-      ))
-
-      toast.success('Download started!', {
-        description: `${file.name} is downloading`
-      })
-    } catch (error: any) {
-      logger.error('Failed to download file', { error, fileName: file.name })
-      toast.error('Failed to download file', {
-        description: error.message || 'Please try again later'
-      })
-    }
-  }, [files])
+    )
+  }, [])
 
   // ============================================================================
-  // HANDLER 2: UPLOAD FILE
+  // HANDLER 2: UPLOAD FILE - Real FormData POST to /api/files
   // ============================================================================
 
   const handleUploadFile = useCallback(async () => {
-    try {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.accept = '*/*'
+
+    input.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement
+      const uploadedFiles = target.files
+
+      if (!uploadedFiles || uploadedFiles.length === 0) return
+
       setIsUploading(true)
-      logger.info('File upload initiated')
+      logger.info('File upload initiated', { fileCount: uploadedFiles.length })
 
-      const input = document.createElement('input')
-      input.type = 'file'
-      input.multiple = true
-      input.onchange = async (e: any) => {
-        const uploadedFiles = e.target.files
-
-        for (const file of uploadedFiles) {
-          try {
+      for (const file of Array.from(uploadedFiles)) {
+        toast.promise(
+          (async () => {
             logger.info('Uploading file', {
               fileName: file.name,
-              fileSize: file.size
+              fileSize: file.size,
+              fileType: file.type
             })
 
-            // Simulate API call
-            const response = await fetch('/api/client-zone/files/upload', {
+            // Create FormData for real file upload
+            const formData = new FormData()
+            formData.append('file', file)
+            formData.append('fileName', file.name)
+            formData.append('project', 'Recent Upload')
+
+            // Real API call with FormData
+            const response = await fetch('/api/files', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                fileName: file.name,
-                fileSize: file.size,
-                clientId: KAZI_CLIENT_DATA.clientInfo.email
-              })
+              body: formData
             })
 
             if (!response.ok) {
-              throw new Error('Failed to upload file')
+              const errorData = await response.json().catch(() => ({}))
+              throw new Error(errorData.error || 'Failed to upload file')
             }
 
-            // Add file to list
+            const result = await response.json()
+            logger.info('File uploaded successfully', { fileName: file.name, fileId: result.id })
+
+            // Add file to list with response data
             const newFile: ExtendedFile = {
-              id: files.length + 1,
+              id: result.id || Date.now(),
               name: file.name,
               size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
               uploadedBy: KAZI_CLIENT_DATA.clientInfo.contactPerson,
               uploadDate: new Date().toISOString().split('T')[0],
               project: 'Recent Upload',
-              type: 'document',
+              type: file.type.includes('image') ? 'image' :
+                    file.type.includes('video') ? 'video' :
+                    file.name.endsWith('.zip') || file.name.endsWith('.rar') ? 'archive' : 'document',
               downloads: 0,
               views: 0,
               shared: false,
               sharedWith: []
             }
 
-            setFiles([newFile, ...files])
-
-            logger.info('File uploaded successfully', { fileName: file.name })
-            toast.success('File uploaded!', {
-              description: file.name
-            })
-          } catch (error: any) {
-            logger.error('Failed to upload file', { error, fileName: file.name })
-            toast.error('Failed to upload file', {
-              description: `${file.name}: ${error.message}`
-            })
+            setFiles(prevFiles => [newFile, ...prevFiles])
+            return file.name
+          })(),
+          {
+            loading: `Uploading ${file.name}...`,
+            success: (name) => `${name} uploaded successfully`,
+            error: (err) => `Failed to upload ${file.name}: ${err.message}`
           }
-        }
+        )
       }
-      input.click()
-    } finally {
+
       setIsUploading(false)
     }
-  }, [files])
+
+    input.click()
+  }, [])
 
   // ============================================================================
-  // HANDLER 3: DELETE FILE
+  // HANDLER 3: DELETE FILE - confirm() + real DELETE request
   // ============================================================================
 
   const handleDeleteFile = useCallback(async (fileId: number, fileName: string) => {
-    try {
-      logger.info('File deletion initiated', { fileId, fileName })
+    // Confirm deletion with user
+    const confirmed = window.confirm(`Are you sure you want to delete "${fileName}"? This action cannot be undone.`)
 
-      const response = await fetch('/api/client-zone/files/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileId,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to delete file')
-      }
-
-      setFiles(files.filter(f => f.id !== fileId))
-      setSelectedFile(null)
-
-      logger.info('File deleted successfully', { fileId, fileName })
-      toast.success('File deleted', {
-        description: fileName
-      })
-    } catch (error: any) {
-      logger.error('Failed to delete file', { error, fileId })
-      toast.error('Failed to delete file')
+    if (!confirmed) {
+      logger.info('File deletion cancelled by user', { fileId, fileName })
+      return
     }
-  }, [files])
+
+    toast.promise(
+      (async () => {
+        logger.info('File deletion initiated', { fileId, fileName })
+
+        // Real DELETE request to API
+        const response = await fetch(`/api/files/${fileId}`, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to delete file')
+        }
+
+        logger.info('File deleted successfully', { fileId, fileName })
+
+        // Remove file from state
+        setFiles(prevFiles => prevFiles.filter(f => f.id !== fileId))
+        setSelectedFile(null)
+
+        return fileName
+      })(),
+      {
+        loading: `Deleting ${fileName}...`,
+        success: (name) => `${name} deleted successfully`,
+        error: (err) => err.message || 'Failed to delete file'
+      }
+    )
+  }, [])
 
   // ============================================================================
-  // HANDLER 4: SHARE FILE
+  // HANDLER 4: SHARE FILE - Web Share API or copy link fallback
   // ============================================================================
 
   const handleShareFile = useCallback(async (file: ExtendedFile) => {
-    try {
-      logger.info('File share initiated', { fileId: file.id, fileName: file.name })
+    const shareUrl = `${window.location.origin}/files/${file.id}`
 
-      const response = await fetch('/api/client-zone/files/share', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileId: file.id,
-          clientId: KAZI_CLIENT_DATA.clientInfo.email
+    logger.info('File share initiated', { fileId: file.id, fileName: file.name })
+
+    // Try Web Share API first (available on mobile and some desktop browsers)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: file.name,
+          text: `Check out this file: ${file.name}`,
+          url: shareUrl
         })
-      })
 
-      if (!response.ok) {
-        throw new Error('Failed to share file')
+        logger.info('File shared via Web Share API', { fileId: file.id })
+
+        // Update shared status
+        setFiles(prevFiles => prevFiles.map(f =>
+          f.id === file.id ? { ...f, shared: true } : f
+        ))
+
+        toast.success('File shared successfully!')
+        return
+      } catch (shareError: any) {
+        // User cancelled or share failed, fall back to clipboard
+        if (shareError.name === 'AbortError') {
+          logger.info('Share cancelled by user', { fileId: file.id })
+          return
+        }
+        logger.info('Web Share API not available, falling back to clipboard', { error: shareError })
       }
+    }
 
-      logger.info('File shared successfully', { fileId: file.id })
+    // Fallback: Copy link to clipboard
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+
+      // Update shared status
+      setFiles(prevFiles => prevFiles.map(f =>
+        f.id === file.id ? { ...f, shared: true } : f
+      ))
+
+      logger.info('File share link copied to clipboard', { fileId: file.id })
       toast.success('Share link copied!', {
         description: 'File link copied to clipboard'
       })
-    } catch (error: any) {
-      logger.error('Failed to share file', { error, fileId: file.id })
-      toast.error('Failed to share file')
+    } catch (clipboardError: any) {
+      logger.error('Failed to copy share link', { error: clipboardError, fileId: file.id })
+      toast.error('Failed to share file', {
+        description: 'Could not copy link to clipboard'
+      })
     }
   }, [])
 
   // ============================================================================
-  // HANDLER 5: VIEW FILE
+  // HANDLER 5: VIEW FILE - Real file preview
   // ============================================================================
 
   const handleViewFile = useCallback(async (file: ExtendedFile) => {
-    try {
-      logger.info('File preview initiated', { fileId: file.id, fileName: file.name })
+    toast.promise(
+      (async () => {
+        logger.info('File preview initiated', { fileId: file.id, fileName: file.name })
 
-      // Update view count
-      setFiles(files.map(f =>
-        f.id === file.id
-          ? { ...f, views: (f.views || 0) + 1 }
-          : f
-      ))
+        // Fetch file preview URL from API
+        const response = await fetch(`/api/files/${file.id}/preview`, {
+          method: 'GET'
+        })
 
-      toast.info('Opening file preview...', {
-        description: file.name
-      })
-    } catch (error: any) {
-      logger.error('Failed to open file preview', { error })
-      toast.error('Failed to open file preview')
-    }
-  }, [files])
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to load file preview')
+        }
+
+        const data = await response.json()
+
+        // Update view count in state
+        setFiles(prevFiles => prevFiles.map(f =>
+          f.id === file.id
+            ? { ...f, views: (f.views || 0) + 1 }
+            : f
+        ))
+
+        // Open preview in new tab or modal
+        if (data.previewUrl) {
+          window.open(data.previewUrl, '_blank', 'noopener,noreferrer')
+        } else {
+          // Fallback: open file directly
+          window.open(`/api/files/${file.id}/download`, '_blank', 'noopener,noreferrer')
+        }
+
+        logger.info('File preview opened', { fileId: file.id })
+        return file.name
+      })(),
+      {
+        loading: `Loading preview for ${file.name}...`,
+        success: (name) => `Opened preview for ${name}`,
+        error: (err) => err.message || 'Failed to open file preview'
+      }
+    )
+  }, [])
 
   // ============================================================================
   // HANDLER 6: COPY FILE LINK
@@ -523,7 +620,7 @@ export default function FilesClient() {
 
   const handleCopyLink = useCallback(async (file: ExtendedFile) => {
     try {
-      const link = `https://files.kazi.io/${file.id}/${file.name}`
+      const link = `${window.location.origin}/files/${file.id}/${encodeURIComponent(file.name)}`
       await navigator.clipboard.writeText(link)
       logger.info('File link copied', { fileId: file.id })
       toast.success('Link copied to clipboard!')
@@ -532,6 +629,155 @@ export default function FilesClient() {
       toast.error('Failed to copy link')
     }
   }, [])
+
+  // ============================================================================
+  // HANDLER 7: RENAME FILE - PUT to /api/files/{id}
+  // ============================================================================
+
+  const handleRenameFile = useCallback(async (file: ExtendedFile) => {
+    const newName = window.prompt('Enter new file name:', file.name)
+
+    if (!newName || newName === file.name) {
+      return
+    }
+
+    toast.promise(
+      (async () => {
+        logger.info('File rename initiated', { fileId: file.id, oldName: file.name, newName })
+
+        const response = await fetch(`/api/files/${file.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: newName })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to rename file')
+        }
+
+        logger.info('File renamed successfully', { fileId: file.id, newName })
+
+        // Update file in state
+        setFiles(prevFiles => prevFiles.map(f =>
+          f.id === file.id ? { ...f, name: newName } : f
+        ))
+
+        // Update selected file if it's the renamed one
+        if (selectedFile?.id === file.id) {
+          setSelectedFile(prev => prev ? { ...prev, name: newName } : null)
+        }
+
+        return { oldName: file.name, newName }
+      })(),
+      {
+        loading: `Renaming ${file.name}...`,
+        success: (data) => `Renamed "${data.oldName}" to "${data.newName}"`,
+        error: (err) => err.message || 'Failed to rename file'
+      }
+    )
+  }, [selectedFile])
+
+  // ============================================================================
+  // HANDLER 8: MOVE FILE - PUT to /api/files/{id}/move
+  // ============================================================================
+
+  const handleMoveFile = useCallback(async (file: ExtendedFile) => {
+    const newProject = window.prompt('Enter destination project/folder:', file.project)
+
+    if (!newProject || newProject === file.project) {
+      return
+    }
+
+    toast.promise(
+      (async () => {
+        logger.info('File move initiated', { fileId: file.id, from: file.project, to: newProject })
+
+        const response = await fetch(`/api/files/${file.id}/move`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destination: newProject })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to move file')
+        }
+
+        logger.info('File moved successfully', { fileId: file.id, newProject })
+
+        // Update file in state
+        setFiles(prevFiles => prevFiles.map(f =>
+          f.id === file.id ? { ...f, project: newProject } : f
+        ))
+
+        // Update selected file if it's the moved one
+        if (selectedFile?.id === file.id) {
+          setSelectedFile(prev => prev ? { ...prev, project: newProject } : null)
+        }
+
+        return { fileName: file.name, destination: newProject }
+      })(),
+      {
+        loading: `Moving ${file.name}...`,
+        success: (data) => `Moved "${data.fileName}" to "${data.destination}"`,
+        error: (err) => err.message || 'Failed to move file'
+      }
+    )
+  }, [selectedFile])
+
+  // ============================================================================
+  // HANDLER 9: EXPORT FILES - Bulk export selected files
+  // ============================================================================
+
+  const handleExportFiles = useCallback(async () => {
+    toast.promise(
+      (async () => {
+        logger.info('Export files initiated', { fileCount: filteredFiles.length })
+
+        // Request bulk export from API
+        const response = await fetch('/api/files/export', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileIds: filteredFiles.map(f => f.id)
+          })
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || 'Failed to export files')
+        }
+
+        // Get the export blob (zip file)
+        const blob = await response.blob()
+
+        // Create download link
+        const blobUrl = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = blobUrl
+        link.download = `files-export-${new Date().toISOString().split('T')[0]}.zip`
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+
+        // Cleanup
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(blobUrl)
+
+        logger.info('Files exported successfully', { fileCount: filteredFiles.length })
+        return filteredFiles.length
+      })(),
+      {
+        loading: `Exporting ${filteredFiles.length} files...`,
+        success: (count) => `Successfully exported ${count} files`,
+        error: (err) => err.message || 'Failed to export files'
+      }
+    )
+  }, [filteredFiles])
+
+  // Create quick actions with real handlers
+  const filesQuickActions = getFilesQuickActions(handleUploadFile, handleExportFiles, router)
 
   // ============================================================================
   // SECURE FILE DELIVERY HANDLERS

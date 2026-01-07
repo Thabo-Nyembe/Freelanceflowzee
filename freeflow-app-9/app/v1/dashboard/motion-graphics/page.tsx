@@ -44,6 +44,14 @@ const logger = createFeatureLogger('MotionGraphicsPage')
 
 type ViewMode = 'projects' | 'editor' | 'templates' | 'assets'
 type EditorPanel = 'layers' | 'timeline' | 'properties' | 'effects'
+type EditorTool = 'move' | 'text' | 'image' | 'video' | 'select'
+
+interface LayerState {
+  id: string
+  name: string
+  visible: boolean
+  locked: boolean
+}
 
 export default function MotionGraphicsPage() {
   // A+++ STATE MANAGEMENT
@@ -64,6 +72,14 @@ export default function MotionGraphicsPage() {
   const [currentTime, setCurrentTime] = useState(0)
   const [selectedLayers, setSelectedLayers] = useState<string[]>([])
   const [zoomLevel, setZoomLevel] = useState([100])
+  const [activeTool, setActiveTool] = useState<EditorTool>('select')
+  const [layers, setLayers] = useState<LayerState[]>([
+    { id: '1', name: 'Text Layer', visible: true, locked: false },
+    { id: '2', name: 'Shape Layer', visible: true, locked: false },
+    { id: '3', name: 'Image Layer', visible: true, locked: false }
+  ])
+  const [isCanvasMaximized, setIsCanvasMaximized] = useState(false)
+  const [canvasRotation, setCanvasRotation] = useState(0)
 
   const storagePercentage = calculateStoragePercentage(
     motionStats?.storageUsed || 0,
@@ -117,6 +133,169 @@ export default function MotionGraphicsPage() {
 
   const handlePlayPause = () => {
     setIsPlaying(!isPlaying)
+  }
+
+  // Real handler: Copy share link to clipboard
+  const handleShareProject = async (project: any) => {
+    try {
+      const shareUrl = `${window.location.origin}/shared/motion/${project.id}`
+      await navigator.clipboard.writeText(shareUrl)
+      toast.success('Share link copied', {
+        description: 'Project share link has been copied to clipboard'
+      })
+    } catch (error) {
+      toast.error('Failed to copy share link', {
+        description: 'Please try again or copy the URL manually'
+      })
+    }
+  }
+
+  // Real handler: Download project data
+  const handleDownloadProject = async (project: any) => {
+    try {
+      const projectData = {
+        id: project.id,
+        name: project.name,
+        description: project.description,
+        duration: project.duration,
+        width: project.width,
+        height: project.height,
+        frameRate: project.frameRate,
+        tags: project.tags,
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(projectData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${project.name.replace(/\s+/g, '-').toLowerCase()}-motion-project.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Download started', {
+        description: `${project.name} project file is downloading`
+      })
+    } catch (error) {
+      toast.error('Failed to download', {
+        description: 'Could not generate project file'
+      })
+    }
+  }
+
+  // Real handler: Duplicate project via API
+  const handleDuplicateProject = async (project: any) => {
+    try {
+      const res = await fetch('/api/motion-projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...project,
+          id: undefined,
+          name: `${project.name} (Copy)`,
+          createdAt: new Date().toISOString()
+        })
+      })
+      if (!res.ok) throw new Error('Failed to duplicate')
+      const newProject = await res.json()
+      setMotionProjects(prev => [...prev, newProject])
+      toast.success('Project duplicated', {
+        description: `Created copy: ${project.name} (Copy)`
+      })
+    } catch (error) {
+      // Fallback: add locally if API not available
+      const duplicatedProject = {
+        ...project,
+        id: `${project.id}-copy-${Date.now()}`,
+        name: `${project.name} (Copy)`,
+        createdAt: new Date().toISOString()
+      }
+      setMotionProjects(prev => [...prev, duplicatedProject])
+      toast.success('Project duplicated locally', {
+        description: `Created copy: ${project.name} (Copy)`
+      })
+    }
+  }
+
+  // Real handler: Set active editor tool
+  const handleSetTool = (tool: EditorTool) => {
+    setActiveTool(tool)
+    toast.success(`${tool.charAt(0).toUpperCase() + tool.slice(1)} tool active`, {
+      description: `Now using the ${tool} tool`
+    })
+  }
+
+  // Real handler: Rotate canvas
+  const handleRotateCanvas = () => {
+    const newRotation = (canvasRotation + 90) % 360
+    setCanvasRotation(newRotation)
+    toast.success('Rotation applied', {
+      description: `Canvas rotated to ${newRotation} degrees`
+    })
+  }
+
+  // Real handler: Toggle canvas maximize
+  const handleMaximizeCanvas = () => {
+    setIsCanvasMaximized(!isCanvasMaximized)
+    toast.success(isCanvasMaximized ? 'Canvas restored' : 'Canvas maximized', {
+      description: isCanvasMaximized ? 'Returned to normal view' : 'Full screen canvas mode'
+    })
+  }
+
+  // Real handler: Add new layer
+  const handleAddLayer = () => {
+    const newLayer: LayerState = {
+      id: `layer-${Date.now()}`,
+      name: `Layer ${layers.length + 1}`,
+      visible: true,
+      locked: false
+    }
+    setLayers(prev => [...prev, newLayer])
+    toast.success('New layer added', {
+      description: `Created: ${newLayer.name}`
+    })
+  }
+
+  // Real handler: Toggle layer visibility
+  const handleToggleLayerVisibility = (layerId: string) => {
+    setLayers(prev => prev.map(layer =>
+      layer.id === layerId ? { ...layer, visible: !layer.visible } : layer
+    ))
+    const layer = layers.find(l => l.id === layerId)
+    const newState = layer ? !layer.visible : true
+    toast.success(`Layer ${newState ? 'shown' : 'hidden'}`, {
+      description: `${layer?.name || 'Layer'} is now ${newState ? 'visible' : 'hidden'}`
+    })
+  }
+
+  // Real handler: Toggle layer lock
+  const handleToggleLayerLock = (layerId: string) => {
+    setLayers(prev => prev.map(layer =>
+      layer.id === layerId ? { ...layer, locked: !layer.locked } : layer
+    ))
+    const layer = layers.find(l => l.id === layerId)
+    const newState = layer ? !layer.locked : true
+    toast.success(`Layer ${newState ? 'locked' : 'unlocked'}`, {
+      description: `${layer?.name || 'Layer'} is now ${newState ? 'locked' : 'editable'}`
+    })
+  }
+
+  // Real handler: Skip to previous frame
+  const handleSkipBack = () => {
+    const newTime = Math.max(0, currentTime - 5)
+    setCurrentTime(newTime)
+    toast.success('Skipped backward', {
+      description: `Moved to frame ${newTime}`
+    })
+  }
+
+  // Real handler: Skip to next frame
+  const handleSkipForward = () => {
+    const newTime = Math.min(100, currentTime + 5)
+    setCurrentTime(newTime)
+    toast.success('Skipped forward', {
+      description: `Moved to frame ${newTime}`
+    })
   }
 
   // A+++ LOADING STATE
@@ -328,7 +507,7 @@ export default function MotionGraphicsPage() {
                             <h3 className="font-semibold text-white mb-1">{project.name}</h3>
                             <p className="text-sm text-gray-400">{project.description}</p>
                           </div>
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Sharing...', success: 'Share link copied', error: 'Failed to share' })}>
+                          <Button variant="ghost" size="icon" onClick={() => handleShareProject(project)}>
                             <Share2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -369,10 +548,10 @@ export default function MotionGraphicsPage() {
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading...', success: 'Download started', error: 'Failed to download' })}>
+                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => handleDownloadProject(project)}>
                             <Download className="w-4 h-4" />
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Project duplicated', error: 'Failed to copy' })}>
+                          <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => handleDuplicateProject(project)}>
                             <Copy className="w-4 h-4" />
                           </Button>
                         </div>
@@ -391,23 +570,23 @@ export default function MotionGraphicsPage() {
               <LiquidGlassCard className="p-4">
                 <div className="flex items-center justify-between flex-wrap gap-4">
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating move tool...', success: 'Move tool active', error: 'Failed to activate' })}>
+                    <Button variant="outline" size="icon" className={`border-gray-700 hover:bg-slate-800 ${activeTool === 'move' ? 'bg-violet-600 border-violet-500' : ''}`} onClick={() => handleSetTool('move')}>
                       <Move className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating text tool...', success: 'Text tool active', error: 'Failed to activate' })}>
+                    <Button variant="outline" size="icon" className={`border-gray-700 hover:bg-slate-800 ${activeTool === 'text' ? 'bg-violet-600 border-violet-500' : ''}`} onClick={() => handleSetTool('text')}>
                       <Type className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating image tool...', success: 'Image tool active', error: 'Failed to activate' })}>
+                    <Button variant="outline" size="icon" className={`border-gray-700 hover:bg-slate-800 ${activeTool === 'image' ? 'bg-violet-600 border-violet-500' : ''}`} onClick={() => handleSetTool('image')}>
                       <Image className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Activating video tool...', success: 'Video tool active', error: 'Failed to activate' })}>
+                    <Button variant="outline" size="icon" className={`border-gray-700 hover:bg-slate-800 ${activeTool === 'video' ? 'bg-violet-600 border-violet-500' : ''}`} onClick={() => handleSetTool('video')}>
                       <Video className="w-4 h-4" />
                     </Button>
                     <div className="w-px h-6 bg-gray-700" />
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Rotating...', success: 'Rotation applied', error: 'Failed to rotate' })}>
+                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={handleRotateCanvas}>
                       <RotateCw className="w-4 h-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Maximizing...', success: 'Canvas maximized', error: 'Failed to maximize' })}>
+                    <Button variant="outline" size="icon" className={`border-gray-700 hover:bg-slate-800 ${isCanvasMaximized ? 'bg-violet-600 border-violet-500' : ''}`} onClick={handleMaximizeCanvas}>
                       <Maximize2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -434,26 +613,36 @@ export default function MotionGraphicsPage() {
                   <LiquidGlassCard className="p-6">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="font-semibold text-white">Layers</h3>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding layer...', success: 'New layer added', error: 'Failed to add layer' })}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleAddLayer}>
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
 
                     <div className="space-y-2">
-                      {['Text Layer', 'Shape Layer', 'Image Layer'].map((layer, index) => (
+                      {layers.map((layer) => (
                         <div
-                          key={index}
+                          key={layer.id}
                           className="flex items-center gap-2 p-3 bg-slate-900/50 rounded-lg border border-gray-700 hover:border-violet-500/50 transition-colors cursor-pointer"
                         >
                           <div className="flex items-center gap-2 flex-1 min-w-0">
                             <Layers className="w-4 h-4 text-violet-400 shrink-0" />
-                            <span className="text-sm text-white truncate">{layer}</span>
+                            <span className="text-sm text-white truncate">{layer.name}</span>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling visibility...', success: 'Layer visibility toggled', error: 'Failed to toggle' })}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={`h-6 w-6 ${!layer.visible ? 'opacity-50' : ''}`}
+                              onClick={() => handleToggleLayerVisibility(layer.id)}
+                            >
                               <Eye className="w-3 h-3" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling lock...', success: 'Layer lock toggled', error: 'Failed to toggle' })}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className={`h-6 w-6 ${layer.locked ? 'text-yellow-400' : ''}`}
+                              onClick={() => handleToggleLayerLock(layer.id)}
+                            >
                               <Lock className="w-3 h-3" />
                             </Button>
                           </div>
@@ -466,11 +655,17 @@ export default function MotionGraphicsPage() {
                 {/* Canvas */}
                 <div className="lg:col-span-2">
                   <LiquidGlassCard className="p-6">
-                    <div className="aspect-video bg-slate-950 rounded-lg border border-gray-700 flex items-center justify-center">
+                    <div
+                      className="aspect-video bg-slate-950 rounded-lg border border-gray-700 flex items-center justify-center transition-transform duration-300"
+                      style={{ transform: `rotate(${canvasRotation}deg)` }}
+                    >
                       <div className="text-center">
                         <Film className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                         <p className="text-gray-400">Canvas Preview</p>
-                        <p className="text-sm text-gray-500 mt-2">1920x1080 • 30fps</p>
+                        <p className="text-sm text-gray-500 mt-2">1920x1080 - 30fps</p>
+                        {canvasRotation > 0 && (
+                          <p className="text-xs text-violet-400 mt-1">Rotation: {canvasRotation} degrees</p>
+                        )}
                       </div>
                     </div>
 
@@ -490,7 +685,7 @@ export default function MotionGraphicsPage() {
                       </div>
 
                       <div className="flex items-center justify-center gap-2">
-                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Skipping back...', success: 'Skipped to previous frame', error: 'Failed to skip' })}>
+                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={handleSkipBack}>
                           <SkipBack className="w-4 h-4" />
                         </Button>
                         <Button
@@ -503,7 +698,7 @@ export default function MotionGraphicsPage() {
                             <Play className="w-5 h-5" />
                           )}
                         </Button>
-                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Skipping forward...', success: 'Skipped to next frame', error: 'Failed to skip' })}>
+                        <Button variant="outline" size="icon" className="border-gray-700 hover:bg-slate-800" onClick={handleSkipForward}>
                           <SkipForward className="w-4 h-4" />
                         </Button>
                       </div>

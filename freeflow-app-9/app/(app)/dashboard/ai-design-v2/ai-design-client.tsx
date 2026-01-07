@@ -358,11 +358,12 @@ const mockAIDesignActivities = [
   { id: '3', user: 'Sophie Miller', action: 'saved', target: 'style preset "Neon Dreams"', timestamp: '30m ago', type: 'info' as const },
 ]
 
-const mockAIDesignQuickActions = [
-  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening AI generation studio...', success: 'AI generation studio ready!', error: 'Failed to open generation studio' }) },
-  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening generated images gallery...', success: 'AI Gallery loaded!', error: 'Failed to load gallery' }) },
-  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Upscaling image...', success: 'Image upscaled successfully!', error: 'Upscale failed' }) },
-  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening style customization panel...', success: 'Style Editor ready!', error: 'Failed to open style editor' }) },
+// Quick actions config - handlers set in component
+const mockAIDesignQuickActionsConfig = [
+  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G' },
+  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B' },
+  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U' },
+  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S' },
 ]
 
 export default function AIDesignClient() {
@@ -1986,7 +1987,17 @@ export default function AIDesignClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAIDesignQuickActions}
+            actions={mockAIDesignQuickActionsConfig.map(action => ({
+              ...action,
+              action: () => {
+                switch(action.id) {
+                  case '1': setShowGenerateDialog(true); toast.success('AI generation studio ready!'); break;
+                  case '2': setActiveTab('gallery'); toast.success('Gallery loaded'); break;
+                  case '3': setShowUpscaleDialog(true); toast.success('Upscale tool ready'); break;
+                  case '4': setShowStyleEditor(true); toast.success('Style editor ready'); break;
+                }
+              }
+            }))}
             variant="grid"
           />
         </div>
@@ -2068,11 +2079,17 @@ export default function AIDesignClient() {
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                      loading: 'Upscaling image...',
-                      success: 'Image upscaled successfully',
-                      error: 'Failed to upscale image'
-                    })}>
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      if (!selectedGeneration) return
+                      toast.promise(
+                        fetch('/api/ai/upscale', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ imageId: selectedGeneration.id })
+                        }).then(r => { if (!r.ok) throw new Error('Failed'); return r.json(); }),
+                        { loading: 'Upscaling image...', success: 'Image upscaled successfully', error: 'Failed to upscale image' }
+                      )
+                    }}>
                       <Maximize2 className="w-4 h-4 mr-2" />
                       Upscale
                     </Button>

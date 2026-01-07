@@ -73,7 +73,7 @@ interface NotificationState {
   showPreviews: boolean
 }
 
-type NotificationAction = 
+type NotificationAction =
   | { type: 'SET_NOTIFICATIONS'; payload: Notification[] }
   | { type: 'MARK_AS_READ'; payload: string }
   | { type: 'MARK_ALL_READ' }
@@ -275,7 +275,7 @@ export default function NotificationsPage() {
   // Handlers
   const handleRefresh = () => { logger.info('Refreshing notifications'); dispatch({ type: 'SET_LOADING', payload: true }); window.location.reload() }
   const handleSettings = () => { logger.info('Opening notification settings'); setActiveTab('settings') }
-  const handleViewNotification = (id: string) => { logger.info('Viewing notification', { notificationId: id }); dispatch({ type: 'MARK_AS_READ', payload: id }); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading notification...', success: 'Viewing notification: ' + id, error: 'Failed to load notification' }) }
+  const handleViewNotification = (id: string) => { logger.info('Viewing notification', { notificationId: id }); dispatch({ type: 'MARK_AS_READ', payload: id }); toast.success('Marked as read') }
   const handleMarkRead = (id: string) => { logger.info('Marking notification as read', { notificationId: id }); dispatch({ type: 'MARK_AS_READ', payload: id }) }
   const handleMarkAllRead = async () => {
     const unreadCount = state.notifications.filter(n => !n.read).length
@@ -310,19 +310,11 @@ export default function NotificationsPage() {
         logger.info('All notifications marked as read', { count: result.count || unreadCount })
 
         // Show success message
-        toast.promise(new Promise(r => setTimeout(r, 800)), {
-          loading: 'Marking notifications as read...',
-          success: `${result.count || unreadCount} notifications marked as read`,
-          error: 'Failed to mark notifications as read'
-        })
+        toast.success('All notifications marked as read')
 
         // Show achievement if present
         if (result.achievement) {
-          toast.promise(new Promise(r => setTimeout(r, 500)), {
-            loading: 'Unlocking achievement...',
-            success: `${result.achievement.message} +${result.achievement.points} points!`,
-            error: 'Failed to unlock achievement'
-          })
+          toast.success(`${result.achievement.message} +${result.achievement.points} points!`)
         }
       }
     } catch (error: any) {
@@ -365,11 +357,7 @@ export default function NotificationsPage() {
         logger.info('Notification archived successfully', { notificationId: id })
 
         // Show success message
-        toast.promise(new Promise(r => setTimeout(r, 700)), {
-          loading: 'Archiving notification...',
-          success: `${notification?.title || 'Notification'} archived`,
-          error: 'Failed to archive notification'
-        })
+        toast.success(`${notification?.title || 'Notification'} archived`)
       }
     } catch (error: any) {
       logger.error('Failed to archive notification', {
@@ -397,11 +385,7 @@ export default function NotificationsPage() {
     }
 
     state.notifications.forEach(n => dispatch({ type: 'ARCHIVE_NOTIFICATION', payload: n.id }))
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Archiving all notifications...',
-      success: 'All notifications archived',
-      error: 'Failed to archive all notifications'
-    })
+    toast.success('All notifications archived')
   }
   const handleDelete = async (id: string) => {
     const notification = state.notifications.find(n => n.id === id)
@@ -438,11 +422,7 @@ export default function NotificationsPage() {
         logger.info('Notification deleted successfully', { notificationId: id })
 
         // Show success message
-        toast.promise(new Promise(r => setTimeout(r, 700)), {
-          loading: 'Deleting notification...',
-          success: `${notification?.title || 'Notification'} deleted`,
-          error: 'Failed to delete notification'
-        })
+        toast.success('Notification deleted')
       }
     } catch (error: any) {
       logger.error('Failed to delete notification', {
@@ -472,13 +452,9 @@ export default function NotificationsPage() {
 
     state.notifications.forEach(n => dispatch({ type: 'DELETE_NOTIFICATION', payload: n.id }))
     setShowDeleteAllConfirm(false)
-    toast.promise(new Promise(r => setTimeout(r, 2000)), {
-      loading: 'Deleting all notifications...',
-      success: 'All notifications deleted',
-      error: 'Failed to delete all notifications'
-    })
+    toast.success('All notifications deleted')
   }
-  const handleUnarchive = (id: string) => { logger.info('Unarchiving notification', { notificationId: id }); toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Unarchiving notification...', success: 'Notification unarchived', error: 'Failed to unarchive notification' }) }
+  const handleUnarchive = (id: string) => { logger.info('Unarchiving notification', { notificationId: id }); toast.success('Notification unarchived') }
   const handleFilterAll = () => { logger.debug('Filtering all notifications'); dispatch({ type: 'SET_FILTER', payload: 'all' }) }
   const handleFilterUnread = () => { logger.debug('Filtering unread notifications'); dispatch({ type: 'SET_FILTER', payload: 'unread' }) }
   const handleFilterRead = () => { logger.debug('Filtering read notifications'); dispatch({ type: 'SET_FILTER', payload: 'read' }) }
@@ -533,10 +509,10 @@ export default function NotificationsPage() {
       }
     }
 
-    toast.success('Preferences saved successfully')
+    toast.success('Settings saved')
   }
   const handleResetPreferences = () => { logger.info('Resetting notification preferences initiated'); setShowResetPreferencesConfirm(true) }
-  const handleConfirmResetPreferences = () => { logger.info('Resetting notification preferences to defaults'); setShowResetPreferencesConfirm(false); toast.success('Preferences reset to defaults') }
+  const handleConfirmResetPreferences = () => { logger.info('Resetting notification preferences to defaults'); setShowResetPreferencesConfirm(false); toast.success('Settings saved') }
   const handleSnooze = async (id: string) => {
     logger.info('Snoozing notification', { notificationId: id, duration: '1 hour' })
 
@@ -558,12 +534,12 @@ export default function NotificationsPage() {
   const filteredNotifications = state.notifications.filter(notification => {
     const matchesSearch = notification.title.toLowerCase().includes(state.search.toLowerCase()) ||
                          notification.message.toLowerCase().includes(state.search.toLowerCase())
-    
-    const matchesFilter = state.filter === 'all' || 
+
+    const matchesFilter = state.filter === 'all' ||
                          (state.filter === 'unread' && !notification.read) ||
                          (state.filter === 'read' && notification.read) ||
                          (state.filter === 'archived' && notification.archived)
-    
+
     return matchesSearch && matchesFilter && !notification.archived
   })
 
@@ -724,7 +700,7 @@ export default function NotificationsPage() {
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center gap-3">
             <Button data-testid="mark-all-read-btn" variant="outline" size="sm" onClick={handleMarkAllRead}>
               <Check className="w-4 h-4 mr-2" />
@@ -753,7 +729,7 @@ export default function NotificationsPage() {
             <TabsTrigger data-testid="notification-settings-tab" value="settings">Settings</TabsTrigger>
             <TabsTrigger data-testid="archive-tab" value="archive">Archive</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="inbox" className="space-y-6">
             {/* Filters and Search */}
             <div className="flex flex-col sm:flex-row gap-4">
@@ -766,7 +742,7 @@ export default function NotificationsPage() {
                   className="pl-10 bg-slate-800/50 border-slate-700 text-white placeholder:text-gray-500"
                 />
               </div>
-              
+
               <div className="flex gap-2">
                 <Button
                   variant={state.filter === 'all' ? 'default' : 'outline'}
@@ -809,7 +785,7 @@ export default function NotificationsPage() {
                   const TypeIcon = getTypeIcon(notification.type)
                   const typeColor = getTypeColor(notification.type)
                   const priorityColor = getPriorityColor(notification.priority)
-                  
+
                   return (
                     <LiquidGlassCard
                       key={notification.id}
@@ -823,7 +799,7 @@ export default function NotificationsPage() {
                           <div className={`p-2 rounded-full ${typeColor}`}>
                             <TypeIcon className="w-5 h-5" />
                           </div>
-                          
+
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between mb-2">
                               <h3 className={`font-medium ${!notification.read ? 'text-white' : 'text-gray-300'}`}>
@@ -836,7 +812,7 @@ export default function NotificationsPage() {
                             </div>
 
                             <p className="text-sm text-gray-400 mb-3">{notification.message}</p>
-                            
+
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
                                 <Badge variant="outline" className="text-xs">
@@ -846,7 +822,7 @@ export default function NotificationsPage() {
                                   {notification.priority}
                                 </Badge>
                               </div>
-                              
+
                               <div className="flex items-center gap-1">
                                 <Button
                                   variant="ghost"

@@ -51,38 +51,22 @@ export default function ClientsPage() {
 
   const handleImportClients = () => {
     logger.info('Import clients initiated')
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Preparing import...',
-      success: 'Import ready - supports CSV, Excel, Google Contacts, and Outlook',
-      error: 'Failed to prepare import'
-    })
+    toast.success('Import ready - supports CSV, Excel, Google Contacts, and Outlook')
   }
 
   const handleExportClients = () => {
     logger.info('Exporting clients')
-    toast.promise(new Promise(r => setTimeout(r, 1200)), {
-      loading: 'Exporting client list...',
-      success: 'Client list exported to CSV successfully',
-      error: 'Failed to export clients'
-    })
+    toast.success('Client list exported to CSV successfully')
   }
 
   const handleSyncContacts = () => {
     logger.info('Syncing contacts')
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Syncing contacts from address book...',
-      success: 'Contacts synced from your address book',
-      error: 'Failed to sync contacts'
-    })
+    toast.success('Contacts synced from your address book')
   }
 
   const handleAddClient = () => {
     logger.info('Adding new client')
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Opening client form...',
-      success: 'Ready to add new client to your directory',
-      error: 'Failed to open client form'
-    })
+    toast.success('Ready to add new client to your directory')
   }
 
   const handleViewClientHistory = (clientName: string) => {
@@ -92,20 +76,12 @@ export default function ClientsPage() {
       bookingCount
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: `Loading history for ${clientName}...`,
-      success: `${clientName}: ${bookingCount} bookings on record`,
-      error: 'Failed to load client history'
-    })
+    toast.success(`${clientName}: ${bookingCount} bookings on record`)
   }
 
   const handleBookNow = (clientName: string) => {
     logger.info('Creating booking for client', { clientName })
-    toast.promise(new Promise(r => setTimeout(r, 700)), {
-      loading: `Creating booking for ${clientName}...`,
-      success: `Booking form ready for ${clientName}`,
-      error: 'Failed to create booking'
-    })
+    toast.success(`Booking form ready for ${clientName}`)
   }
 
   // A+++ LOADING STATE

@@ -662,11 +662,7 @@ const mockAuditActivities = [
   { id: '3', user: 'Compliance', action: 'Generated', target: 'quarterly compliance report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
 ]
 
-const mockAuditQuickActions = [
-  { id: '1', label: 'Search Logs', icon: 'search', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening search...', success: 'Advanced log search ready', error: 'Failed to open search' }), variant: 'default' as const },
-  { id: '2', label: 'Create Alert', icon: 'bell', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating alert rule...', success: 'Alert rule created', error: 'Failed to create alert' }), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting audit logs...', success: 'Audit logs exported', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to use real handlers
 
 // ============================================================================
 // MAIN COMPONENT

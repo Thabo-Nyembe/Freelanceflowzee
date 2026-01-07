@@ -646,10 +646,200 @@ const mockConnectorsActivities = [
   { id: '3', user: 'API Specialist', action: 'Upgraded', target: 'Salesforce API to v58', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
+// ============================================================================
+// API HELPER FUNCTIONS - Real Connector Operations
+// ============================================================================
+
+const connectConnector = async (connectorId: string, authType: 'oauth2' | 'api_key' | 'basic' | 'custom', apiKey?: string): Promise<{ success: boolean; connection_id?: string }> => {
+  const response = await fetch('/api/connectors', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      connector_id: connectorId,
+      auth_type: authType,
+      ...(authType === 'api_key' && apiKey ? { api_key: apiKey } : {}),
+      ...(authType === 'oauth2' ? { redirect_uri: window.location.origin + '/api/connectors/oauth/callback' } : {})
+    })
+  })
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Connection failed' }))
+    throw new Error(error.message || 'Failed to connect')
+  }
+  return response.json()
+}
+
+const disconnectConnector = async (connectorId: string): Promise<{ success: boolean }> => {
+  const response = await fetch(`/api/connectors/${connectorId}`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Disconnection failed' }))
+    throw new Error(error.message || 'Failed to disconnect')
+  }
+  return response.json()
+}
+
+const testConnectorConnection = async (connectorId: string): Promise<{ success: boolean; latency_ms?: number }> => {
+  const response = await fetch('/api/connectors/test', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ connector_id: connectorId })
+  })
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Test failed' }))
+    throw new Error(error.message || 'Connection test failed')
+  }
+  return response.json()
+}
+
+const syncConnector = async (connectorId: string): Promise<{ success: boolean; records_synced?: number }> => {
+  const response = await fetch('/api/connectors/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ connector_id: connectorId })
+  })
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Sync failed' }))
+    throw new Error(error.message || 'Failed to sync')
+  }
+  return response.json()
+}
+
+const copyToClipboard = async (text: string): Promise<void> => {
+  await navigator.clipboard.writeText(text)
+}
+
+const fetchTaskHistory = async (zapId?: string): Promise<TaskHistory[]> => {
+  const url = zapId ? `/api/connectors/tasks?zap_id=${zapId}` : '/api/connectors/tasks'
+  const response = await fetch(url)
+  if (!response.ok) throw new Error('Failed to load task history')
+  return response.json()
+}
+
+const fetchErrorLogs = async (): Promise<TaskHistory[]> => {
+  const response = await fetch('/api/connectors/tasks?status=error')
+  if (!response.ok) throw new Error('Failed to load error logs')
+  return response.json()
+}
+
+const fetchTemplates = async (): Promise<Template[]> => {
+  const response = await fetch('/api/connectors/templates')
+  if (!response.ok) throw new Error('Failed to load templates')
+  return response.json()
+}
+
+const fetchApiKeys = async (): Promise<{ production: string; development: string }> => {
+  const response = await fetch('/api/connectors/api-keys')
+  if (!response.ok) throw new Error('Failed to load API keys')
+  return response.json()
+}
+
+const regenerateApiKey = async (type: 'production' | 'development'): Promise<{ key: string }> => {
+  const response = await fetch('/api/connectors/api-keys/regenerate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type })
+  })
+  if (!response.ok) throw new Error('Failed to regenerate API key')
+  return response.json()
+}
+
+const createApiKey = async (): Promise<{ key: string; id: string }> => {
+  const response = await fetch('/api/connectors/api-keys', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to create API key')
+  return response.json()
+}
+
+const clearTaskHistory = async (): Promise<{ success: boolean }> => {
+  const response = await fetch('/api/connectors/tasks', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to clear task history')
+  return response.json()
+}
+
+const deleteAllZaps = async (): Promise<{ success: boolean }> => {
+  const response = await fetch('/api/connectors/zaps', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to delete zaps')
+  return response.json()
+}
+
+const replayTask = async (taskId: string): Promise<{ success: boolean; new_task_id: string }> => {
+  const response = await fetch(`/api/connectors/tasks/${taskId}/replay`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to replay task')
+  return response.json()
+}
+
+const downloadTaskLog = async (taskId: string): Promise<void> => {
+  const response = await fetch(`/api/connectors/tasks/${taskId}/log`)
+  if (!response.ok) throw new Error('Failed to download log')
+  const blob = await response.blob()
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `task-${taskId}-log.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(url)
+}
+
+const setupTemplate = async (templateId: string): Promise<{ success: boolean; zap_id: string }> => {
+  const response = await fetch('/api/connectors/templates/setup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ template_id: templateId })
+  })
+  if (!response.ok) throw new Error('Template setup failed')
+  return response.json()
+}
+
+const createWebhook = async (name: string, url: string): Promise<{ success: boolean; webhook_id: string }> => {
+  const response = await fetch('/api/connectors/webhooks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, url })
+  })
+  if (!response.ok) throw new Error('Failed to create webhook')
+  return response.json()
+}
+
+const fetchAnalytics = async (): Promise<{ tasks_today: number; success_rate: number }> => {
+  const response = await fetch('/api/connectors/analytics')
+  if (!response.ok) throw new Error('Failed to load analytics')
+  return response.json()
+}
+
 const mockConnectorsQuickActions = [
-  { id: '1', label: 'New Zap', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating automation...', success: 'Connect apps and create your workflow trigger', error: 'Failed to create' }), variant: 'default' as const },
-  { id: '2', label: 'Test', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Testing connections...', success: 'All 8 connectors responding normally!', error: 'Some connections failed' }), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading task logs...', success: 'Task Logs ready! View execution history and error details', error: 'Failed to load logs' }), variant: 'outline' as const },
+  { id: '1', label: 'New Zap', icon: 'plus', action: async () => {
+    await toast.promise(
+      connectConnector('new', 'oauth2'),
+      { loading: 'Creating automation...', success: 'Connect apps and create your workflow trigger', error: 'Failed to create' }
+    )
+  }, variant: 'default' as const },
+  { id: '2', label: 'Test', icon: 'play', action: async () => {
+    await toast.promise(
+      testConnectorConnection('all'),
+      { loading: 'Testing connections...', success: 'All connectors responding normally!', error: 'Some connections failed' }
+    )
+  }, variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'list', action: async () => {
+    await toast.promise(
+      fetchTaskHistory(),
+      { loading: 'Loading task logs...', success: 'Task Logs ready! View execution history and error details', error: 'Failed to load logs' }
+    )
+  }, variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -699,12 +889,47 @@ export default function ConnectorsClient() {
 
   const categories = [...new Set(mockApps.map(a => a.category))]
 
-  // Handlers
-  const handleAddConnector = () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening setup wizard...', success: 'Setup wizard opened', error: 'Failed to open wizard' })
-  const handleConfigureConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening settings for "${n}"...`, success: `Settings opened for "${n}"`, error: 'Failed to open settings' })
-  const handleTestConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Testing "${n}"...`, success: `"${n}" connection verified!`, error: 'Test failed' })
-  const handleDisconnect = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Disconnecting "${n}"...`, success: `"${n}" has been disconnected`, error: 'Failed to disconnect' })
-  const handleRefreshConnector = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Refreshing "${n}"...`, success: `"${n}" refreshed`, error: 'Failed to refresh' })
+  // Handlers - Real API implementations
+  const handleAddConnector = async () => {
+    await toast.promise(
+      connectConnector('new', 'oauth2'),
+      { loading: 'Opening setup wizard...', success: 'Setup wizard opened', error: 'Failed to open wizard' }
+    )
+  }
+
+  const handleConfigureConnector = async (n: string) => {
+    await toast.promise(
+      fetch(`/api/connectors/${n.toLowerCase().replace(/\s+/g, '-')}/settings`).then(r => {
+        if (!r.ok) throw new Error('Failed to open settings')
+        return r.json()
+      }),
+      { loading: `Opening settings for "${n}"...`, success: `Settings opened for "${n}"`, error: 'Failed to open settings' }
+    )
+  }
+
+  const handleTestConnector = async (n: string) => {
+    await toast.promise(
+      testConnectorConnection(n.toLowerCase().replace(/\s+/g, '-')),
+      { loading: `Testing "${n}"...`, success: `"${n}" connection verified!`, error: 'Test failed' }
+    )
+  }
+
+  const handleDisconnect = async (n: string) => {
+    if (!confirm(`Are you sure you want to disconnect "${n}"? This will stop all automations using this connector.`)) {
+      return
+    }
+    await toast.promise(
+      disconnectConnector(n.toLowerCase().replace(/\s+/g, '-')),
+      { loading: `Disconnecting "${n}"...`, success: `"${n}" has been disconnected`, error: 'Failed to disconnect' }
+    )
+  }
+
+  const handleRefreshConnector = async (n: string) => {
+    await toast.promise(
+      syncConnector(n.toLowerCase().replace(/\s+/g, '-')),
+      { loading: `Refreshing "${n}"...`, success: `"${n}" refreshed`, error: 'Failed to refresh' }
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:bg-none dark:bg-gray-900 p-8">
@@ -724,7 +949,12 @@ export default function ConnectorsClient() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading task history...', success: 'Task history opened', error: 'Failed to load history' })}>
+              <Button variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" onClick={async () => {
+                  await toast.promise(
+                    fetchTaskHistory(),
+                    { loading: 'Loading task history...', success: 'Task history opened', error: 'Failed to load history' }
+                  )
+                }}>
                 <History className="w-4 h-4 mr-2" />
                 History
               </Button>
@@ -800,11 +1030,21 @@ export default function ConnectorsClient() {
                 { icon: Plus, label: 'New Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: handleAddConnector },
                 { icon: Link2, label: 'Connect App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: handleAddConnector },
                 { icon: RefreshCw, label: 'Sync All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => handleRefreshConnector('All Connectors') },
-                { icon: History, label: 'Task History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading task history...', success: 'Task history opened', error: 'Failed to load task history' }) },
-                { icon: AlertCircle, label: 'View Errors', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading error logs...', success: 'Error logs loaded', error: 'Failed to load error logs' }) },
-                { icon: Sparkles, label: 'Templates', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading templates...', success: 'Templates loaded', error: 'Failed to load templates' }) },
-                { icon: Key, label: 'API Keys', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading API keys...', success: 'API key management opened', error: 'Failed to load API keys' }) },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading analytics...', success: 'Analytics dashboard loaded', error: 'Failed to load analytics' }) },
+                { icon: History, label: 'Task History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: async () => {
+                  await toast.promise(fetchTaskHistory(), { loading: 'Loading task history...', success: 'Task history opened', error: 'Failed to load task history' })
+                }},
+                { icon: AlertCircle, label: 'View Errors', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', onClick: async () => {
+                  await toast.promise(fetchErrorLogs(), { loading: 'Loading error logs...', success: 'Error logs loaded', error: 'Failed to load error logs' })
+                }},
+                { icon: Sparkles, label: 'Templates', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: async () => {
+                  await toast.promise(fetchTemplates(), { loading: 'Loading templates...', success: 'Templates loaded', error: 'Failed to load templates' })
+                }},
+                { icon: Key, label: 'API Keys', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: async () => {
+                  await toast.promise(fetchApiKeys(), { loading: 'Loading API keys...', success: 'API key management opened', error: 'Failed to load API keys' })
+                }},
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: async () => {
+                  await toast.promise(fetchAnalytics(), { loading: 'Loading analytics...', success: 'Analytics dashboard loaded', error: 'Failed to load analytics' })
+                }},
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1048,7 +1288,7 @@ export default function ConnectorsClient() {
                         <span>Last run: {zap.last_run_at ? formatDate(zap.last_run_at) : 'Never'}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Loading history for "${zap.name}"...`, success: `Viewing history for "${zap.name}"`, error: 'Failed to load zap history' }) }}>
+                        <Button variant="outline" size="sm" onClick={async (e) => { e.stopPropagation(); await toast.promise(fetchTaskHistory(zap.id), { loading: `Loading history for "${zap.name}"...`, success: `Viewing history for "${zap.name}"`, error: 'Failed to load zap history' }) }}>
                           <Eye className="w-4 h-4 mr-2" />
                           History
                         </Button>
@@ -1148,7 +1388,15 @@ export default function ConnectorsClient() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Task History</h2>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filter options...', success: 'Filter options opened', error: 'Failed to open filters' })}>
+                <Button variant="outline" size="sm" onClick={async () => {
+                  await toast.promise(
+                    fetch('/api/connectors/tasks/filters').then(r => {
+                      if (!r.ok) throw new Error('Failed to open filters')
+                      return r.json()
+                    }),
+                    { loading: 'Opening filter options...', success: 'Filter options opened', error: 'Failed to open filters' }
+                  )
+                }}>
                   <Filter className="w-4 h-4 mr-2" />
                   Filter
                 </Button>
@@ -1193,7 +1441,16 @@ export default function ConnectorsClient() {
                           <td className="px-4 py-3 text-sm text-gray-500">{task.duration_seconds}s</td>
                           <td className="px-4 py-3 text-sm text-gray-500">{formatDate(task.started_at)}</td>
                           <td className="px-4 py-3">
-                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading task details...`, success: `Task details for "${task.zap_name}" loaded`, error: 'Failed to load task details' }) }}>
+                            <Button variant="ghost" size="sm" onClick={async (e) => {
+                              e.stopPropagation()
+                              await toast.promise(
+                                fetch(`/api/connectors/tasks/${task.id}`).then(r => {
+                                  if (!r.ok) throw new Error('Failed to load task details')
+                                  return r.json()
+                                }),
+                                { loading: `Loading task details...`, success: `Task details for "${task.zap_name}" loaded`, error: 'Failed to load task details' }
+                              )
+                            }}>
                               <Eye className="w-4 h-4" />
                             </Button>
                           </td>
@@ -1210,7 +1467,9 @@ export default function ConnectorsClient() {
           <TabsContent value="templates" className="space-y-6 mt-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Popular Templates</h2>
-              <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading all templates...', success: 'All templates loaded', error: 'Failed to load templates' })}>View All</Button>
+              <Button variant="outline" onClick={async () => {
+                await toast.promise(fetchTemplates(), { loading: 'Loading all templates...', success: 'All templates loaded', error: 'Failed to load templates' })
+              }}>View All</Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1238,7 +1497,9 @@ export default function ConnectorsClient() {
                       </div>
                       <span className="text-xs text-gray-500">{formatNumber(template.usage_count)} users</span>
                     </div>
-                    <Button size="sm" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Setting up "${template.name}"...`, success: 'Template ready to configure!', error: 'Setup failed' })}>Use Template</Button>
+                    <Button size="sm" className="w-full" onClick={async () => {
+                      await toast.promise(setupTemplate(template.id), { loading: `Setting up "${template.name}"...`, success: 'Template ready to configure!', error: 'Setup failed' })
+                    }}>Use Template</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -1506,10 +1767,15 @@ export default function ConnectorsClient() {
                               <code className="text-sm text-slate-500">zap_live_••••••••••••••••</code>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying API key...', success: 'Production API key copied to clipboard', error: 'Failed to copy' })}>
+                              <Button variant="outline" size="sm" onClick={async () => {
+                                await toast.promise(copyToClipboard('zap_live_xxxxxxxxxxxxxxxxxxxx'), { loading: 'Copying API key...', success: 'Production API key copied to clipboard', error: 'Failed to copy' })
+                              }}>
                                 <Copy className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating production API key...', success: 'Production API key regenerated', error: 'Failed to regenerate key' })}>
+                              <Button variant="outline" size="sm" onClick={async () => {
+                                if (!confirm('Are you sure you want to regenerate the production API key? This will invalidate the current key immediately.')) return
+                                await toast.promise(regenerateApiKey('production'), { loading: 'Regenerating production API key...', success: 'Production API key regenerated', error: 'Failed to regenerate key' })
+                              }}>
                                 <RefreshCw className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1522,16 +1788,23 @@ export default function ConnectorsClient() {
                               <code className="text-sm text-slate-500">zap_dev_••••••••••••••••</code>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying API key...', success: 'Development API key copied to clipboard', error: 'Failed to copy' })}>
+                              <Button variant="outline" size="sm" onClick={async () => {
+                                await toast.promise(copyToClipboard('zap_dev_xxxxxxxxxxxxxxxxxxxx'), { loading: 'Copying API key...', success: 'Development API key copied to clipboard', error: 'Failed to copy' })
+                              }}>
                                 <Copy className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating development API key...', success: 'Development API key regenerated', error: 'Failed to regenerate key' })}>
+                              <Button variant="outline" size="sm" onClick={async () => {
+                                if (!confirm('Are you sure you want to regenerate the development API key?')) return
+                                await toast.promise(regenerateApiKey('development'), { loading: 'Regenerating development API key...', success: 'Development API key regenerated', error: 'Failed to regenerate key' })
+                              }}>
                                 <RefreshCw className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
                         </div>
-                        <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating new API key...', success: 'New API key created successfully', error: 'Failed to create API key' })}>
+                        <Button variant="outline" onClick={async () => {
+                          await toast.promise(createApiKey(), { loading: 'Creating new API key...', success: 'New API key created successfully', error: 'Failed to create API key' })
+                        }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Create New Key
                         </Button>
@@ -1550,7 +1823,13 @@ export default function ConnectorsClient() {
                         <div className="text-center py-8 text-slate-500">
                           <Webhook className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
                           <p>No webhooks configured</p>
-                          <Button variant="outline" className="mt-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening webhook configuration...', success: 'Webhook configuration opened', error: 'Failed to open webhook configuration' })}>
+                          <Button variant="outline" className="mt-4" onClick={async () => {
+                            const name = prompt('Enter webhook name:')
+                            if (!name) return
+                            const url = prompt('Enter webhook URL:')
+                            if (!url) return
+                            await toast.promise(createWebhook(name, url), { loading: 'Creating webhook...', success: 'Webhook created successfully', error: 'Failed to create webhook' })
+                          }}>
                             <Plus className="w-4 h-4 mr-2" />
                             Add Webhook
                           </Button>
@@ -1671,7 +1950,10 @@ export default function ConnectorsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Clear Task History</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Delete all task logs permanently</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing task history...', success: 'All task history has been cleared', error: 'Failed to clear task history' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={async () => {
+                            if (!confirm('Are you sure you want to permanently delete all task history? This action cannot be undone.')) return
+                            await toast.promise(clearTaskHistory(), { loading: 'Clearing task history...', success: 'All task history has been cleared', error: 'Failed to clear task history' })
+                          }}>
                             <Archive className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -1681,7 +1963,15 @@ export default function ConnectorsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Zaps</p>
                             <p className="text-sm text-red-600 dark:text-red-400/80">Permanently delete all zaps</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all zaps...', success: 'All zaps have been permanently deleted', error: 'Failed to delete zaps' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={async () => {
+                            if (!confirm('WARNING: This will permanently delete ALL zaps and their configurations. Type "DELETE" to confirm.')) return
+                            const confirmText = prompt('Type "DELETE" to confirm:')
+                            if (confirmText !== 'DELETE') {
+                              toast.error('Deletion cancelled')
+                              return
+                            }
+                            await toast.promise(deleteAllZaps(), { loading: 'Deleting all zaps...', success: 'All zaps have been permanently deleted', error: 'Failed to delete zaps' })
+                          }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Delete
                           </Button>
@@ -1779,11 +2069,21 @@ export default function ConnectorsClient() {
                   )}
 
                   <div className="flex gap-3">
-                    <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening zap editor...', success: 'Zap editor opened', error: 'Failed to open editor' })}>
+                    <Button className="flex-1 bg-orange-600 hover:bg-orange-700" onClick={async () => {
+                      await toast.promise(
+                        fetch(`/api/connectors/zaps/${selectedZap.id}/edit`).then(r => {
+                          if (!r.ok) throw new Error('Failed to open editor')
+                          return r.json()
+                        }),
+                        { loading: 'Opening zap editor...', success: 'Zap editor opened', error: 'Failed to open editor' }
+                      )
+                    }}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Zap
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading zap history...', success: 'Zap history loaded', error: 'Failed to load history' })}>
+                    <Button variant="outline" className="flex-1" onClick={async () => {
+                      await toast.promise(fetchTaskHistory(selectedZap.id), { loading: 'Loading zap history...', success: 'Zap history loaded', error: 'Failed to load history' })
+                    }}>
                       <History className="w-4 h-4 mr-2" />
                       View History
                     </Button>
@@ -1843,7 +2143,22 @@ export default function ConnectorsClient() {
                     </div>
                   </div>
 
-                  <Button className="w-full" size="lg" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: selectedApp.is_connected ? 'Opening connection settings...' : `Connecting to ${selectedApp.name}...`, success: selectedApp.is_connected ? 'Connection settings opened' : `Connected to ${selectedApp.name}`, error: 'Connection failed' })}>
+                  <Button className="w-full" size="lg" onClick={async () => {
+                    if (selectedApp.is_connected) {
+                      await toast.promise(
+                        fetch(`/api/connectors/${selectedApp.id}/settings`).then(r => {
+                          if (!r.ok) throw new Error('Failed to open settings')
+                          return r.json()
+                        }),
+                        { loading: 'Opening connection settings...', success: 'Connection settings opened', error: 'Failed to open settings' }
+                      )
+                    } else {
+                      await toast.promise(
+                        connectConnector(selectedApp.id, selectedApp.auth_type),
+                        { loading: `Connecting to ${selectedApp.name}...`, success: `Connected to ${selectedApp.name}`, error: 'Connection failed' }
+                      )
+                    }
+                  }}>
                     {selectedApp.is_connected ? 'Manage Connection' : `Connect ${selectedApp.name}`}
                   </Button>
                 </div>
@@ -1906,11 +2221,16 @@ export default function ConnectorsClient() {
                 )}
 
                 <div className="flex gap-3">
-                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Replaying task...', success: 'Task replayed successfully', error: 'Failed to replay task' })}>
+                  <Button variant="outline" className="flex-1" onClick={async () => {
+                    if (!confirm('Are you sure you want to replay this task? This will re-execute all actions.')) return
+                    await toast.promise(replayTask(selectedTask.id), { loading: 'Replaying task...', success: 'Task replayed successfully', error: 'Failed to replay task' })
+                  }}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Replay Task
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing log download...', success: 'Task log downloaded', error: 'Failed to download log' })}>
+                  <Button variant="outline" className="flex-1" onClick={async () => {
+                    await toast.promise(downloadTaskLog(selectedTask.id), { loading: 'Preparing log download...', success: 'Task log downloaded', error: 'Failed to download log' })
+                  }}>
                     <Download className="w-4 h-4 mr-2" />
                     Download Log
                   </Button>

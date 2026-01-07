@@ -362,21 +362,83 @@ const mockCollabActivities = [
 ]
 
 const mockCollabQuickActions = [
-  { id: '1', label: 'New Board', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new collaboration board...',
-    success: 'Board created successfully',
-    error: 'Failed to create board'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Schedule Meeting', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-    loading: 'Opening meeting scheduler...',
-    success: 'Meeting scheduler ready',
-    error: 'Failed to open scheduler'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Start Call', icon: 'video', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Starting video call...',
-    success: 'Call started',
-    error: 'Failed to start call'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'New Board', icon: 'plus', action: () => {
+    const boardName = `Board_${new Date().toLocaleTimeString()}`;
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          const newBoard: Board = {
+            id: `b${Date.now()}`,
+            name: boardName,
+            description: 'New collaboration board',
+            type: 'whiteboard',
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            createdBy: mockMembers[0],
+            members: [mockMembers[0]],
+            isStarred: false,
+            isLocked: false,
+            isPublic: false,
+            viewCount: 0,
+            commentCount: 0,
+            elementCount: 0,
+            version: 1,
+            tags: ['new'],
+          };
+          mockBoards.push(newBoard);
+          resolve();
+        }, 800);
+      }),
+      {
+        loading: 'Creating new collaboration board...',
+        success: 'Board created successfully',
+        error: 'Failed to create board'
+      }
+    );
+  }, variant: 'default' as const },
+  { id: '2', label: 'Schedule Meeting', icon: 'calendar', action: () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          const newMeeting: Meeting = {
+            id: `mt${Date.now()}`,
+            title: 'New Meeting',
+            status: 'scheduled',
+            startTime: new Date(Date.now() + 3600000).toISOString(),
+            duration: 60,
+            organizer: mockMembers[0],
+            participants: mockMembers.slice(0, 2),
+            isRecurring: false,
+            hasRecording: false,
+            meetingUrl: 'https://meet.example.com/new-meeting'
+          };
+          mockMeetings.push(newMeeting);
+          resolve();
+        }, 800);
+      }),
+      {
+        loading: 'Opening meeting scheduler...',
+        success: 'Meeting scheduler ready',
+        error: 'Failed to open scheduler'
+      }
+    );
+  }, variant: 'default' as const },
+  { id: '3', label: 'Start Call', icon: 'video', action: () => {
+    toast.promise(
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          window.open('https://meet.example.com/instant-call', '_blank');
+          resolve();
+        }, 1000);
+      }),
+      {
+        loading: 'Starting video call...',
+        success: 'Call started',
+        error: 'Failed to start call'
+      }
+    );
+  }, variant: 'outline' as const },
 ]
 
 export default function CollaborationClient() {
@@ -763,9 +825,30 @@ export default function CollaborationClient() {
                       <Badge variant="outline">{selectedChannel?.memberCount || 45} members</Badge>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Pinning channel...', success: 'Channel pinned successfully', error: 'Failed to pin channel' })}><Pin className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening search...', success: 'Search opened', error: 'Failed to open search' })}><Search className="h-4 w-4" /></Button>
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading options...', success: 'Options menu opened', error: 'Failed to load options' })}><MoreVertical className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        if (selectedChannel) {
+                          selectedChannel.isPinned = !selectedChannel.isPinned;
+                          toast.success(selectedChannel.isPinned ? 'Channel pinned' : 'Channel unpinned');
+                        }
+                      }}><Pin className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.promise(
+                          new Promise<void>((resolve) => {
+                            setTimeout(() => {
+                              document.getElementById('search-input')?.focus();
+                              resolve();
+                            }, 300);
+                          }),
+                          {
+                            loading: 'Opening search...',
+                            success: 'Search opened',
+                            error: 'Failed to open search'
+                          }
+                        );
+                      }}><Search className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.info('Channel options', { description: 'More options menu opened' });
+                      }}><MoreVertical className="h-4 w-4" /></Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -803,9 +886,24 @@ export default function CollaborationClient() {
                             )}
                           </div>
                           <div className="opacity-0 group-hover:opacity-100 flex items-start gap-1">
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' })}><Smile className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Preparing reply...', success: 'Reply mode activated', error: 'Failed to start reply' })}><Reply className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading message options...', success: 'Message options opened', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                              toast.promise(
+                                new Promise<void>((resolve) => {
+                                  setTimeout(() => {
+                                    toast.success('Emoji picker ready');
+                                    resolve();
+                                  }, 300);
+                                }),
+                                { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' }
+                              );
+                            }}><Smile className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                              setMessageInput(`@${message.author.name} `);
+                              toast.success('Reply mode activated');
+                            }}><Reply className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {
+                              toast.info('Message options', { description: 'Edit, delete, or share this message' });
+                            }}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -814,10 +912,61 @@ export default function CollaborationClient() {
                 </CardContent>
                 <div className="p-4 border-t">
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening file picker...', success: 'File picker opened', error: 'Failed to open file picker' })}><Paperclip className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => {
+                      toast.promise(
+                        new Promise<void>((resolve) => {
+                          setTimeout(() => {
+                            const input = document.createElement('input');
+                            input.type = 'file';
+                            input.onchange = () => {
+                              toast.success('File attached successfully');
+                              resolve();
+                            };
+                            input.click();
+                          }, 200);
+                        }),
+                        { loading: 'Opening file picker...', success: 'File picker opened', error: 'Failed to open file picker' }
+                      );
+                    }}><Paperclip className="h-4 w-4" /></Button>
                     <Input placeholder="Type a message..." className="flex-1" value={messageInput} onChange={(e) => setMessageInput(e.target.value)} />
-                    <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' })}><Smile className="h-4 w-4" /></Button>
-                    <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Sending message...', success: 'Message sent successfully', error: 'Failed to send message' })}><Send className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => {
+                      toast.promise(
+                        new Promise<void>((resolve) => {
+                          setTimeout(() => {
+                            toast.success('Emoji picker ready');
+                            resolve();
+                          }, 300);
+                        }),
+                        { loading: 'Opening emoji picker...', success: 'Emoji picker opened', error: 'Failed to open emoji picker' }
+                      );
+                    }}><Smile className="h-4 w-4" /></Button>
+                    <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => {
+                      if (messageInput.trim()) {
+                        toast.promise(
+                          new Promise<void>((resolve) => {
+                            setTimeout(() => {
+                              mockMessages.push({
+                                id: `m${Date.now()}`,
+                                channelId: selectedChannel?.id || 'c1',
+                                author: mockMembers[0],
+                                content: messageInput,
+                                timestamp: new Date().toISOString(),
+                                isEdited: false,
+                                isPinned: false,
+                                reactions: [],
+                                attachments: [],
+                                mentions: []
+                              });
+                              setMessageInput('');
+                              resolve();
+                            }, 500);
+                          }),
+                          { loading: 'Sending message...', success: 'Message sent successfully', error: 'Failed to send message' }
+                        );
+                      } else {
+                        toast.error('Cannot send empty message');
+                      }
+                    }}><Send className="h-4 w-4" /></Button>
                   </div>
                 </div>
               </Card>
@@ -1017,9 +1166,37 @@ export default function CollaborationClient() {
                           <p className="text-xs text-gray-500">{formatTimeAgo(file.modifiedAt)}</p>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Downloading file...', success: 'File downloaded successfully', error: 'Failed to download file' })}><Download className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing share link...', success: 'Share link copied to clipboard', error: 'Failed to create share link' })}><Share2 className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading file options...', success: 'File options opened', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            toast.promise(
+                              new Promise<void>((resolve) => {
+                                setTimeout(() => {
+                                  const link = document.createElement('a');
+                                  link.href = '#';
+                                  link.download = file.name;
+                                  link.click();
+                                  file.downloadCount++;
+                                  resolve();
+                                }, 1000);
+                              }),
+                              { loading: 'Downloading file...', success: 'File downloaded successfully', error: 'Failed to download file' }
+                            );
+                          }}><Download className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            toast.promise(
+                              new Promise<void>((resolve) => {
+                                setTimeout(() => {
+                                  const shareUrl = `https://app.example.com/share/${file.id}`;
+                                  navigator.clipboard.writeText(shareUrl).then(() => {
+                                    resolve();
+                                  });
+                                }, 400);
+                              }),
+                              { loading: 'Preparing share link...', success: 'Share link copied to clipboard', error: 'Failed to create share link' }
+                            );
+                          }}><Share2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            toast.info('File options', { description: 'Edit, delete, move, or share this file' });
+                          }}><MoreHorizontal className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     )
@@ -1201,7 +1378,9 @@ export default function CollaborationClient() {
                       </div>
                       <Badge variant="outline">{channel.memberCount} members</Badge>
                       {channel.unreadCount > 0 && <Badge className="bg-red-500">{channel.unreadCount}</Badge>}
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading channel options...', success: 'Channel options opened', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        toast.info(`Channel: ${channel.name}`, { description: 'View members, settings, notification preferences' });
+                      }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -1292,7 +1471,17 @@ export default function CollaborationClient() {
                           <p className="text-sm text-gray-500">{activity.description}</p>
                           <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(activity.timestamp)}</p>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening resource...', success: 'Resource opened', error: 'Failed to open' })}><ExternalLink className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          toast.promise(
+                            new Promise<void>((resolve) => {
+                              setTimeout(() => {
+                                window.open(`#/${activity.resourceId}`, '_blank');
+                                resolve();
+                              }, 300);
+                            }),
+                            { loading: 'Opening resource...', success: 'Resource opened', error: 'Failed to open' }
+                          );
+                        }}><ExternalLink className="h-4 w-4" /></Button>
                       </div>
                     ))}
                   </div>
@@ -1590,7 +1779,9 @@ export default function CollaborationClient() {
                             {automation.lastTriggered && <p className="text-xs text-gray-500">Last run: {formatTimeAgo(automation.lastTriggered)}</p>}
                           </div>
                           <Switch checked={automation.isActive} />
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 500)), { loading: 'Loading automation options...', success: 'Automation options opened', error: 'Failed to load options' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => {
+                            toast.info(`Automation: ${automation.name}`, { description: 'Edit trigger, actions, or delete this automation' });
+                          }}><MoreHorizontal className="h-4 w-4" /></Button>
                         </div>
                       ))}
                     </div>
@@ -1833,7 +2024,9 @@ export default function CollaborationClient() {
                   <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-800 rounded">
                     <Zap className="h-4 w-4 text-purple-500" />
                     <span className="text-sm">Send notification</span>
-                    <Button variant="ghost" size="sm" className="ml-auto" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Removing action...', success: 'Action removed', error: 'Failed to remove' })}><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="sm" className="ml-auto" onClick={() => {
+                      toast.success('Action removed successfully');
+                    }}><Trash2 className="h-4 w-4" /></Button>
                   </div>
                   <Button variant="outline" size="sm" className="w-full"><Plus className="h-4 w-4 mr-2" />Add Action</Button>
                 </div>

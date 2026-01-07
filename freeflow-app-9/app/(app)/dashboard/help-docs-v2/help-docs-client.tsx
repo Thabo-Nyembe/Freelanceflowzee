@@ -25,6 +25,13 @@ import { Search, FileText, MessageCircle, ThumbsUp, ThumbsDown,
   Loader2, Check, X
 } from 'lucide-react'
 
+// Import real button handlers
+import {
+  downloadAsJson,
+  apiPost,
+  apiCall
+} from '@/lib/button-handlers'
+
 // Enhanced & Competitive Upgrade Components
 import {
   AIInsightsPanel,
@@ -418,9 +425,18 @@ const mockHelpDocsActivities = [
 ]
 
 const mockHelpDocsQuickActions = [
-  { id: '1', label: 'New Article', icon: 'file-plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new article...', success: 'Article draft created', error: 'Failed to create article' }), variant: 'default' as const },
-  { id: '2', label: 'Review Queue', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading review queue...', success: '5 articles pending review', error: 'Failed to load review queue' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading analytics...', success: 'Documentation analytics ready', error: 'Failed to load analytics' }), variant: 'outline' as const },
+  { id: '1', label: 'New Article', icon: 'file-plus', action: async () => {
+    const result = await apiPost('/api/help-docs/articles', { title: 'New Article Draft', status: 'draft' }, { loading: 'Creating new article...', success: 'Article draft created', error: 'Failed to create article' })
+    return result
+  }, variant: 'default' as const },
+  { id: '2', label: 'Review Queue', icon: 'list', action: async () => {
+    const result = await apiCall('/api/help-docs/articles?status=review', {}, { loading: 'Loading review queue...', success: '5 articles pending review', error: 'Failed to load review queue' })
+    return result
+  }, variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: async () => {
+    const result = await apiCall('/api/help-docs/analytics', {}, { loading: 'Loading analytics...', success: 'Documentation analytics ready', error: 'Failed to load analytics' })
+    return result
+  }, variant: 'outline' as const },
 ]
 
 export default function HelpDocsClient() {
@@ -727,15 +743,12 @@ export default function HelpDocsClient() {
     setShowContactDialog(true)
   }
 
-  const handleBookmarkArticle = (articleTitle: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Bookmarking article...',
-        success: `"${articleTitle}" saved to bookmarks`,
-        error: 'Failed to bookmark article'
-      }
-    )
+  const handleBookmarkArticle = async (articleId: string, articleTitle: string) => {
+    await apiPost('/api/help-docs/bookmarks', { articleId, articleTitle }, {
+      loading: 'Bookmarking article...',
+      success: `"${articleTitle}" saved to bookmarks`,
+      error: 'Failed to bookmark article'
+    })
   }
 
   return (
@@ -991,15 +1004,8 @@ export default function HelpDocsClient() {
                       </div>
                     </div>
                     <Button className="w-full" size="sm" onClick={() => {
-                      toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 1000)),
-                        {
-                          loading: 'Starting chat...',
-                          success: 'Chat session started',
-                          error: 'Failed to start chat'
-                        }
-                      )
                       setShowChatbot(true)
+                      toast.success('Chat session started')
                     }}>Start Chat</Button>
                   </Card>
                   <Card className="p-4">
@@ -1013,14 +1019,8 @@ export default function HelpDocsClient() {
                       </div>
                     </div>
                     <Button variant="outline" className="w-full" size="sm" onClick={() => {
-                      toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 1000)),
-                        {
-                          loading: 'Opening email...',
-                          success: 'Email client opened',
-                          error: 'Failed to open email'
-                        }
-                      )
+                      window.location.href = 'mailto:support@freeflow.app?subject=Help%20Request'
+                      toast.success('Email client opened')
                     }}>Send Email</Button>
                   </Card>
                   <Card className="p-4">
@@ -1050,27 +1050,21 @@ export default function HelpDocsClient() {
                   <p className="text-blue-100">Organize and manage your help center content structure</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Preparing category form...',
-                        success: 'Category form ready',
-                        error: 'Failed to open category form'
-                      }
-                    )
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={async () => {
+                    await apiPost('/api/help-docs/categories', { name: 'New Category' }, {
+                      loading: 'Creating category...',
+                      success: 'Category created',
+                      error: 'Failed to create category'
+                    })
                   }}>
                     <Plus className="w-4 h-4 mr-2" />Add Category
                   </Button>
-                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Opening structure manager...',
-                        success: 'Structure manager opened',
-                        error: 'Failed to open structure manager'
-                      }
-                    )
+                  <Button className="bg-white text-blue-600 hover:bg-blue-50" onClick={async () => {
+                    await apiCall('/api/help-docs/structure', {}, {
+                      loading: 'Loading structure manager...',
+                      success: 'Structure manager loaded',
+                      error: 'Failed to load structure manager'
+                    })
                   }}>
                     <Settings className="w-4 h-4 mr-2" />Manage Structure
                   </Button>
@@ -1212,14 +1206,31 @@ export default function HelpDocsClient() {
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Preparing import...',
-                        success: 'Import dialog ready',
-                        error: 'Failed to open import dialog'
+                    const input = document.createElement('input')
+                    input.type = 'file'
+                    input.accept = '.json,.csv,.md'
+                    input.onchange = async (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0]
+                      if (file) {
+                        toast.loading('Importing articles...')
+                        const formData = new FormData()
+                        formData.append('file', file)
+                        try {
+                          const res = await fetch('/api/help-docs/import', { method: 'POST', body: formData })
+                          if (res.ok) {
+                            toast.dismiss()
+                            toast.success('Articles imported successfully')
+                          } else {
+                            toast.dismiss()
+                            toast.error('Failed to import articles')
+                          }
+                        } catch {
+                          toast.dismiss()
+                          toast.error('Failed to import articles')
+                        }
                       }
-                    )
+                    }
+                    input.click()
                   }}>
                     <Upload className="w-4 h-4 mr-2" />Import
                   </Button>
@@ -1356,27 +1367,21 @@ export default function HelpDocsClient() {
                   <p className="text-orange-100">Track, respond, and resolve customer support requests</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Loading reports...',
-                        success: 'Reports loaded',
-                        error: 'Failed to load reports'
-                      }
-                    )
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={async () => {
+                    await apiCall('/api/help-docs/tickets/reports', {}, {
+                      loading: 'Loading reports...',
+                      success: 'Reports loaded',
+                      error: 'Failed to load reports'
+                    })
                   }}>
                     <BarChart3 className="w-4 h-4 mr-2" />Reports
                   </Button>
-                  <Button className="bg-white text-orange-600 hover:bg-orange-50" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Creating new ticket...',
-                        success: 'New ticket form ready',
-                        error: 'Failed to create ticket form'
-                      }
-                    )
+                  <Button className="bg-white text-orange-600 hover:bg-orange-50" onClick={async () => {
+                    await apiPost('/api/help-docs/tickets', { status: 'new' }, {
+                      loading: 'Creating new ticket...',
+                      success: 'Ticket created',
+                      error: 'Failed to create ticket'
+                    })
                   }}>
                     <Plus className="w-4 h-4 mr-2" />New Ticket
                   </Button>
@@ -1448,15 +1453,12 @@ export default function HelpDocsClient() {
                     <SelectItem value="solved">Solved</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button onClick={() => {
-                  toast.promise(
-                    new Promise((resolve) => setTimeout(resolve, 1000)),
-                    {
-                      loading: 'Preparing new ticket...',
-                      success: 'New ticket form ready',
-                      error: 'Failed to create ticket form'
-                    }
-                  )
+                <Button onClick={async () => {
+                  await apiPost('/api/help-docs/tickets', { status: 'new' }, {
+                    loading: 'Creating new ticket...',
+                    success: 'Ticket created',
+                    error: 'Failed to create ticket'
+                  })
                 }}>
                   <Plus className="w-4 h-4 mr-2" />New Ticket
                 </Button>
@@ -1525,27 +1527,21 @@ export default function HelpDocsClient() {
                   <p className="text-purple-100">Connect with users, share knowledge, and find solutions</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Loading members...',
-                        success: 'Members list loaded',
-                        error: 'Failed to load members'
-                      }
-                    )
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={async () => {
+                    await apiCall('/api/help-docs/community/members', {}, {
+                      loading: 'Loading members...',
+                      success: 'Members list loaded',
+                      error: 'Failed to load members'
+                    })
                   }}>
                     <Users className="w-4 h-4 mr-2" />Members
                   </Button>
-                  <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Preparing new post form...',
-                        success: 'Post form ready',
-                        error: 'Failed to open post form'
-                      }
-                    )
+                  <Button className="bg-white text-purple-600 hover:bg-purple-50" onClick={async () => {
+                    await apiPost('/api/help-docs/community/posts', { title: 'New Post' }, {
+                      loading: 'Creating new post...',
+                      success: 'Post created',
+                      error: 'Failed to create post'
+                    })
                   }}>
                     <Plus className="w-4 h-4 mr-2" />New Post
                   </Button>
@@ -1600,15 +1596,12 @@ export default function HelpDocsClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Community Discussions</h2>
-              <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1000)),
-                  {
-                    loading: 'Preparing new post form...',
-                    success: 'Post form ready',
-                    error: 'Failed to open post form'
-                  }
-                )
+              <Button onClick={async () => {
+                await apiPost('/api/help-docs/community/posts', { title: 'New Post' }, {
+                  loading: 'Creating new post...',
+                  success: 'Post created',
+                  error: 'Failed to create post'
+                })
               }}><Plus className="w-4 h-4 mr-2" />New Post</Button>
             </div>
 
@@ -1679,26 +1672,16 @@ export default function HelpDocsClient() {
                 </div>
                 <div className="flex gap-3">
                   <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Exporting analytics data...',
-                        success: 'Analytics exported successfully',
-                        error: 'Failed to export analytics'
-                      }
-                    )
+                    downloadAsJson(mockStats, 'help-center-analytics.json')
                   }}>
                     <Download className="w-4 h-4 mr-2" />Export
                   </Button>
-                  <Button className="bg-white text-cyan-600 hover:bg-cyan-50" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Refreshing analytics...',
-                        success: 'Analytics refreshed',
-                        error: 'Failed to refresh analytics'
-                      }
-                    )
+                  <Button className="bg-white text-cyan-600 hover:bg-cyan-50" onClick={async () => {
+                    await apiCall('/api/help-docs/analytics', {}, {
+                      loading: 'Refreshing analytics...',
+                      success: 'Analytics refreshed',
+                      error: 'Failed to refresh analytics'
+                    })
                   }}>
                     <RefreshCw className="w-4 h-4 mr-2" />Refresh
                   </Button>
@@ -1823,27 +1806,41 @@ export default function HelpDocsClient() {
                   <p className="text-red-100">Create and manage video tutorials for your help center</p>
                 </div>
                 <div className="flex gap-3">
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Starting live stream...',
-                        success: 'Live stream ready',
-                        error: 'Failed to start live stream'
-                      }
-                    )
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/20" onClick={async () => {
+                    await apiPost('/api/help-docs/videos/livestream', { action: 'start' }, {
+                      loading: 'Starting live stream...',
+                      success: 'Live stream ready',
+                      error: 'Failed to start live stream'
+                    })
                   }}>
                     <Play className="w-4 h-4 mr-2" />Live Stream
                   </Button>
                   <Button className="bg-white text-red-600 hover:bg-red-50" onClick={() => {
-                    toast.promise(
-                      new Promise((resolve) => setTimeout(resolve, 1000)),
-                      {
-                        loading: 'Preparing video upload...',
-                        success: 'Upload form ready',
-                        error: 'Failed to open upload form'
+                    const input = document.createElement('input')
+                    input.type = 'file'
+                    input.accept = 'video/*'
+                    input.onchange = async (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0]
+                      if (file) {
+                        toast.loading('Uploading video...')
+                        const formData = new FormData()
+                        formData.append('video', file)
+                        try {
+                          const res = await fetch('/api/help-docs/videos/upload', { method: 'POST', body: formData })
+                          if (res.ok) {
+                            toast.dismiss()
+                            toast.success('Video uploaded successfully')
+                          } else {
+                            toast.dismiss()
+                            toast.error('Failed to upload video')
+                          }
+                        } catch {
+                          toast.dismiss()
+                          toast.error('Failed to upload video')
+                        }
                       }
-                    )
+                    }
+                    input.click()
                   }}>
                     <Upload className="w-4 h-4 mr-2" />Upload Video
                   </Button>
@@ -1899,14 +1896,31 @@ export default function HelpDocsClient() {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Video Tutorials</h2>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1000)),
-                  {
-                    loading: 'Preparing video upload...',
-                    success: 'Upload form ready',
-                    error: 'Failed to open upload form'
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.accept = 'video/*'
+                input.onchange = async (e) => {
+                  const file = (e.target as HTMLInputElement).files?.[0]
+                  if (file) {
+                    toast.loading('Uploading video...')
+                    const formData = new FormData()
+                    formData.append('video', file)
+                    try {
+                      const res = await fetch('/api/help-docs/videos/upload', { method: 'POST', body: formData })
+                      if (res.ok) {
+                        toast.dismiss()
+                        toast.success('Video uploaded successfully')
+                      } else {
+                        toast.dismiss()
+                        toast.error('Failed to upload video')
+                      }
+                    } catch {
+                      toast.dismiss()
+                      toast.error('Failed to upload video')
+                    }
                   }
-                )
+                }
+                input.click()
               }}><Upload className="w-4 h-4 mr-2" />Upload Video</Button>
             </div>
 
@@ -2334,15 +2348,14 @@ export default function HelpDocsClient() {
                             <h4 className="font-medium text-red-700 dark:text-red-400">Reset Help Center</h4>
                             <p className="text-sm text-red-600 dark:text-red-500">This will reset all settings to defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => {
-                            toast.promise(
-                              new Promise((resolve) => setTimeout(resolve, 2000)),
-                              {
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={async () => {
+                            if (confirm('Are you sure you want to reset all help center settings to defaults? This action cannot be undone.')) {
+                              await apiPost('/api/help-docs/settings/reset', {}, {
                                 loading: 'Resetting help center settings...',
                                 success: 'Help center settings reset to defaults',
                                 error: 'Failed to reset settings'
-                              }
-                            )
+                              })
+                            }
                           }}>
                             Reset
                           </Button>
@@ -2428,25 +2441,19 @@ export default function HelpDocsClient() {
                 <div className="border-t dark:border-gray-700 pt-6">
                   <h4 className="font-semibold mb-4 text-gray-900 dark:text-white">Was this article helpful?</h4>
                   <div className="flex items-center gap-4">
-                    <Button variant="outline" onClick={() => {
-                      toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 800)),
-                        {
-                          loading: 'Recording your feedback...',
-                          success: 'Thank you for your feedback!',
-                          error: 'Failed to submit feedback'
-                        }
-                      )
+                    <Button variant="outline" onClick={async () => {
+                      await apiPost('/api/help-docs/articles/feedback', { articleId: selectedArticle.id, helpful: true }, {
+                        loading: 'Recording your feedback...',
+                        success: 'Thank you for your feedback!',
+                        error: 'Failed to submit feedback'
+                      })
                     }}><ThumbsUp className="w-4 h-4 mr-2" />Yes ({selectedArticle.helpfulVotes})</Button>
-                    <Button variant="outline" onClick={() => {
-                      toast.promise(
-                        new Promise((resolve) => setTimeout(resolve, 800)),
-                        {
-                          loading: 'Recording your feedback...',
-                          success: 'Thank you for your feedback. We will improve this article.',
-                          error: 'Failed to submit feedback'
-                        }
-                      )
+                    <Button variant="outline" onClick={async () => {
+                      await apiPost('/api/help-docs/articles/feedback', { articleId: selectedArticle.id, helpful: false }, {
+                        loading: 'Recording your feedback...',
+                        success: 'Thank you for your feedback. We will improve this article.',
+                        error: 'Failed to submit feedback'
+                      })
                     }}><ThumbsDown className="w-4 h-4 mr-2" />No ({selectedArticle.notHelpfulVotes})</Button>
                   </div>
                 </div>
@@ -2505,16 +2512,20 @@ export default function HelpDocsClient() {
           </ScrollArea>
           <div className="p-4 border-t dark:border-gray-700">
             <div className="flex gap-2">
-              <Input placeholder="Type your question..." className="flex-1" />
-              <Button onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1000)),
-                  {
-                    loading: 'Sending message...',
-                    success: 'Message sent to AI assistant',
-                    error: 'Failed to send message'
-                  }
-                )
+              <Input placeholder="Type your question..." className="flex-1" id="chat-input" />
+              <Button onClick={async () => {
+                const input = document.getElementById('chat-input') as HTMLInputElement
+                const message = input?.value?.trim()
+                if (!message) {
+                  toast.error('Please enter a message')
+                  return
+                }
+                await apiPost('/api/help-docs/chat', { message }, {
+                  loading: 'Sending message...',
+                  success: 'AI assistant responded',
+                  error: 'Failed to send message'
+                })
+                if (input) input.value = ''
               }}><Send className="w-4 h-4" /></Button>
             </div>
           </div>

@@ -457,21 +457,9 @@ const pluginMarketplaceActivities = [
 ]
 
 const pluginMarketplaceQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Creating new item...',
-    success: 'New item created successfully',
-    error: 'Failed to create item'
-  }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Exporting data...',
-    success: 'Data exported successfully',
-    error: 'Export failed'
-  }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), {
-    loading: 'Opening settings...',
-    success: 'Settings loaded',
-    error: 'Failed to load settings'
-  }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Plugin Created', { description: 'New plugin ready' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Plugin data exported' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Plugin settings opened' }) },
 ]
 
 export default function PluginMarketplaceClient() {

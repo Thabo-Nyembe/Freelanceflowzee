@@ -108,20 +108,18 @@ const teamActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const teamQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Adding new team member...', success: 'Team member added successfully', error: 'Failed to add member' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1200)),
-    { loading: 'Exporting team data...', success: 'Team data exported successfully', error: 'Export failed' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 500)),
-    { loading: 'Opening team settings...', success: 'Settings loaded', error: 'Failed to load settings' }
-  ) },
+// Quick actions - handlers defined inside component to access state
+const teamQuickActionsConfig = [
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', actionKey: 'invite' },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', actionKey: 'export' },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', actionKey: 'settings' },
 ]
+
+// Placeholder quick actions for loading state (no-op actions)
+const loadingQuickActions = teamQuickActionsConfig.map(action => ({
+  ...action,
+  action: () => {} // No-op during loading
+}))
 
 export default function TeamClient() {
   // A+++ STATE MANAGEMENT
@@ -363,6 +361,23 @@ export default function TeamClient() {
         'Team Member': 'operations'
       }
 
+      // Send invitation via API
+      const inviteResponse = await fetch('/api/team/invites', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: inviteEmail,
+          name: inviteName,
+          role: inviteRole,
+          userId
+        })
+      })
+
+      if (!inviteResponse.ok) {
+        const errorData = await inviteResponse.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to send invitation')
+      }
+
       // Save to database
       const result = await createTeamMember(userId, {
         name: inviteName,
@@ -375,7 +390,7 @@ export default function TeamClient() {
       })
 
       if (result.error) {
-        throw new Error(result.error.message || 'Failed to invite member')
+        throw new Error(result.error.message || 'Failed to save member')
       }
 
       // Add to local state with database ID
@@ -513,31 +528,52 @@ export default function TeamClient() {
     setShowChangeRoleDialog(true)
   }
 
-  const confirmChangeRole = () => {
-    if (!changeRoleMemberId || !newRole) return
+  const confirmChangeRole = async () => {
+    if (!changeRoleMemberId || !newRole || !userId) return
 
     const member = teamMembers.find(m => m.id === changeRoleMemberId)
     if (!member) return
 
     const previousRole = member.role
-    setTeamMembers(teamMembers.map(m =>
-      m.id === changeRoleMemberId ? { ...m, role: newRole } : m
-    ))
 
-    logger.info('Member role changed', {
-      memberId: changeRoleMemberId,
-      memberName: member.name,
-      previousRole,
-      newRole
-    })
+    try {
+      // Call API to update role
+      const response = await fetch(`/api/team/${changeRoleMemberId}/role`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole, userId })
+      })
 
-    toast.success('Role Updated', {
-      description: `${member.name} role changed from ${previousRole} to ${newRole}`
-    })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to update role')
+      }
 
-    setShowChangeRoleDialog(false)
-    setChangeRoleMemberId(null)
-    setNewRole('')
+      // Update local state on success
+      setTeamMembers(teamMembers.map(m =>
+        m.id === changeRoleMemberId ? { ...m, role: newRole } : m
+      ))
+
+      logger.info('Member role changed', {
+        memberId: changeRoleMemberId,
+        memberName: member.name,
+        previousRole,
+        newRole
+      })
+
+      toast.success('Role Updated', {
+        description: `${member.name} role changed from ${previousRole} to ${newRole}`
+      })
+
+      setShowChangeRoleDialog(false)
+      setChangeRoleMemberId(null)
+      setNewRole('')
+    } catch (error) {
+      logger.error('Failed to update role', { error, memberId: changeRoleMemberId })
+      toast.error('Failed to update role', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleSetPermissions = (id: number) => {
@@ -708,9 +744,14 @@ export default function TeamClient() {
     setShowBulkInviteDialog(true)
   }
 
-  const confirmBulkInvite = () => {
+  const confirmBulkInvite = async () => {
     if (!bulkEmails.trim()) {
       toast.error('Please enter at least one email address')
+      return
+    }
+
+    if (!userId) {
+      toast.error('Please log in to send invitations')
       return
     }
 
@@ -721,17 +762,39 @@ export default function TeamClient() {
       return
     }
 
-    logger.info('Bulk invite initiated', {
-      emailCount: emailList.length,
-      emails: emailList
-    })
+    try {
+      // Send bulk invites via API
+      const response = await fetch('/api/team/invites/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emails: emailList, userId })
+      })
 
-    toast.success('Bulk Invitations Sent', {
-      description: `${emailList.length} invitation emails sent`
-    })
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to send invitations')
+      }
 
-    setShowBulkInviteDialog(false)
-    setBulkEmails('')
+      const result = await response.json()
+
+      logger.info('Bulk invite initiated', {
+        emailCount: emailList.length,
+        emails: emailList,
+        successCount: result.successCount || emailList.length
+      })
+
+      toast.success('Bulk Invitations Sent', {
+        description: `${result.successCount || emailList.length} invitation emails sent`
+      })
+
+      setShowBulkInviteDialog(false)
+      setBulkEmails('')
+    } catch (error) {
+      logger.error('Failed to send bulk invites', { error, emailCount: emailList.length })
+      toast.error('Failed to send invitations', {
+        description: error instanceof Error ? error.message : 'Please try again'
+      })
+    }
   }
 
   const handleTeamChat = () => {
@@ -814,6 +877,16 @@ export default function TeamClient() {
     })
   }
 
+  // Build quick actions with real handlers
+  const teamQuickActions = teamQuickActionsConfig.map(action => ({
+    ...action,
+    action: action.actionKey === 'invite'
+      ? () => handleInviteMember()
+      : action.actionKey === 'export'
+        ? () => handleExportTeam()
+        : () => handleTeamSettings()
+  }))
+
   const roles = [
     { value: 'all', label: 'All Roles' },
     { value: 'designer', label: 'Designer' },
@@ -879,7 +952,7 @@ export default function TeamClient() {
           <CollaborationIndicator collaborators={teamCollaborators} />
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <QuickActionsToolbar actions={teamQuickActions} />
+          <QuickActionsToolbar actions={loadingQuickActions} />
           <ActivityFeed activities={teamActivities} />
         </div>
 <CardSkeleton />

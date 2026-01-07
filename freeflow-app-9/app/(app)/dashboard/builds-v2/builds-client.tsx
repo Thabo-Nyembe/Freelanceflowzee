@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { apiPost, apiDelete, downloadFile } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -87,7 +89,8 @@ type RunnerType = 'hosted' | 'self-hosted'
 type RunnerOS = 'ubuntu' | 'windows' | 'macos'
 type EnvironmentType = 'development' | 'staging' | 'production' | 'testing'
 type ArtifactType = 'binary' | 'report' | 'logs' | 'coverage' | 'docker' | 'archive'
-type SecretScope = 'repository' | 'environment' | 'organization'
+// SecretScope reserved for future API integration
+// type SecretScope = 'repository' | 'environment' | 'organization'
 
 interface WorkflowStep {
   id: string
@@ -206,25 +209,9 @@ interface Runner {
   ip_address?: string
 }
 
-interface Secret {
-  id: string
-  name: string
-  scope: SecretScope
-  environment?: string
-  last_updated_at: string
-  created_at: string
-  created_by: string
-}
-
-interface CacheEntry {
-  id: string
-  key: string
-  ref: string
-  size_bytes: number
-  created_at: string
-  last_accessed_at: string
-  hit_count: number
-}
+// Secret and CacheEntry interfaces reserved for future API integration
+// interface Secret { id: string, name: string, scope: SecretScope, ... }
+// interface CacheEntry { id: string, key: string, ref: string, ... }
 
 // ============================================================================
 // MOCK DATA GENERATION
@@ -770,17 +757,12 @@ const mockBuildsActivities = [
   { id: '3', user: 'Release Manager', action: 'Approved', target: 'hotfix build #1234', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockBuildsQuickActions = [
-  { id: '1', label: 'New Build', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Triggering new build...', success: 'Build #1245 started! ETA: 3 minutes', error: 'Build trigger failed' }), variant: 'default' as const },
-  { id: '2', label: 'Retry', icon: 'refresh-cw', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Retrying failed build...', success: 'Build #1244 restarted!', error: 'Retry failed' }), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'file-text', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading build logs...', success: 'Build Logs - Viewing logs for build #1244 • 234 lines', error: 'Failed to load logs' }), variant: 'outline' as const },
-]
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
 
 export default function BuildsClient() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('builds')
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<BuildStatus | 'all'>('all')
@@ -825,50 +807,117 @@ export default function BuildsClient() {
     }
   }, [])
 
-  // Handlers
-  const handleTriggerBuild = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Starting new build...',
-        success: 'Build triggered successfully',
-        error: 'Failed to trigger build'
-      }
-    )
+  // Real Handlers - calling actual API endpoints
+  const handleTriggerBuild = async (workflowId?: string) => {
+    await apiPost('/api/builds/trigger', {
+      workflow_id: workflowId || 'ci-pipeline',
+      branch: 'main'
+    }, {
+      loading: 'Starting new build...',
+      success: 'Build triggered successfully',
+      error: 'Failed to trigger build'
+    })
   }
 
-  const handleCancelBuild = (build: Build) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: `Cancelling build #${build.number}...`,
-        success: `Build #${build.number} has been cancelled`,
-        error: `Failed to cancel build #${build.number}`
-      }
-    )
+  const handleCancelBuild = async (build: Build) => {
+    await apiPost(`/api/builds/${build.id}/cancel`, {}, {
+      loading: `Cancelling build #${build.build_number}...`,
+      success: `Build #${build.build_number} has been cancelled`,
+      error: `Failed to cancel build #${build.build_number}`
+    })
   }
 
-  const handleRetryBuild = (build: Build) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: `Restarting build #${build.number}...`,
-        success: `Build #${build.number} restarted successfully`,
-        error: `Failed to restart build #${build.number}`
-      }
-    )
+  const handleRetryBuild = async (build: Build) => {
+    await apiPost(`/api/builds/${build.id}/retry`, {
+      run_attempt: build.run_attempt + 1
+    }, {
+      loading: `Restarting build #${build.build_number}...`,
+      success: `Build #${build.build_number} restarted successfully`,
+      error: `Failed to restart build #${build.build_number}`
+    })
   }
 
-  const handleDownloadArtifact = (artifactName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: `Downloading ${artifactName}...`,
-        success: `${artifactName} downloaded successfully`,
-        error: `Failed to download ${artifactName}`
-      }
-    )
+  const handleDownloadArtifact = async (artifact: Artifact) => {
+    await downloadFile(`/api/builds/artifacts/${artifact.id}/download`, artifact.name)
   }
+
+  const handleDownloadLogs = async (build: Build) => {
+    await downloadFile(`/api/builds/${build.id}/logs`, `build-${build.build_number}-logs.txt`)
+  }
+
+  const handleViewBuildDetails = (build: Build) => {
+    router.push(`/dashboard/builds/${build.id}`)
+  }
+
+  const handleRunWorkflow = async (workflow: Workflow) => {
+    await apiPost(`/api/workflows/${workflow.id}/dispatch`, {
+      ref: 'main',
+      inputs: {}
+    }, {
+      loading: `Running ${workflow.name}...`,
+      success: `${workflow.name} started successfully`,
+      error: `Failed to run ${workflow.name}`
+    })
+  }
+
+  const handleDeleteCache = async (cacheKey: string) => {
+    if (!confirm(`Are you sure you want to delete cache "${cacheKey}"?`)) return
+    await apiDelete(`/api/builds/cache/${encodeURIComponent(cacheKey)}`, {
+      loading: 'Deleting cache...',
+      success: 'Cache deleted successfully',
+      error: 'Failed to delete cache'
+    })
+  }
+
+  const handleDeleteSecret = async (secretName: string) => {
+    if (!confirm(`Are you sure you want to delete secret "${secretName}"? This action cannot be undone.`)) return
+    await apiDelete(`/api/builds/secrets/${encodeURIComponent(secretName)}`, {
+      loading: 'Deleting secret...',
+      success: 'Secret deleted successfully',
+      error: 'Failed to delete secret'
+    })
+  }
+
+  const handleCopySecret = async (secretName: string) => {
+    toast.info(`Secret "${secretName}" value is hidden. Navigate to secret settings to view or update.`)
+  }
+
+  // Quick Actions with real functionality
+  const mockBuildsQuickActions = [
+    {
+      id: '1',
+      label: 'New Build',
+      icon: 'plus',
+      action: () => handleTriggerBuild(),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Retry',
+      icon: 'refresh-cw',
+      action: () => {
+        const failedBuild = mockBuilds.find(b => b.status === 'failed')
+        if (failedBuild) {
+          handleRetryBuild(failedBuild)
+        } else {
+          toast.info('No failed builds to retry')
+        }
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Logs',
+      icon: 'file-text',
+      action: () => {
+        const latestBuild = mockBuilds[0]
+        if (latestBuild) {
+          handleDownloadLogs(latestBuild)
+        }
+      },
+      variant: 'outline' as const
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-cyan-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -885,11 +934,14 @@ export default function BuildsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
               <RefreshCw className="w-4 h-4 mr-2" />
               Refresh
             </Button>
-            <Button className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+            <Button
+              className="bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
+              onClick={() => handleTriggerBuild()}
+            >
               <Play className="w-4 h-4 mr-2" />
               Run Workflow
             </Button>
@@ -986,19 +1038,27 @@ export default function BuildsClient() {
             {/* Builds Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Play, label: 'Run Build', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: RefreshCw, label: 'Rebuild', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: GitBranch, label: 'Branches', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Terminal, label: 'Logs', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: Download, label: 'Artifacts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: Search, label: 'Search', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
+                { icon: Play, label: 'Run Build', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => handleTriggerBuild() },
+                { icon: RefreshCw, label: 'Rebuild', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => {
+                  const failedBuild = mockBuilds.find(b => b.status === 'failed')
+                  if (failedBuild) handleRetryBuild(failedBuild)
+                  else toast.info('No failed builds to retry')
+                }},
+                { icon: GitBranch, label: 'Branches', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => router.push('/dashboard/builds/branches') },
+                { icon: Terminal, label: 'Logs', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => {
+                  const latestBuild = mockBuilds[0]
+                  if (latestBuild) handleDownloadLogs(latestBuild)
+                }},
+                { icon: Download, label: 'Artifacts', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => setActiveTab('artifacts') },
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => router.push('/dashboard/analytics') },
+                { icon: Search, label: 'Search', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => document.querySelector<HTMLInputElement>('input[placeholder="Search builds..."]')?.focus() },
+                { icon: Settings, label: 'Settings', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1151,19 +1211,23 @@ export default function BuildsClient() {
             {/* Workflows Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
-                { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
-                { icon: GitBranch, label: 'Triggers', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Timer, label: 'Schedules', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Lock, label: 'Secrets', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Archive, label: 'Archive', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
+                { icon: Workflow, label: 'New Workflow', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => router.push('/dashboard/builds/workflows/new') },
+                { icon: Play, label: 'Run All', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => {
+                  const activeWorkflow = mockWorkflows.find(w => w.is_active)
+                  if (activeWorkflow) handleRunWorkflow(activeWorkflow)
+                }},
+                { icon: FileText, label: 'Templates', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => router.push('/dashboard/builds/templates') },
+                { icon: GitBranch, label: 'Triggers', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => router.push('/dashboard/builds/triggers') },
+                { icon: Timer, label: 'Schedules', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => router.push('/dashboard/builds/schedules') },
+                { icon: Lock, label: 'Secrets', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => setActiveTab('settings') },
+                { icon: Archive, label: 'Archive', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => router.push('/dashboard/builds/archive') },
+                { icon: Settings, label: 'Settings', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1258,19 +1322,20 @@ export default function BuildsClient() {
             {/* Environments Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Cloud, label: 'Deploy', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: Shield, label: 'Protection', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: Key, label: 'Secrets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400' },
-                { icon: Database, label: 'Variables', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Users, label: 'Reviewers', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400' },
-                { icon: Activity, label: 'History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400' },
+                { icon: Globe, label: 'New Env', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => router.push('/dashboard/builds/environments/new') },
+                { icon: Cloud, label: 'Deploy', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => handleTriggerBuild('deploy') },
+                { icon: Shield, label: 'Protection', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => router.push('/dashboard/builds/environments/protection') },
+                { icon: Key, label: 'Secrets', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => setActiveTab('settings') },
+                { icon: Database, label: 'Variables', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => router.push('/dashboard/builds/variables') },
+                { icon: Users, label: 'Reviewers', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', action: () => router.push('/dashboard/builds/reviewers') },
+                { icon: Activity, label: 'History', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => router.push('/dashboard/builds/history') },
+                { icon: Settings, label: 'Settings', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1342,11 +1407,11 @@ export default function BuildsClient() {
                           )}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => router.push(`/dashboard/builds/environments/${env.id}/settings`)}>
                             <Settings className="w-3 h-3 mr-1" />
                             Configure
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={() => env.url && window.open(env.url, '_blank')}>
                             <Eye className="w-3 h-3 mr-1" />
                             View
                           </Button>
@@ -1384,19 +1449,30 @@ export default function BuildsClient() {
             {/* Artifacts Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Download, label: 'Download', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Box, label: 'Browse', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400' },
-                { icon: FileText, label: 'Reports', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Archive, label: 'Archives', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400' },
-                { icon: Database, label: 'Storage', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400' },
-                { icon: Trash2, label: 'Cleanup', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Search, label: 'Search', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400' },
-                { icon: Settings, label: 'Settings', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400' },
+                { icon: Download, label: 'Download', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => {
+                  if (mockArtifacts[0]) handleDownloadArtifact(mockArtifacts[0])
+                }},
+                { icon: Box, label: 'Browse', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', action: () => router.push('/dashboard/builds/artifacts/browse') },
+                { icon: FileText, label: 'Reports', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => router.push('/dashboard/builds/artifacts?type=report') },
+                { icon: Archive, label: 'Archives', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => router.push('/dashboard/builds/artifacts?type=archive') },
+                { icon: Database, label: 'Storage', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', action: () => router.push('/dashboard/builds/storage') },
+                { icon: Trash2, label: 'Cleanup', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
+                  if (confirm('Delete all expired artifacts?')) {
+                    await apiDelete('/api/builds/artifacts/expired', {
+                      loading: 'Cleaning up expired artifacts...',
+                      success: 'Expired artifacts cleaned up',
+                      error: 'Failed to clean up artifacts'
+                    })
+                  }
+                }},
+                { icon: Search, label: 'Search', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', action: () => router.push('/dashboard/builds/artifacts/search') },
+                { icon: Settings, label: 'Settings', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1411,7 +1487,19 @@ export default function BuildsClient() {
                     <CardTitle>Build Artifacts</CardTitle>
                     <CardDescription>Download build outputs and reports</CardDescription>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      if (confirm('Delete all expired artifacts?')) {
+                        await apiDelete('/api/builds/artifacts/expired', {
+                          loading: 'Cleaning up expired artifacts...',
+                          success: 'Expired artifacts cleaned up',
+                          error: 'Failed to clean up artifacts'
+                        })
+                      }
+                    }}
+                  >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Clean Expired
                   </Button>
@@ -1451,7 +1539,7 @@ export default function BuildsClient() {
                           Expires {new Date(artifact.expires_at).toLocaleDateString()}
                         </p>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button variant="outline" size="sm" onClick={() => handleDownloadArtifact(artifact)}>
                         <Download className="w-4 h-4" />
                       </Button>
                     </div>
@@ -1570,16 +1658,16 @@ export default function BuildsClient() {
                           <span className="font-mono text-sm">{secret}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => handleCopySecret(secret)}>
                             <Copy className="w-3 h-3" />
                           </Button>
-                          <Button variant="ghost" size="sm" className="text-red-600">
+                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => handleDeleteSecret(secret)}>
                             <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
                       </div>
                     ))}
-                    <Button variant="outline" className="w-full mt-3">
+                    <Button variant="outline" className="w-full mt-3" onClick={() => router.push('/dashboard/builds/secrets/new')}>
                       <Key className="w-4 h-4 mr-2" />
                       Add Secret
                     </Button>
@@ -1607,7 +1695,7 @@ export default function BuildsClient() {
                           <p className="font-mono text-sm">{cache.key}</p>
                           <p className="text-xs text-gray-500">{cache.size} • {cache.hits} hits</p>
                         </div>
-                        <Button variant="ghost" size="sm" className="text-red-600">
+                        <Button variant="ghost" size="sm" className="text-red-600" onClick={() => handleDeleteCache(cache.key)}>
                           <Trash2 className="w-3 h-3" />
                         </Button>
                       </div>
@@ -1824,17 +1912,40 @@ export default function BuildsClient() {
                   )}
 
                   <div className="flex items-center gap-3 pt-4 border-t">
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => handleDownloadLogs(selectedBuild)}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Logs
                     </Button>
-                    <Button variant="outline" className="flex-1">
+                    <Button variant="outline" className="flex-1" onClick={() => {
+                      const artifact = mockArtifacts.find(a => a.build_id === selectedBuild.id)
+                      if (artifact) handleDownloadArtifact(artifact)
+                      else toast.info('No artifacts available for this build')
+                    }}>
                       <Download className="w-4 h-4 mr-2" />
                       Artifacts
                     </Button>
-                    <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
-                      <RotateCcw className="w-4 h-4 mr-2" />
-                      Re-run
+                    {selectedBuild.status === 'running' ? (
+                      <Button
+                        variant="destructive"
+                        className="flex-1"
+                        onClick={() => handleCancelBuild(selectedBuild)}
+                      >
+                        <StopCircle className="w-4 h-4 mr-2" />
+                        Cancel
+                      </Button>
+                    ) : (
+                      <Button
+                        className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
+                        onClick={() => handleRetryBuild(selectedBuild)}
+                      >
+                        <RotateCcw className="w-4 h-4 mr-2" />
+                        Re-run
+                      </Button>
+                    )}
+                  </div>
+                  <div className="flex justify-center pt-2">
+                    <Button variant="link" onClick={() => handleViewBuildDetails(selectedBuild)}>
+                      View Full Details
                     </Button>
                   </div>
                 </div>
@@ -1899,11 +2010,18 @@ export default function BuildsClient() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-4 border-t">
-                  <Button variant="outline" className="flex-1">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => router.push(`/dashboard/builds/workflows/${selectedWorkflow.id}`)}
+                  >
                     <Eye className="w-4 h-4 mr-2" />
                     View File
                   </Button>
-                  <Button className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white">
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-teal-500 to-cyan-600 text-white"
+                    onClick={() => handleRunWorkflow(selectedWorkflow)}
+                  >
                     <Play className="w-4 h-4 mr-2" />
                     Run Workflow
                   </Button>

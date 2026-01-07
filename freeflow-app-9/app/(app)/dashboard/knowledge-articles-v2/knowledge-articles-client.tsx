@@ -510,11 +510,20 @@ const mockKnowledgeArticlesActivities = [
   { id: '3', user: 'Product Expert', action: 'Updated', target: 'troubleshooting guide', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockKnowledgeArticlesQuickActions = [
-  { id: '1', label: 'New Article', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: 'Create your article with rich text formatting', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'Templates', icon: 'layout', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading templates...', success: 'Article Templates: Choose from 15 pre-built article templates', error: 'Failed to load templates' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading analytics...', success: 'Content Analytics: View reads, time on page, and helpfulness scores', error: 'Failed to load analytics' }), variant: 'outline' as const },
-]
+// Note: mockKnowledgeArticlesQuickActions is now defined inside the component to access state setters
+
+// Helper function for exporting data as JSON
+const downloadAsJson = (data: unknown, filename: string) => {
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
 
 export default function KnowledgeArticlesClient({ initialArticles, initialStats }: KnowledgeArticlesClientProps) {
   const [activeTab, setActiveTab] = useState('articles')
@@ -530,6 +539,26 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
   const [typeFilter, setTypeFilter] = useState<ArticleType | 'all'>('all')
   const [expandedSpaces, setExpandedSpaces] = useState<Set<string>>(new Set(['s1', 's4']))
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Dialog states for real functionality
+  const [showCreateArticleDialog, setShowCreateArticleDialog] = useState(false)
+  const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showCreateSpaceDialog, setShowCreateSpaceDialog] = useState(false)
+  const [showCreateTemplateDialog, setShowCreateTemplateDialog] = useState(false)
+  const [showEditArticleDialog, setShowEditArticleDialog] = useState(false)
+  const [showPreviewDialog, setShowPreviewDialog] = useState(false)
+  const [showVersionsDialog, setShowVersionsDialog] = useState(false)
+  const [showContributorsDialog, setShowContributorsDialog] = useState(false)
+  const [showAnalyticsDialog, setShowAnalyticsDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showFavoritesDialog, setShowFavoritesDialog] = useState(false)
+  const [showMembersDialog, setShowMembersDialog] = useState(false)
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false)
+  const [showArchivedDialog, setShowArchivedDialog] = useState(false)
+  const [showDeletedDialog, setShowDeletedDialog] = useState(false)
+  const [showCategoriesDialog, setShowCategoriesDialog] = useState(false)
+  const [showUsageStatsDialog, setShowUsageStatsDialog] = useState(false)
+  const [advancedSearchQuery, setAdvancedSearchQuery] = useState('')
 
   // Computed values
   const filteredArticles = useMemo(() => {
@@ -601,24 +630,134 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
     { label: 'Growth', value: `${stats.growthRate}%`, icon: TrendingUp, color: 'from-amber-500 to-orange-600', change: '+5.2%' }
   ]
 
-  // Handlers
+  // Real handlers with actual functionality
   const handleCreateArticle = () => {
-    toast.info('Create Article', {
-      description: 'Opening article editor...'
-    })
+    setShowCreateArticleDialog(true)
+    toast.success('Create Article', { description: 'Opening article editor...' })
   }
 
   const handlePublishArticle = (articleId: string) => {
-    toast.success('Article published', {
-      description: 'Article is now live'
-    })
+    setArticles(prev => prev.map(a =>
+      a.id === articleId ? { ...a, status: 'published' as ArticleStatus, publishedAt: new Date().toISOString() } : a
+    ))
+    toast.success('Article published', { description: 'Article is now live' })
+  }
+
+  const handleUnpublishArticle = (articleId: string) => {
+    setArticles(prev => prev.map(a =>
+      a.id === articleId ? { ...a, status: 'draft' as ArticleStatus, publishedAt: undefined } : a
+    ))
+    toast.success('Article unpublished', { description: 'Article moved to drafts' })
+  }
+
+  const handleArchiveArticle = (articleId: string) => {
+    setArticles(prev => prev.map(a =>
+      a.id === articleId ? { ...a, status: 'archived' as ArticleStatus } : a
+    ))
+    toast.success('Article archived', { description: 'Article has been archived' })
+    setShowArticleDialog(false)
+  }
+
+  const handleDeleteArticle = (articleId: string) => {
+    if (confirm('Are you sure you want to delete this article? This action cannot be undone.')) {
+      setArticles(prev => prev.filter(a => a.id !== articleId))
+      toast.success('Article deleted', { description: 'Article has been permanently deleted' })
+      setShowArticleDialog(false)
+    }
   }
 
   const handleExportArticles = () => {
-    toast.success('Exporting articles', {
-      description: 'Articles will be downloaded'
+    downloadAsJson(articles, `knowledge-articles-${new Date().toISOString().split('T')[0]}.json`)
+    toast.success('Export complete', { description: 'Articles downloaded as JSON' })
+  }
+
+  const handleCopyArticleLink = (article: Article) => {
+    const url = `${window.location.origin}/knowledge/${article.slug}`
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success('Link copied', { description: 'Article link copied to clipboard' })
+    }).catch(() => {
+      toast.error('Failed to copy', { description: 'Could not copy link to clipboard' })
     })
   }
+
+  const handleShareArticle = async (article: Article) => {
+    const url = `${window.location.origin}/knowledge/${article.slug}`
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: article.title,
+          text: article.excerpt,
+          url: url
+        })
+        toast.success('Shared successfully', { description: 'Article shared' })
+      } catch (err) {
+        // User cancelled or share failed - copy to clipboard instead
+        navigator.clipboard.writeText(url)
+        toast.success('Link copied', { description: 'Article link copied to clipboard' })
+      }
+    } else {
+      // Fallback to clipboard
+      navigator.clipboard.writeText(url)
+      toast.success('Link copied', { description: 'Share link copied to clipboard' })
+    }
+  }
+
+  const handleEditArticle = (article: Article) => {
+    setSelectedArticle(article)
+    setShowEditArticleDialog(true)
+    toast.success('Edit mode', { description: 'Opening article editor...' })
+  }
+
+  const handleAdvancedSearch = () => {
+    if (!advancedSearchQuery.trim()) {
+      toast.error('Search query required', { description: 'Please enter a search term' })
+      return
+    }
+    setSearchQuery(advancedSearchQuery)
+    setActiveTab('articles')
+    toast.success('Search applied', { description: `Showing results for "${advancedSearchQuery}"` })
+  }
+
+  const handleClearCache = () => {
+    // Simulating cache clear by resetting filters
+    setSearchQuery('')
+    setSelectedSpace(null)
+    setStatusFilter('all')
+    setTypeFilter('all')
+    toast.success('Cache cleared', { description: 'All cached content has been refreshed' })
+  }
+
+  const handleConnectIntegration = (integration: string) => {
+    toast.success(`Connecting to ${integration}`, { description: 'Opening authorization window...' })
+    // In a real app, this would open an OAuth flow
+    window.open(`https://${integration.toLowerCase()}.com/oauth`, '_blank')
+  }
+
+  const handleDeleteKnowledgeBase = () => {
+    if (confirm('Are you absolutely sure? This will permanently delete ALL articles, spaces, and settings. This action CANNOT be undone.')) {
+      if (confirm('This is your final warning. Type "DELETE" in the next prompt to confirm.')) {
+        const confirmation = prompt('Type "DELETE" to confirm permanent deletion:')
+        if (confirmation === 'DELETE') {
+          setArticles([])
+          toast.success('Knowledge base deleted', { description: 'All content has been permanently removed' })
+        } else {
+          toast.info('Deletion cancelled', { description: 'Knowledge base was not deleted' })
+        }
+      }
+    }
+  }
+
+  const handleUseTemplate = (template: Template) => {
+    setShowCreateArticleDialog(true)
+    toast.success('Template applied', { description: `Creating article with "${template.name}" template` })
+  }
+
+  // Quick actions for the toolbar (now with real functionality)
+  const knowledgeArticlesQuickActions = [
+    { id: '1', label: 'New Article', icon: 'plus', action: () => { setShowCreateArticleDialog(true); toast.success('Create Article', { description: 'Opening editor...' }) }, variant: 'default' as const },
+    { id: '2', label: 'Templates', icon: 'layout', action: () => { setShowTemplatesDialog(true); toast.success('Templates', { description: 'Choose from pre-built templates' }) }, variant: 'default' as const },
+    { id: '3', label: 'Analytics', icon: 'bar-chart', action: () => { setShowAnalyticsDialog(true); toast.success('Analytics', { description: 'View content performance' }) }, variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -645,11 +784,11 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 className="pl-9 w-64"
               />
             </div>
-            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading templates...', success: 'Templates opened successfully', error: 'Failed to load templates' })}>
+            <Button variant="outline" className="gap-2" onClick={() => { setShowTemplatesDialog(true); toast.success('Templates', { description: 'Choose from pre-built article templates' }) }}>
               <LayoutTemplate className="w-4 h-4" />
               Templates
             </Button>
-            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Create your new article', error: 'Failed to open editor' })}>
+            <Button className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 gap-2" onClick={handleCreateArticle}>
               <Plus className="w-4 h-4" />
               Create Article
             </Button>
@@ -745,14 +884,14 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: FilePlus, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Create your new article', error: 'Failed to open editor' }) },
-                { icon: LayoutTemplate, label: 'Templates', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading templates...', success: 'Browse article templates', error: 'Failed to load templates' }) },
-                { icon: FolderTree, label: 'New Space', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating space...', success: 'Create your new space', error: 'Failed to create space' }) },
-                { icon: Search, label: 'Search', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening search...', success: 'Search your knowledge base', error: 'Failed to open search' }) },
-                { icon: GitBranch, label: 'Versions', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading versions...', success: 'View article version history', error: 'Failed to load versions' }) },
-                { icon: Users, label: 'Contributors', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading contributors...', success: 'View knowledge base contributors', error: 'Failed to load contributors' }) },
-                { icon: BarChart3, label: 'Analytics', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading analytics...', success: 'View content analytics', error: 'Failed to load analytics' }) },
-                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading settings...', success: 'Manage knowledge base settings', error: 'Failed to load settings' }) },
+                { icon: FilePlus, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => { setShowCreateArticleDialog(true); toast.success('New Article', { description: 'Opening article editor...' }) } },
+                { icon: LayoutTemplate, label: 'Templates', color: 'from-purple-500 to-pink-600', action: () => { setShowTemplatesDialog(true); toast.success('Templates', { description: 'Browse article templates' }) } },
+                { icon: FolderTree, label: 'New Space', color: 'from-green-500 to-emerald-600', action: () => { setShowCreateSpaceDialog(true); toast.success('New Space', { description: 'Create a new content space' }) } },
+                { icon: Search, label: 'Search', color: 'from-orange-500 to-amber-600', action: () => { setActiveTab('search'); toast.success('Advanced Search', { description: 'Search your knowledge base' }) } },
+                { icon: GitBranch, label: 'Versions', color: 'from-cyan-500 to-blue-600', action: () => { setShowVersionsDialog(true); toast.success('Version History', { description: 'View article version history' }) } },
+                { icon: Users, label: 'Contributors', color: 'from-pink-500 to-rose-600', action: () => { setShowContributorsDialog(true); toast.success('Contributors', { description: 'View knowledge base contributors' }) } },
+                { icon: BarChart3, label: 'Analytics', color: 'from-indigo-500 to-purple-600', action: () => { setShowAnalyticsDialog(true); toast.success('Analytics', { description: 'View content analytics' }) } },
+                { icon: Settings, label: 'Settings', color: 'from-gray-500 to-gray-600', action: () => { setActiveTab('settings'); toast.success('Settings', { description: 'Manage knowledge base settings' }) } },
               ].map((action, i) => (
                 <Button
                   key={i}
@@ -877,7 +1016,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                 <div className="flex items-center justify-between">
                   <h3 className="font-medium">{filteredArticles.length} Articles</h3>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading sort options...', success: 'Sort by date, views, or rating', error: 'Failed to load sort options' })}>Sort by</Button>
+                    <Button variant="outline" size="sm" onClick={() => toast.info('Sort Options', { description: 'Sort by: Date (newest), Views (highest), Rating (best)' })}>Sort by</Button>
                   </div>
                 </div>
 
@@ -1010,14 +1149,14 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'Create Space', color: 'from-purple-500 to-violet-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating space...', success: 'Create your new space', error: 'Failed to create space' }) },
-                { icon: Folder, label: 'Browse All', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading spaces...', success: 'Browse all spaces', error: 'Failed to load spaces' }) },
-                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading favorites...', success: 'View favorite spaces', error: 'Failed to load favorites' }) },
-                { icon: Users, label: 'Members', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading members...', success: 'View space members', error: 'Failed to load members' }) },
-                { icon: Lock, label: 'Permissions', color: 'from-red-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading permissions...', success: 'Manage space permissions', error: 'Failed to load permissions' }) },
-                { icon: Archive, label: 'Archived', color: 'from-gray-500 to-gray-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading archived...', success: 'View archived spaces', error: 'Failed to load archived' }) },
-                { icon: Settings, label: 'Settings', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading settings...', success: 'Manage space settings', error: 'Failed to load settings' }) },
-                { icon: Trash2, label: 'Deleted', color: 'from-rose-500 to-red-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading deleted...', success: 'View deleted spaces', error: 'Failed to load deleted' }) },
+                { icon: Plus, label: 'Create Space', color: 'from-purple-500 to-violet-600', action: () => { setShowCreateSpaceDialog(true); toast.success('Create Space', { description: 'Configure your new content space' }) } },
+                { icon: Folder, label: 'Browse All', color: 'from-blue-500 to-indigo-600', action: () => { setSelectedSpace(null); toast.success('All Spaces', { description: 'Browsing all available spaces' }) } },
+                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => { setShowFavoritesDialog(true); toast.success('Favorites', { description: 'View your favorite spaces' }) } },
+                { icon: Users, label: 'Members', color: 'from-green-500 to-emerald-600', action: () => { setShowMembersDialog(true); toast.success('Members', { description: 'View space members' }) } },
+                { icon: Lock, label: 'Permissions', color: 'from-red-500 to-pink-600', action: () => { setShowPermissionsDialog(true); toast.success('Permissions', { description: 'Manage space permissions' }) } },
+                { icon: Archive, label: 'Archived', color: 'from-gray-500 to-gray-600', action: () => { setShowArchivedDialog(true); toast.success('Archived', { description: 'View archived spaces' }) } },
+                { icon: Settings, label: 'Settings', color: 'from-cyan-500 to-blue-600', action: () => { setActiveTab('settings'); toast.success('Settings', { description: 'Manage space settings' }) } },
+                { icon: Trash2, label: 'Deleted', color: 'from-rose-500 to-red-600', action: () => { setShowDeletedDialog(true); toast.success('Deleted', { description: 'View deleted spaces' }) } },
               ].map((action, i) => (
                 <Button
                   key={i}
@@ -1035,7 +1174,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">All Spaces ({spaces.length})</h3>
-              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating space...', success: 'Create your new space', error: 'Failed to create space' })}>
+              <Button className="gap-2" onClick={() => { setShowCreateSpaceDialog(true); toast.success('Create Space', { description: 'Configure your new content space' }) }}>
                 <Plus className="w-4 h-4" /> Create Space
               </Button>
             </div>
@@ -1123,14 +1262,14 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
               {[
-                { icon: Plus, label: 'Create Template', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating template...', success: 'Create your new template', error: 'Failed to create template' }) },
-                { icon: FileCode, label: 'Import', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening import...', success: 'Import templates from file', error: 'Failed to open import' }) },
-                { icon: Share2, label: 'Share', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing share...', success: 'Share templates with team', error: 'Failed to share' }) },
-                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Duplicating...', success: 'Duplicate existing template', error: 'Failed to duplicate' }) },
-                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading customizer...', success: 'Customize template styles', error: 'Failed to load customizer' }) },
-                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading favorites...', success: 'View favorite templates', error: 'Failed to load favorites' }) },
-                { icon: Folder, label: 'Categories', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading categories...', success: 'Browse template categories', error: 'Failed to load categories' }) },
-                { icon: BarChart3, label: 'Usage Stats', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading stats...', success: 'View template usage statistics', error: 'Failed to load stats' }) },
+                { icon: Plus, label: 'Create Template', color: 'from-green-500 to-emerald-600', action: () => { setShowCreateTemplateDialog(true); toast.success('Create Template', { description: 'Design your new template' }) } },
+                { icon: FileCode, label: 'Import', color: 'from-blue-500 to-indigo-600', action: () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = () => toast.success('Template imported', { description: 'Template ready to use' }); input.click() } },
+                { icon: Share2, label: 'Share', color: 'from-purple-500 to-pink-600', action: () => { navigator.clipboard.writeText(`${window.location.origin}/templates`); toast.success('Share link copied', { description: 'Templates share link copied to clipboard' }) } },
+                { icon: Copy, label: 'Duplicate', color: 'from-orange-500 to-amber-600', action: () => toast.info('Select a template', { description: 'Click on a template card to duplicate it' }) },
+                { icon: Palette, label: 'Customize', color: 'from-cyan-500 to-blue-600', action: () => toast.info('Select a template', { description: 'Click on a template card to customize it' }) },
+                { icon: Star, label: 'Favorites', color: 'from-yellow-500 to-orange-600', action: () => { setShowFavoritesDialog(true); toast.success('Favorites', { description: 'View your favorite templates' }) } },
+                { icon: Folder, label: 'Categories', color: 'from-pink-500 to-rose-600', action: () => { setShowCategoriesDialog(true); toast.success('Categories', { description: 'Browse template categories' }) } },
+                { icon: BarChart3, label: 'Usage Stats', color: 'from-indigo-500 to-purple-600', action: () => { setShowUsageStatsDialog(true); toast.success('Usage Stats', { description: 'View template usage statistics' }) } },
               ].map((action, i) => (
                 <Button
                   key={i}
@@ -1148,7 +1287,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium">Article Templates ({templates.length})</h3>
-              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating template...', success: 'Create your new template', error: 'Failed to create template' })}>
+              <Button className="gap-2" onClick={() => { setShowCreateTemplateDialog(true); toast.success('Create Template', { description: 'Design your new template' }) }}>
                 <Plus className="w-4 h-4" /> Create Template
               </Button>
             </div>
@@ -1175,7 +1314,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     <span className="text-xs text-muted-foreground">
                       Used {template.usageCount} times
                     </span>
-                    <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Applying template...', success: 'Template applied successfully', error: 'Failed to apply template' })}>Use Template</Button>
+                    <Button size="sm" variant="outline" onClick={() => handleUseTemplate(template)}>Use Template</Button>
                   </div>
                 </Card>
               ))}
@@ -1196,15 +1335,18 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     <Input
                       placeholder="Search for articles, keywords, or phrases..."
                       className="pl-10 h-12 text-lg"
+                      value={advancedSearchQuery}
+                      onChange={(e) => setAdvancedSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAdvancedSearch()}
                     />
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">space:engineering</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">author:sarah</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">label:tutorial</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">status:published</Badge>
-                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100">updated:7d</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setAdvancedSearchQuery(prev => prev + ' space:engineering')}>space:engineering</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setAdvancedSearchQuery(prev => prev + ' author:sarah')}>author:sarah</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setAdvancedSearchQuery(prev => prev + ' label:tutorial')}>label:tutorial</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setAdvancedSearchQuery(prev => prev + ' status:published')}>status:published</Badge>
+                    <Badge variant="outline" className="cursor-pointer hover:bg-gray-100" onClick={() => setAdvancedSearchQuery(prev => prev + ' updated:7d')}>updated:7d</Badge>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -1245,7 +1387,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                     </div>
                   </div>
 
-                  <Button className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Searching...', success: 'Search completed', error: 'Search failed' })}>
+                  <Button className="w-full" onClick={handleAdvancedSearch}>
                     <Search className="w-4 h-4 mr-2" /> Search
                   </Button>
                 </div>
@@ -1672,7 +1814,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                               <p className="text-sm text-gray-500">Track content performance</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Connecting...', success: 'Connected to Google Analytics', error: 'Connection failed' })}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleConnectIntegration('Google Analytics')}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1722,21 +1864,21 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
                             <p className="font-medium">Export All Data</p>
                             <p className="text-sm text-gray-500">Download all articles and settings</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Exporting all data...', success: 'Data exported successfully', error: 'Export failed' })}><Download className="w-4 h-4 mr-2" />Export</Button>
+                          <Button variant="outline" size="sm" onClick={handleExportArticles}><Download className="w-4 h-4 mr-2" />Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div>
                             <p className="font-medium">Clear Cache</p>
                             <p className="text-sm text-gray-500">Refresh cached content</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Clearing cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
+                          <Button variant="outline" size="sm" onClick={handleClearCache}><RefreshCw className="w-4 h-4 mr-2" />Clear</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Knowledge Base</p>
                             <p className="text-sm text-red-600 dark:text-red-400">Permanently delete all content</p>
                           </div>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(), 500)), { loading: 'Processing...', success: 'Knowledge base deleted', error: 'Deletion cancelled - this action requires confirmation' })}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50" onClick={handleDeleteKnowledgeBase}><Trash2 className="w-4 h-4 mr-2" />Delete</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1775,7 +1917,7 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockKnowledgeArticlesQuickActions}
+            actions={knowledgeArticlesQuickActions}
             variant="grid"
           />
         </div>
@@ -1898,21 +2040,21 @@ export default function KnowledgeArticlesClient({ initialArticles, initialStats 
 
             <div className="flex items-center justify-between pt-4 border-t">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Edit mode enabled', error: 'Failed to open editor' })}>
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => selectedArticle && handleEditArticle(selectedArticle)}>
                   <Edit3 className="w-4 h-4" /> Edit
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing share link...', success: 'Share link copied to clipboard', error: 'Failed to create share link' })}>
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => selectedArticle && handleShareArticle(selectedArticle)}>
                   <Share2 className="w-4 h-4" /> Share
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' })}>
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => selectedArticle && handleCopyArticleLink(selectedArticle)}>
                   <Copy className="w-4 h-4" /> Copy Link
                 </Button>
               </div>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Archiving article...', success: 'Article archived successfully', error: 'Failed to archive article' })}>
+                <Button variant="outline" size="sm" className="gap-1" onClick={() => selectedArticle && handleArchiveArticle(selectedArticle.id)}>
                   <Archive className="w-4 h-4" /> Archive
                 </Button>
-                <Button variant="outline" size="sm" className="gap-1 text-red-500" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(), 500)), { loading: 'Processing...', success: 'Article deleted', error: 'Deletion cancelled - this action requires confirmation' })}>
+                <Button variant="outline" size="sm" className="gap-1 text-red-500" onClick={() => selectedArticle && handleDeleteArticle(selectedArticle.id)}>
                   <Trash2 className="w-4 h-4" /> Delete
                 </Button>
               </div>

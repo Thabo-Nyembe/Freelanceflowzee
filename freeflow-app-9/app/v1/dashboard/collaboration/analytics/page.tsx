@@ -147,11 +147,7 @@ export default function AnalyticsPage() {
         userId
       });
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Loading analytics...',
-        success: `Analytics loaded: ${statsData?.totalMessages || 0} messages, ${statsData?.totalMeetings || 0} meetings`,
-        error: 'Failed to load analytics'
-      });
+      toast.success('Analytics Loaded', { description: `${statsData?.totalMessages || 0} messages, ${statsData?.totalMeetings || 0} meetings` });
       announce(`Analytics loaded successfully: ${statsData?.totalMessages || 0} messages`, "polite");
     } catch (error) {
       logger.error("Exception in fetchAnalyticsData", { error, userId });

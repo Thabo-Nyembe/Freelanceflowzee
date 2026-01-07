@@ -322,9 +322,9 @@ export default function AdvancedMicroFeaturesClient() {
   const tableColumns = useMemo(() => [
     { key: 'project', label: 'Project', sortable: true },
     { key: 'client', label: 'Client', sortable: true },
-    { 
-      key: 'status', 
-      label: 'Status', 
+    {
+      key: 'status',
+      label: 'Status',
       formatter: (value: string) => (
         <Badge variant={value === 'Active' ? 'default' : value === 'Complete' ? 'secondary' : 'outline'}>
           {value}
@@ -378,7 +378,7 @@ export default function AdvancedMicroFeaturesClient() {
   if (isLoading) {
     return (
       <div className="container py-8 min-h-screen bg-gradient-to-br from-slate-50 via-purple-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
-        
+
         {/* V2 Competitive Upgrade Components */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           <AIInsightsPanel insights={advancedMicroFeaturesAIInsights} />
@@ -421,7 +421,7 @@ export default function AdvancedMicroFeaturesClient() {
         {/* Enhanced Breadcrumb */}
         <AnimatedElement animation="slideInDown">
           <div className="mb-6">
-            <EnhancedBreadcrumb 
+            <EnhancedBreadcrumb
               items={breadcrumbItems}
               showMetadata={true}
               enableKeyboardNav={true}
@@ -445,7 +445,7 @@ export default function AdvancedMicroFeaturesClient() {
                   Comprehensive showcase of <AnimatedCounter value={12} />+ enhanced micro-interaction systems
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 {/* Enhanced Search */}
                 <div className="w-64">
@@ -456,7 +456,7 @@ export default function AdvancedMicroFeaturesClient() {
                     enableKeyboardShortcuts={true}
                   />
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <HelpTooltip content="Total micro feature systems implemented">
                     <Badge variant="secondary" className="text-sm px-3 py-1">
@@ -464,7 +464,7 @@ export default function AdvancedMicroFeaturesClient() {
                       <AnimatedCounter value={12} /> Systems
                     </Badge>
                   </HelpTooltip>
-                  
+
                   <ContextualTooltip
                     type="info"
                     title="Feature Status"
@@ -492,28 +492,28 @@ export default function AdvancedMicroFeaturesClient() {
                   Dashboard
                 </TabsTrigger>
               </HelpTooltip>
-              
+
               <HelpTooltip content="Charts, tables, and data visualization components">
                 <TabsTrigger value="visualization" className="flex items-center gap-2">
                   <BarChart3 className="h-4 w-4" />
                   Data Viz
                 </TabsTrigger>
               </HelpTooltip>
-              
+
               <HelpTooltip content="Presence indicators, activity feeds, and comments">
                 <TabsTrigger value="collaboration" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   Collaboration
                 </TabsTrigger>
               </HelpTooltip>
-              
+
               <HelpTooltip content="Theme selectors, keyboard shortcuts, and preferences">
                 <TabsTrigger value="settings" className="flex items-center gap-2">
                   <Settings className="h-4 w-4" />
                   Settings
                 </TabsTrigger>
               </HelpTooltip>
-              
+
               <HelpTooltip content="Integration examples and usage patterns">
                 <TabsTrigger value="integration" className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
@@ -532,8 +532,8 @@ export default function AdvancedMicroFeaturesClient() {
                     data={mockWidgetData}
                     size="large"
                     variant="detailed"
-                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Refreshing widget data...', success: 'Widget data refreshed', error: 'Failed to refresh' }) }}
-                    onSettings={() => { logger.info('Opening widget settings'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening widget settings...', success: 'Widget settings opened', error: 'Failed to open settings' }) }}
+                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.success('Widget data refreshed') }}
+                    onSettings={() => { logger.info('Opening widget settings'); setActiveTab('settings'); toast.success('Widget settings opened') }}
                     onMaximize={() => { logger.info('Maximizing widget'); toast.success('Widget maximized') }}
                   />
                 </div>
@@ -573,13 +573,13 @@ export default function AdvancedMicroFeaturesClient() {
                     dateRange="Last 6 months"
                     onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully', { description: 'Revenue Trends - CSV format' }) }}
                     onShare={() => { logger.info('Sharing chart'); toast.success('Share link copied to clipboard') }}
-                    onSettings={() => { logger.info('Opening chart settings'); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening chart settings...', success: 'Chart settings opened', error: 'Failed to open settings' }) }}
+                    onSettings={() => { logger.info('Opening chart settings'); setActiveTab('settings'); toast.success('Chart settings opened') }}
                     legend={[
                       { name: 'Revenue', color: '#3b82f6', value: '$45K', visible: true },
                       { name: 'Expenses', color: '#ef4444', value: '$28K', visible: true },
                       { name: 'Profit', color: '#10b981', value: '$17K', visible: false }
                     ]}
-                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling legend...', success: `Legend ${name} toggled`, error: 'Failed to toggle' }) }}
+                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.success(`Legend ${name} toggled`) }}
                   >
                     <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
                       <div className="text-center text-muted-foreground">
@@ -601,7 +601,7 @@ export default function AdvancedMicroFeaturesClient() {
                     exportable={true}
                     pagination={true}
                     pageSize={3}
-                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading details...', success: `Viewing details for ${row.name || 'item'}`, error: 'Failed to load details' }) }}
+                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.success(`Viewing details for ${row.project || row.name || 'item'}`) }}
                   />
                 </div>
               </div>
@@ -620,7 +620,7 @@ export default function AdvancedMicroFeaturesClient() {
                         maxDisplay={4}
                         showDetails={true}
                         size="lg"
-                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading profile...', success: `Viewing ${user.name}'s profile`, error: 'Failed to load profile' }) }}
+                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.success(`Viewing ${user.name}'s profile`) }}
                       />
                       <div className="text-sm text-muted-foreground">
                         Team members currently online and their status
@@ -636,7 +636,7 @@ export default function AdvancedMicroFeaturesClient() {
                     activities={mockActivities}
                     maxItems={5}
                     showTimestamps={true}
-                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening activity details...', success: 'Activity details opened', error: 'Failed to open details' }) }}
+                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.success('Activity details opened') }}
                   />
                 </div>
 
@@ -671,7 +671,7 @@ export default function AdvancedMicroFeaturesClient() {
                   <EnhancedSettingsCategories
                     categories={mockSettingsCategories}
                     activeCategory="theme"
-                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching category...', success: `Switched to ${categoryId} settings`, error: 'Failed to switch' }) }}
+                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.success(`Switched to ${categoryId} settings`) }}
                   />
                 </div>
 
@@ -750,4 +750,3 @@ export default function AdvancedMicroFeaturesClient() {
     </div>
   )
 }
-

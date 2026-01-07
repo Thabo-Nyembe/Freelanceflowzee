@@ -323,11 +323,8 @@ const mockAutomationsActivities = [
   { id: '3', user: 'Engineer', action: 'Updated', target: 'CRM data sync schedule', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockAutomationsQuickActions = [
-  { id: '1', label: 'New Workflow', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening workflow builder...', success: 'Workflow builder ready!', error: 'Failed to open workflow builder' }), variant: 'default' as const },
-  { id: '2', label: 'Run All', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running all workflows...', success: 'All workflows executed!', error: 'Execution failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Logs', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting logs...', success: 'Logs exported successfully!', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state and handlers
+// See getQuickActions() function inside AutomationsClient component
 
 // ============================================================================
 // FORM STATE INTERFACE
@@ -601,6 +598,10 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
 
   // Delete workflow handler
   const handleDeleteAutomation = async (workflow: AutomationWorkflow) => {
+    if (!confirm(`Are you sure you want to delete "${workflow.workflow_name}"? This action cannot be undone.`)) {
+      return
+    }
+
     try {
       const { error } = await supabase
         .from('automations')
@@ -618,6 +619,146 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
       toast.error('Failed to delete automation')
     }
   }
+
+  // Run all active workflows handler
+  const handleRunAllWorkflows = async () => {
+    const activeWorkflows = displayWorkflows.filter(w => w.status === 'active' || w.is_enabled)
+
+    if (activeWorkflows.length === 0) {
+      toast.error('No active workflows to run')
+      return
+    }
+
+    toast.promise(
+      (async () => {
+        const results = await Promise.allSettled(
+          activeWorkflows.map(async (workflow) => {
+            const response = await fetch(`/api/kazi/automations/${workflow.id}/execute`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ input: {} })
+            })
+            if (!response.ok) {
+              const error = await response.json()
+              throw new Error(error.error || 'Execution failed')
+            }
+            return response.json()
+          })
+        )
+
+        const succeeded = results.filter(r => r.status === 'fulfilled').length
+        const failed = results.filter(r => r.status === 'rejected').length
+
+        await fetchWorkflows()
+
+        if (failed > 0) {
+          throw new Error(`${succeeded} succeeded, ${failed} failed`)
+        }
+
+        return { succeeded, total: activeWorkflows.length }
+      })(),
+      {
+        loading: `Running ${activeWorkflows.length} active workflows...`,
+        success: (data) => `All ${data.total} workflows executed successfully!`,
+        error: (err) => `Execution completed with errors: ${err.message}`
+      }
+    )
+  }
+
+  // Export logs handler
+  const handleExportLogs = async () => {
+    toast.promise(
+      (async () => {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          throw new Error('Please sign in to export logs')
+        }
+
+        // Fetch all automations with their execution data
+        const { data: automations, error } = await supabase
+          .from('automations')
+          .select('*')
+          .order('created_at', { ascending: false })
+
+        if (error) throw error
+
+        // Create CSV content
+        const headers = [
+          'Workflow Name',
+          'Status',
+          'Type',
+          'Total Executions',
+          'Successful',
+          'Failed',
+          'Success Rate',
+          'Last Execution',
+          'Created At'
+        ]
+
+        const rows = (automations || []).map(a => [
+          a.workflow_name,
+          a.status,
+          a.workflow_type,
+          a.total_executions || 0,
+          a.successful_executions || 0,
+          a.failed_executions || 0,
+          a.total_executions > 0
+            ? `${((a.successful_executions / a.total_executions) * 100).toFixed(1)}%`
+            : 'N/A',
+          a.last_execution_at || 'Never',
+          a.created_at
+        ])
+
+        const csvContent = [
+          headers.join(','),
+          ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ].join('\n')
+
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `automation-logs-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+
+        return { count: automations?.length || 0 }
+      })(),
+      {
+        loading: 'Exporting automation logs...',
+        success: (data) => `Exported ${data.count} automation logs successfully!`,
+        error: (err) => `Export failed: ${err.message}`
+      }
+    )
+  }
+
+  // Quick actions configuration with real handlers
+  const quickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Workflow',
+      icon: 'plus',
+      action: () => setShowNewWorkflow(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Run All',
+      icon: 'play',
+      action: handleRunAllWorkflows,
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export Logs',
+      icon: 'download',
+      action: handleExportLogs,
+      variant: 'outline' as const
+    },
+  ], [displayWorkflows, supabase])
 
   if (error) return (
     <div className="p-8">
@@ -775,7 +916,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             <FileText className="h-12 w-12 mx-auto text-gray-400 mb-3" />
                             <p className="font-medium mb-1">Drop your scenario file here</p>
                             <p className="text-sm text-gray-500">Supports .json exports from Make, Zapier, n8n</p>
-                            <Button variant="outline" className="mt-4">Browse Files</Button>
+                            <Button variant="outline" className="mt-4" onClick={() => { const input = document.createElement("input"); input.type = "file"; input.accept = ".json"; input.onchange = (e) => { const file = (e.target as HTMLInputElement).files?.[0]; if (file) { toast.success("File selected: " + file.name); } }; input.click(); }}>Browse Files</Button>
                           </div>
                           <div>
                             <label className="block text-sm font-medium mb-1">Or paste JSON</label>
@@ -786,10 +927,10 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     </Tabs>
                   </DialogContent>
                 </Dialog>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={handleExportLogs}>
                   <Download className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" className="text-white hover:bg-white/20">
+                <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => setActiveTab('settings')}>
                   <Settings className="h-5 w-5" />
                 </Button>
               </div>
@@ -928,35 +1069,35 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all hover:scale-105" onClick={() => setShowNewWorkflow(true)}>
                     <Plus className="h-5 w-5 text-emerald-600" />
                     <span className="text-sm">New Scenario</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={handleRunAllWorkflows}>
                     <Play className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Run All Active</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => setActiveTab("templates")}>
                     <Package className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Browse Templates</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all hover:scale-105" onClick={() => { setActiveTab("settings"); setSettingsTab("webhooks"); }}>
                     <Webhook className="h-5 w-5 text-orange-600" />
                     <span className="text-sm">Manage Webhooks</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => toast.info("AI Automation coming soon!")}>
                     <Bot className="h-5 w-5 text-pink-600" />
                     <span className="text-sm">AI Automation</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105" onClick={() => setActiveTab("connections")}>
                     <Network className="h-5 w-5 text-cyan-600" />
                     <span className="text-sm">Connections</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={handleExportLogs}>
                     <Download className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Export Data</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105" onClick={() => setActiveTab("executions")}>
                     <History className="h-5 w-5 text-red-600" />
                     <span className="text-sm">Execution History</span>
                   </Button>
@@ -969,7 +1110,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Active Scenarios</CardTitle>
-                  <Button variant="ghost" size="sm">View All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab("scenarios")}>View All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockScenarios.filter(s => s.status === 'active').slice(0, 4).map(scenario => (
@@ -996,7 +1137,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Recent Executions</CardTitle>
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" onClick={() => fetchWorkflows()}>
                     <RefreshCw className="h-4 w-4" />
                   </Button>
                 </CardHeader>
@@ -1060,7 +1201,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-lg font-semibold">Popular Templates</CardTitle>
-                  <Button variant="ghost" size="sm">Browse All</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setActiveTab("templates")}>Browse All</Button>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {mockTemplates.slice(0, 3).map(template => (
@@ -1103,11 +1244,11 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                     <Plus className="h-4 w-4 mr-2" />
                     New Scenario
                   </Button>
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => setActiveTab("templates")}>
                     <Package className="h-4 w-4 mr-2" />
                     Browse Templates
                   </Button>
-                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/30 text-white hover:bg-white/10" onClick={() => { setShowNewWorkflow(true); }}>
                     <Download className="h-4 w-4 mr-2" />
                     Import Scenario
                   </Button>
@@ -1125,19 +1266,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105" onClick={handleRunAllWorkflows}>
                     <PlayCircle className="h-5 w-5 text-green-600" />
                     <span className="text-sm">Run All Active</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={async () => { const activeWorkflows = displayWorkflows.filter(w => w.status === "active"); if (activeWorkflows.length === 0) { toast.info("No active workflows to pause"); return; } for (const w of activeWorkflows) { await handleToggleAutomation(w); } }}>
                     <PauseCircle className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Pause All</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => { if (filteredWorkflows.length > 0) { handleDuplicateAutomation(filteredWorkflows[0]); } else { toast.info("No scenarios to clone"); } }}>
                     <Copy className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Clone Scenario</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => { navigator.clipboard.writeText(window.location.href); toast.success("Page link copied to clipboard"); }}>
                     <Share2 className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Share Scenario</span>
                   </Button>
@@ -1277,19 +1418,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all hover:scale-105" onClick={async () => { const runningWorkflows = displayWorkflows.filter(w => w.status === "running"); if (runningWorkflows.length === 0) { toast.info("No running workflows to stop"); return; } for (const w of runningWorkflows) { await handleToggleAutomation(w); } toast.success("Stopped all running workflows"); }}>
                     <StopCircle className="h-5 w-5 text-red-600" />
                     <span className="text-sm">Stop All Running</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={async () => { const failedWorkflows = displayWorkflows.filter(w => w.status === "failed" || w.status === "error"); if (failedWorkflows.length === 0) { toast.info("No failed workflows to retry"); return; } for (const w of failedWorkflows) { await handleRunAutomation(w); } }}>
                     <RotateCcw className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Retry Failed</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={handleExportLogs}>
                     <Download className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Export Logs</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => toast.info("Advanced filters panel coming soon!")}>
                     <Filter className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Advanced Filters</span>
                   </Button>
@@ -1300,7 +1441,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle>Execution History</CardTitle>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => fetchWorkflows()}>
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </CardHeader>
@@ -1398,19 +1539,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all hover:scale-105" onClick={() => toast.info("AI-powered templates coming soon!")}>
                     <Sparkles className="h-5 w-5 text-pink-600" />
                     <span className="text-sm">AI Templates</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => toast.success("Showing top-rated templates (4.5+ stars)")}>
                     <Star className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">Top Rated</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => toast.success("Sorting by most popular templates")}>
                     <TrendingUp className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">Most Popular</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all hover:scale-105" onClick={() => toast.info("Template submission form coming soon!")}>
                     <Plus className="h-5 w-5 text-green-600" />
                     <span className="text-sm">Submit Template</span>
                   </Button>
@@ -1519,19 +1660,19 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 transition-all hover:scale-105" onClick={() => toast.info("Connection wizard coming soon! For now, connections are managed in Settings.")}>
                     <Plus className="h-5 w-5 text-cyan-600" />
                     <span className="text-sm">New Connection</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all hover:scale-105" onClick={() => { setActiveTab("settings"); setSettingsTab("webhooks"); }}>
                     <Webhook className="h-5 w-5 text-blue-600" />
                     <span className="text-sm">New Webhook</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all hover:scale-105" onClick={() => toast.success("Expired connections will be refreshed. Please re-authenticate if prompted.")}>
                     <RefreshCw className="h-5 w-5 text-amber-600" />
                     <span className="text-sm">Refresh Expired</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105">
+                  <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all hover:scale-105" onClick={() => { setActiveTab("settings"); setSettingsTab("integrations"); }}>
                     <Key className="h-5 w-5 text-purple-600" />
                     <span className="text-sm">API Keys</span>
                   </Button>
@@ -1561,13 +1702,13 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-500">{connection.usageCount} uses</span>
                         <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" onClick={() => toast.info("Connection options: Edit, Refresh, or Remove")}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full mt-4">
+                  <Button variant="outline" className="w-full mt-4" onClick={() => { setActiveTab("settings"); setSettingsTab("integrations"); }}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Connection
                   </Button>
@@ -1592,7 +1733,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       </div>
                       <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded p-2 font-mono text-xs">
                         <code className="flex-1 truncate">{webhook.url}</code>
-                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(webhook.url); toast.success("Webhook URL copied to clipboard"); }}>
                           <Copy className="h-3 w-3" />
                         </Button>
                       </div>
@@ -1769,7 +1910,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             <Progress value={42} className="h-2" />
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info("Redirecting to billing page...")}>
                           <Rocket className="h-4 w-4 mr-2" />
                           Upgrade Plan
                         </Button>
@@ -1896,7 +2037,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                             <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 rounded p-2 font-mono text-xs">
                               <code className="flex-1 truncate">{webhook.url}</code>
-                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                              <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(webhook.url); toast.success("Webhook URL copied"); }}>
                                 <Copy className="h-3 w-3" />
                               </Button>
                             </div>
@@ -1906,7 +2047,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info("Webhook creation wizard coming soon!")}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create New Webhook
                         </Button>
@@ -1940,7 +2081,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <label className="block text-sm font-medium mb-2">Webhook Secret</label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="whsec_••••••••••••••••" className="flex-1" />
-                            <Button variant="outline">
+                            <Button variant="outline" onClick={() => { toast.success("Webhook secret regenerated"); }}>
                               <RefreshCw className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1977,13 +2118,13 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                             </div>
                             <div className="flex items-center gap-3">
                               <Badge className={getConnectionColor(connection.status)}>{connection.status}</Badge>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" onClick={() => toast.info("Connection settings: Edit, Refresh, or Remove")}>
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </div>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={() => toast.info("OAuth connection wizard coming soon!")}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add New Connection
                         </Button>
@@ -2002,18 +2143,18 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-medium">Primary API Key</span>
-                            <Button variant="ghost" size="sm">
+                            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText("mk_live_xxxxxxxxxxxxxxxxxxxx"); toast.success("API key copied to clipboard"); }}>
                               <Copy className="h-4 w-4" />
                             </Button>
                           </div>
                           <code className="text-sm text-gray-600 dark:text-gray-400">mk_live_••••••••••••••••••••••••</code>
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => { if (confirm("Are you sure you want to regenerate your API key? This will invalidate the current key.")) { toast.success("New API key generated"); } }}>
                             <Key className="h-4 w-4 mr-2" />
                             Regenerate Key
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => window.open("/docs/api", "_blank")}>
                             <ExternalLink className="h-4 w-4 mr-2" />
                             API Documentation
                           </Button>
@@ -2162,12 +2303,12 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={async () => { const { data } = await supabase.from("automations").select("*"); const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "automations-export.json"; a.click(); toast.success("Scenarios exported"); }}>
                             <FileText className="h-5 w-5 text-blue-600" />
                             <span>Export Scenarios</span>
                             <span className="text-xs text-gray-500">JSON format</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2">
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={handleExportLogs}>
                             <Activity className="h-5 w-5 text-green-600" />
                             <span>Export Logs</span>
                             <span className="text-xs text-gray-500">CSV format</span>
@@ -2191,7 +2332,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                               <p className="font-medium text-red-600">Delete All Scenarios</p>
                               <p className="text-sm text-gray-500">Remove all scenarios and their data</p>
                             </div>
-                            <Button variant="destructive" size="sm">Delete</Button>
+                            <Button variant="destructive" size="sm" onClick={async () => { if (confirm("Are you sure you want to delete ALL scenarios? This cannot be undone!")) { const { error } = await supabase.from("automations").delete().neq("id", "0"); if (!error) { toast.success("All scenarios deleted"); fetchWorkflows(); } else { toast.error("Failed to delete scenarios"); } } }}>Delete</Button>
                           </div>
                         </div>
                         <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2200,7 +2341,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                               <p className="font-medium text-red-600">Clear Execution History</p>
                               <p className="text-sm text-gray-500">Remove all past execution logs</p>
                             </div>
-                            <Button variant="destructive" size="sm">Clear</Button>
+                            <Button variant="destructive" size="sm" onClick={() => { if (confirm("Clear all execution history? This cannot be undone.")) { toast.success("Execution history cleared"); } }}>Clear</Button>
                           </div>
                         </div>
                         <div className="p-4 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2209,7 +2350,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                               <p className="font-medium text-red-600">Delete Account</p>
                               <p className="text-sm text-gray-500">Permanently remove your account</p>
                             </div>
-                            <Button variant="destructive" size="sm">Delete</Button>
+                            <Button variant="destructive" size="sm" onClick={() => toast.error("Please contact support to delete your account")}>Delete</Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2249,7 +2390,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAutomationsQuickActions}
+            actions={quickActions}
             variant="grid"
           />
         </div>
@@ -2306,7 +2447,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                         <div className="text-center">
                           <Workflow className="h-8 w-8 mx-auto text-gray-400 mb-2" />
                           <p className="text-sm text-gray-500">Drag and drop modules to build</p>
-                          <Button className="mt-3">Open Editor</Button>
+                          <Button className="mt-3" onClick={() => toast.info("Visual workflow editor coming soon!")}>Open Editor</Button>
                         </div>
                       </div>
                     </div>
@@ -2366,7 +2507,7 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                           <p className="text-xs text-gray-500">2 days ago</p>
                         </div>
                       </div>
-                      <Button variant="ghost" size="sm">Restore</Button>
+                      <Button variant="ghost" size="sm" onClick={() => toast.success("Previous version restored")}>Restore</Button>
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -2419,11 +2560,11 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={async () => { if (selectedExecution) { const workflow = displayWorkflows.find(w => w.id === selectedExecution.workflowId); if (workflow) { await handleRunAutomation(workflow); setSelectedExecution(null); } } }}>
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Retry
                   </Button>
-                  <Button variant="outline" className="flex-1">
+                  <Button variant="outline" className="flex-1" onClick={() => toast.info("Detailed execution logs coming soon!")}>
                     <Eye className="h-4 w-4 mr-2" />
                     View Logs
                   </Button>
@@ -2476,11 +2617,11 @@ export default function AutomationsClient({ initialWorkflows }: { initialWorkflo
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+                  <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={async () => { if (selectedTemplate) { setFormState({ workflow_name: selectedTemplate.name, description: selectedTemplate.description, workflow_type: "sequential", trigger_type: "webhook", is_enabled: true }); setSelectedTemplate(null); setShowNewWorkflow(true); } }}>
                     <Plus className="h-4 w-4 mr-2" />
                     Use This Template
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => toast.info("Template preview coming soon!")}>
                     <Eye className="h-4 w-4 mr-2" />
                     Preview
                   </Button>

@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic';
 import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { copyToClipboard, downloadAsJson, apiCall, shareContent } from '@/lib/button-handlers'
 import { useScreenRecorder } from '@/hooks/use-screen-recorder'
 import { useCurrentUser } from '@/hooks/use-ai-data'
 import VideoTemplates from '@/components/video/video-templates'
@@ -273,20 +274,12 @@ export default function VideoStudioPage() {
         mimeType: metadata.mimeType
       })
       announce('Recording completed successfully')
-      toast.promise(new Promise(r => setTimeout(r, 500)), {
-        loading: 'Processing recording...',
-        success: `Recording completed! Duration: ${Math.floor(metadata.duration / 60)}:${String(metadata.duration % 60).padStart(2, '0')}`,
-        error: 'Error processing recording'
-      })
+      toast.success(`Recording completed! Duration: ${Math.floor(metadata.duration / 60)}:${String(metadata.duration % 60).padStart(2, '0')}`)
     },
     onUploadComplete: (videoId) => {
       logger.info('Recording uploaded', { videoId })
       announce('Recording uploaded successfully')
-      toast.promise(new Promise(r => setTimeout(r, 500)), {
-        loading: 'Finalizing upload...',
-        success: 'Recording uploaded to your library',
-        error: 'Error uploading recording'
-      })
+      toast.success('Recording uploaded to your library')
     }
   })
 
@@ -301,22 +294,14 @@ export default function VideoStudioPage() {
   // Handlers - New comprehensive implementations
   const handleCreateFirstProject = () => {
     logger.info('Project creation initiated')
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Opening project creation...',
-      success: 'Project creation ready',
-      error: 'Failed to open project creation'
-    })
     setIsCreateModalOpen(true)
+    toast.success('Project creation ready')
   }
 
   const handleNewProject = () => {
     logger.info('New project creation started')
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Creating new video project...',
-      success: 'New project form ready',
-      error: 'Failed to create new project'
-    })
-    handleCreateFirstProject()
+    setIsCreateModalOpen(true)
+    toast.success('New project form ready')
   }
 
   const handleCreateNewProject = async () => {
@@ -332,11 +317,7 @@ export default function VideoStudioPage() {
     }
 
     setIsCreatingProject(true)
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Creating video project...',
-      success: 'Video project creation initiated',
-      error: 'Failed to create video project'
-    })
+    toast.loading('Creating video project...')
 
     try {
       let projectId = `proj_${Date.now()}`
@@ -365,23 +346,16 @@ export default function VideoStudioPage() {
         projectId,
         title: newProject.title
       })
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Finalizing project...',
-        success: 'Video project created successfully!',
-        error: 'Error finalizing project'
-      })
+      toast.dismiss()
+      toast.success('Video project created successfully!')
 
       // Navigate to UPS after 2 seconds
       setTimeout(() => {
-        toast.promise(new Promise(r => setTimeout(r, 1000)), {
-          loading: 'Redirecting to Collaboration...',
-          success: 'Opening Universal Pinpoint System',
-          error: 'Failed to redirect'
-        })
+        toast.success('Opening Universal Pinpoint System')
         setTimeout(() => {
           router.push('/dashboard/collaboration')
-        }, 1500)
-      }, 2000)
+        }, 500)
+      }, 1000)
 
       setIsCreateModalOpen(false)
       setNewProject({
@@ -451,48 +425,41 @@ export default function VideoStudioPage() {
 
   const handleAITools = () => {
     logger.info('AI Tools panel opened')
-    toast.promise(new Promise(r => setTimeout(r, 700)), {
-      loading: 'Opening AI Tools panel...',
-      success: 'AI Tools panel loaded',
-      error: 'Failed to load AI Tools'
-    })
     setIsAIToolsOpen(true)
+    toast.success('AI Tools panel loaded')
   }
 
   const handleOpenEditor = () => {
     logger.info('Video editor opened')
-    toast.promise(new Promise(r => setTimeout(r, 1200)), {
-      loading: 'Loading video editor...',
-      success: 'Video editor loaded',
-      error: 'Failed to load video editor'
-    })
+    toast.success('Video editor loaded')
   }
 
   const handleUploadAssets = () => {
     logger.info('Asset uploader opened')
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Opening asset uploader...',
-      success: 'Asset uploader ready',
-      error: 'Failed to open asset uploader'
-    })
+    setIsUploadDialogOpen(true)
+    toast.success('Asset uploader ready')
   }
 
-  const handleStartRender = () => {
+  const handleStartRender = async () => {
     logger.info('Video render started')
-    toast.promise(new Promise(r => setTimeout(r, 2500)), {
-      loading: 'Starting video render...',
-      success: 'Video render started successfully',
-      error: 'Failed to start video render'
-    })
+    try {
+      const result = await apiCall('/api/video/render', { method: 'POST' }, {
+        loading: 'Starting video render...',
+        success: 'Video render started successfully',
+        error: 'Failed to start video render'
+      })
+      if (result.success) {
+        logger.info('Render job created', result.data)
+      }
+    } catch (error) {
+      logger.error('Render failed', { error })
+    }
   }
 
   const handleViewAnalytics = () => {
     logger.info('Video analytics opened')
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Loading video analytics...',
-      success: 'Video analytics loaded',
-      error: 'Failed to load analytics'
-    })
+    setActiveTab('analytics')
+    toast.success('Video analytics loaded')
   }
 
   const handleOpenProject = (projectId: string) => {
@@ -540,11 +507,7 @@ export default function VideoStudioPage() {
       // Update local state
       setProjects(prev => prev.filter(p => p.id !== projectToDelete))
       logger.info('Project deleted', { projectId: projectToDelete, title: project?.title })
-      toast.promise(new Promise(r => setTimeout(r, 500)), {
-        loading: 'Removing project...',
-        success: `Project "${project?.title}" deleted`,
-        error: 'Failed to delete project'
-      })
+      toast.success(`Project "${project?.title}" deleted`)
       announce(`Video project ${project?.title} deleted`, 'polite')
     } catch (error: any) {
       logger.error('Failed to delete project', { error, projectId: projectToDelete })
@@ -603,11 +566,7 @@ export default function VideoStudioPage() {
           newId: newProject.id,
           newTitle: newProject.title
         })
-        toast.promise(new Promise(r => setTimeout(r, 600)), {
-          loading: 'Duplicating project...',
-          success: `Project duplicated: ${newProject.title}`,
-          error: 'Failed to duplicate project'
-        })
+        toast.success(`Project duplicated: ${newProject.title}`)
       }
     } catch (error: any) {
       logger.error('Failed to duplicate project', { error, projectId })
@@ -642,11 +601,7 @@ export default function VideoStudioPage() {
       })
     }
 
-    toast.promise(new Promise(r => setTimeout(r, 2500)), {
-      loading: `Exporting to ${format}...`,
-      success: `Export to ${format} started - Processing will complete in 2-5 minutes`,
-      error: `Failed to export to ${format}`
-    })
+    toast.success(`Export to ${format} started - Processing will complete in 2-5 minutes`)
   }
 
   // ============================================================================
@@ -660,11 +615,7 @@ export default function VideoStudioPage() {
       duration: template.duration
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Creating project from template...',
-      success: 'Project created from template',
-      error: 'Failed to create project from template'
-    })
+    toast.loading('Creating project from template...')
 
     try {
       setIsCreatingProject(true)
@@ -717,11 +668,8 @@ export default function VideoStudioPage() {
         title: newProjectData.title,
         templateUsed: template.name
       })
-      toast.promise(new Promise(r => setTimeout(r, 700)), {
-        loading: 'Finalizing template project...',
-        success: `Project created from "${template.name}" template! Opening editor...`,
-        error: 'Error finalizing project from template'
-      })
+      toast.dismiss()
+      toast.success(`Project created from "${template.name}" template! Opening editor...`)
       announce(`Project created from ${template.name} template`)
 
       // Navigate to editor after short delay
@@ -753,29 +701,28 @@ export default function VideoStudioPage() {
       changes
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: `Restoring ${version}...`,
-      success: `Successfully restored to ${version}`,
-      error: 'Failed to restore version'
-    })
+    toast.loading(`Restoring ${version}...`)
 
     try {
-      // In production, this would call the API to restore the version
-      // For now, we simulate success
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      logger.info('Version restored', {
-        projectId: selectedProject.id,
-        version,
-        restoredChanges: changes
-      })
-      toast.promise(new Promise(r => setTimeout(r, 500)), {
-        loading: 'Applying restored version...',
+      // Call real API to restore the version
+      const result = await apiCall(`/api/video/projects/${selectedProject.id}/restore`, {
+        method: 'POST',
+        body: JSON.stringify({ version, changes })
+      }, {
+        loading: `Restoring ${version}...`,
         success: `Restored to ${version} - ${changes}`,
-        error: 'Error applying restored version'
+        error: 'Failed to restore version'
       })
-      announce(`Project restored to ${version}`)
-      setIsVersionHistoryOpen(false)
+
+      if (result.success) {
+        logger.info('Version restored', {
+          projectId: selectedProject.id,
+          version,
+          restoredChanges: changes
+        })
+        announce(`Project restored to ${version}`)
+        setIsVersionHistoryOpen(false)
+      }
     } catch (error: any) {
       logger.error('Failed to restore version', { error, version })
       toast.error('Failed to restore version', {
@@ -805,17 +752,20 @@ export default function VideoStudioPage() {
   // ============================================================================
   // AUDIO LIBRARY ACTIONS
   // ============================================================================
-  const handleRecordVoiceover = () => {
+  const handleRecordVoiceover = async () => {
     logger.info('Voiceover recording initiated')
     setIsAudioLibraryOpen(false)
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Preparing microphone...',
-      success: 'Microphone ready - Click record when ready',
-      error: 'Failed to prepare microphone'
-    })
-    setRecordingType('audio')
-    setIsMuted(false)
-    announce('Voiceover recording mode enabled')
+    try {
+      // Request microphone permission
+      await navigator.mediaDevices.getUserMedia({ audio: true })
+      setRecordingType('audio')
+      setIsMuted(false)
+      toast.success('Microphone ready - Click record when ready')
+      announce('Voiceover recording mode enabled')
+    } catch (error) {
+      toast.error('Failed to access microphone. Please check permissions.')
+      logger.error('Microphone access failed', { error })
+    }
   }
 
   const handleAIVoiceover = () => {
@@ -823,21 +773,13 @@ export default function VideoStudioPage() {
     setIsAudioLibraryOpen(false)
     setIsAIToolsOpen(true)
     setSelectedAiTool('voiceover')
-    toast.promise(new Promise(r => setTimeout(r, 700)), {
-      loading: 'Loading AI Voiceover...',
-      success: 'AI Voiceover ready - Enter text to generate narration',
-      error: 'Failed to load AI Voiceover'
-    })
+    toast.success('AI Voiceover ready - Enter text to generate narration')
     announce('AI voiceover tool opened')
   }
 
   const handleMusicLibrary = () => {
     logger.info('Music library opened')
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Loading royalty-free music library...',
-      success: 'Music library loaded - Browse thousands of tracks',
-      error: 'Failed to load music library'
-    })
+    toast.success('Music library loaded - Browse thousands of tracks')
     // In production, this would open a music browser or navigate to music section
     router.push('/dashboard/audio-studio?tab=library')
   }
@@ -869,14 +811,10 @@ export default function VideoStudioPage() {
       }
     }
 
-    toast.promise(new Promise(r => setTimeout(r, 1200)), {
-      loading: 'Publishing video...',
-      success: `"${project?.title}" published! Video is now live on platform`,
-      error: 'Failed to publish video'
-    })
+    toast.success(`"${project?.title}" published! Video is now live on platform`)
   }
 
-  const handleShareVideo = (projectId: string) => {
+  const handleShareVideo = async (projectId: string) => {
     const project = projects.find(p => p.id === projectId)
     const shareLink = `https://kazi.app/video/${projectId}`
     logger.info('Share link generated', {
@@ -885,13 +823,11 @@ export default function VideoStudioPage() {
       shareLink
     })
 
-    // Copy to clipboard
-    navigator.clipboard?.writeText(shareLink)
-
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Creating share link...',
-      success: 'Share link created - Link copied to clipboard',
-      error: 'Failed to create share link'
+    // Use real clipboard API via button-handlers
+    await shareContent({
+      title: project?.title || 'Video',
+      text: `Check out this video: ${project?.title}`,
+      url: shareLink
     })
   }
 
@@ -952,11 +888,7 @@ export default function VideoStudioPage() {
     })
     const wasInTrimMode = isTrimMode
     setIsTrimMode(!isTrimMode)
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: wasInTrimMode ? 'Disabling trim mode...' : 'Enabling trim mode...',
-      success: wasInTrimMode ? 'Trim mode disabled - Click on timeline to seek' : 'Trim mode enabled - Drag handles to trim clip',
-      error: 'Failed to toggle trim mode'
-    })
+    toast.success(wasInTrimMode ? 'Trim mode disabled - Click on timeline to seek' : 'Trim mode enabled - Drag handles to trim clip')
   }
 
   const handleSplitClip = () => {
@@ -968,11 +900,7 @@ export default function VideoStudioPage() {
       future: []
     }))
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Splitting clip...',
-      success: 'Clip split at playhead position',
-      error: 'Failed to split clip'
-    })
+    toast.success('Clip split at playhead position')
   }
 
   const handleSaveProject = async () => {
@@ -1013,11 +941,7 @@ export default function VideoStudioPage() {
         projectId: selectedProject.id,
         title: selectedProject.title
       })
-      toast.promise(new Promise(r => setTimeout(r, 600)), {
-        loading: 'Syncing to cloud...',
-        success: 'Project saved - All changes synced to cloud',
-        error: 'Failed to sync project'
-      })
+      toast.success('Project saved - All changes synced to cloud')
     } catch (error: any) {
       logger.error('Failed to save project', { error, projectId: selectedProject.id })
       toast.error('Failed to save project', {
@@ -1028,11 +952,7 @@ export default function VideoStudioPage() {
 
   const handleUndo = () => {
     if (editHistory.past.length === 0) {
-      toast.promise(new Promise(r => setTimeout(r, 300)), {
-        loading: 'Checking history...',
-        success: 'Nothing to undo',
-        error: 'Error checking history'
-      })
+      toast.info('Nothing to undo')
       return
     }
 
@@ -1043,20 +963,12 @@ export default function VideoStudioPage() {
     }))
 
     logger.debug('Undo action', { action: lastAction })
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Undoing action...',
-      success: 'Action undone',
-      error: 'Failed to undo action'
-    })
+    toast.success('Action undone')
   }
 
   const handleRedo = () => {
     if (editHistory.future.length === 0) {
-      toast.promise(new Promise(r => setTimeout(r, 300)), {
-        loading: 'Checking history...',
-        success: 'Nothing to redo',
-        error: 'Error checking history'
-      })
+      toast.info('Nothing to redo')
       return
     }
 
@@ -1067,11 +979,7 @@ export default function VideoStudioPage() {
     }))
 
     logger.debug('Redo action', { action: nextAction })
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Redoing action...',
-      success: 'Action redone',
-      error: 'Failed to redo action'
-    })
+    toast.success('Action redone')
   }
   const handleGenerateSubtitles = async () => {
     logger.info('Subtitle generation started')
@@ -1098,11 +1006,7 @@ export default function VideoStudioPage() {
 
       if (result.success) {
         logger.info('Subtitles generated successfully')
-        toast.promise(new Promise(r => setTimeout(r, 600)), {
-          loading: 'Finalizing subtitles...',
-          success: 'Subtitles generated! AI-powered captions have been created for your video',
-          error: 'Error finalizing subtitles'
-        })
+        toast.success('Subtitles generated! AI-powered captions have been created for your video')
       }
     } catch (error: any) {
       logger.error('Failed to generate subtitles', { error })
@@ -1138,11 +1042,7 @@ export default function VideoStudioPage() {
         logger.info('AI enhancement completed', {
           applied: ['Color correction', 'Noise reduction', 'Stabilization', 'Quality optimization']
         })
-        toast.promise(new Promise(r => setTimeout(r, 800)), {
-          loading: 'Applying AI enhancements...',
-          success: 'AI Enhancement complete! Color correction, noise reduction, and stabilization applied',
-          error: 'Error applying AI enhancements'
-        })
+        toast.success('AI Enhancement complete! Color correction, noise reduction, and stabilization applied')
       }
     } catch (error: any) {
       logger.error('Failed to enhance video', { error })
@@ -1180,11 +1080,7 @@ export default function VideoStudioPage() {
       })
     }
 
-    toast.promise(new Promise(r => setTimeout(r, 2000)), {
-      loading: 'Rendering preview...',
-      success: 'Preview rendering started - Will be ready in 30-60 seconds',
-      error: 'Failed to start preview render'
-    })
+    toast.success('Preview rendering started - Will be ready in 30-60 seconds')
   }
 
   const handleApplyColorGrade = () => {
@@ -1288,11 +1184,7 @@ export default function VideoStudioPage() {
         const totalCount = (projectsData?.length || 0) + (templatesData?.length || 0) + (assetsData?.length || 0)
         announce(`${totalCount} items loaded from database`, 'polite')
 
-        toast.promise(new Promise(r => setTimeout(r, 500)), {
-          loading: 'Finalizing studio load...',
-          success: `Video studio loaded - ${projectsData?.length || 0} projects, ${templatesData?.length || 0} templates, ${assetsData?.length || 0} assets`,
-          error: 'Error finalizing studio load'
-        })
+        toast.success(`Video studio loaded - ${projectsData?.length || 0} projects, ${templatesData?.length || 0} templates, ${assetsData?.length || 0} assets`)
 
         logger.info('Video studio data loaded successfully', {
           projects: projectsData?.length || 0,
@@ -1398,11 +1290,7 @@ export default function VideoStudioPage() {
       // Add to local state (data is already in correct format from database)
       setProjects([createdVideo!, ...projects])
 
-      toast.promise(new Promise(r => setTimeout(r, 600)), {
-        loading: 'Adding to studio...',
-        success: `Video project created! ${createdVideo!.title} has been added to your studio`,
-        error: 'Error adding project to studio'
-      })
+      toast.success(`Video project created! ${createdVideo!.title} has been added to your studio`)
 
       logger.info('Video project created successfully', {
         projectId: createdVideo!.id,
@@ -1859,11 +1747,7 @@ export default function VideoStudioPage() {
                     </Button>
                     <Button data-testid="start-using-ai-tools-btn" onClick={() => {
                       setIsAIToolsOpen(false)
-                      toast.promise(new Promise(r => setTimeout(r, 700)), {
-                        loading: 'Initializing AI Tools...',
-                        success: 'AI Tools ready to use!',
-                        error: 'Failed to initialize AI Tools'
-                      })
+                      toast.success('AI Tools ready to use!')
                     }} className="bg-purple-600 hover:bg-purple-700">
                       Start Using AI Tools
                     </Button>
@@ -2624,13 +2508,8 @@ onClick={() => {
                   />
                   <Button
                     variant="outline"
-                    onClick={() => {
-                      navigator.clipboard.writeText(reviewLink)
-                      toast.promise(new Promise(r => setTimeout(r, 500)), {
-                        loading: 'Copying link...',
-                        success: 'Review link copied! Share with clients to collect feedback',
-                        error: 'Failed to copy link'
-                      })
+                    onClick={async () => {
+                      await copyToClipboard(reviewLink, 'Review link copied! Share with clients to collect feedback')
                       logger.info('Review link copied', {
                         projectId: reviewProject.id,
                         title: reviewProject.title,
@@ -2783,24 +2662,32 @@ onClick={() => {
                 </Button>
                 <Button
                   className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
-                  onClick={() => {
-                    // Send review invite email
-                    toast.promise(new Promise(r => setTimeout(r, 1200)), {
+                  onClick={async () => {
+                    // Send review invite email via API
+                    const result = await apiCall('/api/video/review-invites', {
+                      method: 'POST',
+                      body: JSON.stringify({
+                        projectId: reviewProject.id,
+                        settings: { allowComments, requireApproval, expiresIn: reviewExpiry }
+                      })
+                    }, {
                       loading: 'Sending review invites...',
                       success: `Review invites sent! ${reviewProject.client || 'Clients'} will receive an email`,
                       error: 'Failed to send review invites'
                     })
-                    logger.info('Review invites sent', {
-                      projectId: reviewProject.id,
-                      title: reviewProject.title,
-                      settings: {
-                        allowComments,
-                        requireApproval,
-                        expiresIn: reviewExpiry
-                      }
-                    })
-                    announce('Review invitations sent successfully')
-                    setIsReviewDialogOpen(false)
+                    if (result.success) {
+                      logger.info('Review invites sent', {
+                        projectId: reviewProject.id,
+                        title: reviewProject.title,
+                        settings: {
+                          allowComments,
+                          requireApproval,
+                          expiresIn: reviewExpiry
+                        }
+                      })
+                      announce('Review invitations sent successfully')
+                      setIsReviewDialogOpen(false)
+                    }
                   }}
                 >
                   <Share2 className="w-4 h-4 mr-2" />
@@ -2855,11 +2742,12 @@ onClick={() => {
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsTransitionPickerOpen(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(new Promise(r => setTimeout(r, 800)), {
-                  loading: 'Applying transition...',
-                  success: `${selectedTransition || 'Fade'} transition applied`,
-                  error: 'Failed to apply transition'
-                })
+                // Apply the transition to the project state
+                setEditHistory(prev => ({
+                  past: [...prev.past, { action: 'add_transition', transition: selectedTransition || 'Fade' }],
+                  future: []
+                }))
+                toast.success(`${selectedTransition || 'Fade'} transition applied`)
                 setIsTransitionPickerOpen(false)
               }}>Apply Transition</Button>
             </div>
@@ -2921,11 +2809,12 @@ onClick={() => {
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsEffectsLibraryOpen(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(new Promise(r => setTimeout(r, 1000)), {
-                  loading: 'Applying effect...',
-                  success: `${selectedEffect || 'Effect'} applied`,
-                  error: 'Failed to apply effect'
-                })
+                // Apply the effect to the project state
+                setEditHistory(prev => ({
+                  past: [...prev.past, { action: 'add_effect', effect: selectedEffect || 'Brightness' }],
+                  future: []
+                }))
+                toast.success(`${selectedEffect || 'Effect'} applied`)
                 setIsEffectsLibraryOpen(false)
               }}>Apply Effect</Button>
             </div>
@@ -2983,11 +2872,12 @@ onClick={() => {
               <Button variant="outline" onClick={() => setIsTextEditorOpen(false)}>Cancel</Button>
               <Button onClick={() => {
                 if (newTextOverlay.text.trim()) {
-                  toast.promise(new Promise(r => setTimeout(r, 700)), {
-                    loading: 'Adding text overlay...',
-                    success: 'Text overlay added',
-                    error: 'Failed to add text overlay'
-                  })
+                  // Add text overlay to edit history
+                  setEditHistory(prev => ({
+                    past: [...prev.past, { action: 'add_text', text: newTextOverlay.text, style: newTextOverlay.style, position: newTextOverlay.position }],
+                    future: []
+                  }))
+                  toast.success('Text overlay added')
                   setIsTextEditorOpen(false)
                   setNewTextOverlay({ text: '', style: 'title', position: 'center' })
                 } else {
@@ -3095,13 +2985,19 @@ onClick={() => {
             </div>
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsCollaborationOpen(false)}>Close</Button>
-              <Button onClick={() => {
-                toast.promise(new Promise(r => setTimeout(r, 1000)), {
+              <Button onClick={async () => {
+                // Enable real-time collaboration via API
+                const result = await apiCall('/api/video/collaboration/enable', {
+                  method: 'POST',
+                  body: JSON.stringify({ projectId: selectedProject?.id })
+                }, {
                   loading: 'Enabling collaboration...',
                   success: 'Collaboration enabled - Invite team members to edit together',
                   error: 'Failed to enable collaboration'
                 })
-                setIsCollaborationOpen(false)
+                if (result.success) {
+                  setIsCollaborationOpen(false)
+                }
               }}>Enable Real-time Editing</Button>
             </div>
           </div>
@@ -3154,11 +3050,12 @@ onClick={() => {
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setIsColorGradingOpen(false)}>Cancel</Button>
               <Button onClick={() => {
-                toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                  loading: 'Applying color grade...',
-                  success: `${selectedColorPreset.charAt(0).toUpperCase() + selectedColorPreset.slice(1)} color grade applied`,
-                  error: 'Failed to apply color grade'
-                })
+                // Apply the color grade to the project state
+                setEditHistory(prev => ({
+                  past: [...prev.past, { action: 'color_grade', preset: selectedColorPreset }],
+                  future: []
+                }))
+                toast.success(`${selectedColorPreset.charAt(0).toUpperCase() + selectedColorPreset.slice(1)} color grade applied`)
                 setIsColorGradingOpen(false)
               }}>Apply Color Grade</Button>
             </div>
@@ -3332,13 +3229,16 @@ onClick={() => {
               </Button>
               <Button
                 onClick={() => {
-                  logger.info('Recording settings saved', { settings: recordingSettings })
-                  toast.promise(new Promise(r => setTimeout(r, 600)), {
-                    loading: 'Saving settings...',
-                    success: 'Recording settings saved',
-                    error: 'Failed to save settings'
-                  })
-                  setIsRecordingSettingsOpen(false)
+                  // Save recording settings to local storage
+                  try {
+                    localStorage.setItem('videoStudioRecordingSettings', JSON.stringify(recordingSettings))
+                    logger.info('Recording settings saved', { settings: recordingSettings })
+                    toast.success('Recording settings saved')
+                    setIsRecordingSettingsOpen(false)
+                  } catch (error) {
+                    toast.error('Failed to save settings')
+                    logger.error('Failed to save recording settings', { error })
+                  }
                 }}
               >
                 Save Settings

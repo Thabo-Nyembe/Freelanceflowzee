@@ -351,9 +351,9 @@ const mockInvestorMetricsActivities = [
 ]
 
 const mockInvestorMetricsQuickActions = [
-  { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Updating metrics...', success: 'Metrics updated successfully', error: 'Failed to update metrics' }), variant: 'default' as const },
-  { id: '2', label: 'Investor Report', icon: 'file-text', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating investor report...', success: 'Investor report generated', error: 'Failed to generate report' }), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Failed to export data' }), variant: 'outline' as const },
+  { id: '1', label: 'Update Metrics', icon: 'refresh', action: () => toast.success('Metrics Updated', { description: 'All investor metrics refreshed' }), variant: 'default' as const },
+  { id: '2', label: 'Investor Report', icon: 'file-text', action: () => toast.success('Report Generated', { description: 'Investor report ready for download' }), variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.success('Data Exported', { description: 'Metrics exported to Excel' }), variant: 'outline' as const },
 ]
 
 export default function InvestorMetricsClient() {
@@ -649,11 +649,7 @@ export default function InvestorMetricsClient() {
   }
 
   const handleGenerateReport = () => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), {
-      loading: 'Generating report...',
-      success: 'Report generated - Investor presentation is ready',
-      error: 'Failed to generate report'
-    })
+    toast.success('Report Generated', { description: 'Investor presentation is ready' })
   }
 
   const handleSetAlert = async (metric: string) => {

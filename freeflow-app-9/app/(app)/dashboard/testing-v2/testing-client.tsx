@@ -519,11 +519,12 @@ const mockTestingActivities = [
   { id: '3', user: 'Ryan Foster', action: 'added', target: '12 new unit tests', timestamp: '45m ago', type: 'success' as const },
 ]
 
-const mockTestingQuickActions = [
-  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Running tests...', success: 'All tests passed!', error: 'Some tests failed' }) },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening test report viewer...', success: 'Test report loaded!', error: 'Failed to load test report' }) },
-  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening debugger for failed tests...', success: 'Debug mode activated!', error: 'Failed to open debugger' }) },
-  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening test creation form...', success: 'Test creation form ready!', error: 'Failed to open test form' }) },
+// Quick actions config - handlers set in component
+const mockTestingQuickActionsConfig = [
+  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R' },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: 'V' },
+  { id: '3', label: 'Debug Failed', icon: 'Bug', shortcut: 'D' },
+  { id: '4', label: 'Add Test', icon: 'Plus', shortcut: 'N' },
 ]
 
 export default function TestingClient() {
@@ -993,12 +994,19 @@ export default function TestingClient() {
               {[
                 { icon: Play, label: 'Run All', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowRunDialog(true) },
                 { icon: Repeat, label: 'Retry Failed', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: handleRerunFailed },
-                { icon: Square, label: 'Stop All', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Stopping tests...', success: 'All tests stopped', error: 'Failed to stop tests' }) },
+                { icon: Square, label: 'Stop All', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: async () => {
+                  try {
+                    await fetch('/api/testing/stop', { method: 'POST' })
+                    toast.success('All tests stopped')
+                  } catch {
+                    toast.error('Failed to stop tests')
+                  }
+                } },
                 { icon: Download, label: 'Export', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: handleExportResults },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: fetchTests },
                 { icon: Plus, label: 'New Test', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setShowCreateDialog(true) },
                 { icon: BarChart3, label: 'Analytics', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => setActiveTab('coverage') },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening archive...', success: 'Archive opened', error: 'Failed to open archive' }) },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { setActiveTab('archive'); toast.success('Archive opened'); } },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1160,14 +1168,14 @@ export default function TestingClient() {
             {/* Explorer Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: FolderOpen, label: 'Expand All', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Expanding folders...', success: 'All folders expanded', error: 'Failed to expand folders' }) },
-                { icon: Folder, label: 'Collapse All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Collapsing folders...', success: 'All folders collapsed', error: 'Failed to collapse folders' }) },
+                { icon: FolderOpen, label: 'Expand All', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => { setExpandedFolders(new Set(tests.map(t => t.path))); toast.success('All folders expanded'); } },
+                { icon: Folder, label: 'Collapse All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { setExpandedFolders(new Set()); toast.success('All folders collapsed'); } },
                 { icon: FileCode, label: 'New Test', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => setShowCreateDialog(true) },
                 { icon: Search, label: 'Find Test', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => document.querySelector<HTMLInputElement>('input[placeholder="Search tests..."]')?.focus() },
                 { icon: Play, label: 'Run Selected', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setShowRunDialog(true) },
-                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filters...', success: 'Filters opened', error: 'Failed to open filters' }) },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { document.querySelector<HTMLInputElement>('input[placeholder="Search tests..."]')?.focus(); toast.success('Filter by status or search by name'); } },
                 { icon: RefreshCw, label: 'Reload', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: fetchTests },
-                { icon: Code, label: 'Open File', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading...', success: 'Select a test file to open', error: 'Action failed' }) },
+                { icon: Code, label: 'Open File', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { if (selectedSpec) { toast.success(`Opening ${selectedSpec.file}`); } else { toast.info('Select a test file first'); } } },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1279,12 +1287,12 @@ export default function TestingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Download, label: 'Export All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: handleExportResults },
-                { icon: Filter, label: 'Filter', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filters...', success: 'Filters opened', error: 'Failed to open filters' }) },
+                { icon: Filter, label: 'Filter', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { setStatusFilter('all'); toast.success('All filters cleared'); } },
                 { icon: XCircle, label: 'Failed Only', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => setStatusFilter('failed') },
                 { icon: CheckCircle2, label: 'Passed Only', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => setStatusFilter('passed') },
-                { icon: Camera, label: 'Screenshots', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading screenshots...', success: 'Screenshots loaded', error: 'Failed to load screenshots' }) },
-                { icon: Video, label: 'Videos', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading videos...', success: 'Videos loaded', error: 'Failed to load videos' }) },
-                { icon: Layers, label: 'Traces', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading traces...', success: 'Traces loaded', error: 'Failed to load traces' }) },
+                { icon: Camera, label: 'Screenshots', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { const screenshotTests = mockTestSpecs.filter(t => t.screenshots?.length); toast.success(`Found ${screenshotTests.length} tests with screenshots`); } },
+                { icon: Video, label: 'Videos', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => { const videoTests = mockTestSpecs.filter(t => t.video); toast.success(`Found ${videoTests.length} tests with video recordings`); } },
+                { icon: Layers, label: 'Traces', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { const tracedTests = mockTestSpecs.filter(t => t.steps?.length); toast.success(`Found ${tracedTests.length} tests with traces`); } },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: fetchTests },
               ].map((action, i) => (
                 <button
@@ -2157,7 +2165,22 @@ export default defineConfig({
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockTestingQuickActions}
+            actions={mockTestingQuickActionsConfig.map(action => ({
+              ...action,
+              action: async () => {
+                switch(action.id) {
+                  case '1':
+                    toast.promise(
+                      runTests(),
+                      { loading: 'Running tests...', success: 'Tests completed!', error: 'Some tests failed' }
+                    );
+                    break;
+                  case '2': setShowReportViewer(true); toast.success('Test report loaded'); break;
+                  case '3': setActiveTab('debug'); toast.success('Debug mode activated'); break;
+                  case '4': setShowAddTestDialog(true); toast.success('Ready to add new test'); break;
+                }
+              }
+            }))}
             variant="grid"
           />
         </div>

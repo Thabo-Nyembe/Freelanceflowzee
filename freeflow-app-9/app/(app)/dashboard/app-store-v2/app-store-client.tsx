@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Store,
   Search,
@@ -592,10 +594,11 @@ const mockAppStoreActivities = [
   { id: '3', user: 'Security', action: 'Flagged', target: 'Unknown app for review', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockAppStoreQuickActions = [
-  { id: '1', label: 'Browse Apps', icon: 'search', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Browsing available applications...', success: 'App Store loaded successfully', error: 'Failed to browse apps' }), variant: 'default' as const },
-  { id: '2', label: 'Install App', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Installing application...', success: 'Application installed successfully', error: 'Installation failed' }), variant: 'default' as const },
-  { id: '3', label: 'Manage Apps', icon: 'settings', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app management panel...', success: 'App management panel opened', error: 'Failed to open management panel' }), variant: 'outline' as const },
+// Quick actions are defined inside the component to have access to state setters
+const getAppStoreQuickActions = (setActiveTab: (tab: string) => void, setSearchQuery: (query: string) => void) => [
+  { id: '1', label: 'Browse Apps', icon: 'search', action: () => { setActiveTab('discover'); setSearchQuery(''); toast.success('Browsing all available apps') }, variant: 'default' as const },
+  { id: '2', label: 'Install App', icon: 'plus', action: () => { setActiveTab('discover'); toast.info('Select an app to install from the catalog') }, variant: 'default' as const },
+  { id: '3', label: 'Manage Apps', icon: 'settings', action: () => { setActiveTab('installed'); toast.success('App management panel opened') }, variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -604,6 +607,7 @@ const mockAppStoreQuickActions = [
 
 export default function AppStoreClient() {
   const supabase = createClient()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState('discover')
   const [apps, setApps] = useState<App[]>(mockApps)
   const [reviews, setReviews] = useState<Review[]>(mockReviews)
@@ -616,6 +620,10 @@ export default function AppStoreClient() {
   const [pricingFilter, setPricingFilter] = useState<AppPricing | 'all'>('all')
   const [selectedApp, setSelectedApp] = useState<App | null>(null)
   const [showAppDialog, setShowAppDialog] = useState(false)
+  const [showReviewDialog, setShowReviewDialog] = useState(false)
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewTitle, setReviewTitle] = useState('')
+  const [reviewContent, setReviewContent] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [settingsTab, setSettingsTab] = useState('general')
   const [loading, setLoading] = useState(false)
@@ -748,6 +756,74 @@ export default function AppStoreClient() {
   const trendingApps = apps.filter(a => a.trending)
   const editorChoiceApps = apps.filter(a => a.editorChoice)
 
+  // Real handler: Open app in new tab or navigate to app page
+  const handleOpenApp = (app: App, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    const appUrl = app.developer.website ? `https://${app.developer.website}` : `/dashboard/apps/${app.slug}`
+    window.open(appUrl, '_blank')
+    toast.success(`Opening ${app.name}`)
+  }
+
+  // Real handler: Open app settings
+  const handleOpenSettings = (app: App) => {
+    router.push(`/dashboard/app-store-v2/settings/${app.slug}`)
+    toast.success(`Opening settings for ${app.name}`)
+  }
+
+  // Real handler: Submit review
+  const handleSubmitReview = async () => {
+    if (!selectedApp || !userId) {
+      toast.error('Please sign in to submit a review')
+      return
+    }
+    if (!reviewTitle.trim() || !reviewContent.trim()) {
+      toast.error('Please fill in all fields')
+      return
+    }
+    setLoading(true)
+    try {
+      const { error } = await supabase
+        .from('plugin_reviews')
+        .upsert({
+          plugin_id: selectedApp.id,
+          user_id: userId,
+          rating: reviewRating,
+          title: reviewTitle,
+          comment: reviewContent,
+          verified: true
+        }, { onConflict: 'plugin_id,user_id' })
+
+      if (error) throw error
+
+      toast.success('Review submitted successfully!')
+      setShowReviewDialog(false)
+      setReviewTitle('')
+      setReviewContent('')
+      setReviewRating(5)
+      await fetchApps()
+    } catch (error: any) {
+      toast.error('Failed to submit review', {
+        description: error.message || 'Please try again'
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Real handler: Navigate to checkout for purchase
+  const handlePurchase = (app: App, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    if (app.pricing === 'enterprise') {
+      // For enterprise, navigate to contact sales
+      router.push(`/dashboard/billing?app=${app.slug}&type=enterprise`)
+      toast.info('Redirecting to enterprise sales...')
+    } else {
+      // For paid apps, navigate to checkout
+      router.push(`/dashboard/billing/checkout?app=${app.slug}&price=${app.price}`)
+      toast.info('Redirecting to checkout...')
+    }
+  }
+
   // Handlers - Real Supabase CRUD operations
   const handleInstallApp = async (app: App) => {
     if (!userId) {
@@ -801,6 +877,12 @@ export default function AppStoreClient() {
       toast.error('Please sign in')
       return
     }
+
+    // Confirm before uninstalling
+    if (!confirm(`Are you sure you want to uninstall "${app.name}"? This action cannot be undone.`)) {
+      return
+    }
+
     setLoading(true)
     try {
       const { error } = await supabase
@@ -971,6 +1053,9 @@ export default function AppStoreClient() {
     }
   }
 
+  // Generate quick actions with current state
+  const mockAppStoreQuickActions = getAppStoreQuickActions(setActiveTab, setSearchQuery)
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
       {/* Header */}
@@ -1112,14 +1197,20 @@ export default function AppStoreClient() {
                 <Button
                   variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('grid')}
+                  onClick={() => {
+                    setViewMode('grid')
+                    toast.success('Grid view enabled')
+                  }}
                 >
                   <Grid3X3 className="w-4 h-4" />
                 </Button>
                 <Button
                   variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="sm"
-                  onClick={() => setViewMode('list')}
+                  onClick={() => {
+                    setViewMode('list')
+                    toast.success('List view enabled')
+                  }}
                 >
                   <List className="w-4 h-4" />
                 </Button>
@@ -1387,7 +1478,7 @@ export default function AppStoreClient() {
                     <div className="flex gap-2 mt-4 pt-3 border-t">
                       {app.status === 'installed' ? (
                         <>
-                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app...', success: 'App opened', error: 'Failed to open app' }) }}>
+                          <Button size="sm" className="flex-1" onClick={(e) => handleOpenApp(app, e)}>
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
@@ -1397,10 +1488,10 @@ export default function AppStoreClient() {
                         </>
                       ) : app.status === 'trial' ? (
                         <>
-                          <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={(e) => { e.stopPropagation(); handleInstallApp(app) }} disabled={loading}>
+                          <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={(e) => handlePurchase(app, e)} disabled={loading}>
                             Purchase
                           </Button>
-                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app...', success: 'App opened', error: 'Failed to open app' }) }}>
+                          <Button size="sm" variant="outline" onClick={(e) => handleOpenApp(app, e)}>
                             <Play className="w-4 h-4" />
                           </Button>
                         </>
@@ -1451,10 +1542,10 @@ export default function AppStoreClient() {
                             <p className="text-sm text-muted-foreground">v{app.version} • {formatBytes(app.size)}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app...', success: 'App opened', error: 'Failed to open app' }) }}>
+                            <Button size="sm" onClick={(e) => handleOpenApp(app, e)}>
                               <Play className="w-4 h-4" />
                             </Button>
-                            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleViewApp(app) }}>
+                            <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleOpenSettings(app) }}>
                               <Settings className="w-4 h-4" />
                             </Button>
                             <Button size="sm" variant="outline" className="text-red-600" onClick={(e) => { e.stopPropagation(); handleUninstallApp(app) }} disabled={loading}>
@@ -1781,8 +1872,8 @@ export default function AppStoreClient() {
                         <div className="flex items-center justify-between">
                           <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">Grid or list view</p></div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching to grid...', success: 'Grid view active', error: 'Failed to switch' })}><Grid3X3 className="h-4 w-4" /></Button>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching to list...', success: 'List view active', error: 'Failed to switch' })}><List className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => { setViewMode('grid'); toast.success('Grid view set as default') }}><Grid3X3 className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => { setViewMode('list'); toast.success('List view set as default') }}><List className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2142,7 +2233,10 @@ export default function AppStoreClient() {
                       </div>
                       <p className="text-sm text-muted-foreground">{selectedApp.developer.appCount} apps • {formatNumber(selectedApp.developer.totalDownloads)} total downloads</p>
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => {
+                      const url = selectedApp.developer.website ? `https://${selectedApp.developer.website}` : '#'
+                      window.open(url, '_blank')
+                    }}>
                       <ExternalLink className="w-4 h-4 mr-1" />
                       Website
                     </Button>
@@ -2153,11 +2247,11 @@ export default function AppStoreClient() {
                 <div className="flex items-center gap-3 pt-4 border-t">
                   {selectedApp.status === 'installed' ? (
                     <>
-                      <Button className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching app...', success: 'App opened successfully', error: 'Failed to open app' })}>
+                      <Button className="flex-1" onClick={() => handleOpenApp(selectedApp)}>
                         <Play className="w-4 h-4 mr-2" />
                         Open App
                       </Button>
-                      <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' })}>
+                      <Button variant="outline" onClick={() => handleOpenSettings(selectedApp)}>
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </Button>
@@ -2168,11 +2262,11 @@ export default function AppStoreClient() {
                     </>
                   ) : selectedApp.status === 'trial' ? (
                     <>
-                      <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => { handleInstallApp(selectedApp); setShowAppDialog(false) }} disabled={loading}>
+                      <Button className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={() => handlePurchase(selectedApp)} disabled={loading}>
                         <DollarSign className="w-4 h-4 mr-2" />
                         Purchase Now
                       </Button>
-                      <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching trial app...', success: 'Trial app opened successfully', error: 'Failed to open trial app' })}>
+                      <Button variant="outline" onClick={() => handleOpenApp(selectedApp)}>
                         <Play className="w-4 h-4 mr-2" />
                         Continue Trial
                       </Button>
@@ -2196,9 +2290,74 @@ export default function AppStoreClient() {
                     </>
                   )}
                 </div>
+
+                {/* Rate/Review Section */}
+                {(selectedApp.status === 'installed' || selectedApp.status === 'trial') && (
+                  <div className="pt-4 border-t">
+                    <Button variant="outline" className="w-full" onClick={() => setShowReviewDialog(true)}>
+                      <Star className="w-4 h-4 mr-2" />
+                      Rate & Review This App
+                    </Button>
+                  </div>
+                )}
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Dialog */}
+      <Dialog open={showReviewDialog} onOpenChange={setShowReviewDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Rate & Review {selectedApp?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Your Rating</Label>
+              <div className="flex gap-2 mt-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    onClick={() => setReviewRating(star)}
+                    className="focus:outline-none"
+                  >
+                    <Star
+                      className={`w-8 h-8 ${star <= reviewRating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-300'}`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="review-title">Title</Label>
+              <Input
+                id="review-title"
+                value={reviewTitle}
+                onChange={(e) => setReviewTitle(e.target.value)}
+                placeholder="Summarize your experience"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="review-content">Review</Label>
+              <Textarea
+                id="review-content"
+                value={reviewContent}
+                onChange={(e) => setReviewContent(e.target.value)}
+                placeholder="Tell others what you think about this app..."
+                className="mt-1 min-h-[100px]"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setShowReviewDialog(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleSubmitReview} disabled={loading}>
+                {loading ? 'Submitting...' : 'Submit Review'}
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

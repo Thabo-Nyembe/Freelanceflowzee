@@ -135,21 +135,9 @@ const emailAgentActivities = [
 ]
 
 const emailAgentQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Creating new item...',
-    success: 'New item created successfully',
-    error: 'Failed to create item'
-  }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Exporting data...',
-    success: 'Data exported successfully',
-    error: 'Export failed'
-  }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), {
-    loading: 'Opening settings...',
-    success: 'Settings opened',
-    error: 'Failed to open settings'
-  }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Item Created', { description: 'New email agent ready' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Email data exported' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Email agent settings opened' }) },
 ]
 
 export default function EmailAgentClient() {

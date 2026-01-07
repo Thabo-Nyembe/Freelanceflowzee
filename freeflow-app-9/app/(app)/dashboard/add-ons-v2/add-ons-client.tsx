@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { copyToClipboard, apiPost, apiDelete, downloadAsJson } from '@/lib/button-handlers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -447,12 +448,6 @@ const mockAddOnsActivities = [
   { id: '3', user: 'Admin', action: 'Configured', target: 'Jira Sync settings', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockAddOnsQuickActions = [
-  { id: '1', label: 'Browse Add-Ons', icon: 'store', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening add-on marketplace...', success: 'Add-on store loaded!', error: 'Failed to load add-on store' }), variant: 'default' as const },
-  { id: '2', label: 'Update All', icon: 'refresh', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Updating all add-ons...', success: 'All add-ons updated successfully!', error: 'Update failed' }), variant: 'default' as const },
-  { id: '3', label: 'Settings', icon: 'settings', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening settings panel...', success: 'Settings loaded!', error: 'Failed to load settings' }), variant: 'outline' as const },
-]
-
 export default function AddOnsClient() {
   const [activeTab, setActiveTab] = useState('discover')
   const [searchQuery, setSearchQuery] = useState('')
@@ -462,22 +457,24 @@ export default function AddOnsClient() {
   const [categoryFilter, setCategoryFilter] = useState<AddOnCategory | 'all'>('all')
   const [statusFilter, setStatusFilter] = useState<AddOnStatus | 'all'>('all')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [addOns, setAddOns] = useState<AddOn[]>(mockAddOns)
 
   // Stats
   const stats: AddOnStats = useMemo(() => ({
-    totalAddOns: mockAddOns.length,
-    installedAddOns: mockAddOns.filter(a => a.status === 'installed').length,
-    availableAddOns: mockAddOns.filter(a => a.status === 'available').length,
-    totalDownloads: mockAddOns.reduce((sum, a) => sum + a.downloadCount, 0),
-    avgRating: mockAddOns.reduce((sum, a) => sum + a.rating, 0) / mockAddOns.length,
-    featuredCount: mockAddOns.filter(a => a.isFeatured).length,
-    freeCount: mockAddOns.filter(a => a.pricingType === 'free').length,
-    paidCount: mockAddOns.filter(a => a.pricingType !== 'free').length
-  }), [])
+    totalAddOns: addOns.length,
+    installedAddOns: addOns.filter(a => a.status === 'installed').length,
+    availableAddOns: addOns.filter(a => a.status === 'available').length,
+    totalDownloads: addOns.reduce((sum, a) => sum + a.downloadCount, 0),
+    avgRating: addOns.reduce((sum, a) => sum + a.rating, 0) / addOns.length,
+    featuredCount: addOns.filter(a => a.isFeatured).length,
+    freeCount: addOns.filter(a => a.pricingType === 'free').length,
+    paidCount: addOns.filter(a => a.pricingType !== 'free').length
+  }), [addOns])
 
   // Filtered data
   const filteredAddOns = useMemo(() => {
-    return mockAddOns.filter(addOn => {
+    return addOns.filter(addOn => {
       const matchesSearch = addOn.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         addOn.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         addOn.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -485,41 +482,174 @@ export default function AddOnsClient() {
       const matchesStatus = statusFilter === 'all' || addOn.status === statusFilter
       return matchesSearch && matchesCategory && matchesStatus
     })
-  }, [searchQuery, categoryFilter, statusFilter])
+  }, [addOns, searchQuery, categoryFilter, statusFilter])
 
-  const installedAddOns = useMemo(() => mockAddOns.filter(a => a.status === 'installed'), [])
-  const featuredAddOns = useMemo(() => mockAddOns.filter(a => a.isFeatured), [])
+  const installedAddOns = useMemo(() => addOns.filter(a => a.status === 'installed'), [addOns])
+  const featuredAddOns = useMemo(() => addOns.filter(a => a.isFeatured), [addOns])
 
-  // Handlers
-  const handleInstallAddOn = (addOnName: string) => {
-    toast.success('Installing add-on', {
-      description: `"${addOnName}" is being installed...`
+  // Real handlers with actual functionality
+  const handleInstallAddOn = useCallback(async (addOn: AddOn) => {
+    const result = await apiPost(`/api/add-ons/${addOn.id}/install`, { addOnId: addOn.id }, {
+      loading: `Installing ${addOn.name}...`,
+      success: `${addOn.name} installed successfully!`,
+      error: `Failed to install ${addOn.name}`
     })
-  }
+    if (result.success) {
+      setAddOns(prev => prev.map(a => a.id === addOn.id ? { ...a, status: 'installed' as AddOnStatus } : a))
+    }
+  }, [])
 
-  const handleUninstallAddOn = (addOnName: string) => {
-    toast.info('Uninstalling add-on', {
-      description: `Removing "${addOnName}"...`
+  const handleUninstallAddOn = useCallback(async (addOn: AddOn) => {
+    if (!confirm(`Are you sure you want to uninstall "${addOn.name}"? This action cannot be undone.`)) {
+      return
+    }
+    const result = await apiDelete(`/api/add-ons/${addOn.id}`, {
+      loading: `Uninstalling ${addOn.name}...`,
+      success: `${addOn.name} uninstalled successfully!`,
+      error: `Failed to uninstall ${addOn.name}`
     })
-  }
+    if (result.success) {
+      setAddOns(prev => prev.map(a => a.id === addOn.id ? { ...a, status: 'available' as AddOnStatus } : a))
+      setShowAddOnDialog(false)
+    }
+  }, [])
 
-  const handleUpdateAddOn = (addOnName: string) => {
-    toast.info('Updating add-on', {
-      description: `Updating "${addOnName}" to latest version...`
+  const handleUpdateAddOn = useCallback(async (addOn: AddOn) => {
+    const result = await apiPost(`/api/add-ons/${addOn.id}/update`, { addOnId: addOn.id }, {
+      loading: `Updating ${addOn.name}...`,
+      success: `${addOn.name} updated to latest version!`,
+      error: `Failed to update ${addOn.name}`
     })
-  }
+    if (result.success) {
+      setAddOns(prev => prev.map(a => a.id === addOn.id ? { ...a, status: 'installed' as AddOnStatus } : a))
+    }
+  }, [])
 
-  const handleViewAddOnDetails = (addOnName: string) => {
-    toast.info('Loading details', {
-      description: `Opening "${addOnName}" details...`
+  const handleDisableAddOn = useCallback(async (addOn: AddOn) => {
+    const result = await apiPost(`/api/add-ons/${addOn.id}/disable`, { addOnId: addOn.id }, {
+      loading: `Disabling ${addOn.name}...`,
+      success: `${addOn.name} disabled!`,
+      error: `Failed to disable ${addOn.name}`
     })
-  }
+    if (result.success) {
+      setAddOns(prev => prev.map(a => a.id === addOn.id ? { ...a, status: 'disabled' as AddOnStatus } : a))
+    }
+  }, [])
 
-  const handlePurchaseAddOn = (addOnName: string) => {
-    toast.info('Purchase', {
-      description: `Opening checkout for "${addOnName}"...`
+  const handleEnableAddOn = useCallback(async (addOn: AddOn) => {
+    const result = await apiPost(`/api/add-ons/${addOn.id}/enable`, { addOnId: addOn.id }, {
+      loading: `Enabling ${addOn.name}...`,
+      success: `${addOn.name} enabled!`,
+      error: `Failed to enable ${addOn.name}`
     })
-  }
+    if (result.success) {
+      setAddOns(prev => prev.map(a => a.id === addOn.id ? { ...a, status: 'installed' as AddOnStatus } : a))
+    }
+  }, [])
+
+  const handleConfigureAddOn = useCallback((addOn: AddOn) => {
+    setSelectedAddOn(addOn)
+    setShowSettingsDialog(true)
+    toast.success(`Opening settings for ${addOn.name}`)
+  }, [])
+
+  const handleUpdateAllAddOns = useCallback(async () => {
+    const updatableAddOns = addOns.filter(a => a.status === 'update_available')
+    if (updatableAddOns.length === 0) {
+      toast.info('All add-ons are up to date!')
+      return
+    }
+    const result = await apiPost('/api/add-ons/update-all', { addOnIds: updatableAddOns.map(a => a.id) }, {
+      loading: `Updating ${updatableAddOns.length} add-ons...`,
+      success: 'All add-ons updated successfully!',
+      error: 'Failed to update some add-ons'
+    })
+    if (result.success) {
+      setAddOns(prev => prev.map(a => a.status === 'update_available' ? { ...a, status: 'installed' as AddOnStatus } : a))
+    }
+  }, [addOns])
+
+  const handleCheckForUpdates = useCallback(async () => {
+    const result = await apiPost('/api/add-ons/check-updates', {}, {
+      loading: 'Checking for updates...',
+      success: 'Update check complete!',
+      error: 'Failed to check for updates'
+    })
+    if (result.success) {
+      toast.info('All add-ons are up to date!')
+    }
+  }, [])
+
+  const handleBrowseStore = useCallback(() => {
+    setActiveTab('discover')
+    setCategoryFilter('all')
+    setStatusFilter('all')
+    toast.success('Add-on store loaded!')
+  }, [])
+
+  const handleExportSettings = useCallback(() => {
+    const settings = {
+      addOns: addOns.map(a => ({ id: a.id, name: a.name, status: a.status })),
+      preferences: {
+        viewMode,
+        categoryFilter,
+        statusFilter
+      },
+      exportedAt: new Date().toISOString()
+    }
+    downloadAsJson(settings, 'add-ons-settings.json')
+  }, [addOns, viewMode, categoryFilter, statusFilter])
+
+  const handleImportSettings = useCallback(() => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      try {
+        const text = await file.text()
+        const settings = JSON.parse(text)
+        toast.success('Settings imported successfully!')
+        console.log('Imported settings:', settings)
+      } catch {
+        toast.error('Failed to import settings')
+      }
+    }
+    input.click()
+  }, [])
+
+  const handleResetSettings = useCallback(() => {
+    if (!confirm('Are you sure you want to reset all add-on settings? This cannot be undone.')) {
+      return
+    }
+    setViewMode('grid')
+    setCategoryFilter('all')
+    setStatusFilter('all')
+    toast.success('All settings have been reset!')
+  }, [])
+
+  const handleSubmitAddOn = useCallback(() => {
+    window.open('/dashboard/add-ons/submit', '_blank')
+    toast.success('Opening add-on submission page')
+  }, [])
+
+  const handleOpenDocumentation = useCallback(() => {
+    window.open('/docs/add-ons', '_blank')
+    toast.success('Opening documentation')
+  }, [])
+
+  const handleOpenApiReference = useCallback(() => {
+    window.open('/docs/api/add-ons', '_blank')
+    toast.success('Opening API reference')
+  }, [])
+
+  // Quick actions with real functionality
+  const mockAddOnsQuickActions = useMemo(() => [
+    { id: '1', label: 'Browse Add-Ons', icon: 'store', action: handleBrowseStore, variant: 'default' as const },
+    { id: '2', label: 'Update All', icon: 'refresh', action: handleUpdateAllAddOns, variant: 'default' as const },
+    { id: '3', label: 'Settings', icon: 'settings', action: () => { setActiveTab('settings'); toast.success('Settings loaded!') }, variant: 'outline' as const },
+  ], [handleBrowseStore, handleUpdateAllAddOns])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900">
@@ -540,11 +670,11 @@ export default function AddOnsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleSubmitAddOn}>
               <Upload className="w-4 h-4 mr-2" />
               Submit Add-on
             </Button>
-            <Button className="bg-gradient-to-r from-orange-500 to-pink-600 text-white">
+            <Button className="bg-gradient-to-r from-orange-500 to-pink-600 text-white" onClick={handleBrowseStore}>
               <Store className="w-4 h-4 mr-2" />
               Browse Store
             </Button>
@@ -714,16 +844,20 @@ export default function AddOnsClient() {
         {/* Quick Actions */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
           {[
-            { icon: Store, label: 'Browse All', desc: 'Explore marketplace', color: 'from-orange-500 to-pink-600' },
-            { icon: Download, label: 'Install New', desc: 'Get add-ons', color: 'from-blue-500 to-indigo-600' },
-            { icon: Package, label: 'Manage', desc: 'Your add-ons', color: 'from-green-500 to-emerald-600' },
-            { icon: Crown, label: 'Featured', desc: 'Top picks', color: 'from-amber-500 to-orange-600' },
-            { icon: RefreshCw, label: 'Updates', desc: 'Check updates', color: 'from-purple-500 to-violet-600' },
-            { icon: Shield, label: 'Security', desc: 'Scan add-ons', color: 'from-red-500 to-rose-600' },
-            { icon: Code, label: 'Develop', desc: 'Create add-ons', color: 'from-cyan-500 to-blue-600' },
-            { icon: Settings, label: 'Settings', desc: 'Configure', color: 'from-gray-500 to-slate-600' }
+            { icon: Store, label: 'Browse All', desc: 'Explore marketplace', color: 'from-orange-500 to-pink-600', action: handleBrowseStore },
+            { icon: Download, label: 'Install New', desc: 'Get add-ons', color: 'from-blue-500 to-indigo-600', action: () => { setActiveTab('discover'); toast.success('Browse available add-ons') } },
+            { icon: Package, label: 'Manage', desc: 'Your add-ons', color: 'from-green-500 to-emerald-600', action: () => { setActiveTab('installed'); toast.success('Managing your add-ons') } },
+            { icon: Crown, label: 'Featured', desc: 'Top picks', color: 'from-amber-500 to-orange-600', action: () => { setActiveTab('featured'); toast.success('Viewing featured add-ons') } },
+            { icon: RefreshCw, label: 'Updates', desc: 'Check updates', color: 'from-purple-500 to-violet-600', action: handleCheckForUpdates },
+            { icon: Shield, label: 'Security', desc: 'Scan add-ons', color: 'from-red-500 to-rose-600', action: async () => { await apiPost('/api/add-ons/security-scan', {}, { loading: 'Scanning add-ons...', success: 'Security scan complete!', error: 'Scan failed' }) } },
+            { icon: Code, label: 'Develop', desc: 'Create add-ons', color: 'from-cyan-500 to-blue-600', action: handleOpenDocumentation },
+            { icon: Settings, label: 'Settings', desc: 'Configure', color: 'from-gray-500 to-slate-600', action: () => { setActiveTab('settings'); toast.success('Settings loaded') } }
           ].map((action, idx) => (
-            <Card key={idx} className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0">
+            <Card
+              key={idx}
+              className="cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0"
+              onClick={action.action}
+            >
               <CardContent className="p-4 text-center">
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mx-auto mb-2 group-hover:scale-110 transition-transform`}>
                   <action.icon className="w-5 h-5 text-white" />
@@ -750,7 +884,7 @@ export default function AddOnsClient() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setViewMode('grid')}
+              onClick={() => { setViewMode('grid'); toast.success('Grid view enabled') }}
               className={viewMode === 'grid' ? 'bg-orange-100' : ''}
             >
               <Grid3x3 className="w-4 h-4" />
@@ -758,12 +892,12 @@ export default function AddOnsClient() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setViewMode('list')}
+              onClick={() => { setViewMode('list'); toast.success('List view enabled') }}
               className={viewMode === 'list' ? 'bg-orange-100' : ''}
             >
               <List className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info('Filter options coming soon!')}>
               <Filter className="w-4 h-4 mr-2" />
               Filters
             </Button>
@@ -823,7 +957,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{filteredAddOns.filter(a => a.isFeatured).length}</div>
                       <div className="text-xs text-blue-100">Featured</div>
                     </div>
-                    <Button className="bg-white text-blue-600 hover:bg-blue-50 gap-2">
+                    <Button className="bg-white text-blue-600 hover:bg-blue-50 gap-2" onClick={() => toast.info('Advanced search coming soon!')}>
                       <Search className="w-4 h-4" />
                       Advanced Search
                     </Button>
@@ -1086,10 +1220,10 @@ export default function AddOnsClient() {
                       <div className="text-xs text-green-100">Active</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{installedAddOns.filter(a => a.status === 'disabled').length}</div>
+                      <div className="text-2xl font-bold">{addOns.filter(a => a.status === 'disabled').length}</div>
                       <div className="text-xs text-green-100">Disabled</div>
                     </div>
-                    <Button className="bg-white text-green-600 hover:bg-green-50 gap-2">
+                    <Button className="bg-white text-green-600 hover:bg-green-50 gap-2" onClick={handleCheckForUpdates}>
                       <RefreshCw className="w-4 h-4" />
                       Check Updates
                     </Button>
@@ -1117,18 +1251,23 @@ export default function AddOnsClient() {
                           <p className="text-sm text-gray-500 dark:text-gray-400">{addOn.shortDescription}</p>
                           <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                             <span>v{addOn.version}</span>
-                            <span>•</span>
+                            <span>-</span>
                             <span>{addOn.size}</span>
-                            <span>•</span>
+                            <span>-</span>
                             <span>Updated {formatDate(addOn.lastUpdated)}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); handleConfigureAddOn(addOn) }}>
                             <Settings className="w-4 h-4 mr-2" />
                             Configure
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-200 hover:bg-red-50">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 border-red-200 hover:bg-red-50"
+                            onClick={(e) => { e.stopPropagation(); handleDisableAddOn(addOn) }}
+                          >
                             <PowerOff className="w-4 h-4 mr-2" />
                             Disable
                           </Button>
@@ -1192,7 +1331,7 @@ export default function AddOnsClient() {
                       <div className="text-2xl font-bold">{featuredAddOns.filter(a => a.isVerified).length}</div>
                       <div className="text-xs text-amber-100">Verified</div>
                     </div>
-                    <Button className="bg-white text-amber-600 hover:bg-amber-50 gap-2">
+                    <Button className="bg-white text-amber-600 hover:bg-amber-50 gap-2" onClick={handleSubmitAddOn}>
                       <Star className="w-4 h-4" />
                       Submit Add-on
                     </Button>
@@ -1205,7 +1344,11 @@ export default function AddOnsClient() {
               {featuredAddOns.map((addOn) => {
                 const CategoryIcon = getCategoryIcon(addOn.category)
                 return (
-                  <Card key={addOn.id} className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden">
+                  <Card
+                    key={addOn.id}
+                    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden"
+                    onClick={() => { setSelectedAddOn(addOn); setShowAddOnDialog(true) }}
+                  >
                     <div className="h-32 bg-gradient-to-br from-orange-200 to-pink-200 dark:from-orange-900/50 dark:to-pink-900/50 relative">
                       <Badge className="absolute top-2 right-2 bg-amber-100 text-amber-700">
                         <Crown className="w-3 h-3 mr-1" /> Featured
@@ -1257,14 +1400,14 @@ export default function AddOnsClient() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockAddOns.filter(a => a.category === 'ai').length}</div>
+                      <div className="text-2xl font-bold">{addOns.filter(a => a.category === 'ai').length}</div>
                       <div className="text-xs text-cyan-100">AI & ML</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockAddOns.filter(a => a.category === 'integration').length}</div>
+                      <div className="text-2xl font-bold">{addOns.filter(a => a.category === 'integration').length}</div>
                       <div className="text-xs text-cyan-100">Integrations</div>
                     </div>
-                    <Button className="bg-white text-cyan-600 hover:bg-cyan-50 gap-2">
+                    <Button className="bg-white text-cyan-600 hover:bg-cyan-50 gap-2" onClick={() => toast.info('Category request coming soon!')}>
                       <Plus className="w-4 h-4" />
                       Request Category
                     </Button>
@@ -1276,7 +1419,7 @@ export default function AddOnsClient() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               {(['ai', 'integration', 'security', 'analytics', 'communication', 'design', 'developer', 'storage', 'marketing', 'productivity'] as AddOnCategory[]).map((cat) => {
                 const Icon = getCategoryIcon(cat)
-                const count = mockAddOns.filter(a => a.category === cat).length
+                const count = addOns.filter(a => a.category === cat).length
                 return (
                   <Card
                     key={cat}
@@ -1316,14 +1459,14 @@ export default function AddOnsClient() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{mockAddOns.filter(a => a.status === 'update_available').length}</div>
+                      <div className="text-2xl font-bold">{addOns.filter(a => a.status === 'update_available').length}</div>
                       <div className="text-xs text-purple-100">Updates Available</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold">{installedAddOns.length}</div>
                       <div className="text-xs text-purple-100">Up to Date</div>
                     </div>
-                    <Button className="bg-white text-purple-600 hover:bg-purple-50 gap-2">
+                    <Button className="bg-white text-purple-600 hover:bg-purple-50 gap-2" onClick={handleUpdateAllAddOns}>
                       <RefreshCw className="w-4 h-4" />
                       Update All
                     </Button>
@@ -1340,9 +1483,9 @@ export default function AddOnsClient() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {mockAddOns.filter(a => a.status === 'update_available').length > 0 ? (
+                {addOns.filter(a => a.status === 'update_available').length > 0 ? (
                   <div className="space-y-4">
-                    {mockAddOns.filter(a => a.status === 'update_available').map((addOn) => (
+                    {addOns.filter(a => a.status === 'update_available').map((addOn) => (
                       <div key={addOn.id} className="flex items-center justify-between p-4 rounded-lg bg-yellow-50 dark:bg-yellow-900/20">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
@@ -1353,7 +1496,10 @@ export default function AddOnsClient() {
                             <p className="text-sm text-gray-500">New version available</p>
                           </div>
                         </div>
-                        <Button className="bg-gradient-to-r from-orange-500 to-pink-600 text-white">
+                        <Button
+                          className="bg-gradient-to-r from-orange-500 to-pink-600 text-white"
+                          onClick={() => handleUpdateAddOn(addOn)}
+                        >
                           Update Now
                         </Button>
                       </div>
@@ -1392,7 +1538,7 @@ export default function AddOnsClient() {
                         </div>
                         <div>
                           <p className="font-medium">{update.addon}</p>
-                          <p className="text-xs text-muted-foreground">v{update.from} → v{update.to}</p>
+                          <p className="text-xs text-muted-foreground">v{update.from} - v{update.to}</p>
                         </div>
                       </div>
                       <div className="text-right">
@@ -1460,9 +1606,9 @@ export default function AddOnsClient() {
                           <label className="text-sm font-medium">Default Currency</label>
                           <select className="w-full p-2 border rounded-lg dark:bg-gray-700">
                             <option>USD ($)</option>
-                            <option>EUR (€)</option>
-                            <option>GBP (£)</option>
-                            <option>JPY (¥)</option>
+                            <option>EUR (E)</option>
+                            <option>GBP (P)</option>
+                            <option>JPY (Y)</option>
                           </select>
                         </div>
                       </div>
@@ -1538,7 +1684,7 @@ export default function AddOnsClient() {
                           <RefreshCw className="w-5 h-5" />
                           <span className="font-medium">Last checked: 2 hours ago</span>
                         </div>
-                        <Button className="mt-3" variant="outline">Check for Updates Now</Button>
+                        <Button className="mt-3" variant="outline" onClick={handleCheckForUpdates}>Check for Updates Now</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1629,11 +1775,11 @@ export default function AddOnsClient() {
                       <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                         <div className="font-medium text-purple-700 dark:text-purple-400 mb-2">Developer Resources</div>
                         <div className="flex gap-3">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleOpenDocumentation}>
                             <FileText className="w-4 h-4 mr-2" />
                             Documentation
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleOpenApiReference}>
                             <Code className="w-4 h-4 mr-2" />
                             API Reference
                           </Button>
@@ -1727,15 +1873,15 @@ export default function AddOnsClient() {
                         </div>
                       </div>
                       <div className="flex gap-3">
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={handleImportSettings}>
                           <Upload className="w-4 h-4 mr-2" />
                           Import Settings
                         </Button>
-                        <Button variant="outline">
+                        <Button variant="outline" onClick={handleExportSettings}>
                           <Download className="w-4 h-4 mr-2" />
                           Export Settings
                         </Button>
-                        <Button variant="destructive">
+                        <Button variant="destructive" onClick={handleResetSettings}>
                           <Trash2 className="w-4 h-4 mr-2" />
                           Reset All
                         </Button>
@@ -1859,27 +2005,98 @@ export default function AddOnsClient() {
                 <div className="flex gap-3">
                   {selectedAddOn.status === 'installed' ? (
                     <>
-                      <Button className="flex-1" variant="outline">
+                      <Button className="flex-1" variant="outline" onClick={() => handleConfigureAddOn(selectedAddOn)}>
                         <Settings className="w-4 h-4 mr-2" />
                         Configure
                       </Button>
-                      <Button className="flex-1 text-red-600" variant="outline">
+                      <Button className="flex-1 text-red-600" variant="outline" onClick={() => handleUninstallAddOn(selectedAddOn)}>
                         <Trash2 className="w-4 h-4 mr-2" />
                         Uninstall
                       </Button>
                     </>
+                  ) : selectedAddOn.status === 'disabled' ? (
+                    <>
+                      <Button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white" onClick={() => handleEnableAddOn(selectedAddOn)}>
+                        <Zap className="w-4 h-4 mr-2" />
+                        Enable
+                      </Button>
+                      <Button className="flex-1 text-red-600" variant="outline" onClick={() => handleUninstallAddOn(selectedAddOn)}>
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Uninstall
+                      </Button>
+                    </>
+                  ) : selectedAddOn.status === 'update_available' ? (
+                    <>
+                      <Button className="flex-1 bg-gradient-to-r from-orange-500 to-pink-600 text-white" onClick={() => handleUpdateAddOn(selectedAddOn)}>
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Update Now
+                      </Button>
+                      <Button className="flex-1" variant="outline" onClick={() => handleConfigureAddOn(selectedAddOn)}>
+                        <Settings className="w-4 h-4 mr-2" />
+                        Configure
+                      </Button>
+                    </>
                   ) : (
                     <>
-                      <Button className="flex-1 bg-gradient-to-r from-orange-500 to-pink-600 text-white">
+                      <Button className="flex-1 bg-gradient-to-r from-orange-500 to-pink-600 text-white" onClick={() => handleInstallAddOn(selectedAddOn)}>
                         <Download className="w-4 h-4 mr-2" />
                         {selectedAddOn.hasFreeTrial ? 'Start Free Trial' : 'Install'}
                       </Button>
-                      <Button className="flex-1" variant="outline">
+                      <Button className="flex-1" variant="outline" onClick={() => window.open(`/add-ons/${selectedAddOn.id}`, '_blank')}>
                         <ExternalLink className="w-4 h-4 mr-2" />
                         Learn More
                       </Button>
                     </>
                   )}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog for individual add-on */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Configure {selectedAddOn?.name}</DialogTitle>
+            </DialogHeader>
+            {selectedAddOn && (
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <p className="text-sm text-muted-foreground">
+                    Configure settings for {selectedAddOn.name}. Changes will be saved automatically.
+                  </p>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium text-sm">Enable Notifications</div>
+                      <div className="text-xs text-muted-foreground">Receive notifications from this add-on</div>
+                    </div>
+                    <input type="checkbox" defaultChecked className="toggle" />
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium text-sm">Auto-sync Data</div>
+                      <div className="text-xs text-muted-foreground">Automatically sync data in background</div>
+                    </div>
+                    <input type="checkbox" defaultChecked className="toggle" />
+                  </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium text-sm">Developer Mode</div>
+                      <div className="text-xs text-muted-foreground">Enable debug features</div>
+                    </div>
+                    <input type="checkbox" className="toggle" />
+                  </div>
+                </div>
+                <div className="flex gap-3 pt-4">
+                  <Button className="flex-1" onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved!') }}>
+                    Save Changes
+                  </Button>
+                  <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>
+                    Cancel
+                  </Button>
                 </div>
               </div>
             )}

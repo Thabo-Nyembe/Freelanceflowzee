@@ -385,12 +385,8 @@ const mockChangelogActivities = [
   { id: '3', user: 'Tech Writer', action: 'updated', target: 'migration guide for v3.0', timestamp: '5h ago', type: 'info' as const },
 ]
 
-const mockChangelogQuickActions = [
-  { id: '1', label: 'New Release', icon: 'Tag', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening release creation form...', success: 'Release form ready!', error: 'Failed to open release form' }) },
-  { id: '2', label: 'Draft', icon: 'Edit', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Starting new changelog draft...', success: 'Draft created!', error: 'Failed to create draft' }) },
-  { id: '3', label: 'Compare', icon: 'GitBranch', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening version comparison tool...', success: 'Comparison ready!', error: 'Failed to open comparison tool' }) },
-  { id: '4', label: 'Notify', icon: 'Bell', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending notifications...', success: 'Notifications sent to subscribers!', error: 'Failed to send notifications' }) },
-]
+// Quick actions are defined inside the component to access state setters
+// See getChangelogQuickActions() function inside ChangelogClient component
 
 // Default form state for new changelog entry
 const defaultChangelogForm: Partial<Changelog> = {

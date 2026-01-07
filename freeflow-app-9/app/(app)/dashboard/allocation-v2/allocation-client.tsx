@@ -687,11 +687,7 @@ const mockAllocationActivities = [
   { id: '3', user: 'System', action: 'Flagged', target: 'Conflicting allocations for 2 resources', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
 ]
 
-const mockAllocationQuickActions = [
-  { id: '1', label: 'New Allocation', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new allocation...', success: 'Resource allocation created', error: 'Failed to create allocation' }), variant: 'default' as const },
-  { id: '2', label: 'View Calendar', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening resource allocation calendar...', success: 'Calendar loaded successfully', error: 'Failed to load calendar' }), variant: 'default' as const },
-  { id: '3', label: 'Capacity Report', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating capacity report...', success: 'Capacity report generated', error: 'Failed to generate report' }), variant: 'outline' as const },
-]
+// Quick actions are now handled as callbacks in the component to access state
 
 // ============================================================================
 // MAIN COMPONENT
@@ -755,8 +751,14 @@ export default function AllocationClient() {
   // Form state
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
+  const [showAssignDialog, setShowAssignDialog] = useState(false)
+  const [showTimeEntryDialog, setShowTimeEntryDialog] = useState(false)
+  const [showApproveDialog, setShowApproveDialog] = useState(false)
+  const [showTransferDialog, setShowTransferDialog] = useState(false)
   const [formData, setFormData] = useState<AllocationForm>(initialFormState)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [timeEntryData, setTimeEntryData] = useState({ hours: 0, description: '', date: '' })
+  const [transferData, setTransferData] = useState({ targetProject: '', notes: '' })
 
   // Filtered data
   const filteredAllocations = useMemo(() => {
@@ -1057,11 +1059,11 @@ export default function AllocationClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Allocation', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => { setFormData(initialFormState); setShowCreateDialog(true) } },
-                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading resources...', success: 'Select a resource to assign', error: 'Failed to load resources' }) },
+                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.success('Select a resource to assign') },
                 { icon: Calendar, label: 'Schedule', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('schedule') },
-                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening time entry...', success: 'Time tracking feature ready', error: 'Failed to open time entry' }) },
-                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking pending allocations...', success: 'Select pending allocations to approve', error: 'Failed to load allocations' }) },
-                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading transfer options...', success: 'Transfer allocation between projects', error: 'Failed to load transfer options' }) },
+                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Time tracking feature ready') },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Select pending allocations to approve') },
+                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Transfer allocation between projects') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('reports') },
                 { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (

@@ -552,11 +552,53 @@ const mockCoursesActivities = [
   { id: '3', user: 'Content Editor', action: 'uploaded', target: '3 new video lessons', timestamp: '2h ago', type: 'info' as const },
 ]
 
-const mockCoursesQuickActions = [
-  { id: '1', label: 'New Course', icon: 'BookOpen', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening course creation wizard...', success: 'Course wizard ready!', error: 'Failed to open wizard' }) },
-  { id: '2', label: 'Add Lecture', icon: 'PlayCircle', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening lecture editor...', success: 'Lecture editor opened!', error: 'Failed to open editor' }) },
-  { id: '3', label: 'Create Quiz', icon: 'FileText', shortcut: 'Q', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening quiz builder...', success: 'Quiz builder ready!', error: 'Failed to open quiz builder' }) },
-  { id: '4', label: 'View Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading course analytics...', success: 'Analytics dashboard opened!', error: 'Failed to load analytics' }) },
+// Quick actions are defined inside the component to access state setters
+const getCoursesQuickActions = (
+  setShowCreateCourseDialog: (open: boolean) => void,
+  setShowAddLectureDialog: (open: boolean) => void,
+  setActiveView: (view: 'courses' | 'curriculum' | 'students' | 'analytics' | 'reviews') => void
+) => [
+  {
+    id: '1',
+    label: 'New Course',
+    icon: 'BookOpen',
+    shortcut: 'C',
+    action: () => {
+      setShowCreateCourseDialog(true)
+      toast.success('Course creation wizard opened')
+    }
+  },
+  {
+    id: '2',
+    label: 'Add Lecture',
+    icon: 'PlayCircle',
+    shortcut: 'L',
+    action: () => {
+      setShowAddLectureDialog(true)
+      toast.success('Lecture editor opened')
+    }
+  },
+  {
+    id: '3',
+    label: 'Create Quiz',
+    icon: 'FileText',
+    shortcut: 'Q',
+    action: () => {
+      // Navigate to curriculum view where quizzes can be created
+      setActiveView('curriculum')
+      toast.success('Quiz builder opened - add a new lecture with type "Quiz"')
+    }
+  },
+  {
+    id: '4',
+    label: 'View Analytics',
+    icon: 'BarChart3',
+    shortcut: 'A',
+    action: () => {
+      setActiveView('analytics')
+      toast.success('Analytics dashboard opened')
+    }
+  },
 ]
 
 export default function CoursesClient() {
@@ -2516,7 +2558,7 @@ export default function CoursesClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCoursesQuickActions}
+            actions={getCoursesQuickActions(setShowCreateCourseDialog, setShowAddLectureDialog, setActiveView)}
             variant="grid"
           />
         </div>

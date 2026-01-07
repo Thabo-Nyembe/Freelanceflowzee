@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { downloadAsCsv, apiPost } from '@/lib/button-handlers'
 import { useCapacity, type Capacity, type ResourceType, type CapacityStatus } from '@/lib/hooks/use-capacity'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -334,10 +335,50 @@ const mockCapacityActivities = [
   { id: '3', user: 'HR Partner', action: 'Onboarded', target: '2 new contractors', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
+// Real action handlers for quick actions
+const handleAllocateAction = async () => {
+  const result = await apiPost('/api/capacity/allocations', {
+    action: 'open_form',
+    timestamp: new Date().toISOString()
+  }, {
+    loading: 'Opening allocation form...',
+    success: 'Ready to assign resources to projects',
+    error: 'Failed to open allocation form'
+  })
+  return result
+}
+
+const handleBalanceWorkloads = async () => {
+  const result = await apiPost('/api/capacity/balance', {
+    teamMembers: mockTeamMembers.map(m => m.id),
+    action: 'auto_balance'
+  }, {
+    loading: 'Auto-balancing workloads...',
+    success: 'Workloads balanced! Redistributed allocations for optimal utilization',
+    error: 'Failed to balance workloads'
+  })
+  return result
+}
+
+const handleExportCapacityReport = () => {
+  const reportData = mockTeamMembers.map(member => ({
+    name: member.name,
+    role: member.role,
+    department: member.department,
+    totalCapacity: member.totalCapacity,
+    allocatedHours: member.allocatedHours,
+    availableHours: member.availableHours,
+    utilizationRate: `${member.utilizationRate}%`,
+    status: member.status,
+    projects: member.projects.map(p => p.name).join('; ')
+  }))
+  downloadAsCsv(reportData, `capacity-report-${new Date().toISOString().split('T')[0]}.csv`)
+}
+
 const mockCapacityQuickActions = [
-  { id: '1', label: 'Allocate', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening allocation form...', success: 'Assign resources to projects', error: 'Failed to open form' }), variant: 'default' as const },
-  { id: '2', label: 'Balance', icon: 'shuffle', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Auto-balancing workloads...', success: 'Workloads balanced! 3 reassignments made', error: 'Balancing failed' }), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'bar-chart', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating capacity report...', success: 'Capacity Report - 78% utilized • 12 team members • 5 projects active', error: 'Failed to generate report' }), variant: 'outline' as const },
+  { id: '1', label: 'Allocate', icon: 'plus', action: handleAllocateAction, variant: 'default' as const },
+  { id: '2', label: 'Balance', icon: 'shuffle', action: handleBalanceWorkloads, variant: 'default' as const },
+  { id: '3', label: 'Report', icon: 'bar-chart', action: handleExportCapacityReport, variant: 'outline' as const },
 ]
 
 export default function CapacityClient({ initialCapacity }: { initialCapacity: Capacity[] }) {
@@ -592,7 +633,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                       <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">{week.available}h free</div>
                     </div>
                     {week.overbooked > 0 && (
-                      <div className="text-xs text-red-600 dark:text-red-400 mt-1">⚠️ {week.overbooked} overbooked</div>
+                      <div className="text-xs text-red-600 dark:text-red-400 mt-1">{week.overbooked} overbooked</div>
                     )}
                   </div>
                 ))}
@@ -968,7 +1009,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                               <div key={idx} className={`flex items-center justify-between p-3 rounded-lg ${ms.completed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
                                 <div className="flex items-center gap-2">
                                   {ms.completed ? (
-                                    <span className="text-green-600">✓</span>
+                                    <span className="text-green-600">&#10003;</span>
                                   ) : (
                                     <span className="w-4 h-4 border-2 border-gray-300 dark:border-gray-600 rounded-full" />
                                   )}
@@ -1014,9 +1055,9 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Weekly Schedule</h3>
                 <div className="flex gap-2">
-                  <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">← Previous</button>
+                  <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">&larr; Previous</button>
                   <button className="px-3 py-1 text-sm bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded">This Week</button>
-                  <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">Next →</button>
+                  <button className="px-3 py-1 text-sm border border-gray-200 dark:border-gray-700 rounded hover:bg-gray-50 dark:hover:bg-gray-700">Next &rarr;</button>
                 </div>
               </div>
 
@@ -1098,7 +1139,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                     <p className="text-violet-200 text-sm">Weeks</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockForecast.filter(f => f.predictedUtilization > 90).length}</p>
+                    <p className="text-3xl font-bold">{mockForecast.filter(f => f.utilizationRate > 90).length}</p>
                     <p className="text-violet-200 text-sm">Overloaded</p>
                   </div>
                 </div>
@@ -1160,7 +1201,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
               <div className="space-y-3">
                 <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                   <div className="flex items-start gap-3">
-                    <span className="text-amber-600">⚠️</span>
+                    <span className="text-amber-600">!</span>
                     <div>
                       <div className="font-medium text-amber-800 dark:text-amber-400">Marcus Johnson is overbooked</div>
                       <div className="text-sm text-amber-700 dark:text-amber-500">Consider redistributing 4h from Brand Refresh to maintain work-life balance.</div>
@@ -1169,7 +1210,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 </div>
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                   <div className="flex items-start gap-3">
-                    <span className="text-blue-600">💡</span>
+                    <span className="text-blue-600">i</span>
                     <div>
                       <div className="font-medium text-blue-800 dark:text-blue-400">Lisa Thompson has availability</div>
                       <div className="text-sm text-blue-700 dark:text-blue-500">20h available this week. Consider assigning to API Gateway testing.</div>
@@ -1178,7 +1219,7 @@ export default function CapacityClient({ initialCapacity }: { initialCapacity: C
                 </div>
                 <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                   <div className="flex items-start gap-3">
-                    <span className="text-red-600">🚨</span>
+                    <span className="text-red-600">!!</span>
                     <div>
                       <div className="font-medium text-red-800 dark:text-red-400">Brand Refresh project at risk</div>
                       <div className="text-sm text-red-700 dark:text-red-500">Only 1 team member assigned. Consider adding support to meet deadline.</div>

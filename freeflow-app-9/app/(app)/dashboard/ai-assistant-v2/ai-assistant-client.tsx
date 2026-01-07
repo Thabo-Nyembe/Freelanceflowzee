@@ -437,12 +437,7 @@ const mockAIAssistantActivities = [
   { id: '3', user: 'Data Scientist', action: 'analyzed', target: 'conversation patterns', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mockAIAssistantQuickActions = [
-  { id: '1', label: 'New Chat', icon: 'MessageSquare', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Starting new conversation...', success: 'Chat started! How can I help?', error: 'Failed to start' }) },
-  { id: '2', label: 'Templates', icon: 'FileText', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading prompt templates...', success: '50+ pre-built prompts ready to use!', error: 'Failed to load templates' }) },
-  { id: '3', label: 'Knowledge', icon: 'Database', shortcut: 'K', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Accessing knowledge base...', success: 'Documents and data sources loaded!', error: 'Failed to access knowledge base' }) },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening AI settings...', success: 'Settings panel opened!', error: 'Failed to open settings' }) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function AIAssistantClient() {
   const supabase = createClient()
@@ -593,19 +588,21 @@ export default function AIAssistantClient() {
     }
   }
 
-  // Handle copy message
-  const handleCopy = (id: string, content: string) => {
-    navigator.clipboard.writeText(content)
-    setCopiedId(id)
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 400)),
-      {
-        loading: 'Copying to clipboard...',
-        success: 'Copied to clipboard!',
-        error: 'Failed to copy'
-      }
-    )
-    setTimeout(() => setCopiedId(null), 2000)
+  // Handle copy message - real clipboard functionality
+  const handleCopy = async (id: string, content: string) => {
+    try {
+      await navigator.clipboard.writeText(content)
+      setCopiedId(id)
+      toast.success('Copied to clipboard!', {
+        description: 'Response has been copied'
+      })
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+      toast.error('Failed to copy', {
+        description: 'Could not access clipboard'
+      })
+    }
   }
 
   // Handle new conversation - real Supabase operation
@@ -671,19 +668,18 @@ export default function AIAssistantClient() {
     }
   }
 
-  // Handle prompt use
+  // Handle prompt use - load prompt template into input
   const handleUsePrompt = (prompt: PromptTemplate) => {
     setInputMessage(prompt.prompt)
     setActiveTab('chat')
     inputRef.current?.focus()
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Loading prompt template...',
-        success: 'Prompt loaded into input!',
-        error: 'Failed to load prompt'
-      }
-    )
+    toast.success('Prompt loaded!', {
+      description: `"${prompt.name}" template ready to use`
+    })
+    // Increment usage count locally
+    setPrompts(prev => prev.map(p =>
+      p.id === prompt.id ? { ...p, usageCount: p.usageCount + 1 } : p
+    ))
   }
 
   // Handle create assistant - Supabase operation

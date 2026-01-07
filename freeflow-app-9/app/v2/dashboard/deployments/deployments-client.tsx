@@ -529,6 +529,10 @@ export default function DeploymentsClient() {
   const [showIntegrationDialog, setShowIntegrationDialog] = useState(false)
   const [expandedLogs, setExpandedLogs] = useState<string[]>(['clone', 'install', 'build', 'deploy'])
   const [settingsTab, setSettingsTab] = useState('general')
+  const [buildLogs, setBuildLogs] = useState<BuildLog[]>(mockBuildLogs)
+  const [envVars, setEnvVars] = useState<EnvironmentVariable[]>(mockEnvVars)
+  const [newEnvKey, setNewEnvKey] = useState('')
+  const [newEnvValue, setNewEnvValue] = useState('')
 
   const filteredDeployments = useMemo(() => {
     return mockDeployments.filter(d => {
@@ -1022,9 +1026,9 @@ export default function DeploymentsClient() {
                         <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening terminal...', success: 'Terminal opened', error: 'Failed to open terminal' })}><Terminal className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading metrics...', success: 'Metrics loaded', error: 'Failed to load metrics' })}><BarChart3 className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' })}><Settings className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.success('Terminal opened', { description: `Terminal for ${fn.name}` })} title="Open terminal"><Terminal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.success('Metrics loaded', { description: `${fn.avgDuration}ms avg, ${fn.errors} errors` })} title="View metrics"><BarChart3 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => toast.info('Opening settings for ' + fn.name)} title="Open settings"><Settings className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1269,19 +1273,19 @@ export default function DeploymentsClient() {
               </div>
               <div className="grid grid-cols-5 gap-4">
                 <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold">{mockBuildLogs.length}</p>
+                  <p className="text-2xl font-bold">{buildLogs.length}</p>
                   <p className="text-sm text-gray-400">Total Logs</p>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-red-400">{mockBuildLogs.filter(l => l.level === 'error').length}</p>
+                  <p className="text-2xl font-bold text-red-400">{buildLogs.filter(l => l.level === 'error').length}</p>
                   <p className="text-sm text-gray-400">Errors</p>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-amber-400">{mockBuildLogs.filter(l => l.level === 'warn').length}</p>
+                  <p className="text-2xl font-bold text-amber-400">{buildLogs.filter(l => l.level === 'warn').length}</p>
                   <p className="text-sm text-gray-400">Warnings</p>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 text-center">
-                  <p className="text-2xl font-bold text-green-400">{mockBuildLogs.filter(l => l.level === 'success').length}</p>
+                  <p className="text-2xl font-bold text-green-400">{buildLogs.filter(l => l.level === 'success').length}</p>
                   <p className="text-sm text-gray-400">Success</p>
                 </div>
                 <div className="bg-white/10 rounded-lg p-3 text-center">
@@ -1321,7 +1325,7 @@ export default function DeploymentsClient() {
                     <Input type="datetime-local" className="w-48" />
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Refreshing...', success: 'Refreshed', error: 'Failed to refresh' })}><RefreshCw className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => { toast.loading('Refreshing logs...'); setTimeout(() => toast.success('Logs refreshed'), 300); }}><RefreshCw className="h-4 w-4" /></Button>
                     <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />More Filters</Button>
                   </div>
                 </div>
@@ -1337,21 +1341,47 @@ export default function DeploymentsClient() {
                   <Badge className="bg-green-600 text-white">Live</Badge>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying logs...', success: 'Logs copied', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading logs...', success: 'Download started', error: 'Failed to download' })}><Download className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Clearing logs...', success: 'Logs cleared', error: 'Failed to clear' })}><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
+                    const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
+                    navigator.clipboard.writeText(logsText).then(() => {
+                      toast.success('Logs copied to clipboard', { description: `${buildLogs.length} log entries copied` });
+                    }).catch(() => {
+                      toast.error('Failed to copy logs');
+                    });
+                  }} title="Copy logs"><Copy className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
+                    const logsText = buildLogs.map(log => `[${log.timestamp}] ${log.level.toUpperCase()} [${log.step}] ${log.message}`).join('\n');
+                    const blob = new Blob([logsText], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `deployment-logs-${new Date().toISOString().split('T')[0]}.txt`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                    toast.success('Logs downloaded', { description: `deployment-logs-${new Date().toISOString().split('T')[0]}.txt` });
+                  }} title="Download logs"><Download className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
+                    setBuildLogs([]);
+                    toast.success('Logs cleared', { description: 'All build logs have been cleared' });
+                  }} title="Clear logs"><Trash2 className="h-4 w-4" /></Button>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
                 <ScrollArea className="h-[500px] bg-gray-900 p-4 font-mono text-sm">
-                  {mockBuildLogs.map(log => (
+                  {buildLogs.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">No logs to display</div>
+                  ) : (
+                  buildLogs.map(log => (
                     <div key={log.id} className="flex items-start gap-3 mb-2 hover:bg-gray-800 p-1 rounded">
                       <span className="text-gray-500 text-xs w-20 shrink-0">{log.timestamp}</span>
                       <Badge className={`shrink-0 ${log.level === 'error' ? 'bg-red-600' : log.level === 'warn' ? 'bg-amber-600' : log.level === 'success' ? 'bg-green-600' : 'bg-blue-600'}`}>{log.level.toUpperCase()}</Badge>
                       <span className="text-gray-400 text-xs shrink-0">[{log.step}]</span>
                       <span className="text-white">{log.message}</span>
                     </div>
-                  ))}
+                  ))
+                  )}
                 </ScrollArea>
               </CardContent>
             </Card>
@@ -1873,7 +1903,7 @@ export default function DeploymentsClient() {
                             </div>
                             <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
                           </div>
-                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' })}><Settings className="h-4 w-4" /></Button></div>
+                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => toast.info(`Opening settings for ${integration.name}`)} title="Open settings"><Settings className="h-4 w-4" /></Button></div>
                         </div>
                       ))}
                     </CardContent>
@@ -2045,13 +2075,29 @@ export default function DeploymentsClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Input placeholder="KEY" className="flex-1 font-mono" />
-                <Input placeholder="Value" className="flex-1" type="password" />
-                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding variable...', success: 'Variable added', error: 'Failed to add variable' })}><Plus className="h-4 w-4" /></Button>
+                <Input placeholder="KEY" className="flex-1 font-mono" value={newEnvKey} onChange={(e) => setNewEnvKey(e.target.value)} />
+                <Input placeholder="Value" className="flex-1" type="password" value={newEnvValue} onChange={(e) => setNewEnvValue(e.target.value)} />
+                <Button onClick={() => {
+                  if (!newEnvKey.trim()) {
+                    toast.error('Validation Error', { description: 'Variable key is required' });
+                    return;
+                  }
+                  const newVar: EnvironmentVariable = {
+                    id: Date.now().toString(),
+                    key: newEnvKey,
+                    value: newEnvValue,
+                    environment: 'production',
+                    encrypted: true
+                  };
+                  setEnvVars([...envVars, newVar]);
+                  setNewEnvKey('');
+                  setNewEnvValue('');
+                  toast.success('Variable added', { description: `${newEnvKey} has been added to environment variables` });
+                }}><Plus className="h-4 w-4" /></Button>
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-2">
-                  {mockEnvVars.map(env => (
+                  {envVars.map(env => (
                     <div key={env.id} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div className="flex-1">
                         <div className="flex items-center gap-2">
@@ -2062,15 +2108,9 @@ export default function DeploymentsClient() {
                       </div>
                       <Badge variant="outline">{env.environment}</Badge>
                       <Button variant="ghost" size="icon" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 1000)),
-                          {
-                            loading: 'Deleting environment variable...',
-                            success: `Deleted ${env.key}`,
-                            error: 'Failed to delete environment variable'
-                          }
-                        )
-                      }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                        setEnvVars(envVars.filter(e => e.id !== env.id));
+                        toast.success('Variable deleted', { description: `${env.key} has been removed` });
+                      }} title="Delete variable"><Trash2 className="h-4 w-4 text-red-500" /></Button>
                     </div>
                   ))}
                 </div>

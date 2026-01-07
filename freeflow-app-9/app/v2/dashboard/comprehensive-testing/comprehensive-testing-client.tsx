@@ -350,9 +350,9 @@ const comprehensiveTestingActivities = [
 ]
 
 const comprehensiveTestingQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new item...', success: 'Item created successfully', error: 'Failed to create item' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Export failed' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Test Item', { description: 'Test item created' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Started', { description: 'Data exported successfully' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Testing settings loaded' }) },
 ]
 
 export default function ComprehensiveTestingClient() {

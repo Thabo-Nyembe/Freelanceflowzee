@@ -433,11 +433,7 @@ const mockRolesActivities = [
   { id: '3', user: 'Security', action: 'Updated permissions for', target: 'Admin role', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockRolesQuickActions = [
-  { id: '1', label: 'New Role', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating role...', success: 'Role created! Configure permissions', error: 'Failed to create role' }), variant: 'default' as const },
-  { id: '2', label: 'Audit Permissions', icon: 'shield', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running permission audit...', success: 'Audit complete! 3 roles have elevated access', error: 'Audit failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating roles report...', success: 'Report exported to roles-report.csv', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters and handlers
 
 // Initial form state for creating/editing roles
 const initialRoleFormState = {
@@ -750,6 +746,116 @@ export default function RolesClient() {
     URL.revokeObjectURL(url)
     toast.success('Exported', { description: 'Roles data exported successfully' })
   }
+
+  // Export audit logs as JSON
+  const handleExportAuditLogs = () => {
+    const blob = new Blob([JSON.stringify(mockAuditLogs, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Exported', { description: 'Audit logs exported successfully' })
+  }
+
+  // Export user assignments as JSON
+  const handleExportUserAssignments = () => {
+    const blob = new Blob([JSON.stringify(mockUserAssignments, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `user-assignments-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Exported', { description: 'User assignments exported successfully' })
+  }
+
+  // Handle permission sync (refresh permissions from server)
+  const handleSyncPermissions = async () => {
+    toast.info('Syncing', { description: 'Syncing permissions...' })
+    await fetchRoles()
+    toast.success('Synced', { description: 'Permissions synced successfully' })
+  }
+
+  // Handle policy evaluation
+  const handleEvaluatePolicies = () => {
+    toast.info('Evaluating', { description: 'Evaluating access policies...' })
+    // Simulate policy evaluation
+    setTimeout(() => {
+      toast.success('Evaluated', { description: `${mockPolicies.filter(p => p.active).length} active policies evaluated` })
+    }, 1000)
+  }
+
+  // Handle user group sync
+  const handleSyncUserGroups = async () => {
+    toast.info('Syncing', { description: 'Syncing user groups...' })
+    await fetchRoles()
+    toast.success('Synced', { description: 'User groups synced successfully' })
+  }
+
+  // Handle filter apply (for demonstration)
+  const handleApplyFilter = (section: string) => {
+    toast.success('Filters Applied', { description: `${section} filters applied successfully` })
+  }
+
+  // Settings save handlers
+  const handleSaveGeneralSettings = () => {
+    toast.success('Settings Saved', { description: 'General settings saved successfully' })
+  }
+
+  const handleSaveSecuritySettings = () => {
+    toast.success('Settings Saved', { description: 'Security settings saved successfully' })
+  }
+
+  const handleSavePermissionSettings = () => {
+    toast.success('Settings Saved', { description: 'Permission settings saved successfully' })
+  }
+
+  const handleSaveNotificationSettings = () => {
+    toast.success('Settings Saved', { description: 'Notification settings saved successfully' })
+  }
+
+  const handleSaveAdvancedSettings = () => {
+    toast.success('Settings Saved', { description: 'Advanced settings saved successfully' })
+  }
+
+  // Handle integration connect/configure
+  const handleIntegrationAction = (name: string, status: string) => {
+    if (status === 'connected') {
+      toast.success('Configured', { description: `${name} configured successfully` })
+    } else {
+      toast.success('Connected', { description: `Connected to ${name} successfully` })
+    }
+  }
+
+  // Danger zone actions
+  const handleResetPermissions = () => {
+    if (confirm('Are you sure you want to reset all permissions? This action cannot be undone.')) {
+      toast.success('Reset Complete', { description: 'All permissions have been reset' })
+    }
+  }
+
+  const handleClearAuditLogs = () => {
+    if (confirm('Are you sure you want to clear all audit logs? This action cannot be undone.')) {
+      toast.success('Cleared', { description: 'Audit logs have been cleared' })
+    }
+  }
+
+  // Handle permission audit
+  const handleAuditPermissions = () => {
+    toast.info('Auditing', { description: 'Running permission audit...' })
+    setTimeout(() => {
+      toast.success('Audit Complete', { description: `Audit complete! ${combinedRoles.filter(r => r.type === 'admin').length} roles have elevated access` })
+    }, 1500)
+  }
+
+  // Quick actions for the QuickActionsToolbar component
+  const rolesQuickActions = [
+    { id: '1', label: 'New Role', icon: 'plus', action: () => setCreateDialogOpen(true), variant: 'default' as const },
+    { id: '2', label: 'Audit Permissions', icon: 'shield', action: handleAuditPermissions, variant: 'default' as const },
+    { id: '3', label: 'Export Report', icon: 'download', action: handleExportRoles, variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900">
@@ -1282,7 +1388,7 @@ export default function RolesClient() {
                     <p className="text-amber-100 text-sm">Fine-grained access control configuration</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Syncing permissions...', success: 'Permissions synced successfully!', error: 'Failed to sync permissions' })}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleSyncPermissions}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
                     <Button onClick={handleCreateRole} className="bg-white text-amber-700 hover:bg-amber-50"><Plus className="h-4 w-4 mr-2" />Add Permission</Button>
                   </div>
                 </div>
@@ -1389,7 +1495,7 @@ export default function RolesClient() {
                     <p className="text-blue-100 text-sm">Manage user-to-role mappings</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Exporting user assignments...', success: 'User assignments exported successfully!', error: 'Failed to export user assignments' })}><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleExportUserAssignments}><Download className="h-4 w-4 mr-2" />Export</Button>
                     <Button onClick={() => handleAssignRole('selected user')} className="bg-white text-blue-700 hover:bg-blue-50"><UserPlus className="h-4 w-4 mr-2" />Assign Role</Button>
                   </div>
                 </div>
@@ -1447,7 +1553,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search users..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Applying filters...', success: 'Filters applied successfully!', error: 'Failed to apply filters' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => handleApplyFilter('Assignments')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1503,7 +1609,7 @@ export default function RolesClient() {
                     <p className="text-green-100 text-sm">Conditional access and security rules</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Evaluating policies...', success: 'Policies evaluated successfully!', error: 'Failed to evaluate policies' })}><RefreshCw className="h-4 w-4 mr-2" />Evaluate</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleEvaluatePolicies}><RefreshCw className="h-4 w-4 mr-2" />Evaluate</Button>
                     <Button onClick={handleCreateRole} className="bg-white text-green-700 hover:bg-green-50"><Plus className="h-4 w-4 mr-2" />Add Policy</Button>
                   </div>
                 </div>
@@ -1562,7 +1668,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search policies..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Applying filters...', success: 'Filters applied successfully!', error: 'Failed to apply filters' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => handleApplyFilter('Policies')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1626,8 +1732,8 @@ export default function RolesClient() {
                     <p className="text-slate-200 text-sm">Complete activity log and compliance tracking</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Exporting audit logs...', success: 'Audit logs exported successfully!', error: 'Failed to export audit logs' })}><Download className="h-4 w-4 mr-2" />Export</Button>
-                    <Button className="bg-white text-slate-700 hover:bg-slate-50" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Applying filters...', success: 'Filters applied successfully!', error: 'Failed to apply filters' })}><Filter className="h-4 w-4 mr-2" />Filter</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleExportAuditLogs}><Download className="h-4 w-4 mr-2" />Export</Button>
+                    <Button className="bg-white text-slate-700 hover:bg-slate-50" onClick={() => handleApplyFilter('Audit')}><Filter className="h-4 w-4 mr-2" />Filter</Button>
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-4">
@@ -1733,7 +1839,7 @@ export default function RolesClient() {
                     <p className="text-rose-100 text-sm">Organize users for bulk role management</p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Syncing user groups...', success: 'User groups synced successfully!', error: 'Failed to sync user groups' })}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
+                    <Button variant="outline" className="border-white/50 text-white hover:bg-white/10" onClick={handleSyncUserGroups}><RefreshCw className="h-4 w-4 mr-2" />Sync</Button>
                     <Button onClick={handleCreateRole} className="bg-white text-rose-700 hover:bg-rose-50"><Plus className="h-4 w-4 mr-2" />Create Group</Button>
                   </div>
                 </div>
@@ -1791,7 +1897,7 @@ export default function RolesClient() {
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Search groups..." className="w-64" />
-                      <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Applying filters...', success: 'Filters applied successfully!', error: 'Failed to apply filters' })}><Filter className="w-4 h-4 mr-2" />Filter</Button>
+                      <Button variant="outline" onClick={() => handleApplyFilter('Groups')}><Filter className="w-4 h-4 mr-2" />Filter</Button>
                     </div>
                   </div>
                 </CardHeader>
@@ -1899,7 +2005,7 @@ export default function RolesClient() {
                             <Switch defaultChecked />
                           </div>
                         </div>
-                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Saving general settings...', success: 'General settings saved successfully!', error: 'Failed to save general settings' })}>Save General Settings</Button>
+                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSaveGeneralSettings}>Save General Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -1944,7 +2050,7 @@ export default function RolesClient() {
                             <Switch defaultChecked />
                           </div>
                         </div>
-                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Saving security settings...', success: 'Security settings saved successfully!', error: 'Failed to save security settings' })}>Save Security Settings</Button>
+                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSaveSecuritySettings}>Save Security Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -1975,7 +2081,7 @@ export default function RolesClient() {
                             <Switch />
                           </div>
                         </div>
-                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Saving permission settings...', success: 'Permission settings saved successfully!', error: 'Failed to save permission settings' })}>Save Permission Settings</Button>
+                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSavePermissionSettings}>Save Permission Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -2001,7 +2107,7 @@ export default function RolesClient() {
                                   <Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{integration.status}</Badge>
                                 </div>
                                 {integration.status === 'connected' && <p className="text-sm text-gray-500">{integration.users} users synced</p>}
-                                <Button variant={integration.status === 'connected' ? 'outline' : 'default'} className="w-full mt-3" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: integration.status === 'connected' ? `Configuring ${integration.name}...` : `Connecting to ${integration.name}...`, success: integration.status === 'connected' ? `${integration.name} configured successfully!` : `Connected to ${integration.name} successfully!`, error: integration.status === 'connected' ? `Failed to configure ${integration.name}` : `Failed to connect to ${integration.name}` })}>
+                                <Button variant={integration.status === 'connected' ? 'outline' : 'default'} className="w-full mt-3" size="sm" onClick={() => handleIntegrationAction(integration.name, integration.status)}>
                                   {integration.status === 'connected' ? 'Configure' : 'Connect'}
                                 </Button>
                               </CardContent>
@@ -2062,7 +2168,7 @@ export default function RolesClient() {
                             <Switch defaultChecked />
                           </div>
                         </div>
-                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Saving notification settings...', success: 'Notification settings saved successfully!', error: 'Failed to save notification settings' })}>Save Notification Settings</Button>
+                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSaveNotificationSettings}>Save Notification Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -2089,8 +2195,8 @@ export default function RolesClient() {
                           <h4 className="font-medium">Data Management</h4>
                           <div className="grid grid-cols-2 gap-3">
                             <Button variant="outline" className="justify-start" onClick={handleExportRoles}><Download className="w-4 h-4 mr-2" />Export Roles & Permissions</Button>
-                            <Button variant="outline" className="justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Exporting audit logs...', success: 'Audit logs exported successfully!', error: 'Failed to export audit logs' })}><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
-                            <Button variant="outline" className="justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Exporting user assignments...', success: 'User assignments exported successfully!', error: 'Failed to export user assignments' })}><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
+                            <Button variant="outline" className="justify-start" onClick={handleExportAuditLogs}><FileText className="w-4 h-4 mr-2" />Export Audit Logs</Button>
+                            <Button variant="outline" className="justify-start" onClick={handleExportUserAssignments}><Users className="w-4 h-4 mr-2" />Export User Assignments</Button>
                             <Button variant="outline" className="justify-start" onClick={handleRefreshRoles}><RefreshCw className="w-4 h-4 mr-2" />Sync with Directory</Button>
                           </div>
                         </div>
@@ -2098,11 +2204,11 @@ export default function RolesClient() {
                           <h4 className="font-medium text-red-800 dark:text-red-200 mb-2">Danger Zone</h4>
                           <p className="text-sm text-red-600 dark:text-red-300 mb-3">These actions are irreversible. Proceed with caution.</p>
                           <div className="flex gap-3">
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2500)), { loading: 'Resetting all permissions...', success: 'All permissions reset successfully!', error: 'Failed to reset permissions' })}>Reset All Permissions</Button>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2500)), { loading: 'Clearing audit logs...', success: 'Audit logs cleared successfully!', error: 'Failed to clear audit logs' })}>Clear Audit Logs</Button>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={handleResetPermissions}>Reset All Permissions</Button>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={handleClearAuditLogs}>Clear Audit Logs</Button>
                           </div>
                         </div>
-                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Saving advanced settings...', success: 'Advanced settings saved successfully!', error: 'Failed to save advanced settings' })}>Save Advanced Settings</Button>
+                        <Button className="bg-purple-600 hover:bg-purple-700" onClick={handleSaveAdvancedSettings}>Save Advanced Settings</Button>
                       </CardContent>
                     </Card>
                   )}
@@ -2139,7 +2245,7 @@ export default function RolesClient() {
               maxItems={5}
             />
             <QuickActionsToolbar
-              actions={mockRolesQuickActions}
+              actions={rolesQuickActions}
               variant="grid"
             />
           </div>

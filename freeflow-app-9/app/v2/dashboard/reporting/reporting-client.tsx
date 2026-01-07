@@ -128,10 +128,10 @@ const mockReportingActivities = [
 ]
 
 const mockReportingQuickActions = [
-  { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating dashboard...', success: 'Dashboard created successfully', error: 'Failed to create dashboard' }) },
-  { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating worksheet...', success: 'Worksheet created successfully', error: 'Failed to create worksheet' }) },
-  { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Scheduling report...', success: 'Report scheduled successfully', error: 'Failed to schedule report' }) },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Failed to export data' }) },
+  { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.success('Dashboard created successfully') },
+  { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W', action: () => toast.success('Worksheet created successfully') },
+  { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S', action: () => toast.success('Report scheduled successfully') },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => toast.success('Data exported successfully') },
 ]
 
 export default function ReportingClient() {

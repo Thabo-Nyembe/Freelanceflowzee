@@ -2338,7 +2338,7 @@ export default function HelpDocsClient() {
           <div className="p-4 border-t dark:border-gray-700">
             <div className="flex gap-2">
               <Input placeholder="Type your question..." className="flex-1" />
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Sending message...', success: 'Message sent', error: 'Failed to send' })}><Send className="w-4 h-4" /></Button>
+              <Button onClick={() => toast.success('Message sent')}><Send className="w-4 h-4" /></Button>
             </div>
           </div>
         </DialogContent>

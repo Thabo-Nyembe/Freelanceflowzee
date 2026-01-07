@@ -359,10 +359,10 @@ const mockAIDesignActivities = [
 ]
 
 const mockAIDesignQuickActions = [
-  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Initializing AI generation...', success: 'AI generator ready', error: 'Failed to initialize generator' }) },
-  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading gallery...', success: 'Gallery loaded successfully', error: 'Failed to load gallery' }) },
-  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Upscaling image with AI...', success: 'Image upscaled successfully', error: 'Failed to upscale image' }) },
-  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Loading style editor...', success: 'Style editor ready', error: 'Failed to load style editor' }) },
+  { id: '1', label: 'New Generation', icon: 'Wand2', shortcut: 'G', action: () => toast.success('AI Generator Ready', { description: 'Start creating your design' }) },
+  { id: '2', label: 'Browse Gallery', icon: 'Image', shortcut: 'B', action: () => toast.success('Gallery Loaded', { description: 'Browse your generated designs' }) },
+  { id: '3', label: 'Upscale Image', icon: 'ZoomIn', shortcut: 'U', action: () => toast.success('Upscale Ready', { description: 'Select an image to upscale' }) },
+  { id: '4', label: 'Edit Style', icon: 'Palette', shortcut: 'S', action: () => toast.success('Style Editor', { description: 'Customize your design style' }) },
 ]
 
 export default function AIDesignClient() {
@@ -2068,11 +2068,7 @@ export default function AIDesignClient() {
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                      loading: 'Upscaling image...',
-                      success: 'Image upscaled successfully',
-                      error: 'Failed to upscale image'
-                    })}>
+                    <Button variant="outline" className="flex-1" onClick={() => toast.success('Image Upscaled', { description: 'High-resolution version ready' })}>
                       <Maximize2 className="w-4 h-4 mr-2" />
                       Upscale
                     </Button>

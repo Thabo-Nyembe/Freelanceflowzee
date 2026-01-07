@@ -437,11 +437,16 @@ const mockPerfActivities = [
   { id: '3', type: 'milestone' as const, title: 'Core Web Vitals passed', description: 'Homepage now passes all CWV metrics', user: { name: 'DevOps Team', avatar: '/avatars/devops.jpg' }, timestamp: new Date(Date.now() - 86400000).toISOString(), metadata: {} },
 ]
 
-const mockPerfQuickActions = [
-  { id: '1', label: 'Run Audit', icon: 'Play', shortcut: '⌘R', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Running performance audit...', success: 'Audit completed successfully!', error: 'Audit failed' }) },
-  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening performance report...', success: 'Performance report loaded!', error: 'Failed to load performance report' }) },
-  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening test comparison tool...', success: 'Test comparison tool ready!', error: 'Failed to open comparison tool' }) },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: '⌘E', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting data...', success: 'Data exported successfully!', error: 'Export failed' }) },
+// Quick actions are defined inside component to access state/handlers
+const getQuickActions = (
+  setShowRunDialog: (v: boolean) => void,
+  setActiveTab: (v: string) => void,
+  handleExportReport: () => void
+) => [
+  { id: '1', label: 'Run Audit', icon: 'Play', shortcut: '⌘R', action: () => { setShowRunDialog(true); toast.success('Audit dialog opened'); } },
+  { id: '2', label: 'View Report', icon: 'FileText', shortcut: '⌘V', action: () => { setActiveTab('history'); toast.success('Viewing performance reports'); } },
+  { id: '3', label: 'Compare Tests', icon: 'GitBranch', shortcut: '⌘C', action: () => { setActiveTab('history'); toast.success('Compare tests in History tab'); } },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: '⌘E', action: () => handleExportReport() },
 ]
 
 export default function PerformanceClient() {
@@ -631,18 +636,15 @@ export default function PerformanceClient() {
   }
 
   // Copy URL
-  const handleCopyUrl = () => {
-    navigator.clipboard.writeText(testUrl)
-    setCopiedUrl(true)
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Copying URL...',
-        success: 'URL copied to clipboard!',
-        error: 'Failed to copy URL'
-      }
-    )
-    setTimeout(() => setCopiedUrl(false), 2000)
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(testUrl)
+      setCopiedUrl(true)
+      toast.success('URL copied to clipboard!')
+      setTimeout(() => setCopiedUrl(false), 2000)
+    } catch (err) {
+      toast.error('Failed to copy URL')
+    }
   }
 
   const currentTest = selectedTest || mockPageTests[0]
@@ -700,15 +702,28 @@ export default function PerformanceClient() {
         return
       }
 
-      // In production, this would create a scheduled job
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 800)),
-        {
-          loading: 'Scheduling test...',
-          success: 'Test scheduled successfully! You will receive notifications when tests complete',
-          error: 'Failed to schedule test'
-        }
-      )
+      // Create scheduled test record in Supabase
+      const { error } = await supabase
+        .from('performance_alerts')
+        .insert({
+          user_id: userId,
+          alert_type: 'scheduled_test',
+          metric_name: 'performance_audit',
+          threshold_value: 0,
+          current_value: 0,
+          severity: 'info',
+          message: `Scheduled audit for ${testUrl}`,
+          is_resolved: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) throw error
+
+      toast.success('Test scheduled successfully!', {
+        description: 'You will receive notifications when tests complete'
+      })
+      fetchPerformanceData()
     } catch (err: any) {
       toast.error(err.message || 'Failed to schedule test')
     }
@@ -721,14 +736,11 @@ export default function PerformanceClient() {
       return
     }
 
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Loading comparison view...',
-        success: 'Comparison view ready! Comparing latest test results',
-        error: 'Failed to open comparison view'
-      }
-    )
+    // Navigate to history tab which shows comparison data
+    setActiveTab('history')
+    toast.success('Comparison view ready!', {
+      description: 'Comparing latest test results in History tab'
+    })
   }
 
   // Add performance budget
@@ -2133,14 +2145,11 @@ export default function PerformanceClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Project</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete this project</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('blocked')), 1000)),
-                            {
-                              loading: 'Checking permissions...',
-                              success: 'Project deleted',
-                              error: 'Action blocked. Contact support to delete project.'
-                            }
-                          )}>Delete</Button>
+                          <Button variant="destructive" size="sm" onClick={() => {
+                            toast.error('Action blocked', {
+                              description: 'Contact support to delete project. This requires admin approval.'
+                            })
+                          }}>Delete</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2396,7 +2405,7 @@ export default function PerformanceClient() {
       </div>
 
       {/* Quick Actions Toolbar */}
-      <QuickActionsToolbar actions={mockPerfQuickActions} />
+      <QuickActionsToolbar actions={getQuickActions(setShowRunDialog, setActiveTab, handleExportReport)} />
     </div>
   )
 }

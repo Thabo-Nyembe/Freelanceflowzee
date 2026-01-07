@@ -476,18 +476,10 @@ export default function ProjectTemplatesPage() {
 
     if (isCurrentlyLiked) {
       announce(`Removed like from ${template.title}`, 'polite')
-      toast.promise(new Promise(r => setTimeout(r, 500)), {
-        loading: 'Removing like...',
-        success: 'Like removed',
-        error: 'Failed to remove like'
-      })
+      toast.success('Like Removed', { description: 'Template removed from favorites' })
     } else {
       announce(`Template ${template.title} liked`, 'polite')
-      toast.promise(new Promise(r => setTimeout(r, 500)), {
-        loading: 'Liking template...',
-        success: 'Template liked! Added to your favorites',
-        error: 'Failed to like template'
-      })
+      toast.success('Template Liked', { description: 'Added to your favorites' })
     }
   }, [announce, userId, likedTemplates])
 
@@ -513,11 +505,7 @@ export default function ProjectTemplatesPage() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.promise(new Promise(r => setTimeout(r, 700)), {
-      loading: 'Preparing template export...',
-      success: 'Template exported! JSON file downloaded to your device',
-      error: 'Failed to export template'
-    })
+    toast.success('Template Exported', { description: 'JSON file downloaded to your device' })
     announce('Template exported successfully', 'polite')
   }, [announce])
 

@@ -72,18 +72,29 @@ export default function SystemInsightsPage() {
     loadSystemMetrics()
   }, [userId, announce])
 
-  // Demo: Success Toast with Data
-  const showSuccessToast = () => {
+  // Demo: Success Toast with Data - Real API call
+  const showSuccessToast = async () => {
     logger.info('Success toast demonstrated', {
       type: 'demo',
       category: 'success-toast'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1200)), {
-      loading: 'Processing files...',
-      success: 'Operation Completed Successfully - 5 files processed, 2.3 MB, 1.2s',
-      error: 'Operation failed'
-    })
+    try {
+      const startTime = Date.now()
+      const res = await fetch('/api/system/health', { method: 'GET' })
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1)
+
+      if (!res.ok) throw new Error('Health check failed')
+
+      const data = await res.json()
+      toast.success('Operation Completed Successfully', {
+        description: `System healthy, ${Object.keys(data).length} checks passed, ${duration}s`
+      })
+    } catch (error) {
+      toast.error('Operation Failed', {
+        description: 'Could not complete health check'
+      })
+    }
   }
 
   // Demo: Error Toast with Error ID
@@ -102,8 +113,8 @@ export default function SystemInsightsPage() {
     })
   }
 
-  // Demo: Copy Toast with Character Count
-  const showCopyToast = () => {
+  // Demo: Copy Toast with Character Count - Real clipboard operation
+  const showCopyToast = async () => {
     const content = 'const greeting = "Hello, World!";'
 
     logger.info('Copy toast demonstrated', {
@@ -112,59 +123,116 @@ export default function SystemInsightsPage() {
       category: 'copy-toast'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Copying to clipboard...',
-      success: `Code Copied - ${content.length} characters copied to clipboard`,
-      error: 'Failed to copy to clipboard'
-    })
+    try {
+      await navigator.clipboard.writeText(content)
+      toast.success('Code Copied', {
+        description: `${content.length} characters copied to clipboard`
+      })
+    } catch (error) {
+      toast.error('Failed to copy', {
+        description: 'Could not access clipboard'
+      })
+    }
   }
 
-  // Demo: File Operation Toast
+  // Demo: File Operation Toast - Real file download
   const showFileToast = () => {
+    const fileName = 'project-data.json'
+    const projectData = {
+      name: 'FreeFlow System Insights Demo',
+      version: '1.0.0',
+      timestamp: new Date().toISOString(),
+      metrics: {
+        activeLoggers: 52,
+        toastNotifications: 1247,
+        eventsLogged: 8392
+      }
+    }
+
     logger.info('File toast demonstrated', {
       type: 'demo',
-      fileName: 'project-data.json',
-      fileSize: '1.2 MB',
+      fileName,
+      fileSize: '1.2 KB',
       category: 'file-toast'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Downloading project-data.json...',
-      success: 'File Downloaded - project-data.json, 1.2 MB',
-      error: 'Download failed'
-    })
+    try {
+      const jsonStr = JSON.stringify(projectData, null, 2)
+      const blob = new Blob([jsonStr], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('File Downloaded', {
+        description: `${fileName}, ${(blob.size / 1024).toFixed(1)} KB`
+      })
+    } catch (error) {
+      toast.error('Download Failed', {
+        description: 'Could not generate download file'
+      })
+    }
   }
 
-  // Demo: Progress Toast
-  const showProgressToast = () => {
+  // Demo: Progress Toast - Real API call with loading state
+  const showProgressToast = async () => {
     setLoading(true)
+    const startTime = Date.now()
 
-    const promise = new Promise((resolve) => {
-      setTimeout(resolve, 3000)
+    logger.info('Progress toast demonstrated', {
+      type: 'demo',
+      category: 'progress-toast'
     })
 
-    toast.promise(promise, {
-      loading: 'Processing video... 0%',
-      success: 'Video processed successfully • 5 scenes detected • 2.3s',
-      error: 'Video processing failed',
-    })
+    try {
+      // Simulate video analysis with real API call
+      const res = await fetch('/api/analytics/summary', { method: 'GET' })
+      const duration = ((Date.now() - startTime) / 1000).toFixed(1)
 
-    promise.finally(() => setLoading(false))
+      if (!res.ok) throw new Error('Processing failed')
+
+      const data = await res.json()
+      toast.success('Processing Complete', {
+        description: `Analysis complete, ${Object.keys(data).length} metrics retrieved, ${duration}s`
+      })
+    } catch (error) {
+      toast.error('Processing Failed', {
+        description: 'Could not complete analysis'
+      })
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // Demo: Action Toast with Undo
+  // Demo: Action Toast with Undo - Real state change with undo
+  const [deletedItems, setDeletedItems] = useState<string[]>([])
+
   const showActionToast = () => {
+    const itemsToDelete = ['item-1', 'item-2', 'item-3']
+
     logger.info('Action toast demonstrated', {
       type: 'demo',
       action: 'delete',
-      itemCount: 3,
+      itemCount: itemsToDelete.length,
       category: 'action-toast'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Deleting 3 items...',
-      success: '3 Items Deleted - Files moved to trash',
-      error: 'Failed to delete items'
+    // Actually update state
+    setDeletedItems(prev => [...prev, ...itemsToDelete])
+
+    toast.success(`${itemsToDelete.length} Items Deleted`, {
+      description: 'Files moved to trash',
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          setDeletedItems(prev => prev.filter(id => !itemsToDelete.includes(id)))
+          toast.success('Restored', { description: `${itemsToDelete.length} items restored` })
+        }
+      }
     })
   }
 
@@ -178,11 +246,7 @@ export default function SystemInsightsPage() {
       category: 'metric-toast'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Fetching API metrics...',
-      success: 'API Performance - Response time: 145ms (32% faster)',
-      error: 'Failed to fetch metrics'
-    })
+    toast.success('API Performance - Response time: 145ms (32% faster)')
   }
 
   // Demo: Data Operation Toast
@@ -194,11 +258,7 @@ export default function SystemInsightsPage() {
       category: 'data-toast'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 2000)), {
-      loading: 'Synchronizing data...',
-      success: 'Data Synchronized - 247 records updated',
-      error: 'Synchronization failed'
-    })
+    toast.success('Data Synchronized - 247 records updated')
   }
 
   // Demo: Multiple Toast Types
@@ -209,31 +269,11 @@ export default function SystemInsightsPage() {
       category: 'multiple-toasts'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Uploading file...',
-      success: 'Task 1 Complete - File uploaded',
-      error: 'Upload failed'
-    })
-    setTimeout(() => toast.promise(new Promise(r => setTimeout(r, 700)), {
-      loading: 'Processing data...',
-      success: 'Task 2 Complete - Data processed',
-      error: 'Processing failed'
-    }), 500)
-    setTimeout(() => toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Generating report...',
-      success: 'Task 3 Complete - Report generated',
-      error: 'Report generation failed'
-    }), 1000)
-    setTimeout(() => toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Sending email...',
-      success: 'Task 4 Complete - Email sent',
-      error: 'Email sending failed'
-    }), 1500)
-    setTimeout(() => toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Finalizing...',
-      success: 'All Tasks Complete - 4/4 completed successfully',
-      error: 'Finalization failed'
-    }), 2000)
+    toast.success('Task 1 Complete - File uploaded')
+    setTimeout(() => toast.success('Task 2 Complete - Data processed'), 500)
+    setTimeout(() => toast.success('Task 3 Complete - Report generated'), 1000)
+    setTimeout(() => toast.success('Task 4 Complete - Email sent'), 1500)
+    setTimeout(() => toast.success('All Tasks Complete - 4/4 completed successfully'), 2000)
   }
 
   const demoCategories = [

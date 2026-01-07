@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { copyToClipboard, downloadAsJson, shareContent, apiPost } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -559,11 +560,7 @@ const mockAICreateActivities = [
   { id: '3', user: 'System', action: 'Saved', target: 'creation to gallery', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockAICreateQuickActions = [
-  { id: '1', label: 'New Creation', icon: 'sparkles', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Initializing AI generator...', success: 'AI generator ready', error: 'Failed to initialize' }), variant: 'default' as const },
-  { id: '2', label: 'Use Template', icon: 'copy', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading templates...', success: 'AI creation templates ready', error: 'Failed to load templates' }), variant: 'default' as const },
-  { id: '3', label: 'View Gallery', icon: 'image', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading gallery...', success: 'AI creations gallery opened', error: 'Failed to load gallery' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state setters
 
 // ============================================================================
 // MAIN COMPONENT
@@ -618,40 +615,144 @@ export default function AICreateClient() {
     { value: '21:9', label: 'Ultrawide' }
   ]
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!prompt.trim()) return
     setIsGenerating(true)
-    toast.info('Generating...', {
-      description: 'AI is creating your content'
+
+    const result = await apiPost('/api/ai/generate', {
+      prompt,
+      negativePrompt,
+      style: selectedStyle,
+      aspectRatio: selectedRatio,
+      quality,
+      modelId: selectedModel,
+      guidance: guidance[0],
+      steps: steps[0]
+    }, {
+      loading: 'Generating your AI creation...',
+      success: 'AI creation generated successfully!',
+      error: 'Failed to generate. Please try again.'
     })
-    // Simulate generation
-    setTimeout(() => setIsGenerating(false), 2000)
+
+    setIsGenerating(false)
+
+    if (result.success) {
+      // Optionally clear the prompt or refresh gallery
+      setActiveTab('gallery')
+    }
   }
 
-  // Handlers
-  const handleSaveCreation = () => {
-    toast.success('Creation saved', {
-      description: 'Your AI creation has been saved to gallery'
+  // Handlers with real functionality
+  const handleSaveCreation = async (generation?: Generation) => {
+    if (!generation && !selectedGeneration) {
+      toast.error('No creation selected')
+      return
+    }
+    const gen = generation || selectedGeneration
+    await apiPost('/api/ai/creations/save', {
+      generationId: gen?.id,
+      prompt: gen?.prompt,
+      style: gen?.style
+    }, {
+      loading: 'Saving creation...',
+      success: 'Creation saved to gallery!',
+      error: 'Failed to save creation'
     })
   }
 
-  const handleDownloadCreation = () => {
-    toast.success('Downloading', {
-      description: 'Your creation will be downloaded shortly'
+  const handleDownloadCreation = (generation?: Generation) => {
+    const gen = generation || selectedGeneration
+    if (!gen) {
+      toast.error('No creation selected')
+      return
+    }
+    // Create download data
+    const downloadData = {
+      id: gen.id,
+      prompt: gen.prompt,
+      negativePrompt: gen.negativePrompt,
+      style: gen.style,
+      aspectRatio: gen.aspectRatio,
+      quality: gen.quality,
+      model: gen.model,
+      seed: gen.seed,
+      steps: gen.steps,
+      guidance: gen.guidance,
+      createdAt: gen.createdAt
+    }
+    downloadAsJson(downloadData, `ai-creation-${gen.id}`)
+  }
+
+  const handleShareCreation = async (generation?: Generation) => {
+    const gen = generation || selectedGeneration
+    if (!gen) {
+      toast.error('No creation selected')
+      return
+    }
+    await shareContent({
+      title: `AI Creation: ${gen.style}`,
+      text: gen.prompt,
+      url: `${window.location.origin}/ai-create/view/${gen.id}`
     })
   }
 
-  const handleShareCreation = () => {
-    toast.success('Link copied', {
-      description: 'Share link copied to clipboard'
-    })
+  const handleCopyPrompt = async (generation?: Generation) => {
+    const gen = generation || selectedGeneration
+    if (!gen) {
+      toast.error('No creation selected')
+      return
+    }
+    await copyToClipboard(gen.prompt, 'Prompt copied to clipboard!')
   }
 
-  const handleRegenerateCreation = () => {
-    toast.info('Regenerating', {
-      description: 'Creating a new variation...'
-    })
+  const handleRegenerateCreation = async (generation?: Generation) => {
+    const gen = generation || selectedGeneration
+    if (!gen) {
+      toast.error('No creation selected')
+      return
+    }
+    setPrompt(gen.prompt)
+    setNegativePrompt(gen.negativePrompt || '')
+    setSelectedStyle(gen.style)
+    setActiveTab('generator')
+    toast.success('Prompt loaded! Click Generate to create a new variation.')
   }
+
+  // Quick actions for the toolbar
+  const aiCreateQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Creation',
+      icon: 'sparkles',
+      action: () => {
+        setActiveTab('generator')
+        setPrompt('')
+        setNegativePrompt('')
+        toast.success('Ready for new creation')
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Use Template',
+      icon: 'copy',
+      action: () => {
+        setActiveTab('templates')
+        toast.success('Browse templates to get started')
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'View Gallery',
+      icon: 'image',
+      action: () => {
+        setActiveTab('gallery')
+        toast.success('Gallery opened')
+      },
+      variant: 'outline' as const
+    },
+  ], [setActiveTab, setPrompt, setNegativePrompt])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -1308,15 +1409,45 @@ export default function AICreateClient() {
                       <div className="flex items-center gap-2">
                         {gen.status === 'completed' && (
                           <>
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleRegenerateCreation(gen)
+                              }}
+                              title="Regenerate"
+                            >
                               <RefreshCw className="w-4 h-4" />
                             </Button>
-                            <Button variant="ghost" size="sm">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDownloadCreation(gen)
+                              }}
+                              title="Download"
+                            >
                               <Download className="w-4 h-4" />
                             </Button>
                           </>
                         )}
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (confirm('Are you sure you want to delete this generation?')) {
+                              apiPost('/api/ai/creations/delete', { id: gen.id }, {
+                                loading: 'Deleting...',
+                                success: 'Generation deleted',
+                                error: 'Failed to delete'
+                              })
+                            }
+                          }}
+                          title="Delete"
+                        >
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1972,7 +2103,7 @@ export default function AICreateClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAICreateQuickActions}
+            actions={aiCreateQuickActions}
             variant="grid"
           />
         </div>
@@ -2068,29 +2199,63 @@ export default function AICreateClient() {
                   </div>
 
                   <div className="flex items-center gap-2 pt-4 border-t">
-                    <Button className="bg-gradient-to-r from-violet-500 to-purple-600 text-white">
+                    <Button
+                      className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                      onClick={() => handleRegenerateCreation(selectedGeneration)}
+                    >
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Regenerate
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        if (selectedGeneration) {
+                          setPrompt(selectedGeneration.prompt)
+                          setNegativePrompt(selectedGeneration.negativePrompt || '')
+                          setSelectedStyle(selectedGeneration.style)
+                          setActiveTab('generator')
+                          setSelectedGeneration(null)
+                          toast.success('Create a variation by adjusting and generating')
+                        }
+                      }}
+                    >
                       <Layers className="w-4 h-4 mr-2" />
                       Create Variation
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleDownloadCreation(selectedGeneration)}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Download
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleShareCreation(selectedGeneration)}
+                    >
                       <Share2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => handleCopyPrompt(selectedGeneration)}
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copy Prompt
+                    </Button>
                     {selectedGeneration.isFavorite ? (
-                      <Button variant="outline">
+                      <Button
+                        variant="outline"
+                        onClick={() => apiPost('/api/ai/creations/favorite', { id: selectedGeneration.id, favorite: false }, { loading: 'Removing favorite...', success: 'Removed from favorites', error: 'Failed to update' })}
+                      >
                         <Heart className="w-4 h-4 mr-2 fill-red-500 text-red-500" />
                         Favorited
                       </Button>
                     ) : (
-                      <Button variant="outline">
+                      <Button
+                        variant="outline"
+                        onClick={() => apiPost('/api/ai/creations/favorite', { id: selectedGeneration.id, favorite: true }, { loading: 'Adding to favorites...', success: 'Added to favorites!', error: 'Failed to update' })}
+                      >
                         <Heart className="w-4 h-4 mr-2" />
                         Favorite
                       </Button>

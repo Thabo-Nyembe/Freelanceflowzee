@@ -192,16 +192,8 @@ const mockActivities = [
     timestamp: new Date(Date.now() - 300000),
     isRead: false,
     actions: [
-      { label: 'View', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Opening document...',
-        success: 'Document opened',
-        error: 'Failed to open document'
-      }) },
-      { label: 'Reply', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Opening reply editor...',
-        success: 'Reply editor ready',
-        error: 'Failed to open reply editor'
-      }) },
+      { label: 'View', action: () => toast.success('Document opened', { description: 'Operation completed successfully' }) },
+      { label: 'Reply', action: () => toast.success('Reply editor ready', { description: 'Operation completed successfully' }) },
     ],
   },
   {
@@ -354,36 +346,12 @@ const mockAchievements = [
 ]
 
 const mockQuickActions = [
-  { id: '1', label: 'New Task', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new task...',
-    success: 'Task created successfully',
-    error: 'Failed to create task'
-  }), category: 'Create' },
-  { id: '2', label: 'Search', icon: <Search className="h-5 w-5" />, shortcut: '⌘K', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Opening search...',
-    success: 'Search ready',
-    error: 'Failed to open search'
-  }), category: 'Navigate' },
-  { id: '3', label: 'AI Assistant', icon: <Brain className="h-5 w-5" />, shortcut: '⌘J', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Launching AI Assistant...',
-    success: 'AI Assistant ready',
-    error: 'Failed to launch AI Assistant'
-  }), category: 'AI' },
-  { id: '4', label: 'New Project', icon: <FileText className="h-5 w-5" />, shortcut: '⌘P', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new project...',
-    success: 'Project created successfully',
-    error: 'Failed to create project'
-  }), category: 'Create' },
-  { id: '5', label: 'Edit', icon: <Edit className="h-5 w-5" />, shortcut: '⌘E', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Opening editor...',
-    success: 'Editor ready',
-    error: 'Failed to open editor'
-  }), category: 'Actions' },
-  { id: '6', label: 'Star', icon: <Star className="h-5 w-5" />, shortcut: '⌘S', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Adding to favorites...',
-    success: 'Added to favorites',
-    error: 'Failed to add to favorites'
-  }), category: 'Actions' },
+  { id: '1', label: 'New Task', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => toast.success('Task created successfully', { description: 'Operation completed successfully' }), category: 'Create' },
+  { id: '2', label: 'Search', icon: <Search className="h-5 w-5" />, shortcut: '⌘K', action: () => toast.success('Search ready', { description: 'Operation completed successfully' }), category: 'Navigate' },
+  { id: '3', label: 'AI Assistant', icon: <Brain className="h-5 w-5" />, shortcut: '⌘J', action: () => toast.success('AI Assistant ready', { description: 'Operation completed successfully' }), category: 'AI' },
+  { id: '4', label: 'New Project', icon: <FileText className="h-5 w-5" />, shortcut: '⌘P', action: () => toast.success('Project created successfully', { description: 'Operation completed successfully' }), category: 'Create' },
+  { id: '5', label: 'Edit', icon: <Edit className="h-5 w-5" />, shortcut: '⌘E', action: () => toast.success('Editor ready', { description: 'Operation completed successfully' }), category: 'Actions' },
+  { id: '6', label: 'Star', icon: <Star className="h-5 w-5" />, shortcut: '⌘S', action: () => toast.success('Added to favorites', { description: 'Operation completed successfully' }), category: 'Actions' },
 ]
 
 // ============================================================================

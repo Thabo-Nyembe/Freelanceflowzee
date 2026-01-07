@@ -433,26 +433,10 @@ const mockCustomersActivities = [
 ]
 
 const mockCustomersQuickActions = [
-  { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Opening contact form...',
-    success: 'Contact form ready',
-    error: 'Failed to open contact form'
-  }) },
-  { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Logging activity...',
-    success: 'Activity logged successfully',
-    error: 'Failed to log activity'
-  }) },
-  { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Preparing email...',
-    success: 'Email composer opened',
-    error: 'Failed to open email composer'
-  }) },
-  { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Opening scheduler...',
-    success: 'Call scheduler ready',
-    error: 'Failed to open scheduler'
-  }) },
+  { id: '1', label: 'Add Contact', icon: 'UserPlus', shortcut: 'N', action: () => toast.success('Contact form opened') },
+  { id: '2', label: 'Log Activity', icon: 'Activity', shortcut: 'L', action: () => toast.success('Activity logged successfully') },
+  { id: '3', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => toast.success('Email composer opened') },
+  { id: '4', label: 'Schedule Call', icon: 'Phone', shortcut: 'C', action: () => toast.success('Call scheduler opened') },
 ]
 
 // ============================================================================
@@ -915,10 +899,10 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                             <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); handleOpenEditDialog(customer) }}>
                               <Edit className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: `Opening email composer for ${customer.email}...`, success: `Email composer ready for ${customer.email}`, error: 'Failed to open email composer' }) }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); window.location.href = `mailto:${customer.email}`; toast.success(`Opening email for ${customer.email}`) }}>
                               <Mail className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Opening call log form...', success: 'Call log form ready', error: 'Failed to open call log form' }) }}>
+                            <Button size="sm" variant="ghost" onClick={(e) => { e.stopPropagation(); toast.success('Call log form opened') }}>
                               <PhoneCall className="h-4 w-4" />
                             </Button>
                             <Button size="sm" variant="ghost" className="text-red-500 hover:text-red-700" onClick={(e) => { e.stopPropagation(); handleDeleteClick(customer.id) }}>
@@ -968,9 +952,9 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                       </div>
                       <div className="flex flex-col items-end gap-2">
                         <div className="flex items-center gap-2">
-                          <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening email...', success: 'Email client opened', error: 'Failed to open email' })}><Mail className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Initiating call...', success: 'Call initiated', error: 'Failed to initiate call' })}><PhoneCall className="h-4 w-4" /></Button>
-                          <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening calendar...', success: 'Calendar opened', error: 'Failed to open calendar' })}><Calendar className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => { window.location.href = `mailto:${contact.email}`; toast.success(`Opening email for ${contact.email}`) }}><Mail className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => { window.location.href = `tel:${contact.phone}`; toast.success(`Initiating call to ${contact.phone}`) }}><PhoneCall className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => toast.success('Calendar opened for scheduling')}><Calendar className="h-4 w-4" /></Button>
                         </div>
                         <span className="text-xs text-gray-500">Last activity: {formatTimeAgo(contact.lastActivityDate)}</span>
                       </div>
@@ -1185,7 +1169,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                           <span>Owner: {task.ownerName}</span>
                         </div>
                       </div>
-                      <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Task options opened', error: 'Failed to load' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => toast.success('Task options menu opened')}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1569,7 +1553,7 @@ export default function CustomersClient({ initialCustomers }: { initialCustomers
                               <Input type="number" defaultValue={stage.probability} min={0} max={100} className="text-center" />
                             </div>
                             <span className="text-sm text-gray-500">% Probability</span>
-                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Stage options opened', error: 'Failed to load' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => toast.success('Stage options menu opened')}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full">

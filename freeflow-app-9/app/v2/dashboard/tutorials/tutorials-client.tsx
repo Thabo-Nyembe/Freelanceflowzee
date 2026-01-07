@@ -520,7 +520,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
     toast.info('My List', { description: 'Opening your saved courses...' })
   }
   const handleQuickAction = (actionLabel: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Performing ${actionLabel.toLowerCase()}...`, success: `${actionLabel} completed`, error: `Failed to complete ${actionLabel}` })
+    toast.success(actionLabel, { description: 'Action completed successfully' })
   }
   const handleMarkAllRead = () => {
     toast.success('Notifications', { description: 'All notifications marked as read' })
@@ -1056,7 +1056,7 @@ export default function TutorialsClient({ initialTutorials, initialStats }: Tuto
                         <p className="text-sm text-gray-500">{notification.message}</p>
                         <p className="text-xs text-gray-400 mt-1">{notification.createdAt}</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Notification options ready', error: 'Failed to load options' })}><MoreHorizontal className="w-4 h-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => toast.success('Options', { description: 'Notification options ready' })}><MoreHorizontal className="w-4 h-4" /></Button>
                     </div>
                   ))}
                 </div>

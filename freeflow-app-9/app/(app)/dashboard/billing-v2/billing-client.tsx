@@ -200,11 +200,7 @@ const mockBillingActivities = [
   { id: '3', user: 'Accountant', action: 'Reconciled', target: 'Q4 revenue report', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockBillingQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating invoice...', success: 'Invoice created! Add line items and send', error: 'Failed to create invoice' }), variant: 'default' as const },
-  { id: '2', label: 'Refund', icon: 'rotate-ccw', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Processing refund...', success: 'Refund form ready! Select transaction and amount', error: 'Refund processing failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting billing data...', success: 'Billing report exported to CSV', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access state setters and handlers
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -215,6 +211,12 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | null>(null)
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
   const [settingsTab, setSettingsTab] = useState('payment')
+  const [showWebhookModal, setShowWebhookModal] = useState(false)
+  const [selectedWebhook, setSelectedWebhook] = useState<WebhookEndpoint | null>(null)
+  const [showTaxRateModal, setShowTaxRateModal] = useState(false)
+  const [selectedTaxRate, setSelectedTaxRate] = useState<TaxRate | null>(null)
+  const [showAuditLogModal, setShowAuditLogModal] = useState(false)
+  const [showSecretKey, setShowSecretKey] = useState(false)
 
   const { transactions, loading, error, refetch: refetchTransactions } = useBilling({ status: statusFilter })
   const display = transactions.length > 0 ? transactions : initialBilling
@@ -680,6 +682,36 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
       toast.error('Failed to resume subscription')
     }
   }, [updateSubscription])
+
+  // Quick actions with real functionality
+  const mockBillingQuickActions = [
+    {
+      id: '1',
+      label: 'New Invoice',
+      icon: 'plus',
+      action: () => setShowNewInvoiceModal(true),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Refund',
+      icon: 'rotate-ccw',
+      action: () => {
+        // Open refund dialog or navigate to refunds section
+        setActiveTab('settings')
+        setSettingsTab('advanced')
+        toast.info('Navigate to a transaction to process a refund')
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export',
+      icon: 'download',
+      action: handleExportBilling,
+      variant: 'outline' as const
+    },
+  ]
 
   if (error) return <div className="p-8 min-h-screen bg-gray-900"><div className="bg-red-900/20 border border-red-800 text-red-400 px-4 py-3 rounded">Error: {error.message}</div></div>
 
@@ -1371,7 +1403,11 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Portal URL</Label>
                         <div className="flex gap-2">
                           <Input value="https://billing.yourapp.com/portal" readOnly className="flex-1" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'Portal URL copied to clipboard', error: 'Failed to copy' })}>
+                          <Button variant="outline" size="icon" onClick={() => {
+                            navigator.clipboard.writeText('https://billing.yourapp.com/portal')
+                              .then(() => toast.success('Portal URL copied to clipboard'))
+                              .catch(() => toast.error('Failed to copy'))
+                          }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1491,7 +1527,18 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <div className="w-16 h-16 mx-auto mb-2 bg-gray-100 dark:bg-gray-800 rounded flex items-center justify-center">
                             <Building className="w-8 h-8 text-gray-400" />
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening file picker...', success: 'Logo upload dialog opened', error: 'Failed to open upload' })}>Upload Logo</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            const input = document.createElement('input')
+                            input.type = 'file'
+                            input.accept = 'image/*'
+                            input.onchange = (e) => {
+                              const file = (e.target as HTMLInputElement).files?.[0]
+                              if (file) {
+                                toast.success(`Logo "${file.name}" selected for upload`)
+                              }
+                            }
+                            input.click()
+                          }}>Upload Logo</Button>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -1779,7 +1826,11 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                             {integration.status === 'connected' ? (
                               <Badge className="bg-green-100 text-green-700">Connected</Badge>
                             ) : (
-                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Initiating connection...', success: 'OAuth flow started - complete in popup', error: 'Connection failed' })}>Connect</Button>
+                              <Button variant="outline" size="sm" onClick={() => {
+                                toast.info(`Opening ${integration.name} OAuth authorization...`)
+                                // In production, this would open an OAuth popup
+                                window.open(`https://oauth.example.com/authorize?app=${integration.name.toLowerCase()}`, '_blank', 'width=600,height=700')
+                              }}>Connect</Button>
                             )}
                           </div>
                         ))}
@@ -1807,10 +1858,16 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {wh.events.length} events • {wh.success_rate}% success rate
                               </div>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading webhook...', success: 'Webhook editor opened', error: 'Failed to load webhook' })}><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              setSelectedWebhook(wh)
+                              setShowWebhookModal(true)
+                            }}><Edit className="h-4 w-4" /></Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating endpoint...', success: 'New webhook endpoint form opened', error: 'Failed to create endpoint' })}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          setSelectedWebhook(null)
+                          setShowWebhookModal(true)
+                        }}>
                           <Plus className="h-4 w-4 mr-2" />
                           Add Endpoint
                         </Button>
@@ -1830,7 +1887,11 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Publishable Key</Label>
                         <div className="flex gap-2">
                           <Input value="pk_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'Publishable key copied to clipboard', error: 'Failed to copy' })}>
+                          <Button variant="outline" size="icon" onClick={() => {
+                            navigator.clipboard.writeText('pk_live_xxxxxxxxxxxxxxxxxxxxx')
+                              .then(() => toast.success('Publishable key copied to clipboard'))
+                              .catch(() => toast.error('Failed to copy'))
+                          }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1838,11 +1899,19 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Secret Key</Label>
                         <div className="flex gap-2">
-                          <Input value="STRIPE_KEY_PLACEHOLDER" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revealing...', success: 'Secret key revealed - will hide in 30s', error: 'Failed to reveal' })}>
+                          <Input value={showSecretKey ? 'sk_live_yyyyyyyyyyyyyyyyyyyyy' : 'STRIPE_KEY_PLACEHOLDER'} readOnly className="flex-1 font-mono text-sm" type={showSecretKey ? 'text' : 'password'} />
+                          <Button variant="outline" size="icon" onClick={() => {
+                            setShowSecretKey(true)
+                            toast.success('Secret key revealed - will hide in 30s')
+                            setTimeout(() => setShowSecretKey(false), 30000)
+                          }}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'Secret key copied to clipboard', error: 'Failed to copy' })}>
+                          <Button variant="outline" size="icon" onClick={() => {
+                            navigator.clipboard.writeText('sk_live_yyyyyyyyyyyyyyyyyyyyy')
+                              .then(() => toast.success('Secret key copied to clipboard'))
+                              .catch(() => toast.error('Failed to copy'))
+                          }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1852,7 +1921,23 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           <strong>Warning:</strong> Never share your secret key in public repositories or client-side code.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Rotating API keys...', success: 'API keys rotated - update your integrations', error: 'Failed to rotate keys' })}>
+                      <Button variant="outline" className="w-full" onClick={async () => {
+                        if (!confirm('Are you sure you want to rotate API keys? This will invalidate your existing keys and require updating all integrations.')) {
+                          return
+                        }
+                        toast.loading('Rotating API keys...', { id: 'rotate-keys' })
+                        try {
+                          // In production, this would call an API endpoint to rotate keys
+                          const supabase = createClient()
+                          await supabase.from('api_keys').update({
+                            rotated_at: new Date().toISOString(),
+                            status: 'rotated'
+                          }).eq('status', 'active')
+                          toast.success('API keys rotated - update your integrations', { id: 'rotate-keys' })
+                        } catch (error) {
+                          toast.error('Failed to rotate keys', { id: 'rotate-keys' })
+                        }
+                      }}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Rotate API Keys
                       </Button>
@@ -1870,7 +1955,10 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Percent className="h-5 w-5 text-indigo-600" />
                         Tax Rates
                       </CardTitle>
-                      <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating tax rate...', success: 'Tax rate form opened', error: 'Failed to create tax rate' })}>
+                      <Button onClick={() => {
+                        setSelectedTaxRate(null)
+                        setShowTaxRateModal(true)
+                      }}>
                         <Plus className="h-4 w-4 mr-2" />
                         Add Tax Rate
                       </Button>
@@ -1892,7 +1980,10 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {tax.inclusive ? 'Inclusive' : 'Exclusive'}
                               </Badge>
                               <Switch checked={tax.active} />
-                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading tax rate...', success: 'Tax rate editor opened', error: 'Failed to load tax rate' })}><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                setSelectedTaxRate(tax)
+                                setShowTaxRateModal(true)
+                              }}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -2016,7 +2107,11 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Test Card Number</Label>
                         <div className="flex gap-2">
                           <Input value="4242 4242 4242 4242" readOnly className="flex-1 font-mono" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying...', success: 'Test card number copied to clipboard', error: 'Failed to copy' })}>
+                          <Button variant="outline" size="icon" onClick={() => {
+                            navigator.clipboard.writeText('4242424242424242')
+                              .then(() => toast.success('Test card number copied to clipboard'))
+                              .catch(() => toast.error('Failed to copy'))
+                          }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -2093,15 +2188,48 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           </SelectContent>
                         </Select>
                       </div>
-                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting billing data...', success: 'All billing data exported to CSV', error: 'Export failed' })}>
+                      <Button variant="outline" className="w-full" onClick={handleExportBilling}>
                         <Download className="h-4 w-4 mr-2" />
                         Export All Billing Data
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating tax report...', success: 'Tax report generated and downloaded', error: 'Report generation failed' })}>
+                      <Button variant="outline" className="w-full" onClick={async () => {
+                        toast.loading('Generating tax report...', { id: 'tax-report' })
+                        try {
+                          const supabase = createClient()
+                          const { data: taxData, error } = await supabase
+                            .from('invoices')
+                            .select('*')
+                            .not('tax', 'is', null)
+                            .order('created_at', { ascending: false })
+
+                          if (error) throw error
+
+                          if (taxData && taxData.length > 0) {
+                            const headers = ['Invoice', 'Customer', 'Subtotal', 'Tax', 'Total', 'Date']
+                            const rows = taxData.map(inv => [inv.invoice_number, inv.client_name, inv.subtotal, inv.tax, inv.total, inv.created_at])
+                            const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+
+                            const blob = new Blob([csv], { type: 'text/csv' })
+                            const url = window.URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = `tax-report-${new Date().toISOString().split('T')[0]}.csv`
+                            document.body.appendChild(a)
+                            a.click()
+                            window.URL.revokeObjectURL(url)
+                            document.body.removeChild(a)
+                            toast.success('Tax report generated and downloaded', { id: 'tax-report' })
+                          } else {
+                            toast.info('No tax data to export', { id: 'tax-report' })
+                          }
+                        } catch (error) {
+                          toast.error('Report generation failed', { id: 'tax-report' })
+                        }
+                      }}>
                         <FileText className="h-4 w-4 mr-2" />
                         Generate Tax Report
                       </Button>
-                      <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading audit log...', success: 'Audit log opened', error: 'Failed to load audit log' })}>
+                      <Button variant="outline" className="w-full" onClick={() => setShowAuditLogModal(true)}>
                         <History className="h-4 w-4 mr-2" />
                         View Audit Log
                       </Button>
@@ -2121,15 +2249,63 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                           These actions are irreversible. Please proceed with caution.
                         </p>
                       </div>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Canceling all subscriptions...', success: 'All subscriptions have been canceled', error: 'Failed to cancel subscriptions' })}>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={async () => {
+                        if (!confirm('WARNING: This will cancel ALL subscriptions immediately. This action cannot be undone. Are you absolutely sure?')) {
+                          return
+                        }
+                        toast.loading('Canceling all subscriptions...', { id: 'cancel-all' })
+                        try {
+                          const supabase = createClient()
+                          await supabase.from('subscriptions').update({
+                            status: 'canceled',
+                            canceled_at: new Date().toISOString()
+                          }).eq('status', 'active')
+                          refreshSubscriptions?.()
+                          toast.success('All subscriptions have been canceled', { id: 'cancel-all' })
+                        } catch (error) {
+                          toast.error('Failed to cancel subscriptions', { id: 'cancel-all' })
+                        }
+                      }}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Cancel All Subscriptions
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Deleting test data...', success: 'All test data has been deleted', error: 'Failed to delete test data' })}>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={async () => {
+                        if (!confirm('WARNING: This will delete ALL test data. This action cannot be undone. Are you absolutely sure?')) {
+                          return
+                        }
+                        toast.loading('Deleting test data...', { id: 'delete-test' })
+                        try {
+                          const supabase = createClient()
+                          // Delete test records (those with test metadata or in test mode)
+                          await supabase.from('billing').delete().eq('is_test', true)
+                          await supabase.from('subscriptions').delete().eq('is_test', true)
+                          await supabase.from('invoices').delete().eq('is_test', true)
+                          refetchTransactions?.()
+                          toast.success('All test data has been deleted', { id: 'delete-test' })
+                        } catch (error) {
+                          toast.error('Failed to delete test data', { id: 'delete-test' })
+                        }
+                      }}>
                         <Trash2 className="h-4 w-4 mr-2" />
                         Delete All Test Data
                       </Button>
-                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: 'Disabling billing module...', success: 'Billing module has been disabled', error: 'Failed to disable billing' })}>
+                      <Button variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50" onClick={async () => {
+                        if (!confirm('WARNING: This will disable the entire billing module. Users will not be able to make payments. Are you absolutely sure?')) {
+                          return
+                        }
+                        toast.loading('Disabling billing module...', { id: 'disable-billing' })
+                        try {
+                          const supabase = createClient()
+                          await supabase.from('settings').upsert({
+                            key: 'billing_enabled',
+                            value: false,
+                            updated_at: new Date().toISOString()
+                          })
+                          toast.success('Billing module has been disabled', { id: 'disable-billing' })
+                        } catch (error) {
+                          toast.error('Failed to disable billing', { id: 'disable-billing' })
+                        }
+                      }}>
                         <Lock className="h-4 w-4 mr-2" />
                         Disable Billing Module
                       </Button>

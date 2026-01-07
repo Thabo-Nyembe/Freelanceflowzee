@@ -602,11 +602,7 @@ const mockMilestonesActivities = [
   { id: '3', user: 'Product Owner', action: 'Created', target: 'Q2 roadmap milestones', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockMilestonesQuickActions = [
-  { id: '1', label: 'New Milestone', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening milestone form...', success: 'Define milestone objectives and due date', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'View Timeline', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading Gantt chart...', success: 'Timeline view ready with project milestones', error: 'Failed to load timeline' }), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating milestone report...', success: 'Report exported to milestones-2024.pdf', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access state setters
 
 // Database milestone type (matches Supabase schema)
 interface DbMilestone {
@@ -1092,7 +1088,7 @@ export default function MilestonesClient() {
                 { icon: CalendarDays, label: 'Timeline', color: 'text-blue-500', action: () => setActiveTab('timeline') },
                 { icon: Package, label: 'Deliverables', color: 'text-green-500', action: () => setActiveTab('deliverables') },
                 { icon: Link2, label: 'Dependencies', color: 'text-purple-500', action: () => setActiveTab('dependencies') },
-                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading risk assessment...', success: 'Risk analysis ready', error: 'Failed to load risks' }) },
+                { icon: AlertTriangle, label: 'Risks', color: 'text-amber-500', action: () => toast.success('Risk analysis ready') },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-500', action: () => setActiveTab('reports') },
                 { icon: Download, label: 'Export', color: 'text-cyan-500', action: handleExportReport },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-pink-500', action: handleSync },
@@ -1848,7 +1844,7 @@ export default function MilestonesClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="ms_sk_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Key copied to clipboard', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => toast.success('Key copied to clipboard')}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                       </CardContent>
@@ -1926,11 +1922,7 @@ export default function MilestonesClient() {
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                              loading: 'Archiving old milestones...',
-                              success: 'Old milestones archived successfully',
-                              error: 'Failed to archive milestones'
-                            })}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2" onClick={() => toast.success('Old milestones archived successfully')}>
                             <Archive className="w-5 h-5" />
                             <span>Archive Old</span>
                           </Button>
@@ -1938,11 +1930,7 @@ export default function MilestonesClient() {
                             <RefreshCw className="w-5 h-5" />
                             <span>Reset Stats</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-                              loading: 'Purging completed milestones...',
-                              success: 'Completed milestones purged successfully',
-                              error: 'Failed to purge milestones'
-                            })}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col items-center gap-2 text-red-500 hover:text-red-600" onClick={() => toast.success('Completed milestones purged successfully')}>
                             <Trash2 className="w-5 h-5" />
                             <span>Purge Completed</span>
                           </Button>

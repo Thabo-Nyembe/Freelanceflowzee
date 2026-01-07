@@ -110,11 +110,7 @@ export default function EmailMarketingPage() {
         setTemplates(templatesResult.data || [])
 
         setIsLoading(false)
-        toast.promise(new Promise(r => setTimeout(r, 800)), {
-          loading: 'Loading email marketing data...',
-          success: `Email marketing loaded: ${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers, ${templatesResult.data?.length || 0} templates`,
-          error: 'Failed to load email marketing'
-        })
+        toast.success(`Email marketing loaded: ${campaignsResult.data?.length || 0} campaigns, ${subscribersResult.data?.length || 0} subscribers, ${templatesResult.data?.length || 0} templates`)
         logger.info('Email marketing data loaded successfully', {
           campaignsCount: campaignsResult.data?.length,
           subscribersCount: subscribersResult.data?.length,
@@ -140,11 +136,7 @@ export default function EmailMarketingPage() {
 
   const handleCreateCampaign = () => {
     announce('Opening campaign creation', 'polite')
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Opening Campaign Builder...',
-      success: 'Campaign Builder ready - Set up your new email campaign',
-      error: 'Failed to open Campaign Builder'
-    })
+    toast.success('Campaign Builder ready - Set up your new email campaign')
     // Navigate to campaign creation page
     window.location.href = '/dashboard/email-marketing/create'
   }
@@ -207,11 +199,7 @@ export default function EmailMarketingPage() {
 
   const handleViewReport = (campaign: any) => {
     announce(`Viewing report for campaign ${campaign.name}`, 'polite')
-    toast.promise(new Promise(r => setTimeout(r, 1200)), {
-      loading: 'Loading campaign analytics...',
-      success: `Campaign analytics: Open Rate: ${campaign.openRate || campaign.open_rate}% | Click Rate: ${campaign.clickRate || campaign.click_rate}%`,
-      error: 'Failed to load campaign analytics'
-    })
+    toast.success(`Campaign analytics: Open Rate: ${campaign.openRate || campaign.open_rate}% | Click Rate: ${campaign.clickRate || campaign.click_rate}%`)
   }
 
   const handleDuplicateCampaign = async (campaign: any) => {
@@ -270,11 +258,7 @@ export default function EmailMarketingPage() {
         newName: newCampaignName
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Duplicating campaign...',
-        success: `Campaign duplicated: ${newCampaignName}`,
-        error: 'Failed to duplicate campaign'
-      })
+      toast.success(`Campaign duplicated: ${newCampaignName}`)
 
       // Add to local state
       setCampaigns(prev => [data, ...prev])
@@ -333,11 +317,7 @@ export default function EmailMarketingPage() {
       if (error) throw error
 
       setSubscribers(prev => [data, ...prev])
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Adding subscriber...',
-        success: `Subscriber added: ${subscriberForm.email} is now subscribed`,
-        error: 'Failed to add subscriber'
-      })
+      toast.success(`Subscriber added: ${subscriberForm.email} is now subscribed`)
       announce('Subscriber added successfully', 'polite')
       setIsSubscriberFormOpen(false)
     } catch (err: any) {
@@ -409,11 +389,7 @@ export default function EmailMarketingPage() {
 
       setAutomations(prev => [...prev, newAutomation])
       setIsAutomationOpen(false)
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Creating automation...',
-        success: `Automation created: ${automationForm.name} is now active`,
-        error: 'Failed to create automation'
-      })
+      toast.success(`Automation created: ${automationForm.name} is now active`)
       announce('Automation created successfully', 'polite')
     } catch (error: any) {
       logger.error('Failed to create automation', { error: error.message })
@@ -457,11 +433,7 @@ export default function EmailMarketingPage() {
       }
 
       setAutomations(prev => prev.filter(a => a.id !== id))
-      toast.promise(new Promise(r => setTimeout(r, 600)), {
-        loading: 'Deleting automation...',
-        success: 'Automation deleted successfully',
-        error: 'Failed to delete automation'
-      })
+      toast.success('Automation deleted successfully')
       announce('Automation deleted', 'polite')
     } catch (error: any) {
       logger.error('Failed to delete automation', { error: error.message })
@@ -500,11 +472,7 @@ export default function EmailMarketingPage() {
 
       logger.info('Template created successfully', { templateId: data?.id })
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Creating template...',
-        success: 'Template created - Start customizing your new template',
-        error: 'Failed to create template'
-      })
+      toast.success('Template created - Start customizing your new template')
       announce('Template created successfully', 'polite')
 
       // Reload templates
@@ -520,11 +488,7 @@ export default function EmailMarketingPage() {
 
   const handleUseTemplate = useCallback((template: any) => {
     announce(`Using template: ${template.name}`, 'polite')
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Loading template...',
-      success: `Template selected: Starting campaign with ${template.name}`,
-      error: 'Failed to load template'
-    })
+    toast.success(`Template selected: Starting campaign with ${template.name}`)
     // Navigate to campaign creation with template ID
     window.location.href = `/dashboard/email-marketing/create?template=${template.id}`
   }, [announce])

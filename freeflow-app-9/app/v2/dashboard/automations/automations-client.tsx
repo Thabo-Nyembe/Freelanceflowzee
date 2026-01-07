@@ -324,21 +324,9 @@ const mockAutomationsActivities = [
 ]
 
 const mockAutomationsQuickActions = [
-  { id: '1', label: 'New Workflow', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Creating new workflow...',
-    success: 'Workflow created successfully',
-    error: 'Failed to create workflow'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Run All', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: 'Running all workflows...',
-    success: 'All workflows executed successfully',
-    error: 'Failed to run workflows'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Export Logs', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Exporting logs...',
-    success: 'Logs exported successfully',
-    error: 'Failed to export logs'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'New Workflow', icon: 'plus', action: () => toast.success('Workflow created successfully'), variant: 'default' as const },
+  { id: '2', label: 'Run All', icon: 'play', action: () => toast.success('All workflows executed successfully'), variant: 'default' as const },
+  { id: '3', label: 'Export Logs', icon: 'download', action: () => toast.success('Logs exported successfully'), variant: 'outline' as const },
 ]
 
 // ============================================================================

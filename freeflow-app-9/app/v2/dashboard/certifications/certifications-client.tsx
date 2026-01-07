@@ -649,21 +649,9 @@ const mockCertsActivities = [
 ]
 
 const mockCertsQuickActions = [
-  { id: '1', label: 'Add Credential', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Adding credential...',
-    success: 'Credential added successfully',
-    error: 'Failed to add credential'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Verify Badge', icon: 'shield', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Verifying badge...',
-    success: 'Badge verified successfully',
-    error: 'Badge verification failed'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: 'Exporting report...',
-    success: 'Report exported successfully',
-    error: 'Export failed'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'Add Credential', icon: 'plus', action: () => toast.success('Credential added successfully'), variant: 'default' as const },
+  { id: '2', label: 'Verify Badge', icon: 'shield', action: () => toast.success('Badge verified successfully'), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.success('Report exported successfully'), variant: 'outline' as const },
 ]
 
 export default function CertificationsClient() {

@@ -313,9 +313,9 @@ const mockPerfAnalyticsActivities = [
 ]
 
 const mockPerfAnalyticsQuickActions = [
-  { id: '1', label: 'New Alert', icon: 'bell', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Creating alert...', success: 'Alert created successfully', error: 'Failed to create alert' }), variant: 'default' as const },
-  { id: '2', label: 'Dashboard', icon: 'layout', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Opening dashboard...', success: 'Dashboard opened', error: 'Failed to open dashboard' }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Failed to export data' }), variant: 'outline' as const },
+  { id: '1', label: 'New Alert', icon: 'bell', action: () => toast.success('New Alert', { description: 'Alert created successfully' }), variant: 'default' as const },
+  { id: '2', label: 'Dashboard', icon: 'layout', action: () => toast.success('Dashboard', { description: 'Performance dashboard opened' }), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => toast.success('Export Complete', { description: 'Data exported successfully' }), variant: 'outline' as const },
 ]
 
 export default function PerformanceAnalyticsClient() {

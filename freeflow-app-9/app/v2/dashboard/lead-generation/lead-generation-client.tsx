@@ -563,23 +563,7 @@ const mockLeadGenActivities = [
   { id: '3', user: 'Marketing Ops', action: 'Launched', target: 'email nurture sequence', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockLeadGenQuickActions = [
-  { id: '1', label: 'Add Lead', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Adding new lead...',
-    success: 'Lead added successfully',
-    error: 'Failed to add lead'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Score', icon: 'star', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-    loading: 'Calculating lead score...',
-    success: 'Lead score updated successfully',
-    error: 'Failed to calculate score'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Nurture', icon: 'mail', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Starting nurture sequence...',
-    success: 'Nurture sequence initiated',
-    error: 'Failed to start nurture sequence'
-  }), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access component state and handlers
 
 // Default stats for initial hook state
 const defaultStats: LeadStats = {
@@ -1309,6 +1293,54 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
       description: 'Opening additional lead actions...'
     })
   }
+
+  // Quick actions with real functionality
+  const leadGenQuickActions = [
+    {
+      id: '1',
+      label: 'Add Lead',
+      icon: 'plus',
+      action: () => {
+        resetNewLeadForm()
+        setIsAddLeadDialogOpen(true)
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Score',
+      icon: 'star',
+      action: async () => {
+        if (selectedLead) {
+          const newScore = Math.min(100, selectedLead.score + 10)
+          const result = await updateScore(selectedLead.id, newScore)
+          if (result) {
+            toast.success('Lead Score Updated', {
+              description: `Score increased to ${newScore}`
+            })
+          } else {
+            toast.error('Failed to Update Score', {
+              description: 'Please try again'
+            })
+          }
+        } else {
+          toast.info('Select a Lead', {
+            description: 'Please select a lead first to update its score'
+          })
+        }
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export CSV',
+      icon: 'mail',
+      action: () => {
+        handleExportLeads()
+      },
+      variant: 'outline' as const
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50/30 to-red-50/40 dark:bg-none dark:bg-gray-900 p-6">
@@ -2623,7 +2655,7 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockLeadGenQuickActions}
+            actions={leadGenQuickActions}
             variant="grid"
           />
         </div>
@@ -3053,19 +3085,66 @@ export default function LeadGenerationClient({ initialLeads, initialStats }: Lea
                   accept=".csv"
                   className="hidden"
                   id="csv-upload"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0]
                     if (file) {
-                      toast.info('Processing File', {
-                        description: `Importing leads from ${file.name}...`
-                      })
-                      // In a real implementation, parse and import the CSV
-                      setTimeout(() => {
-                        toast.success('Import Complete', {
-                          description: 'Leads have been imported successfully'
-                        })
+                      setIsSubmitting(true)
+                      try {
+                        const text = await file.text()
+                        const lines = text.split('\n').filter(line => line.trim())
+                        // Skip header row
+                        const dataLines = lines.slice(1)
+                        let successCount = 0
+                        let errorCount = 0
+
+                        for (const line of dataLines) {
+                          // Parse CSV: Name, Email, Phone, Company, Title, Source, Score, Value
+                          const values = line.split(',').map(v => v.replace(/^"|"$/g, '').trim())
+                          if (values.length >= 1 && values[0]) {
+                            const leadData: LeadInput = {
+                              name: values[0] || 'Unknown',
+                              email: values[1] || '',
+                              phone: values[2] || '',
+                              company: values[3] || '',
+                              title: values[4] || '',
+                              source: values[5] || 'website',
+                              score: parseInt(values[6]) || 50,
+                              value_estimate: parseFloat(values[7]) || 0,
+                              status: 'new',
+                              tags: []
+                            }
+                            const result = await createLead(leadData)
+                            if (result) {
+                              successCount++
+                            } else {
+                              errorCount++
+                            }
+                          }
+                        }
+
+                        if (successCount > 0) {
+                          toast.success('Import Complete', {
+                            description: `Successfully imported ${successCount} leads${errorCount > 0 ? `, ${errorCount} failed` : ''}`
+                          })
+                        } else if (errorCount > 0) {
+                          toast.error('Import Failed', {
+                            description: 'No leads could be imported. Check the CSV format.'
+                          })
+                        } else {
+                          toast.info('No Data', {
+                            description: 'The CSV file appears to be empty.'
+                          })
+                        }
                         setIsImportDialogOpen(false)
-                      }, 1500)
+                      } catch (error) {
+                        toast.error('Import Error', {
+                          description: 'Failed to read the CSV file. Please check the format.'
+                        })
+                      } finally {
+                        setIsSubmitting(false)
+                        // Reset file input
+                        e.target.value = ''
+                      }
                     }
                   }}
                 />

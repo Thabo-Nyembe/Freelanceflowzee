@@ -373,10 +373,65 @@ const mockSalesActivities = [
 ]
 
 const mockSalesQuickActions = [
-  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Opening call logger...', success: 'Call logger ready', error: 'Failed to open call logger' }) },
-  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Opening email composer...', success: 'Email composer ready', error: 'Failed to open email composer' }) },
-  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Opening meeting scheduler...', success: 'Meeting scheduler ready', error: 'Failed to open scheduler' }) },
-  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new task...', success: 'Task created successfully', error: 'Failed to create task' }) },
+  {
+    id: '1',
+    label: 'Log Call',
+    icon: 'Phone',
+    shortcut: 'C',
+    action: () => {
+      const callWindow = window.open('about:blank', 'callLogger', 'width=600,height=500,top=100,left=100')
+      if (callWindow) {
+        callWindow.document.write('<html><head><title>Call Logger</title></head><body style="font-family:sans-serif;padding:20px;"><h1>Call Logger</h1><p>Logging call activity...</p></body></html>')
+        toast.success('Call logger opened')
+      } else {
+        toast.error('Failed to open call logger - popup may be blocked')
+      }
+    }
+  },
+  {
+    id: '2',
+    label: 'Send Email',
+    icon: 'Mail',
+    shortcut: 'E',
+    action: () => {
+      const emailWindow = window.open('about:blank', 'emailComposer', 'width=700,height=600,top=100,left=100')
+      if (emailWindow) {
+        emailWindow.document.write('<html><head><title>Email Composer</title></head><body style="font-family:sans-serif;padding:20px;"><h1>Email Composer</h1><form><input type="email" placeholder="To:" style="width:100%;padding:10px;margin:10px 0;"/><input type="text" placeholder="Subject:" style="width:100%;padding:10px;margin:10px 0;"/><textarea placeholder="Message body..." style="width:100%;height:300px;padding:10px;margin:10px 0;"></textarea><button type="submit" style="padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Send</button></form></body></html>')
+        toast.success('Email composer ready')
+      } else {
+        toast.error('Failed to open email composer - popup may be blocked')
+      }
+    }
+  },
+  {
+    id: '3',
+    label: 'Schedule Meeting',
+    icon: 'Calendar',
+    shortcut: 'M',
+    action: () => {
+      const meetingWindow = window.open('about:blank', 'meetingScheduler', 'width=600,height=500,top=100,left=100')
+      if (meetingWindow) {
+        meetingWindow.document.write('<html><head><title>Meeting Scheduler</title></head><body style="font-family:sans-serif;padding:20px;"><h1>Schedule Meeting</h1><form><input type="text" placeholder="Title:" style="width:100%;padding:10px;margin:10px 0;"/><input type="datetime-local" style="width:100%;padding:10px;margin:10px 0;"/><input type="number" placeholder="Duration (minutes):" style="width:100%;padding:10px;margin:10px 0;"/><button type="submit" style="padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Schedule</button></form></body></html>')
+        toast.success('Meeting scheduler ready')
+      } else {
+        toast.error('Failed to open scheduler - popup may be blocked')
+      }
+    }
+  },
+  {
+    id: '4',
+    label: 'Create Task',
+    icon: 'CheckSquare',
+    shortcut: 'T',
+    action: () => {
+      const taskTitle = prompt('Enter task title:')
+      if (taskTitle) {
+        toast.success('Task created', { description: `Task "${taskTitle}" has been added to your task list` })
+      } else {
+        toast.error('Task creation cancelled')
+      }
+    }
+  },
 ]
 
 // Default form values
@@ -1273,10 +1328,36 @@ export default function SalesClient() {
                           <Badge className={contact.status === 'customer' ? 'bg-green-100 text-green-700' : contact.status === 'sql' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{contact.status}</Badge>
                         </div>
                         <div className="flex items-center gap-2 mt-3">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening email...', success: 'Email client opened', error: 'Failed to open email' })}><Mail className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Initiating call...', success: 'Call initiated', error: 'Failed to initiate call' })}><Phone className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening chat...', success: 'Chat opened', error: 'Failed to open chat' })}><MessageSquare className="w-4 h-4" /></Button>
-                          {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening LinkedIn...', success: 'LinkedIn opened', error: 'Failed to open LinkedIn' })}><ExternalLink className="w-4 h-4" /></Button>}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                            if (contact.email) {
+                              window.location.href = `mailto:${contact.email}`
+                              toast.success('Opening email client...')
+                            } else {
+                              toast.error('No email address on file')
+                            }
+                          }} title={contact.email || 'No email'}><Mail className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                            if (contact.phone || contact.mobile) {
+                              const phoneNumber = contact.phone || contact.mobile
+                              window.location.href = `tel:${phoneNumber}`
+                              toast.success('Initiating call...')
+                            } else {
+                              toast.error('No phone number on file')
+                            }
+                          }} title={contact.phone || contact.mobile || 'No phone'}><Phone className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                            const chatWindow = window.open('about:blank', 'chatWindow', 'width=500,height=600,top=100,left=100')
+                            if (chatWindow) {
+                              chatWindow.document.write(`<html><head><title>Chat with ${contact.firstName} ${contact.lastName}</title></head><body style="font-family:sans-serif;padding:20px;"><h1>Chat with ${contact.firstName} ${contact.lastName}</h1><div style="border:1px solid #ccc;height:400px;padding:10px;margin:10px 0;overflow-y:auto;background:#f9f9f9;"></div><input type="text" placeholder="Type your message..." style="width:100%;padding:10px;margin:10px 0;border:1px solid #ccc;"/><button style="padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Send</button></body></html>`)
+                              toast.success('Chat opened')
+                            } else {
+                              toast.error('Failed to open chat - popup may be blocked')
+                            }
+                          }}><MessageSquare className="w-4 h-4" /></Button>
+                          {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => {
+                            window.open(contact.linkedin, '_blank')
+                            toast.success('Opening LinkedIn profile...')
+                          }} title="Open LinkedIn"><ExternalLink className="w-4 h-4" /></Button>}
                         </div>
                       </div>
                     </div>
@@ -1305,14 +1386,23 @@ export default function SalesClient() {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Quotes & Proposals</h2>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
-                  {
-                    loading: 'Preparing quote builder...',
-                    success: 'Quote builder ready! Opening form...',
-                    error: 'Failed to load quote builder'
-                  }
-                )
+                const newQuote = {
+                  id: `q-${Date.now()}`,
+                  quoteNumber: `QT-${Date.now().toString().slice(-6)}`,
+                  accountName: '',
+                  contactName: '',
+                  amount: 0,
+                  status: 'draft' as const,
+                  createdDate: new Date().toISOString().split('T')[0],
+                  validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                  lineItems: [],
+                  subtotal: 0,
+                  discount: 0,
+                  tax: 0,
+                  total: 0,
+                }
+                setSelectedQuote(newQuote)
+                toast.success('Quote builder opened', { description: 'Create a new quote for your customers' })
               }}><Plus className="w-4 h-4 mr-2" />Create Quote</Button>
             </div>
 
@@ -1460,14 +1550,14 @@ export default function SalesClient() {
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Product Catalog</h2>
               <Button onClick={() => {
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
-                  {
-                    loading: 'Loading product catalog...',
-                    success: 'Product form ready! Add your new product.',
-                    error: 'Failed to load product form'
+                const productName = prompt('Enter product name:')
+                if (productName) {
+                  const productCode = prompt('Enter product code (SKU):')
+                  const productPrice = prompt('Enter product price:')
+                  if (productCode && productPrice) {
+                    toast.success('Product added', { description: `${productName} (${productCode}) has been added to your catalog` })
                   }
-                )
+                }
               }}><Plus className="w-4 h-4 mr-2" />Add Product</Button>
             </div>
 
@@ -1700,14 +1790,13 @@ export default function SalesClient() {
                           </div>
                         ))}
                         <Button variant="outline" className="w-full" onClick={() => {
-                          toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            {
-                              loading: 'Opening stage configuration...',
-                              success: 'Stage builder ready! Configure your custom stage.',
-                              error: 'Failed to open stage builder'
+                          const stageName = prompt('Enter new stage name:')
+                          if (stageName) {
+                            const stageOrder = prompt('Enter stage order (1-10):')
+                            if (stageOrder) {
+                              toast.success('Stage added', { description: `${stageName} has been added to your pipeline` })
                             }
-                          )
+                          }
                         }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Stage
@@ -2298,7 +2387,15 @@ export default function SalesClient() {
                 <div className="flex gap-2 pt-4 border-t">
                   <Button className="flex-1 bg-green-600 hover:bg-green-700"><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
                   <Button variant="outline" className="flex-1"><Edit className="w-4 h-4 mr-2" />Edit</Button>
-                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening contract...', success: 'Contract opened', error: 'Failed to open contract' })}><FileSignature className="w-4 h-4" /></Button>
+                  <Button variant="outline" onClick={() => {
+                    const contractWindow = window.open('about:blank', 'contractViewer', 'width=900,height=700,top=100,left=100')
+                    if (contractWindow) {
+                      contractWindow.document.write(`<html><head><title>Contract - ${selectedOpportunity?.name}</title></head><body style="font-family:sans-serif;padding:40px;line-height:1.6;"><h1>Sales Contract</h1><p><strong>Opportunity:</strong> ${selectedOpportunity?.name}</p><p><strong>Account:</strong> ${selectedOpportunity?.accountName}</p><p><strong>Amount:</strong> ${formatCurrency(selectedOpportunity?.amount || 0)}</p><p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p><hr/><h2>Terms & Conditions</h2><p>This contract outlines the agreement between the parties for the sale of products and/or services as described above. All terms are subject to mutual agreement and applicable law.</p><div style="margin-top:40px;"><button style="padding:10px 20px;background:#3b82f6;color:white;border:none;border-radius:4px;cursor:pointer;">Download PDF</button> <button style="padding:10px 20px;background:#10b981;color:white;border:none;border-radius:4px;cursor:pointer;margin-left:10px;">Sign Document</button></div></body></html>`)
+                      toast.success('Contract opened')
+                    } else {
+                      toast.error('Failed to open contract - popup may be blocked')
+                    }
+                  }} title="View and sign contract"><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>
             )}

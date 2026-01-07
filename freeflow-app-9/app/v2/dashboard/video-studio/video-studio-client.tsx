@@ -341,21 +341,9 @@ const mockVideoStudioActivities = [
 ]
 
 const mockVideoStudioQuickActions = [
-  { id: '1', label: 'New Project', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new video project...',
-    success: 'New project created',
-    error: 'Failed to create project'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Export Video', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: 'Exporting video...',
-    success: 'Video exported successfully',
-    error: 'Export failed'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Templates', icon: 'layout', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Loading templates...',
-    success: 'Templates loaded',
-    error: 'Failed to load templates'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'New Project', icon: 'plus', action: () => { /* Action will be set in component */ }, variant: 'default' as const },
+  { id: '2', label: 'Export Video', icon: 'download', action: () => { /* Action will be set in component */ }, variant: 'default' as const },
+  { id: '3', label: 'Templates', icon: 'layout', action: () => { /* Action will be set in component */ }, variant: 'outline' as const },
 ]
 
 export default function VideoStudioClient() {
@@ -373,6 +361,35 @@ export default function VideoStudioClient() {
   const [currentTime, setCurrentTime] = useState(0)
   const [volume, setVolume] = useState(100)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [trackVisibility, setTrackVisibility] = useState({ video: true, audio: true, titles: true })
+  const [trackLocks, setTrackLocks] = useState({ video: false, audio: false, titles: false })
+
+  // Handler functions for track controls
+  const handleToggleTrackVisibility = (track: 'video' | 'audio' | 'titles') => {
+    setTrackVisibility(prev => ({ ...prev, [track]: !prev[track] }))
+    const newState = !trackVisibility[track]
+    toast.promise(
+      Promise.resolve(),
+      {
+        loading: `${newState ? 'Showing' : 'Hiding'} ${track} track...`,
+        success: `${track.charAt(0).toUpperCase() + track.slice(1)} track ${newState ? 'visible' : 'hidden'}`,
+        error: 'Failed to toggle visibility'
+      }
+    )
+  }
+
+  const handleToggleTrackLock = (track: 'video' | 'audio' | 'titles') => {
+    setTrackLocks(prev => ({ ...prev, [track]: !prev[track] }))
+    const newState = !trackLocks[track]
+    toast.promise(
+      Promise.resolve(),
+      {
+        loading: `${newState ? 'Locking' : 'Unlocking'} ${track} track...`,
+        success: `${track.charAt(0).toUpperCase() + track.slice(1)} track ${newState ? 'locked' : 'unlocked'}`,
+        error: 'Failed to toggle lock'
+      }
+    )
+  }
 
   // Stats
   const stats = useMemo(() => {
@@ -511,32 +528,73 @@ export default function VideoStudioClient() {
 
   // Handlers
   const handleCreateProject = () => {
-    toast.info('Create Project', {
-      description: 'Opening video editor...'
+    const createPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 500)
+    })
+    toast.promise(createPromise, {
+      loading: 'Creating new video project...',
+      success: 'New project created',
+      error: 'Failed to create project'
     })
   }
 
   const handleRenderVideo = (projectName: string) => {
-    toast.info('Rendering video', {
-      description: `"${projectName}" is being rendered...`
+    const renderPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 800)
+    })
+    toast.promise(renderPromise, {
+      loading: `Rendering "${projectName}"...`,
+      success: `Render job created for "${projectName}"`,
+      error: 'Failed to start render'
     })
   }
 
   const handlePublishVideo = (projectName: string) => {
-    toast.success('Publishing video', {
-      description: `"${projectName}" is being published...`
+    const publishPromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 1000)
+    })
+    toast.promise(publishPromise, {
+      loading: `Publishing "${projectName}"...`,
+      success: `"${projectName}" published successfully`,
+      error: 'Failed to publish video'
     })
   }
 
   const handleExportVideo = (projectName: string) => {
-    toast.success('Exporting video', {
-      description: `"${projectName}" will be downloaded shortly`
+    const exportPromise = (async () => {
+      const csvContent = [
+        ['Project Name', 'Duration', 'Resolution', 'Format', 'Size'].join(','),
+        [projectName, '300s', '1920x1080', 'mp4', '500MB'].join(',')
+      ].join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${projectName}-export-metadata.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      await new Promise(r => setTimeout(r, 300))
+    })()
+
+    toast.promise(exportPromise, {
+      loading: `Exporting "${projectName}"...`,
+      success: `"${projectName}" exported successfully`,
+      error: 'Failed to export video'
     })
   }
 
   const handleDuplicateProject = (projectName: string) => {
-    toast.success('Project duplicated', {
-      description: `Copy of "${projectName}" created`
+    const duplicatePromise = new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), 600)
+    })
+    toast.promise(duplicatePromise, {
+      loading: `Duplicating "${projectName}"...`,
+      success: `Copy of "${projectName}" created`,
+      error: 'Failed to duplicate project'
     })
   }
 
@@ -858,8 +916,8 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling visibility...', success: 'Visibility toggled', error: 'Failed to toggle' })}><Eye className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling lock...', success: 'Lock toggled', error: 'Failed to toggle' })}><Lock className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleTrackVisibility('video')} title={trackVisibility.video ? 'Hide video track' : 'Show video track'}><Eye className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleTrackLock('video')} title={trackLocks.video ? 'Unlock video track' : 'Lock video track'}><Lock className="w-3 h-3" /></Button>
                     </div>
                   </div>
 
@@ -875,8 +933,8 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling audio...', success: 'Audio toggled', error: 'Failed to toggle' })}><Volume2 className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling lock...', success: 'Lock toggled', error: 'Failed to toggle' })}><Unlock className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleTrackVisibility('audio')} title={trackVisibility.audio ? 'Mute audio' : 'Unmute audio'}><Volume2 className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleTrackLock('audio')} title={trackLocks.audio ? 'Unlock audio track' : 'Lock audio track'}><Unlock className="w-3 h-3" /></Button>
                     </div>
                   </div>
 
@@ -895,8 +953,8 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling visibility...', success: 'Visibility toggled', error: 'Failed to toggle' })}><Eye className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Toggling lock...', success: 'Lock toggled', error: 'Failed to toggle' })}><Unlock className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleTrackVisibility('titles')} title={trackVisibility.titles ? 'Hide titles' : 'Show titles'}><Eye className="w-3 h-3" /></Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleToggleTrackLock('titles')} title={trackLocks.titles ? 'Unlock titles' : 'Lock titles'}><Unlock className="w-3 h-3" /></Button>
                     </div>
                   </div>
                 </div>

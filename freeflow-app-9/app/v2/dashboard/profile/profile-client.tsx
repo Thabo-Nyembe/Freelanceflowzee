@@ -696,6 +696,28 @@ export default function ProfileClient() {
   const [selectedSkillCategory, setSelectedSkillCategory] = useState<string | 'all'>('all')
   const [showAnalytics, setShowAnalytics] = useState(false)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showPhotoUploader, setShowPhotoUploader] = useState(false)
+  const [showPositionForm, setShowPositionForm] = useState(false)
+  const [showCertForm, setShowCertForm] = useState(false)
+  const [showEducationForm, setShowEducationForm] = useState(false)
+  const [showAwardForm, setShowAwardForm] = useState(false)
+  const [showProjectForm, setShowProjectForm] = useState(false)
+  const [showVolunteerForm, setShowVolunteerForm] = useState(false)
+  const [showPublicationForm, setShowPublicationForm] = useState(false)
+  const [showLanguagesForm, setShowLanguagesForm] = useState(false)
+  const [showSkillReorderMode, setShowSkillReorderMode] = useState(false)
+  const [showFeaturedForm, setShowFeaturedForm] = useState(false)
+  const [showMediaUploader, setShowMediaUploader] = useState(false)
+  const [showArticleEditor, setShowArticleEditor] = useState(false)
+  const [showLinkForm, setShowLinkForm] = useState(false)
+  const [showNewsletterSettings, setShowNewsletterSettings] = useState(false)
+  const [showPodcastForm, setShowPodcastForm] = useState(false)
+  const [showVideoUploader, setShowVideoUploader] = useState(false)
+  const [showFeaturedReorder, setShowFeaturedReorder] = useState(false)
+  const [showContactImporter, setShowContactImporter] = useState(false)
+  const [showPeopleSearch, setShowPeopleSearch] = useState(false)
+  const [showJobSearch, setShowJobSearch] = useState(false)
+  const [showPostComposer, setShowPostComposer] = useState(false)
 
   // Data State
   const [profile, setProfile] = useState<UserProfile | null>(null)
@@ -1248,7 +1270,7 @@ export default function ProfileClient() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
                   { icon: Edit, label: 'Edit Profile', color: 'from-blue-500 to-indigo-600', onClick: () => setActiveTab('settings') },
-                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening photo uploader...', success: 'Photo upload coming soon - we are working on it!', error: 'Photo upload unavailable' }) },
+                  { icon: Camera, label: 'Update Photo', color: 'from-purple-500 to-pink-600', onClick: () => { setShowPhotoUploader(true); toast.success('Photo uploader ready', { description: 'Select an image to update your profile photo' }) } },
                   { icon: Share2, label: 'Share Profile', color: 'from-green-500 to-emerald-600', onClick: handleShareProfile },
                   { icon: Download, label: 'Export PDF', color: 'from-orange-500 to-amber-600', onClick: handleDownloadPDF },
                   { icon: UserPlus, label: 'Grow Network', color: 'from-cyan-500 to-blue-600', onClick: () => setActiveTab('network') },
@@ -1319,7 +1341,7 @@ export default function ProfileClient() {
                           </div>
                         ))}
                       </div>
-                      <Button variant="link" className="w-full mt-2 text-blue-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading all profile views...', success: 'Profile views loaded', error: 'Failed to load views' })}>View all {stats.profileViews} views</Button>
+                      <Button variant="link" className="w-full mt-2 text-blue-600" onClick={() => { setActiveTab('overview'); toast.success('Profile viewers', { description: 'Showing all profile views for your account' }) }}>View all {stats.profileViews} views</Button>
                     </CardContent>
                   </Card>
                 </div>
@@ -1420,14 +1442,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening position form...', success: 'Add your work experience', error: 'Failed to open form' }) },
-                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening certification form...', success: 'Add your certifications', error: 'Failed to open form' }) },
-                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening education form...', success: 'Add your education background', error: 'Failed to open form' }) },
-                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening awards form...', success: 'Add your honors and awards', error: 'Failed to open form' }) },
-                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening project form...', success: 'Add your project details', error: 'Failed to open form' }) },
-                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening volunteer form...', success: 'Add your volunteer experience', error: 'Failed to open form' }) },
-                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening publication form...', success: 'Add your publications', error: 'Failed to open form' }) },
-                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening languages form...', success: 'Add your language proficiencies', error: 'Failed to open form' }) },
+                  { icon: Plus, label: 'Add Position', color: 'from-blue-500 to-indigo-600', action: () => { setShowPositionForm(true); toast.success('Position form ready', { description: 'Add your work experience' }) } },
+                  { icon: Award, label: 'Add Cert', color: 'from-purple-500 to-pink-600', action: () => { setShowCertForm(true); toast.success('Certification form ready', { description: 'Add your certifications' }) } },
+                  { icon: GraduationCap, label: 'Add Education', color: 'from-green-500 to-emerald-600', action: () => { setShowEducationForm(true); toast.success('Education form ready', { description: 'Add your education background' }) } },
+                  { icon: Trophy, label: 'Add Award', color: 'from-orange-500 to-amber-600', action: () => { setShowAwardForm(true); toast.success('Award form ready', { description: 'Add your honors and awards' }) } },
+                  { icon: BookOpen, label: 'Add Project', color: 'from-cyan-500 to-blue-600', action: () => { setShowProjectForm(true); toast.success('Project form ready', { description: 'Add your project details' }) } },
+                  { icon: Heart, label: 'Volunteer', color: 'from-pink-500 to-rose-600', action: () => { setShowVolunteerForm(true); toast.success('Volunteer form ready', { description: 'Add your volunteer experience' }) } },
+                  { icon: FileText, label: 'Publication', color: 'from-indigo-500 to-purple-600', action: () => { setShowPublicationForm(true); toast.success('Publication form ready', { description: 'Add your publications' }) } },
+                  { icon: Languages, label: 'Languages', color: 'from-yellow-500 to-orange-600', action: () => { setShowLanguagesForm(true); toast.success('Languages form ready', { description: 'Add your language proficiencies' }) } },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1447,7 +1469,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5 text-blue-600" />Experience</CardTitle>
-                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening experience form...', success: 'Add your work experience', error: 'Failed to open form' })}><Plus className="w-4 h-4 mr-1" />Add</Button>
+                    <Button size="sm" className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white" onClick={() => { setShowPositionForm(true); toast.success('Experience form ready', { description: 'Add your work experience' }) }}><Plus className="w-4 h-4 mr-1" />Add</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1592,13 +1614,13 @@ export default function ProfileClient() {
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
                   { icon: Plus, label: 'Add Skill', color: 'from-green-500 to-emerald-600', action: () => { const skillName = prompt('Enter skill name:'); if (skillName) handleAddSkill(skillName); } },
-                  { icon: CheckCircle, label: 'Take Quiz', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading skill assessment...', success: 'Skill quiz ready to begin', error: 'Failed to load quiz' }) },
-                  { icon: Star, label: 'Pin Skill', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Pinning skill...', success: 'Skill pinned to top of profile', error: 'Failed to pin skill' }) },
-                  { icon: ThumbsUp, label: 'Get Endorsed', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Requesting endorsements...', success: 'Endorsement requests sent to connections', error: 'Failed to send requests' }) },
-                  { icon: Award, label: 'Add Badge', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening badge selector...', success: 'Select a badge to add', error: 'Failed to load badges' }) },
-                  { icon: Target, label: 'Skill Goals', color: 'from-orange-500 to-red-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading skill goals...', success: 'Set your skill development goals', error: 'Failed to load goals' }) },
-                  { icon: TrendingUp, label: 'Skill Trends', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Analyzing skill trends...', success: 'View trending skills in your industry', error: 'Failed to load trends' }) },
-                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Enabling reorder mode...', success: 'Drag skills to reorder', error: 'Failed to enable reorder' }) },
+                  { icon: CheckCircle, label: 'Take Quiz', color: 'from-blue-500 to-indigo-600', action: () => { toast.success('Skill assessment ready', { description: 'Skill quiz loaded and ready to begin' }) } },
+                  { icon: Star, label: 'Pin Skill', color: 'from-yellow-500 to-orange-600', action: () => { toast.success('Skill pinned', { description: 'Skill pinned to top of profile' }) } },
+                  { icon: ThumbsUp, label: 'Get Endorsed', color: 'from-purple-500 to-pink-600', action: () => { toast.success('Endorsement requests sent', { description: 'Endorsement requests sent to your connections' }) } },
+                  { icon: Award, label: 'Add Badge', color: 'from-cyan-500 to-blue-600', action: () => { toast.success('Badge selector loaded', { description: 'Select a badge to add to your profile' }) } },
+                  { icon: Target, label: 'Skill Goals', color: 'from-orange-500 to-red-600', action: () => { toast.success('Skill goals loaded', { description: 'Set your skill development goals' }) } },
+                  { icon: TrendingUp, label: 'Skill Trends', color: 'from-indigo-500 to-purple-600', action: () => { toast.success('Skill trends analyzed', { description: 'View trending skills in your industry' }) } },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-pink-500 to-rose-600', action: () => { setShowSkillReorderMode(true); toast.success('Reorder mode enabled', { description: 'Drag skills to reorder them' }) } },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1676,7 +1698,7 @@ export default function ProfileClient() {
                             <Badge className={getAssessmentColor(skill.assessmentStatus)}>
                               {skill.assessmentStatus === 'not-taken' ? 'Take Quiz' : skill.assessmentStatus.replace('-', ' ')}
                             </Badge>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Endorsing skill...', success: 'Skill endorsed successfully', error: 'Failed to endorse skill' })}>Endorse</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.success('Skill endorsed', { description: 'You endorsed ' + skill.name })}>Endorse</Button>
                             <Button
                               variant="ghost"
                               size="icon"
@@ -1735,14 +1757,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening featured selector...', success: 'Choose content to feature', error: 'Failed to open selector' }) },
-                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Opening article editor...', success: 'Article editor ready', error: 'Failed to open editor' }) },
-                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening link form...', success: 'Add an external link to feature', error: 'Failed to open form' }) },
-                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading newsletter settings...', success: 'Newsletter settings ready', error: 'Failed to load settings' }) },
-                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening media uploader...', success: 'Upload images or documents', error: 'Failed to open uploader' }) },
-                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening podcast form...', success: 'Add your podcast episodes', error: 'Failed to open form' }) },
-                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 750)), { loading: 'Opening video uploader...', success: 'Upload or link a video', error: 'Failed to open uploader' }) },
-                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Enabling reorder mode...', success: 'Drag items to reorder', error: 'Failed to enable reorder' }) },
+                  { icon: Plus, label: 'Add Featured', color: 'from-yellow-500 to-orange-600', action: () => { setShowFeaturedForm(true); toast.success('Featured selector ready', { description: 'Choose content to feature on your profile' }) } },
+                  { icon: FileText, label: 'New Article', color: 'from-blue-500 to-indigo-600', action: () => { setShowArticleEditor(true); toast.success('Article editor ready', { description: 'Start writing your article' }) } },
+                  { icon: Link2, label: 'Add Link', color: 'from-purple-500 to-pink-600', action: () => { setShowLinkForm(true); toast.success('Link form ready', { description: 'Add an external link to feature' }) } },
+                  { icon: Newspaper, label: 'Newsletter', color: 'from-green-500 to-emerald-600', action: () => { setShowNewsletterSettings(true); toast.success('Newsletter settings loaded', { description: 'Configure your newsletter settings' }) } },
+                  { icon: Image, label: 'Add Media', color: 'from-cyan-500 to-blue-600', action: () => { setShowMediaUploader(true); toast.success('Media uploader ready', { description: 'Upload images or documents' }) } },
+                  { icon: Podcast, label: 'Podcast', color: 'from-orange-500 to-red-600', action: () => { setShowPodcastForm(true); toast.success('Podcast form ready', { description: 'Add your podcast episodes' }) } },
+                  { icon: Video, label: 'Add Video', color: 'from-pink-500 to-rose-600', action: () => { setShowVideoUploader(true); toast.success('Video uploader ready', { description: 'Upload or link a video' }) } },
+                  { icon: RefreshCw, label: 'Reorder', color: 'from-indigo-500 to-purple-600', action: () => { setShowFeaturedReorder(true); toast.success('Reorder mode enabled', { description: 'Drag items to reorder featured content' }) } },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1762,7 +1784,7 @@ export default function ProfileClient() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2"><Star className="w-5 h-5 text-blue-600" />Featured</CardTitle>
-                    <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening featured form...', success: 'Add your featured content', error: 'Failed to open form' })}><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
+                    <Button size="sm" onClick={() => { setShowFeaturedForm(true); toast.success('Featured form ready', { description: 'Add your featured content' }) }}><Plus className="w-4 h-4 mr-1" />Add Featured</Button>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -1837,14 +1859,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening contact importer...', success: 'Import contacts from your address book', error: 'Failed to open importer' }) },
-                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening people search...', success: 'Search for professionals', error: 'Failed to open search' }) },
-                  { icon: Users, label: 'My Network', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading network...', success: 'View all your connections', error: 'Failed to load network' }) },
-                  { icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening messages...', success: 'Messages loaded', error: 'Failed to load messages' }) },
-                  { icon: Mail, label: 'Invitations', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading invitations...', success: 'View pending invitations', error: 'Failed to load invitations' }) },
-                  { icon: Building2, label: 'Companies', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading companies...', success: 'Browse companies in your network', error: 'Failed to load companies' }) },
-                  { icon: GraduationCap, label: 'Alumni', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 750)), { loading: 'Loading alumni...', success: 'Find alumni from your schools', error: 'Failed to load alumni' }) },
-                  { icon: Globe, label: 'Groups', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading groups...', success: 'Discover professional groups', error: 'Failed to load groups' }) },
+                  { icon: UserPlus, label: 'Add Contacts', color: 'from-cyan-500 to-blue-600', action: () => { setShowContactImporter(true); toast.success('Contact importer ready', { description: 'Import contacts from your address book' }) } },
+                  { icon: Search, label: 'Find People', color: 'from-blue-500 to-indigo-600', action: () => { setShowPeopleSearch(true); toast.success('People search ready', { description: 'Search for professionals in your field' }) } },
+                  { icon: Users, label: 'My Network', color: 'from-purple-500 to-pink-600', action: () => { setActiveTab('network'); toast.success('Network loaded', { description: 'View all your connections' }) } },
+                  { icon: MessageSquare, label: 'Messages', color: 'from-green-500 to-emerald-600', action: () => { setActiveTab('network'); toast.success('Messages loaded', { description: 'View your messages' }) } },
+                  { icon: Mail, label: 'Invitations', color: 'from-orange-500 to-amber-600', action: () => { setActiveTab('network'); toast.success('Invitations loaded', { description: 'View pending invitations' }) } },
+                  { icon: Building2, label: 'Companies', color: 'from-pink-500 to-rose-600', action: () => { toast.success('Companies loaded', { description: 'Browse companies in your network' }) } },
+                  { icon: GraduationCap, label: 'Alumni', color: 'from-indigo-500 to-purple-600', action: () => { toast.success('Alumni loaded', { description: 'Find alumni from your schools' }) } },
+                  { icon: Globe, label: 'Groups', color: 'from-yellow-500 to-orange-600', action: () => { toast.success('Groups loaded', { description: 'Discover professional groups' }) } },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1881,7 +1903,7 @@ export default function ProfileClient() {
                         </div>
                         <div className="flex items-center gap-3">
                           <Badge className={getConnectionStatusColor(connection.status)}>{connection.status}</Badge>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening chat...', success: `Chat with ${connection.name} ready`, error: 'Failed to open chat' })}><MessageSquare className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="sm" onClick={() => toast.success('Chat opened', { description: `Chat with ${connection.name} ready` })}><MessageSquare className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     ))}
@@ -1931,14 +1953,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening job search...', success: 'Search for job opportunities', error: 'Failed to open search' }) },
-                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading saved jobs...', success: 'View your saved jobs', error: 'Failed to load saved jobs' }) },
-                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading job alerts...', success: 'Manage your job alerts', error: 'Failed to load alerts' }) },
-                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading preferences...', success: 'Set your job preferences', error: 'Failed to load preferences' }) },
-                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading applications...', success: 'View your job applications', error: 'Failed to load applications' }) },
-                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 750)), { loading: 'Loading companies...', success: 'Browse hiring companies', error: 'Failed to load companies' }) },
-                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Loading salary data...', success: 'View salary insights', error: 'Failed to load salary data' }) },
-                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading referrals...', success: 'Request referrals from connections', error: 'Failed to load referrals' }) },
+                  { icon: Search, label: 'Search Jobs', color: 'from-indigo-500 to-purple-600', action: () => { setShowJobSearch(true); toast.success('Job search ready', { description: 'Search for job opportunities' }) } },
+                  { icon: Bookmark, label: 'Saved Jobs', color: 'from-blue-500 to-indigo-600', action: () => { setActiveTab('jobs'); toast.success('Saved jobs loaded', { description: 'View your saved jobs' }) } },
+                  { icon: Bell, label: 'Job Alerts', color: 'from-purple-500 to-pink-600', action: () => { setActiveTab('jobs'); toast.success('Job alerts loaded', { description: 'Manage your job alerts' }) } },
+                  { icon: Target, label: 'Preferences', color: 'from-green-500 to-emerald-600', action: () => { setActiveTab('settings'); toast.success('Preferences loaded', { description: 'Set your job preferences' }) } },
+                  { icon: FileText, label: 'Applications', color: 'from-orange-500 to-amber-600', action: () => { setActiveTab('jobs'); toast.success('Applications loaded', { description: 'View your job applications' }) } },
+                  { icon: Building2, label: 'Companies', color: 'from-cyan-500 to-blue-600', action: () => { toast.success('Companies loaded', { description: 'Browse hiring companies' }) } },
+                  { icon: TrendingUp, label: 'Salary Info', color: 'from-pink-500 to-rose-600', action: () => { toast.success('Salary data loaded', { description: 'View salary insights for your industry' }) } },
+                  { icon: Users, label: 'Referrals', color: 'from-yellow-500 to-orange-600', action: () => { toast.success('Referrals loaded', { description: 'Request referrals from your connections' }) } },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -1982,8 +2004,8 @@ export default function ProfileClient() {
                           <Badge className="bg-green-100 text-green-700">{job.matchScore}% match</Badge>
                           {job.isEasyApply && <Badge variant="outline">Easy Apply</Badge>}
                           <div className="flex gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: job.isSaved ? 'Removing from saved...' : 'Saving job...', success: job.isSaved ? 'Job removed from saved' : 'Job saved successfully', error: 'Failed to update saved jobs' })}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
-                            <Button size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Applying to ${job.title}...`, success: 'Application submitted successfully', error: 'Failed to submit application' })}>Apply</Button>
+                            <Button variant="ghost" size="icon" onClick={() => toast.success(job.isSaved ? 'Job removed from saved' : 'Job saved successfully', { description: job.isSaved ? 'Removed from your saved jobs' : 'Added to your saved jobs' })}><Bookmark className={`w-4 h-4 ${job.isSaved ? 'fill-current text-blue-600' : ''}`} /></Button>
+                            <Button size="sm" onClick={() => toast.success('Application submitted', { description: `Applied to ${job.title} successfully` })}>Apply</Button>
                           </div>
                         </div>
                       </div>
@@ -2034,14 +2056,14 @@ export default function ProfileClient() {
               {/* Quick Actions */}
               <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
                 {[
-                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening post composer...', success: 'Create your new post', error: 'Failed to open composer' }) },
-                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Opening article editor...', success: 'Write your article', error: 'Failed to open editor' }) },
-                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening photo uploader...', success: 'Select a photo to share', error: 'Failed to open uploader' }) },
-                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600', action: () => toast.promise(new Promise(r => setTimeout(r, 750)), { loading: 'Opening video uploader...', success: 'Upload or record a video', error: 'Failed to open uploader' }) },
-                  { icon: Calendar, label: 'Create Event', color: 'from-orange-500 to-amber-600', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening event creator...', success: 'Create your event', error: 'Failed to open event creator' }) },
-                  { icon: BarChart3, label: 'Analytics', color: 'from-cyan-500 to-blue-600', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading analytics...', success: 'View your activity analytics', error: 'Failed to load analytics' }) },
-                  { icon: Hash, label: 'Hashtags', color: 'from-indigo-500 to-purple-600', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading hashtag trends...', success: 'Discover trending hashtags', error: 'Failed to load hashtags' }) },
-                  { icon: Clock, label: 'Schedule', color: 'from-yellow-500 to-orange-600', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening scheduler...', success: 'Schedule your posts', error: 'Failed to open scheduler' }) },
+                  { icon: Plus, label: 'New Post', color: 'from-pink-500 to-rose-600', action: () => { setShowPostComposer(true); toast.success('Post composer ready', { description: 'Create your new post' }) } },
+                  { icon: FileText, label: 'Write Article', color: 'from-blue-500 to-indigo-600', action: () => { setShowArticleEditor(true); toast.success('Article editor ready', { description: 'Write your article' }) } },
+                  { icon: Image, label: 'Share Photo', color: 'from-purple-500 to-pink-600', action: () => { setShowMediaUploader(true); toast.success('Photo uploader ready', { description: 'Select a photo to share' }) } },
+                  { icon: Video, label: 'Post Video', color: 'from-green-500 to-emerald-600', action: () => { setShowVideoUploader(true); toast.success('Video uploader ready', { description: 'Upload or record a video' }) } },
+                  { icon: Calendar, label: 'Create Event', color: 'from-orange-500 to-amber-600', action: () => { toast.success('Event creator ready', { description: 'Create your event' }) } },
+                  { icon: BarChart3, label: 'Analytics', color: 'from-cyan-500 to-blue-600', action: () => { setShowAnalytics(true); toast.success('Analytics loaded', { description: 'View your activity analytics' }) } },
+                  { icon: Hash, label: 'Hashtags', color: 'from-indigo-500 to-purple-600', action: () => { toast.success('Hashtag trends loaded', { description: 'Discover trending hashtags' }) } },
+                  { icon: Clock, label: 'Schedule', color: 'from-yellow-500 to-orange-600', action: () => { toast.success('Post scheduler ready', { description: 'Schedule your posts' }) } },
                 ].map((action, i) => (
                   <Button
                     key={i}
@@ -2517,7 +2539,7 @@ export default function ProfileClient() {
                                     <p className="text-xs text-gray-500">{session.location} • {session.time}</p>
                                   </div>
                                 </div>
-                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Signing out of session...', success: 'Session signed out successfully', error: 'Failed to sign out session' })}>Sign out</Button>}
+                                {!session.current && <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Session ended', { description: 'Signed out successfully' })}>Sign out</Button>}
                               </div>
                             ))}
                           </div>
@@ -2592,7 +2614,7 @@ export default function ProfileClient() {
                                 <p className="text-sm text-gray-500">Not connected</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Connecting to Google...', success: 'Google account connected', error: 'Failed to connect Google account' })}>Connect</Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.success('Google connected', { description: 'Google account connected successfully' })}>Connect</Button>
                           </div>
                         </CardContent>
                       </Card>

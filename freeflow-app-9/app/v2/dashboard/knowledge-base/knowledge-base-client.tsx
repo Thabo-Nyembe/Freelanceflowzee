@@ -1060,11 +1060,11 @@ export default function KnowledgeBaseClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Page', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setShowCreateDialog(true) },
-                { icon: FolderOpen, label: 'New Space', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating space...', success: 'Space created successfully', error: 'Failed to create space' }) },
+                { icon: FolderOpen, label: 'New Space', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Space created successfully') },
                 { icon: Layout, label: 'Templates', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setActiveTab('templates') },
                 { icon: Search, label: 'Search', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {} },
-                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading starred pages...', success: 'Showing starred pages', error: 'Failed to load starred pages' }) },
-                { icon: Clock, label: 'Recent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading recent pages...', success: 'Showing recent pages', error: 'Failed to load recent pages' }) },
+                { icon: Star, label: 'Starred', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => toast.success('Showing starred pages') },
+                { icon: Clock, label: 'Recent', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.success('Showing recent pages') },
                 { icon: Archive, label: 'Archive', color: 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400', onClick: () => setSelectedStatus('archived') },
                 { icon: Download, label: 'Export', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: handleExport },
               ].map((action, idx) => (
@@ -1662,8 +1662,8 @@ export default function KnowledgeBaseClient() {
                         <div className="flex items-center justify-between">
                           <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">List or tree view</p></div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching...', success: 'List view enabled', error: 'Failed to switch' })}><List className="h-4 w-4" /></Button>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching...', success: 'Grid view enabled', error: 'Failed to switch' })}><Grid3X3 className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.success('List view enabled')}><List className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.success('Grid view enabled')}><Grid3X3 className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">

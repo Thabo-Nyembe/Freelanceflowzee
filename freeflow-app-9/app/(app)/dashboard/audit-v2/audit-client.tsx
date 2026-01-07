@@ -476,11 +476,7 @@ const mockAuditActivities = [
   { id: '3', user: 'Security Analyst', action: 'Investigated', target: 'failed login attempts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockAuditQuickActions = [
-  { id: '1', label: 'Run Audit', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Starting audit...', success: 'Audit running - Scanning for compliance issues', error: 'Audit failed to start' }), variant: 'default' as const },
-  { id: '2', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Exporting report...', success: 'Export complete - Report downloaded', error: 'Export failed' }), variant: 'outline' as const },
-  { id: '3', label: 'Schedule', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening scheduler...', success: 'Scheduler ready - Configure audit schedule', error: 'Failed to open scheduler' }), variant: 'default' as const },
-]
+// Quick actions are now handled by real handler functions in the component
 
 export default function AuditClient({ initialEvents, initialComplianceChecks }: AuditClientProps) {
   const [activeTab, setActiveTab] = useState('events')
@@ -593,60 +589,189 @@ export default function AuditClient({ initialEvents, initialComplianceChecks }: 
   }
 
   // Handlers
-  const handleRunAudit = () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Starting audit...', success: 'Audit started successfully', error: 'Failed to start audit' })
-  const handleExportAudit = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting report...', success: 'Report downloaded successfully', error: 'Export failed' })
-  const handleScheduleAudit = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening scheduler...', success: 'Scheduler ready', error: 'Failed to open scheduler' })
-  const handleResolveIssue = (id: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Resolving issue #${id}...`, success: `Issue #${id} resolved successfully`, error: `Failed to resolve issue #${id}` })
+  const handleRunAudit = async () => {
+    try {
+      const res = await fetch('/api/audit/run', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to start audit')
+      toast.success('Audit started successfully')
+    } catch {
+      toast.error('Failed to start audit')
+    }
+  }
+  const handleExportAudit = () => {
+    const data = JSON.stringify({ events: auditEvents, complianceChecks, exportedAt: new Date().toISOString() }, null, 2)
+    const blob = new Blob([data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit-report-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Audit report exported')
+  }
+  const handleScheduleAudit = () => {
+    setShowCreateAlert(true)
+    toast.success('Configure your scheduled audit')
+  }
+  const handleResolveIssue = async (id: string) => {
+    try {
+      const res = await fetch(`/api/audit/issues/${id}/resolve`, { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to resolve issue')
+      toast.success(`Issue #${id} resolved successfully`)
+    } catch {
+      toast.error(`Failed to resolve issue #${id}`)
+    }
+  }
   const handleRefresh = () => {
-    toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Fetching latest events...', success: 'Events refreshed successfully', error: 'Failed to refresh events' })
+    window.location.reload()
+    toast.success('Refreshing audit events...')
   }
   const handleSettings = () => {
-    toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening settings panel...', success: 'Settings panel opened', error: 'Failed to open settings' })
+    setActiveTab('settings')
+    toast.success('Settings panel opened')
   }
   const handleSearch = () => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Executing search query...', success: 'Search completed', error: 'Search failed' })
+    const results = auditEvents.filter(e =>
+      e.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      e.details?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    toast.success(`Found ${results.length} matching events`)
   }
   const handleQuickAction = (label: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `${label} action in progress...`, success: `${label} action completed`, error: `${label} action failed` })
+    switch (label.toLowerCase()) {
+      case 'refresh': handleRefresh(); break
+      case 'export': handleExportAudit(); break
+      case 'settings': handleSettings(); break
+      default: toast.success(`${label} action completed`)
+    }
   }
   const handleCreateReport = () => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening report builder...', success: 'Report builder ready', error: 'Failed to open report builder' })
+    setShowCreateSearch(true)
+    toast.success('Report builder opened')
   }
   const handleDownloadReport = (reportName: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Downloading ${reportName}...`, success: `${reportName} downloaded successfully`, error: `Failed to download ${reportName}` })
+    const data = JSON.stringify({ report: reportName, events: auditEvents, generatedAt: new Date().toISOString() }, null, 2)
+    const blob = new Blob([data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${reportName.toLowerCase().replace(/\s+/g, '-')}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success(`${reportName} downloaded`)
   }
-  const handleRunReport = (reportName: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Generating ${reportName}...`, success: `${reportName} generated successfully`, error: `Failed to generate ${reportName}` })
+  const handleRunReport = async (reportName: string) => {
+    try {
+      const res = await fetch('/api/audit/reports/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reportName })
+      })
+      if (!res.ok) throw new Error('Failed to generate report')
+      toast.success(`${reportName} generated successfully`)
+    } catch {
+      toast.error(`Failed to generate ${reportName}`)
+    }
   }
-  const handleSaveSettings = () => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Saving retention settings...', success: 'Retention settings updated', error: 'Failed to save settings' })
+  const handleSaveSettings = async () => {
+    try {
+      const res = await fetch('/api/audit/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settingsTab })
+      })
+      if (!res.ok) throw new Error('Failed to save settings')
+      toast.success('Retention settings updated')
+    } catch {
+      toast.error('Failed to save settings')
+    }
   }
-  const handleIntegrationAction = (name: string, status: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `${status === 'connected' ? 'Configuring' : 'Connecting'} ${name}...`, success: `${name} ${status === 'connected' ? 'configured' : 'connected'} successfully`, error: `Failed to ${status === 'connected' ? 'configure' : 'connect'} ${name}` })
+  const handleIntegrationAction = async (name: string, status: string) => {
+    const action = status === 'connected' ? 'configure' : 'connect'
+    try {
+      const res = await fetch(`/api/integrations/${encodeURIComponent(name)}/${action}`, { method: 'POST' })
+      if (!res.ok) throw new Error(`Failed to ${action} ${name}`)
+      toast.success(`${name} ${status === 'connected' ? 'configured' : 'connected'} successfully`)
+    } catch {
+      toast.error(`Failed to ${action} ${name}`)
+    }
   }
-  const handleCopyApiKey = () => {
-    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy API key' })
+  const handleCopyApiKey = async () => {
+    const apiKey = 'aud_live_xxxxxxxxxxxx' // Would come from state in real implementation
+    try {
+      await navigator.clipboard.writeText(apiKey)
+      toast.success('API key copied to clipboard')
+    } catch {
+      toast.error('Failed to copy API key')
+    }
   }
-  const handleRegenerateApiKey = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating new API key...', success: 'New API key generated', error: 'Failed to regenerate API key' })
+  const handleRegenerateApiKey = async () => {
+    if (!confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) return
+    try {
+      const res = await fetch('/api/audit/api-keys/regenerate', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to regenerate key')
+      toast.success('New API key generated')
+    } catch {
+      toast.error('Failed to regenerate API key')
+    }
   }
   const handleExportAllData = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing full data export...', success: 'Data export ready for download', error: 'Failed to export data' })
+    const fullExport = {
+      events: auditEvents,
+      complianceChecks,
+      alerts: mockAlerts,
+      exportedAt: new Date().toISOString()
+    }
+    const data = JSON.stringify(fullExport, null, 2)
+    const blob = new Blob([data], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `audit-full-export-${new Date().toISOString().split('T')[0]}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    toast.success('Full data export downloaded')
   }
-  const handleClearCache = () => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Clearing cache...', success: 'All cached data has been cleared', error: 'Failed to clear cache' })
+  const handleClearCache = async () => {
+    try {
+      const res = await fetch('/api/audit/cache/clear', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to clear cache')
+      toast.success('All cached data has been cleared')
+    } catch {
+      toast.error('Failed to clear cache')
+    }
   }
-  const handleResetSettings = () => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Restoring default settings...', success: 'Settings restored to defaults', error: 'Failed to reset settings' })
+  const handleResetSettings = async () => {
+    if (!confirm('Are you sure you want to reset all settings to defaults?')) return
+    try {
+      const res = await fetch('/api/audit/settings/reset', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to reset settings')
+      toast.success('Settings restored to defaults')
+    } catch {
+      toast.error('Failed to reset settings')
+    }
   }
   const handleDeleteAllData = () => {
-    toast.error('Delete All Data', { description: 'This action requires confirmation' })
+    if (!confirm('WARNING: This will permanently delete all audit data. This action cannot be undone. Are you absolutely sure?')) return
+    toast.error('Delete All Data - Please contact support for data deletion requests')
   }
-  const handleAcknowledgeAlert = () => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Acknowledging alert...', success: 'Alert has been acknowledged', error: 'Failed to acknowledge alert' })
+  const handleAcknowledgeAlert = async () => {
+    try {
+      const res = await fetch('/api/audit/alerts/acknowledge', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to acknowledge')
+      toast.success('Alert has been acknowledged')
+    } catch {
+      toast.error('Failed to acknowledge alert')
+    }
   }
-  const handleSuppressAlert = () => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Suppressing alert...', success: 'Alert notifications suppressed', error: 'Failed to suppress alert' })
+  const handleSuppressAlert = async () => {
+    try {
+      const res = await fetch('/api/audit/alerts/suppress', { method: 'POST' })
+      if (!res.ok) throw new Error('Failed to suppress')
+      toast.success('Alert notifications suppressed')
+    } catch {
+      toast.error('Failed to suppress alert')
+    }
   }
   const handleDeleteAlert = () => {
     toast.error('Alert Deleted', { description: 'Alert has been removed' })

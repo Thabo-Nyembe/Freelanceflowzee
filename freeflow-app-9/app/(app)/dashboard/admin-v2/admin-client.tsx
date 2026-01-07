@@ -301,10 +301,15 @@ const mockAdminActivities = [
   { id: '3', user: 'System', action: 'Completed', target: 'daily backup job', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockAdminQuickActions = [
-  { id: '1', label: 'Add User', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening user creation form...', success: 'User form ready!', error: 'Failed to open user form' }), variant: 'default' as const },
-  { id: '2', label: 'Run Job', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Starting job...', success: 'Job executed successfully!', error: 'Job execution failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Logs', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting logs...', success: 'Logs exported successfully!', error: 'Export failed' }), variant: 'outline' as const },
+// Quick actions with real functionality - handlers passed from component
+const getAdminQuickActions = (handlers: {
+  onAddUser: () => void;
+  onRunJob: () => Promise<void>;
+  onExportLogs: () => Promise<void>;
+}) => [
+  { id: '1', label: 'Add User', icon: 'plus', action: handlers.onAddUser, variant: 'default' as const },
+  { id: '2', label: 'Run Job', icon: 'play', action: handlers.onRunJob, variant: 'default' as const },
+  { id: '3', label: 'Export Logs', icon: 'download', action: handlers.onExportLogs, variant: 'outline' as const },
 ]
 
 export default function AdminClient({ initialSettings }: { initialSettings: AdminSetting[] }) {
@@ -662,12 +667,15 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
     }
   }, [supabase])
 
-  // Clear Cache (sends request to clear server cache)
+  // Clear Cache - calls real API endpoint
   const handleClearCache = useCallback(async () => {
     setIsLoading(true)
     try {
-      // This would typically call an API endpoint that clears server-side caches
-      await new Promise(resolve => setTimeout(resolve, 500))
+      const response = await fetch('/api/admin/cache/clear', { method: 'POST' })
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to clear cache')
+      }
       toast.success('Cache cleared', { description: 'All cached data has been purged' })
     } catch (err) {
       toast.error('Failed to clear cache', { description: (err as Error).message })
@@ -1818,7 +1826,19 @@ export default function AdminClient({ initialSettings }: { initialSettings: Admi
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockAdminQuickActions}
+            actions={getAdminQuickActions({
+              onAddUser: () => setShowNewUserDialog(true),
+              onRunJob: async () => {
+                const response = await fetch('/api/admin/jobs/run', {
+                  method: 'POST',
+                  body: JSON.stringify({ jobId: 'default' }),
+                  headers: { 'Content-Type': 'application/json' }
+                })
+                if (!response.ok) throw new Error('Job execution failed')
+                toast.success('Job executed successfully')
+              },
+              onExportLogs: handleExportLogs,
+            })}
             variant="grid"
           />
         </div>

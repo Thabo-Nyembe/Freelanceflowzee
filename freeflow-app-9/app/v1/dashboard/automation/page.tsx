@@ -156,11 +156,7 @@ export default function AutomationPage() {
         userId
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Creating workflow...',
-        success: 'Workflow Created - New workflow has been created as draft',
-        error: 'Failed to create workflow'
-      })
+      toast.success('Workflow Created', { description: 'New workflow has been created as draft' })
       logger.info('Workflow created', { success: true, workflowId: newWorkflowId })
       announce('Workflow created successfully', 'polite')
 
@@ -192,11 +188,7 @@ export default function AutomationPage() {
         description: 'Updated workflow configuration'
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Updating workflow...',
-        success: 'Workflow Updated - Configuration has been updated successfully',
-        error: 'Failed to update workflow'
-      })
+      toast.success('Workflow Updated', { description: 'Configuration has been updated successfully' })
       logger.info('Workflow edited', { success: true, workflowId })
       announce('Workflow updated successfully', 'polite')
 
@@ -230,11 +222,7 @@ export default function AutomationPage() {
       const { deleteWorkflow: deleteWorkflowQuery } = await import('@/lib/automation-queries')
       await deleteWorkflowQuery(deleteWorkflow.id)
 
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Deleting workflow...',
-        success: `Workflow Deleted - "${deleteWorkflow.name}" has been permanently removed`,
-        error: 'Failed to delete workflow'
-      })
+      toast.success('Workflow Deleted', { description: `"${deleteWorkflow.name}" has been permanently removed` })
       logger.info('Workflow deleted', { success: true, workflowId: deleteWorkflow.id })
       announce('Workflow deleted successfully', 'polite')
 
@@ -266,11 +254,7 @@ export default function AutomationPage() {
 
       await updateWorkflow(workflowId, { status: 'active' })
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Enabling workflow...',
-        success: `Workflow Enabled - "${workflowName}" is now active and will run automatically`,
-        error: 'Failed to enable workflow'
-      })
+      toast.success('Workflow Enabled', { description: `"${workflowName}" is now active and will run automatically` })
       logger.info('Workflow enabled', { success: true, workflowId })
       announce('Workflow enabled successfully', 'polite')
 
@@ -299,11 +283,7 @@ export default function AutomationPage() {
 
       await updateWorkflow(workflowId, { status: 'paused' })
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Disabling workflow...',
-        success: `Workflow Disabled - "${workflowName}" has been paused and will not run`,
-        error: 'Failed to disable workflow'
-      })
+      toast.success('Workflow Disabled', { description: `"${workflowName}" has been paused and will not run` })
       logger.info('Workflow disabled', { success: true, workflowId })
       announce('Workflow disabled successfully', 'polite')
 
@@ -339,11 +319,7 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to test workflow')
       const result = await response.json()
 
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Testing workflow...',
-        success: `Workflow Test Complete - "${workflowName}" test run completed successfully`,
-        error: 'Failed to test workflow'
-      })
+      toast.success('Workflow Test Complete', { description: `"${workflowName}" test run completed successfully` })
       logger.info('Workflow tested', { success: true, workflowId, result })
       announce('Workflow test completed', 'polite')
 
@@ -379,11 +355,7 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to connect integration')
       const result = await response.json()
 
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Connecting integration...',
-        success: `Integration Connected - ${integrationName} has been connected successfully`,
-        error: 'Failed to connect integration'
-      })
+      toast.success('Integration Connected', { description: `${integrationName} has been connected successfully` })
       logger.info('Integration connected', { success: true, integrationId, result })
       announce('Integration connected successfully', 'polite')
 
@@ -426,11 +398,7 @@ export default function AutomationPage() {
 
       if (!response.ok) throw new Error('Failed to disconnect integration')
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Disconnecting integration...',
-        success: `Integration Disconnected - ${disconnectIntegration.name} has been disconnected`,
-        error: 'Failed to disconnect integration'
-      })
+      toast.success('Integration Disconnected', { description: `${disconnectIntegration.name} has been disconnected` })
       logger.info('Integration disconnected', { success: true, integrationId: disconnectIntegration.id })
       announce('Integration disconnected successfully', 'polite')
 
@@ -473,11 +441,7 @@ export default function AutomationPage() {
       if (!response.ok) throw new Error('Failed to test webhook')
       const result = await response.json()
 
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Testing webhook...',
-        success: 'Webhook Test Successful - Test webhook was sent and received successfully',
-        error: 'Webhook test failed'
-      })
+      toast.success('Webhook Test Successful', { description: 'Test webhook was sent and received successfully' })
       logger.info('Webhook tested', { success: true, result })
       announce('Webhook test successful', 'polite')
     } catch (error) {
@@ -505,11 +469,7 @@ export default function AutomationPage() {
       // Note: Integrations would be loaded from integration queries when available
       setIntegrations([])
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Refreshing automation data...',
-        success: `Automation Refreshed - All workflows and integrations have been reloaded (${workflowsResult?.length || 0} workflows)`,
-        error: 'Failed to refresh automation'
-      })
+      toast.success('Automation Refreshed', { description: `All workflows and integrations have been reloaded (${workflowsResult?.length || 0} workflows)` })
       logger.info('Automation refresh completed', { success: true, workflowCount: workflowsResult?.length || 0 })
       announce('Automation refreshed successfully', 'polite')
     } catch (error) {

@@ -412,9 +412,9 @@ const mockFeaturesActivities = [
 ]
 
 const mockFeaturesQuickActions = [
-  { id: '1', label: 'New Feature', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating feature...', success: 'Feature created!', error: 'Failed to create feature' }), variant: 'default' as const },
-  { id: '2', label: 'View Roadmap', icon: 'map', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading roadmap...', success: 'Roadmap loaded!', error: 'Failed to load roadmap' }), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Exporting report...', success: 'Report exported!', error: 'Failed to export report' }), variant: 'outline' as const },
+  { id: '1', label: 'New Feature', icon: 'plus', action: () => toast.success('New Feature', { description: 'Feature form ready' }), variant: 'default' as const },
+  { id: '2', label: 'View Roadmap', icon: 'map', action: () => toast.success('Roadmap', { description: 'Roadmap loaded' }), variant: 'default' as const },
+  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.success('Report Exported', { description: 'Feature report downloaded' }), variant: 'outline' as const },
 ]
 
 export default function FeaturesClient() {

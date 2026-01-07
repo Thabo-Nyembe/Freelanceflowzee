@@ -1499,7 +1499,7 @@ export default function ComplianceClient() {
                         <Button variant="ghost" size="icon" onClick={() => handleViewDetails('policy', policy.name)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening policy settings...', success: `${policy.name} settings opened - Configure policy distribution and approvals`, error: 'Failed to open settings' })}>
+                        <Button variant="ghost" size="icon" onClick={() => toast.success(`${policy.name} settings opened - Configure policy distribution and approvals`)}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>

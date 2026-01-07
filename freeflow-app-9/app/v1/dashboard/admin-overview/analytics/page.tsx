@@ -428,11 +428,7 @@ export default function AnalyticsPage() {
     logger.info('Opening detailed revenue view')
     const willShow = !showRevenueDetails
     setShowRevenueDetails(willShow)
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: willShow ? 'Loading revenue details...' : 'Hiding revenue details...',
-      success: willShow ? 'Revenue details displayed' : 'Revenue details hidden',
-      error: 'Failed to toggle revenue details'
-    })
+    toast.success(willShow ? 'Revenue Details Shown' : 'Revenue Details Hidden', { description: 'View toggled' })
     announce(willShow ? 'Revenue details shown' : 'Revenue details hidden', 'polite')
   }
 

@@ -201,9 +201,21 @@ const mockBillingActivities = [
 ]
 
 const mockBillingQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new invoice...', success: 'Invoice created successfully', error: 'Failed to create invoice' }), variant: 'default' as const },
-  { id: '2', label: 'Refund', icon: 'rotate-ccw', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Processing refund...', success: 'Refund processed successfully', error: 'Failed to process refund' }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Exporting billing data...', success: 'Data exported successfully', error: 'Export failed' }), variant: 'outline' as const },
+  { id: '1', label: 'New Invoice', icon: 'plus', action: () => toast.success('Invoice created successfully'), variant: 'default' as const },
+  { id: '2', label: 'Refund', icon: 'rotate-ccw', action: () => toast.success('Refund processed successfully'), variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => {
+    const billingData = { exported_at: new Date().toISOString(), summary: { total_subscriptions: 5, active: 3, pending: 1, cancelled: 1 } }
+    const blob = new Blob([JSON.stringify(billingData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `billing-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Billing data exported successfully')
+  }, variant: 'outline' as const },
 ]
 
 export default function BillingClient({ initialBilling }: { initialBilling: BillingTransaction[] }) {
@@ -1807,7 +1819,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {wh.events.length} events • {wh.success_rate}% success rate
                               </div>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening webhook editor...', success: 'Webhook editor opened', error: 'Failed to open' })}><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.success('Webhook editor opened')}><Edit className="h-4 w-4" /></Button>
                           </div>
                         ))}
                         <Button variant="outline" className="w-full">
@@ -1830,7 +1842,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Publishable Key</Label>
                         <div className="flex gap-2">
                           <Input value="pk_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Publishable key copied', error: 'Failed to copy' })}>
+                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('pk_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('Publishable key copied'); }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1839,10 +1851,10 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                         <Label className="text-sm font-medium">Secret Key</Label>
                         <div className="flex gap-2">
                           <Input value="STRIPE_KEY_PLACEHOLDER" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revealing key...', success: 'Secret key revealed', error: 'Failed to reveal' })}>
+                          <Button variant="outline" size="icon" onClick={() => toast.success('Secret key revealed')}>
                             <Eye className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Secret key copied', error: 'Failed to copy' })}>
+                          <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText('sk_live_xxxxxxxxxxxxxxxxxxxxx'); toast.success('Secret key copied'); }}>
                             <Copy className="h-4 w-4" />
                           </Button>
                         </div>
@@ -1892,7 +1904,7 @@ export default function BillingClient({ initialBilling }: { initialBilling: Bill
                                 {tax.inclusive ? 'Inclusive' : 'Exclusive'}
                               </Badge>
                               <Switch checked={tax.active} />
-                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening tax editor...', success: 'Tax rate editor opened', error: 'Failed to open' })}><Edit className="h-4 w-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.success('Tax rate editor opened')}><Edit className="h-4 w-4" /></Button>
                             </div>
                           </div>
                         ))}

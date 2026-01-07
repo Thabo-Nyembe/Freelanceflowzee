@@ -553,11 +553,7 @@ export default function WidgetsPage() {
 
       logger.info('Widget created successfully', { widgetId: newWidget.id, name: newWidget.name, type: newWidget.type })
 
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Creating widget...',
-        success: `Widget created - ${newWidget.name} - ${newWidget.type} - ${newWidget.category} - ${newWidget.size} size - Visible on dashboard`,
-        error: 'Failed to create widget'
-      })
+      toast.success(`Widget created - ${newWidget.name} - ${newWidget.type} - ${newWidget.category} - ${newWidget.size} size - Visible on dashboard`)
     } catch (error) {
       logger.error('Widget creation error', {
         error: error instanceof Error ? error.message : 'Unknown error',
@@ -597,11 +593,7 @@ export default function WidgetsPage() {
         userId
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Deleting widget...',
-        success: `Widget deleted - ${widgetToDelete.name} - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`,
-        error: 'Failed to delete widget'
-      })
+      toast.success(`Widget deleted - ${widgetToDelete.name} - ${widgetToDelete.type} - ${widgetToDelete.category} - Usage: ${widgetToDelete.usageCount} times`)
       announce('Widget deleted successfully', 'polite')
     } catch (error: any) {
       logger.error('Widget deletion error', {
@@ -665,11 +657,7 @@ export default function WidgetsPage() {
         userId
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Deleting widgets...',
-        success: `Deleted ${deletedCount} widget(s) - Removed: ${widgetNames.slice(0, 3).join(', ')}${widgetNames.length > 3 ? ` +${widgetNames.length - 3} more` : ''}`,
-        error: 'Failed to delete widgets'
-      })
+      toast.success(`Deleted ${deletedCount} widget(s) - Removed: ${widgetNames.slice(0, 3).join(', ')}${widgetNames.length > 3 ? ` +${widgetNames.length - 3} more` : ''}`)
       announce(`${deletedCount} widgets deleted successfully`, 'polite')
     } catch (error: any) {
       logger.error('Bulk delete error', {
@@ -714,11 +702,7 @@ export default function WidgetsPage() {
       widgetCount: state.widgets.length
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Exporting configuration...',
-      success: `Configuration exported - ${fileName} - ${fileSizeKB} KB - ${state.widgets.length} widgets - JSON format`,
-      error: 'Failed to export configuration'
-    })
+    toast.success(`Configuration exported - ${fileName} - ${fileSizeKB} KB - ${state.widgets.length} widgets - JSON format`)
   }
 
   // ============================================================================
@@ -1239,11 +1223,7 @@ export default function WidgetsPage() {
               Cancel
             </Button>
             <Button onClick={() => {
-              toast.promise(new Promise(r => setTimeout(r, 800)), {
-                loading: 'Updating widget...',
-                success: 'Widget updated successfully',
-                error: 'Failed to update widget'
-              })
+              toast.success('Widget updated successfully')
               setIsEditModalOpen(false)
             }}>
               Save Changes

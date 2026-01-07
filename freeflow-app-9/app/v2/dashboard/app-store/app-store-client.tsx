@@ -1396,7 +1396,7 @@ export default function AppStoreClient() {
                     <div className="flex gap-2 mt-4 pt-3 border-t">
                       {app.status === 'installed' ? (
                         <>
-                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching app...', success: 'App opened successfully', error: 'Failed to open app' }) }}>
+                          <Button size="sm" className="flex-1" onClick={(e) => { e.stopPropagation(); toast.success('App opened successfully') }}>
                             <Play className="w-4 h-4 mr-1" />
                             Open
                           </Button>
@@ -1409,7 +1409,7 @@ export default function AppStoreClient() {
                           <Button size="sm" className="flex-1 bg-purple-600 hover:bg-purple-700" onClick={(e) => { e.stopPropagation(); handleInstallApp(app) }} disabled={loading}>
                             Purchase
                           </Button>
-                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching app...', success: 'App opened successfully', error: 'Failed to open app' }) }}>
+                          <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); toast.success('App opened successfully') }}>
                             <Play className="w-4 h-4" />
                           </Button>
                         </>
@@ -1460,7 +1460,7 @@ export default function AppStoreClient() {
                             <p className="text-sm text-muted-foreground">v{app.version} • {formatBytes(app.size)}</p>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching app...', success: 'App opened successfully', error: 'Failed to open app' }) }}>
+                            <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.success('App opened successfully') }}>
                               <Play className="w-4 h-4" />
                             </Button>
                             <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); handleViewApp(app) }}>
@@ -1790,8 +1790,8 @@ export default function AppStoreClient() {
                         <div className="flex items-center justify-between">
                           <div><Label className="text-base">Default View Mode</Label><p className="text-sm text-gray-500">Grid or list view</p></div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching...', success: 'Grid view enabled', error: 'Failed to switch' })}><Grid3X3 className="h-4 w-4" /></Button>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching...', success: 'List view enabled', error: 'Failed to switch' })}><List className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.success('Grid view enabled')}><Grid3X3 className="h-4 w-4" /></Button>
+                            <Button variant="outline" size="sm" onClick={() => toast.success('List view enabled')}><List className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
@@ -2165,11 +2165,11 @@ export default function AppStoreClient() {
                 <div className="flex items-center gap-3 pt-4 border-t">
                   {selectedApp.status === 'installed' ? (
                     <>
-                      <Button className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching app...', success: 'App opened successfully', error: 'Failed to open app' })}>
+                      <Button className="flex-1" onClick={() => toast.success('App opened successfully')}>
                         <Play className="w-4 h-4 mr-2" />
                         Open App
                       </Button>
-                      <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading settings...', success: 'Settings opened', error: 'Failed to open settings' })}>
+                      <Button variant="outline" onClick={() => toast.success('Settings opened')}>
                         <Settings className="w-4 h-4 mr-2" />
                         Settings
                       </Button>
@@ -2184,7 +2184,7 @@ export default function AppStoreClient() {
                         <DollarSign className="w-4 h-4 mr-2" />
                         Purchase Now
                       </Button>
-                      <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Launching trial app...', success: 'App opened successfully', error: 'Failed to open app' })}>
+                      <Button variant="outline" onClick={() => toast.success('App opened successfully')}>
                         <Play className="w-4 h-4 mr-2" />
                         Continue Trial
                       </Button>

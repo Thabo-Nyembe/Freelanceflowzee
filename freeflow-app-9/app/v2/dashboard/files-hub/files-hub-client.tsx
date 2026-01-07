@@ -1028,11 +1028,7 @@ export default function FilesHubClient() {
                           <p className="text-sm text-gray-500">Modified {formatDate(file.modifiedAt)} at {formatTime(file.modifiedAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                              loading: 'Preparing download...',
-                              success: 'File downloaded successfully',
-                              error: 'Download failed'
-                            })}>
+                          <Button variant="ghost" size="sm" onClick={() => toast.success('File downloaded successfully')}>
                             <Download className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleShareFile(file.id, file.name)}>
@@ -1441,8 +1437,8 @@ export default function FilesHubClient() {
                               <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
                                 {link.access}
                               </Badge>
-                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
-                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Removing link...', success: 'Link removed', error: 'Failed to remove' })}><Trash2 className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => toast.success('Link copied to clipboard')}><Copy className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.success('Link removed')}><Trash2 className="w-4 h-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -1695,8 +1691,8 @@ export default function FilesHubClient() {
                         <Label className="text-sm font-medium">API Key</Label>
                         <div className="flex gap-2">
                           <Input value="fh_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revealing key...', success: 'Key revealed', error: 'Failed to reveal' })}><Eye className="w-4 h-4" /></Button>
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Key copied to clipboard', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.success('Key revealed')}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.success('Key copied to clipboard')}><Copy className="w-4 h-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1797,7 +1793,7 @@ export default function FilesHubClient() {
                         <Label className="text-sm font-medium">Encryption Key</Label>
                         <div className="flex gap-2">
                           <Input value="•••••••••••••••••••••" readOnly className="flex-1 font-mono" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revealing key...', success: 'Key revealed', error: 'Failed to reveal' })}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.success('Key revealed')}><Eye className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </CardContent>
@@ -2150,11 +2146,7 @@ export default function FilesHubClient() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                      loading: 'Preparing download...',
-                      success: 'File downloaded successfully',
-                      error: 'Download failed'
-                    })}>
+                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.success('File downloaded successfully')}>
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>

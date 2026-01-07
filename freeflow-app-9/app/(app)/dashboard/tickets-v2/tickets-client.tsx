@@ -435,11 +435,7 @@ const mockTicketsActivities = [
   { id: '3', user: 'Mike Johnson', action: 'Escalated', target: '#TKT-1235 to Tier 2', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening ticket form...', success: 'Create a new support ticket', error: 'Failed to open form' }), variant: 'default' as const },
-  { id: '2', label: 'View Queue', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading ticket queue...', success: 'Ticket Queue: 47 open • 12 in progress • 8 high priority', error: 'Failed to load queue' }), variant: 'default' as const },
-  { id: '3', label: 'Reports', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating reports...', success: 'Ticket Reports: Resolution time: 2.4h avg • 94% satisfaction', error: 'Failed to load reports' }), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state
 
 export default function TicketsClient() {
   const [activeTab, setActiveTab] = useState('tickets')

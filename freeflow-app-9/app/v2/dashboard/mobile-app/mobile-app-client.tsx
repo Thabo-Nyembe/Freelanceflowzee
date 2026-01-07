@@ -192,21 +192,9 @@ const mockMobileAppActivities = [
 ]
 
 const mockMobileAppQuickActions = [
-  { id: '1', label: 'New Build', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: 'Initiating new build...',
-    success: 'Build started successfully',
-    error: 'Failed to start build'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Submit Review', icon: 'send', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Submitting for review...',
-    success: 'App submitted for review',
-    error: 'Failed to submit for review'
-  }), variant: 'default' as const },
-  { id: '3', label: 'View Analytics', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Loading analytics...',
-    success: 'Analytics loaded',
-    error: 'Failed to load analytics'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'New Build', icon: 'plus', action: () => toast.success('Build Started', { description: 'Mobile build initiated' }), variant: 'default' as const },
+  { id: '2', label: 'Submit Review', icon: 'send', action: () => toast.success('Submitted for Review', { description: 'App submitted to store' }), variant: 'default' as const },
+  { id: '3', label: 'View Analytics', icon: 'chart', action: () => toast.success('Analytics Loaded', { description: 'App metrics ready' }), variant: 'outline' as const },
 ]
 
 export default function MobileAppClient({ initialFeatures, initialVersions, initialStats }: MobileAppClientProps) {

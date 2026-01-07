@@ -123,12 +123,7 @@ const mockInvoicesActivities = [
   { id: '4', user: 'System', action: 'received', target: 'payment of $4,500 from TechCorp', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockInvoicesQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening invoice builder...', success: 'Create professional invoices with custom branding', error: 'Failed to open' }) },
-  { id: '2', label: 'Send Reminders', icon: 'Mail', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Sending payment reminders...', success: '5 reminders sent for overdue invoices', error: 'Failed to send' }) },
-  { id: '3', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating invoice report...', success: 'Report exported to invoices-2024.csv', error: 'Export failed' }) },
-  { id: '4', label: 'Record Payment', icon: 'CreditCard', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening payment form...', success: 'Record payments against open invoices', error: 'Failed to open' }) },
-]
+// Quick actions will be defined inside the component to access handlers
 
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | 'all'>('all')
@@ -433,15 +428,56 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
     }
   }
 
-  const handleExportInvoices = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Exporting invoices...',
-        success: 'Export completed - Your invoices have been exported',
-        error: 'Failed to export invoices'
+  const handleExportInvoices = (format: 'csv' | 'json' = 'csv') => {
+    try {
+      const data = displayInvoices.map(inv => ({
+        invoice_number: inv.invoice_number,
+        title: inv.title,
+        client_name: inv.client_name,
+        client_email: inv.client_email,
+        status: inv.status,
+        currency: inv.currency,
+        subtotal: inv.subtotal,
+        tax_amount: inv.tax_amount,
+        discount_amount: inv.discount_amount,
+        total_amount: inv.total_amount,
+        amount_paid: inv.amount_paid,
+        amount_due: inv.amount_due,
+        issue_date: inv.issue_date,
+        due_date: inv.due_date,
+        paid_date: inv.paid_date
+      }))
+
+      if (format === 'csv') {
+        const headers = Object.keys(data[0] || {}).join(',')
+        const rows = data.map(row => Object.values(row).map(v => `"${v ?? ''}"`).join(','))
+        const csvContent = [headers, ...rows].join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `invoices-export-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        toast.success('Export completed', { description: `${data.length} invoices exported to CSV` })
+      } else {
+        const jsonContent = JSON.stringify(data, null, 2)
+        const blob = new Blob([jsonContent], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `invoices-export-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        toast.success('Export completed', { description: `${data.length} invoices exported to JSON` })
       }
-    )
+    } catch (error) {
+      toast.error('Failed to export invoices')
+    }
   }
 
   const getStatusColor = (status: string) => {
@@ -457,16 +493,122 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
 
   const getCurrencySymbol = (code: string) => currencies.find(c => c.code === code)?.symbol || '$'
 
-  const handleDownloadInvoice = (invoice: Invoice) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: `Generating PDF for invoice #${invoice.invoice_number}...`,
-        success: `Invoice #${invoice.invoice_number} PDF downloaded successfully`,
-        error: 'Failed to download invoice PDF'
+  const handleDownloadInvoice = async (invoice: Invoice) => {
+    try {
+      toast.loading(`Generating PDF for invoice #${invoice.invoice_number}...`)
+      const response = await fetch(`/api/invoices/${invoice.id}/download`, {
+        method: 'GET',
+      })
+
+      if (!response.ok) {
+        // Fallback: generate a simple text-based invoice if API not available
+        const invoiceContent = `
+INVOICE #${invoice.invoice_number}
+================================
+Date: ${invoice.issue_date}
+Due Date: ${invoice.due_date}
+Status: ${invoice.status}
+
+Client: ${invoice.client_name}
+Email: ${invoice.client_email || 'N/A'}
+
+Title: ${invoice.title}
+
+Subtotal: ${getCurrencySymbol(invoice.currency)}${invoice.subtotal?.toLocaleString() || '0'}
+Tax: ${getCurrencySymbol(invoice.currency)}${invoice.tax_amount?.toLocaleString() || '0'}
+Discount: ${getCurrencySymbol(invoice.currency)}${invoice.discount_amount?.toLocaleString() || '0'}
+--------------------------------
+Total: ${getCurrencySymbol(invoice.currency)}${invoice.total_amount?.toLocaleString() || '0'}
+
+Amount Paid: ${getCurrencySymbol(invoice.currency)}${invoice.amount_paid?.toLocaleString() || '0'}
+Amount Due: ${getCurrencySymbol(invoice.currency)}${invoice.amount_due?.toLocaleString() || '0'}
+
+Notes: ${invoice.notes || 'N/A'}
+Terms: ${invoice.terms_and_conditions || 'N/A'}
+        `.trim()
+
+        const blob = new Blob([invoiceContent], { type: 'text/plain' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `invoice-${invoice.invoice_number}.txt`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+        toast.dismiss()
+        toast.success(`Invoice #${invoice.invoice_number} downloaded successfully`)
+        return
       }
-    )
+
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `invoice-${invoice.invoice_number}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      toast.dismiss()
+      toast.success(`Invoice #${invoice.invoice_number} PDF downloaded successfully`)
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Failed to download invoice PDF')
+    }
   }
+
+  // Quick actions with real functionality
+  const invoicesQuickActions = [
+    {
+      id: '1',
+      label: 'New Invoice',
+      icon: 'FileText',
+      shortcut: 'N',
+      action: () => setShowCreateModal(true)
+    },
+    {
+      id: '2',
+      label: 'Send Reminders',
+      icon: 'Mail',
+      shortcut: 'R',
+      action: async () => {
+        const overdueInvoices = displayInvoices.filter(inv => inv.status === 'overdue')
+        if (overdueInvoices.length === 0) {
+          toast.info('No overdue invoices to send reminders for')
+          return
+        }
+        let sentCount = 0
+        for (const inv of overdueInvoices) {
+          await handleSendReminder(inv)
+          sentCount++
+        }
+        toast.success(`${sentCount} reminders sent for overdue invoices`)
+      }
+    },
+    {
+      id: '3',
+      label: 'Export Report',
+      icon: 'Download',
+      shortcut: 'E',
+      action: () => handleExportInvoices('csv')
+    },
+    {
+      id: '4',
+      label: 'Record Payment',
+      icon: 'CreditCard',
+      shortcut: 'P',
+      action: () => {
+        const unpaidInvoices = displayInvoices.filter(inv => inv.status !== 'paid' && inv.status !== 'cancelled')
+        if (unpaidInvoices.length === 0) {
+          toast.info('No unpaid invoices to record payment for')
+          return
+        }
+        toast.info(`Select an invoice to record payment. ${unpaidInvoices.length} unpaid invoices available.`)
+        setActiveTab('sent')
+      }
+    },
+  ]
 
   if (error) {
     return (
@@ -689,7 +831,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                   <option value="30days">Last 30 Days</option>
                   <option value="90days">Last 90 Days</option>
                 </select>
-                <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading filter options...', success: 'Filter options ready', error: 'Failed to load filters' })}>
+                <Button variant="outline" size="icon" onClick={() => toast.info('Filter options', { description: `Showing ${filteredInvoices.length} of ${displayInvoices.length} invoices` })}>
                   <Filter className="h-4 w-4" />
                 </Button>
               </div>
@@ -805,11 +947,17 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading invoice #${invoice.invoice_number}...`, success: `Invoice #${invoice.invoice_number} opened`, error: 'Failed to load invoice' })}>
+                            <DropdownMenuItem onClick={() => {
+                                window.open(`/dashboard/invoices/${invoice.id}`, '_blank')
+                                toast.success(`Invoice #${invoice.invoice_number} opened in new tab`)
+                              }}>
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Opening editor for invoice #${invoice.invoice_number}...`, success: `Invoice #${invoice.invoice_number} ready to edit`, error: 'Failed to open editor' })}>
+                            <DropdownMenuItem onClick={() => {
+                                window.open(`/dashboard/invoices/${invoice.id}/edit`, '_blank')
+                                toast.success(`Invoice #${invoice.invoice_number} opened for editing`)
+                              }}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -825,7 +973,11 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                               <Copy className="h-4 w-4 mr-2" />
                               Duplicate
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying invoice link...', success: 'Invoice link copied to clipboard', error: 'Failed to copy link' })}>
+                            <DropdownMenuItem onClick={() => {
+                                const invoiceUrl = `${window.location.origin}/invoices/${invoice.id}`
+                                navigator.clipboard.writeText(invoiceUrl)
+                                toast.success('Invoice link copied to clipboard')
+                              }}>
                               <Share2 className="h-4 w-4 mr-2" />
                               Share Link
                             </DropdownMenuItem>
@@ -1203,7 +1355,10 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                           <Label>Reminder Email Subject</Label>
                           <Input defaultValue="Reminder: Invoice #{{invoice_number}} is due" />
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening email template editor...', success: 'Email template editor opened', error: 'Failed to open editor' })}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                            window.open('/dashboard/settings/email-templates', '_blank')
+                            toast.success('Email template editor opened')
+                          }}>
                           <Mail className="w-4 h-4 mr-2" />
                           Customize Email Templates
                         </Button>
@@ -1237,7 +1392,27 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             </div>
                             <div className="flex items-center gap-2">
                               {gateway.connected && <Badge className="bg-green-100 text-green-700">Connected</Badge>}
-                              <Button variant={gateway.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: gateway.connected ? `Opening ${gateway.name} settings...` : `Connecting to ${gateway.name}...`, success: gateway.connected ? `${gateway.name} settings opened` : `${gateway.name} connection initiated`, error: `Failed to ${gateway.connected ? 'configure' : 'connect to'} ${gateway.name}` })}>
+                              <Button variant={gateway.connected ? 'outline' : 'default'} size="sm" onClick={async () => {
+                                  if (gateway.connected) {
+                                    window.open(`/dashboard/settings/integrations/${gateway.name.toLowerCase()}`, '_blank')
+                                    toast.success(`${gateway.name} settings opened`)
+                                  } else {
+                                    try {
+                                      const response = await fetch(`/api/integrations/${gateway.name.toLowerCase()}/connect`, { method: 'POST' })
+                                      if (response.ok) {
+                                        const data = await response.json()
+                                        if (data.authUrl) {
+                                          window.open(data.authUrl, '_blank')
+                                        }
+                                        toast.success(`${gateway.name} connection initiated`)
+                                      } else {
+                                        toast.info(`${gateway.name} integration coming soon`)
+                                      }
+                                    } catch {
+                                      toast.info(`${gateway.name} integration coming soon`)
+                                    }
+                                  }
+                                }}>
                                 {gateway.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1342,10 +1517,25 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="inv_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying API key...', success: 'API key copied to clipboard', error: 'Failed to copy API key' })}>
+                            <Button variant="outline" size="icon" onClick={() => {
+                                navigator.clipboard.writeText('inv_live_xxxxxxxxxxxxxxxxxx')
+                                toast.success('API key copied to clipboard')
+                              }}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate API key' })}>
+                            <Button variant="outline" size="icon" onClick={async () => {
+                                if (!confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) return
+                                try {
+                                  const response = await fetch('/api/settings/api-key/regenerate', { method: 'POST' })
+                                  if (response.ok) {
+                                    toast.success('New API key generated successfully')
+                                  } else {
+                                    toast.error('Failed to regenerate API key')
+                                  }
+                                } catch {
+                                  toast.error('Failed to regenerate API key')
+                                }
+                              }}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1381,7 +1571,25 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             ))}
                           </div>
                         </div>
-                        <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Testing webhook connection...', success: 'Webhook test successful - Event delivered', error: 'Webhook test failed - Check URL' })}>
+                        <Button variant="outline" onClick={async () => {
+                            toast.loading('Testing webhook connection...')
+                            try {
+                              const response = await fetch('/api/webhooks/test', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ event: 'test.event' })
+                              })
+                              toast.dismiss()
+                              if (response.ok) {
+                                toast.success('Webhook test successful - Event delivered')
+                              } else {
+                                toast.error('Webhook test failed - Check URL')
+                              }
+                            } catch {
+                              toast.dismiss()
+                              toast.error('Webhook test failed - Check URL')
+                            }
+                          }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Test Webhook
                         </Button>
@@ -1409,7 +1617,27 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 mb-3">{app.description}</p>
-                              <Button variant="outline" size="sm" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: app.connected ? `Opening ${app.name} configuration...` : `Connecting to ${app.name}...`, success: app.connected ? `${app.name} settings opened` : `${app.name} OAuth started`, error: `Failed to ${app.connected ? 'configure' : 'connect to'} ${app.name}` })}>
+                              <Button variant="outline" size="sm" className="w-full" onClick={async () => {
+                                  if (app.connected) {
+                                    window.open(`/dashboard/settings/integrations/${app.name.toLowerCase()}`, '_blank')
+                                    toast.success(`${app.name} settings opened`)
+                                  } else {
+                                    try {
+                                      const response = await fetch(`/api/integrations/${app.name.toLowerCase()}/oauth`, { method: 'POST' })
+                                      if (response.ok) {
+                                        const data = await response.json()
+                                        if (data.authUrl) {
+                                          window.open(data.authUrl, '_blank')
+                                        }
+                                        toast.success(`${app.name} OAuth started`)
+                                      } else {
+                                        toast.info(`${app.name} integration coming soon`)
+                                      }
+                                    } catch {
+                                      toast.info(`${app.name} integration coming soon`)
+                                    }
+                                  }
+                                }}>
                                 {app.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -1467,15 +1695,15 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting all invoices to CSV...', success: 'All invoices exported to invoices-export.csv', error: 'Failed to export invoices' })}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => handleExportInvoices('csv')}>
                             <Download className="w-5 h-5 text-blue-600" />
                             <span>Export All Invoices</span>
                             <span className="text-xs text-gray-500">CSV format</span>
                           </Button>
-                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Generating Excel report...', success: 'Report exported to invoice-report.xlsx', error: 'Failed to generate report' })}>
+                          <Button variant="outline" className="h-auto py-4 flex flex-col gap-2" onClick={() => handleExportInvoices('json')}>
                             <FileSpreadsheet className="w-5 h-5 text-green-600" />
                             <span>Export Report</span>
-                            <span className="text-xs text-gray-500">Excel format</span>
+                            <span className="text-xs text-gray-500">JSON format</span>
                           </Button>
                         </div>
                         <div className="space-y-2">
@@ -1547,7 +1775,25 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Archive All Draft Invoices</div>
                             <p className="text-sm text-gray-500">Move all drafts to archive</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Archiving all draft invoices...', success: `${stats.draft} draft invoices archived successfully`, error: 'Failed to archive drafts' })}>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={async () => {
+                              if (stats.draft === 0) {
+                                toast.info('No draft invoices to archive')
+                                return
+                              }
+                              if (!confirm(`Are you sure you want to archive ${stats.draft} draft invoices?`)) return
+                              toast.loading('Archiving draft invoices...')
+                              try {
+                                const draftInvoices = displayInvoices.filter(i => i.status === 'draft')
+                                for (const inv of draftInvoices) {
+                                  await updateInvoice(inv.id, { status: 'cancelled' })
+                                }
+                                toast.dismiss()
+                                toast.success(`${stats.draft} draft invoices archived successfully`)
+                              } catch {
+                                toast.dismiss()
+                                toast.error('Failed to archive drafts')
+                              }
+                            }}>
                             Archive Drafts
                           </Button>
                         </div>
@@ -1556,7 +1802,19 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Reset Invoice Numbering</div>
                             <p className="text-sm text-gray-500">Reset invoice number sequence</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Resetting invoice numbering...', success: 'Invoice numbering reset to INV-0001', error: 'Failed to reset invoice numbers' })}>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={async () => {
+                              if (!confirm('Are you sure you want to reset invoice numbering? This will start new invoices from INV-0001.')) return
+                              try {
+                                const response = await fetch('/api/invoices/settings/reset-numbering', { method: 'POST' })
+                                if (response.ok) {
+                                  toast.success('Invoice numbering reset to INV-0001')
+                                } else {
+                                  toast.error('Failed to reset invoice numbers')
+                                }
+                              } catch {
+                                toast.error('Failed to reset invoice numbers')
+                              }
+                            }}>
                             Reset Numbers
                           </Button>
                         </div>
@@ -1565,7 +1823,26 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             <div className="font-medium">Delete All Data</div>
                             <p className="text-sm text-gray-500">Permanently delete all invoice data</p>
                           </div>
-                          <Button variant="destructive" onClick={() => toast.promise(new Promise((_, reject) => setTimeout(() => reject(new Error('Safety check')), 800)), { loading: 'Preparing data deletion...', success: 'All invoice data deleted', error: 'Deletion cancelled - Confirm in settings first' })}>
+                          <Button variant="destructive" onClick={async () => {
+                              const confirmation = prompt('This will permanently delete ALL invoice data. Type "DELETE ALL" to confirm:')
+                              if (confirmation !== 'DELETE ALL') {
+                                toast.error('Deletion cancelled - confirmation text did not match')
+                                return
+                              }
+                              toast.loading('Deleting all invoice data...')
+                              try {
+                                const response = await fetch('/api/invoices/delete-all', { method: 'DELETE' })
+                                toast.dismiss()
+                                if (response.ok) {
+                                  toast.success('All invoice data deleted')
+                                } else {
+                                  toast.error('Failed to delete invoice data')
+                                }
+                              } catch {
+                                toast.dismiss()
+                                toast.error('Failed to delete invoice data')
+                              }
+                            }}>
                             Delete All Data
                           </Button>
                         </div>
@@ -1610,7 +1887,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockInvoicesQuickActions}
+            actions={invoicesQuickActions}
             variant="grid"
           />
         </div>
@@ -2113,7 +2390,15 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
             <Button variant="outline" onClick={() => setShowCreateModal(false)}>
               Cancel
             </Button>
-            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating invoice preview...', success: 'Invoice preview ready', error: 'Failed to generate preview' })}>
+            <Button variant="outline" onClick={() => {
+                if (!newInvoice.client || !newInvoice.title) {
+                  toast.error('Please fill in client name and invoice title to preview')
+                  return
+                }
+                toast.success('Invoice preview ready', {
+                  description: `${newInvoice.title} for ${newInvoice.client} - Total: ${getCurrencySymbol(newInvoice.currency)}${calculateTotal().toLocaleString()}`
+                })
+              }}>
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>

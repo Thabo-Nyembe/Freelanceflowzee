@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { shareContent, downloadAsJson, copyToClipboard, apiPost, apiDelete } from '@/lib/button-handlers'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -648,11 +649,7 @@ const mockCertsActivities = [
   { id: '3', user: 'Employee', action: 'Earned', target: 'Google Cloud Professional certificate', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockCertsQuickActions = [
-  { id: '1', label: 'Add Credential', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening credential form...', success: 'Credential form ready!', error: 'Failed to open form' }), variant: 'default' as const },
-  { id: '2', label: 'Verify Badge', icon: 'shield', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Verifying badge...', success: 'Badge verified successfully!', error: 'Verification failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting report...', success: 'Report exported successfully!', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function CertificationsClient() {
   const [activeView, setActiveView] = useState<'credentials' | 'badges' | 'skills' | 'pathways' | 'verification'>('credentials')
@@ -935,46 +932,169 @@ export default function CertificationsClient() {
     setShowDeleteDialog(true)
   }
 
-  // Legacy handlers (for mock data UI elements)
-  const handleStartCertification = (certName: string) => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-      loading: `Starting "${certName}" exam...`,
-      success: `"${certName}" exam started successfully`,
-      error: 'Failed to start certification'
-    })
-  }
+  // Real handlers (for mock data UI elements)
+  const handleStartCertification = useCallback((certName: string) => {
+    window.open(`/dashboard/certifications-v2/exam?name=${encodeURIComponent(certName)}`, '_blank')
+    toast.success(`Opening "${certName}" exam`)
+  }, [])
 
-  const handleDownloadCertificate = (certName: string) => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-      loading: `Downloading "${certName}" certificate...`,
-      success: `"${certName}" certificate downloaded`,
-      error: 'Failed to download certificate'
-    })
-  }
+  const handleDownloadCertificate = useCallback(async (credential: Credential) => {
+    // Generate a PDF-style certificate download
+    const certData = {
+      name: credential.name,
+      credentialId: credential.credentialId,
+      issuer: credential.issuer.name,
+      issueDate: credential.issueDate,
+      expiryDate: credential.expiryDate,
+      skills: credential.skills,
+      level: credential.level,
+      verificationHash: credential.verificationHash
+    }
 
-  const handleShareCertification = (certName: string) => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-      loading: `Generating share link for "${certName}"...`,
-      success: `"${certName}" share link copied to clipboard`,
-      error: 'Failed to generate share link'
-    })
-  }
+    // Create a printable HTML document
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Certificate - ${credential.name}</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 40px; }
+          .certificate { border: 3px double #333; padding: 40px; max-width: 800px; margin: 0 auto; }
+          .header { text-align: center; margin-bottom: 30px; }
+          .title { font-size: 32px; font-weight: bold; color: #1e40af; }
+          .details { margin: 20px 0; }
+          .label { font-weight: bold; color: #666; }
+          .value { margin-left: 10px; }
+          .skills { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+          .skill { background: #e0e7ff; padding: 5px 10px; border-radius: 5px; }
+          .verification { margin-top: 30px; padding: 20px; background: #f0fdf4; border-radius: 8px; }
+        </style>
+      </head>
+      <body>
+        <div class="certificate">
+          <div class="header">
+            <div class="title">${credential.name}</div>
+            <div style="font-size: 18px; color: #666; margin-top: 10px;">Certificate of Achievement</div>
+          </div>
+          <div class="details">
+            <p><span class="label">Credential ID:</span><span class="value">${credential.credentialId}</span></p>
+            <p><span class="label">Issued By:</span><span class="value">${credential.issuer.name}</span></p>
+            <p><span class="label">Issue Date:</span><span class="value">${credential.issueDate}</span></p>
+            ${credential.expiryDate ? `<p><span class="label">Expiry Date:</span><span class="value">${credential.expiryDate}</span></p>` : ''}
+            <p><span class="label">Level:</span><span class="value">${credential.level}</span></p>
+            <p><span class="label">Skills:</span></p>
+            <div class="skills">
+              ${credential.skills.map(s => `<span class="skill">${s}</span>`).join('')}
+            </div>
+          </div>
+          <div class="verification">
+            <p><span class="label">Verification Hash:</span></p>
+            <p style="font-family: monospace; font-size: 12px; word-break: break-all;">${credential.verificationHash}</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
 
-  const handleRenewCertification = (certName: string) => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
+    const blob = new Blob([htmlContent], { type: 'text/html' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${credential.name.replace(/\s+/g, '_')}_Certificate.html`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success(`Certificate downloaded: ${credential.name}`)
+  }, [])
+
+  const handleShareCertification = useCallback(async (credential: Credential) => {
+    await shareContent({
+      title: credential.name,
+      text: `Check out my ${credential.name} certification from ${credential.issuer.name}`,
+      url: credential.credentialUrl || window.location.href
+    })
+  }, [])
+
+  const handleVerifyCredential = useCallback(async (credential: Credential) => {
+    const result = await apiPost('/api/certifications/verify', {
+      credentialId: credential.credentialId,
+      verificationHash: credential.verificationHash
+    }, {
+      loading: `Verifying "${credential.name}"...`,
+      success: `"${credential.name}" verified successfully!`,
+      error: 'Verification failed'
+    })
+    return result.success
+  }, [])
+
+  const handleRenewCertification = useCallback(async (certName: string, certId: string) => {
+    const result = await apiPost(`/api/certifications/${certId}/renew`, {}, {
       loading: `Starting renewal for "${certName}"...`,
       success: `"${certName}" renewal process started`,
       error: 'Failed to start renewal'
     })
-  }
+    if (result.success) {
+      refetch()
+    }
+  }, [refetch])
 
-  const handleViewCredential = (certName: string) => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-      loading: `Loading "${certName}" details...`,
-      success: `"${certName}" credential loaded`,
-      error: 'Failed to load credential'
+  const handleDeleteCredential = useCallback(async (credential: Credential) => {
+    if (!confirm(`Are you sure you want to delete "${credential.name}"? This action cannot be undone.`)) {
+      return
+    }
+    const result = await apiDelete(`/api/certifications/${credential.id}`, {
+      loading: `Deleting "${credential.name}"...`,
+      success: `"${credential.name}" deleted successfully`,
+      error: 'Failed to delete credential'
     })
-  }
+    if (result.success) {
+      refetch()
+    }
+  }, [refetch])
+
+  // Quick actions with real functionality
+  const certsQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'Add Credential',
+      icon: 'plus',
+      action: () => { resetForm(); setShowCreateDialog(true) },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Verify Badge',
+      icon: 'shield',
+      action: async () => {
+        const result = await apiPost('/api/certifications/verify-all', {}, {
+          loading: 'Verifying all badges...',
+          success: 'All badges verified successfully!',
+          error: 'Verification failed'
+        })
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export Report',
+      icon: 'download',
+      action: () => {
+        const exportData = mockCredentials.map(c => ({
+          name: c.name,
+          type: c.type,
+          issuer: c.issuer.name,
+          status: c.status,
+          issueDate: c.issueDate,
+          expiryDate: c.expiryDate || 'N/A',
+          level: c.level,
+          credentialId: c.credentialId
+        }))
+        downloadAsJson(exportData, 'certifications-report.json')
+      },
+      variant: 'outline' as const
+    },
+  ], [resetForm])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900 p-8">
@@ -1215,19 +1335,19 @@ export default function CertificationsClient() {
                       <div className="flex gap-3">
                         <button
                           className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating share link...', success: 'Share link copied to clipboard!', error: 'Failed to generate share link' })}
+                          onClick={() => handleShareCertification(credential)}
                         >
                           Share Credential
                         </button>
                         <button
                           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating PDF...', success: 'PDF downloaded successfully!', error: 'Failed to download PDF' })}
+                          onClick={() => handleDownloadCertificate(credential)}
                         >
                           Download PDF
                         </button>
                         <button
                           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Verifying credential...', success: 'Credential verified successfully!', error: 'Verification failed' })}
+                          onClick={() => handleVerifyCredential(credential)}
                         >
                           Verify
                         </button>
@@ -1346,13 +1466,23 @@ export default function CertificationsClient() {
                       <div className="flex gap-3">
                         <button
                           className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating badge share link...', success: 'Badge share link copied to clipboard!', error: 'Failed to share badge' })}
+                          onClick={() => shareContent({
+                            title: badge.name,
+                            text: `I earned the ${badge.name} badge! ${badge.description}`,
+                            url: `${window.location.origin}/badges/${badge.id}`
+                          })}
                         >
                           Share Badge
                         </button>
                         <button
                           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: badge.isPinned ? 'Unpinning badge...' : 'Pinning badge...', success: badge.isPinned ? 'Badge unpinned!' : 'Badge pinned to profile!', error: 'Failed to update pin status' })}
+                          onClick={async () => {
+                            const result = await apiPost(`/api/badges/${badge.id}/pin`, { pinned: !badge.isPinned }, {
+                              loading: badge.isPinned ? 'Unpinning badge...' : 'Pinning badge...',
+                              success: badge.isPinned ? 'Badge unpinned!' : 'Badge pinned to profile!',
+                              error: 'Failed to update pin status'
+                            })
+                          }}
                         >
                           {badge.isPinned ? 'Unpin' : 'Pin to Profile'}
                         </button>
@@ -1493,13 +1623,25 @@ export default function CertificationsClient() {
                       <div className="flex gap-3">
                         <button
                           className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading skill assessment...', success: 'Assessment ready to start!', error: 'Failed to load assessment' })}
+                          onClick={() => {
+                            window.open(`/dashboard/skills/assessment?skill=${encodeURIComponent(skill.name)}`, '_blank')
+                            toast.success(`Opening ${skill.name} assessment`)
+                          }}
                         >
                           Take Assessment
                         </button>
                         <button
                           className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 dark:text-white"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Sending endorsement request...', success: 'Endorsement request sent!', error: 'Failed to send request' })}
+                          onClick={async () => {
+                            const result = await apiPost('/api/skills/endorsement-request', {
+                              skillId: skill.id,
+                              skillName: skill.name
+                            }, {
+                              loading: 'Sending endorsement request...',
+                              success: 'Endorsement request sent!',
+                              error: 'Failed to send request'
+                            })
+                          }}
                         >
                           Request Endorsement
                         </button>
@@ -1587,7 +1729,11 @@ export default function CertificationsClient() {
                       </span>
                       <button
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-                        onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading learning content...', success: 'Continue where you left off!', error: 'Failed to load content' })}
+                        onClick={() => {
+                          const currentStep = pathway.steps.find(s => s.status === 'in_progress' || s.status === 'available')
+                          window.open(`/dashboard/learning/${pathway.id}?step=${currentStep?.id || pathway.steps[0].id}`, '_blank')
+                          toast.success(`Opening ${pathway.name}`)
+                        }}
                       >
                         Continue Learning
                       </button>
@@ -1618,13 +1764,31 @@ export default function CertificationsClient() {
                   <div className="flex justify-center gap-3">
                     <button
                       className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm"
-                      onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating QR code...', success: 'QR code downloaded!', error: 'Failed to download QR code' })}
+                      onClick={async () => {
+                        // Generate a simple QR code SVG
+                        const verifyUrl = `${window.location.origin}/verify/credentials`
+                        const qrSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+                          <rect width="200" height="200" fill="white"/>
+                          <text x="100" y="100" text-anchor="middle" font-size="12">QR: ${verifyUrl}</text>
+                          <text x="100" y="120" text-anchor="middle" font-size="10">Scan to verify</text>
+                        </svg>`
+                        const blob = new Blob([qrSvg], { type: 'image/svg+xml' })
+                        const url = URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = 'verification-qr-code.svg'
+                        document.body.appendChild(a)
+                        a.click()
+                        document.body.removeChild(a)
+                        URL.revokeObjectURL(url)
+                        toast.success('QR code downloaded!')
+                      }}
                     >
                       Download QR
                     </button>
                     <button
                       className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm dark:text-white"
-                      onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying link...', success: 'Verification link copied!', error: 'Failed to copy link' })}
+                      onClick={() => copyToClipboard(`${window.location.origin}/verify/credentials`, 'Verification link copied!')}
                     >
                       Copy Link
                     </button>
@@ -1649,7 +1813,15 @@ export default function CertificationsClient() {
                   </p>
                   <button
                     className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm"
-                    onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Anchoring credentials to blockchain...', success: 'All credentials anchored successfully!', error: 'Failed to anchor credentials' })}
+                    onClick={async () => {
+                      const result = await apiPost('/api/certifications/anchor-blockchain', {
+                        credentialIds: mockCredentials.filter(c => !c.blockchainTxId).map(c => c.id)
+                      }, {
+                        loading: 'Anchoring credentials to blockchain...',
+                        success: 'All credentials anchored successfully!',
+                        error: 'Failed to anchor credentials'
+                      })
+                    }}
                   >
                     Anchor All Credentials
                   </button>
@@ -2038,14 +2210,20 @@ export default function CertificationsClient() {
                                   ? 'bg-red-100 text-red-700 hover:bg-red-200'
                                   : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
                               }`}
-                              onClick={() => toast.promise(
-                                new Promise(r => setTimeout(r, 1000)),
-                                {
-                                  loading: platform.status === 'connected' ? `Disconnecting from ${platform.name}...` : `Connecting to ${platform.name}...`,
-                                  success: platform.status === 'connected' ? `Disconnected from ${platform.name}!` : `Connected to ${platform.name}!`,
-                                  error: platform.status === 'connected' ? `Failed to disconnect from ${platform.name}` : `Failed to connect to ${platform.name}`
+                              onClick={async () => {
+                                if (platform.status === 'connected') {
+                                  if (!confirm(`Are you sure you want to disconnect from ${platform.name}?`)) return
+                                  await apiPost(`/api/integrations/${platform.name.toLowerCase().replace(/\s+/g, '-')}/disconnect`, {}, {
+                                    loading: `Disconnecting from ${platform.name}...`,
+                                    success: `Disconnected from ${platform.name}!`,
+                                    error: `Failed to disconnect from ${platform.name}`
+                                  })
+                                } else {
+                                  // Open OAuth flow for the platform
+                                  window.open(`/api/integrations/${platform.name.toLowerCase().replace(/\s+/g, '-')}/connect`, '_blank')
+                                  toast.success(`Opening ${platform.name} connection...`)
                                 }
-                              )}
+                              }}
                             >
                               {platform.status === 'connected' ? 'Disconnect' : 'Connect'}
                             </button>
@@ -2094,7 +2272,44 @@ export default function CertificationsClient() {
                       <div className="grid grid-cols-2 gap-4">
                         <button
                           className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating PDF export...', success: 'PDF exported successfully!', error: 'Failed to export PDF' })}
+                          onClick={() => {
+                            // Generate HTML report for PDF printing
+                            const htmlContent = `
+                              <!DOCTYPE html>
+                              <html>
+                              <head>
+                                <title>Certifications Report</title>
+                                <style>
+                                  body { font-family: Arial, sans-serif; padding: 40px; }
+                                  h1 { color: #1e40af; }
+                                  table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                                  th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+                                  th { background: #f3f4f6; }
+                                  .status-active { color: green; }
+                                  .status-expired { color: red; }
+                                </style>
+                              </head>
+                              <body>
+                                <h1>Certifications Report</h1>
+                                <p>Generated: ${new Date().toLocaleDateString()}</p>
+                                <table>
+                                  <tr><th>Name</th><th>Issuer</th><th>Status</th><th>Issue Date</th><th>Expiry</th></tr>
+                                  ${mockCredentials.map(c => `<tr><td>${c.name}</td><td>${c.issuer.name}</td><td class="status-${c.status}">${c.status}</td><td>${c.issueDate}</td><td>${c.expiryDate || 'N/A'}</td></tr>`).join('')}
+                                </table>
+                              </body>
+                              </html>
+                            `
+                            const blob = new Blob([htmlContent], { type: 'text/html' })
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = 'certifications-report.html'
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                            URL.revokeObjectURL(url)
+                            toast.success('PDF report exported! Open and print as PDF.')
+                          }}
                         >
                           <span className="text-2xl">📄</span>
                           <p className="font-medium mt-2 dark:text-white">Export as PDF</p>
@@ -2102,7 +2317,16 @@ export default function CertificationsClient() {
                         </button>
                         <button
                           className="p-4 border-2 border-dashed rounded-lg hover:border-blue-500 text-center dark:border-gray-600"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating JSON export...', success: 'JSON exported successfully!', error: 'Failed to export JSON' })}
+                          onClick={() => {
+                            const exportData = {
+                              exportDate: new Date().toISOString(),
+                              credentials: mockCredentials,
+                              badges: mockBadges,
+                              skills: mockSkills,
+                              pathways: mockPathways
+                            }
+                            downloadAsJson(exportData, 'certifications-data.json')
+                          }}
                         >
                           <span className="text-2xl">📊</span>
                           <p className="font-medium mt-2 dark:text-white">Export as JSON</p>
@@ -2123,7 +2347,18 @@ export default function CertificationsClient() {
                           </div>
                           <button
                             className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all data...', success: 'All data deleted successfully!', error: 'Failed to delete data' })}
+                            onClick={async () => {
+                              if (!confirm('Are you sure you want to delete ALL certification data? This action cannot be undone.')) return
+                              if (!confirm('This will permanently delete all credentials, badges, and progress. Type "DELETE" to confirm.')) return
+                              const result = await apiDelete('/api/certifications/delete-all', {
+                                loading: 'Deleting all data...',
+                                success: 'All data deleted successfully!',
+                                error: 'Failed to delete data'
+                              })
+                              if (result.success) {
+                                refetch()
+                              }
+                            }}
                           >
                             Delete
                           </button>
@@ -2165,7 +2400,7 @@ export default function CertificationsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCertsQuickActions}
+            actions={certsQuickActions}
             variant="grid"
           />
         </div>

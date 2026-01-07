@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { toast } from 'sonner'
+import { copyToClipboard } from '@/lib/button-handlers'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -585,10 +586,66 @@ const mockContentActivities = [
   { id: '3', user: 'System', action: 'Archived', target: '12 outdated entries', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
+// Real action handlers for content quick actions
+const handleCreateNewEntry = async () => {
+  try {
+    const response = await fetch('/api/content/entries', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'New Entry',
+        content_type_id: 'article',
+        status: 'draft',
+        fields: {}
+      })
+    })
+    if (!response.ok) throw new Error('Failed to create entry')
+    return await response.json()
+  } catch {
+    throw new Error('Failed to create entry')
+  }
+}
+
+const handleBulkPublish = async () => {
+  try {
+    const response = await fetch('/api/content/entries/bulk-publish', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'draft' })
+    })
+    if (!response.ok) throw new Error('Failed to publish entries')
+    return await response.json()
+  } catch {
+    throw new Error('Some entries failed to publish')
+  }
+}
+
+const handleExportAll = async () => {
+  try {
+    const response = await fetch('/api/content/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    if (!response.ok) throw new Error('Export failed')
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'content-export.zip'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+    return { success: true }
+  } catch {
+    throw new Error('Export failed')
+  }
+}
+
 const mockContentQuickActions = [
-  { id: '1', label: 'New Entry', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating content entry...', success: 'Entry created! Add content and media', error: 'Failed to create entry' }), variant: 'default' as const },
-  { id: '2', label: 'Bulk Publish', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Publishing 12 entries...', success: 'All entries published successfully!', error: 'Some entries failed to publish' }), variant: 'default' as const },
-  { id: '3', label: 'Export All', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting content...', success: 'Content exported to content-export.zip', error: 'Export failed' }), variant: 'outline' as const },
+  { id: '1', label: 'New Entry', icon: 'plus', action: () => toast.promise(handleCreateNewEntry(), { loading: 'Creating content entry...', success: 'Entry created! Add content and media', error: 'Failed to create entry' }), variant: 'default' as const },
+  { id: '2', label: 'Bulk Publish', icon: 'upload', action: () => toast.promise(handleBulkPublish(), { loading: 'Publishing entries...', success: 'All entries published successfully!', error: 'Some entries failed to publish' }), variant: 'default' as const },
+  { id: '3', label: 'Export All', icon: 'download', action: () => toast.promise(handleExportAll(), { loading: 'Exporting content...', success: 'Content exported to content-export.zip', error: 'Export failed' }), variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -1513,7 +1570,7 @@ export default function ContentStudioClient() {
                             <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded flex-1">
                               •••••••••••••••••••••
                             </code>
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Delivery API key copied', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => copyToClipboard('cda_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'Delivery API key copied')}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
@@ -1522,7 +1579,7 @@ export default function ContentStudioClient() {
                             <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded flex-1">
                               •••••••••••••••••••••
                             </code>
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Management API key copied', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => copyToClipboard('cma_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'Management API key copied')}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="flex gap-2">

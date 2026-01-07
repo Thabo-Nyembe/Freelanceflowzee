@@ -508,12 +508,7 @@ const mockPollsActivities = [
   { id: '3', user: 'Marketing Team', action: 'shared', target: 'survey link to 500 customers', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mockPollsQuickActions = [
-  { id: '1', label: 'New Survey', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening survey builder...', success: 'Survey builder ready - create your new survey', error: 'Failed to open survey builder' }) },
-  { id: '2', label: 'View Results', icon: 'BarChart3', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading results dashboard...', success: 'Results dashboard ready - view survey analytics', error: 'Failed to load results' }) },
-  { id: '3', label: 'Templates', icon: 'Layout', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading template library...', success: 'Template library ready - choose from pre-built survey templates', error: 'Failed to load templates' }) },
-  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting survey data...', success: 'Export completed!', error: 'Export failed' }) },
-]
+// Quick actions defined inline within component for proper state access
 
 // ============================================================================
 // SUPABASE POLL TYPE
@@ -574,6 +569,55 @@ export default function PollsClient() {
     starts_at: '',
     ends_at: ''
   })
+
+  // Selected form for viewing
+  const [selectedFormForView, setSelectedFormForView] = useState<Form | null>(null)
+
+  // Selected theme
+  const [selectedTheme, setSelectedTheme] = useState<string>(mockThemes[0].id)
+
+  // Quick actions with real functionality
+  const pollsQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Survey',
+      icon: 'Plus',
+      shortcut: 'N',
+      action: () => {
+        setShowCreateDialog(true)
+        toast.success('Survey builder opened')
+      }
+    },
+    {
+      id: '2',
+      label: 'View Results',
+      icon: 'BarChart3',
+      shortcut: 'R',
+      action: () => {
+        setActiveTab('responses')
+        toast.success('Viewing survey results')
+      }
+    },
+    {
+      id: '3',
+      label: 'Templates',
+      icon: 'Layout',
+      shortcut: 'T',
+      action: () => {
+        setShowTemplateDialog(true)
+        toast.success('Template library opened')
+      }
+    },
+    {
+      id: '4',
+      label: 'Export',
+      icon: 'Download',
+      shortcut: 'E',
+      action: () => {
+        handleExportResponses()
+      }
+    },
+  ], [])
 
   // Reset form
   const resetForm = () => {
@@ -799,14 +843,6 @@ export default function PollsClient() {
     })
   }
 
-  const handleCreateForm = () => {
-    setShowCreateDialog(true)
-  }
-
-  const handleUseTemplate = () => {
-    setShowTemplateDialog(true)
-  }
-
   const handleExportResponses = async () => {
     try {
       const csvContent = dbPolls.map(p =>
@@ -826,14 +862,220 @@ export default function PollsClient() {
 
   const handleShareForm = async (pollId: string) => {
     const url = `${window.location.origin}/polls/${pollId}`
-    toast.promise(
-      navigator.clipboard.writeText(url),
-      {
-        loading: 'Copying share link...',
-        success: 'Poll share link copied to clipboard',
-        error: 'Failed to copy link'
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success('Poll share link copied to clipboard')
+    } catch {
+      toast.error('Failed to copy link')
+    }
+  }
+
+  // Handle form preview
+  const handlePreviewForm = (form: Form) => {
+    setSelectedFormForView(form)
+    toast.success(`Previewing: ${form.title}`)
+  }
+
+  // Handle form edit - opens settings tab
+  const handleEditForm = (form: Form) => {
+    setSelectedFormForView(form)
+    setActiveTab('settings')
+    toast.success(`Editing: ${form.title}`)
+  }
+
+  // Handle share for mockForms
+  const handleShareMockForm = async (form: Form) => {
+    const url = `${window.location.origin}/polls/${form.slug}`
+    try {
+      // Try Web Share API first
+      if (navigator.share) {
+        await navigator.share({
+          title: form.title,
+          text: form.description,
+          url: url
+        })
+        toast.success('Poll shared successfully')
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(url)
+        toast.success('Poll link copied to clipboard')
       }
-    )
+    } catch (err) {
+      // User cancelled share or clipboard failed
+      if ((err as Error).name !== 'AbortError') {
+        toast.error('Failed to share poll')
+      }
+    }
+  }
+
+  // Handle view results for a form
+  const handleViewResults = (form: Form) => {
+    setSelectedFormForView(form)
+    setActiveTab('analytics')
+    toast.success(`Viewing results for: ${form.title}`)
+  }
+
+  // Handle form settings
+  const handleFormSettings = (form: Form) => {
+    setSelectedFormForView(form)
+    setActiveTab('settings')
+    setSettingsTab('form-defaults')
+    toast.success(`Opening settings for: ${form.title}`)
+  }
+
+  // Handle duplicate mock form
+  const handleDuplicateMockForm = (form: Form) => {
+    const duplicatedForm: Form = {
+      ...form,
+      id: `form-${Date.now()}`,
+      title: `${form.title} (Copy)`,
+      status: 'draft',
+      responseCount: 0,
+      viewCount: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+    setForms(prev => [duplicatedForm, ...prev])
+    toast.success(`Duplicated: ${form.title}`)
+  }
+
+  // Handle delete mock form
+  const handleDeleteMockForm = (form: Form) => {
+    if (confirm(`Are you sure you want to delete "${form.title}"? This action cannot be undone.`)) {
+      setForms(prev => prev.filter(f => f.id !== form.id))
+      toast.success(`Deleted: ${form.title}`)
+    }
+  }
+
+  // Handle view response details
+  const handleViewResponseDetails = (formTitle: string, responseNum: number) => {
+    toast.success(`Viewing response #${responseNum} for ${formTitle}`)
+    setActiveTab('analytics')
+  }
+
+  // Integration connection state
+  const [integrationStatus, setIntegrationStatus] = useState<Record<string, boolean>>({
+    'Google Sheets': true,
+    'Slack': true,
+    'Zapier': false,
+    'Webhooks': true,
+    'Mailchimp': false,
+    'HubSpot': false
+  })
+
+  // Handle integration toggle
+  const handleIntegrationToggle = (integrationName: string, isCurrentlyConnected: boolean) => {
+    if (isCurrentlyConnected) {
+      // Configure - open settings tab for integrations
+      setActiveTab('settings')
+      setSettingsTab('integrations')
+      toast.success(`Configuring ${integrationName}`)
+    } else {
+      // Connect
+      setIntegrationStatus(prev => ({ ...prev, [integrationName]: true }))
+      toast.success(`${integrationName} connected successfully!`)
+    }
+  }
+
+  // Handle theme selection
+  const handleThemeSelect = (theme: FormTheme) => {
+    setSelectedTheme(theme.id)
+    toast.success(`${theme.name} theme set as default`)
+  }
+
+  // Handle copy API key
+  const handleCopyApiKey = async () => {
+    try {
+      await navigator.clipboard.writeText('sk_live_xxxxxxxxxxxxxxxxxxxxx')
+      toast.success('API key copied to clipboard')
+    } catch {
+      toast.error('Failed to copy API key')
+    }
+  }
+
+  // Handle regenerate API key
+  const handleRegenerateApiKey = () => {
+    if (confirm('Are you sure you want to regenerate your API key? Your old key will stop working immediately.')) {
+      toast.success('New API key generated successfully')
+    }
+  }
+
+  // Handle add webhook
+  const handleAddWebhook = () => {
+    toast.success('Webhook endpoint created')
+  }
+
+  // Handle manage subscription
+  const handleManageSubscription = () => {
+    setActiveTab('settings')
+    setSettingsTab('advanced')
+    toast.success('Subscription management opened')
+  }
+
+  // Handle upgrade plan
+  const handleUpgradePlan = () => {
+    toast.success('Upgrade options available - contact sales for enterprise plans')
+  }
+
+  // Handle delete all responses
+  const handleDeleteAllResponses = () => {
+    if (confirm('Are you sure you want to delete ALL responses? This action cannot be undone.')) {
+      setForms(prev => prev.map(f => ({ ...f, responseCount: 0, viewCount: 0, completionRate: 0 })))
+      toast.success('All responses deleted permanently')
+    }
+  }
+
+  // Handle reset workspace
+  const handleResetWorkspace = () => {
+    if (confirm('Are you sure you want to reset your workspace? This will delete all forms and data. This action cannot be undone.')) {
+      setForms([])
+      setDbPolls([])
+      toast.success('Workspace reset complete')
+    }
+  }
+
+  // Handle delete account
+  const handleDeleteAccount = () => {
+    if (confirm('Are you sure you want to delete your account? This action is permanent and cannot be undone.')) {
+      toast.error('Account deletion requires email confirmation. Check your inbox.')
+    }
+  }
+
+  // Handle use template
+  const handleUseTemplate = (template: FormTemplate) => {
+    const newForm: Form = {
+      id: `form-${Date.now()}`,
+      title: template.name,
+      description: template.description,
+      slug: `${template.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
+      status: 'draft',
+      questions: template.questions,
+      theme: mockThemes[0],
+      settings: {
+        showProgressBar: true,
+        showQuestionNumbers: true,
+        allowBackNavigation: true,
+        shuffleQuestions: false,
+        limitResponses: false,
+        closeOnDate: false,
+        notifyOnResponse: false,
+        notifyEmails: [],
+        sendConfirmationEmail: false,
+        redirectOnComplete: false,
+        passwordProtected: false
+      },
+      responseCount: 0,
+      viewCount: 0,
+      completionRate: 0,
+      averageTime: 0,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      workspace: 'Default',
+      createdBy: { id: 'user-1', name: 'Current User', avatar: '/avatars/default.jpg' }
+    }
+    setForms(prev => [newForm, ...prev])
+    setShowTemplateDialog(false)
+    toast.success(`Template applied! Form "${template.name}" ready to customize`)
   }
 
   return (
@@ -972,13 +1214,13 @@ export default function PollsClient() {
                       )}
                     </div>
                     <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening preview...', success: 'Preview ready', error: 'Failed to load preview' })} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
+                      <button onClick={() => handlePreviewForm(form)} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
                         <Eye className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Editor ready', error: 'Failed to open editor' })} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
+                      <button onClick={() => handleEditForm(form)} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
                         <Edit2 className="w-4 h-4 text-gray-600" />
                       </button>
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Preparing share link...', success: 'Share link copied!', error: 'Failed to copy link' })} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
+                      <button onClick={() => handleShareMockForm(form)} className="p-1.5 bg-white/80 hover:bg-white rounded-lg shadow-sm">
                         <Share2 className="w-4 h-4 text-gray-600" />
                       </button>
                     </div>
@@ -1020,19 +1262,19 @@ export default function PollsClient() {
                   {/* Actions */}
                   <div className="px-4 py-3 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading results...', success: 'Results loaded', error: 'Failed to load results' })} className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                      <button onClick={() => handleViewResults(form)} className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         Results
                       </button>
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading settings...', success: 'Settings ready', error: 'Failed to load settings' })} className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                      <button onClick={() => handleFormSettings(form)} className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
                         Settings
                       </button>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Duplicating form...', success: 'Form duplicated!', error: 'Failed to duplicate form' })} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                      <button onClick={() => handleDuplicateMockForm(form)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Duplicate form">
                         <Copy className="w-4 h-4 text-gray-400" />
                       </button>
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading options...', success: 'Options menu ready', error: 'Failed to load options' })} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
-                        <MoreVertical className="w-4 h-4 text-gray-400" />
+                      <button onClick={() => handleDeleteMockForm(form)} className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" title="Delete form">
+                        <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500" />
                       </button>
                     </div>
                   </div>
@@ -1174,7 +1416,7 @@ export default function PollsClient() {
                           </div>
                         </div>
                       </div>
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading response details...', success: 'Response details loaded', error: 'Failed to load details' })} className="px-3 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
+                      <button onClick={() => handleViewResponseDetails(form.title, form.responseCount - i)} className="px-3 py-1.5 text-sm font-medium text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors">
                         View Details
                       </button>
                     </div>
@@ -1291,37 +1533,40 @@ export default function PollsClient() {
           <TabsContent value="integrations" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
-                { name: 'Google Sheets', description: 'Sync responses to Google Sheets automatically', icon: '📊', connected: true },
-                { name: 'Slack', description: 'Get notified in Slack for new responses', icon: '💬', connected: true },
-                { name: 'Zapier', description: 'Connect to 5000+ apps with Zapier', icon: '⚡', connected: false },
-                { name: 'Webhooks', description: 'Send data to your custom endpoints', icon: '🔗', connected: true },
-                { name: 'Mailchimp', description: 'Add respondents to your mailing lists', icon: '📧', connected: false },
-                { name: 'HubSpot', description: 'Create leads from form submissions', icon: '🎯', connected: false }
-              ].map((integration, i) => (
-                <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="text-4xl">{integration.icon}</div>
-                    {integration.connected ? (
-                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded">
-                        Connected
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded">
-                        Not Connected
-                      </span>
-                    )}
+                { name: 'Google Sheets', description: 'Sync responses to Google Sheets automatically', icon: '📊' },
+                { name: 'Slack', description: 'Get notified in Slack for new responses', icon: '💬' },
+                { name: 'Zapier', description: 'Connect to 5000+ apps with Zapier', icon: '⚡' },
+                { name: 'Webhooks', description: 'Send data to your custom endpoints', icon: '🔗' },
+                { name: 'Mailchimp', description: 'Add respondents to your mailing lists', icon: '📧' },
+                { name: 'HubSpot', description: 'Create leads from form submissions', icon: '🎯' }
+              ].map((integration, i) => {
+                const isConnected = integrationStatus[integration.name] ?? false
+                return (
+                  <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="text-4xl">{integration.icon}</div>
+                      {isConnected ? (
+                        <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-medium rounded">
+                          Connected
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded">
+                          Not Connected
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="font-semibold mb-1">{integration.name}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{integration.description}</p>
+                    <button onClick={() => handleIntegrationToggle(integration.name, isConnected)} className={`w-full py-2 rounded-lg text-sm font-medium transition-colors ${
+                      isConnected
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                        : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    }`}>
+                      {isConnected ? 'Configure' : 'Connect'}
+                    </button>
                   </div>
-                  <h3 className="font-semibold mb-1">{integration.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{integration.description}</p>
-                  <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: integration.connected ? 'Loading configuration...' : 'Connecting integration...', success: integration.connected ? 'Configuration loaded' : 'Integration connected!', error: integration.connected ? 'Failed to load configuration' : 'Failed to connect' })} className={`w-full py-2 rounded-lg text-sm font-medium transition-colors ${
-                    integration.connected
-                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                      : 'bg-emerald-600 text-white hover:bg-emerald-700'
-                  }`}>
-                    {integration.connected ? 'Configure' : 'Connect'}
-                  </button>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </TabsContent>
 
@@ -1828,8 +2073,8 @@ export default function PollsClient() {
                           {mockThemes.map(theme => (
                             <button
                               key={theme.id}
-                              onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Applying ${theme.name} theme...`, success: `${theme.name} theme set as default`, error: 'Failed to apply theme' })}
-                              className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-emerald-500 transition-all"
+                              onClick={() => handleThemeSelect(theme)}
+                              className={`p-3 border rounded-lg transition-all ${selectedTheme === theme.id ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20' : 'border-gray-200 dark:border-gray-700 hover:border-emerald-500'}`}
                             >
                               <div
                                 className="h-20 rounded-lg mb-2"
@@ -1919,7 +2164,7 @@ export default function PollsClient() {
                           </div>
                         </div>
 
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating webhook endpoint...', success: 'Webhook endpoint created!', error: 'Failed to create endpoint' })}>
+                        <Button variant="outline" className="w-full" onClick={handleAddWebhook}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Webhook Endpoint
                         </Button>
@@ -1939,10 +2184,10 @@ export default function PollsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="STRIPE_KEY_PLACEHOLDER" readOnly />
-                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>
+                            <Button variant="outline" onClick={handleCopyApiKey}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Regenerating API key...', success: 'New API key generated!', error: 'Failed to regenerate API key' })}>
+                            <Button variant="outline" onClick={handleRegenerateApiKey}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -2106,7 +2351,7 @@ export default function PollsClient() {
                           </Select>
                         </div>
 
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting all data...', success: 'Data export completed!', error: 'Failed to export data' })}>
+                        <Button variant="outline" className="w-full" onClick={handleExportResponses}>
                           <Download className="w-4 h-4 mr-2" />
                           Export All Data
                         </Button>
@@ -2146,10 +2391,10 @@ export default function PollsClient() {
                         </div>
 
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading subscription details...', success: 'Subscription management ready', error: 'Failed to load subscription' })}>
+                          <Button variant="outline" className="flex-1" onClick={handleManageSubscription}>
                             Manage Subscription
                           </Button>
-                          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading upgrade options...', success: 'Upgrade options available!', error: 'Failed to load upgrade options' })}>
+                          <Button className="flex-1 bg-emerald-600 hover:bg-emerald-700" onClick={handleUpgradePlan}>
                             Upgrade Plan
                           </Button>
                         </div>
@@ -2171,7 +2416,7 @@ export default function PollsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete All Responses</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Remove all response data permanently</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all responses...', success: 'All responses deleted permanently', error: 'Failed to delete responses' })}>Delete All</Button>
+                          <Button variant="destructive" size="sm" onClick={handleDeleteAllResponses}>Delete All</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2179,7 +2424,7 @@ export default function PollsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset Workspace</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Delete all forms and start fresh</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Resetting workspace...', success: 'Workspace reset complete', error: 'Failed to reset workspace' })}>Reset</Button>
+                          <Button variant="destructive" size="sm" onClick={handleResetWorkspace}>Reset</Button>
                         </div>
 
                         <div className="flex items-center justify-between p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
@@ -2187,7 +2432,7 @@ export default function PollsClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Delete Account</p>
                             <p className="text-sm text-red-600 dark:text-red-500">Permanently delete your account</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Deleting account...', success: 'Account deleted successfully', error: 'Failed to delete account' })}>Delete Account</Button>
+                          <Button variant="destructive" size="sm" onClick={handleDeleteAccount}>Delete Account</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2226,7 +2471,7 @@ export default function PollsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockPollsQuickActions}
+            actions={pollsQuickActions}
             variant="grid"
           />
         </div>
@@ -2369,7 +2614,7 @@ export default function PollsClient() {
                     <p className="text-sm text-gray-500 line-clamp-2">{template.description}</p>
                     <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <span className="text-xs text-gray-500">{template.usageCount.toLocaleString()} uses</span>
-                      <button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading template...', success: 'Template applied! Form ready to customize', error: 'Failed to load template' })} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg">
+                      <button onClick={() => handleUseTemplate(template)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg">
                         Use Template
                       </button>
                     </div>

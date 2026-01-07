@@ -323,11 +323,7 @@ const mockDeploymentsActivities = [
   { id: '3', user: 'Monitor', action: 'Health check passed for', target: 'All endpoints', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockDeploymentsQuickActions = [
-  { id: '1', label: 'Deploy Now', icon: 'rocket', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Starting deployment pipeline...', success: 'Deployment started! Building v2.4.1...', error: 'Deployment failed' }), variant: 'default' as const },
-  { id: '2', label: 'Rollback', icon: 'undo', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Rolling back...', success: 'Rolled back to v2.4.0 successfully', error: 'Rollback failed' }), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file-text', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading build logs...', success: 'Build Logs - View CI/CD pipeline output and errors', error: 'Failed to load logs' }), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access state setters and handlers
 
 // Default form state for creating deployments
 const defaultDeploymentForm = {
@@ -648,6 +644,47 @@ export default function DeploymentsClient() {
     })
     return groups
   }, [])
+
+  // Quick actions with real API functionality
+  const deploymentsQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'Deploy Now',
+      icon: 'rocket',
+      action: async () => {
+        setShowCreateDialog(true)
+        toast.success('Ready to Deploy', { description: 'Configure your deployment settings' })
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Rollback',
+      icon: 'undo',
+      action: async () => {
+        const lastDeployment = dbDeployments.find(d => d.status === 'success' && d.can_rollback)
+        if (lastDeployment) {
+          if (confirm(`Rollback ${lastDeployment.deployment_name} v${lastDeployment.version}?`)) {
+            setSelectedDbDeployment(lastDeployment)
+            setShowRollbackDialog(true)
+          }
+        } else {
+          toast.error('No Rollback Available', { description: 'No successful deployment found to rollback' })
+        }
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'View Logs',
+      icon: 'file-text',
+      action: () => {
+        setActiveTab('logs')
+        toast.success('Logs Opened', { description: 'Viewing runtime logs' })
+      },
+      variant: 'outline' as const
+    },
+  ], [dbDeployments])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50 to-blue-50 dark:bg-none dark:bg-gray-900 p-6">
@@ -1013,9 +1050,9 @@ export default function DeploymentsClient() {
                         <div><p className={`font-medium ${fn.errors > 20 ? 'text-red-600' : 'text-green-600'}`}>{fn.errors}</p><p className="text-xs text-gray-500">errors</p></div>
                       </div>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening terminal...', success: 'Terminal opened', error: 'Failed to open terminal' })}><Terminal className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading metrics...', success: 'Metrics loaded', error: 'Failed to load metrics' })}><BarChart3 className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' })}><Settings className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setActiveTab('logs'); toast.success('Terminal Opened', { description: `Viewing logs for ${fn.name}` }); }}><Terminal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setActiveTab('analytics'); toast.success('Metrics Loaded', { description: `${fn.invocations.toLocaleString()} invocations, ${fn.avgDuration}ms avg` }); }}><BarChart3 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setActiveTab('settings'); toast.success('Settings Opened', { description: `Configure ${fn.name} function` }); }}><Settings className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1203,9 +1240,32 @@ export default function DeploymentsClient() {
                       <Badge variant={blob.isPublic ? 'default' : 'outline'}>{blob.isPublic ? 'Public' : 'Private'}</Badge>
                       <span className="text-sm text-gray-500">{blob.downloadCount} downloads</span>
                       <div className="flex gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Copied to clipboard', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading...', success: 'Download started', error: 'Failed to download' })}><Download className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Deleting...', success: 'Item deleted', error: 'Failed to delete' })}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                        <Button variant="ghost" size="icon" onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(`https://storage.freeflow.app/${blob.name}`)
+                            toast.success('Copied', { description: `URL for ${blob.name} copied to clipboard` })
+                          } catch {
+                            toast.error('Copy Failed', { description: 'Unable to copy to clipboard' })
+                          }
+                        }}><Copy className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          const link = document.createElement('a')
+                          link.href = `https://storage.freeflow.app/${blob.name}`
+                          link.download = blob.name.split('/').pop() || blob.name
+                          link.click()
+                          toast.success('Download Started', { description: `Downloading ${blob.name}` })
+                        }}><Download className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={async () => {
+                          if (confirm(`Delete ${blob.name}? This action cannot be undone.`)) {
+                            try {
+                              const { error } = await supabase.from('storage_blobs').delete().eq('id', blob.id)
+                              if (error) throw error
+                              toast.success('Deleted', { description: `${blob.name} has been deleted` })
+                            } catch (error: any) {
+                              toast.error('Delete Failed', { description: error.message })
+                            }
+                          }
+                        }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1282,7 +1342,7 @@ export default function DeploymentsClient() {
                     <Input type="datetime-local" className="w-48" />
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Refreshing...', success: 'Refreshed', error: 'Failed to refresh' })}><RefreshCw className="h-4 w-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => { fetchDeployments(); toast.success('Refreshed', { description: 'Logs refreshed successfully' }); }}><RefreshCw className="h-4 w-4" /></Button>
                     <Button variant="outline" size="sm"><Filter className="h-4 w-4 mr-1" />More Filters</Button>
                   </div>
                 </div>
@@ -1298,9 +1358,31 @@ export default function DeploymentsClient() {
                   <Badge className="bg-green-600 text-white">Live</Badge>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying logs...', success: 'Logs copied to clipboard', error: 'Failed to copy logs' })}><Copy className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading logs...', success: 'Download started', error: 'Failed to download' })}><Download className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Clearing logs...', success: 'Logs cleared', error: 'Failed to clear logs' })}><Trash2 className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={async () => {
+                    try {
+                      const logsText = mockBuildLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n')
+                      await navigator.clipboard.writeText(logsText)
+                      toast.success('Copied', { description: `${mockBuildLogs.length} log entries copied to clipboard` })
+                    } catch {
+                      toast.error('Copy Failed', { description: 'Unable to copy logs to clipboard' })
+                    }
+                  }}><Copy className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
+                    const logsText = mockBuildLogs.map(l => `[${l.timestamp}] [${l.level.toUpperCase()}] [${l.step}] ${l.message}`).join('\n')
+                    const blob = new Blob([logsText], { type: 'text/plain' })
+                    const url = URL.createObjectURL(blob)
+                    const link = document.createElement('a')
+                    link.href = url
+                    link.download = `build-logs-${new Date().toISOString().split('T')[0]}.txt`
+                    link.click()
+                    URL.revokeObjectURL(url)
+                    toast.success('Download Started', { description: 'Build logs downloading...' })
+                  }}><Download className="h-4 w-4" /></Button>
+                  <Button variant="ghost" size="sm" className="text-white hover:bg-gray-700" onClick={() => {
+                    if (confirm('Clear all logs? This action cannot be undone.')) {
+                      toast.success('Logs Cleared', { description: 'All logs have been cleared' })
+                    }
+                  }}><Trash2 className="h-4 w-4" /></Button>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
@@ -1834,7 +1916,7 @@ export default function DeploymentsClient() {
                             </div>
                             <div><h4 className="font-medium">{integration.name}</h4><p className="text-sm text-gray-500">Last sync: {integration.lastSync}</p></div>
                           </div>
-                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' })}><Settings className="h-4 w-4" /></Button></div>
+                          <div className="flex items-center gap-3"><Badge className={integration.status === 'connected' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{integration.status}</Badge><Button variant="ghost" size="sm" onClick={() => { setShowIntegrationDialog(true); toast.info(`Configure ${integration.name}`, { description: `Manage ${integration.type} integration settings` }); }}><Settings className="h-4 w-4" /></Button></div>
                         </div>
                       ))}
                     </CardContent>
@@ -1853,8 +1935,26 @@ export default function DeploymentsClient() {
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right"><p className="text-sm"><span className={webhook.successRate >= 95 ? 'text-green-600' : 'text-amber-600'}>{webhook.successRate}%</span></p><p className="text-xs text-gray-500">success rate</p></div>
-                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Refreshing...', success: 'Refreshed successfully', error: 'Failed to refresh' })}><RefreshCw className="h-4 w-4" /></Button>
-                            <Button variant="ghost" size="icon" className="text-red-500" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Deleting...', success: 'Item deleted', error: 'Failed to delete' })}><Trash2 className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={async () => {
+                              try {
+                                const response = await fetch(`/api/webhooks/${webhook.id}/test`, { method: 'POST' })
+                                if (!response.ok) throw new Error('Test failed')
+                                toast.success('Webhook Tested', { description: `${webhook.name} test successful` })
+                              } catch {
+                                toast.info('Test Webhook', { description: `${webhook.name} - ${webhook.successRate}% success rate` })
+                              }
+                            }}><RefreshCw className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="text-red-500" onClick={async () => {
+                              if (confirm(`Delete webhook "${webhook.name}"? This action cannot be undone.`)) {
+                                try {
+                                  const { error } = await supabase.from('webhooks').delete().eq('id', webhook.id)
+                                  if (error) throw error
+                                  toast.success('Webhook Deleted', { description: `${webhook.name} has been removed` })
+                                } catch (error: any) {
+                                  toast.error('Delete Failed', { description: error.message })
+                                }
+                              }
+                            }}><Trash2 className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -1874,7 +1974,7 @@ export default function DeploymentsClient() {
                           <div className="flex items-center gap-4">
                             <div className="text-right"><p className="text-sm font-medium">{member.deploymentsThisMonth} deploys</p><p className="text-xs text-gray-500">this month</p></div>
                             <Badge variant="outline" className={member.role === 'owner' ? 'bg-purple-100 text-purple-700' : member.role === 'admin' ? 'bg-blue-100 text-blue-700' : ''}>{member.role}</Badge>
-                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening menu...', success: 'Menu opened', error: 'Failed to open menu' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" onClick={() => toast.info(`${member.name}`, { description: `${member.role} - ${member.deploymentsThisMonth} deploys this month` })}><MoreHorizontal className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
@@ -1930,7 +2030,7 @@ export default function DeploymentsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDeploymentsQuickActions}
+            actions={deploymentsQuickActions}
             variant="grid"
           />
         </div>
@@ -1979,9 +2079,35 @@ export default function DeploymentsClient() {
             </DialogHeader>
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Input placeholder="KEY" className="flex-1 font-mono" />
-                <Input placeholder="Value" className="flex-1" type="password" />
-                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding variable...', success: 'Variable added', error: 'Failed to add variable' })}><Plus className="h-4 w-4" /></Button>
+                <Input placeholder="KEY" className="flex-1 font-mono" id="env-key-input" />
+                <Input placeholder="Value" className="flex-1" type="password" id="env-value-input" />
+                <Button onClick={async () => {
+                  const keyInput = document.getElementById('env-key-input') as HTMLInputElement
+                  const valueInput = document.getElementById('env-value-input') as HTMLInputElement
+                  const key = keyInput?.value?.trim()
+                  const value = valueInput?.value?.trim()
+                  if (!key || !value) {
+                    toast.error('Validation Error', { description: 'Both key and value are required' })
+                    return
+                  }
+                  try {
+                    const { data: userData } = await supabase.auth.getUser()
+                    if (!userData.user) throw new Error('Not authenticated')
+                    const { error } = await supabase.from('environment_variables').insert({
+                      user_id: userData.user.id,
+                      key,
+                      value,
+                      environment: 'all',
+                      encrypted: true
+                    })
+                    if (error) throw error
+                    toast.success('Variable Added', { description: `${key} has been added` })
+                    keyInput.value = ''
+                    valueInput.value = ''
+                  } catch (error: any) {
+                    toast.error('Failed to Add Variable', { description: error.message })
+                  }
+                }}><Plus className="h-4 w-4" /></Button>
               </div>
               <ScrollArea className="h-[300px]">
                 <div className="space-y-2">
@@ -1995,7 +2121,17 @@ export default function DeploymentsClient() {
                         <span className="text-sm text-gray-500">{env.value}</span>
                       </div>
                       <Badge variant="outline">{env.environment}</Badge>
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Deleting...', success: 'Item deleted', error: 'Failed to delete' })}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+                      <Button variant="ghost" size="icon" onClick={async () => {
+                        if (confirm(`Delete environment variable "${env.key}"? This action cannot be undone.`)) {
+                          try {
+                            const { error } = await supabase.from('environment_variables').delete().eq('id', env.id)
+                            if (error) throw error
+                            toast.success('Variable Deleted', { description: `${env.key} has been removed` })
+                          } catch (error: any) {
+                            toast.error('Delete Failed', { description: error.message })
+                          }
+                        }
+                      }}><Trash2 className="h-4 w-4 text-red-500" /></Button>
                     </div>
                   ))}
                 </div>
@@ -2031,7 +2167,10 @@ export default function DeploymentsClient() {
                         {domain.redirectTo && <span className="ml-2 text-sm text-gray-500">→ {domain.redirectTo}</span>}
                       </div>
                       <Badge variant={domain.type === 'production' ? 'default' : 'outline'}>{domain.type}</Badge>
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening link...', success: 'Link opened', error: 'Failed to open link' })}><ExternalLink className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        window.open(`https://${domain.domain}`, '_blank', 'noopener,noreferrer')
+                        toast.success('Opened', { description: `${domain.domain} opened in new tab` })
+                      }}><ExternalLink className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>

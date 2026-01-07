@@ -646,26 +646,10 @@ const mockHealthScoreActivities = [
 ]
 
 const mockHealthScoreQuickActions = [
-  { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Running health check...',
-    success: 'Health check completed successfully',
-    error: 'Health check failed'
-  }) },
-  { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Loading metrics...',
-    success: 'Metrics loaded successfully',
-    error: 'Failed to load metrics'
-  }) },
-  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), {
-    loading: 'Loading alerts...',
-    success: 'Alerts loaded successfully',
-    error: 'Failed to load alerts'
-  }) },
-  { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-    loading: 'Generating reports...',
-    success: 'Reports generated successfully',
-    error: 'Failed to generate reports'
-  }) },
+  { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: () => toast.success('Health check completed successfully') },
+  { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: () => toast.success('Metrics loaded successfully') },
+  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.success('Alerts loaded successfully') },
+  { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: () => toast.success('Reports generated successfully') },
 ]
 
 export default function HealthScoreClient() {

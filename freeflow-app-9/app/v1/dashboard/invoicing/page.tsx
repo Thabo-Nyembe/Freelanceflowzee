@@ -200,10 +200,8 @@ export default function InvoicingPage() {
         items: []
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Creating invoice...',
-        success: `Invoice ${invoiceNumber} has been created as draft`,
-        error: 'Failed to create invoice'
+      toast.success('Invoice created', {
+        description: `Invoice ${invoiceNumber} has been created as draft`
       })
       announce('Invoice created successfully', 'polite')
       logger.info('Invoice created', { success: true, invoiceId: newInvoice.id })
@@ -237,10 +235,8 @@ export default function InvoicingPage() {
         notes: 'Updated invoice terms'
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Updating invoice...',
-        success: 'Invoice details have been updated successfully',
-        error: 'Failed to update invoice'
+      toast.success('Invoice updated', {
+        description: 'Invoice details have been updated successfully'
       })
       announce('Invoice updated successfully', 'polite')
       logger.info('Invoice edited', { success: true, invoiceId })
@@ -278,10 +274,8 @@ export default function InvoicingPage() {
       const { deleteInvoice: deleteInvoiceQuery } = await import('@/lib/admin-overview-queries')
       await deleteInvoiceQuery(deleteInvoice.id)
 
-      toast.promise(new Promise(r => setTimeout(r, 1800)), {
-        loading: 'Deleting invoice...',
-        success: `${deleteInvoice.number} has been permanently removed`,
-        error: 'Failed to delete invoice'
+      toast.success('Invoice deleted', {
+        description: `${deleteInvoice.number} has been permanently removed`
       })
       announce('Invoice deleted successfully', 'polite')
       logger.info('Invoice deleted', { success: true, invoiceId: deleteInvoice.id })
@@ -314,10 +308,8 @@ export default function InvoicingPage() {
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(invoiceId, 'sent')
 
-      toast.promise(new Promise(r => setTimeout(r, 2000)), {
-        loading: 'Sending invoice...',
-        success: `${invoiceNumber} has been sent to ${clientEmail}`,
-        error: 'Failed to send invoice'
+      toast.success('Invoice sent', {
+        description: `${invoiceNumber} has been sent to ${clientEmail}`
       })
       announce('Invoice sent successfully', 'polite')
       logger.info('Invoice sent', { success: true, invoiceId })
@@ -348,10 +340,8 @@ export default function InvoicingPage() {
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(invoiceId, 'paid')
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Marking invoice as paid...',
-        success: `${invoiceNumber} has been marked as paid and closed`,
-        error: 'Failed to mark invoice as paid'
+      toast.success('Invoice marked as paid', {
+        description: `${invoiceNumber} has been marked as paid and closed`
       })
       announce('Invoice marked as paid', 'polite')
       logger.info('Invoice marked as paid', { success: true, invoiceId })
@@ -381,14 +371,22 @@ export default function InvoicingPage() {
       })
 
       if (!response.ok) throw new Error('Failed to generate PDF')
-      const result = await response.json()
+      const blob = await response.blob()
 
-      toast.promise(new Promise(r => setTimeout(r, 2500)), {
-        loading: 'Generating PDF...',
-        success: `${invoiceNumber} has been saved as PDF file`,
-        error: 'Failed to download PDF'
+      // Create download link and trigger download
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${invoiceNumber}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('PDF downloaded', {
+        description: `${invoiceNumber} has been saved as PDF file`
       })
-      logger.info('PDF download completed', { success: true, invoiceId, result })
+      logger.info('PDF download completed', { success: true, invoiceId })
       announce('PDF downloaded successfully', 'polite')
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Download failed'
@@ -411,14 +409,12 @@ export default function InvoicingPage() {
       })
 
       if (!response.ok) throw new Error('Failed to send reminder')
-      const result = await response.json()
+      await response.json()
 
-      toast.promise(new Promise(r => setTimeout(r, 2000)), {
-        loading: 'Sending reminder...',
-        success: `Payment reminder for ${invoiceNumber} sent to ${clientEmail}`,
-        error: 'Failed to send reminder'
+      toast.success('Reminder sent', {
+        description: `Payment reminder for ${invoiceNumber} sent to ${clientEmail}`
       })
-      logger.info('Reminder sent', { success: true, invoiceId, result })
+      logger.info('Reminder sent', { success: true, invoiceId })
       announce('Reminder sent successfully', 'polite')
 
       setInvoices(prev => prev.map(inv => inv.id === invoiceId ? { ...inv, remindersSent: (inv.remindersSent || 0) + 1, lastReminderDate: new Date().toISOString() } : inv))
@@ -451,10 +447,8 @@ export default function InvoicingPage() {
       const { updateInvoiceStatus } = await import('@/lib/admin-overview-queries')
       await updateInvoiceStatus(voidInvoice.id, 'cancelled')
 
-      toast.promise(new Promise(r => setTimeout(r, 1800)), {
-        loading: 'Voiding invoice...',
-        success: `${voidInvoice.number} has been voided and cancelled`,
-        error: 'Failed to void invoice'
+      toast.success('Invoice voided', {
+        description: `${voidInvoice.number} has been voided and cancelled`
       })
       announce('Invoice voided successfully', 'polite')
       logger.info('Invoice voided', { success: true, invoiceId: voidInvoice.id })
@@ -478,10 +472,8 @@ export default function InvoicingPage() {
     logger.info('Opening invoice details', { invoiceId: invoice.id })
     setSelectedInvoice(invoice)
     setShowInvoiceModal(true)
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Loading invoice details...',
-      success: `Viewing details for ${invoice.number}`,
-      error: 'Failed to load invoice details'
+    toast.success('Invoice details loaded', {
+      description: `Viewing details for ${invoice.number}`
     })
     announce('Invoice details opened', 'polite')
   }
@@ -501,10 +493,8 @@ export default function InvoicingPage() {
       const invoicesResult = await getInvoices(userId)
       setInvoices((invoicesResult || []).map(mapAdminInvoiceToInvoice))
 
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Refreshing invoices...',
-        success: `Reloaded ${invoicesResult?.length || 0} invoices`,
-        error: 'Failed to refresh invoices'
+      toast.success('Invoices refreshed', {
+        description: `Reloaded ${invoicesResult?.length || 0} invoices`
       })
       logger.info('Invoices refresh completed', {
         success: true,
@@ -846,7 +836,7 @@ export default function InvoicingPage() {
                   onClick={() => setShowInvoiceModal(false)}
                   className="text-gray-400 hover:text-gray-600 text-2xl"
                 >
-                  ×
+                  x
                 </button>
               </div>
 

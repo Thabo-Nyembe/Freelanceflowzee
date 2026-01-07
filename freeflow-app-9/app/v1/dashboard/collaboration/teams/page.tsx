@@ -170,11 +170,7 @@ export default function TeamsPage() {
         });
 
         logger.info("Teams loaded successfully", { count: teamsData.length });
-        toast.promise(new Promise(r => setTimeout(r, 800)), {
-          loading: 'Loading teams...',
-          success: `Teams loaded - ${teamsData.length} team${teamsData.length !== 1 ? "s" : ""} found`,
-          error: 'Failed to load teams'
-        });
+        toast.success(`Teams loaded - ${teamsData.length} team${teamsData.length !== 1 ? "s" : ""} found`);
       }
     } catch (err: any) {
       const errorMessage = err.message || "Failed to load teams";
@@ -235,11 +231,7 @@ export default function TeamsPage() {
         setTeams([newTeam, ...teams]);
         setIsCreateTeamOpen(false);
 
-        toast.promise(new Promise(r => setTimeout(r, 1200)), {
-          loading: 'Creating team...',
-          success: `Team "${data.name}" created successfully`,
-          error: 'Failed to create team'
-        });
+        toast.success(`Team created`);
         logger.info("Team created", { teamId: data.id, name: data.name });
 
         // Refresh stats
@@ -311,11 +303,7 @@ export default function TeamsPage() {
       window.open(`mailto:${email}?subject=${subject}&body=${body}`, "_blank");
 
       logger.info("Member added successfully", { memberId: newMember.id, email });
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Adding member...',
-        success: `Member added - Invitation sent to ${email}`,
-        error: 'Failed to add member'
-      });
+      toast.success(`Invitation sent`);
       announce(`${name} added to team successfully`, "polite");
     } catch (error) {
       logger.error("Failed to add member", { error });
@@ -337,11 +325,7 @@ export default function TeamsPage() {
       }));
 
       logger.info("Member removed successfully", { memberId });
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Removing member...',
-        success: `Member removed - ${member?.name || "Team member"}`,
-        error: 'Failed to remove member'
-      });
+      toast.success(`Member removed`);
       announce(`${member?.name || "Member"} removed from team`, "polite");
     } catch (error) {
       logger.error("Failed to remove member", { error, memberId });
@@ -361,11 +345,7 @@ export default function TeamsPage() {
       );
 
       logger.info("Favorite toggled successfully");
-      toast.promise(new Promise(r => setTimeout(r, 500)), {
-        loading: 'Updating favorite...',
-        success: 'Favorite updated',
-        error: 'Failed to update favorite'
-      });
+      toast.success('Favorite updated');
     } catch (error) {
       logger.error("Failed to toggle favorite", { error });
       toast.error("Failed to update favorite");
@@ -383,11 +363,7 @@ export default function TeamsPage() {
       );
 
       logger.info("Role changed successfully", { memberId, newRole });
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Updating role...',
-        success: `Role updated - ${member?.name} is now ${newRole}`,
-        error: 'Failed to update role'
-      });
+      toast.success(`Role updated`);
       announce(`${member?.name}'s role changed to ${newRole}`, "polite");
     } catch (error) {
       logger.error("Failed to change role", { error, memberId });
@@ -407,20 +383,12 @@ export default function TeamsPage() {
         window.open(`mailto:${member.email}?subject=${subject}`, "_blank");
 
         logger.info("Email client opened", { memberId });
-        toast.promise(new Promise(r => setTimeout(r, 600)), {
-          loading: 'Opening email...',
-          success: `Email opened - Compose message to ${member.name}`,
-          error: 'Failed to open email'
-        });
+        toast.success(`Email opened - Compose message to ${member.name}`);
         announce(`Opening email to ${member.name}`, "polite");
       } else {
         // Navigate to messages hub
         window.location.href = `/dashboard/messages?member=${memberId}`;
-        toast.promise(new Promise(r => setTimeout(r, 800)), {
-          loading: 'Redirecting...',
-          success: 'Redirecting to messages',
-          error: 'Failed to redirect'
-        });
+        toast.success('Redirecting to messages');
       }
     } catch (error) {
       logger.error("Failed to send message", { error, memberId });

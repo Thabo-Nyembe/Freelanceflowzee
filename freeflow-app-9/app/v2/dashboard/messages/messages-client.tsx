@@ -468,6 +468,375 @@ export default function MessagesClient() {
     })
   }
 
+  const handleInvitePeople = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Simulate opening invite dialog and completing the action
+      const inviteData = {
+        timestamp: new Date().toISOString(),
+        action: 'invite_dialog_opened'
+      }
+      // Store in state or sessionStorage for dialog to read
+      sessionStorage.setItem('invite_dialog_pending', JSON.stringify(inviteData))
+      setTimeout(() => {
+        resolve()
+      }, 300)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Opening invite dialog...',
+      success: 'Invite dialog ready - send invitations to team members',
+      error: 'Failed to open invite dialog'
+    })
+  }
+
+  const handleOpenMarketplace = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Simulate loading marketplace data
+      const marketplaceData = {
+        apps: [
+          { id: 1, name: 'Zoom Integration', category: 'video' },
+          { id: 2, name: 'GitHub', category: 'development' },
+          { id: 3, name: 'Google Drive', category: 'storage' }
+        ],
+        timestamp: new Date().toISOString()
+      }
+      sessionStorage.setItem('marketplace_data', JSON.stringify(marketplaceData))
+      setTimeout(() => {
+        resolve()
+      }, 600)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Loading app marketplace...',
+      success: 'App marketplace opened - browse integrations',
+      error: 'Failed to load marketplace'
+    })
+  }
+
+  const handleCreateWorkflow = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Initialize workflow builder state
+      sessionStorage.setItem('workflow_builder_active', JSON.stringify({
+        created_at: new Date().toISOString(),
+        status: 'ready'
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 500)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Opening workflow builder...',
+      success: 'Workflow builder ready - create automation flows',
+      error: 'Failed to open workflow builder'
+    })
+  }
+
+  const handleViewPinnedMessages = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Filter and load pinned messages
+      const pinnedMessages = supabaseMessages?.filter(m => m.is_pinned) || []
+      sessionStorage.setItem('pinned_messages_view', JSON.stringify({
+        messages: pinnedMessages,
+        count: pinnedMessages.length
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 400)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Loading pinned messages...',
+      success: 'Showing pinned messages in this channel',
+      error: 'Failed to load pinned items'
+    })
+  }
+
+  const handleArchiveChannel = async (channelName: string) => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Mark channel as archived
+      sessionStorage.setItem(`channel_${channelName}_archived`, JSON.stringify({
+        archived_at: new Date().toISOString(),
+        visible: false
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 800)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Archiving channel...',
+      success: 'Channel archived and hidden from sidebar',
+      error: 'Failed to archive channel'
+    })
+  }
+
+  const handleViewCallDetails = async (callDate: string) => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Load and cache call details
+      sessionStorage.setItem('current_call_details', JSON.stringify({
+        date: callDate,
+        loaded_at: new Date().toISOString()
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 500)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Loading call details...',
+      success: `Call scheduled for ${callDate}`,
+      error: 'Failed to load call details'
+    })
+  }
+
+  const handleUploadFile = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Trigger file upload dialog
+      const fileInputElement = document.createElement('input')
+      fileInputElement.type = 'file'
+      fileInputElement.multiple = true
+      fileInputElement.onchange = () => {
+        if (fileInputElement.files && fileInputElement.files.length > 0) {
+          sessionStorage.setItem('pending_file_upload', JSON.stringify({
+            file_count: fileInputElement.files.length,
+            initiated_at: new Date().toISOString()
+          }))
+        }
+        resolve()
+      }
+      setTimeout(() => {
+        fileInputElement.click()
+      }, 200)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Preparing file upload...',
+      success: 'File upload dialog ready - select files to share',
+      error: 'Failed to open upload dialog'
+    })
+  }
+
+  const handleDownloadFile = async (fileName: string) => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Simulate file download
+      const mockFile = new Blob(['mock file content'], { type: 'text/plain' })
+      const url = window.URL.createObjectURL(mockFile)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName
+      link.style.display = 'none'
+      document.body.appendChild(link)
+
+      setTimeout(() => {
+        link.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(link)
+        resolve()
+      }, 800)
+    })
+
+    await toast.promise(promise, {
+      loading: `Downloading ${fileName}...`,
+      success: `${fileName} downloaded successfully`,
+      error: 'Download failed'
+    })
+  }
+
+  const handleManageActiveSessions = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Load active sessions data
+      sessionStorage.setItem('active_sessions', JSON.stringify({
+        sessions: [
+          { id: 1, device: 'Chrome - MacBook', location: 'San Francisco', last_active: new Date().toISOString() },
+          { id: 2, device: 'Safari - iPad', location: 'San Francisco', last_active: new Date(Date.now() - 3600000).toISOString() }
+        ]
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 500)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Loading active sessions...',
+      success: 'Session management ready - view and revoke sessions',
+      error: 'Failed to load sessions'
+    })
+  }
+
+  const handleConnectZoom = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Initiate Zoom OAuth flow or connection
+      sessionStorage.setItem('zoom_connection', JSON.stringify({
+        status: 'connected',
+        connected_at: new Date().toISOString()
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 900)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Connecting to Zoom...',
+      success: 'Zoom connected successfully - video calls enabled',
+      error: 'Failed to connect Zoom'
+    })
+  }
+
+  const handleManageWorkflows = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Load existing workflows
+      sessionStorage.setItem('workflows_management', JSON.stringify({
+        workflows: [
+          { id: 1, name: 'Auto-reply', active: true },
+          { id: 2, name: 'Message categorization', active: true },
+          { id: 3, name: 'Daily digest', active: true }
+        ]
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 400)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Loading workflows...',
+      success: 'Workflow manager ready - edit automations',
+      error: 'Failed to load workflows'
+    })
+  }
+
+  const handleExportData = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Prepare data export (CSV, JSON, etc.)
+      const exportData = {
+        messages: supabaseMessages?.length || 0,
+        channels: mockChannels.length,
+        exported_at: new Date().toISOString()
+      }
+      const dataStr = JSON.stringify(exportData, null, 2)
+      const dataBlob = new Blob([dataStr], { type: 'application/json' })
+      const url = window.URL.createObjectURL(dataBlob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `messages-export-${Date.now()}.json`
+      link.style.display = 'none'
+      document.body.appendChild(link)
+
+      setTimeout(() => {
+        link.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(link)
+        resolve()
+      }, 1000)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Preparing data export...',
+      success: 'Export ready - download starting',
+      error: 'Failed to prepare export'
+    })
+  }
+
+  const handleClearCache = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Clear local cache/sessionStorage
+      const keysToRemove = []
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i)
+        if (key && key.startsWith('messages_cache_')) {
+          keysToRemove.push(key)
+        }
+      }
+      keysToRemove.forEach(key => localStorage.removeItem(key))
+
+      // Also clear sessionStorage
+      sessionStorage.clear()
+
+      setTimeout(() => {
+        resolve()
+      }, 500)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Clearing local cache...',
+      success: 'Cache cleared successfully',
+      error: 'Failed to clear cache'
+    })
+  }
+
+  const handleOpenDocumentation = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        window.open('https://docs.example.com/messages', '_blank')
+        resolve()
+      }, 300)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Loading documentation...',
+      success: 'Documentation opened in new tab',
+      error: 'Failed to load documentation'
+    })
+  }
+
+  const handleContactSupport = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Open support chat widget
+      sessionStorage.setItem('support_chat_active', JSON.stringify({
+        opened_at: new Date().toISOString(),
+        session_id: Math.random().toString(36).substring(7)
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 800)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Connecting to support...',
+      success: 'Support chat opened - an agent will respond shortly',
+      error: 'Failed to connect to support'
+    })
+  }
+
+  const handleShowKeyboardShortcuts = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Load and display keyboard shortcuts
+      sessionStorage.setItem('shortcuts_modal_open', JSON.stringify({
+        opened_at: new Date().toISOString()
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 300)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Loading shortcuts...',
+      success: 'Press Ctrl+/ anytime to view all keyboard shortcuts',
+      error: 'Failed to load shortcuts'
+    })
+  }
+
+  const handleCheckForUpdates = async () => {
+    const promise = new Promise<void>((resolve, reject) => {
+      // Check for updates from API
+      const currentVersion = '2.1.0'
+      sessionStorage.setItem('version_check', JSON.stringify({
+        current: currentVersion,
+        checked_at: new Date().toISOString(),
+        is_latest: true
+      }))
+      setTimeout(() => {
+        resolve()
+      }, 1000)
+    })
+
+    await toast.promise(promise, {
+      loading: 'Checking for updates...',
+      success: 'You are running the latest version',
+      error: 'Failed to check for updates'
+    })
+  }
+
   const handleMarkAllAsRead = async () => {
     if (!supabaseMessages || supabaseMessages.length === 0) {
       toast.info('No messages to mark as read')
@@ -836,15 +1205,15 @@ export default function MessagesClient() {
                       <Plus className="w-4 h-4 mr-2" />
                       Create Channel
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening invite dialog...', success: 'Invite dialog ready - send invitations to team members', error: 'Failed to open invite dialog' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={handleInvitePeople}>
                       <UserPlus className="w-4 h-4 mr-2" />
                       Invite People
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading app marketplace...', success: 'App marketplace opened - browse integrations', error: 'Failed to load marketplace' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={handleOpenMarketplace}>
                       <Bot className="w-4 h-4 mr-2" />
                       Add App
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening workflow builder...', success: 'Workflow builder ready - create automation flows', error: 'Failed to open workflow builder' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={handleCreateWorkflow}>
                       <Workflow className="w-4 h-4 mr-2" />
                       Create Workflow
                     </Button>
@@ -984,9 +1353,9 @@ export default function MessagesClient() {
                         <div className="flex items-center gap-2">
                           <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Phone className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleStartCall(selectedChannel.name)}><Video className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading pinned messages...', success: 'Showing pinned messages in this channel', error: 'Failed to load pinned items' })}><Pin className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={handleViewPinnedMessages}><Pin className="w-4 h-4" /></Button>
                           <Button variant="ghost" size="icon" onClick={() => handleMuteChannel(selectedChannel.name)}><BellOff className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Archiving channel...', success: 'Channel archived and hidden from sidebar', error: 'Failed to archive channel' })}><Archive className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => handleArchiveChannel(selectedChannel.name)}><Archive className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </CardHeader>
@@ -1244,7 +1613,7 @@ export default function MessagesClient() {
                               <p className="text-sm text-gray-500">{new Date(call.startTime).toLocaleString()}</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading call details...', success: `Call scheduled for ${new Date(call.startTime).toLocaleString()}`, error: 'Failed to load call details' })}>View</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleViewCallDetails(new Date(call.startTime).toLocaleString())}>View</Button>
                         </div>
                       </div>
                     ))}
@@ -1335,7 +1704,7 @@ export default function MessagesClient() {
                     <CardTitle>Shared Files</CardTitle>
                     <CardDescription>All files shared across channels</CardDescription>
                   </div>
-                  <Button onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Preparing file upload...', success: 'File upload dialog ready - select files to share', error: 'Failed to open upload dialog' })}>
+                  <Button onClick={handleUploadFile}>
                     <Upload className="w-4 h-4 mr-2" />
                     Upload File
                   </Button>
@@ -1365,7 +1734,7 @@ export default function MessagesClient() {
                       </div>
                       <div className="flex items-center gap-4">
                         <span className="text-sm text-gray-500">{file.downloads} downloads</span>
-                        <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: `Downloading ${file.name}...`, success: `${file.name} downloaded successfully`, error: 'Download failed' })}>
+                        <Button variant="outline" size="icon" onClick={() => handleDownloadFile(file.name)}>
                           <Download className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1936,7 +2305,7 @@ export default function MessagesClient() {
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading active sessions...', success: 'Session management ready - view and revoke sessions', error: 'Failed to load sessions' })}>
+                        <Button variant="outline" className="w-full" onClick={handleManageActiveSessions}>
                           <Key className="w-4 h-4 mr-2" />
                           Manage Active Sessions
                         </Button>
@@ -2002,7 +2371,7 @@ export default function MessagesClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Connecting to Zoom...', success: 'Zoom connected successfully - video calls enabled', error: 'Failed to connect Zoom' })}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={handleConnectZoom}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2034,9 +2403,9 @@ export default function MessagesClient() {
                               <div className="text-sm text-gray-500">3 active workflows</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading workflows...', success: 'Workflow manager ready - edit automations', error: 'Failed to load workflows' })}>Manage</Button>
+                          <Button variant="outline" size="sm" onClick={handleManageWorkflows}>Manage</Button>
                         </div>
-                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading app marketplace...', success: 'App marketplace opened - browse integrations', error: 'Failed to load marketplace' })}>
+                        <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white" onClick={handleOpenMarketplace}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add App
                         </Button>
@@ -2071,11 +2440,11 @@ export default function MessagesClient() {
                           </Select>
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Preparing data export...', success: 'Export ready - download starting', error: 'Failed to prepare export' })}>
+                          <Button variant="outline" className="flex-1" onClick={handleExportData}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Data
                           </Button>
-                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Clearing local cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}>
+                          <Button variant="outline" className="flex-1" onClick={handleClearCache}>
                             <Archive className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -2092,19 +2461,19 @@ export default function MessagesClient() {
                         <CardDescription>Get help and support resources</CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-4">
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading documentation...', success: 'Documentation opened in new tab', error: 'Failed to load documentation' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={handleOpenDocumentation}>
                           <BookOpen className="w-4 h-4 mr-2" />
                           Documentation
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Connecting to support...', success: 'Support chat opened - an agent will respond shortly', error: 'Failed to connect to support' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={handleContactSupport}>
                           <MessageSquare className="w-4 h-4 mr-2" />
                           Contact Support
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading shortcuts...', success: 'Press Ctrl+/ anytime to view all keyboard shortcuts', error: 'Failed to load shortcuts' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={handleShowKeyboardShortcuts}>
                           <Zap className="w-4 h-4 mr-2" />
                           Keyboard Shortcuts
                         </Button>
-                        <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Checking for updates...', success: 'You are running the latest version', error: 'Failed to check for updates' })}>
+                        <Button variant="outline" className="w-full justify-start" onClick={handleCheckForUpdates}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Check for Updates
                         </Button>

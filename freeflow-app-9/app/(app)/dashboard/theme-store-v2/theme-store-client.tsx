@@ -235,11 +235,7 @@ const mockThemeStoreActivities = [
   { id: '3', user: 'UI Reviewer', action: 'Approved', target: 'Minimal Blog Theme submission', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockThemeStoreQuickActions = [
-  { id: '1', label: 'Upload', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening upload wizard...', success: 'Upload your theme package (.zip)', error: 'Upload cancelled' }), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading theme preview...', success: 'Theme Preview - Live preview mode active', error: 'Preview failed' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'barChart', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading store analytics...', success: 'Store Analytics - 1,234 downloads, $4,500 revenue, 4.8 avg rating', error: 'Failed to load analytics' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to use real handlers
 
 export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeStoreClientProps) {
   const [activeTab, setActiveTab] = useState('browse')
@@ -297,68 +293,564 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
   const categories: ThemeCategory[] = ['minimal', 'professional', 'creative', 'dark', 'light', 'modern', 'e-commerce', 'portfolio', 'blog', 'dashboard']
   const frameworks: Framework[] = ['react', 'vue', 'angular', 'nextjs', 'nuxt', 'universal']
 
-  // Handlers
-  const handleInstallTheme = (n: string) => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Installing "${n}"...`, success: `"${n}" installed successfully`, error: `Failed to install "${n}"` })
-  const handlePreviewTheme = (n: string) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Loading preview for "${n}"...`, success: `Previewing "${n}"`, error: 'Failed to load preview' })
-  const handleActivateTheme = (n: string) => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: `Activating "${n}"...`, success: `"${n}" is now active`, error: `Failed to activate "${n}"` })
-  const handleCustomize = () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening customizer...', success: 'Customizer ready', error: 'Failed to open customizer' })
-  const handleWishlist = () => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening your wishlist...', success: 'Wishlist loaded', error: 'Failed to load wishlist' })
+  // Handlers - Real API integrations
+  const handleInstallTheme = async (themeName: string) => {
+    const theme = themes.find(t => t.name === themeName)
+    if (!theme) {
+      toast.error('Theme not found')
+      return
+    }
+
+    toast.promise(
+      fetch('/api/themes/install', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeId: theme.id, themeName: theme.name })
+      }).then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({ message: 'Installation failed' }))
+          throw new Error(error.message || 'Failed to install theme')
+        }
+        return res.json()
+      }),
+      {
+        loading: `Installing "${themeName}"...`,
+        success: `"${themeName}" installed successfully`,
+        error: (err) => err.message || `Failed to install "${themeName}"`
+      }
+    )
   }
-  const handleMyThemes = () => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening your themes library...', success: 'Themes library loaded', error: 'Failed to load themes' })
+
+  const handlePreviewTheme = async (themeName: string) => {
+    const theme = themes.find(t => t.name === themeName)
+    if (!theme) {
+      toast.error('Theme not found')
+      return
+    }
+
+    // Set the selected theme and open preview dialog
+    setSelectedTheme(theme)
+    setShowThemeDialog(true)
+    toast.success(`Previewing "${themeName}"`)
   }
-  const handleQuickAction = (label: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Executing ${label.toLowerCase()} action...`, success: `${label} action completed`, error: `${label} action failed` })
+
+  const handleActivateTheme = async (themeName: string) => {
+    const theme = themes.find(t => t.name === themeName)
+    if (!theme) {
+      toast.error('Theme not found')
+      return
+    }
+
+    toast.promise(
+      fetch('/api/themes/active', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeId: theme.id })
+      }).then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json().catch(() => ({ message: 'Activation failed' }))
+          throw new Error(error.message || 'Failed to activate theme')
+        }
+        return res.json()
+      }),
+      {
+        loading: `Activating "${themeName}"...`,
+        success: `"${themeName}" is now active`,
+        error: (err) => err.message || `Failed to activate "${themeName}"`
+      }
+    )
   }
-  const handleDeactivateTheme = () => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Deactivating current theme...', success: 'Theme deactivated', error: 'Failed to deactivate theme' })
+
+  const handleCustomize = () => {
+    setCustomizerOpen(true)
+    setActiveTab('customizer')
+    toast.success('Customizer ready')
   }
+
+  const handleWishlist = async () => {
+    toast.promise(
+      fetch('/api/themes/wishlist').then(async (res) => {
+        if (!res.ok) throw new Error('Failed to load wishlist')
+        return res.json()
+      }),
+      {
+        loading: 'Opening your wishlist...',
+        success: 'Wishlist loaded',
+        error: 'Failed to load wishlist'
+      }
+    )
+  }
+
+  const handleMyThemes = async () => {
+    setActiveTab('installed')
+    toast.success('Themes library loaded')
+  }
+
+  const handleQuickAction = async (label: string) => {
+    switch (label.toLowerCase()) {
+      case 'search':
+        document.querySelector<HTMLInputElement>('input[placeholder="Search themes..."]')?.focus()
+        toast.success('Search activated')
+        break
+      case 'popular':
+      case 'trending':
+      case 'top rated':
+      case 'downloads':
+        setSortBy(label.toLowerCase() === 'downloads' ? 'popular' : label.toLowerCase() === 'top rated' ? 'rating' : 'popular')
+        toast.success(`Sorted by ${label}`)
+        break
+      case 'new':
+        setSortBy('newest')
+        toast.success('Showing newest themes')
+        break
+      case 'favorites':
+        handleWishlist()
+        break
+      case 'filters':
+        toast.success('Filters panel visible')
+        break
+      case 'switch theme':
+        setActiveTab('installed')
+        toast.success('Select a theme to activate')
+        break
+      case 'customize':
+        handleCustomize()
+        break
+      case 'export':
+        toast.promise(
+          fetch('/api/themes/export', { method: 'POST' }).then(res => {
+            if (!res.ok) throw new Error('Export failed')
+            return res.blob()
+          }).then(blob => {
+            const url = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'theme-export.zip'
+            a.click()
+            URL.revokeObjectURL(url)
+          }),
+          { loading: 'Exporting theme...', success: 'Theme exported', error: 'Export failed' }
+        )
+        break
+      case 'check updates':
+        toast.promise(
+          fetch('/api/themes/updates').then(res => {
+            if (!res.ok) throw new Error('Failed to check updates')
+            return res.json()
+          }),
+          { loading: 'Checking for updates...', success: (data) => `${data.updates || 0} updates available`, error: 'Failed to check updates' }
+        )
+        break
+      case 'duplicate':
+        toast.info('Select a theme to duplicate')
+        break
+      case 'settings':
+        setActiveTab('settings')
+        toast.success('Settings opened')
+        break
+      case 'uninstall':
+        toast.info('Select a theme to uninstall')
+        break
+      case 'import':
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = '.zip,.json'
+        input.onchange = async (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0]
+          if (file) {
+            const formData = new FormData()
+            formData.append('theme', file)
+            toast.promise(
+              fetch('/api/themes/import', { method: 'POST', body: formData }).then(res => {
+                if (!res.ok) throw new Error('Import failed')
+                return res.json()
+              }),
+              { loading: 'Importing theme...', success: 'Theme imported successfully', error: 'Import failed' }
+            )
+          }
+        }
+        input.click()
+        break
+      default:
+        toast.success(`${label} action completed`)
+    }
+  }
+
+  const handleDeactivateTheme = async () => {
+    if (!activeTheme) {
+      toast.error('No active theme to deactivate')
+      return
+    }
+
+    toast.promise(
+      fetch('/api/themes/deactivate', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeId: activeTheme.id })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to deactivate theme')
+        return res.json()
+      }),
+      {
+        loading: 'Deactivating current theme...',
+        success: 'Theme deactivated',
+        error: 'Failed to deactivate theme'
+      }
+    )
+  }
+
   const handleThemeSettings = () => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening theme settings...', success: 'Theme settings loaded', error: 'Failed to load settings' })
+    setActiveTab('settings')
+    toast.success('Theme settings loaded')
   }
-  const handleRemoveTheme = (themeName: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Removing "${themeName}"...`, success: `"${themeName}" removed`, error: `Failed to remove "${themeName}"` })
+
+  const handleRemoveTheme = async (themeName: string) => {
+    const theme = themes.find(t => t.name === themeName)
+    if (!theme) {
+      toast.error('Theme not found')
+      return
+    }
+
+    toast.promise(
+      fetch(`/api/themes/${theme.id}`, {
+        method: 'DELETE'
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to remove theme')
+        return res.json()
+      }),
+      {
+        loading: `Removing "${themeName}"...`,
+        success: `"${themeName}" removed`,
+        error: `Failed to remove "${themeName}"`
+      }
+    )
   }
-  const handleSaveChanges = () => {
-    toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Saving theme changes...', success: 'Theme changes saved successfully', error: 'Failed to save changes' })
+
+  const handleSaveChanges = async () => {
+    toast.promise(
+      fetch('/api/themes/customize', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          themeId: activeTheme?.id,
+          customColors,
+          previewMode,
+          previewDevice
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to save changes')
+        return res.json()
+      }),
+      {
+        loading: 'Saving theme changes...',
+        success: 'Theme changes saved successfully',
+        error: 'Failed to save changes'
+      }
+    )
   }
-  const handleClearCache = () => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Clearing theme cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })
+
+  const handleClearCache = async () => {
+    toast.promise(
+      fetch('/api/themes/cache/clear', {
+        method: 'POST'
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to clear cache')
+        return res.json()
+      }),
+      {
+        loading: 'Clearing theme cache...',
+        success: 'Cache cleared successfully',
+        error: 'Failed to clear cache'
+      }
+    )
   }
-  const handleOptimizeStorage = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Optimizing storage...', success: 'Storage optimized', error: 'Failed to optimize storage' })
+
+  const handleOptimizeStorage = async () => {
+    toast.promise(
+      fetch('/api/themes/storage/optimize', {
+        method: 'POST'
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to optimize storage')
+        return res.json()
+      }),
+      {
+        loading: 'Optimizing storage...',
+        success: 'Storage optimized',
+        error: 'Failed to optimize storage'
+      }
+    )
   }
+
   const handleAddPaymentMethod = () => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening payment method form...', success: 'Payment form ready', error: 'Failed to open payment form' })
+    window.location.href = '/dashboard/settings/billing?action=add-payment'
   }
-  const handleConnect = (integration: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Connecting to ${integration}...`, success: `Connected to ${integration}`, error: `Failed to connect to ${integration}` })
+
+  const handleConnect = async (integration: string) => {
+    toast.promise(
+      fetch('/api/integrations/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: integration.toLowerCase() })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error(`Failed to connect to ${integration}`)
+        const data = await res.json()
+        if (data.authUrl) {
+          window.open(data.authUrl, '_blank')
+        }
+        return data
+      }),
+      {
+        loading: `Connecting to ${integration}...`,
+        success: `Connected to ${integration}`,
+        error: `Failed to connect to ${integration}`
+      }
+    )
   }
-  const handleRegenerateKey = () => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Regenerating API key...', success: 'API key regenerated', error: 'Failed to regenerate key' })
+
+  const handleRegenerateKey = async () => {
+    toast.promise(
+      fetch('/api/themes/api-key/regenerate', {
+        method: 'POST'
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to regenerate API key')
+        return res.json()
+      }),
+      {
+        loading: 'Regenerating API key...',
+        success: 'API key regenerated',
+        error: 'Failed to regenerate key'
+      }
+    )
   }
+
   const handleViewDocs = () => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening API documentation...', success: 'Documentation loaded', error: 'Failed to load documentation' })
+    window.open('/docs/api/themes', '_blank')
+    toast.success('Documentation opened')
   }
-  const handleDownloadSDK = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Downloading SDK...', success: 'SDK downloaded successfully', error: 'Failed to download SDK' })
+
+  const handleDownloadSDK = async () => {
+    toast.promise(
+      fetch('/api/themes/sdk/download').then(async (res) => {
+        if (!res.ok) throw new Error('Failed to download SDK')
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'theme-sdk.zip'
+        a.click()
+        URL.revokeObjectURL(url)
+        return true
+      }),
+      {
+        loading: 'Downloading SDK...',
+        success: 'SDK downloaded successfully',
+        error: 'Failed to download SDK'
+      }
+    )
   }
-  const handleRemoveAll = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Removing all installed themes...', success: 'All themes removed', error: 'Failed to remove themes' })
+
+  const handleRemoveAll = async () => {
+    toast.promise(
+      fetch('/api/themes/all', {
+        method: 'DELETE'
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to remove all themes')
+        return res.json()
+      }),
+      {
+        loading: 'Removing all installed themes...',
+        success: 'All themes removed',
+        error: 'Failed to remove themes'
+      }
+    )
   }
-  const handleResetPreferences = () => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting store preferences...', success: 'Preferences reset to defaults', error: 'Failed to reset preferences' })
+
+  const handleResetPreferences = async () => {
+    toast.promise(
+      fetch('/api/themes/preferences/reset', {
+        method: 'POST'
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to reset preferences')
+        return res.json()
+      }),
+      {
+        loading: 'Resetting store preferences...',
+        success: 'Preferences reset to defaults',
+        error: 'Failed to reset preferences'
+      }
+    )
   }
-  const handleAddToWishlist = (themeName: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Adding "${themeName}" to wishlist...`, success: `"${themeName}" added to wishlist`, error: 'Failed to add to wishlist' })
+
+  const handleAddToWishlist = async (themeName: string) => {
+    const theme = themes.find(t => t.name === themeName)
+    if (!theme) {
+      toast.error('Theme not found')
+      return
+    }
+
+    toast.promise(
+      fetch('/api/themes/wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeId: theme.id })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to add to wishlist')
+        return res.json()
+      }),
+      {
+        loading: `Adding "${themeName}" to wishlist...`,
+        success: `"${themeName}" added to wishlist`,
+        error: 'Failed to add to wishlist'
+      }
+    )
   }
-  const handleVerifyLicense = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Verifying license...', success: 'License verified', error: 'License verification failed' })
+
+  const handleVerifyLicense = async () => {
+    toast.promise(
+      fetch('/api/themes/license/verify', {
+        method: 'POST'
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('License verification failed')
+        return res.json()
+      }),
+      {
+        loading: 'Verifying license...',
+        success: 'License verified',
+        error: 'License verification failed'
+      }
+    )
   }
-  const handleViewReceipt = (invoice: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Opening receipt for ${invoice}...`, success: `Receipt for ${invoice} loaded`, error: 'Failed to load receipt' })
+
+  const handleViewReceipt = async (invoice: string) => {
+    toast.promise(
+      fetch(`/api/themes/receipts/${invoice}`).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to load receipt')
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        window.open(url, '_blank')
+        return true
+      }),
+      {
+        loading: `Opening receipt for ${invoice}...`,
+        success: `Receipt for ${invoice} loaded`,
+        error: 'Failed to load receipt'
+      }
+    )
   }
+
+  const handlePurchaseTheme = async (theme: ThemeExtended) => {
+    if (theme.price === 0) {
+      await handleInstallTheme(theme.name)
+      return
+    }
+
+    toast.promise(
+      fetch('/api/payments/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          themeId: theme.id,
+          themeName: theme.name,
+          price: theme.discountPrice || theme.price,
+          license: theme.license
+        })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to initiate payment')
+        const data = await res.json()
+        if (data.checkoutUrl) {
+          window.location.href = data.checkoutUrl
+        }
+        return data
+      }),
+      {
+        loading: 'Initiating payment...',
+        success: 'Redirecting to checkout...',
+        error: 'Failed to initiate payment'
+      }
+    )
+  }
+
+  const handleSubmitReview = async (themeId: string, rating: number, title: string, content: string) => {
+    toast.promise(
+      fetch('/api/themes/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ themeId, rating, title, content })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to submit review')
+        return res.json()
+      }),
+      {
+        loading: 'Submitting review...',
+        success: 'Review submitted successfully',
+        error: 'Failed to submit review'
+      }
+    )
+  }
+
+  // Theme store quick actions with real functionality
+  const themeStoreQuickActions = [
+    {
+      id: '1',
+      label: 'Upload',
+      icon: 'upload',
+      action: async () => {
+        const input = document.createElement('input')
+        input.type = 'file'
+        input.accept = '.zip'
+        input.onchange = async (e) => {
+          const file = (e.target as HTMLInputElement).files?.[0]
+          if (file) {
+            const formData = new FormData()
+            formData.append('theme', file)
+            toast.promise(
+              fetch('/api/themes/upload', { method: 'POST', body: formData }).then(res => {
+                if (!res.ok) throw new Error('Upload failed')
+                return res.json()
+              }),
+              { loading: 'Uploading theme package...', success: 'Theme uploaded successfully', error: 'Upload failed' }
+            )
+          }
+        }
+        input.click()
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Preview',
+      icon: 'eye',
+      action: () => {
+        if (activeTheme) {
+          setSelectedTheme(activeTheme)
+          setShowThemeDialog(true)
+          toast.success('Theme Preview - Live preview mode active')
+        } else {
+          toast.info('Select a theme to preview')
+        }
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Analytics',
+      icon: 'barChart',
+      action: async () => {
+        toast.promise(
+          fetch('/api/themes/analytics').then(res => {
+            if (!res.ok) throw new Error('Failed to load analytics')
+            return res.json()
+          }),
+          {
+            loading: 'Loading store analytics...',
+            success: (data) => `Store Analytics - ${data.downloads || 0} downloads, $${data.revenue || 0} revenue, ${data.rating || 0} avg rating`,
+            error: 'Failed to load analytics'
+          }
+        )
+      },
+      variant: 'outline' as const
+    }
+  ]
 
   const getCategoryIcon = (cat: ThemeCategory) => {
     const icons: Record<string, any> = {
@@ -1056,7 +1548,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
                   <Button className="flex-1 bg-rose-600 hover:bg-rose-700" onClick={handleSaveChanges}>
                     Save Changes
                   </Button>
-                  <Button variant="outline" onClick={() => { setCustomColors({}); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Resetting colors...', success: 'Colors reset to defaults', error: 'Failed to reset colors' }) }}>
+                  <Button variant="outline" onClick={() => { setCustomColors({}); toast.success('Colors reset to defaults'); }}>
                     Reset
                   </Button>
                 </div>
@@ -1778,7 +2270,7 @@ export default function ThemeStoreClient({ initialThemes, initialStats }: ThemeS
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockThemeStoreQuickActions}
+            actions={themeStoreQuickActions}
             variant="grid"
           />
         </div>

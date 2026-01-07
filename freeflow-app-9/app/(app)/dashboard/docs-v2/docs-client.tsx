@@ -403,9 +403,50 @@ const mockDocsActivities = [
 ]
 
 const mockDocsQuickActions = [
-  { id: '1', label: 'New Doc', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating document...', success: 'Document created! Start writing', error: 'Failed to create document' }), variant: 'default' as const },
-  { id: '2', label: 'Preview', icon: 'eye', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading preview...', success: 'Preview Mode - See how users will view your documentation', error: 'Failed to load preview' }), variant: 'default' as const },
-  { id: '3', label: 'Publish', icon: 'send', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Publishing documentation...', success: 'Documentation published to production!', error: 'Publish failed' }), variant: 'outline' as const },
+  { id: '1', label: 'New Doc', icon: 'plus', action: async () => {
+    toast.loading('Creating document...')
+    try {
+      const response = await fetch('/api/docs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: 'Untitled Document', content: '', status: 'draft' })
+      })
+      toast.dismiss()
+      if (response.ok) {
+        toast.success('Document created! Start writing')
+      } else {
+        toast.error('Failed to create document')
+      }
+    } catch {
+      toast.dismiss()
+      toast.error('Failed to create document')
+    }
+  }, variant: 'default' as const },
+  { id: '2', label: 'Preview', icon: 'eye', action: () => {
+    // Open preview in new window
+    const previewUrl = `${window.location.origin}/docs/preview`
+    window.open(previewUrl, '_blank', 'noopener,noreferrer')
+    toast.success('Preview opened in new tab')
+  }, variant: 'default' as const },
+  { id: '3', label: 'Publish', icon: 'send', action: async () => {
+    toast.loading('Publishing documentation...')
+    try {
+      const response = await fetch('/api/docs/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'published', publishedAt: new Date().toISOString() })
+      })
+      toast.dismiss()
+      if (response.ok) {
+        toast.success('Documentation published to production!')
+      } else {
+        toast.error('Publish failed')
+      }
+    } catch {
+      toast.dismiss()
+      toast.error('Publish failed')
+    }
+  }, variant: 'outline' as const },
 ]
 
 export default function DocsClient() {
@@ -609,7 +650,7 @@ export default function DocsClient() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Documentation</h2>
                   <p className="text-blue-100">GitBook-level developer documentation</p>
-                  <p className="text-blue-200 text-xs mt-1">Search • Categories • Version control</p>
+                  <p className="text-blue-200 text-xs mt-1">Search - Categories - Version control</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
@@ -796,7 +837,7 @@ export default function DocsClient() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Documentation Spaces</h2>
                   <p className="text-emerald-100">Confluence-level team spaces</p>
-                  <p className="text-emerald-200 text-xs mt-1">Team access • Collections • Permissions</p>
+                  <p className="text-emerald-200 text-xs mt-1">Team access - Collections - Permissions</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
@@ -835,7 +876,7 @@ export default function DocsClient() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">API Reference</h2>
                   <p className="text-orange-100">Stripe-level API documentation</p>
-                  <p className="text-orange-200 text-xs mt-1">Interactive • Code samples • Try it live</p>
+                  <p className="text-orange-200 text-xs mt-1">Interactive - Code samples - Try it live</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
@@ -892,7 +933,7 @@ export default function DocsClient() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Version History</h2>
                   <p className="text-purple-100">GitHub Releases-level changelog</p>
-                  <p className="text-purple-200 text-xs mt-1">Version tracking • Release notes • Diffs</p>
+                  <p className="text-purple-200 text-xs mt-1">Version tracking - Release notes - Diffs</p>
                 </div>
               </div>
             </div>
@@ -938,7 +979,7 @@ export default function DocsClient() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Documentation Settings</h2>
                   <p className="text-slate-100">ReadMe-level configuration options</p>
-                  <p className="text-slate-200 text-xs mt-1">Appearance • Permissions • Integrations</p>
+                  <p className="text-slate-200 text-xs mt-1">Appearance - Permissions - Integrations</p>
                 </div>
               </div>
             </div>
@@ -1435,7 +1476,10 @@ export default function DocsClient() {
                         <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center justify-between mb-2">
                             <Label className="text-gray-900 dark:text-white font-medium">API Token</Label>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={async () => {
+                              await navigator.clipboard.writeText('docs_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                              toast.success('API token copied to clipboard')
+                            }}>
                               <Copy className="h-4 w-4 mr-2" />
                               Copy
                             </Button>
@@ -1444,7 +1488,21 @@ export default function DocsClient() {
                             docs_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                           </code>
                         </div>
-                        <Button variant="outline" className="w-full">
+                        <Button variant="outline" className="w-full" onClick={async () => {
+                          toast.loading('Regenerating API token...')
+                          try {
+                            const response = await fetch('/api/tokens/regenerate', { method: 'POST' })
+                            toast.dismiss()
+                            if (response.ok) {
+                              toast.success('API token regenerated successfully')
+                            } else {
+                              toast.error('Failed to regenerate token')
+                            }
+                          } catch {
+                            toast.dismiss()
+                            toast.error('Failed to regenerate token')
+                          }
+                        }}>
                           <RefreshCw className="h-4 w-4 mr-2" />
                           Regenerate API Token
                         </Button>
@@ -1530,11 +1588,38 @@ export default function DocsClient() {
                           <Switch />
                         </div>
                         <div className="flex gap-3">
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={() => {
+                            // Export all docs as JSON
+                            const docsData = JSON.stringify(mockDocs, null, 2)
+                            const blob = new Blob([docsData], { type: 'application/json' })
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = 'documentation-export.json'
+                            document.body.appendChild(a)
+                            a.click()
+                            document.body.removeChild(a)
+                            URL.revokeObjectURL(url)
+                            toast.success('Documentation exported successfully')
+                          }}>
                             <Download className="h-4 w-4 mr-2" />
                             Export All Docs
                           </Button>
-                          <Button variant="outline" className="flex-1">
+                          <Button variant="outline" className="flex-1" onClick={async () => {
+                            toast.loading('Creating backup...')
+                            try {
+                              const response = await fetch('/api/docs/backup', { method: 'POST' })
+                              toast.dismiss()
+                              if (response.ok) {
+                                toast.success('Backup created successfully')
+                              } else {
+                                toast.error('Backup failed')
+                              }
+                            } catch {
+                              toast.dismiss()
+                              toast.error('Backup failed')
+                            }
+                          }}>
                             <Archive className="h-4 w-4 mr-2" />
                             Backup Docs
                           </Button>
@@ -1596,7 +1681,22 @@ export default function DocsClient() {
                             <h4 className="font-medium text-gray-900 dark:text-white">Clear Search Index</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Rebuild documentation search index</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20">
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20" onClick={async () => {
+                            if (!confirm('Are you sure you want to rebuild the search index? This may take a few minutes.')) return
+                            toast.loading('Rebuilding search index...')
+                            try {
+                              const response = await fetch('/api/docs/rebuild-index', { method: 'POST' })
+                              toast.dismiss()
+                              if (response.ok) {
+                                toast.success('Search index rebuilt successfully')
+                              } else {
+                                toast.error('Failed to rebuild index')
+                              }
+                            } catch {
+                              toast.dismiss()
+                              toast.error('Failed to rebuild index')
+                            }
+                          }}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Rebuild
                           </Button>
@@ -1606,7 +1706,22 @@ export default function DocsClient() {
                             <h4 className="font-medium text-gray-900 dark:text-white">Delete All Drafts</h4>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Permanently remove all draft documents</p>
                           </div>
-                          <Button variant="destructive">
+                          <Button variant="destructive" onClick={async () => {
+                            if (!confirm('Are you sure you want to delete all drafts? This action cannot be undone.')) return
+                            toast.loading('Deleting all drafts...')
+                            try {
+                              const response = await fetch('/api/docs/drafts', { method: 'DELETE' })
+                              toast.dismiss()
+                              if (response.ok) {
+                                toast.success('All drafts deleted successfully')
+                              } else {
+                                toast.error('Failed to delete drafts')
+                              }
+                            } catch {
+                              toast.dismiss()
+                              toast.error('Failed to delete drafts')
+                            }
+                          }}>
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete Drafts
                           </Button>
@@ -1673,11 +1788,31 @@ export default function DocsClient() {
                     <p className="text-gray-500 mt-1">{selectedDoc.description}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={async () => {
+                      toast.loading('Saving bookmark...')
+                      try {
+                        const response = await fetch('/api/bookmarks', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ docId: selectedDoc.id, type: 'doc' })
+                        })
+                        toast.dismiss()
+                        if (response.ok) {
+                          toast.success('Document bookmarked')
+                        } else {
+                          toast.error('Failed to bookmark')
+                        }
+                      } catch {
+                        toast.dismiss()
+                        toast.error('Failed to bookmark')
+                      }
+                    }}>
                       <Bookmark className="h-4 w-4 mr-2" />
                       Bookmark
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => {
+                      window.location.href = `/docs/edit/${selectedDoc.id}`
+                    }}>
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </Button>
@@ -1835,11 +1970,37 @@ export default function DocsClient() {
                       <CardContent className="p-4">
                         <h4 className="font-medium mb-3">Was this helpful?</h4>
                         <div className="flex items-center gap-4">
-                          <Button variant="outline" className="gap-2">
+                          <Button variant="outline" className="gap-2" onClick={async () => {
+                            try {
+                              const response = await fetch(`/api/docs/${selectedDoc.id}/feedback`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ helpful: true })
+                              })
+                              if (response.ok) {
+                                toast.success('Thanks for your feedback!')
+                              }
+                            } catch {
+                              toast.error('Failed to submit feedback')
+                            }
+                          }}>
                             <ThumbsUp className="h-4 w-4" />
                             Yes ({selectedDoc.feedback.helpful})
                           </Button>
-                          <Button variant="outline" className="gap-2">
+                          <Button variant="outline" className="gap-2" onClick={async () => {
+                            try {
+                              const response = await fetch(`/api/docs/${selectedDoc.id}/feedback`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ helpful: false })
+                              })
+                              if (response.ok) {
+                                toast.success('Thanks for your feedback!')
+                              }
+                            } catch {
+                              toast.error('Failed to submit feedback')
+                            }
+                          }}>
                             <ThumbsDown className="h-4 w-4" />
                             No ({selectedDoc.feedback.notHelpful})
                           </Button>

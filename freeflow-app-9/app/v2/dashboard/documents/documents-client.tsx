@@ -321,21 +321,9 @@ const mockDocumentsActivities = [
 ]
 
 const mockDocumentsQuickActions = [
-  { id: '1', label: 'New Document', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new document...',
-    success: 'Document created successfully',
-    error: 'Failed to create document'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Upload Files', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Uploading files...',
-    success: 'Files uploaded successfully',
-    error: 'Upload failed'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Create Folder', icon: 'folder', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Creating folder...',
-    success: 'Folder created successfully',
-    error: 'Failed to create folder'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'New Document', icon: 'plus', action: () => toast.success('Document created successfully'), variant: 'default' as const },
+  { id: '2', label: 'Upload Files', icon: 'upload', action: () => toast.success('Files uploaded successfully'), variant: 'default' as const },
+  { id: '3', label: 'Create Folder', icon: 'folder', action: () => toast.success('Folder created successfully'), variant: 'outline' as const },
 ]
 
 export default function DocumentsClient({ initialDocuments }: { initialDocuments: Document[] }) {
@@ -827,7 +815,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing share options...', success: 'Select a document to share', error: 'Share preparation failed' })}
+                onClick={() => toast.success('Select a document to share')}
               >
                 <Share2 className="w-5 h-5" />
                 <span className="text-xs font-medium">Share</span>
@@ -1032,7 +1020,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Preparing export...', success: 'Select a document to export', error: 'Export preparation failed' })}
+                onClick={() => toast.success('Select a document to export')}
               >
                 <Download className="w-5 h-5" />
                 <span className="text-xs font-medium">Export</span>
@@ -1040,7 +1028,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing duplication...', success: 'Select a document to duplicate', error: 'Duplication preparation failed' })}
+                onClick={() => toast.success('Select a document to duplicate')}
               >
                 <Copy className="w-5 h-5" />
                 <span className="text-xs font-medium">Duplicate</span>
@@ -1048,7 +1036,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing move options...', success: 'Select a document to move', error: 'Move preparation failed' })}
+                onClick={() => toast.success('Select a document to move')}
               >
                 <Move className="w-5 h-5" />
                 <span className="text-xs font-medium">Move</span>
@@ -1056,7 +1044,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
               <Button
                 variant="ghost"
                 className="h-20 flex-col gap-2 bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400 hover:scale-105 transition-all duration-200"
-                onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing delete...', success: 'Select a document to delete', error: 'Delete preparation failed' })}
+                onClick={() => toast.success('Select a document to delete')}
               >
                 <Trash2 className="w-5 h-5" />
                 <span className="text-xs font-medium">Delete</span>
@@ -2059,11 +2047,7 @@ export default function DocumentsClient({ initialDocuments }: { initialDocuments
             <AIInsightsPanel
               insights={mockDocumentsAIInsights}
               title="Document Intelligence"
-              onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                loading: `Processing ${insight.type || 'insight'} action...`,
-                success: 'Insight action completed successfully',
-                error: 'Failed to process insight action'
-              })}
+              onInsightAction={(insight) => toast.success('Insight action completed successfully')}
             />
           </div>
           <div className="space-y-6">

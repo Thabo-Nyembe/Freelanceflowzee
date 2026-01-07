@@ -361,9 +361,9 @@ const mockTransactionsActivities = [
 ]
 
 const mockTransactionsQuickActions = [
-  { id: '1', label: 'New Payment', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating payment...', success: 'Payment initiated successfully', error: 'Failed to create payment' }), variant: 'default' as const },
-  { id: '2', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating report...', success: 'Report exported successfully', error: 'Failed to export report' }), variant: 'default' as const },
-  { id: '3', label: 'Issue Refund', icon: 'undo', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Processing refund...', success: 'Refund issued successfully', error: 'Failed to issue refund' }), variant: 'outline' as const },
+  { id: '1', label: 'New Payment', icon: 'plus', action: () => toast.success('Payment Created', { description: 'Payment initiated successfully' }), variant: 'default' as const },
+  { id: '2', label: 'Export Report', icon: 'download', action: () => toast.success('Report Exported', { description: 'Transaction report generated' }), variant: 'default' as const },
+  { id: '3', label: 'Issue Refund', icon: 'undo', action: () => toast.success('Refund Issued', { description: 'Refund processed successfully' }), variant: 'outline' as const },
 ]
 
 export default function TransactionsClient({ initialTransactions }: { initialTransactions: Transaction[] }) {

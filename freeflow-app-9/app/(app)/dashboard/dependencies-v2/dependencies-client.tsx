@@ -353,12 +353,7 @@ const mockDependenciesActivities = [
   { id: '3', user: 'Security Eng', action: 'patched', target: '3 critical packages', timestamp: '4h ago', type: 'success' as const },
 ]
 
-const mockDependenciesQuickActions = [
-  { id: '1', label: 'Run Scan', icon: 'Shield', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Scanning dependencies for vulnerabilities...', success: 'Scan complete! 3 vulnerabilities found', error: 'Scan failed' }) },
-  { id: '2', label: 'Update All', icon: 'RefreshCw', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Updating 12 packages...', success: 'All dependencies updated to latest versions!', error: 'Update failed - check for conflicts' }) },
-  { id: '3', label: 'Lock File', icon: 'Lock', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Generating lockfile...', success: 'package-lock.json updated', error: 'Failed to generate lockfile' }) },
-  { id: '4', label: 'Report', icon: 'FileText', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating dependency report...', success: 'Report exported to dependencies-report.pdf', error: 'Report generation failed' }) },
-]
+// Quick actions are defined inside the component to access real handlers
 
 export default function DependenciesClient({ initialDependencies }: { initialDependencies: Dependency[] }) {
   const supabase = createClient()
@@ -941,6 +936,189 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
       })
     }
   }
+
+  // Real handler for updating all dependencies
+  const handleUpdateAllDependencies = async () => {
+    const outdatedDeps = mockDependencies.filter(dep => dep.updateAvailable && !dep.breaking)
+    if (outdatedDeps.length === 0) {
+      toast.info('All dependencies are up to date')
+      return
+    }
+
+    toast.loading('Updating dependencies', {
+      description: `Updating ${outdatedDeps.length} packages...`
+    })
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Update each dependency via API
+      for (const dep of outdatedDeps) {
+        await dependencyMutation.mutate({
+          current_version: dep.latestVersion,
+          is_outdated: false,
+          updated_at: new Date().toISOString()
+        }, dep.id)
+      }
+
+      await refetchDependencies()
+      toast.success('Dependencies updated', {
+        description: `Successfully updated ${outdatedDeps.length} packages to latest versions`
+      })
+    } catch (err) {
+      toast.error('Update failed', {
+        description: err instanceof Error ? err.message : 'Some packages failed to update'
+      })
+    }
+  }
+
+  // Real handler for generating lockfile
+  const handleGenerateLockfile = async () => {
+    toast.loading('Generating lockfile', {
+      description: 'Creating package-lock.json...'
+    })
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Call API to generate lockfile
+      const response = await fetch('/api/dependencies/lockfile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'generate' })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to generate lockfile')
+      }
+
+      toast.success('Lockfile generated', {
+        description: 'package-lock.json has been updated'
+      })
+    } catch (err) {
+      toast.error('Lockfile generation failed', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Real handler for generating PDF report
+  const handleGeneratePdfReport = async () => {
+    toast.loading('Generating report', {
+      description: 'Creating dependency security report...'
+    })
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Create comprehensive report data
+      const reportData = {
+        generatedAt: new Date().toISOString(),
+        scanResult: mockScanResult,
+        vulnerabilities: mockVulnerabilities,
+        dependencies: mockDependencies,
+        licenses: mockLicenses,
+        policies: mockPolicies
+      }
+
+      // Export as JSON (PDF would require a server-side library)
+      const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `dependencies-security-report-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      // Record export
+      await supabase.from('dependency_exports').insert({
+        user_id: user.id,
+        export_type: 'security_report',
+        format: 'json',
+        status: 'completed'
+      })
+
+      toast.success('Report generated', {
+        description: 'Security report has been downloaded'
+      })
+    } catch (err) {
+      toast.error('Report generation failed', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Real handler for applying AI insight
+  const handleApplyInsight = async (insight: { id: string; title: string; type: string; category?: string }) => {
+    toast.loading('Applying insight', {
+      description: `Processing ${insight.title}...`
+    })
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      // Take action based on insight type/category
+      if (insight.category === 'Security' || insight.type === 'success') {
+        // Trigger a new scan
+        await handleScanVulnerabilities()
+      } else if (insight.category === 'Updates' || insight.type === 'info') {
+        // Update outdated packages
+        await handleUpdateAllDependencies()
+      } else if (insight.category === 'Deprecation' || insight.type === 'warning') {
+        // Show deprecated packages for review
+        toast.success('Insight applied', {
+          description: `Review deprecated packages and consider alternatives`
+        })
+      } else {
+        toast.success('Insight acknowledged', {
+          description: insight.title
+        })
+      }
+    } catch (err) {
+      toast.error('Failed to apply insight', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
+  }
+
+  // Quick actions with real functionality
+  const dependenciesQuickActions = [
+    {
+      id: '1',
+      label: 'Run Scan',
+      icon: 'Shield',
+      shortcut: 'S',
+      action: () => setShowScanDialog(true)
+    },
+    {
+      id: '2',
+      label: 'Update All',
+      icon: 'RefreshCw',
+      shortcut: 'U',
+      action: handleUpdateAllDependencies
+    },
+    {
+      id: '3',
+      label: 'Lock File',
+      icon: 'Lock',
+      shortcut: 'L',
+      action: handleGenerateLockfile
+    },
+    {
+      id: '4',
+      label: 'Report',
+      icon: 'FileText',
+      shortcut: 'R',
+      action: handleGeneratePdfReport
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50/30 to-pink-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
@@ -2233,7 +2411,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             <AIInsightsPanel
               insights={mockDependenciesAIInsights}
               title="Dependencies Intelligence"
-              onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Applying ${insight.title}...`, success: insight.title, error: 'Failed to apply insight' })}
+              onInsightAction={handleApplyInsight}
             />
           </div>
           <div className="space-y-6">
@@ -2255,7 +2433,7 @@ export default function DependenciesClient({ initialDependencies }: { initialDep
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockDependenciesQuickActions}
+            actions={dependenciesQuickActions}
             variant="grid"
           />
         </div>

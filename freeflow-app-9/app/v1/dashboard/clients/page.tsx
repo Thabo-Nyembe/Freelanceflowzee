@@ -873,21 +873,13 @@ export default function ClientsPage() {
     // Navigate to messages page with client pre-selected
     router.push(`/dashboard/messages?client=${encodeURIComponent(client.name)}&email=${encodeURIComponent(client.email)}`)
 
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Opening message composer...',
-      success: `Message composer ready for ${client.name}`,
-      error: 'Failed to open message composer'
-    })
+    toast.success(`Message composer ready for ${client.name}`)
   }
 
   const handleSendEmail = (client: Client) => {
     logger.info('Send email to client', { clientId: client.id, email: client.email })
     window.location.href = `mailto:${client.email}`
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Opening email client...',
-      success: 'Email client opened',
-      error: 'Failed to open email client'
-    })
+    toast.success('Email client opened')
   }
 
   const handleCallClient = (client: Client) => {
@@ -897,11 +889,7 @@ export default function ClientsPage() {
       // Use tel: protocol to initiate call
       window.location.href = `tel:${client.phone}`
 
-      toast.promise(new Promise(r => setTimeout(r, 700)), {
-        loading: 'Initiating call...',
-        success: `Calling ${client.name} at ${client.phone}`,
-        error: 'Failed to initiate call'
-      })
+      toast.success(`Calling ${client.name} at ${client.phone}`)
     } else {
       toast.error('No phone number available', {
         description: `${client.name} doesn't have a phone number on file`
@@ -915,11 +903,7 @@ export default function ClientsPage() {
     // Navigate to bookings/calendar with client pre-filled
     router.push(`/dashboard/bookings?client=${encodeURIComponent(client.name)}&clientId=${client.id}`)
 
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Opening calendar...',
-      success: `Calendar ready for scheduling with ${client.name}`,
-      error: 'Failed to open calendar'
-    })
+    toast.success(`Calendar ready for scheduling with ${client.name}`)
   }
 
   const handleViewAnalytics = (client: Client) => {
@@ -946,11 +930,7 @@ export default function ClientsPage() {
       a.click()
 
       logger.info('Clients exported successfully', { count: state.clients.length })
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Preparing export...',
-        success: `${state.clients.length} clients exported successfully`,
-        error: 'Failed to export clients'
-      })
+      toast.success(`${state.clients.length} clients exported successfully`)
 
       setIsExportModalOpen(false)
     } catch (error) {

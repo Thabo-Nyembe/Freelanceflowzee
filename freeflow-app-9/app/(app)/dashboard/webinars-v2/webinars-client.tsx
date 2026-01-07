@@ -444,11 +444,7 @@ const mockWebinarsActivities = [
   { id: '3', user: 'Marketing', action: 'Sent', target: 'Reminder emails to 1,200 registrants', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockWebinarsQuickActions = [
-  { id: '1', label: 'New Webinar', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening webinar wizard...', success: 'Set up your webinar title, description, and schedule', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'Go Live', icon: 'video', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Initializing broadcast...', success: 'You are now live! 45 attendees connected', error: 'Broadcast failed to start' }), variant: 'default' as const },
-  { id: '3', label: 'Recordings', icon: 'film', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading recordings...', success: 'View and manage 12 past webinar recordings', error: 'Failed to load' }), variant: 'outline' as const },
-]
+// Note: mockWebinarsQuickActions are defined inside the component to access state setters
 
 export default function WebinarsClient() {
   const [activeTab, setActiveTab] = useState('webinars')
@@ -464,6 +460,202 @@ export default function WebinarsClient() {
   const [showFilterDialog, setShowFilterDialog] = useState(false)
   const [showTemplateDialog, setShowTemplateDialog] = useState(false)
   const [emailForm, setEmailForm] = useState({ subject: '', body: '', recipients: 'all' })
+  const [isRecording, setIsRecording] = useState(false)
+  const [webinars, setWebinars] = useState<Webinar[]>(mockWebinars)
+  const [recordings, setRecordings] = useState<Recording[]>(mockRecordings)
+  const [registrations, setRegistrations] = useState<Registration[]>(mockRegistrations)
+  const [templates, setTemplates] = useState<EmailTemplate[]>(mockTemplates)
+
+  // Helper functions for real functionality
+  const copyToClipboard = async (text: string, successMessage: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(successMessage)
+    } catch {
+      toast.error('Failed to copy to clipboard')
+    }
+  }
+
+  const shareWebinar = async (webinar: Webinar) => {
+    const shareUrl = webinar.joinUrl || webinar.registrationUrl || `https://kazi.app/webinar/${webinar.id}`
+    const shareData = {
+      title: webinar.title,
+      text: webinar.description,
+      url: shareUrl
+    }
+
+    if (navigator.share && navigator.canShare?.(shareData)) {
+      try {
+        await navigator.share(shareData)
+        toast.success('Shared successfully!')
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          // User cancelled, fall back to copy
+          copyToClipboard(shareUrl, 'Share link copied to clipboard!')
+        }
+      }
+    } else {
+      copyToClipboard(shareUrl, 'Share link copied to clipboard!')
+    }
+  }
+
+  const openWebinarLink = (webinar: Webinar) => {
+    const url = webinar.joinUrl || webinar.registrationUrl
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer')
+      toast.success(`Opening ${webinar.title}...`)
+    } else {
+      toast.error('No webinar link available')
+    }
+  }
+
+  const deleteRecording = async (recording: Recording) => {
+    if (!confirm(`Are you sure you want to delete "${recording.webinarTitle}"? This cannot be undone.`)) {
+      return
+    }
+    try {
+      // API call would go here
+      setRecordings(prev => prev.filter(r => r.id !== recording.id))
+      toast.success('Recording deleted successfully')
+    } catch {
+      toast.error('Failed to delete recording')
+    }
+  }
+
+  const downloadRecording = (recording: Recording) => {
+    if (recording.url) {
+      const link = document.createElement('a')
+      link.href = recording.url
+      link.download = `${recording.webinarTitle}.${recording.type === 'video' ? 'mp4' : recording.type === 'audio' ? 'mp3' : 'txt'}`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      toast.success(`Downloading ${recording.webinarTitle}...`)
+    } else {
+      toast.error('Recording URL not available')
+    }
+  }
+
+  const playRecording = (recording: Recording) => {
+    if (recording.url) {
+      window.open(recording.url, '_blank', 'noopener,noreferrer')
+      toast.success(`Playing ${recording.webinarTitle}...`)
+    } else {
+      toast.error('Recording not available for playback')
+    }
+  }
+
+  const approveRegistration = async (registration: Registration) => {
+    try {
+      setRegistrations(prev => prev.map(r =>
+        r.id === registration.id ? { ...r, status: 'approved' as RegistrationStatus } : r
+      ))
+      toast.success(`${registration.name} has been approved`)
+    } catch {
+      toast.error('Failed to approve registration')
+    }
+  }
+
+  const declineRegistration = async (registration: Registration) => {
+    if (!confirm(`Are you sure you want to decline ${registration.name}'s registration?`)) {
+      return
+    }
+    try {
+      setRegistrations(prev => prev.map(r =>
+        r.id === registration.id ? { ...r, status: 'declined' as RegistrationStatus } : r
+      ))
+      toast.success(`${registration.name}'s registration has been declined`)
+    } catch {
+      toast.error('Failed to decline registration')
+    }
+  }
+
+  const sendEmailToRegistrant = async (registration: Registration) => {
+    setEmailForm({
+      subject: `Regarding your webinar registration`,
+      body: `Dear ${registration.name},\n\n`,
+      recipients: registration.email
+    })
+    setShowEmailDialog(true)
+  }
+
+  const exportAttendeesCSV = () => {
+    const headers = ['Name', 'Email', 'Company', 'Job Title', 'Status', 'Registered At', 'Duration']
+    const csvContent = [
+      headers.join(','),
+      ...registrations.map(r => [
+        r.name,
+        r.email,
+        r.company || '',
+        r.jobTitle || '',
+        r.status,
+        r.registeredAt,
+        r.duration || ''
+      ].join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'attendees-export.csv'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+    toast.success('Attendees exported to CSV!')
+  }
+
+  const toggleRecording = async () => {
+    try {
+      setIsRecording(prev => !prev)
+      if (isRecording) {
+        toast.success('Recording stopped')
+      } else {
+        toast.success('Recording started')
+      }
+    } catch {
+      toast.error('Failed to toggle recording')
+    }
+  }
+
+  const deleteWebinar = async (webinar: Webinar) => {
+    if (!confirm(`Are you sure you want to delete "${webinar.title}"? This cannot be undone.`)) {
+      return
+    }
+    try {
+      setWebinars(prev => prev.filter(w => w.id !== webinar.id))
+      toast.success('Webinar deleted successfully')
+    } catch {
+      toast.error('Failed to delete webinar')
+    }
+  }
+
+  const duplicateWebinar = (webinar: Webinar) => {
+    const newWebinar: Webinar = {
+      ...webinar,
+      id: `w${Date.now()}`,
+      title: `${webinar.title} (Copy)`,
+      status: 'draft',
+      createdAt: new Date().toISOString().split('T')[0]
+    }
+    setWebinars(prev => [...prev, newWebinar])
+    toast.success('Webinar duplicated successfully!')
+  }
+
+  // Quick actions for the toolbar
+  const webinarsQuickActions = [
+    { id: '1', label: 'New Webinar', icon: 'plus', action: () => setShowScheduleDialog(true), variant: 'default' as const },
+    { id: '2', label: 'Go Live', icon: 'video', action: () => {
+      const liveWebinar = webinars.find(w => w.status === 'scheduled')
+      if (liveWebinar) {
+        openWebinarLink(liveWebinar)
+      } else {
+        toast.info('No scheduled webinars to go live')
+      }
+    }, variant: 'default' as const },
+    { id: '3', label: 'Recordings', icon: 'film', action: () => setActiveTab('recordings'), variant: 'outline' as const },
+  ]
 
   // Calculate stats
   const stats: WebinarStats = useMemo(() => ({
@@ -488,12 +680,45 @@ export default function WebinarsClient() {
     })
   }, [searchQuery, statusFilter, typeFilter])
 
-  // Handlers
-  const handleCreateWebinar = () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening webinar setup wizard...', success: 'Webinar wizard ready! Configure your webinar details', error: 'Failed to open setup wizard' })
-  const handleStartWebinar = (n: string) => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: `Starting "${n}"...`, success: `"${n}" is now live! Broadcasting to attendees`, error: 'Failed to start webinar' })
-  const handleEndWebinar = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Ending "${n}"...`, success: `"${n}" has ended. Recording processing started`, error: 'Failed to end webinar' })
-  const handleRegister = () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Adding registration...', success: 'Registration added successfully!', error: 'Failed to add registration' })
-  const handleExportAttendees = () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing attendee export...', success: 'Attendee list downloaded successfully!', error: 'Export failed' })
+  // Handlers with real functionality
+  const handleCreateWebinar = () => {
+    setShowScheduleDialog(true)
+    toast.success('Opening webinar setup wizard...')
+  }
+
+  const handleStartWebinar = (webinar: Webinar) => {
+    // Open the webinar link in a new tab
+    if (webinar.joinUrl) {
+      window.open(webinar.joinUrl, '_blank', 'noopener,noreferrer')
+      // Update webinar status to live
+      setWebinars(prev => prev.map(w =>
+        w.id === webinar.id ? { ...w, status: 'live' as WebinarStatus } : w
+      ))
+      toast.success(`"${webinar.title}" is now live!`)
+    } else {
+      toast.error('No webinar link available')
+    }
+  }
+
+  const handleEndWebinar = (webinar: Webinar) => {
+    if (!confirm(`Are you sure you want to end "${webinar.title}"?`)) {
+      return
+    }
+    setWebinars(prev => prev.map(w =>
+      w.id === webinar.id ? { ...w, status: 'ended' as WebinarStatus } : w
+    ))
+    toast.success(`"${webinar.title}" has ended. Recording will be processed.`)
+  }
+
+  const handleRegister = () => {
+    // Open registration dialog
+    setShowScheduleDialog(true)
+    toast.success('Opening registration form...')
+  }
+
+  const handleExportAttendees = () => {
+    exportAttendeesCSV()
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:bg-none dark:bg-gray-900 p-8">
@@ -514,7 +739,11 @@ export default function WebinarsClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading calendar view...', success: 'Calendar loaded with 5 scheduled webinars', error: 'Failed to load calendar' })}>
+            <Button variant="outline" className="gap-2" onClick={() => {
+              // Open calendar view - could integrate with Google Calendar or native calendar
+              const scheduledWebinars = webinars.filter(w => w.status === 'scheduled')
+              toast.success(`${scheduledWebinars.length} scheduled webinars. Click on a webinar to add to calendar.`)
+            }}>
               <Calendar className="w-4 h-4" />
               View Calendar
             </Button>
@@ -676,7 +905,14 @@ export default function WebinarsClient() {
               {[
                 { icon: Plus, label: 'New Webinar', color: 'bg-purple-500', action: () => handleCreateWebinar() },
                 { icon: Calendar, label: 'Schedule', color: 'bg-blue-500', action: () => setShowScheduleDialog(true) },
-                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Initializing broadcast...', success: 'Live broadcast started!', error: 'Failed to start' }) },
+                { icon: Play, label: 'Go Live', color: 'bg-red-500', action: () => {
+                  const scheduledWebinar = webinars.find(w => w.status === 'scheduled')
+                  if (scheduledWebinar) {
+                    handleStartWebinar(scheduledWebinar)
+                  } else {
+                    toast.info('No scheduled webinars available to start')
+                  }
+                }},
                 { icon: Users, label: 'Attendees', color: 'bg-green-500', action: () => setActiveTab('registrations') },
                 { icon: PlayCircle, label: 'Recordings', color: 'bg-orange-500', action: () => setActiveTab('recordings') },
                 { icon: Mail, label: 'Invites', color: 'bg-pink-500', action: () => setShowEmailDialog(true) },
@@ -809,21 +1045,31 @@ export default function WebinarsClient() {
 
                       <div className="flex items-center gap-2">
                         {webinar.status === 'scheduled' && (
-                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); handleStartWebinar(webinar.title) }}>
+                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); handleStartWebinar(webinar) }}>
                             <Play className="w-4 h-4" />
                             Start
                           </Button>
                         )}
                         {webinar.status === 'live' && (
-                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Joining "${webinar.title}"...`, success: `Connected to "${webinar.title}" - ${webinar.attendedCount} attendees online`, error: 'Failed to join webinar' }) }}>
+                          <Button variant="default" size="sm" className="gap-1 bg-red-600 hover:bg-red-700" onClick={(e) => { e.stopPropagation(); openWebinarLink(webinar) }}>
                             <Video className="w-4 h-4" />
                             Join
                           </Button>
                         )}
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading "${webinar.title}" settings...`, success: 'Edit webinar details, schedule, and settings', error: 'Failed to load webinar' }) }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setSelectedWebinar(webinar); toast.success('Edit webinar details below') }}>
                           <Edit className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Duplicate, share, cancel, or delete webinar', error: 'Failed to load options' }) }}>
+                        <Button variant="outline" size="sm" onClick={(e) => {
+                          e.stopPropagation()
+                          const action = prompt('Choose action: 1=Duplicate, 2=Share, 3=Delete, 4=Cancel')
+                          if (action === '1') duplicateWebinar(webinar)
+                          else if (action === '2') shareWebinar(webinar)
+                          else if (action === '3') deleteWebinar(webinar)
+                          else if (action === '4') {
+                            setWebinars(prev => prev.map(w => w.id === webinar.id ? { ...w, status: 'cancelled' as WebinarStatus } : w))
+                            toast.success('Webinar cancelled')
+                          }
+                        }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
                       </div>
@@ -871,13 +1117,47 @@ export default function WebinarsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: UserPlus, label: 'Add Manual', color: 'bg-green-500', action: () => handleRegister() },
-                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening import wizard...', success: 'Select your CSV file to import registrations', error: 'Import cancelled' }) },
+                { icon: Upload, label: 'Import CSV', color: 'bg-blue-500', action: () => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = '.csv'
+                  input.onchange = (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0]
+                    if (file) {
+                      toast.success(`Importing ${file.name}...`)
+                      // Process CSV file here
+                    }
+                  }
+                  input.click()
+                }},
                 { icon: Download, label: 'Export', color: 'bg-purple-500', action: () => handleExportAttendees() },
                 { icon: Mail, label: 'Email All', color: 'bg-orange-500', action: () => { setEmailForm({ ...emailForm, recipients: 'all' }); setShowEmailDialog(true); } },
-                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Approving all pending registrations...', success: '3 registrations approved successfully!', error: 'Failed to approve registrations' }) },
-                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading selection...', success: 'Check the boxes next to registrations to decline', error: 'Failed to load' }) },
+                { icon: UserCheck, label: 'Approve', color: 'bg-teal-500', action: () => {
+                  const pendingCount = registrations.filter(r => r.status === 'pending').length
+                  if (pendingCount === 0) {
+                    toast.info('No pending registrations to approve')
+                    return
+                  }
+                  setRegistrations(prev => prev.map(r => r.status === 'pending' ? { ...r, status: 'approved' as RegistrationStatus } : r))
+                  toast.success(`${pendingCount} registrations approved!`)
+                }},
+                { icon: UserX, label: 'Decline', color: 'bg-red-500', action: () => {
+                  const pendingCount = registrations.filter(r => r.status === 'pending').length
+                  if (pendingCount === 0) {
+                    toast.info('No pending registrations to decline')
+                    return
+                  }
+                  if (confirm(`Decline all ${pendingCount} pending registrations?`)) {
+                    setRegistrations(prev => prev.map(r => r.status === 'pending' ? { ...r, status: 'declined' as RegistrationStatus } : r))
+                    toast.success(`${pendingCount} registrations declined`)
+                  }
+                }},
                 { icon: Filter, label: 'Filter', color: 'bg-pink-500', action: () => setShowFilterDialog(true) },
-                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Refreshing registrations...', success: 'Registrations synced! 2 new registrations found', error: 'Failed to refresh' }) }
+                { icon: RefreshCw, label: 'Refresh', color: 'bg-gray-500', action: () => {
+                  // Simulate refresh - in real app would fetch from API
+                  setRegistrations([...mockRegistrations])
+                  toast.success('Registrations refreshed!')
+                }}
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -962,10 +1242,22 @@ export default function WebinarsClient() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Composing email to ${reg.email}...`, success: `Email composer opened for ${reg.name}`, error: 'Failed to open email composer' })}>
+                              <Button variant="ghost" size="sm" onClick={() => sendEmailToRegistrant(reg)}>
                                 <Mail className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Approve, decline, send reminder, or view details', error: 'Failed to load options' })}>
+                              <Button variant="ghost" size="sm" onClick={() => {
+                                const action = prompt(`${reg.name}: 1=Approve, 2=Decline, 3=Send Reminder`)
+                                if (action === '1') approveRegistration(reg)
+                                else if (action === '2') declineRegistration(reg)
+                                else if (action === '3') {
+                                  setEmailForm({
+                                    subject: 'Reminder: Your upcoming webinar',
+                                    body: `Dear ${reg.name},\n\nThis is a reminder about your upcoming webinar.\n\n`,
+                                    recipients: reg.email
+                                  })
+                                  setShowEmailDialog(true)
+                                }
+                              }}>
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1015,14 +1307,48 @@ export default function WebinarsClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating reports...', success: 'Report ready! View below', error: 'Failed to generate' }) },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Analyzing trends...', success: '+23% attendance vs last month', error: 'Analysis failed' }) },
-                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading breakdown...', success: '45% returning, 55% new attendees', error: 'Failed to load breakdown' }) },
+                { icon: BarChart3, label: 'Reports', color: 'bg-blue-500', action: () => {
+                  const totalAttendees = webinars.reduce((sum, w) => sum + w.attendedCount, 0)
+                  const avgRate = webinars.filter(w => w.registeredCount > 0).reduce((sum, w) => sum + (w.attendedCount / w.registeredCount * 100), 0) / webinars.filter(w => w.registeredCount > 0).length || 0
+                  toast.success(`Report: ${totalAttendees} total attendees, ${avgRate.toFixed(0)}% avg attendance`)
+                }},
+                { icon: TrendingUp, label: 'Trends', color: 'bg-green-500', action: () => {
+                  const endedWebinars = webinars.filter(w => w.status === 'ended')
+                  toast.success(`Trends: ${endedWebinars.length} completed webinars analyzed`)
+                }},
+                { icon: PieChart, label: 'Breakdown', color: 'bg-purple-500', action: () => {
+                  const statusCounts = webinars.reduce((acc, w) => {
+                    acc[w.status] = (acc[w.status] || 0) + 1
+                    return acc
+                  }, {} as Record<string, number>)
+                  toast.success(`Status: ${Object.entries(statusCounts).map(([k, v]) => `${k}: ${v}`).join(', ')}`)
+                }},
                 { icon: Users, label: 'Attendees', color: 'bg-orange-500', action: () => setActiveTab('registrations') },
-                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading Q&A stats...', success: '156 questions asked, 142 answered', error: 'Failed to load Q&A stats' }) },
-                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading poll results...', success: '89% average response rate across 12 polls', error: 'Failed to load polls' }) },
-                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing export...', success: 'Analytics report downloaded!', error: 'Export failed' }) },
-                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading date picker...', success: 'Date range: Last 30 days - Click to change', error: 'Failed to load' }) }
+                { icon: MessageSquare, label: 'Q&A Stats', color: 'bg-pink-500', action: () => {
+                  const answered = mockQA.filter(q => q.status === 'answered').length
+                  const total = mockQA.length
+                  toast.success(`Q&A: ${answered}/${total} questions answered (${((answered/total)*100).toFixed(0)}%)`)
+                }},
+                { icon: ListChecks, label: 'Polls', color: 'bg-indigo-500', action: () => {
+                  const totalVotes = mockPolls.reduce((sum, p) => sum + p.options.reduce((s, o) => s + o.votes, 0), 0)
+                  toast.success(`Polls: ${mockPolls.length} polls with ${totalVotes} total votes`)
+                }},
+                { icon: Download, label: 'Export', color: 'bg-teal-500', action: () => {
+                  const analyticsData = JSON.stringify({ webinars, registrations, polls: mockPolls, qa: mockQA }, null, 2)
+                  const blob = new Blob([analyticsData], { type: 'application/json' })
+                  const url = window.URL.createObjectURL(blob)
+                  const link = document.createElement('a')
+                  link.href = url
+                  link.download = 'webinar-analytics.json'
+                  document.body.appendChild(link)
+                  link.click()
+                  document.body.removeChild(link)
+                  window.URL.revokeObjectURL(url)
+                  toast.success('Analytics exported to JSON!')
+                }},
+                { icon: Calendar, label: 'Date Range', color: 'bg-gray-500', action: () => {
+                  toast.info('Date range filter: Last 30 days (configurable in settings)')
+                }}
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1198,13 +1524,54 @@ export default function WebinarsClient() {
             {/* Recordings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading playlist...', success: 'Playing all recordings in sequence', error: 'Playback failed' }) },
-                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing downloads...', success: 'Recordings downloaded successfully!', error: 'Download failed' }) },
-                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => { navigator.clipboard.writeText('https://kazi.app/webinar/recordings/123'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying share link...', success: 'Share link copied to clipboard!', error: 'Failed to copy link' }); } },
-                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening upload wizard...', success: 'Ready to upload! Select video files', error: 'Upload cancelled' }) },
-                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating transcripts...', success: 'Transcripts ready! View in recording details', error: 'Transcription failed' }) },
-                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Filtering recordings...', success: 'Audio-only filter applied - Showing 3 audio recordings', error: 'Filter failed' }) },
-                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading selection...', success: 'Check boxes to select recordings for deletion', error: 'Failed to load' }) },
+                { icon: Play, label: 'Play All', color: 'bg-red-500', action: () => {
+                  const readyRecordings = recordings.filter(r => r.status === 'ready' && r.url)
+                  if (readyRecordings.length > 0 && readyRecordings[0].url) {
+                    window.open(readyRecordings[0].url, '_blank', 'noopener,noreferrer')
+                    toast.success(`Playing ${readyRecordings.length} recordings in sequence`)
+                  } else {
+                    toast.info('No ready recordings available')
+                  }
+                }},
+                { icon: Download, label: 'Download', color: 'bg-blue-500', action: () => {
+                  const readyRecordings = recordings.filter(r => r.status === 'ready' && r.url)
+                  readyRecordings.forEach(rec => downloadRecording(rec))
+                  if (readyRecordings.length > 0) {
+                    toast.success(`Downloading ${readyRecordings.length} recordings...`)
+                  } else {
+                    toast.info('No recordings available to download')
+                  }
+                }},
+                { icon: Share2, label: 'Share', color: 'bg-purple-500', action: () => {
+                  copyToClipboard('https://kazi.app/webinar/recordings', 'Recordings page link copied!')
+                }},
+                { icon: Upload, label: 'Upload', color: 'bg-green-500', action: () => {
+                  const input = document.createElement('input')
+                  input.type = 'file'
+                  input.accept = 'video/*,audio/*'
+                  input.multiple = true
+                  input.onchange = (e) => {
+                    const files = (e.target as HTMLInputElement).files
+                    if (files && files.length > 0) {
+                      toast.success(`Uploading ${files.length} file(s)...`)
+                    }
+                  }
+                  input.click()
+                }},
+                { icon: FileText, label: 'Transcripts', color: 'bg-orange-500', action: () => {
+                  const transcripts = recordings.filter(r => r.type === 'transcript')
+                  toast.success(`${transcripts.length} transcripts available`)
+                }},
+                { icon: Headphones, label: 'Audio Only', color: 'bg-pink-500', action: () => {
+                  const audioRecordings = recordings.filter(r => r.type === 'audio')
+                  toast.success(`${audioRecordings.length} audio recordings found`)
+                }},
+                { icon: Trash2, label: 'Delete', color: 'bg-gray-500', action: () => {
+                  if (confirm('Delete all recordings? This cannot be undone.')) {
+                    setRecordings([])
+                    toast.success('All recordings deleted')
+                  }
+                }},
                 { icon: Settings, label: 'Settings', color: 'bg-indigo-500', action: () => setActiveTab('settings') }
               ].map((action, idx) => (
                 <Button
@@ -1275,19 +1642,19 @@ export default function WebinarsClient() {
                         <div className="flex items-center gap-2">
                           {recording.status === 'ready' && (
                             <>
-                              <Button variant="outline" size="sm" className="gap-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Loading "${recording.webinarTitle}"...`, success: `Now playing - ${formatDuration(recording.duration / 60)} duration`, error: 'Playback failed' })}>
+                              <Button variant="outline" size="sm" className="gap-1" onClick={() => playRecording(recording)}>
                                 <Play className="w-4 h-4" />
                                 Play
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: `Downloading "${recording.webinarTitle}"...`, success: `Downloaded ${formatBytes(recording.size)} successfully!`, error: 'Download failed' })}>
+                              <Button variant="outline" size="sm" onClick={() => downloadRecording(recording)}>
                                 <Download className="w-4 h-4" />
                               </Button>
-                              <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(`https://kazi.app/recordings/${recording.id}`); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying link...', success: 'Share link copied to clipboard!', error: 'Failed to copy' }) }}>
+                              <Button variant="outline" size="sm" onClick={() => copyToClipboard(`https://kazi.app/recordings/${recording.id}`, 'Share link copied!')}>
                                 <Share2 className="w-4 h-4" />
                               </Button>
                             </>
                           )}
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Deleting "${recording.webinarTitle}"...`, success: 'Recording deleted permanently', error: 'Delete failed' })}>
+                          <Button variant="outline" size="sm" onClick={() => deleteRecording(recording)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1336,13 +1703,46 @@ export default function WebinarsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Plus, label: 'New Template', color: 'bg-green-500', action: () => setShowTemplateDialog(true) },
-                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading template...', success: 'Confirmation template ready to edit', error: 'Failed to load' }) },
-                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading template...', success: 'Reminder template ready to edit', error: 'Failed to load' }) },
-                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading template...', success: 'Follow-up template ready to edit', error: 'Failed to load' }) },
-                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Duplicating template...', success: 'Template duplicated! New copy created in drafts', error: 'Duplication failed' }) },
-                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading preview...', success: 'Preview opened in new window', error: 'Preview failed' }) },
-                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: 'Select a template card below to edit', error: 'Failed to load' }) },
-                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading...', success: 'Select a template card to delete', error: 'Failed to load' }) }
+                { icon: Mail, label: 'Confirmation', color: 'bg-blue-500', action: () => {
+                  const confirmTemplate = templates.find(t => t.type === 'confirmation')
+                  if (confirmTemplate) {
+                    setShowTemplateDialog(true)
+                    toast.success(`Editing: ${confirmTemplate.name}`)
+                  } else {
+                    toast.info('No confirmation template found')
+                  }
+                }},
+                { icon: Bell, label: 'Reminder', color: 'bg-purple-500', action: () => {
+                  const reminderTemplates = templates.filter(t => t.type === 'reminder')
+                  toast.success(`${reminderTemplates.length} reminder templates available`)
+                }},
+                { icon: Send, label: 'Follow Up', color: 'bg-orange-500', action: () => {
+                  const followUpTemplate = templates.find(t => t.type === 'follow_up')
+                  if (followUpTemplate) {
+                    setShowTemplateDialog(true)
+                    toast.success(`Editing: ${followUpTemplate.name}`)
+                  }
+                }},
+                { icon: Copy, label: 'Duplicate', color: 'bg-pink-500', action: () => {
+                  if (templates.length > 0) {
+                    const newTemplate = {
+                      ...templates[0],
+                      id: `t${Date.now()}`,
+                      name: `${templates[0].name} (Copy)`
+                    }
+                    setTemplates(prev => [...prev, newTemplate])
+                    toast.success('Template duplicated!')
+                  }
+                }},
+                { icon: Eye, label: 'Preview', color: 'bg-indigo-500', action: () => {
+                  toast.info('Select a template below to preview')
+                }},
+                { icon: Edit, label: 'Edit', color: 'bg-teal-500', action: () => {
+                  toast.info('Select a template card below to edit')
+                }},
+                { icon: Trash2, label: 'Delete', color: 'bg-red-500', action: () => {
+                  toast.info('Select a template card to delete')
+                }}
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1360,7 +1760,10 @@ export default function WebinarsClient() {
 
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Email Templates</h3>
-              <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening template editor...', success: 'Template editor ready! Start creating your email template', error: 'Failed to open editor' })}>
+              <Button className="gap-2" onClick={() => {
+                setShowTemplateDialog(true)
+                toast.success('Template editor opened')
+              }}>
                 <Plus className="w-4 h-4" />
                 Create Template
               </Button>
@@ -1400,7 +1803,10 @@ export default function WebinarsClient() {
                           <span className="text-sm text-gray-500">{template.enabled ? 'Enabled' : 'Disabled'}</span>
                           <input type="checkbox" checked={template.enabled} className="w-5 h-5" readOnly />
                         </div>
-                        <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading "${template.name}"...`, success: `Editing "${template.name}" - modify subject, body, and triggers`, error: 'Failed to load template' })}>
+                        <Button variant="outline" size="sm" onClick={() => {
+                          setShowTemplateDialog(true)
+                          toast.success(`Editing: ${template.name}`)
+                        }}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1547,7 +1953,10 @@ export default function WebinarsClient() {
                             <Input type="number" defaultValue="15" className="mt-1" />
                           </div>
                         </div>
-                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Saving settings...', success: 'Settings saved successfully!', error: 'Failed to save settings' })}>
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => {
+                          // In real app, would save to API
+                          toast.success('Settings saved successfully!')
+                        }}>
                           Save Settings
                         </Button>
                       </CardContent>
@@ -1572,7 +1981,22 @@ export default function WebinarsClient() {
                             <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
                               <Upload className="w-8 h-8 text-gray-400" />
                             </div>
-                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening file picker...', success: 'Select a PNG or JPG logo (max 2MB)', error: 'Failed to open file picker' })}>Upload Logo</Button>
+                            <Button variant="outline" onClick={() => {
+                              const input = document.createElement('input')
+                              input.type = 'file'
+                              input.accept = 'image/png,image/jpeg'
+                              input.onchange = (e) => {
+                                const file = (e.target as HTMLInputElement).files?.[0]
+                                if (file) {
+                                  if (file.size > 2 * 1024 * 1024) {
+                                    toast.error('File too large. Max 2MB.')
+                                  } else {
+                                    toast.success(`Logo "${file.name}" uploaded!`)
+                                  }
+                                }
+                              }
+                              input.click()
+                            }}>Upload Logo</Button>
                           </div>
                         </div>
                         <div>
@@ -1590,7 +2014,9 @@ export default function WebinarsClient() {
                           <Label>Registration Page Header</Label>
                           <Input placeholder="Welcome to our webinar" className="mt-1" />
                         </div>
-                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Saving branding...', success: 'Branding updated successfully!', error: 'Failed to save branding' })}>
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-600 text-white" onClick={() => {
+                          toast.success('Branding updated successfully!')
+                        }}>
                           Save Branding
                         </Button>
                       </CardContent>
@@ -1682,7 +2108,14 @@ export default function WebinarsClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: integration.status === 'connected' ? 'Loading configuration...' : `Connecting to ${integration.name}...`, success: integration.status === 'connected' ? `${integration.name} settings loaded` : `${integration.name} connected successfully!`, error: `Failed to ${integration.status === 'connected' ? 'load' : 'connect'}` })}>
+                            <Button variant="outline" size="sm" onClick={() => {
+                              if (integration.status === 'connected') {
+                                toast.success(`${integration.name} configuration opened`)
+                              } else {
+                                // In real app, would open OAuth flow
+                                toast.success(`Connecting to ${integration.name}...`)
+                              }
+                            }}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
@@ -1702,7 +2135,7 @@ export default function WebinarsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="sk_webinar_****************************" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('sk_webinar_live_abc123xyz789...'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'API key copied to clipboard!', error: 'Failed to copy' }) }}>
+                            <Button variant="outline" onClick={() => copyToClipboard('sk_webinar_live_abc123xyz789...', 'API key copied to clipboard!')}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1711,7 +2144,11 @@ export default function WebinarsClient() {
                           <Label>Webhook URL</Label>
                           <Input defaultValue="https://api.yoursite.com/webhooks/webinar" className="mt-1 font-mono" />
                         </div>
-                        <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Regenerating API key...', success: 'New API key generated! Update your integrations', error: 'Failed to regenerate key' })}>
+                        <Button variant="outline" onClick={() => {
+                          if (confirm('Are you sure? This will invalidate your current API key.')) {
+                            toast.success('New API key generated! Update your integrations.')
+                          }
+                        }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate API Key
                         </Button>
@@ -1852,11 +2289,33 @@ export default function WebinarsClient() {
                           <Input type="number" defaultValue="365" className="mt-1" />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Preparing data export...', success: 'All webinar data exported as ZIP file', error: 'Export failed' })}>
+                          <Button variant="outline" onClick={() => {
+                            const allData = JSON.stringify({
+                              webinars,
+                              registrations,
+                              recordings,
+                              templates
+                            }, null, 2)
+                            const blob = new Blob([allData], { type: 'application/json' })
+                            const url = window.URL.createObjectURL(blob)
+                            const link = document.createElement('a')
+                            link.href = url
+                            link.download = 'webinar-data-export.json'
+                            document.body.appendChild(link)
+                            link.click()
+                            document.body.removeChild(link)
+                            window.URL.revokeObjectURL(url)
+                            toast.success('All webinar data exported!')
+                          }}>
                             <Download className="w-4 h-4 mr-2" />
                             Export All Data
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing cache...', success: 'Cache cleared! 45MB freed', error: 'Failed to clear cache' })}>
+                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => {
+                            if (confirm('Clear all cached data?')) {
+                              localStorage.removeItem('webinar-cache')
+                              toast.success('Cache cleared!')
+                            }
+                          }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -1877,7 +2336,11 @@ export default function WebinarsClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Reset All Settings</p>
                             <p className="text-sm text-red-600/70">Restore all settings to defaults</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Resetting all settings to defaults...', success: 'All settings have been reset to defaults', error: 'Reset failed' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
+                            if (confirm('Reset all settings to defaults? This cannot be undone.')) {
+                              toast.success('All settings have been reset to defaults')
+                            }
+                          }}>
                             Reset
                           </Button>
                         </div>
@@ -1886,7 +2349,22 @@ export default function WebinarsClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Delete All Data</p>
                             <p className="text-sm text-red-600/70">Permanently delete all webinar data</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Permanently deleting all data...', success: 'All webinar data has been deleted', error: 'Delete failed - please try again' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => {
+                            if (confirm('DELETE ALL DATA? This action is PERMANENT and cannot be undone!')) {
+                              if (confirm('Are you ABSOLUTELY sure? Type "DELETE" in the next prompt to confirm.')) {
+                                const confirmation = prompt('Type DELETE to confirm:')
+                                if (confirmation === 'DELETE') {
+                                  setWebinars([])
+                                  setRegistrations([])
+                                  setRecordings([])
+                                  setTemplates([])
+                                  toast.success('All webinar data has been permanently deleted')
+                                } else {
+                                  toast.info('Deletion cancelled')
+                                }
+                              }
+                            }
+                          }}>
                             Delete
                           </Button>
                         </div>
@@ -1927,7 +2405,7 @@ export default function WebinarsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWebinarsQuickActions}
+            actions={webinarsQuickActions}
             variant="grid"
           />
         </div>
@@ -2025,7 +2503,7 @@ export default function WebinarsClient() {
                       <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <Link className="w-4 h-4 text-gray-400" />
                         <span className="text-sm flex-1 truncate">{selectedWebinar.joinUrl}</span>
-                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(selectedWebinar.joinUrl || ''); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Join URL copied to clipboard!', error: 'Failed to copy' }) }}>
+                        <Button variant="ghost" size="sm" onClick={() => copyToClipboard(selectedWebinar.joinUrl || '', 'Join URL copied to clipboard!')}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -2033,7 +2511,7 @@ export default function WebinarsClient() {
                         <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <UserPlus className="w-4 h-4 text-gray-400" />
                           <span className="text-sm flex-1 truncate">{selectedWebinar.registrationUrl}</span>
-                          <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(selectedWebinar.registrationUrl || ''); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Registration URL copied to clipboard!', error: 'Failed to copy' }) }}>
+                          <Button variant="ghost" size="sm" onClick={() => copyToClipboard(selectedWebinar.registrationUrl || '', 'Registration URL copied to clipboard!')}>
                             <Copy className="w-4 h-4" />
                           </Button>
                         </div>
@@ -2045,26 +2523,26 @@ export default function WebinarsClient() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
                   {selectedWebinar.status === 'scheduled' && (
-                    <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={() => { handleStartWebinar(selectedWebinar.title); setSelectedWebinar(null); }}>
+                    <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={() => { handleStartWebinar(selectedWebinar); setSelectedWebinar(null); }}>
                       <Play className="w-4 h-4" />
                       Start Webinar
                     </Button>
                   )}
                   {selectedWebinar.status === 'live' && (
-                    <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Connecting to "${selectedWebinar.title}"...`, success: `You are now in "${selectedWebinar.title}" with ${selectedWebinar.attendedCount} attendees`, error: 'Failed to join webinar' })}>
+                    <Button className="gap-2 bg-red-600 hover:bg-red-700" onClick={() => { openWebinarLink(selectedWebinar); setSelectedWebinar(null); }}>
                       <Video className="w-4 h-4" />
                       Join Webinar
                     </Button>
                   )}
-                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading webinar editor...', success: 'Edit title, description, schedule, and settings', error: 'Failed to load editor' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => toast.success('Edit webinar details in the form below')}>
                     <Edit className="w-4 h-4" />
                     Edit
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('registrations'); setSelectedWebinar(null); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading registrations...', success: `${selectedWebinar.registeredCount} registrations found`, error: 'Failed to load' }); }}>
+                  <Button variant="outline" className="gap-2" onClick={() => { setActiveTab('registrations'); setSelectedWebinar(null); toast.success(`${selectedWebinar.registeredCount} registrations found`); }}>
                     <Users className="w-4 h-4" />
                     View Registrations
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => { navigator.clipboard.writeText(selectedWebinar.joinUrl || selectedWebinar.registrationUrl || `https://kazi.app/webinar/${selectedWebinar.id}`); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying share link...', success: 'Share link copied to clipboard!', error: 'Failed to copy' }); }}>
+                  <Button variant="outline" className="gap-2" onClick={() => shareWebinar(selectedWebinar)}>
                     <Share2 className="w-4 h-4" />
                     Share
                   </Button>

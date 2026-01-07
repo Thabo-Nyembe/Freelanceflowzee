@@ -401,8 +401,8 @@ const mockWarehouseActivities = [
 ]
 
 const mockWarehouseQuickActions = [
-  { id: '1', label: 'Add Inventory', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Adding inventory...', success: 'Inventory added successfully', error: 'Failed to add inventory' }), variant: 'default' as const },
-  { id: '2', label: 'Cycle Count', icon: 'clipboard', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 700)), { loading: 'Starting cycle count...', success: 'Cycle count started', error: 'Failed to start cycle count' }), variant: 'outline' as const },
+  { id: '1', label: 'Add Inventory', icon: 'plus', action: () => toast.success('Ready to Add', { description: 'Enter inventory details to add new items' }), variant: 'default' as const },
+  { id: '2', label: 'Cycle Count', icon: 'clipboard', action: () => toast.success('Cycle Count Started', { description: 'Count in progress for selected locations' }), variant: 'outline' as const },
 ]
 
 export default function WarehouseClient() {

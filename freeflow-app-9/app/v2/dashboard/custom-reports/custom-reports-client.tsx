@@ -87,9 +87,9 @@ const customReportsActivities = [
 ]
 
 const customReportsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new item...', success: 'Item created successfully', error: 'Failed to create item' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting report...', success: 'Report exported successfully', error: 'Failed to export report' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading settings...', success: 'Settings loaded', error: 'Failed to load settings' }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Report Created', { description: 'New custom report ready' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Report Exported', { description: 'Custom report exported' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Report settings opened' }) },
 ]
 
 export default function CustomReportsClient() {

@@ -154,6 +154,20 @@ export default function AnalyticsClient() {
   const [cohortType, setCohortType] = useState<'retention' | 'revenue' | 'engagement'>('retention')
   const [settingsTab, setSettingsTab] = useState('general')
   const [isLoading, setIsLoading] = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [showMetricCreator, setShowMetricCreator] = useState(false)
+  const [showCohortCreator, setShowCohortCreator] = useState(false)
+  const [showEventSchemaEditor, setShowEventSchemaEditor] = useState(false)
+  const [editingReportId, setEditingReportId] = useState<string | null>(null)
+  const [viewingDashboardId, setViewingDashboardId] = useState<string | null>(null)
+  const [integrationStates, setIntegrationStates] = useState<Record<string, boolean>>({
+    'Google Analytics': true,
+    'Mixpanel': true,
+    'Segment': false,
+    'Amplitude': false,
+    'Hotjar': true,
+  })
+  const [apiKey, setApiKey] = useState('ak_live_' + Math.random().toString(36).substring(2, 14))
 
   // Database state
   const [dbFunnels, setDbFunnels] = useState<any[]>([])
@@ -494,29 +508,60 @@ export default function AnalyticsClient() {
   }
 
   // UI Handlers
-  const handleNotifications = () => {
+  const handleNotifications = async () => {
     setSettingsTab('notifications')
     setActiveTab('settings')
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening notification settings...',
-        success: 'Notification settings opened',
-        error: 'Failed to open notification settings'
-      }
-    )
+    toast.success('Notification settings opened', { description: 'Configure your alert preferences' })
   }
 
   const handleExport = async () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Generating analytics report...',
-        success: 'Export completed successfully',
-        error: 'Failed to export analytics report'
-      }
-    )
-    // In production, this would trigger a real export job
+    const exportData = async () => {
+      // Gather analytics data for export
+      const metricsData = mockMetrics.map(m => ({
+        name: m.name,
+        value: m.value,
+        previousValue: m.previousValue,
+        changePercent: m.changePercent,
+        category: m.category,
+        type: m.type,
+        status: m.status
+      }))
+
+      // Create CSV content
+      const headers = ['Name', 'Value', 'Previous Value', 'Change %', 'Category', 'Type', 'Status']
+      const csvRows = [
+        headers.join(','),
+        ...metricsData.map(m => [
+          `"${m.name}"`,
+          m.value,
+          m.previousValue,
+          m.changePercent.toFixed(2),
+          `"${m.category}"`,
+          `"${m.type}"`,
+          `"${m.status}"`
+        ].join(','))
+      ]
+      const csvContent = csvRows.join('\n')
+
+      // Create and download the file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `analytics-report-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+
+      return { fileName: link.download }
+    }
+
+    toast.promise(exportData(), {
+      loading: 'Generating analytics report...',
+      success: (data) => `Export completed: ${data.fileName}`,
+      error: 'Failed to export analytics report'
+    })
   }
 
   const handleShare = async () => {
@@ -528,15 +573,13 @@ export default function AnalyticsClient() {
     }
   }
 
-  const handleFilters = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening filter panel...',
-        success: 'Filter panel ready',
-        error: 'Failed to open filter panel'
-      }
-    )
+  const handleFilters = async () => {
+    setShowFilters(!showFilters)
+    if (!showFilters) {
+      toast.success('Filter panel opened', { description: 'Apply filters to refine your data' })
+    } else {
+      toast.info('Filter panel closed')
+    }
   }
 
   const handleRefresh = async () => {
@@ -766,15 +809,31 @@ export default function AnalyticsClient() {
                     <p className="text-2xl font-bold">$285K</p>
                     <p className="text-indigo-100 text-sm">Total Revenue</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1500)),
-                      {
-                        loading: 'Exporting analytics overview...',
-                        success: 'Analytics overview exported successfully',
-                        error: 'Failed to export analytics overview'
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={async () => {
+                    const exportOverview = async () => {
+                      const overviewData = {
+                        generatedAt: new Date().toISOString(),
+                        timeRange,
+                        metrics: keyMetrics.map(m => ({ label: m.label, value: m.value, change: m.change })),
+                        realtimeMetrics: realtimeMetrics.map(m => ({ label: m.label, value: m.value, trend: m.trend }))
                       }
-                    )
+                      const jsonContent = JSON.stringify(overviewData, null, 2)
+                      const blob = new Blob([jsonContent], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const link = document.createElement('a')
+                      link.href = url
+                      link.download = `analytics-overview-${new Date().toISOString().split('T')[0]}.json`
+                      document.body.appendChild(link)
+                      link.click()
+                      document.body.removeChild(link)
+                      URL.revokeObjectURL(url)
+                      return { fileName: link.download }
+                    }
+                    toast.promise(exportOverview(), {
+                      loading: 'Exporting analytics overview...',
+                      success: (data) => `Overview exported: ${data.fileName}`,
+                      error: 'Failed to export analytics overview'
+                    })
                   }}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
@@ -962,15 +1021,9 @@ export default function AnalyticsClient() {
                     <p className="text-blue-100">{filteredMetrics.length} active metrics tracked</p>
                   </div>
                 </div>
-                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 800)),
-                    {
-                      loading: 'Opening metric creator...',
-                      success: 'Metric creator ready',
-                      error: 'Failed to open metric creator'
-                    }
-                  )
+                <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={async () => {
+                  setShowMetricCreator(true)
+                  toast.success('Metric creator opened', { description: 'Create a new custom metric' })
                 }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Metric

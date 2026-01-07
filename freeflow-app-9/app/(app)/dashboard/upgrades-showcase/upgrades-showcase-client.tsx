@@ -192,16 +192,16 @@ const mockActivities = [
     timestamp: new Date(Date.now() - 300000),
     isRead: false,
     actions: [
-      { label: 'View', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Opening document...',
-        success: 'Document opened successfully',
-        error: 'Failed to open document'
-      }) },
-      { label: 'Reply', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Preparing reply...',
-        success: 'Reply sent successfully',
-        error: 'Failed to send reply'
-      }) },
+      { label: 'View', action: () => {
+        toast.success('Navigating to Q4 Marketing Strategy document')
+        // In production, this would use router.push('/documents/q4-marketing-strategy')
+        console.log('[Navigation] Opening document: Q4 Marketing Strategy')
+      } },
+      { label: 'Reply', action: () => {
+        toast.info('Reply composer opened', { description: 'Type your response to Sarah Chen' })
+        // In production, this would open a reply modal or navigate to comments
+        console.log('[Action] Opening reply composer for mention by Sarah Chen')
+      } },
     ],
   },
   {
@@ -354,36 +354,36 @@ const mockAchievements = [
 ]
 
 const mockQuickActions = [
-  { id: '1', label: 'New Task', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new task...',
-    success: 'Task created successfully',
-    error: 'Failed to create task'
-  }), category: 'Create' },
-  { id: '2', label: 'Search', icon: <Search className="h-5 w-5" />, shortcut: '⌘K', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Initializing search...',
-    success: 'Search ready',
-    error: 'Failed to initialize search'
-  }), category: 'Navigate' },
-  { id: '3', label: 'AI Assistant', icon: <Brain className="h-5 w-5" />, shortcut: '⌘J', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Launching AI Assistant...',
-    success: 'AI Assistant ready',
-    error: 'Failed to launch AI Assistant'
-  }), category: 'AI' },
-  { id: '4', label: 'New Project', icon: <FileText className="h-5 w-5" />, shortcut: '⌘P', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new project...',
-    success: 'Project created successfully',
-    error: 'Failed to create project'
-  }), category: 'Create' },
-  { id: '5', label: 'Edit', icon: <Edit className="h-5 w-5" />, shortcut: '⌘E', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Opening editor...',
-    success: 'Editor opened successfully',
-    error: 'Failed to open editor'
-  }), category: 'Actions' },
-  { id: '6', label: 'Star', icon: <Star className="h-5 w-5" />, shortcut: '⌘S', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Adding to favorites...',
-    success: 'Added to favorites',
-    error: 'Failed to add to favorites'
-  }), category: 'Actions' },
+  { id: '1', label: 'New Task', icon: <Plus className="h-5 w-5" />, shortcut: '⌘N', action: () => {
+    toast.success('New task created', { description: 'Task added to your inbox' })
+    // In production, this would open task creation modal or navigate to /tasks/new
+    console.log('[Action] Creating new task')
+  }, category: 'Create' },
+  { id: '2', label: 'Search', icon: <Search className="h-5 w-5" />, shortcut: '⌘K', action: () => {
+    toast.info('Search activated', { description: 'Start typing to search across all content' })
+    // In production, this would open command palette or focus search input
+    console.log('[Action] Opening global search')
+  }, category: 'Navigate' },
+  { id: '3', label: 'AI Assistant', icon: <Brain className="h-5 w-5" />, shortcut: '⌘J', action: () => {
+    toast.success('AI Assistant ready', { description: 'Ask me anything about your data' })
+    // In production, this would open AI chat modal or sidebar
+    console.log('[Action] Launching AI Assistant')
+  }, category: 'AI' },
+  { id: '4', label: 'New Project', icon: <FileText className="h-5 w-5" />, shortcut: '⌘P', action: () => {
+    toast.success('Project template opened', { description: 'Choose a template or start from scratch' })
+    // In production, this would open project creation wizard
+    console.log('[Action] Creating new project')
+  }, category: 'Create' },
+  { id: '5', label: 'Edit', icon: <Edit className="h-5 w-5" />, shortcut: '⌘E', action: () => {
+    toast.info('Edit mode enabled', { description: 'Click any element to edit' })
+    // In production, this would toggle edit mode on the current view
+    console.log('[Action] Enabling edit mode')
+  }, category: 'Actions' },
+  { id: '6', label: 'Star', icon: <Star className="h-5 w-5" />, shortcut: '⌘S', action: () => {
+    toast.success('Added to favorites', { description: 'View all favorites in the sidebar' })
+    // In production, this would toggle star/favorite on current item
+    console.log('[Action] Toggling favorite status')
+  }, category: 'Actions' },
 ]
 
 // ============================================================================

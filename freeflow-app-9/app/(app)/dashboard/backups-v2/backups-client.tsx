@@ -485,21 +485,45 @@ const mockBackupsActivities = [
 ]
 
 const mockBackupsQuickActions = [
-  { id: '1', label: 'New Backup', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: 'Creating new backup...',
-    success: 'Backup created successfully',
-    error: 'Failed to create backup'
-  }), variant: 'default' as const },
-  { id: '2', label: 'Restore', icon: 'refresh-cw', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), {
-    loading: 'Restoring from backup...',
-    success: 'Restore completed successfully',
-    error: 'Restore failed'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Verify', icon: 'check', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Verifying backup integrity...',
-    success: 'Backup verified successfully',
-    error: 'Verification failed'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'New Backup', icon: 'plus', action: async () => {
+    try {
+      const response = await fetch('/api/backups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'full', name: 'Quick Backup' })
+      })
+      if (!response.ok) throw new Error('Failed to create backup')
+      const data = await response.json()
+      toast.success(`Backup "${data.name || 'Quick Backup'}" created successfully`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to create backup')
+    }
+  }, variant: 'default' as const },
+  { id: '2', label: 'Restore', icon: 'refresh-cw', action: async () => {
+    if (!confirm('Are you sure you want to restore from the latest backup? This will overwrite current data.')) return
+    try {
+      const response = await fetch('/api/backups/latest/restore', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) throw new Error('Failed to restore backup')
+      toast.success('Restore completed successfully')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Restore failed')
+    }
+  }, variant: 'default' as const },
+  { id: '3', label: 'Verify', icon: 'check', action: async () => {
+    try {
+      const response = await fetch('/api/backups/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) throw new Error('Verification failed')
+      toast.success('Backup verified successfully')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Verification failed')
+    }
+  }, variant: 'outline' as const },
 ]
 
 export default function BackupsClient() {
@@ -633,31 +657,99 @@ export default function BackupsClient() {
   }
 
   // Handlers
-  const handleCreateBackup = () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Creating backup...',
-    success: 'Backup created successfully',
-    error: 'Failed to create backup'
-  })
-  const handleRestoreBackup = (n: string) => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: `Restoring "${n}"...`,
-    success: `"${n}" restored successfully`,
-    error: `Failed to restore "${n}"`
-  })
-  const handleDeleteBackup = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: `Deleting "${n}"...`,
-    success: `"${n}" deleted successfully`,
-    error: `Failed to delete "${n}"`
-  })
-  const handleDownloadBackup = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: `Downloading "${n}"...`,
-    success: `"${n}" downloaded successfully`,
-    error: `Failed to download "${n}"`
-  })
-  const handleScheduleBackup = () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Scheduling backup...',
-    success: 'Auto backup scheduled successfully',
-    error: 'Failed to schedule backup'
-  })
+  const handleCreateBackup = async () => {
+    toast.loading('Creating backup...')
+    try {
+      const response = await fetch('/api/backups', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'full', name: `Backup ${new Date().toISOString()}` })
+      })
+      if (!response.ok) throw new Error('Failed to create backup')
+      const data = await response.json()
+      toast.dismiss()
+      toast.success(`Backup "${data.name || 'New Backup'}" created successfully`)
+    } catch (error) {
+      toast.dismiss()
+      toast.error(error instanceof Error ? error.message : 'Failed to create backup')
+    }
+  }
+
+  const handleRestoreBackup = async (backupName: string, backupId?: string) => {
+    if (!confirm(`Are you sure you want to restore "${backupName}"? This will overwrite current data.`)) return
+    toast.loading(`Restoring "${backupName}"...`)
+    try {
+      const id = backupId || 'latest'
+      const response = await fetch(`/api/backups/${id}/restore`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) throw new Error(`Failed to restore "${backupName}"`)
+      toast.dismiss()
+      toast.success(`"${backupName}" restored successfully`)
+    } catch (error) {
+      toast.dismiss()
+      toast.error(error instanceof Error ? error.message : `Failed to restore "${backupName}"`)
+    }
+  }
+
+  const handleDeleteBackup = async (backupName: string, backupId?: string) => {
+    if (!confirm(`Are you sure you want to delete "${backupName}"? This action cannot be undone.`)) return
+    toast.loading(`Deleting "${backupName}"...`)
+    try {
+      const id = backupId || 'latest'
+      const response = await fetch(`/api/backups/${id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+      if (!response.ok) throw new Error(`Failed to delete "${backupName}"`)
+      toast.dismiss()
+      toast.success(`"${backupName}" deleted successfully`)
+    } catch (error) {
+      toast.dismiss()
+      toast.error(error instanceof Error ? error.message : `Failed to delete "${backupName}"`)
+    }
+  }
+
+  const handleDownloadBackup = async (backupName: string, backupId?: string) => {
+    toast.loading(`Downloading "${backupName}"...`)
+    try {
+      const id = backupId || 'latest'
+      const response = await fetch(`/api/backups/${id}/download`)
+      if (!response.ok) throw new Error(`Failed to download "${backupName}"`)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${backupName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.zip`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.dismiss()
+      toast.success(`"${backupName}" downloaded successfully`)
+    } catch (error) {
+      toast.dismiss()
+      toast.error(error instanceof Error ? error.message : `Failed to download "${backupName}"`)
+    }
+  }
+
+  const handleScheduleBackup = async (schedule?: { frequency: string; time: string }) => {
+    toast.loading('Scheduling backup...')
+    try {
+      const response = await fetch('/api/backups/schedule', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(schedule || { frequency: 'daily', time: '02:00' })
+      })
+      if (!response.ok) throw new Error('Failed to schedule backup')
+      toast.dismiss()
+      toast.success('Auto backup scheduled successfully')
+    } catch (error) {
+      toast.dismiss()
+      toast.error(error instanceof Error ? error.message : 'Failed to schedule backup')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 dark:bg-none dark:bg-gray-900 p-6">
@@ -935,11 +1027,21 @@ export default function BackupsClient() {
                       <Download className="h-6 w-6 mb-2 text-blue-600" />
                       Restore Data
                     </Button>
-                    <Button variant="outline" className="h-20 flex-col" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-                      loading: 'Verifying backups...',
-                      success: 'All backups verified successfully',
-                      error: 'Backup verification failed'
-                    })}>
+                    <Button variant="outline" className="h-20 flex-col" onClick={async () => {
+                      toast.loading('Verifying backups...')
+                      try {
+                        const response = await fetch('/api/backups/verify', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' }
+                        })
+                        if (!response.ok) throw new Error('Backup verification failed')
+                        toast.dismiss()
+                        toast.success('All backups verified successfully')
+                      } catch (error) {
+                        toast.dismiss()
+                        toast.error(error instanceof Error ? error.message : 'Backup verification failed')
+                      }
+                    }}>
                       <ShieldCheck className="h-6 w-6 mb-2 text-purple-600" />
                       Verify Backups
                     </Button>
@@ -1042,11 +1144,16 @@ export default function BackupsClient() {
                         {job.verified && <ShieldCheck className="h-4 w-4 text-blue-600" />}
                         {job.crossRegionEnabled && <Globe className="h-4 w-4 text-purple-600" />}
                       </div>
-                      <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), {
-                        loading: 'Loading options...',
-                        success: `Options loaded for "${job.name}"`,
-                        error: 'Failed to load options'
-                      }) }}><MoreHorizontal className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" onClick={async (e) => {
+                        e.stopPropagation()
+                        try {
+                          const response = await fetch(`/api/backups/${job.id}`)
+                          if (!response.ok) throw new Error('Failed to load options')
+                          toast.success(`Options loaded for "${job.name}"`)
+                        } catch (error) {
+                          toast.error(error instanceof Error ? error.message : 'Failed to load options')
+                        }
+                      }}><MoreHorizontal className="h-4 w-4" /></Button>
                     </div>
                   ))}
                 </div>
@@ -1141,13 +1248,87 @@ export default function BackupsClient() {
             {/* Vaults Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Vault', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating vault...', success: 'Vault created successfully', error: 'Failed to create vault' }) },
-                { icon: Lock, label: 'Lock Vault', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Locking vault...', success: 'Vault locked successfully', error: 'Failed to lock vault' }) },
+                { icon: Plus, label: 'New Vault', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: async () => {
+                  toast.loading('Creating vault...')
+                  try {
+                    const response = await fetch('/api/backups/vaults', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ name: `Vault ${new Date().toISOString()}` })
+                    })
+                    if (!response.ok) throw new Error('Failed to create vault')
+                    toast.dismiss()
+                    toast.success('Vault created successfully')
+                  } catch (error) {
+                    toast.dismiss()
+                    toast.error(error instanceof Error ? error.message : 'Failed to create vault')
+                  }
+                } },
+                { icon: Lock, label: 'Lock Vault', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: async () => {
+                  if (!confirm('Are you sure you want to lock this vault? This action may be irreversible.')) return
+                  toast.loading('Locking vault...')
+                  try {
+                    const response = await fetch('/api/backups/vaults/lock', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' }
+                    })
+                    if (!response.ok) throw new Error('Failed to lock vault')
+                    toast.dismiss()
+                    toast.success('Vault locked successfully')
+                  } catch (error) {
+                    toast.dismiss()
+                    toast.error(error instanceof Error ? error.message : 'Failed to lock vault')
+                  }
+                } },
                 { icon: Shield, label: 'Compliance', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => setActiveTab('compliance') },
-                { icon: Key, label: 'Access', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading access controls...', success: 'Access controls loaded', error: 'Failed to load access controls' }) },
-                { icon: Copy, label: 'Replicate', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Replicating vault...', success: 'Vault replicated successfully', error: 'Failed to replicate vault' }) },
-                { icon: Archive, label: 'Archive', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Archiving...', success: 'Moved to archive successfully', error: 'Failed to archive' }) },
-                { icon: Eye, label: 'Audit', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading audit log...', success: 'Audit log loaded', error: 'Failed to load audit log' }) },
+                { icon: Key, label: 'Access', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: async () => {
+                  try {
+                    const response = await fetch('/api/backups/vaults/access')
+                    if (!response.ok) throw new Error('Failed to load access controls')
+                    toast.success('Access controls loaded')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to load access controls')
+                  }
+                } },
+                { icon: Copy, label: 'Replicate', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: async () => {
+                  toast.loading('Replicating vault...')
+                  try {
+                    const response = await fetch('/api/backups/vaults/replicate', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' }
+                    })
+                    if (!response.ok) throw new Error('Failed to replicate vault')
+                    toast.dismiss()
+                    toast.success('Vault replicated successfully')
+                  } catch (error) {
+                    toast.dismiss()
+                    toast.error(error instanceof Error ? error.message : 'Failed to replicate vault')
+                  }
+                } },
+                { icon: Archive, label: 'Archive', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: async () => {
+                  toast.loading('Archiving...')
+                  try {
+                    const response = await fetch('/api/backups/archive', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' }
+                    })
+                    if (!response.ok) throw new Error('Failed to archive')
+                    toast.dismiss()
+                    toast.success('Moved to archive successfully')
+                  } catch (error) {
+                    toast.dismiss()
+                    toast.error(error instanceof Error ? error.message : 'Failed to archive')
+                  }
+                } },
+                { icon: Eye, label: 'Audit', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: async () => {
+                  try {
+                    const response = await fetch('/api/backups/audit')
+                    if (!response.ok) throw new Error('Failed to load audit log')
+                    toast.success('Audit log loaded')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to load audit log')
+                  }
+                } },
                 { icon: Settings, label: 'Settings', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => setActiveTab('settings') },
               ].map((action, idx) => (
                 <Button
@@ -1245,7 +1426,17 @@ export default function BackupsClient() {
                           <p className="text-sm"><span className="text-green-600 font-medium">{report.controlsPassed}</span> / {report.controlsTotal}</p>
                           <p className="text-xs text-gray-500">Controls Passed</p>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening preview...', success: 'Preview opened', error: 'Failed to open preview' })}><Eye className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" onClick={async (e) => {
+                          e.stopPropagation()
+                          try {
+                            const response = await fetch(`/api/backups/compliance/${report.id}`)
+                            if (!response.ok) throw new Error('Failed to open preview')
+                            setSelectedCompliance(report)
+                            toast.success('Preview opened')
+                          } catch (error) {
+                            toast.error(error instanceof Error ? error.message : 'Failed to open preview')
+                          }
+                        }}><Eye className="h-4 w-4" /></Button>
                       </div>
                     ))}
                   </div>
@@ -1396,12 +1587,66 @@ export default function BackupsClient() {
             {/* Settings Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading general settings...', success: 'General settings loaded', error: 'Failed to load settings' }) },
-                { icon: HardDrive, label: 'Storage', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading storage settings...', success: 'Storage settings loaded', error: 'Failed to load settings' }) },
-                { icon: Bell, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading alert settings...', success: 'Alert settings loaded', error: 'Failed to load settings' }) },
-                { icon: Webhook, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading integrations...', success: 'Integrations loaded', error: 'Failed to load integrations' }) },
-                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading security settings...', success: 'Security settings loaded', error: 'Failed to load settings' }) },
-                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading advanced settings...', success: 'Advanced settings loaded', error: 'Failed to load settings' }) },
+                { icon: Settings, label: 'General', color: 'bg-slate-100 text-slate-600 dark:bg-slate-900/30 dark:text-slate-400', action: async () => {
+                  try {
+                    const response = await fetch('/api/backups/settings/general')
+                    if (!response.ok) throw new Error('Failed to load settings')
+                    setSettingsTab('general')
+                    toast.success('General settings loaded')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to load settings')
+                  }
+                } },
+                { icon: HardDrive, label: 'Storage', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: async () => {
+                  try {
+                    const response = await fetch('/api/backups/settings/storage')
+                    if (!response.ok) throw new Error('Failed to load settings')
+                    setSettingsTab('storage')
+                    toast.success('Storage settings loaded')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to load settings')
+                  }
+                } },
+                { icon: Bell, label: 'Alerts', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: async () => {
+                  try {
+                    const response = await fetch('/api/backups/settings/notifications')
+                    if (!response.ok) throw new Error('Failed to load settings')
+                    setSettingsTab('notifications')
+                    toast.success('Alert settings loaded')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to load settings')
+                  }
+                } },
+                { icon: Webhook, label: 'Integrations', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: async () => {
+                  try {
+                    const response = await fetch('/api/backups/settings/integrations')
+                    if (!response.ok) throw new Error('Failed to load integrations')
+                    setSettingsTab('integrations')
+                    toast.success('Integrations loaded')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to load integrations')
+                  }
+                } },
+                { icon: Shield, label: 'Security', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
+                  try {
+                    const response = await fetch('/api/backups/settings/security')
+                    if (!response.ok) throw new Error('Failed to load settings')
+                    setSettingsTab('security')
+                    toast.success('Security settings loaded')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to load settings')
+                  }
+                } },
+                { icon: Sliders, label: 'Advanced', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', action: async () => {
+                  try {
+                    const response = await fetch('/api/backups/settings/advanced')
+                    if (!response.ok) throw new Error('Failed to load settings')
+                    setSettingsTab('advanced')
+                    toast.success('Advanced settings loaded')
+                  } catch (error) {
+                    toast.error(error instanceof Error ? error.message : 'Failed to load settings')
+                  }
+                } },
                 { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', action: () => handleDownloadBackup('Backup Config') },
                 { icon: RefreshCw, label: 'Reset', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => handleDeleteBackup('All Settings') },
               ].map((action, idx) => (
@@ -1747,8 +1992,22 @@ export default function BackupsClient() {
                   </div>
                   <div className="flex gap-3">
                     <Button className="bg-green-600 hover:bg-green-700" onClick={handleCreateBackup}><Play className="h-4 w-4 mr-2" />Run Now</Button>
-                    <Button variant="outline" onClick={() => handleRestoreBackup(selectedJob.name)}><Download className="h-4 w-4 mr-2" />Restore</Button>
-                    <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Verifying backup...', success: 'Backup verified successfully', error: 'Verification failed' })}><ShieldCheck className="h-4 w-4 mr-2" />Verify</Button>
+                    <Button variant="outline" onClick={() => handleRestoreBackup(selectedJob.name, selectedJob.id)}><Download className="h-4 w-4 mr-2" />Restore</Button>
+                    <Button variant="outline" onClick={async () => {
+                      toast.loading('Verifying backup...')
+                      try {
+                        const response = await fetch(`/api/backups/${selectedJob.id}/verify`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' }
+                        })
+                        if (!response.ok) throw new Error('Verification failed')
+                        toast.dismiss()
+                        toast.success('Backup verified successfully')
+                      } catch (error) {
+                        toast.dismiss()
+                        toast.error(error instanceof Error ? error.message : 'Verification failed')
+                      }
+                    }}><ShieldCheck className="h-4 w-4 mr-2" />Verify</Button>
                     <Button variant="outline" onClick={() => setShowLegalHoldDialog(true)}><Gavel className="h-4 w-4 mr-2" />Legal Hold</Button>
                   </div>
                 </div>

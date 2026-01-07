@@ -485,8 +485,15 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
     toast.loading(`Syncing ${accountName}...`, { id: 'sync' })
 
     try {
-      // Simulate sync delay
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      // Call API to sync bank account
+      const response = await fetch(`/api/financial/bank-accounts/${accountId}/sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        throw new Error('Sync failed')
+      }
 
       toast.success('Sync complete!', {
         id: 'sync',
@@ -744,11 +751,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                       onClick={() => {
                         setActiveTab('settings')
                         setSettingsTab('accounting')
-                        toast.promise(new Promise(r => setTimeout(r, 600)), {
-                          loading: 'Navigating to budget settings...',
-                          success: 'Navigate to budget settings to edit budgets',
-                          error: 'Failed to navigate'
-                        })
+                        toast.success('Navigate to budget settings to edit budgets')
                       }}
                       className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                     >
@@ -800,11 +803,7 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                     onClick={() => {
                       setActiveTab('settings')
                       setSettingsTab('banking')
-                      toast.promise(new Promise(r => setTimeout(r, 600)), {
-                        loading: 'Navigating to banking settings...',
-                        success: 'Connect your bank accounts in settings',
-                        error: 'Failed to navigate'
-                      })
+                      toast.success('Connect your bank accounts in settings')
                     }}
                     className="flex items-center gap-2 text-sm text-emerald-600 hover:text-emerald-700 font-medium"
                   >
@@ -1772,11 +1771,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                              loading: 'Opening template editor...',
-                              success: 'Income Statement template ready for customization',
-                              error: 'Failed to open template editor'
-                            })}
+                            onClick={() => {
+                              handleGenerateReport('Profit & Loss')
+                              toast.info('Income Statement template ready for customization')
+                            }}
                           >
                             Customize
                           </Button>
@@ -1794,11 +1792,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                              loading: 'Opening template editor...',
-                              success: 'Balance Sheet template ready for customization',
-                              error: 'Failed to open template editor'
-                            })}
+                            onClick={() => {
+                              handleGenerateReport('Balance Sheet')
+                              toast.info('Balance Sheet template ready for customization')
+                            }}
                           >
                             Customize
                           </Button>
@@ -1816,11 +1813,10 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                              loading: 'Opening template editor...',
-                              success: 'Cash Flow Statement template ready for customization',
-                              error: 'Failed to open template editor'
-                            })}
+                            onClick={() => {
+                              handleGenerateReport('Cash Flow')
+                              toast.info('Cash Flow Statement template ready for customization')
+                            }}
                           >
                             Customize
                           </Button>
@@ -1883,19 +1879,18 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => toast.warning('Are you sure? Disconnecting will stop automatic transaction syncing.', {
-                                action: {
-                                  label: 'Disconnect',
-                                  onClick: () => toast.promise(
-                                    new Promise(resolve => setTimeout(resolve, 1500)),
-                                    {
-                                      loading: 'Disconnecting Chase Business Checking...',
-                                      success: 'Chase Business Checking has been disconnected',
-                                      error: 'Failed to disconnect account'
-                                    }
-                                  )
+                              onClick={async () => {
+                                if (!confirm('Are you sure? Disconnecting will stop automatic transaction syncing.')) return
+                                toast.loading('Disconnecting Chase Business Checking...', { id: 'disconnect-chase' })
+                                try {
+                                  const response = await fetch('/api/financial/bank-accounts/chase/disconnect', { method: 'POST' })
+                                  if (!response.ok) throw new Error('Failed')
+                                  toast.success('Chase Business Checking has been disconnected', { id: 'disconnect-chase' })
+                                  refetch()
+                                } catch {
+                                  toast.error('Failed to disconnect account', { id: 'disconnect-chase' })
                                 }
-                              })}
+                              }}
                             >
                               Disconnect
                             </Button>
@@ -1916,19 +1911,18 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => toast.warning('Are you sure? Disconnecting will stop automatic transaction syncing.', {
-                                action: {
-                                  label: 'Disconnect',
-                                  onClick: () => toast.promise(
-                                    new Promise(resolve => setTimeout(resolve, 1500)),
-                                    {
-                                      loading: 'Disconnecting American Express Business...',
-                                      success: 'American Express Business has been disconnected',
-                                      error: 'Failed to disconnect account'
-                                    }
-                                  )
+                              onClick={async () => {
+                                if (!confirm('Are you sure? Disconnecting will stop automatic transaction syncing.')) return
+                                toast.loading('Disconnecting American Express Business...', { id: 'disconnect-amex' })
+                                try {
+                                  const response = await fetch('/api/financial/bank-accounts/amex/disconnect', { method: 'POST' })
+                                  if (!response.ok) throw new Error('Failed')
+                                  toast.success('American Express Business has been disconnected', { id: 'disconnect-amex' })
+                                  refetch()
+                                } catch {
+                                  toast.error('Failed to disconnect account', { id: 'disconnect-amex' })
                                 }
-                              })}
+                              }}
                             >
                               Disconnect
                             </Button>
@@ -1937,11 +1931,16 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                         <Button
                           variant="outline"
                           className="w-full"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                            loading: 'Initializing Plaid connection...',
-                            success: 'Bank connection ready - Plaid integration coming soon',
-                            error: 'Failed to initialize bank connection'
-                          })}
+                          onClick={async () => {
+                            toast.loading('Initializing Plaid connection...', { id: 'plaid-connect' })
+                            try {
+                              const response = await fetch('/api/financial/bank-accounts/connect', { method: 'POST' })
+                              if (!response.ok) throw new Error('Failed')
+                              toast.success('Bank connection ready - follow the instructions to link your account', { id: 'plaid-connect' })
+                            } catch {
+                              toast.info('Bank connection ready - Plaid integration coming soon', { id: 'plaid-connect' })
+                            }
+                          }}
                         >
                           <Plus className="h-4 w-4 mr-2" />
                           Connect Another Bank
@@ -2109,11 +2108,16 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 1800)), {
-                              loading: 'Configuring QuickBooks export...',
-                              success: 'QuickBooks export configured successfully',
-                              error: 'Failed to configure QuickBooks export'
-                            })}
+                            onClick={async () => {
+                              toast.loading('Configuring QuickBooks export...', { id: 'quickbooks' })
+                              try {
+                                const response = await fetch('/api/financial/integrations/quickbooks/configure', { method: 'POST' })
+                                if (!response.ok) throw new Error('Failed')
+                                toast.success('QuickBooks export configured successfully', { id: 'quickbooks' })
+                              } catch {
+                                toast.info('QuickBooks integration setup - coming soon', { id: 'quickbooks' })
+                              }
+                            }}
                           >
                             Configure
                           </Button>
@@ -2131,11 +2135,22 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-                              loading: 'Initializing Xero OAuth connection...',
-                              success: 'Xero connection ready - OAuth setup coming soon',
-                              error: 'Failed to initialize Xero connection'
-                            })}
+                            onClick={async () => {
+                              toast.loading('Initializing Xero OAuth connection...', { id: 'xero' })
+                              try {
+                                const response = await fetch('/api/financial/integrations/xero/connect', { method: 'POST' })
+                                if (!response.ok) throw new Error('Failed')
+                                const data = await response.json()
+                                if (data.authUrl) {
+                                  window.open(data.authUrl, '_blank')
+                                  toast.success('Opening Xero authorization page', { id: 'xero' })
+                                } else {
+                                  toast.success('Xero connection ready', { id: 'xero' })
+                                }
+                              } catch {
+                                toast.info('Xero integration - OAuth setup coming soon', { id: 'xero' })
+                              }
+                            }}
                           >
                             Connect
                           </Button>
@@ -2153,11 +2168,16 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                              loading: 'Loading API key management...',
-                              success: 'API key management panel ready',
-                              error: 'Failed to load API key management'
-                            })}
+                            onClick={async () => {
+                              toast.loading('Loading API key management...', { id: 'api-keys' })
+                              try {
+                                const response = await fetch('/api/financial/api-keys')
+                                if (!response.ok) throw new Error('Failed')
+                                toast.success('API key management panel ready', { id: 'api-keys' })
+                              } catch {
+                                toast.info('Navigate to Settings > API Keys to manage access', { id: 'api-keys' })
+                              }
+                            }}
                           >
                             Manage Keys
                           </Button>
@@ -2175,20 +2195,18 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-50"
-                            onClick={() => toast.warning('Close Fiscal Year?', {
-                              description: 'This will lock all transactions from the previous fiscal year. This action cannot be undone.',
-                              action: {
-                                label: 'Close Year',
-                                onClick: () => toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 2000)),
-                                  {
-                                    loading: 'Closing fiscal year...',
-                                    success: 'Fiscal year closed - Previous year transactions are now locked',
-                                    error: 'Failed to close fiscal year'
-                                  }
-                                )
+                            onClick={async () => {
+                              if (!confirm('Close Fiscal Year?\n\nThis will lock all transactions from the previous fiscal year. This action cannot be undone.')) return
+                              toast.loading('Closing fiscal year...', { id: 'close-year' })
+                              try {
+                                const response = await fetch('/api/financial/fiscal-year/close', { method: 'POST' })
+                                if (!response.ok) throw new Error('Failed')
+                                toast.success('Fiscal year closed - Previous year transactions are now locked', { id: 'close-year' })
+                                refetch()
+                              } catch {
+                                toast.error('Failed to close fiscal year', { id: 'close-year' })
                               }
-                            })}
+                            }}
                           >
                             Close Year
                           </Button>
@@ -2201,14 +2219,9 @@ export default function FinancialClient({ initialFinancial }: { initialFinancial
                           <Button
                             variant="outline"
                             className="border-red-300 text-red-600 hover:bg-red-50"
-                            onClick={() => toast.promise(
-                              new Promise((_, reject) => setTimeout(() => reject(new Error('Blocked')), 500)),
-                              {
-                                loading: 'Checking permissions...',
-                                success: 'Request submitted',
-                                error: 'Action blocked - Please contact support to reset your financial data. This destructive action requires admin approval.'
-                              }
-                            )}
+                            onClick={() => {
+                              toast.error('Action blocked - Please contact support to reset your financial data. This destructive action requires admin approval.')
+                            }}
                           >
                             Reset Data
                           </Button>

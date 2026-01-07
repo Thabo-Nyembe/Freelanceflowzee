@@ -223,11 +223,7 @@ export default function ModelingStudioPage() {
 
       setObjects([...objects, newObject])
 
-      toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
-        loading: `Adding ${objectType} to scene...`,
-        success: `Object Added: ${newObject.name} - ${objectType} primitive - Position (0, 0, 0)`,
-        error: 'Failed to add object'
-      })
+      toast.success(`Object Added: ${newObject.name} - ${objectType} primitive - Position (0, 0, 0)`)
 
       logger.info('Object added successfully', {
         objectId: newObject.id,
@@ -250,12 +246,16 @@ export default function ModelingStudioPage() {
       objectsCount: objects.length
     })
 
-    toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), {
-      loading: `Applying ${materialName} material...`,
-      success: `Material applied: ${materialName} - ${material?.type || 'Custom'} material - ${material?.color || '#ffffff'}`,
-      error: 'Failed to apply material'
-    })
-  }, [materials, selectedObject, objects.length])
+    if (selectedObject) {
+      // Apply material to selected object
+      setObjects(prev => prev.map(obj =>
+        obj.id === selectedObject ? { ...obj, material: material?.id || 'default' } : obj
+      ))
+      toast.success(`Material applied: ${materialName} - ${material?.type || 'Custom'} material - ${material?.color || '#ffffff'}`)
+    } else {
+      toast.error('No object selected to apply material')
+    }
+  }, [materials, selectedObject])
 
   const handleRenderScene = useCallback((params?: any) => {
     // Handler ready
@@ -285,11 +285,7 @@ export default function ModelingStudioPage() {
 
     setLights([...lights, newLight])
 
-    toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), {
-      loading: `Adding ${lightType} light to scene...`,
-      success: `Light added: ${lightType} - Intensity: ${newLight.intensity} - ${lights.length + 1} total lights in scene`,
-      error: 'Failed to add light'
-    })
+    toast.success(`Light added: ${lightType} - Intensity: ${newLight.intensity} - ${lights.length + 1} total lights in scene`)
   }, [lights])
 
   const handle3DSettings = useCallback((params?: any) => {
@@ -476,6 +472,8 @@ export default function ModelingStudioPage() {
 
     const fileSizeKB = (blob.size / 1024).toFixed(1)
 
+    toast.success(`3D model exported: ${fileName} - ${fileSizeKB} KB - ${objects.length} objects - ${materials.length} materials - ${lights.length} lights`)
+
     // Save export job to database if user is authenticated
     if (userId) {
       try {
@@ -497,12 +495,6 @@ export default function ModelingStudioPage() {
         logger.error('Failed to save export job', { error: err, userId })
       }
     }
-
-    toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), {
-      loading: 'Exporting 3D model...',
-      success: `3D model exported: ${fileName} - ${fileSizeKB} KB - ${objects.length} objects - ${materials.length} materials - ${lights.length} lights`,
-      error: 'Failed to export 3D model'
-    })
   }
 
   const renderScene = async () => {
@@ -519,11 +511,7 @@ export default function ModelingStudioPage() {
       visibleObjects: objects.filter(o => o.visible).length
     })
 
-    toast.promise(new Promise(resolve => setTimeout(resolve, 2500)), {
-      loading: `Rendering 3D scene at ${quality} quality...`,
-      success: `Scene rendered: ${quality} quality - ${objects.length} objects - ${lights.length} lights - ${objects.filter(o => o.visible).length} visible`,
-      error: 'Failed to render scene'
-    })
+    toast.success(`Scene rendered: ${quality} quality - ${objects.length} objects - ${lights.length} lights - ${objects.filter(o => o.visible).length} visible`)
 
     // Save render job to database if user is authenticated
     if (userId) {
@@ -669,11 +657,7 @@ export default function ModelingStudioPage() {
                           scene: { camera: cameraPosition, settings: { renderQuality: renderQuality[0] } }
                         }
                         navigator.clipboard.writeText(JSON.stringify(modelData, null, 2))
-                        toast.promise(new Promise(resolve => setTimeout(resolve, 800)), {
-                          loading: 'Copying model to clipboard...',
-                          success: `Model copied to clipboard - ${objects.length} objects, ${materials.length} materials`,
-                          error: 'Failed to copy model'
-                        })
+                        toast.success('Model Copied', { description: `${objects.length} objects, ${materials.length} materials copied to clipboard` })
                       }}
                       data-testid="share-model-btn"
                     >
@@ -703,11 +687,7 @@ export default function ModelingStudioPage() {
                             previousTool: selectedTool
                           })
                           setSelectedTool(tool.id as any)
-                          toast.promise(new Promise(resolve => setTimeout(resolve, 500)), {
-                            loading: `Activating ${tool.label} tool...`,
-                            success: `${tool.label} tool activated`,
-                            error: 'Failed to activate tool'
-                          })
+                          toast.success(`${tool.label} Tool`, { description: 'Tool activated' })
                         }}
                         className="gap-2"
                         data-testid={`3d-tool-${tool.id}-btn`}
@@ -865,11 +845,7 @@ export default function ModelingStudioPage() {
                                 objectsCount: objects.length + 1
                               })
                               addObject(primitive.id)
-                              toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), {
-                                loading: `Adding ${primitive.name} to scene...`,
-                                success: `${primitive.name} added - ${objects.length + 1} total objects`,
-                                error: `Failed to add ${primitive.name}`
-                              })
+                              toast.success(`${primitive.name} Added`, { description: `${objects.length + 1} total objects in scene` })
                             }}
                             className="gap-2"
                             data-testid={`add-${primitive.id}-btn`}
@@ -913,11 +889,7 @@ export default function ModelingStudioPage() {
                                     newVisibility: !obj.visible
                                   })
                                   updateObjectProperty(obj.id, 'visible', !obj.visible)
-                                  toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-                                    loading: `${!obj.visible ? 'Showing' : 'Hiding'} ${obj.name}...`,
-                                    success: `${obj.name} ${!obj.visible ? 'visible' : 'hidden'}`,
-                                    error: 'Failed to toggle visibility'
-                                  })
+                                  toast.success(`${obj.name} ${!obj.visible ? 'Visible' : 'Hidden'}`, { description: 'Visibility toggled' })
                                 }}
                                 data-testid={`toggle-visibility-${obj.id}-btn`}
                               >
@@ -935,11 +907,7 @@ export default function ModelingStudioPage() {
                                     objectsCount: objects.length + 1
                                   })
                                   duplicateObject(obj.id)
-                                  toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), {
-                                    loading: `Duplicating ${obj.name}...`,
-                                    success: `${obj.name} duplicated - ${objects.length + 1} total objects`,
-                                    error: `Failed to duplicate ${obj.name}`
-                                  })
+                                  toast.success(`${obj.name} Duplicated`, { description: `${objects.length + 1} total objects` })
                                 }}
                                 data-testid={`duplicate-${obj.id}-btn`}
                               >
@@ -957,11 +925,7 @@ export default function ModelingStudioPage() {
                                     remainingObjects: objects.length - 1
                                   })
                                   deleteObject(obj.id)
-                                  toast.promise(new Promise(resolve => setTimeout(resolve, 800)), {
-                                    loading: `Deleting ${obj.name}...`,
-                                    success: `${obj.name} deleted - ${objects.length - 1} remaining`,
-                                    error: `Failed to delete ${obj.name}`
-                                  })
+                                  toast.success(`${obj.name} Deleted`, { description: `${objects.length - 1} objects remaining` })
                                 }}
                                 data-testid={`delete-${obj.id}-btn`}
                               >
@@ -1022,11 +986,7 @@ export default function ModelingStudioPage() {
                             materialsCount: materials.length + 1
                           })
                           setMaterials([...materials, newMaterial])
-                          toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), {
-                            loading: 'Creating new material...',
-                            success: `${newMaterial.name} created - ${materials.length + 1} total materials`,
-                            error: 'Failed to create material'
-                          })
+                          toast.success(`${newMaterial.name} Created`, { description: `${materials.length + 1} total materials` })
                         }}
                         data-testid="add-material-btn"
                       >
@@ -1102,11 +1062,7 @@ export default function ModelingStudioPage() {
                             lightsCount: lights.length + 1
                           })
                           setLights([...lights, newLight])
-                          toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), {
-                            loading: 'Adding light to scene...',
-                            success: `${newLight.name} (${newLight.type}) added - ${lights.length + 1} total lights`,
-                            error: 'Failed to add light'
-                          })
+                          toast.success(`${newLight.name} Added`, { description: `${newLight.type} light - ${lights.length + 1} total` })
                         }}
                         data-testid="add-light-btn"
                       >

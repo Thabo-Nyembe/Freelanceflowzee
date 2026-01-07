@@ -166,11 +166,7 @@ export default function ComparePage() {
     setComparing(false)
     setComparisonProgress(100)
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Finalizing comparison...',
-      success: `Comparison Complete - Compared ${selectedModels.length} models in ${newResults.reduce((acc, r) => acc + r.responseTime, 0).toFixed(1)}s`,
-      error: 'Failed to complete comparison'
-    })
+    toast.success(`Comparison Complete - Compared ${selectedModels.length} models in ${newResults.reduce((acc, r) => acc + r.responseTime, 0).toFixed(1)}s`)
     announce('Model comparison complete', 'polite')
 
     logger.info('Comparison complete', {
@@ -181,22 +177,14 @@ export default function ComparePage() {
 
   const handleCopyOutput = useCallback((output: string, modelName: string) => {
     navigator.clipboard.writeText(output)
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Copying to clipboard...',
-      success: `Copied to clipboard - ${modelName} output copied`,
-      error: 'Failed to copy'
-    })
+    toast.success(`Copied to clipboard - ${modelName} output copied`)
     logger.info('Output copied', { model: modelName })
   }, [])
 
   const handleRateOutput = useCallback((modelId: string, rating: 'up' | 'down') => {
     setRatings(prev => ({ ...prev, [modelId]: rating }))
     const model = MODELS_TO_COMPARE.find(m => m.id === modelId)!
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Saving rating...',
-      success: `Rating saved - You ${rating === 'up' ? 'liked' : 'disliked'} ${model.name}'s output`,
-      error: 'Failed to save rating'
-    })
+    toast.success(`Rating saved - You ${rating === 'up' ? 'liked' : 'disliked'} ${model.name}'s output`)
     logger.info('Output rated', { model: model.name, rating })
   }, [])
 
@@ -230,11 +218,7 @@ export default function ComparePage() {
         return
       }
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Saving comparison...',
-        success: 'Comparison Saved - Added to your comparison history',
-        error: 'Failed to save comparison'
-      })
+      toast.success('Comparison Saved - Added to your comparison history')
       logger.info('Comparison saved to database')
       announce('Comparison saved', 'polite')
     } catch (error) {
@@ -272,11 +256,7 @@ export default function ComparePage() {
     a.click()
     URL.revokeObjectURL(url)
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Exporting comparison...',
-      success: 'Export Complete - Comparison exported as JSON',
-      error: 'Failed to export'
-    })
+    toast.success('Export Complete - Comparison exported as JSON')
     logger.info('Comparison exported')
   }, [prompt, results, ratings])
 
@@ -284,11 +264,7 @@ export default function ComparePage() {
     setResults([])
     setComparisonProgress(0)
     setRatings({})
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Resetting comparison...',
-      success: 'Comparison Reset - Ready for a new comparison',
-      error: 'Failed to reset'
-    })
+    toast.success('Comparison Reset - Ready for a new comparison')
   }, [])
 
   return (

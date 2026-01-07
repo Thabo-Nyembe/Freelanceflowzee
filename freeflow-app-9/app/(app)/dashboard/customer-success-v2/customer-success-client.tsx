@@ -66,6 +66,8 @@ import {
   QuickActionsToolbar,
 } from '@/components/ui/competitive-upgrades-extended'
 
+import { downloadAsCsv, apiPost } from '@/lib/button-handlers'
+
 
 
 
@@ -436,11 +438,59 @@ const mockCSActivities = [
   { id: '3', user: 'System', action: 'Detected', target: 'usage spike at GlobalTech', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockCSQuickActions = [
-  { id: '1', label: 'New Playbook', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating playbook...', success: 'Playbook created! Add triggers and actions', error: 'Failed to create playbook' }), variant: 'default' as const },
-  { id: '2', label: 'Health Report', icon: 'activity', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Generating health report...', success: 'Customer Health Report - 87% healthy • 8% at-risk • 5% churning', error: 'Failed to generate report' }), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting customer data...', success: 'Data exported to customer-success-report.csv', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Helper function for exporting customer success data
+function exportCustomerSuccessData(customers: Customer[]) {
+  const exportData = customers.map(c => ({
+    Name: c.name,
+    Industry: c.industry,
+    Tier: c.tier,
+    HealthScore: c.healthScore,
+    HealthStatus: c.healthStatus,
+    ARR: c.arr,
+    MRR: c.mrr,
+    NPS: c.nps,
+    CSAT: c.csat,
+    RenewalDate: c.renewalDate,
+    DaysToRenewal: c.daysToRenewal,
+    RenewalRisk: c.renewalRisk,
+    LTV: c.lifetimeValue,
+    CSM: c.csm.name,
+    RisksCount: c.risks.length,
+    OpportunitiesCount: c.opportunities.length,
+    Tags: c.tags.join('; ')
+  }))
+
+  downloadAsCsv(exportData, `customer-success-report-${new Date().toISOString().split('T')[0]}.csv`)
+}
+
+// Helper function for creating playbook via API
+async function createPlaybook() {
+  const result = await apiPost('/api/playbooks', {
+    name: 'New Playbook',
+    trigger: 'Custom trigger',
+    steps: [],
+    successRate: 0,
+    activeAccounts: 0
+  }, {
+    loading: 'Creating playbook...',
+    success: 'Playbook created! Add triggers and actions',
+    error: 'Failed to create playbook'
+  })
+  return result
+}
+
+// Helper function for generating health report
+function generateHealthReport(customers: Customer[]) {
+  const healthyCount = customers.filter(c => c.healthStatus === 'healthy').length
+  const atRiskCount = customers.filter(c => c.healthStatus === 'at_risk' || c.healthStatus === 'critical').length
+  const churningCount = customers.filter(c => c.healthStatus === 'churned').length
+
+  const healthyPercent = Math.round((healthyCount / customers.length) * 100)
+  const atRiskPercent = Math.round((atRiskCount / customers.length) * 100)
+  const churningPercent = Math.round((churningCount / customers.length) * 100)
+
+  toast.success(`Customer Health Report - ${healthyPercent}% healthy - ${atRiskPercent}% at-risk - ${churningPercent}% churning`)
+}
 
 export default function CustomerSuccessClient() {
   const [customers] = useState<Customer[]>(mockCustomers)
@@ -452,6 +502,13 @@ export default function CustomerSuccessClient() {
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [activeTab, setActiveTab] = useState('portfolio')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Quick actions with real functionality
+  const mockCSQuickActions = [
+    { id: '1', label: 'New Playbook', icon: 'plus', action: () => createPlaybook(), variant: 'default' as const },
+    { id: '2', label: 'Health Report', icon: 'activity', action: () => generateHealthReport(customers), variant: 'default' as const },
+    { id: '3', label: 'Export Data', icon: 'download', action: () => exportCustomerSuccessData(customers), variant: 'outline' as const },
+  ]
 
   // Filtered customers
   const filteredCustomers = useMemo(() => {
@@ -554,23 +611,41 @@ export default function CustomerSuccessClient() {
     return icons[type]
   }
 
-  // Handlers
+  // Handlers with real functionality
   const handleScheduleQBR = (customerId: string) => {
-    toast.info('Schedule QBR', {
-      description: 'Opening calendar...'
-    })
+    // Open calendar to schedule QBR
+    window.open(`/dashboard/calendar?action=schedule&type=qbr&customerId=${customerId}`, '_blank')
+    toast.info('Opening calendar to schedule QBR')
   }
 
-  const handleLogInteraction = (customerId: string) => {
-    toast.success('Interaction logged', {
-      description: 'Customer touchpoint recorded'
+  const handleLogInteraction = async (customerId: string) => {
+    const result = await apiPost('/api/customer-success/touchpoints', {
+      customerId,
+      type: 'call',
+      date: new Date().toISOString(),
+      summary: 'Customer touchpoint',
+      sentiment: 'neutral'
+    }, {
+      loading: 'Logging interaction...',
+      success: 'Customer touchpoint recorded',
+      error: 'Failed to log interaction'
     })
+    return result
   }
 
   const handleExportReport = () => {
-    toast.success('Exporting report', {
-      description: 'Customer success report will be downloaded'
-    })
+    exportCustomerSuccessData(customers)
+  }
+
+  // Contact handlers
+  const handleEmailContact = (email: string) => {
+    window.location.href = `mailto:${email}`
+    toast.success(`Opening email to ${email}`)
+  }
+
+  const handleCallContact = (phone: string) => {
+    window.location.href = `tel:${phone}`
+    toast.success(`Initiating call`)
   }
 
   return (
@@ -854,7 +929,11 @@ export default function CustomerSuccessClient() {
                     <p className="text-2xl font-bold">{customers.filter(c => c.healthStatus === 'healthy').length}</p>
                     <p className="text-green-100 text-sm">Healthy</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={handleExportReport}
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -904,7 +983,13 @@ export default function CustomerSuccessClient() {
                               <div className="text-sm text-gray-500">{customer.risks.length} active risks</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm">Take Action</Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleScheduleQBR(customer.id)}
+                          >
+                            Take Action
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -997,7 +1082,11 @@ export default function CustomerSuccessClient() {
                     <p className="text-2xl font-bold">{customers.filter(c => c.renewalRisk === 'low').length}</p>
                     <p className="text-blue-100 text-sm">On Track</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={() => window.open('/dashboard/calendar?view=renewals', '_blank')}
+                  >
                     <Calendar className="h-4 w-4 mr-2" />
                     Schedule
                   </Button>
@@ -1054,7 +1143,13 @@ export default function CustomerSuccessClient() {
                               {customer.renewalRisk} risk
                             </Badge>
                           </div>
-                          <Button variant="outline" size="sm">Prepare</Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleScheduleQBR(customer.id)}
+                          >
+                            Prepare
+                          </Button>
                         </div>
                       </div>
                     ))}
@@ -1081,7 +1176,11 @@ export default function CustomerSuccessClient() {
                     <p className="text-2xl font-bold">{(playbooks.reduce((sum, p) => sum + p.successRate, 0) / playbooks.length).toFixed(0)}%</p>
                     <p className="text-orange-100 text-sm">Avg Success Rate</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={() => createPlaybook()}
+                  >
                     <Plus className="h-4 w-4 mr-2" />
                     Create
                   </Button>
@@ -1092,16 +1191,29 @@ export default function CustomerSuccessClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-4 gap-4">
               {[
-                { icon: Plus, label: 'New Playbook', desc: 'Create new', color: 'text-orange-500' },
-                { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500' },
-                { icon: Target, label: 'Set Triggers', desc: 'Automation', color: 'text-purple-500' },
-                { icon: BarChart3, label: 'Analytics', desc: 'Performance', color: 'text-green-500' },
-                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500' },
-                { icon: Clock, label: 'Schedule', desc: 'Timing', color: 'text-amber-500' },
-                { icon: GraduationCap, label: 'Training', desc: 'Best practices', color: 'text-cyan-500' },
-                { icon: Download, label: 'Export', desc: 'Share playbook', color: 'text-gray-500' },
+                { icon: Plus, label: 'New Playbook', desc: 'Create new', color: 'text-orange-500', action: () => createPlaybook() },
+                { icon: BookOpen, label: 'Templates', desc: 'Start fast', color: 'text-blue-500', action: () => window.open('/dashboard/templates?type=playbook', '_blank') },
+                { icon: Target, label: 'Set Triggers', desc: 'Automation', color: 'text-purple-500', action: () => toast.info('Opening trigger configuration') },
+                { icon: BarChart3, label: 'Analytics', desc: 'Performance', color: 'text-green-500', action: () => window.open('/dashboard/analytics?view=playbooks', '_blank') },
+                { icon: Users, label: 'Enrollments', desc: 'Active runs', color: 'text-pink-500', action: () => toast.info('Viewing active playbook enrollments') },
+                { icon: Clock, label: 'Schedule', desc: 'Timing', color: 'text-amber-500', action: () => window.open('/dashboard/calendar?view=playbooks', '_blank') },
+                { icon: GraduationCap, label: 'Training', desc: 'Best practices', color: 'text-cyan-500', action: () => window.open('/dashboard/help-center?topic=playbooks', '_blank') },
+                { icon: Download, label: 'Export', desc: 'Share playbook', color: 'text-gray-500', action: () => {
+                  const exportData = playbooks.map(p => ({
+                    Name: p.name,
+                    Trigger: p.trigger,
+                    Steps: p.steps.length,
+                    SuccessRate: p.successRate,
+                    ActiveAccounts: p.activeAccounts
+                  }))
+                  downloadAsCsv(exportData, 'playbooks-export.csv')
+                }},
               ].map((action, i) => (
-                <Card key={i} className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105">
+                <Card
+                  key={i}
+                  className="p-4 cursor-pointer hover:shadow-lg transition-all hover:scale-105"
+                  onClick={action.action}
+                >
                   <action.icon className={`h-8 w-8 ${action.color} mb-3`} />
                   <h4 className="font-semibold text-gray-900 dark:text-white">{action.label}</h4>
                   <p className="text-sm text-gray-500 dark:text-gray-400">{action.desc}</p>
@@ -1111,7 +1223,7 @@ export default function CustomerSuccessClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">All Playbooks</h2>
-              <Button>
+              <Button onClick={() => createPlaybook()}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Playbook
               </Button>
@@ -1150,7 +1262,13 @@ export default function CustomerSuccessClient() {
                         <span className="text-gray-500">Success Rate:</span>
                         <span className="font-semibold text-green-600 ml-1">{playbook.successRate}%</span>
                       </div>
-                      <Button variant="outline" size="sm">Edit</Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(`/dashboard/playbooks/${playbook.id}/edit`, '_blank')}
+                      >
+                        Edit
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -1196,7 +1314,12 @@ export default function CustomerSuccessClient() {
                       </Avatar>
                       <div>
                         <h3 className="font-semibold text-lg">{csm.name}</h3>
-                        <div className="text-sm text-gray-500">{csm.email}</div>
+                        <div
+                          className="text-sm text-gray-500 cursor-pointer hover:text-blue-600"
+                          onClick={() => handleEmailContact(csm.email)}
+                        >
+                          {csm.email}
+                        </div>
                       </div>
                     </div>
 
@@ -1253,7 +1376,11 @@ export default function CustomerSuccessClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={handleExportReport}
+                  >
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1567,7 +1694,7 @@ export default function CustomerSuccessClient() {
                             <p className="font-medium">Export All Data</p>
                             <p className="text-sm text-gray-500">Download complete backup</p>
                           </div>
-                          <Button variant="outline">Export</Button>
+                          <Button variant="outline" onClick={handleExportReport}>Export</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1698,7 +1825,11 @@ export default function CustomerSuccessClient() {
                                   <div className="text-sm text-gray-500">{contact.role}</div>
                                 </div>
                               </div>
-                              <Button variant="ghost" size="sm">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEmailContact(contact.email)}
+                              >
                                 <Mail className="h-4 w-4" />
                               </Button>
                             </div>
@@ -1717,7 +1848,12 @@ export default function CustomerSuccessClient() {
                             </Avatar>
                             <div>
                               <div className="font-medium">{selectedCustomer.csm.name}</div>
-                              <div className="text-sm text-gray-500">{selectedCustomer.csm.email}</div>
+                              <div
+                                className="text-sm text-gray-500 cursor-pointer hover:text-blue-600"
+                                onClick={() => handleEmailContact(selectedCustomer.csm.email)}
+                              >
+                                {selectedCustomer.csm.email}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -1767,7 +1903,10 @@ export default function CustomerSuccessClient() {
                   <TabsContent value="touchpoints" className="p-4 space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="font-medium">Recent Touchpoints</h4>
-                      <Button size="sm">
+                      <Button
+                        size="sm"
+                        onClick={() => handleLogInteraction(selectedCustomer.id)}
+                      >
                         <Plus className="h-4 w-4 mr-2" />
                         Log Touchpoint
                       </Button>

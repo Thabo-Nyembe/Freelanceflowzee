@@ -735,14 +735,31 @@ export default function CrmClient() {
   }
 
   const handleImportContacts = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Preparing import wizard...',
-        success: 'Import feature coming soon! CSV import will be available in the next release',
-        error: 'Failed to load import wizard'
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv,.json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (event) => {
+          try {
+            const content = event.target?.result as string
+            if (file.name.endsWith('.json')) {
+              const data = JSON.parse(content)
+              toast.success(`Parsed ${Array.isArray(data) ? data.length : 1} contacts from ${file.name}`)
+            } else {
+              const lines = content.split('\n').filter(l => l.trim())
+              toast.success(`Parsed ${Math.max(0, lines.length - 1)} contacts from ${file.name}`)
+            }
+          } catch {
+            toast.error('Failed to parse import file')
+          }
+        }
+        reader.readAsText(file)
       }
-    )
+    }
+    input.click()
   }
 
   // Filtered contacts
@@ -860,7 +877,13 @@ export default function CrmClient() {
             <Button variant="outline" size="icon" onClick={handleSyncData}>
               <RefreshCw className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening filters...', success: 'Filters panel ready', error: 'Failed to open filters' })}>
+            <Button variant="outline" size="icon" onClick={() => {
+              const statuses: (ContactStatus | 'all')[] = ['all', 'active', 'vip', 'new', 'qualified', 'inactive', 'churned']
+              const currentIndex = statuses.indexOf(statusFilter)
+              const nextStatus = statuses[(currentIndex + 1) % statuses.length]
+              setStatusFilter(nextStatus)
+              toast.success(`Filter: ${nextStatus === 'all' ? 'All contacts' : nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1)}`)
+            }}>
               <Filter className="w-4 h-4" />
             </Button>
             <Button onClick={handleAddContact} className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
@@ -1050,7 +1073,10 @@ export default function CrmClient() {
                                     {deal.company}
                                   </p>
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Loading options for ${deal.name}...`, success: 'Deal options ready', error: 'Failed to load options' }) }}>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEditDeal(deal)
+                                }}>
                                   <MoreVertical className="w-4 h-4" />
                                 </Button>
                               </div>
@@ -1197,13 +1223,32 @@ export default function CrmClient() {
                           <td className="py-3 px-4 text-sm text-gray-500">{formatTimeAgo(contact.lastContact)}</td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `Composing email to ${contact.name}...`, success: 'Email composer opened', error: 'Failed to open email' }) }}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => {
+                                e.stopPropagation()
+                                if (contact.email) {
+                                  window.location.href = `mailto:${contact.email}`
+                                  toast.success(`Opening email to ${contact.name}`)
+                                } else {
+                                  toast.error('No email address available')
+                                }
+                              }}>
                                 <Mail className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Initiating call to ${contact.name}...`, success: contact.phone ? `Ready to call ${contact.phone}` : 'No phone number available', error: 'Failed to initiate call' }) }}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => {
+                                e.stopPropagation()
+                                if (contact.phone) {
+                                  window.location.href = `tel:${contact.phone}`
+                                  toast.success(`Calling ${contact.phone}`)
+                                } else {
+                                  toast.error('No phone number available')
+                                }
+                              }}>
                                 <Phone className="w-4 h-4" />
                               </Button>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading options for ${contact.name}...`, success: 'Contact options ready', error: 'Failed to load options' }) }}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditContact(contact)
+                              }}>
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1610,9 +1655,32 @@ export default function CrmClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Reports & Analytics</h3>
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening Report Builder...', success: 'Report Builder ready! Configure your custom report', error: 'Failed to open' })}>
+              <Button onClick={() => {
+                const reportData = reports.map(r => ({
+                  name: r.name,
+                  type: r.type,
+                  frequency: r.frequency,
+                  status: r.status,
+                  recipients: r.recipients,
+                  lastRun: r.lastRun
+                }))
+                const csv = [
+                  ['Name', 'Type', 'Frequency', 'Status', 'Recipients', 'Last Run'].join(','),
+                  ...reportData.map(r => [r.name, r.type, r.frequency, r.status, r.recipients, r.lastRun].join(','))
+                ].join('\n')
+                const blob = new Blob([csv], { type: 'text/csv' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `crm-reports-${new Date().toISOString().split('T')[0]}.csv`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
+                toast.success('Report exported as CSV')
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Create Report
+                Export Reports
               </Button>
             </div>
 
@@ -1694,9 +1762,33 @@ export default function CrmClient() {
 
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Workflows & Automation</h3>
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening Automation Builder...', success: 'Automation Builder ready! Set up triggers and actions', error: 'Failed to open' })}>
+              <Button onClick={() => {
+                const automationData = automations.map(a => ({
+                  name: a.name,
+                  type: a.type,
+                  trigger: a.trigger,
+                  actions: a.actions,
+                  executions: a.executions,
+                  successRate: a.successRate,
+                  status: a.status
+                }))
+                const csv = [
+                  ['Name', 'Type', 'Trigger', 'Actions', 'Executions', 'Success Rate', 'Status'].join(','),
+                  ...automationData.map(a => [a.name, a.type, a.trigger, a.actions, a.executions, `${a.successRate}%`, a.status].join(','))
+                ].join('\n')
+                const blob = new Blob([csv], { type: 'text/csv' })
+                const url = URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `crm-automations-${new Date().toISOString().split('T')[0]}.csv`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                URL.revokeObjectURL(url)
+                toast.success('Automations exported as CSV')
+              }}>
                 <Plus className="w-4 h-4 mr-2" />
-                Create Automation
+                Export Automations
               </Button>
             </div>
 
@@ -1741,7 +1833,10 @@ export default function CrmClient() {
                         <Badge className={automation.status === 'active' ? 'bg-green-100 text-green-700' : automation.status === 'paused' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-700'}>
                           {automation.status}
                         </Badge>
-                        <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Loading options for ${automation.name}...`, success: 'Automation options ready', error: 'Failed to load options' })}>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          navigator.clipboard.writeText(JSON.stringify(automation, null, 2))
+                          toast.success(`Copied ${automation.name} details to clipboard`)
+                        }}>
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </div>

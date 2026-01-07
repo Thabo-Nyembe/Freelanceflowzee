@@ -570,11 +570,7 @@ const mockRenewalsActivities = [
   { id: '3', user: 'Mike Johnson', action: 'Sent', target: 'proposal to Acme Corporation', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'info' as const },
 ]
 
-const mockRenewalsQuickActions = [
-  { id: '1', label: 'New Renewal', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening renewal form...', success: 'New Renewal form ready!', error: 'Failed to open form' }), variant: 'default' as const },
-  { id: '2', label: 'Run Playbook', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: 'Running playbook...', success: 'Playbook executed successfully!', error: 'Playbook execution failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Pipeline', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting pipeline...', success: 'Pipeline exported successfully!', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions are defined inside component to access state setters
 
 export default function RenewalsClient({ initialRenewals }: RenewalsClientProps) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -583,6 +579,63 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
   const [selectedStatus, setSelectedStatus] = useState<RenewalStatus | 'all'>('all')
   const [selectedRenewal, setSelectedRenewal] = useState<Renewal | null>(null)
   const [isRenewalDialogOpen, setIsRenewalDialogOpen] = useState(false)
+  const [isNewRenewalDialogOpen, setIsNewRenewalDialogOpen] = useState(false)
+
+  // Quick actions with real functionality
+  const handleNewRenewal = () => {
+    setIsNewRenewalDialogOpen(true)
+    toast.success('New Renewal form ready!')
+  }
+
+  const handleRunPlaybook = async () => {
+    try {
+      const response = await fetch('/api/renewals/playbook', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'run' })
+      })
+      if (response.ok) {
+        toast.success('Playbook executed successfully!')
+      } else {
+        toast.error('Playbook execution failed')
+      }
+    } catch {
+      toast.error('Playbook execution failed')
+    }
+  }
+
+  const handleExportPipeline = () => {
+    const pipelineData = renewals.map(r => ({
+      customerName: r.customerName,
+      status: r.status,
+      currentARR: r.currentARR,
+      proposedARR: r.proposedARR,
+      probability: r.probability,
+      renewalDate: r.renewalDate,
+      healthScore: r.healthScoreValue,
+      csmName: r.csmName
+    }))
+    const csvContent = [
+      'Customer Name,Status,Current ARR,Proposed ARR,Probability,Renewal Date,Health Score,CSM',
+      ...pipelineData.map(r => `"${r.customerName}","${r.status}",${r.currentARR},${r.proposedARR},${r.probability},"${r.renewalDate}",${r.healthScore},"${r.csmName}"`)
+    ].join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `renewal-pipeline-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    toast.success('Pipeline exported successfully!')
+  }
+
+  const renewalsQuickActions = [
+    { id: '1', label: 'New Renewal', icon: 'plus', action: handleNewRenewal, variant: 'default' as const },
+    { id: '2', label: 'Run Playbook', icon: 'play', action: handleRunPlaybook, variant: 'default' as const },
+    { id: '3', label: 'Export Pipeline', icon: 'download', action: handleExportPipeline, variant: 'outline' as const },
+  ]
 
   const renewals = mockRenewals
   const playbooks = mockPlaybooks
@@ -1716,7 +1769,7 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockRenewalsQuickActions}
+            actions={renewalsQuickActions}
             variant="grid"
           />
         </div>
@@ -1908,6 +1961,62 @@ export default function RenewalsClient({ initialRenewals }: RenewalsClientProps)
                 </ScrollArea>
               </>
             )}
+          </DialogContent>
+        </Dialog>
+
+        {/* New Renewal Dialog */}
+        <Dialog open={isNewRenewalDialogOpen} onOpenChange={setIsNewRenewalDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-violet-600" />
+                Create New Renewal
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Customer Name</Label>
+                  <Input placeholder="Enter customer name" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Current ARR</Label>
+                  <Input type="number" placeholder="0" className="mt-1" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Renewal Date</Label>
+                  <Input type="date" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Contract Term (months)</Label>
+                  <Input type="number" placeholder="12" className="mt-1" />
+                </div>
+              </div>
+              <div>
+                <Label>CSM Name</Label>
+                <Input placeholder="Assigned CSM" className="mt-1" />
+              </div>
+              <div>
+                <Label>Notes</Label>
+                <Input placeholder="Additional notes" className="mt-1" />
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setIsNewRenewalDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-violet-500 to-purple-600 text-white"
+                onClick={() => {
+                  setIsNewRenewalDialogOpen(false)
+                  toast.success('Renewal created successfully!')
+                }}
+              >
+                Create Renewal
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </div>

@@ -204,9 +204,9 @@ const mockSupportTicketsActivities = [
 ]
 
 const mockSupportTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening ticket form...', success: 'Create a new support ticket', error: 'Failed to open form' }), variant: 'default' as const },
-  { id: '2', label: 'My Queue', icon: 'inbox', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading your queue...', success: 'Your Queue: 12 assigned tickets • 3 high priority • 2 overdue', error: 'Failed to load queue' }), variant: 'default' as const },
-  { id: '3', label: 'Macros', icon: 'zap', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading macros...', success: 'Quick Macros: 24 macros available • Click to apply common responses', error: 'Failed to load macros' }), variant: 'outline' as const },
+  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.success('New Ticket', { description: 'Create a new support ticket' }), variant: 'default' as const },
+  { id: '2', label: 'My Queue', icon: 'inbox', action: () => toast.success('Your Queue', { description: '12 assigned tickets • 3 high priority • 2 overdue' }), variant: 'default' as const },
+  { id: '3', label: 'Macros', icon: 'zap', action: () => toast.success('Quick Macros', { description: '24 macros available • Click to apply common responses' }), variant: 'outline' as const },
 ]
 
 export default function SupportTicketsClient({ initialTickets, initialStats }: SupportTicketsClientProps) {

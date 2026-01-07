@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { apiPost, downloadAsJson } from '@/lib/button-handlers'
 import {
   Box,
   Layers,
@@ -345,12 +346,6 @@ const mock3DActivities = [
   { id: '3', user: 'Rigger', action: 'Started', target: 'facial blend shapes', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mock3DQuickActions = [
-  { id: '1', label: 'New Model', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating 3D model...', success: 'Model created! Start sculpting in the editor', error: 'Failed to create model' }), variant: 'default' as const },
-  { id: '2', label: 'Render', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 5000)), { loading: 'Rendering scene at 4K...', success: 'Render complete! View in preview', error: 'Render failed - check GPU memory' }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting model...', success: 'Exported to FBX, OBJ, and GLTF formats', error: 'Export failed' }), variant: 'outline' as const },
-]
-
 export default function ThreeDModelingClient() {
   const [activeTab, setActiveTab] = useState('models')
   const [selectedTool, setSelectedTool] = useState<ToolType>('select')
@@ -360,6 +355,55 @@ export default function ThreeDModelingClient() {
   const [showRenderDialog, setShowRenderDialog] = useState(false)
   const [viewportMode, setViewportMode] = useState<'solid' | 'wireframe' | 'material'>('solid')
   const [settingsTab, setSettingsTab] = useState('general')
+
+  // Real action handlers for quick actions
+  const handleCreateModel = useCallback(async () => {
+    const result = await apiPost('/api/3d-models', {
+      name: `New Model ${Date.now()}`,
+      format: 'GLTF',
+      status: 'draft'
+    }, {
+      loading: 'Creating 3D model...',
+      success: 'Model created! Start sculpting in the editor',
+      error: 'Failed to create model'
+    })
+    if (result.success) {
+      // Optionally refresh models list or navigate to editor
+    }
+  }, [])
+
+  const handleStartRender = useCallback(async () => {
+    const result = await apiPost('/api/3d-models/render', {
+      quality: 'high',
+      resolution: '4K',
+      format: 'png'
+    }, {
+      loading: 'Starting render at 4K...',
+      success: 'Render job queued! Check render queue for progress',
+      error: 'Render failed - check GPU memory'
+    })
+    if (result.success) {
+      setActiveTab('render')
+    }
+  }, [])
+
+  const handleExportModels = useCallback(() => {
+    const exportData = {
+      models: mockModels,
+      materials: mockMaterials,
+      textures: mockTextures,
+      exportedAt: new Date().toISOString(),
+      format: 'FBX, OBJ, GLTF'
+    }
+    downloadAsJson(exportData, `3d-models-export-${Date.now()}.json`)
+  }, [])
+
+  // Quick actions with real functionality
+  const mock3DQuickActions = [
+    { id: '1', label: 'New Model', icon: 'plus', action: handleCreateModel, variant: 'default' as const },
+    { id: '2', label: 'Render', icon: 'play', action: handleStartRender, variant: 'default' as const },
+    { id: '3', label: 'Export', icon: 'download', action: handleExportModels, variant: 'outline' as const },
+  ]
 
   // Stats calculation
   const stats = useMemo(() => {
@@ -466,12 +510,6 @@ export default function ThreeDModelingClient() {
   ]
 
   // Handlers
-  const handleCreateModel = () => {
-    toast.info('Create Model', {
-      description: 'Opening 3D canvas...'
-    })
-  }
-
   const handleExportModel = (format: string) => {
     toast.success('Exporting model', {
       description: `Model will be exported as ${format}`
@@ -503,11 +541,11 @@ export default function ThreeDModelingClient() {
               <Upload className="w-4 h-4" />
               Import
             </Button>
-            <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" onClick={handleExportModels}>
               <Download className="w-4 h-4" />
               Export
             </Button>
-            <Button className="gap-2 bg-gradient-to-r from-slate-600 to-zinc-700 hover:from-slate-700 hover:to-zinc-800">
+            <Button className="gap-2 bg-gradient-to-r from-slate-600 to-zinc-700 hover:from-slate-700 hover:to-zinc-800" onClick={handleCreateModel}>
               <Plus className="w-4 h-4" />
               New Model
             </Button>
@@ -773,7 +811,7 @@ export default function ThreeDModelingClient() {
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{selectedModel?.polygons.toLocaleString() || '0'}</p>
+                    <p className="text-3xl font-bold">{selectedModel?.polygon_count?.toLocaleString() || '0'}</p>
                     <p className="text-blue-200 text-sm">Polygons</p>
                   </div>
                 </div>
@@ -1835,11 +1873,11 @@ export default function ThreeDModelingClient() {
                   <Play className="w-4 h-4" />
                   Open in Editor
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={handleStartRender}>
                   <Cpu className="w-4 h-4" />
                   Render
                 </Button>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={handleExportModels}>
                   <Download className="w-4 h-4" />
                   Export
                 </Button>

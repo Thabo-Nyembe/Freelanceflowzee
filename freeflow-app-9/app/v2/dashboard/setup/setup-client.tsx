@@ -128,9 +128,9 @@ const setupActivities = [
 ]
 
 const setupQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new item...', success: 'New item created!', error: 'Failed to create item' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Exporting configuration...', success: 'Configuration exported!', error: 'Failed to export' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening settings...', success: 'Settings opened!', error: 'Failed to open settings' }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Item', { description: 'Item created successfully' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Complete', { description: 'Configuration exported' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Settings opened' }) },
 ]
 
 export default function SetupClient() {

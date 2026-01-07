@@ -626,26 +626,10 @@ const mockInvoicingActivities = [
 ]
 
 const mockInvoicingQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Creating new invoice...',
-    success: 'Invoice created successfully',
-    error: 'Failed to create invoice'
-  }) },
-  { id: '2', label: 'Record Payment', icon: 'DollarSign', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Recording payment...',
-    success: 'Payment recorded successfully',
-    error: 'Failed to record payment'
-  }) },
-  { id: '3', label: 'Send Reminders', icon: 'Send', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Sending reminders...',
-    success: 'Reminders sent successfully',
-    error: 'Failed to send reminders'
-  }) },
-  { id: '4', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), {
-    loading: 'Exporting report...',
-    success: 'Report exported successfully',
-    error: 'Export failed'
-  }) },
+  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => toast.success('Invoice created successfully') },
+  { id: '2', label: 'Record Payment', icon: 'DollarSign', shortcut: 'P', action: () => toast.success('Payment recorded successfully') },
+  { id: '3', label: 'Send Reminders', icon: 'Send', shortcut: 'R', action: () => toast.success('Reminders sent successfully') },
+  { id: '4', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => toast.success('Report exported successfully') },
 ]
 
 // ============================================================================
@@ -2070,11 +2054,7 @@ export default function InvoicingClient() {
                     <Printer className="w-4 h-4 mr-2" />
                     Print
                   </Button>
-                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-                    loading: 'Opening edit mode...',
-                    success: 'Edit mode ready',
-                    error: 'Failed to open edit mode'
-                  })}>
+                  <Button variant="outline" onClick={() => toast.success('Edit mode ready')}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

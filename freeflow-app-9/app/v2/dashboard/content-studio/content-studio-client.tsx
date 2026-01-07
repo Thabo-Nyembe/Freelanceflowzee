@@ -1522,7 +1522,7 @@ export default function ContentStudioClient() {
                             <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded flex-1">
                               •••••••••••••••••••••
                             </code>
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Delivery API key copied', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('cs_delivery_xxxxxxxxxxxxx'); toast.success('Delivery API Key Copied', { description: 'Key copied to clipboard' }); }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
@@ -1531,7 +1531,7 @@ export default function ContentStudioClient() {
                             <code className="text-sm font-mono bg-gray-100 dark:bg-gray-600 px-2 py-1 rounded flex-1">
                               •••••••••••••••••••••
                             </code>
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Management API key copied', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('cs_management_xxxxxxxxxxxxx'); toast.success('Management API Key Copied', { description: 'Key copied to clipboard' }); }}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="flex gap-2">

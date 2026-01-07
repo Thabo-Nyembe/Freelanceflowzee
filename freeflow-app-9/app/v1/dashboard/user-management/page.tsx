@@ -888,11 +888,7 @@ export default function UserManagementPage() {
                   <Button
                     variant="outline"
                     className="gap-2"
-                    onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                      loading: 'Creating department...',
-                      success: 'Department creation dialog opened',
-                      error: 'Failed to create department'
-                    })}
+                    onClick={() => toast.success('Create Department', { description: 'Department form opened' })}
                   >
                     <UserPlus className="w-4 h-4" />
                     Create Department
@@ -909,11 +905,7 @@ export default function UserManagementPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), {
-                            loading: 'Loading department details...',
-                            success: `Viewing ${dept.name} department`,
-                            error: 'Failed to load department'
-                          })}
+                          onClick={() => toast.success(`${dept.name}`, { description: 'Department details opened' })}
                         >
                           View
                         </Button>

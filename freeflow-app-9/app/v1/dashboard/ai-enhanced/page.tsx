@@ -642,11 +642,7 @@ export default function AIEnhancedPage() {
         category: uiTool.category
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Creating AI tool...',
-        success: `AI tool created: ${uiTool.name} - ${uiTool.type} - ${uiTool.category} - Ready to use`,
-        error: 'Failed to create AI tool'
-      })
+      toast.success(`AI tool created: ${uiTool.name} - ${uiTool.type} - ${uiTool.category} - Ready to use`)
 
       setShowCreateModal(false)
       setToolName('')
@@ -680,11 +676,7 @@ export default function AIEnhancedPage() {
     dispatch({ type: 'SELECT_TOOL', tool })
     setShowViewModal(true)
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Loading tool details...',
-      success: `Viewing: ${tool.name} - ${tool.type} - ${tool.model} - ${formatNumber(tool.usageCount)} uses`,
-      error: 'Failed to load tool details'
-    })
+    toast.success(`Viewing: ${tool.name} - ${tool.type} - ${tool.model} - ${formatNumber(tool.usageCount)} uses`)
   }
 
   const handleDeleteTool = async (toolId: string) => {
@@ -713,11 +705,7 @@ export default function AIEnhancedPage() {
         name: tool?.name
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Deleting AI tool...',
-        success: `AI tool deleted: ${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`,
-        error: 'Failed to delete AI tool'
-      })
+      toast.success(`AI tool deleted: ${tool?.name} - ${tool?.type} - ${formatNumber(tool?.usageCount || 0)} uses - Removed from workspace`)
 
       setShowDeleteModal(false)
       setShowViewModal(false)
@@ -762,11 +750,7 @@ export default function AIEnhancedPage() {
         totalUsage
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Deleting selected tools...',
-        success: `Deleted ${state.selectedTools.length} tool(s): ${state.selectedTools.length} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`,
-        error: 'Failed to delete selected tools'
-      })
+      toast.success(`Deleted ${state.selectedTools.length} tool(s): ${state.selectedTools.length} AI tools - ${formatNumber(totalUsage)} total uses - Removed from workspace`)
 
       dispatch({ type: 'CLEAR_SELECTED_TOOLS' })
     } catch (error: any) {
@@ -804,11 +788,7 @@ export default function AIEnhancedPage() {
         throw error
       }
 
-      toast.promise(new Promise(r => setTimeout(r, 600)), {
-        loading: newFavoriteState ? 'Adding to favorites...' : 'Removing from favorites...',
-        success: `${newFavoriteState ? 'Added to favorites' : 'Removed from favorites'}: ${tool?.name} - ${tool?.type} - ${newFavoriteState ? 'Favorited' : 'Unfavorited'}`,
-        error: 'Failed to update favorite status'
-      })
+      toast.success(`${newFavoriteState ? 'Added to favorites' : 'Removed from favorites'}: ${tool?.name} - ${tool?.type} - ${newFavoriteState ? 'Favorited' : 'Unfavorited'}`)
     } catch (error: any) {
       logger.error('Failed to toggle favorite', { error: error.message, toolId })
       toast.error('Failed to update favorite status')

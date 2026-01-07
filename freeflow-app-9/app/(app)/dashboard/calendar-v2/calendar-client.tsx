@@ -263,10 +263,11 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
       } as any)
       setShowNewEvent(false)
       setNewEventForm({ title: '', startTime: '', endTime: '', eventType: 'meeting', location: '', description: '' })
-      toast.promise(Promise.resolve(), { loading: 'Creating event...', success: 'Event created successfully', error: 'Failed to create event' })
+      toast.success('Event created successfully')
       refetch()
     } catch (error) {
       console.error('Failed to create event:', error)
+      toast.error('Failed to create event')
     }
   }
   const displayEvents = (events && events.length > 0) ? events : (initialEvents || [])
@@ -411,6 +412,20 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
     description: ''
   })
   const [isEditing, setIsEditing] = useState(false)
+  const [showAddCalendar, setShowAddCalendar] = useState(false)
+  const [showSchedulingLink, setShowSchedulingLink] = useState(false)
+  const [showAddReminder, setShowAddReminder] = useState(false)
+  const [calendars, setCalendars] = useState(mockCalendars)
+  const [reminders, setReminders] = useState(mockReminders)
+  const [connectedApps, setConnectedApps] = useState<Record<string, boolean>>({
+    'Google Calendar': true,
+    'Outlook Calendar': true,
+    'Apple Calendar': false,
+    'Zoom': true,
+    'Microsoft Teams': false,
+    'Slack': true,
+    'Notion': false,
+  })
 
   // Handle updating an event
   const handleUpdateEvent = async () => {
@@ -424,7 +439,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
         location: editForm.location || null,
         description: editForm.description || null
       } as any)
-      toast.promise(Promise.resolve(), { loading: 'Updating event...', success: 'Event updated successfully', error: 'Failed to update event' })
+      toast.success('Event updated successfully')
       setIsEditing(false)
       setSelectedEvent(null)
       refetch()
@@ -435,9 +450,10 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
 
   // Handle deleting an event
   const handleDeleteEvent = async (event: CalendarEvent) => {
+    if (!confirm(`Delete "${event.title}"?`)) return
     try {
       await deleteEvent({ id: event.id } as any)
-      toast.promise(Promise.resolve(), { loading: 'Deleting event...', success: `"${event.title}" removed`, error: 'Failed to delete event' })
+      toast.success(`"${event.title}" removed`)
       setSelectedEvent(null)
       refetch()
     } catch (err) {
@@ -458,11 +474,53 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
   }
 
   const handleExportCalendar = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting calendar...', success: 'Calendar exported successfully', error: 'Export failed' })
+    // Generate ICS content from events
+    const icsEvents = displayEvents.map(event => {
+      const start = new Date(event.start_time)
+      const end = new Date(event.end_time)
+      const formatDate = (d: Date) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
+      return `BEGIN:VEVENT
+DTSTART:${formatDate(start)}
+DTEND:${formatDate(end)}
+SUMMARY:${event.title}
+DESCRIPTION:${event.description || ''}
+LOCATION:${event.location || ''}
+STATUS:${event.status?.toUpperCase() || 'CONFIRMED'}
+UID:${event.id}@freeflow-calendar
+END:VEVENT`
+    }).join('\n')
+
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//FreeFlow//Calendar//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+${icsEvents}
+END:VCALENDAR`
+
+    // Create and download file
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `freeflow-calendar-${new Date().toISOString().split('T')[0]}.ics`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success(`Exported ${displayEvents.length} events to ICS file`)
   }
 
-  const handleSyncCalendar = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Syncing with external calendars...', success: 'Calendar synced successfully', error: 'Sync failed' })
+  const handleSyncCalendar = async () => {
+    toast.loading('Syncing with external calendars...')
+    try {
+      await refetch()
+      toast.dismiss()
+      toast.success('Calendar synced successfully')
+    } catch (err) {
+      toast.dismiss()
+      toast.error('Failed to sync calendar')
+    }
   }
 
   // In demo mode, continue with empty events instead of showing error
@@ -547,7 +605,12 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                           <label className="block text-sm font-medium mb-1">Location</label>
                           <div className="flex items-center gap-2">
                             <Input placeholder="Add location or video link" className="flex-1" value={newEventForm.location} onChange={(e) => setNewEventForm(prev => ({ ...prev, location: e.target.value }))} />
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Adding video link...', success: 'Video meeting link added', error: 'Failed to add video link' })}>
+                            <Button variant="outline" size="sm" onClick={() => {
+                              const meetId = Math.random().toString(36).substring(2, 11)
+                              const meetLink = `https://meet.freeflow.com/${meetId}`
+                              setNewEventForm(prev => ({ ...prev, location: meetLink }))
+                              toast.success('Video meeting link added')
+                            }}>
                               <Video className="h-4 w-4" />
                             </Button>
                           </div>
@@ -784,7 +847,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       <Switch checked={cal.enabled} className="scale-75" />
                     </label>
                   ))}
-                  <Button variant="outline" className="w-full mt-2" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening calendar wizard...', success: 'Calendar added successfully', error: 'Failed to add calendar' })}>
+                  <Button variant="outline" className="w-full mt-2" size="sm" onClick={() => setShowAddCalendar(true)}>
                     <Plus className="h-4 w-4 mr-2" />
                     Add Calendar
                   </Button>
@@ -811,7 +874,14 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </div>
                       <div className="flex items-center gap-2 mt-2">
                         <Input value={link.url} readOnly className="text-xs h-8" />
-                        <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={() => toast.promise(navigator.clipboard.writeText(link.url), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' })}>
+                        <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(link.url)
+                            toast.success('Link copied to clipboard')
+                          } catch (err) {
+                            toast.error('Failed to copy link')
+                          }
+                        }}>
                           <Copy className="h-3 w-3" />
                         </Button>
                       </div>
@@ -1251,7 +1321,7 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                 <h2 className="text-2xl font-bold">Scheduling Links</h2>
                 <p className="text-gray-500">Let others book time on your calendar</p>
               </div>
-              <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Creating scheduling link...', success: 'Scheduling link created', error: 'Failed to create link' })}>
+              <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowSchedulingLink(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Link
               </Button>
@@ -1271,10 +1341,20 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg mb-4">
                       <Link2 className="h-4 w-4 text-gray-400" />
                       <code className="text-sm text-gray-600 dark:text-gray-400 flex-1 truncate">{link.url}</code>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toast.promise(navigator.clipboard.writeText(link.url), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' })}>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(link.url)
+                          toast.success('Link copied to clipboard')
+                        } catch (err) {
+                          toast.error('Failed to copy link')
+                        }
+                      }}>
                         <Copy className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toast.promise(new Promise(r => { window.open(link.url, '_blank'); setTimeout(r, 500); }), { loading: 'Opening link...', success: 'Link opened in new tab', error: 'Failed to open link' })}>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => {
+                        window.open(link.url, '_blank')
+                        toast.success('Link opened in new tab')
+                      }}>
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1322,13 +1402,13 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             <Card>
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Reminders</CardTitle>
-                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Adding reminder...', success: 'Reminder added successfully', error: 'Failed to add reminder' })}>
+                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowAddReminder(true)}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Reminder
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {mockReminders.map(reminder => (
+                {reminders.map(reminder => (
                   <div key={reminder.id} className={`flex items-center gap-4 p-4 rounded-lg ${reminder.completed ? 'bg-gray-100 dark:bg-gray-800 opacity-60' : 'bg-gray-50 dark:bg-gray-800'}`}>
                     <button className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${reminder.completed ? 'bg-teal-600 border-teal-600' : 'border-gray-300'}`}>
                       {reminder.completed && <CheckCircle2 className="h-3 w-3 text-white" />}
@@ -1340,7 +1420,12 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                       </p>
                     </div>
                     <Badge variant="outline">{reminder.type}</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Deleting reminder...', success: `"${reminder.title}" deleted`, error: 'Failed to delete reminder' })}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
+                    <Button variant="ghost" size="sm" onClick={() => {
+                      if (confirm(`Delete reminder "${reminder.title}"?`)) {
+                        setReminders(prev => prev.filter(r => r.id !== reminder.id))
+                        toast.success(`"${reminder.title}" deleted`)
+                      }
+                    }}><Trash2 className="h-4 w-4 text-gray-400" /></Button>
                   </div>
                 ))}
               </CardContent>
@@ -1576,29 +1661,36 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {[
-                        { name: 'Google Calendar', connected: true, email: 'user@gmail.com', icon: CalendarIcon },
-                        { name: 'Outlook Calendar', connected: true, email: 'user@outlook.com', icon: CalendarIcon },
-                        { name: 'Apple Calendar', connected: false, icon: CalendarIcon },
-                        { name: 'Zoom', connected: true, email: 'Connected', icon: Video },
-                        { name: 'Microsoft Teams', connected: false, icon: Users },
-                        { name: 'Slack', connected: true, email: 'Connected', icon: MessageSquare },
-                        { name: 'Notion', connected: false, icon: FileText },
-                      ].map((cal, i) => (
+                        { name: 'Google Calendar', email: 'user@gmail.com', icon: CalendarIcon },
+                        { name: 'Outlook Calendar', email: 'user@outlook.com', icon: CalendarIcon },
+                        { name: 'Apple Calendar', icon: CalendarIcon },
+                        { name: 'Zoom', email: 'Connected', icon: Video },
+                        { name: 'Microsoft Teams', icon: Users },
+                        { name: 'Slack', email: 'Connected', icon: MessageSquare },
+                        { name: 'Notion', icon: FileText },
+                      ].map((cal, i) => {
+                        const isConnected = connectedApps[cal.name] || false
+                        return (
                         <div key={i} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${cal.connected ? 'bg-teal-100 text-teal-600' : 'bg-gray-200 text-gray-500'}`}>
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isConnected ? 'bg-teal-100 text-teal-600' : 'bg-gray-200 text-gray-500'}`}>
                               <cal.icon className="h-5 w-5" />
                             </div>
                             <div>
                               <p className="font-medium text-gray-900 dark:text-white">{cal.name}</p>
-                              {cal.email && <p className="text-sm text-gray-500">{cal.email}</p>}
+                              {isConnected && cal.email && <p className="text-sm text-gray-500">{cal.email}</p>}
                             </div>
                           </div>
-                          <Button variant={cal.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: cal.connected ? `Disconnecting ${cal.name}...` : `Connecting ${cal.name}...`, success: cal.connected ? `${cal.name} disconnected` : `${cal.name} connected successfully`, error: `Failed to ${cal.connected ? 'disconnect' : 'connect'} ${cal.name}` })}>
-                            {cal.connected ? 'Disconnect' : 'Connect'}
+                          <Button variant={isConnected ? 'outline' : 'default'} size="sm" onClick={() => {
+                            const action = isConnected ? 'disconnect' : 'connect'
+                            if (isConnected && !confirm(`Disconnect ${cal.name}?`)) return
+                            setConnectedApps(prev => ({ ...prev, [cal.name]: !isConnected }))
+                            toast.success(isConnected ? `${cal.name} disconnected` : `${cal.name} connected successfully`)
+                          }}>
+                            {isConnected ? 'Disconnect' : 'Connect'}
                           </Button>
                         </div>
-                      ))}
+                      )})}
                     </CardContent>
                   </Card>
                 )}
@@ -1816,7 +1908,22 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                               <p className="font-medium text-red-700 dark:text-red-400">Clear All Events</p>
                               <p className="text-sm text-red-600">Remove all events from calendar</p>
                             </div>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing all events...', success: 'All events cleared successfully', error: 'Failed to clear events' })}>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={async () => {
+                              if (!confirm('Are you sure you want to clear ALL events? This action cannot be undone.')) return
+                              toast.loading('Clearing all events...')
+                              try {
+                                // Delete all events one by one
+                                for (const event of displayEvents) {
+                                  await deleteEvent({ id: event.id } as any)
+                                }
+                                toast.dismiss()
+                                toast.success('All events cleared successfully')
+                                refetch()
+                              } catch (err) {
+                                toast.dismiss()
+                                toast.error('Failed to clear events')
+                              }
+                            }}>
                               Clear
                             </Button>
                           </div>
@@ -1825,7 +1932,11 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                               <p className="font-medium text-red-700 dark:text-red-400">Delete Calendar</p>
                               <p className="text-sm text-red-600">Permanently delete this calendar</p>
                             </div>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting calendar...', success: 'Calendar deleted successfully', error: 'Failed to delete calendar' })}>
+                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100" onClick={() => {
+                              if (!confirm('Are you sure you want to DELETE this calendar? This action cannot be undone and will remove all events.')) return
+                              // In a real app, this would call an API to delete the calendar
+                              toast.error('Calendar deletion is disabled in demo mode for safety')
+                            }}>
                               Delete
                             </Button>
                           </div>
@@ -1933,7 +2044,11 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                   {selectedEvent.location_type === 'virtual' && (
                     <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
                       <Video className="h-5 w-5" />
-                      <Button variant="link" className="text-teal-600 p-0" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Joining video call...', success: 'Opening video call...', error: 'Failed to join call' })}>Join Video Call</Button>
+                      <Button variant="link" className="text-teal-600 p-0" onClick={() => {
+                        const meetLink = selectedEvent?.location?.includes('http') ? selectedEvent.location : `https://meet.freeflow.com/${selectedEvent?.id}`
+                        window.open(meetLink, '_blank')
+                        toast.success('Opening video call...')
+                      }}>Join Video Call</Button>
                     </div>
                   )}
                   <div className="flex items-center gap-3 text-gray-600 dark:text-gray-400">
@@ -1952,7 +2067,14 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
                     <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => startEditing(selectedEvent)}>
                       <Edit2 className="h-4 w-4 mr-2" />Edit
                     </Button>
-                    <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText(selectedEvent.title), { loading: 'Copying...', success: 'Copied to clipboard', error: 'Failed to copy' })}>
+                    <Button variant="outline" onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(selectedEvent.title)
+                        toast.success('Copied to clipboard')
+                      } catch (err) {
+                        toast.error('Failed to copy')
+                      }
+                    }}>
                       <Copy className="h-4 w-4" />
                     </Button>
                     <Button variant="outline" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteEvent(selectedEvent)} disabled={loading}>
@@ -1964,6 +2086,177 @@ export default function CalendarClient({ initialEvents }: { initialEvents: Calen
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Add Calendar Dialog */}
+        <Dialog open={showAddCalendar} onOpenChange={setShowAddCalendar}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <CalendarIcon className="h-5 w-5 text-teal-600" />
+                Add New Calendar
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Calendar Name</label>
+                <Input placeholder="e.g., Work, Personal, Team" id="new-calendar-name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Type</label>
+                <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" id="new-calendar-type">
+                  <option value="personal">Personal</option>
+                  <option value="work">Work</option>
+                  <option value="shared">Shared</option>
+                  <option value="subscribed">Subscribed</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Color</label>
+                <div className="flex gap-2">
+                  {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-pink-500', 'bg-orange-500', 'bg-teal-500'].map(color => (
+                    <button key={color} className={`w-8 h-8 rounded-full ${color} hover:scale-110 transition-transform`} />
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowAddCalendar(false)}>Cancel</Button>
+                <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                  const nameInput = document.getElementById('new-calendar-name') as HTMLInputElement
+                  const name = nameInput?.value?.trim()
+                  if (!name) {
+                    toast.error('Please enter a calendar name')
+                    return
+                  }
+                  const newCal = {
+                    id: Date.now().toString(),
+                    name,
+                    color: 'bg-teal-500',
+                    enabled: true,
+                    type: 'personal' as const,
+                    eventCount: 0
+                  }
+                  setCalendars(prev => [...prev, newCal])
+                  setShowAddCalendar(false)
+                  toast.success(`Calendar "${name}" added successfully`)
+                }}>
+                  Add Calendar
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Scheduling Link Dialog */}
+        <Dialog open={showSchedulingLink} onOpenChange={setShowSchedulingLink}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5 text-teal-600" />
+                Create Scheduling Link
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Link Name</label>
+                <Input placeholder="e.g., 30-min Meeting" id="new-link-name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Duration (minutes)</label>
+                <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" id="new-link-duration">
+                  <option value="15">15 minutes</option>
+                  <option value="30">30 minutes</option>
+                  <option value="45">45 minutes</option>
+                  <option value="60">1 hour</option>
+                  <option value="90">1.5 hours</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Buffer Time</label>
+                <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" id="new-link-buffer">
+                  <option value="0">No buffer</option>
+                  <option value="5">5 minutes</option>
+                  <option value="10">10 minutes</option>
+                  <option value="15">15 minutes</option>
+                  <option value="30">30 minutes</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowSchedulingLink(false)}>Cancel</Button>
+                <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                  const nameInput = document.getElementById('new-link-name') as HTMLInputElement
+                  const name = nameInput?.value?.trim()
+                  if (!name) {
+                    toast.error('Please enter a link name')
+                    return
+                  }
+                  const linkId = Math.random().toString(36).substring(2, 10)
+                  const newUrl = `https://cal.com/user/${linkId}`
+                  navigator.clipboard.writeText(newUrl)
+                  setShowSchedulingLink(false)
+                  toast.success(`Scheduling link created and copied to clipboard`)
+                }}>
+                  Create Link
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Reminder Dialog */}
+        <Dialog open={showAddReminder} onOpenChange={setShowAddReminder}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5 text-teal-600" />
+                Add Reminder
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Reminder Title</label>
+                <Input placeholder="e.g., Review Q4 Reports" id="new-reminder-title" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Date & Time</label>
+                <Input type="datetime-local" id="new-reminder-datetime" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Notification Type</label>
+                <select className="w-full px-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700" id="new-reminder-type">
+                  <option value="notification">Push Notification</option>
+                  <option value="email">Email</option>
+                  <option value="sms">SMS</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setShowAddReminder(false)}>Cancel</Button>
+                <Button className="flex-1 bg-teal-600 hover:bg-teal-700" onClick={() => {
+                  const titleInput = document.getElementById('new-reminder-title') as HTMLInputElement
+                  const datetimeInput = document.getElementById('new-reminder-datetime') as HTMLInputElement
+                  const typeSelect = document.getElementById('new-reminder-type') as HTMLSelectElement
+                  const title = titleInput?.value?.trim()
+                  const datetime = datetimeInput?.value
+                  if (!title || !datetime) {
+                    toast.error('Please fill in all fields')
+                    return
+                  }
+                  const newReminder: Reminder = {
+                    id: Date.now().toString(),
+                    title,
+                    datetime: new Date(datetime),
+                    completed: false,
+                    type: (typeSelect?.value || 'notification') as 'email' | 'notification' | 'sms'
+                  }
+                  setReminders(prev => [...prev, newReminder])
+                  setShowAddReminder(false)
+                  toast.success(`Reminder "${title}" added successfully`)
+                }}>
+                  Add Reminder
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )

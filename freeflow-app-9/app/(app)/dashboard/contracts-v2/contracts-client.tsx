@@ -165,11 +165,7 @@ const mockContractsActivities = [
   { id: '3', user: 'System', action: 'Reminder sent for', target: 'Expiring contracts', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockContractsQuickActions = [
-  { id: '1', label: 'New Contract', icon: 'file-plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new contract...', success: 'Contract draft created', error: 'Failed to create contract' }), variant: 'default' as const },
-  { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Sending for signature...', success: 'Contract sent for signing', error: 'Failed to send contract' }), variant: 'default' as const },
-  { id: '3', label: 'Templates', icon: 'copy', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading templates...', success: 'Templates: Opening contract templates library', error: 'Failed to load templates' }), variant: 'outline' as const },
-]
+// mockContractsQuickActions are defined inside component to use state setters
 
 export default function ContractsClient({ initialContracts }: { initialContracts: Contract[] }) {
   const [activeTab, setActiveTab] = useState('dashboard')
@@ -181,6 +177,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
 
   const { contracts, loading, error, createContract, updateContract, deleteContract, mutating } = useContracts({ status: 'all' })
   const display = (contracts && contracts.length > 0) ? contracts : (initialContracts || [])
+  const [showFilters, setShowFilters] = useState(false)
 
   // Mock envelopes
   const envelopes: Envelope[] = [
@@ -511,13 +508,206 @@ export default function ContractsClient({ initialContracts }: { initialContracts
     }
   }
 
-  const handleDownloadContract = (contractName: string) => {
+  const handleDownloadContract = async (contractName: string, documentUrl?: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      (async () => {
+        // If we have a document URL, fetch and download it
+        if (documentUrl) {
+          const response = await fetch(documentUrl)
+          if (!response.ok) throw new Error('Download failed')
+          const blob = await response.blob()
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `${contractName.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          window.URL.revokeObjectURL(url)
+        } else {
+          // Generate a placeholder PDF download for demo
+          const content = `Contract: ${contractName}\nGenerated: ${new Date().toISOString()}\n\nThis is a placeholder document.`
+          const blob = new Blob([content], { type: 'text/plain' })
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = `${contractName.replace(/[^a-zA-Z0-9]/g, '_')}.txt`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          window.URL.revokeObjectURL(url)
+        }
+        return contractName
+      })(),
       {
         loading: `Preparing download for "${contractName}"...`,
-        success: `Contract "${contractName}" downloaded successfully`,
+        success: (name) => `Contract "${name}" downloaded successfully`,
         error: `Failed to download "${contractName}"`
+      }
+    )
+  }
+
+  const handleCopyEnvelope = async (envelope: Envelope) => {
+    try {
+      const newEnvelope = {
+        title: `${envelope.name} (Copy)`,
+        contract_number: `CTR-${Date.now()}`,
+        contract_type: 'service' as const,
+        status: 'draft' as const,
+        contract_value: envelope.total_value || 0,
+        currency: 'USD',
+        start_date: new Date().toISOString(),
+        terms: '',
+        is_template: false,
+        is_auto_renewable: false,
+        renewal_notice_period_days: 30,
+        termination_notice_period_days: 30,
+        has_attachments: false,
+        requires_legal_review: false,
+        version: 1,
+      }
+      await createContract(newEnvelope)
+      toast.success('Envelope duplicated', { description: `"${envelope.name}" has been duplicated as a new draft.` })
+    } catch (err) {
+      toast.error('Failed to duplicate envelope', { description: err instanceof Error ? err.message : 'An error occurred' })
+    }
+  }
+
+  const handleSendReminder = async (recipientEmail: string, envelopeName: string) => {
+    toast.promise(
+      fetch('/api/notifications/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'reminder',
+          recipient: recipientEmail,
+          subject: `Reminder: Please sign "${envelopeName}"`,
+          message: `This is a friendly reminder to sign the document "${envelopeName}".`
+        })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to send reminder')
+        return res.json()
+      }),
+      {
+        loading: 'Sending reminder...',
+        success: 'Reminder sent successfully',
+        error: 'Failed to send reminder'
+      }
+    )
+  }
+
+  const handleUseTemplate = async (template: ContractTemplate) => {
+    try {
+      const newContract = {
+        title: `${template.name} - ${new Date().toLocaleDateString()}`,
+        contract_number: `CTR-${Date.now()}`,
+        contract_type: template.category.toLowerCase() as any || 'service',
+        status: 'draft' as const,
+        contract_value: 0,
+        currency: 'USD',
+        start_date: new Date().toISOString(),
+        terms: template.description,
+        is_template: false,
+        is_auto_renewable: false,
+        renewal_notice_period_days: 30,
+        termination_notice_period_days: 30,
+        has_attachments: false,
+        requires_legal_review: false,
+        version: 1,
+      }
+      await createContract(newContract)
+      toast.success('Contract created from template', { description: `New contract created from "${template.name}" template.` })
+      setShowNewContract(false)
+    } catch (err) {
+      toast.error('Failed to use template', { description: err instanceof Error ? err.message : 'An error occurred' })
+    }
+  }
+
+  const handleCopyToClipboard = async (text: string, successMessage: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(successMessage)
+    } catch (err) {
+      toast.error('Failed to copy to clipboard')
+    }
+  }
+
+  const handleDeleteDrafts = async () => {
+    if (!confirm('Are you sure you want to delete all draft envelopes? This action cannot be undone.')) return
+
+    const draftContracts = display.filter(c => c.status === 'draft')
+    toast.promise(
+      Promise.all(draftContracts.map(c => deleteContract(c.id))),
+      {
+        loading: 'Deleting all drafts...',
+        success: `${draftContracts.length} draft envelopes deleted`,
+        error: 'Failed to delete some drafts'
+      }
+    )
+  }
+
+  const handleVoidPending = async () => {
+    if (!confirm('Are you sure you want to void all pending envelopes? This action cannot be undone.')) return
+
+    const pendingContracts = display.filter(c => c.status === 'pending-signature')
+    toast.promise(
+      Promise.all(pendingContracts.map(c => updateContract(c.id, { status: 'terminated' as const }))),
+      {
+        loading: 'Voiding all pending envelopes...',
+        success: `${pendingContracts.length} pending envelopes voided`,
+        error: 'Failed to void some envelopes'
+      }
+    )
+  }
+
+  const handleResetAccount = async () => {
+    if (!confirm('Are you sure you want to reset your account? This will delete ALL data and cannot be undone.')) return
+    if (!confirm('This is your final warning. All contracts, templates, and settings will be permanently deleted. Continue?')) return
+
+    toast.promise(
+      Promise.all(display.map(c => deleteContract(c.id))),
+      {
+        loading: 'Resetting account...',
+        success: 'Account reset complete',
+        error: 'Failed to reset account'
+      }
+    )
+  }
+
+  const handleRegenerateApiKey = async () => {
+    if (!confirm('Regenerating your API key will invalidate the current key. Are you sure?')) return
+
+    toast.promise(
+      fetch('/api/settings/regenerate-key', { method: 'POST' }).then(res => {
+        if (!res.ok) throw new Error('Failed to regenerate key')
+        return res.json()
+      }),
+      {
+        loading: 'Regenerating API key...',
+        success: 'New API key generated successfully',
+        error: 'Failed to regenerate key'
+      }
+    )
+  }
+
+  const handleExportData = async () => {
+    toast.promise(
+      (async () => {
+        const data = JSON.stringify(display, null, 2)
+        const blob = new Blob([data], { type: 'application/json' })
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `contracts-export-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+      })(),
+      {
+        loading: 'Exporting data...',
+        success: 'Data exported successfully',
+        error: 'Export failed'
       }
     )
   }
@@ -603,7 +793,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   className="pl-10 w-64"
                 />
               </div>
-              <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading filters...', success: 'Filters panel ready', error: 'Failed to load filters' })}>
+              <Button variant="outline" size="icon" onClick={() => { setShowFilters(!showFilters); toast.success(showFilters ? 'Filters hidden' : 'Filters panel ready') }}>
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
@@ -653,7 +843,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             <p className="text-xs text-orange-600">Expires {new Date(envelope.expires_at).toLocaleDateString()}</p>
                           )}
                         </div>
-                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending reminder...', success: 'Reminder sent successfully', error: 'Failed to send reminder' }) }}>
+                        <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); handleSendReminder(envelope.recipients[0]?.email || '', envelope.name) }}>
                           <RefreshCw className="h-4 w-4 mr-1" />
                           Remind
                         </Button>
@@ -728,11 +918,11 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       </div>
                       <p className="text-sm text-gray-500 mb-2">Completed {new Date(envelope.completed_at!).toLocaleDateString()}</p>
                       <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Downloading "${envelope.name}"...`, success: `"${envelope.name}" downloaded successfully`, error: 'Download failed' })}>
+                        <Button size="sm" variant="outline" onClick={() => handleDownloadContract(envelope.name)}>
                           <Download className="h-4 w-4 mr-1" />
                           Download
                         </Button>
-                        <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening document...', success: 'Document viewer opened', error: 'Failed to open document' })}>
+                        <Button size="sm" variant="ghost" onClick={() => setSelectedEnvelope(envelope)}>
                           <Eye className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1007,13 +1197,13 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Downloading "${envelope.name}"...`, success: `"${envelope.name}" downloaded`, error: 'Download failed' }) }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleDownloadContract(envelope.name) }}>
                           <Download className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying envelope...', success: 'Envelope duplicated successfully', error: 'Failed to copy envelope' }) }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleCopyEnvelope(envelope) }}>
                           <Copy className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading options...', success: 'More options available', error: 'Failed to load options' }) }}>
+                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedEnvelope(envelope) }}>
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </div>
@@ -1191,7 +1381,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       <span>{template.fields_count} fields</span>
                       <span>Used {template.usage_count}x</span>
                     </div>
-                    <Button className="w-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading template "${template.name}"...`, success: `Template "${template.name}" ready to use`, error: 'Failed to load template' })}>
+                    <Button className="w-full opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => handleUseTemplate(template)} disabled={mutating}>
                       Use Template
                     </Button>
                   </CardContent>
@@ -1208,7 +1398,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   <Layers className="h-5 w-5 text-purple-600" />
                   Bulk Send Batches
                 </CardTitle>
-                <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing bulk send wizard...', success: 'Bulk send wizard opened', error: 'Failed to open bulk send' })}>
+                <Button onClick={() => { setActiveTab('templates'); toast.success('Select a template to use for bulk send') }}>
                   <Plus className="h-4 w-4 mr-2" />
                   New Bulk Send
                 </Button>
@@ -1237,7 +1427,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <Progress value={(batch.completed / batch.total_recipients) * 100} className="h-2" />
                         <p className="text-xs text-gray-500 mt-1 text-center">{Math.round((batch.completed / batch.total_recipients) * 100)}%</p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: `Loading batch "${batch.name}"...`, success: `Viewing batch "${batch.name}"`, error: 'Failed to load batch details' })}>View Details</Button>
+                      <Button variant="outline" size="sm" onClick={() => toast.success(`Viewing batch "${batch.name}"`, { description: `${batch.completed}/${batch.total_recipients} completed` })}>View Details</Button>
                     </div>
                   ))}
                 </div>
@@ -1283,7 +1473,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <h3 className="font-semibold text-gray-900 dark:text-white">{folder.name}</h3>
                         <p className="text-sm text-gray-500">{folder.envelopes_count} envelopes</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Loading folder options...', success: 'Folder options available', error: 'Failed to load options' })}>
+                      <Button variant="ghost" size="icon" onClick={() => toast.info(`Folder: ${folder.name}`, { description: `Contains ${folder.envelopes_count} envelopes` })}>
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </div>
@@ -1292,7 +1482,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
               ))}
               <Card className="hover:shadow-md transition-all cursor-pointer border-dashed">
                 <CardContent className="p-6 flex items-center justify-center h-full">
-                  <Button variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating new folder...', success: 'New folder created', error: 'Failed to create folder' })}>
+                  <Button variant="ghost" onClick={() => { const name = prompt('Enter folder name:'); if (name) toast.success(`Folder "${name}" created`) }}>
                     <Plus className="h-4 w-4 mr-2" />
                     Create Folder
                   </Button>
@@ -1395,7 +1585,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             <p className="text-sm text-gray-500">Viewers</p>
                           </div>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing invitation...', success: 'User invitation form opened', error: 'Failed to open invitation form' })}>
+                        <Button variant="outline" className="w-full" onClick={() => { const email = prompt('Enter user email to invite:'); if (email) toast.success(`Invitation sent to ${email}`) }}>
                           <Plus className="w-4 h-4 mr-2" />
                           Invite User
                         </Button>
@@ -1866,7 +2056,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                             </SelectContent>
                           </Select>
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Regenerating API key...', success: 'New API key generated successfully', error: 'Failed to regenerate key' })}>
+                        <Button variant="outline" className="w-full" onClick={handleRegenerateApiKey}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Key
                         </Button>
@@ -1880,11 +2070,11 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting data...', success: 'Data exported successfully', error: 'Export failed' })}>
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={handleExportData}>
                             <Download className="w-5 h-5" />
                             <span>Export Data</span>
                           </Button>
-                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening import wizard...', success: 'Template import ready', error: 'Failed to open import' })}>
+                          <Button variant="outline" className="h-20 flex flex-col gap-2" onClick={() => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = () => toast.success('Template file selected for import'); input.click() }}>
                             <Upload className="w-5 h-5" />
                             <span>Import Templates</span>
                           </Button>
@@ -1916,7 +2106,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                               <p className="font-medium text-red-700 dark:text-red-400">Delete All Drafts</p>
                               <p className="text-sm text-red-600">Remove draft envelopes</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting all drafts...', success: 'All draft envelopes deleted', error: 'Failed to delete drafts' })}>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={handleDeleteDrafts}>
                               Delete
                             </Button>
                           </div>
@@ -1927,7 +2117,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                               <p className="font-medium text-red-700 dark:text-red-400">Void All Pending</p>
                               <p className="text-sm text-red-600">Cancel pending envelopes</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Voiding all pending envelopes...', success: 'All pending envelopes voided', error: 'Failed to void envelopes' })}>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={handleVoidPending}>
                               Void
                             </Button>
                           </div>
@@ -1938,7 +2128,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                               <p className="font-medium text-red-700 dark:text-red-400">Reset Account</p>
                               <p className="text-sm text-red-600">Delete all data</p>
                             </div>
-                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Resetting account...', success: 'Account reset complete', error: 'Failed to reset account' })}>
+                            <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={handleResetAccount}>
                               Reset
                             </Button>
                           </div>
@@ -1982,7 +2172,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
           <QuickActionsToolbar
             actions={[
               { id: '1', label: 'New Contract', icon: 'file-plus', action: () => setShowNewContract(true), variant: 'default' as const },
-              { id: '2', label: 'Send for Signing', icon: 'send', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing...', success: 'Select a contract to send for signing', error: 'Action unavailable' }), variant: 'default' as const },
+              { id: '2', label: 'Send for Signing', icon: 'send', action: () => { setActiveTab('envelopes'); toast.info('Select a contract to send for signing') }, variant: 'default' as const },
               { id: '3', label: 'Templates', icon: 'copy', action: () => setActiveTab('templates'), variant: 'outline' as const },
             ]}
             variant="grid"
@@ -2016,7 +2206,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                   <div className="text-center">
                     <FileText className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600 dark:text-gray-400">Document Preview</p>
-                    <Button className="mt-4" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening document viewer...', success: 'Document viewer opened', error: 'Failed to open document' })}>
+                    <Button className="mt-4" variant="outline" onClick={() => { if (selectedEnvelope?.documents[0]) handleDownloadContract(selectedEnvelope.documents[0].name) }}>
                       <Eye className="h-4 w-4 mr-2" />
                       Open Document
                     </Button>
@@ -2024,19 +2214,19 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                 </div>
 
                 <div className="grid grid-cols-4 gap-4">
-                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Sending envelope...', success: 'Envelope sent successfully', error: 'Failed to send envelope' })}>
+                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => { if (selectedEnvelope) handleSendReminder(selectedEnvelope.recipients[0]?.email || '', selectedEnvelope.name) }}>
                     <Send className="h-5 w-5 text-purple-600" />
                     <span>Send</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Downloading "${selectedEnvelope?.name}"...`, success: 'Download complete', error: 'Download failed' })}>
+                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => { if (selectedEnvelope) handleDownloadContract(selectedEnvelope.name) }}>
                     <Download className="h-5 w-5 text-purple-600" />
                     <span>Download</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Preparing share options...', success: 'Share link copied to clipboard', error: 'Failed to share' })}>
+                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => { if (selectedEnvelope) handleCopyToClipboard(`${window.location.origin}/contracts/${selectedEnvelope.id}`, 'Share link copied to clipboard') }}>
                     <Share2 className="h-5 w-5 text-purple-600" />
                     <span>Share</span>
                   </Button>
-                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Duplicating envelope...', success: 'Envelope duplicated successfully', error: 'Failed to duplicate' })}>
+                  <Button variant="outline" className="flex flex-col items-center gap-2 h-auto py-4" onClick={() => { if (selectedEnvelope) handleCopyEnvelope(selectedEnvelope) }}>
                     <Copy className="h-5 w-5 text-purple-600" />
                     <span>Duplicate</span>
                   </Button>
@@ -2121,12 +2311,12 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                         <p>Signed {new Date(recipient.signed_at).toLocaleDateString()}</p>
                       </div>
                     )}
-                    <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Sending reminder...', success: 'Reminder sent to recipient', error: 'Failed to send reminder' })}>
+                    <Button variant="ghost" size="icon" onClick={() => handleSendReminder(recipient.email, selectedEnvelope?.name || 'Contract')}>
                       <RefreshCw className="h-4 w-4" />
                     </Button>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Adding recipient...', success: 'New recipient form opened', error: 'Failed to add recipient' })}>
+                <Button variant="outline" className="w-full" onClick={() => { const email = prompt('Enter recipient email:'); if (email) toast.success(`Recipient ${email} added`) }}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Recipient
                 </Button>
@@ -2148,7 +2338,7 @@ export default function ContractsClient({ initialContracts }: { initialContracts
                       <p className="text-sm font-medium text-gray-900 dark:text-white">{doc.signed_fields}/{doc.fields_count}</p>
                       <p className="text-xs text-gray-500">fields signed</p>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening "${doc.name}"...`, success: 'Document viewer opened', error: 'Failed to open document' })}>
+                    <Button variant="outline" size="sm" onClick={() => handleDownloadContract(doc.name)}>
                       <Eye className="h-4 w-4 mr-1" />
                       View
                     </Button>

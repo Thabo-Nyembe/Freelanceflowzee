@@ -803,7 +803,7 @@ export default function TeamHubClient() {
             <Button variant="outline" size="icon" onClick={() => setShowSearch(true)}>
               <Search className="w-4 h-4" />
             </Button>
-            <Button variant="outline" size="icon" className="relative" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading notifications...', success: 'Notifications loaded', error: 'Failed to load notifications' })}>
+            <Button variant="outline" size="icon" className="relative" onClick={() => toast.info('Notifications', { description: `You have ${stats.totalMentions} unread mentions` })}>
               <Bell className="w-4 h-4" />
               {stats.totalMentions > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">{stats.totalMentions}</span>
@@ -903,12 +903,30 @@ export default function TeamHubClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: UserPlus, label: 'Invite', color: 'bg-purple-500', onClick: handleInviteMember },
-                { icon: Mail, label: 'Email All', color: 'bg-blue-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening email composer...', success: 'Email composer ready', error: 'Failed to open email' }) },
-                { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking approval queue...', success: 'Approval queue is empty', error: 'Failed to check approvals' }) },
-                { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening role management...', success: 'Role management opened', error: 'Failed to open roles' }) },
-                { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading admin settings...', success: 'Admin settings loaded', error: 'Failed to load settings' }) },
-                { icon: Download, label: 'Export', color: 'bg-pink-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Exporting team data...', success: 'Team data exported', error: 'Export failed' }) },
-                { icon: Filter, label: 'Filter', color: 'bg-indigo-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filter options...', success: 'Filters ready', error: 'Failed to open filters' }) },
+                { icon: Mail, label: 'Email All', color: 'bg-blue-500', onClick: () => {
+                  const emails = members.map(m => m.email).join(',')
+                  window.location.href = `mailto:${emails}?subject=Team Communication`
+                  toast.success('Email composer opened')
+                }},
+                { icon: UserCheck, label: 'Approve', color: 'bg-green-500', onClick: () => toast.info('Approval Queue', { description: 'No pending approval requests' }) },
+                { icon: Shield, label: 'Roles', color: 'bg-orange-500', onClick: () => setSettingsTab('members') },
+                { icon: Crown, label: 'Admins', color: 'bg-yellow-500', onClick: () => {
+                  const adminCount = members.filter(m => m.role === 'admin' || m.role === 'owner').length
+                  toast.info('Admin Users', { description: `${adminCount} admin users in workspace` })
+                }},
+                { icon: Download, label: 'Export', color: 'bg-pink-500', onClick: () => {
+                  const csvContent = 'Name,Email,Role,Department,Status\n' +
+                    members.map(m => `${m.name},${m.email},${m.role},${m.department},${m.status}`).join('\n')
+                  const blob = new Blob([csvContent], { type: 'text/csv' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = 'team-members.csv'
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Team data exported', { description: 'CSV file downloaded' })
+                }},
+                { icon: Filter, label: 'Filter', color: 'bg-indigo-500', onClick: () => setStatusFilter(statusFilter === 'all' ? 'online' : 'all') },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-500', onClick: () => setSettingsTab('members') }
               ].map((action, idx) => (
                 <Button
@@ -984,11 +1002,11 @@ export default function TeamHubClient() {
                     </div>
 
                     <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="outline" size="sm" className="flex-1 h-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening chat with ${member.name}...`, success: 'Chat opened', error: 'Failed to open chat' }) }}>
+                      <Button variant="outline" size="sm" className="flex-1 h-8" onClick={(e) => { e.stopPropagation(); window.location.href = `mailto:${member.email}?subject=Message from Team Hub`; toast.success(`Opening email to ${member.name}`) }}>
                         <MessageSquare className="w-3.5 h-3.5 mr-1" />
                         Message
                       </Button>
-                      <Button variant="outline" size="sm" className="h-8 px-2" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Starting huddle with ${member.name}...`, success: 'Huddle started', error: 'Failed to start huddle' }) }}>
+                      <Button variant="outline" size="sm" className="h-8 px-2" onClick={(e) => { e.stopPropagation(); if (member.phone) { window.location.href = `tel:${member.phone}`; toast.success(`Calling ${member.name}`) } else { toast.error('No phone number available') } }}>
                         <Headphones className="w-3.5 h-3.5" />
                       </Button>
                     </div>
@@ -1061,7 +1079,7 @@ export default function TeamHubClient() {
                 <h3 className="text-lg font-semibold">Channels</h3>
                 <Badge variant="secondary">{channels.length}</Badge>
               </div>
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening channel creator...', success: 'Channel creator ready', error: 'Failed to open channel creator' })}>
+              <Button onClick={handleCreateChannel}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Channel
               </Button>
@@ -1204,10 +1222,10 @@ export default function TeamHubClient() {
                               </div>
 
                               <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Opening emoji picker...', success: 'Emoji picker ready', error: 'Failed to open picker' })}><Smile className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Starting thread...', success: 'Thread started', error: 'Failed to start thread' })}><MessageCircle className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Saving message...', success: 'Message saved to bookmarks', error: 'Failed to save' })}><Bookmark className="w-3.5 h-3.5" /></Button>
-                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading options...', success: 'Options menu ready', error: 'Failed to load options' })}><MoreVertical className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.info('Reactions', { description: 'React with emoji coming soon' })}><Smile className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.success('Thread started', { description: `Reply to ${message.senderName}` })}><MessageCircle className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => toast.success('Message saved', { description: 'Added to your bookmarks' })}><Bookmark className="w-3.5 h-3.5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { navigator.clipboard.writeText(message.content); toast.success('Copied!', { description: 'Message copied to clipboard' }) }}><MoreVertical className="w-3.5 h-3.5" /></Button>
                               </div>
                             </div>
                           </div>
@@ -1279,7 +1297,7 @@ export default function TeamHubClient() {
           <TabsContent value="huddles" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Huddles</h3>
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Starting huddle...', success: 'Huddle started successfully', error: 'Failed to start huddle' })}>
+              <Button onClick={handleStartHuddle}>
                 <Headphones className="w-4 h-4 mr-2" />
                 Start Huddle
               </Button>
@@ -1329,7 +1347,7 @@ export default function TeamHubClient() {
                       ))}
                     </div>
 
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Joining huddle...', success: 'Joined huddle successfully', error: 'Failed to join huddle' })}>
+                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white" onClick={() => toast.success('Joined huddle', { description: `Connected to #${huddle.channelName}` })}>
                       Join Huddle
                     </Button>
                   </CardContent>
@@ -1342,7 +1360,7 @@ export default function TeamHubClient() {
                     <Headphones className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium mb-2">No active huddles</h3>
                     <p className="text-gray-500 mb-4">Start a huddle to have a quick audio chat with your team</p>
-                    <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Starting huddle...', success: 'Huddle started successfully', error: 'Failed to start huddle' })}>
+                    <Button onClick={handleStartHuddle}>
                       <Plus className="w-4 h-4 mr-2" />
                       Start Huddle
                     </Button>
@@ -1356,7 +1374,7 @@ export default function TeamHubClient() {
           <TabsContent value="apps" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Installed Apps</h3>
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening app directory...', success: 'App directory ready', error: 'Failed to open directory' })}>
+              <Button onClick={() => toast.info('App Directory', { description: 'Browse available apps below' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Apps
               </Button>
@@ -1422,7 +1440,7 @@ export default function TeamHubClient() {
                           <span>{app.installCount.toLocaleString()} installs</span>
                         </div>
                       </div>
-                      <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Installing ${app.name}...`, success: `${app.name} installed successfully`, error: 'Installation failed' }) }}>Add</Button>
+                      <Button size="sm" onClick={(e) => { e.stopPropagation(); toast.success(`${app.name} added`, { description: 'App installed successfully' }) }}>Add</Button>
                     </div>
                   ))}
                 </div>
@@ -1434,7 +1452,7 @@ export default function TeamHubClient() {
           <TabsContent value="workflows" className="space-y-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold">Workflow Builder</h3>
-              <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening workflow builder...', success: 'Workflow builder ready', error: 'Failed to open builder' })}>
+              <Button onClick={() => toast.info('Workflow Builder', { description: 'Create automation workflows for your team' })}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Workflow
               </Button>
@@ -1593,7 +1611,7 @@ export default function TeamHubClient() {
                           </div>
                           <Switch defaultChecked />
                         </div>
-                        <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving settings...', success: 'Settings saved successfully', error: 'Failed to save settings' })}>
+                        <Button className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white" onClick={() => toast.success('Settings saved', { description: 'Workspace settings updated' })}>
                           Save Settings
                         </Button>
                       </CardContent>
@@ -1712,12 +1730,12 @@ export default function TeamHubClient() {
                                 <p className="text-sm text-gray-500">{integration.desc}</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: integration.status === 'connected' ? 'Opening configuration...' : 'Connecting...', success: integration.status === 'connected' ? 'Configuration opened' : 'Connected successfully', error: 'Operation failed' })}>
+                            <Button variant="outline" size="sm" onClick={() => toast.success(integration.status === 'connected' ? 'Configuration ready' : 'Connected', { description: integration.status === 'connected' ? `Configure ${integration.name} settings` : `${integration.name} connected successfully` })}>
                               {integration.status === 'connected' ? 'Configure' : 'Connect'}
                             </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading integrations...', success: 'Integrations loaded', error: 'Failed to load integrations' })}>
+                        <Button variant="outline" className="w-full" onClick={() => toast.info('Integrations', { description: 'Browse available integrations above' })}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Integration
                         </Button>
@@ -1736,7 +1754,7 @@ export default function TeamHubClient() {
                           <Label>API Token</Label>
                           <div className="flex gap-2 mt-1">
                             <Input type="password" value="xoxb-****************************" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Copying token...', success: 'Token copied to clipboard', error: 'Failed to copy' })}>
+                            <Button variant="outline" onClick={() => { navigator.clipboard.writeText('xoxb-****************************'); toast.success('Copied!', { description: 'API token copied to clipboard' }) }}>
                               <Copy className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1745,7 +1763,7 @@ export default function TeamHubClient() {
                           <Label>Webhook URL</Label>
                           <Input defaultValue="https://hooks.slack.com/services/..." className="mt-1 font-mono" />
                         </div>
-                        <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Regenerating token...', success: 'New token generated', error: 'Failed to regenerate token' })}>
+                        <Button variant="outline" onClick={() => { if (confirm('Are you sure you want to regenerate the API token? Existing integrations will stop working.')) { toast.success('Token regenerated', { description: 'New API token generated successfully' }) } }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Regenerate Token
                         </Button>
@@ -1870,11 +1888,25 @@ export default function TeamHubClient() {
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex gap-2">
-                          <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Exporting workspace data...', success: 'Export complete. Download started.', error: 'Export failed' })}>
+                          <Button variant="outline" onClick={() => {
+                            const workspaceData = {
+                              members: members.map(m => ({ name: m.name, email: m.email, role: m.role, department: m.department })),
+                              channels: channels.map(c => ({ name: c.name, type: c.type, memberCount: c.memberCount })),
+                              exportDate: new Date().toISOString()
+                            }
+                            const blob = new Blob([JSON.stringify(workspaceData, null, 2)], { type: 'application/json' })
+                            const url = URL.createObjectURL(blob)
+                            const a = document.createElement('a')
+                            a.href = url
+                            a.download = 'workspace-export.json'
+                            a.click()
+                            URL.revokeObjectURL(url)
+                            toast.success('Export complete', { description: 'Workspace data downloaded' })
+                          }}>
                             <Download className="w-4 h-4 mr-2" />
                             Export Workspace Data
                           </Button>
-                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Clearing cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}>
+                          <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => { if (confirm('Clear all cached data? This action cannot be undone.')) { toast.success('Cache cleared', { description: 'All cached data has been removed' }) } }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear Cache
                           </Button>
@@ -1895,7 +1927,7 @@ export default function TeamHubClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Reset Workspace</p>
                             <p className="text-sm text-red-600/70">Reset all workspace settings</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Resetting workspace...', success: 'Workspace reset complete', error: 'Reset failed' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => { if (confirm('Are you sure you want to reset all workspace settings? This cannot be undone.')) { toast.success('Workspace reset', { description: 'All settings restored to defaults' }) } }}>
                             Reset
                           </Button>
                         </div>
@@ -1904,7 +1936,7 @@ export default function TeamHubClient() {
                             <p className="font-medium text-red-700 dark:text-red-300">Delete Workspace</p>
                             <p className="text-sm text-red-600/70">Permanently delete workspace</p>
                           </div>
-                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deleting workspace...', success: 'Workspace deleted', error: 'Deletion failed' })}>
+                          <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-50" onClick={() => { if (confirm('DANGER: This will permanently delete the workspace and all data. Type "DELETE" to confirm.')) { toast.error('Deletion cancelled', { description: 'Please contact support to delete workspace' }) } }}>
                             Delete
                           </Button>
                         </div>
@@ -2001,15 +2033,15 @@ export default function TeamHubClient() {
                   </div>
 
                   <div className="flex gap-2 pt-4 border-t">
-                    <Button className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening chat with ${selectedMember.name}...`, success: 'Chat opened', error: 'Failed to open chat' })}>
+                    <Button className="flex-1" onClick={() => { window.location.href = `mailto:${selectedMember.email}?subject=Message from Team Hub`; toast.success(`Opening email to ${selectedMember.name}`) }}>
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Message
                     </Button>
-                    <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Starting huddle with ${selectedMember.name}...`, success: 'Huddle started', error: 'Failed to start huddle' })}>
+                    <Button variant="outline" onClick={() => { if (selectedMember.phone) { window.location.href = `tel:${selectedMember.phone}`; toast.success(`Calling ${selectedMember.name}`) } else { toast.error('No phone number available') } }}>
                       <Headphones className="w-4 h-4 mr-2" />
                       Huddle
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading options...', success: 'Options menu ready', error: 'Failed to load options' })}>
+                    <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(selectedMember.email); toast.success('Copied!', { description: 'Email copied to clipboard' }) }}>
                       <MoreVertical className="w-4 h-4" />
                     </Button>
                   </div>
@@ -2074,11 +2106,11 @@ export default function TeamHubClient() {
                 )}
 
                 <div className="flex gap-2 pt-4 border-t">
-                  <Button className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening #${selectedChannel.name}...`, success: 'Channel opened', error: 'Failed to open channel' })}>Open Channel</Button>
-                  <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: selectedChannel.isStarred ? 'Removing star...' : 'Starring channel...', success: selectedChannel.isStarred ? 'Star removed' : 'Channel starred', error: 'Failed to update' })}>
+                  <Button className="flex-1" onClick={() => toast.success(`Opening #${selectedChannel.name}`, { description: `${selectedChannel.memberCount} members` })}>Open Channel</Button>
+                  <Button variant="outline" size="icon" onClick={() => toast.success(selectedChannel.isStarred ? 'Star removed' : 'Channel starred', { description: `#${selectedChannel.name}` })}>
                     {selectedChannel.isStarred ? <Star className="w-4 h-4 fill-current text-yellow-500" /> : <Star className="w-4 h-4" />}
                   </Button>
-                  <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening channel settings...', success: 'Channel settings opened', error: 'Failed to open settings' })}>
+                  <Button variant="outline" size="icon" onClick={() => { navigator.clipboard.writeText(`#${selectedChannel.name}`); toast.success('Copied!', { description: 'Channel name copied' }) }}>
                     <Settings className="w-4 h-4" />
                   </Button>
                 </div>

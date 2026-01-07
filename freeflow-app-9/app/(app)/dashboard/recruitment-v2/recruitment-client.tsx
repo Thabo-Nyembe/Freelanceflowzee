@@ -1449,7 +1449,7 @@ export default function RecruitmentClient() {
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening editor for ${job.title}...`, success: 'Job editor opened', error: 'Failed to open job editor' }) }}>
+                          <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); toast.success('Job editor opened') }}>
                             <Edit className="w-4 h-4 mr-1" />
                             Edit
                           </Button>

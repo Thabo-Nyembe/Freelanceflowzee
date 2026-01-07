@@ -213,19 +213,74 @@ const paymentsActivities = [
   { id: '3', user: 'System', action: 'generated', target: 'weekly report', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const paymentsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1000)),
-    { loading: 'Creating new payment item...', success: 'Payment item created successfully', error: 'Failed to create payment item' }
-  ) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 1500)),
-    { loading: 'Exporting payment data...', success: 'Payment data exported successfully', error: 'Failed to export payment data' }
-  ) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(
-    new Promise(resolve => setTimeout(resolve, 800)),
-    { loading: 'Loading payment settings...', success: 'Payment settings opened', error: 'Failed to load settings' }
-  ) },
+// Quick actions handlers - defined inside component to access router and state
+const getPaymentsQuickActions = (
+  router: ReturnType<typeof useRouter>,
+  milestones: Milestone[],
+  paymentHistory: PaymentHistory[],
+  setShowRecordPaymentDialog: (show: boolean) => void
+) => [
+  {
+    id: '1',
+    label: 'New Item',
+    icon: 'Plus',
+    shortcut: 'N',
+    action: async () => {
+      setShowRecordPaymentDialog(true)
+    }
+  },
+  {
+    id: '2',
+    label: 'Export',
+    icon: 'Download',
+    shortcut: 'E',
+    action: async () => {
+      try {
+        // Generate CSV from payment history
+        const headers = ['Date', 'Milestone', 'Amount', 'Type', 'Transaction ID', 'Status']
+        const csvRows = [
+          headers.join(','),
+          ...paymentHistory.map(payment => [
+            new Date(payment.date).toLocaleDateString(),
+            `"${payment.milestone}"`,
+            payment.amount,
+            payment.type,
+            payment.transactionId,
+            payment.status
+          ].join(','))
+        ]
+        const csvContent = csvRows.join('\n')
+
+        // Create and download file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `payments-export-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+
+        toast.success('Payment data exported', {
+          description: `Exported ${paymentHistory.length} payment records to CSV`
+        })
+      } catch (error) {
+        toast.error('Failed to export payment data', {
+          description: 'Please try again later'
+        })
+      }
+    }
+  },
+  {
+    id: '3',
+    label: 'Settings',
+    icon: 'Settings',
+    shortcut: 'S',
+    action: async () => {
+      router.push('/v2/dashboard/settings?tab=payments')
+    }
+  },
 ]
 
 export default function PaymentsClient() {
@@ -250,6 +305,88 @@ export default function PaymentsClient() {
   const [showDisputeDialog, setShowDisputeDialog] = useState(false)
   const [disputeMilestone, setDisputeMilestone] = useState<Milestone | null>(null)
   const [disputeReason, setDisputeReason] = useState('')
+
+  // Record payment dialog state
+  const [showRecordPaymentDialog, setShowRecordPaymentDialog] = useState(false)
+  const [newPaymentData, setNewPaymentData] = useState({
+    milestone: '',
+    amount: '',
+    type: 'hold' as 'release' | 'hold' | 'return',
+    notes: ''
+  })
+
+  // Get quick actions with current state
+  const paymentsQuickActions = getPaymentsQuickActions(
+    router,
+    milestones,
+    paymentHistory,
+    setShowRecordPaymentDialog
+  )
+
+  // Record new payment handler
+  const handleRecordPayment = async () => {
+    if (!newPaymentData.milestone.trim() || !newPaymentData.amount) {
+      toast.error('Please fill in all required fields')
+      return
+    }
+
+    const amount = parseFloat(newPaymentData.amount)
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid amount')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          milestone: newPaymentData.milestone.trim(),
+          amount: amount,
+          type: newPaymentData.type,
+          notes: newPaymentData.notes.trim(),
+          timestamp: new Date().toISOString()
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to record payment')
+      }
+
+      const data = await response.json()
+
+      // Add to payment history
+      const newPayment: PaymentHistory = {
+        id: paymentHistory.length + 1,
+        date: new Date().toISOString().split('T')[0],
+        milestone: newPaymentData.milestone.trim(),
+        amount: amount,
+        type: newPaymentData.type,
+        status: 'pending',
+        transactionId: data.transactionId || `TXN-${Date.now()}`
+      }
+
+      setPaymentHistory([newPayment, ...paymentHistory])
+
+      logger.info('Payment recorded successfully', {
+        transactionId: newPayment.transactionId,
+        amount: amount
+      })
+
+      toast.success('Payment recorded!', {
+        description: `${formatCurrency(amount)} payment for "${newPaymentData.milestone}" has been recorded`
+      })
+
+      // Reset form and close dialog
+      setNewPaymentData({ milestone: '', amount: '', type: 'hold', notes: '' })
+      setShowRecordPaymentDialog(false)
+    } catch (error: any) {
+      logger.error('Failed to record payment', { error })
+      toast.error('Failed to record payment', {
+        description: error.message || 'Please try again later'
+      })
+    }
+  }
 
   // Load Payments Data
   useEffect(() => {
@@ -997,6 +1134,83 @@ export default function PaymentsClient() {
                 className="bg-red-600 hover:bg-red-700 text-white"
               >
                 Submit Dispute
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Record Payment Dialog */}
+        <Dialog open={showRecordPaymentDialog} onOpenChange={setShowRecordPaymentDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-blue-500" />
+                Record New Payment
+              </DialogTitle>
+              <DialogDescription>
+                Create a new payment record for a milestone or project.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="paymentMilestone">Milestone / Description *</Label>
+                <Input
+                  id="paymentMilestone"
+                  value={newPaymentData.milestone}
+                  onChange={(e) => setNewPaymentData({ ...newPaymentData, milestone: e.target.value })}
+                  placeholder="e.g., Website Design Phase 1"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="paymentAmount">Amount *</Label>
+                <Input
+                  id="paymentAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={newPaymentData.amount}
+                  onChange={(e) => setNewPaymentData({ ...newPaymentData, amount: e.target.value })}
+                  placeholder="0.00"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="paymentType">Payment Type</Label>
+                <select
+                  id="paymentType"
+                  value={newPaymentData.type}
+                  onChange={(e) => setNewPaymentData({ ...newPaymentData, type: e.target.value as 'release' | 'hold' | 'return' })}
+                  className="w-full h-10 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="hold">Hold (Escrow)</option>
+                  <option value="release">Release</option>
+                  <option value="return">Return</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="paymentNotes">Notes (Optional)</Label>
+                <Textarea
+                  id="paymentNotes"
+                  value={newPaymentData.notes}
+                  onChange={(e) => setNewPaymentData({ ...newPaymentData, notes: e.target.value })}
+                  placeholder="Additional notes about this payment..."
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => {
+                setNewPaymentData({ milestone: '', amount: '', type: 'hold', notes: '' })
+                setShowRecordPaymentDialog(false)
+              }}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleRecordPayment}
+                disabled={!newPaymentData.milestone.trim() || !newPaymentData.amount}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Record Payment
               </Button>
             </DialogFooter>
           </DialogContent>

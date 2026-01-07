@@ -436,21 +436,9 @@ const mockTicketsActivities = [
 ]
 
 const mockTicketsQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new ticket...',
-    success: 'Ticket created successfully',
-    error: 'Failed to create ticket'
-  }), variant: 'default' as const },
-  { id: '2', label: 'View Queue', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Loading ticket queue...',
-    success: 'Queue loaded',
-    error: 'Failed to load queue'
-  }), variant: 'default' as const },
-  { id: '3', label: 'Reports', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-    loading: 'Loading ticket reports...',
-    success: 'Reports loaded',
-    error: 'Failed to load reports'
-  }), variant: 'outline' as const },
+  { id: '1', label: 'New Ticket', icon: 'plus', action: () => toast.success('Ticket Created', { description: 'New support ticket ready' }), variant: 'default' as const },
+  { id: '2', label: 'View Queue', icon: 'list', action: () => toast.success('Queue Loaded', { description: 'Showing all pending tickets' }), variant: 'default' as const },
+  { id: '3', label: 'Reports', icon: 'chart', action: () => toast.success('Reports Loaded', { description: 'Ticket analytics ready' }), variant: 'outline' as const },
 ]
 
 export default function TicketsClient() {

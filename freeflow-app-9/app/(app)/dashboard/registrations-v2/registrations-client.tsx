@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { copyToClipboard, downloadAsCsv, downloadAsJson, printContent } from '@/lib/button-handlers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -744,9 +745,32 @@ const mockRegistrationsActivities = [
 ]
 
 const mockRegistrationsQuickActions = [
-  { id: '1', label: 'New Event', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new event...', success: 'Event created successfully', error: 'Failed to create event' }), variant: 'default' as const },
-  { id: '2', label: 'Import List', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Importing registration list...', success: 'Registrations imported successfully', error: 'Import failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Data', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting registration data...', success: 'Data exported successfully', error: 'Export failed' }), variant: 'outline' as const },
+  { id: '1', label: 'New Event', icon: 'plus', action: () => toast.info('Create new event', { description: 'Use the Events tab to create a new event' }), variant: 'default' as const },
+  { id: '2', label: 'Import List', icon: 'upload', action: () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.csv,.xlsx,.json'
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (file) {
+        toast.success('File selected', { description: `${file.name} ready for import. API integration required.` })
+      }
+    }
+    input.click()
+  }, variant: 'default' as const },
+  { id: '3', label: 'Export Data', icon: 'download', action: () => {
+    const exportData = mockRegistrations.map(r => ({
+      registrationNumber: r.registrationNumber,
+      firstName: r.attendee.firstName,
+      lastName: r.attendee.lastName,
+      email: r.attendee.email,
+      company: r.attendee.company || '',
+      ticketType: r.ticketType,
+      status: r.status,
+      totalPaid: r.totalPaid
+    }))
+    downloadAsCsv(exportData, `registrations-export-${new Date().toISOString().split('T')[0]}`)
+  }, variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -1551,13 +1575,23 @@ export default function RegistrationsClient() {
                           {getPaymentBadge(registration.paymentStatus)}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating QR code...', success: 'QR code ready', error: 'Failed to generate QR code' })}>
+                          <Button variant="ghost" size="sm" onClick={(e) => {
+                            e.stopPropagation()
+                            copyToClipboard(registration.qrCode, `QR Code copied: ${registration.qrCode}`)
+                          }}>
                             <QrCode className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing email...', success: 'Email draft created', error: 'Failed to create email' })}>
+                          <Button variant="ghost" size="sm" onClick={(e) => {
+                            e.stopPropagation()
+                            window.location.href = `mailto:${registration.attendee.email}?subject=Regarding your registration ${registration.registrationNumber}`
+                            toast.success('Email client opened')
+                          }}>
                             <Mail className="w-4 h-4" />
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options loaded', error: 'Failed to load options' })}>
+                          <Button variant="ghost" size="sm" onClick={(e) => {
+                            e.stopPropagation()
+                            handleViewRegistration(registration)
+                          }}>
                             <MoreHorizontal className="w-4 h-4" />
                           </Button>
                         </div>
@@ -1620,7 +1654,19 @@ export default function RegistrationsClient() {
                       </div>
                     </div>
 
-                    <Button variant="outline" size="sm" className="w-full mt-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading event details...', success: 'Event details loaded', error: 'Failed to load details' })}>
+                    <Button variant="outline" size="sm" className="w-full mt-4" onClick={() => {
+                      const eventDetails = {
+                        id: event.id,
+                        name: event.name,
+                        type: event.type,
+                        date: event.date,
+                        location: event.location,
+                        capacity: event.capacity,
+                        registrations: event.registrationCount,
+                        revenue: event.revenue
+                      }
+                      copyToClipboard(JSON.stringify(eventDetails, null, 2), 'Event details copied to clipboard')
+                    }}>
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
@@ -1645,7 +1691,18 @@ export default function RegistrationsClient() {
                   <div className="aspect-square bg-gray-100 dark:bg-gray-800 rounded-xl flex flex-col items-center justify-center">
                     <QrCode className="w-24 h-24 text-muted-foreground mb-4" />
                     <p className="text-muted-foreground mb-4">Point camera at QR code</p>
-                    <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Initializing scanner...', success: 'Scanner ready', error: 'Failed to initialize scanner' })}>
+                    <Button onClick={async () => {
+                      try {
+                        if ('mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices) {
+                          await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                          toast.success('Camera access granted', { description: 'QR scanner ready. Point at a registration QR code.' })
+                        } else {
+                          toast.info('Camera not available', { description: 'Use manual entry below' })
+                        }
+                      } catch (error) {
+                        toast.error('Camera access denied', { description: 'Please allow camera access or use manual entry' })
+                      }
+                    }}>
                       <QrCode className="w-4 h-4 mr-2" />
                       Start Scanning
                     </Button>
@@ -1752,7 +1809,11 @@ export default function RegistrationsClient() {
                             <p className="font-semibold">{template.openRate}%</p>
                             <p className="text-xs text-muted-foreground">Open Rate</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Sending template...', success: 'Template sent successfully', error: 'Failed to send template' })}>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            const emails = registrations.map(r => r.attendee.email).join(',')
+                            window.location.href = `mailto:${emails}?subject=${encodeURIComponent(template.name)}`
+                            toast.success('Email client opened', { description: `Sending "${template.name}" to ${registrations.length} recipients` })
+                          }}>
                             <Send className="w-4 h-4 mr-2" />
                             Send
                           </Button>
@@ -1788,15 +1849,29 @@ export default function RegistrationsClient() {
                     <CardTitle>Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Preparing bulk email...', success: 'Bulk email sent to all registrants', error: 'Failed to send bulk email' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => {
+                      const allEmails = registrations.map(r => r.attendee.email).join(',')
+                      window.location.href = `mailto:${allEmails}?subject=${encodeURIComponent('Important Update for All Registrants')}`
+                      toast.success('Email client opened', { description: `Bulk email to ${registrations.length} registrants` })
+                    }}>
                       <Mail className="w-4 h-4 mr-2" />
                       Send Bulk Email
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Sending reminders...', success: 'Reminders sent successfully', error: 'Failed to send reminders' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => {
+                      const pendingEmails = registrations.filter(r => r.status === 'confirmed').map(r => r.attendee.email).join(',')
+                      if (pendingEmails) {
+                        window.location.href = `mailto:${pendingEmails}?subject=${encodeURIComponent('Reminder: Your Upcoming Event')}`
+                        toast.success('Email client opened', { description: 'Reminder email prepared for confirmed attendees' })
+                      } else {
+                        toast.info('No confirmed attendees', { description: 'No attendees to send reminders to' })
+                      }
+                    }}>
                       <Send className="w-4 h-4 mr-2" />
                       Send Reminders
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating template...', success: 'Template created successfully', error: 'Failed to create template' })}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => {
+                      toast.info('Template Editor', { description: 'Email template editor would open here. Feature requires backend integration.' })
+                    }}>
                       <Plus className="w-4 h-4 mr-2" />
                       Create Template
                     </Button>
@@ -2128,7 +2203,13 @@ export default function RegistrationsClient() {
                                 <p className="text-sm text-gray-500">{integration.connected ? 'Connected' : 'Not connected'}</p>
                               </div>
                             </div>
-                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: integration.connected ? 'Disconnecting integration...' : 'Connecting integration...', success: integration.connected ? 'Integration disconnected' : 'Integration connected successfully', error: integration.connected ? 'Failed to disconnect' : 'Failed to connect' })}>
+                            <Button variant={integration.connected ? 'outline' : 'default'} size="sm" onClick={() => {
+                              if (integration.connected) {
+                                toast.info(`${integration.name} disconnection`, { description: 'Integration management requires backend configuration' })
+                              } else {
+                                toast.info(`Connect ${integration.name}`, { description: `OAuth flow for ${integration.name} would start here. Requires API keys.` })
+                              }
+                            }}>
                               {integration.connected ? 'Disconnect' : 'Connect'}
                             </Button>
                           </div>
@@ -2197,11 +2278,44 @@ export default function RegistrationsClient() {
                       <CardContent className="space-y-4">
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Export All Data</p><p className="text-sm text-gray-500">Download CSV/Excel</p></div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting all data...', success: 'Data exported successfully', error: 'Failed to export data' })}>Export</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            const allData = {
+                              registrations: registrations.map(r => ({
+                                id: r.id,
+                                registrationNumber: r.registrationNumber,
+                                attendee: r.attendee,
+                                ticketType: r.ticketType,
+                                status: r.status,
+                                totalPaid: r.totalPaid,
+                                createdAt: r.createdAt
+                              })),
+                              events: events.map(e => ({
+                                id: e.id,
+                                name: e.name,
+                                date: e.date,
+                                registrationCount: e.registrationCount,
+                                revenue: e.revenue
+                              })),
+                              analytics: analytics,
+                              exportedAt: new Date().toISOString()
+                            }
+                            downloadAsJson(allData, `registrations-full-export-${new Date().toISOString().split('T')[0]}`)
+                          }}>Export</Button>
                         </div>
                         <div className="flex items-center justify-between p-4 border rounded-lg dark:border-gray-700">
                           <div><p className="font-medium">Clear Cache</p><p className="text-sm text-gray-500">128 MB used</p></div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Clearing cache...', success: 'Cache cleared successfully', error: 'Failed to clear cache' })}>Clear</Button>
+                          <Button variant="outline" size="sm" onClick={() => {
+                            if ('caches' in window) {
+                              caches.keys().then(names => {
+                                names.forEach(name => caches.delete(name))
+                              })
+                              toast.success('Cache cleared', { description: 'Browser cache has been cleared' })
+                            } else {
+                              localStorage.clear()
+                              sessionStorage.clear()
+                              toast.success('Storage cleared', { description: 'Local and session storage cleared' })
+                            }
+                          }}>Clear</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2386,24 +2500,54 @@ export default function RegistrationsClient() {
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4 border-t">
                   {selectedRegistration.status === 'confirmed' && (
-                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Processing check-in...', success: 'Attendee checked in successfully', error: 'Check-in failed' })}>
+                    <Button className="flex-1 bg-green-600 hover:bg-green-700" onClick={async () => {
+                      try {
+                        const { data: { user } } = await supabase.auth.getUser()
+                        if (!user) {
+                          toast.error('Authentication required')
+                          return
+                        }
+                        // For demo data, just show success
+                        toast.success('Attendee checked in', {
+                          description: `${selectedRegistration.attendee.firstName} ${selectedRegistration.attendee.lastName} checked in at ${new Date().toLocaleTimeString()}`
+                        })
+                        setShowRegistrationDialog(false)
+                      } catch (error) {
+                        toast.error('Check-in failed')
+                      }
+                    }}>
                       <UserCheck className="w-4 h-4 mr-2" />
                       Check In
                     </Button>
                   )}
-                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating QR code...', success: 'QR code displayed', error: 'Failed to generate QR code' })}>
+                  <Button variant="outline" onClick={() => {
+                    copyToClipboard(selectedRegistration.qrCode, `QR Code: ${selectedRegistration.qrCode}`)
+                  }}>
                     <QrCode className="w-4 h-4 mr-2" />
                     View QR Code
                   </Button>
-                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Preparing badge...', success: 'Badge sent to printer', error: 'Failed to print badge' })}>
+                  <Button variant="outline" onClick={() => {
+                    printContent()
+                  }}>
                     <Printer className="w-4 h-4 mr-2" />
                     Print Badge
                   </Button>
-                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Preparing email...', success: 'Email sent successfully', error: 'Failed to send email' })}>
+                  <Button variant="outline" onClick={() => {
+                    window.location.href = `mailto:${selectedRegistration.attendee.email}?subject=${encodeURIComponent(`Your registration: ${selectedRegistration.registrationNumber}`)}`
+                    toast.success('Email client opened')
+                  }}>
                     <Mail className="w-4 h-4 mr-2" />
                     Send Email
                   </Button>
-                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading editor...', success: 'Editor ready', error: 'Failed to load editor' })}>
+                  <Button variant="outline" onClick={() => {
+                    const regData = {
+                      name: `${selectedRegistration.attendee.firstName} ${selectedRegistration.attendee.lastName}`,
+                      email: selectedRegistration.attendee.email,
+                      company: selectedRegistration.attendee.company,
+                      status: selectedRegistration.status
+                    }
+                    copyToClipboard(JSON.stringify(regData, null, 2), 'Registration data copied - paste into editor')
+                  }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit
                   </Button>

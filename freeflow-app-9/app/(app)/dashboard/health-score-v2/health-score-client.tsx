@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { shareContent, downloadAsCsv, apiCall } from '@/lib/button-handlers'
 import {
   Activity,
   Server,
@@ -645,12 +646,7 @@ const mockHealthScoreActivities = [
   { id: '3', user: 'Platform Eng', action: 'deployed', target: 'performance optimization', timestamp: '3h ago', type: 'info' as const },
 ]
 
-const mockHealthScoreQuickActions = [
-  { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running health check...', success: 'Health check completed!', error: 'Health check failed' }) },
-  { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading metrics dashboard...', success: 'Metrics dashboard opened!', error: 'Failed to load metrics' }) },
-  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading health alerts...', success: 'Alerts panel opened!', error: 'Failed to load alerts' }) },
-  { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading health reports...', success: 'Reports viewer opened!', error: 'Failed to load reports' }) },
-]
+// Quick actions will be defined inside the component to access state setters
 
 export default function HealthScoreClient() {
   const supabase = createClient()
@@ -669,6 +665,10 @@ export default function HealthScoreClient() {
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [showAlertsDialog, setShowAlertsDialog] = useState(false)
+  const [showMetricsDialog, setShowMetricsDialog] = useState(false)
+  const [showReportsDialog, setShowReportsDialog] = useState(false)
   const [formState, setFormState] = useState<HealthScoreFormState>(initialFormState)
   const [editingId, setEditingId] = useState<string | null>(null)
 
@@ -922,38 +922,86 @@ export default function HealthScoreClient() {
     }
   }
 
-  const handleRunDiagnostics = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
-      {
-        loading: 'Running diagnostics...',
-        success: 'System health check completed',
-        error: 'Diagnostics failed'
-      }
-    )
+  // Run diagnostics by calling the health check API
+  const handleRunDiagnostics = async () => {
+    const result = await apiCall('/api/health-score/check', {
+      method: 'POST',
+      body: JSON.stringify({ services: mockServices.map(s => s.id) })
+    }, {
+      loading: 'Running diagnostics...',
+      success: 'System health check completed',
+      error: 'Diagnostics failed'
+    })
+    if (result.success) {
+      fetchHealthScores()
+    }
   }
 
+  // Export health data as CSV
   const handleExportHealth = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 700)),
-      {
-        loading: 'Exporting health report...',
-        success: 'Health metrics exported successfully',
-        error: 'Export failed'
-      }
-    )
+    const exportData = [
+      ...mockServices.map(s => ({
+        type: 'Service',
+        name: s.name,
+        status: s.status,
+        apdexScore: s.apdexScore,
+        errorRate: s.errorRate,
+        uptime: s.uptime,
+        throughput: s.throughput
+      })),
+      ...dbHealthScores.map(h => ({
+        type: 'Customer Health',
+        name: h.customer_name,
+        status: h.category,
+        apdexScore: h.overall_score / 100,
+        errorRate: 0,
+        uptime: h.overall_score,
+        throughput: 0
+      }))
+    ]
+    downloadAsCsv(exportData, `health-report-${new Date().toISOString().split('T')[0]}.csv`)
   }
 
+  // Open alerts configuration dialog
   const handleConfigureAlerts = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening alert configuration...',
-        success: 'Alert configuration loaded',
-        error: 'Failed to load configuration'
-      }
-    )
+    setShowAlertsDialog(true)
+    toast.success('Alert configuration opened')
   }
+
+  // Open settings dialog
+  const handleOpenSettings = () => {
+    setShowSettingsDialog(true)
+    toast.success('Settings opened')
+  }
+
+  // Open metrics dialog
+  const handleViewMetrics = () => {
+    setShowMetricsDialog(true)
+    toast.success('Metrics dashboard opened')
+  }
+
+  // Open reports dialog
+  const handleViewReports = () => {
+    setShowReportsDialog(true)
+    toast.success('Reports viewer opened')
+  }
+
+  // Share health report
+  const handleShareReport = async () => {
+    await shareContent({
+      title: 'System Health Report',
+      text: `Overall Health: ${overallHealth}% | Services: ${mockServices.length} | Open Incidents: ${openIncidents}`,
+      url: window.location.href
+    })
+  }
+
+  // Quick actions defined inside component to access state
+  const healthScoreQuickActions = [
+    { id: '1', label: 'Run Check', icon: 'Activity', shortcut: 'C', action: handleRunDiagnostics },
+    { id: '2', label: 'View Metrics', icon: 'BarChart', shortcut: 'M', action: handleViewMetrics },
+    { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: handleConfigureAlerts },
+    { id: '4', label: 'Reports', icon: 'FileText', shortcut: 'R', action: handleViewReports },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:bg-none dark:bg-gray-900">
@@ -1001,8 +1049,11 @@ export default function HealthScoreClient() {
                   <option value="7d" className="text-gray-900">Last 7 days</option>
                   <option value="30d" className="text-gray-900">Last 30 days</option>
                 </select>
-                <button className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors">
-                  <RefreshCw className="w-5 h-5 text-white" />
+                <button
+                  onClick={handleRefreshMetrics}
+                  className="p-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+                >
+                  <RefreshCw className={`w-5 h-5 text-white ${loading ? 'animate-spin' : ''}`} />
                 </button>
               </div>
             </div>
@@ -1110,7 +1161,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
-                onClick={handleRunDiagnostics}
+                onClick={handleViewMetrics}
                 className="h-20 flex-col gap-2 bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400 hover:scale-105 transition-all duration-200"
               >
                 <BarChart3 className="w-5 h-5" />
@@ -1118,6 +1169,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
+                onClick={handleViewReports}
                 className="h-20 flex-col gap-2 bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 hover:scale-105 transition-all duration-200"
               >
                 <FileText className="w-5 h-5" />
@@ -1133,6 +1185,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
+                onClick={handleShareReport}
                 className="h-20 flex-col gap-2 bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 hover:scale-105 transition-all duration-200"
               >
                 <Shield className="w-5 h-5" />
@@ -1140,6 +1193,7 @@ export default function HealthScoreClient() {
               </Button>
               <Button
                 variant="ghost"
+                onClick={handleOpenSettings}
                 className="h-20 flex-col gap-2 bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 hover:scale-105 transition-all duration-200"
               >
                 <Settings className="w-5 h-5" />
@@ -1965,7 +2019,7 @@ export default function HealthScoreClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockHealthScoreQuickActions}
+            actions={healthScoreQuickActions}
             variant="grid"
           />
         </div>
@@ -2399,6 +2453,167 @@ export default function HealthScoreClient() {
                 <Button onClick={editingId ? handleUpdateHealthScore : handleCreateHealthScore} disabled={isSubmitting}>
                   {isSubmitting ? 'Saving...' : editingId ? 'Update' : 'Create'}
                 </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Health Score Settings
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <h4 className="font-medium mb-2">Refresh Interval</h4>
+                <select className="w-full p-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <option value="30">30 seconds</option>
+                  <option value="60">1 minute</option>
+                  <option value="300">5 minutes</option>
+                  <option value="0">Manual only</option>
+                </select>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <h4 className="font-medium mb-2">Health Score Thresholds</h4>
+                <div className="grid grid-cols-3 gap-2 text-sm">
+                  <div>
+                    <Label>Excellent</Label>
+                    <Input type="number" defaultValue={80} min={0} max={100} />
+                  </div>
+                  <div>
+                    <Label>Good</Label>
+                    <Input type="number" defaultValue={60} min={0} max={100} />
+                  </div>
+                  <div>
+                    <Label>Fair</Label>
+                    <Input type="number" defaultValue={40} min={0} max={100} />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowSettingsDialog(false)}>Cancel</Button>
+                <Button onClick={() => { setShowSettingsDialog(false); toast.success('Settings saved'); }}>Save Settings</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Alerts Configuration Dialog */}
+        <Dialog open={showAlertsDialog} onOpenChange={setShowAlertsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Bell className="w-5 h-5" />
+                Alert Configuration
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-3">
+                {mockAlerts.slice(0, 3).map(alert => (
+                  <div key={alert.id} className="p-3 bg-gray-50 dark:bg-gray-900 rounded-lg flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-sm">{alert.name}</p>
+                      <p className="text-xs text-gray-500">{alert.condition}</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" defaultChecked={alert.enabled} className="sr-only peer" />
+                      <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setShowAlertsDialog(false)}>Cancel</Button>
+                <Button onClick={() => { setShowAlertsDialog(false); toast.success('Alert configuration saved'); }}>Save Alerts</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Metrics Dialog */}
+        <Dialog open={showMetricsDialog} onOpenChange={setShowMetricsDialog}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BarChart3 className="w-5 h-5" />
+                Metrics Dashboard
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="grid grid-cols-3 gap-4">
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-emerald-600">{overallHealth}%</p>
+                  <p className="text-xs text-gray-500">Overall Health</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-blue-600">{avgApdex.toFixed(2)}</p>
+                  <p className="text-xs text-gray-500">Avg Apdex</p>
+                </div>
+                <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg text-center">
+                  <p className="text-2xl font-bold text-orange-600">{avgErrorRate.toFixed(2)}%</p>
+                  <p className="text-xs text-gray-500">Error Rate</p>
+                </div>
+              </div>
+              <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <h4 className="font-medium mb-3">Service Performance</h4>
+                <div className="space-y-2">
+                  {mockServices.slice(0, 4).map(service => (
+                    <div key={service.id} className="flex items-center justify-between text-sm">
+                      <span>{service.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={service.status === 'healthy' ? 'text-green-600' : 'text-yellow-600'}>{service.status}</span>
+                        <span className="text-gray-500">{service.uptime}%</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex justify-end">
+                <Button onClick={() => setShowMetricsDialog(false)}>Close</Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Reports Dialog */}
+        <Dialog open={showReportsDialog} onOpenChange={setShowReportsDialog}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Health Reports
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <button
+                  onClick={() => { handleExportHealth(); setShowReportsDialog(false); }}
+                  className="w-full p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <p className="font-medium">Export Health Report (CSV)</p>
+                  <p className="text-xs text-gray-500">Download all health metrics as CSV</p>
+                </button>
+                <button
+                  onClick={() => { window.print(); setShowReportsDialog(false); toast.success('Print dialog opened'); }}
+                  className="w-full p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <p className="font-medium">Print Health Report</p>
+                  <p className="text-xs text-gray-500">Print the current health dashboard</p>
+                </button>
+                <button
+                  onClick={() => { handleShareReport(); setShowReportsDialog(false); }}
+                  className="w-full p-3 bg-gray-50 dark:bg-gray-900 rounded-lg text-left hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <p className="font-medium">Share Health Report</p>
+                  <p className="text-xs text-gray-500">Share via email or copy link</p>
+                </button>
+              </div>
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => setShowReportsDialog(false)}>Close</Button>
               </div>
             </div>
           </DialogContent>

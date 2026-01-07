@@ -127,11 +127,12 @@ const mockReportingActivities = [
   { id: '3', user: 'Data Engineer', action: 'connected', target: 'Snowflake data source', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mockReportingQuickActions = [
-  { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating dashboard...', success: 'Drag widgets to build your custom dashboard', error: 'Failed to create' }) },
-  { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening worksheet...', success: 'Write SQL queries against your data sources', error: 'Failed to open' }) },
-  { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening scheduler...', success: 'Set up automated report delivery via email', error: 'Failed to open' }) },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting data...', success: 'Data exported to CSV', error: 'Export failed' }) },
+// Quick actions - handlers will be set in component
+const mockReportingQuickActionsConfig = [
+  { id: '1', label: 'New Dashboard', icon: 'LayoutDashboard', shortcut: 'D' },
+  { id: '2', label: 'New Worksheet', icon: 'FileSpreadsheet', shortcut: 'W' },
+  { id: '3', label: 'Schedule Report', icon: 'Calendar', shortcut: 'S' },
+  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E' },
 ]
 
 export default function ReportingClient() {
@@ -1670,7 +1671,17 @@ export default function ReportingClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockReportingQuickActions}
+            actions={mockReportingQuickActionsConfig.map(action => ({
+              ...action,
+              action: () => {
+                switch(action.id) {
+                  case '1': setShowCreateDashboard(true); toast.success('Dashboard creation ready'); break
+                  case '2': setShowCreateWorksheet(true); toast.success('Worksheet creation ready'); break
+                  case '3': setShowScheduleDialog(true); toast.success('Report scheduler ready'); break
+                  case '4': handleExportData(); break
+                }
+              }
+            }))}
             variant="grid"
           />
         </div>

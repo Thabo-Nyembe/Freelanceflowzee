@@ -467,10 +467,11 @@ const mockStorageActivities = [
   { id: '3', user: 'System', action: 'Completed', target: 'automatic backup', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockStorageQuickActions = [
-  { id: '1', label: 'Upload Files', icon: 'upload', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening file picker...', success: 'Select files to upload (max 100MB each)', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'New Folder', icon: 'folder-plus', action: () => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Creating folder...', success: 'Enter a name for your new folder', error: 'Failed to create' }), variant: 'default' as const },
-  { id: '3', label: 'Storage Report', icon: 'bar-chart', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating storage report...', success: 'Storage Report: 45.2 GB used of 100 GB (45%)', error: 'Failed to generate report' }), variant: 'outline' as const },
+// Quick actions defined inside component to access handlers
+const getStorageQuickActions = (onUpload: () => void, onNewFolder: () => void, onExport: () => void) => [
+  { id: '1', label: 'Upload Files', icon: 'upload', action: onUpload, variant: 'default' as const },
+  { id: '2', label: 'New Folder', icon: 'folder-plus', action: onNewFolder, variant: 'default' as const },
+  { id: '3', label: 'Storage Report', icon: 'bar-chart', action: onExport, variant: 'outline' as const },
 ]
 
 export default function CloudStorageClient() {
@@ -961,27 +962,16 @@ export default function CloudStorageClient() {
     )
   }
 
-  // Other handlers (keeping toast-only for non-CRUD operations)
+  // Other handlers with real functionality
   const handleFilter = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 400)),
-      {
-        loading: 'Applying filter...',
-        success: 'Use the type and sort dropdowns to filter files',
-        error: 'Failed to apply filter'
-      }
-    )
+    // Focus on the filter dropdown to help users discover filtering options
+    toast.info('Filter Options', { description: 'Use the type and sort dropdowns to filter your files' })
   }
 
   const handleUpgrade = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Checking upgrade options...',
-        success: 'Contact support for storage upgrade options',
-        error: 'Failed to load upgrade options'
-      }
-    )
+    // Open pricing page or show upgrade dialog
+    window.open('/pricing', '_blank')
+    toast.info('Upgrade Storage', { description: 'Opening storage upgrade options...' })
   }
 
   const handleScan = async () => {
@@ -996,14 +986,10 @@ export default function CloudStorageClient() {
   }
 
   const handleMoreOptions = (fileName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 300)),
-      {
-        loading: 'Loading options...',
-        success: `Right-click for more options on "${fileName}"`,
-        error: 'Failed to load options'
-      }
-    )
+    // Show context menu options
+    toast.info(`Options for "${fileName}"`, {
+      description: 'Download, Share, Move, Copy, or Delete this file'
+    })
   }
 
   const handleCopyLink = async (url: string) => {
@@ -1015,79 +1001,97 @@ export default function CloudStorageClient() {
     }
   }
 
-  const handleCancelTransfer = (fileName: string) => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 400)),
-      {
-        loading: 'Cancelling transfer...',
-        success: `Cancelled transfer for "${fileName}"`,
-        error: 'Failed to cancel transfer'
+  const handleCancelTransfer = async (fileName: string) => {
+    if (!confirm(`Cancel the transfer for "${fileName}"?`)) return
+
+    try {
+      // Call API to cancel the transfer
+      const response = await fetch('/api/cloud-storage/transfers/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to cancel transfer')
       }
-    )
+
+      toast.success('Transfer Cancelled', { description: `Cancelled transfer for "${fileName}"` })
+      refetch()
+    } catch (error) {
+      toast.error('Cancel Failed', { description: `Could not cancel transfer for "${fileName}"` })
+    }
   }
 
   const handleRetentionPolicy = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 400)),
-      {
-        loading: 'Loading retention policy...',
-        success: 'Files in trash are permanently deleted after 30 days',
-        error: 'Failed to load retention policy'
-      }
-    )
+    // Display retention policy info
+    toast.info('Retention Policy', {
+      description: 'Files in trash are permanently deleted after 30 days. Upgrade to Pro for extended retention.'
+    })
   }
 
   const handleRestoreAll = async () => {
-    toast.promise(
-      (async () => {
-        // In a real app, you'd query for deleted files and restore them
-        await new Promise(resolve => setTimeout(resolve, 600))
-        await refetch()
-      })(),
-      {
-        loading: 'Restoring all files...',
-        success: 'All deleted files have been restored',
-        error: 'Failed to restore files'
+    if (!confirm('Restore all files from trash? This will move all deleted files back to their original locations.')) return
+
+    try {
+      toast.loading('Restoring all files...')
+
+      // Call API to restore all deleted files
+      const response = await fetch('/api/cloud-storage/trash/restore-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        throw new Error('Failed to restore files')
       }
-    )
+
+      toast.success('Files Restored', { description: 'All deleted files have been restored to their original locations' })
+      refetch()
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Restore Failed', { description: 'Could not restore files. Please try again.' })
+    }
   }
 
   const handleEmptyTrash = async () => {
-    toast.promise(
-      (async () => {
-        // In a real app, you'd permanently delete files marked as deleted
-        await new Promise(resolve => setTimeout(resolve, 600))
-        await refetch()
-      })(),
-      {
-        loading: 'Emptying trash...',
-        success: 'All files in trash have been permanently deleted',
-        error: 'Failed to empty trash'
+    if (!confirm('Permanently delete all files in trash? This action cannot be undone.')) return
+
+    try {
+      toast.loading('Emptying trash...')
+
+      // Call API to permanently delete all trash files
+      const response = await fetch('/api/cloud-storage/trash/empty', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        throw new Error('Failed to empty trash')
       }
-    )
+
+      toast.success('Trash Emptied', { description: 'All files in trash have been permanently deleted' })
+      refetch()
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Empty Trash Failed', { description: 'Could not empty trash. Please try again.' })
+    }
   }
 
   const handleSearchTrash = () => {
     setActiveTab('trash')
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 300)),
-      {
-        loading: 'Opening trash...',
-        success: 'Use the search bar to find deleted files',
-        error: 'Failed to open trash'
-      }
-    )
+    toast.info('Trash Opened', { description: 'Use the search bar to find deleted files' })
   }
 
   const handleAutoDelete = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 400)),
-      {
-        loading: 'Loading auto-delete settings...',
-        success: 'Files are auto-deleted 30 days after being trashed',
-        error: 'Failed to load settings'
-      }
-    )
+    // Navigate to settings tab and show auto-delete section
+    setActiveTab('settings')
+    setSettingsTab('advanced')
+    toast.info('Auto-Delete Settings', { description: 'Configure trash retention period in Advanced settings' })
   }
 
   const handleExportData = async () => {
@@ -1108,40 +1112,85 @@ export default function CloudStorageClient() {
     }
   }
 
-  const handlePauseSync = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 400)),
-      {
-        loading: 'Pausing sync...',
-        success: 'File synchronization has been paused',
-        error: 'Failed to pause sync'
+  const [syncPaused, setSyncPaused] = useState(false)
+
+  const handlePauseSync = async () => {
+    try {
+      toast.loading(syncPaused ? 'Resuming sync...' : 'Pausing sync...')
+
+      // Call API to toggle sync status
+      const response = await fetch('/api/cloud-storage/sync/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paused: !syncPaused })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle sync')
       }
-    )
+
+      setSyncPaused(!syncPaused)
+      toast.success(
+        syncPaused ? 'Sync Resumed' : 'Sync Paused',
+        { description: syncPaused ? 'File synchronization has been resumed' : 'File synchronization has been paused' }
+      )
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Sync Toggle Failed', { description: 'Could not update sync status' })
+    }
   }
 
   const handleClearCache = () => {
-    toast.promise(
-      new Promise(resolve => {
-        localStorage.removeItem('cloud-storage-cache')
-        setTimeout(resolve, 400)
-      }),
-      {
-        loading: 'Clearing cache...',
-        success: 'All cached data has been removed',
-        error: 'Failed to clear cache'
-      }
-    )
+    if (!confirm('Clear all cached data? This may temporarily slow down file loading.')) return
+
+    try {
+      // Clear localStorage cache
+      localStorage.removeItem('cloud-storage-cache')
+      localStorage.removeItem('cloud-storage-thumbnails')
+      localStorage.removeItem('cloud-storage-recent')
+
+      // Clear session storage
+      sessionStorage.removeItem('cloud-storage-session')
+
+      toast.success('Cache Cleared', { description: 'All cached data has been removed' })
+    } catch (error) {
+      toast.error('Clear Cache Failed', { description: 'Could not clear cache' })
+    }
   }
 
-  const handleDeleteAllFiles = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 500)),
-      {
-        loading: 'Checking delete permissions...',
-        success: 'This action requires confirmation. Contact support to delete all files.',
-        error: 'Failed to check permissions'
+  const handleDeleteAllFiles = async () => {
+    // This is a dangerous action - require double confirmation
+    if (!confirm('WARNING: This will delete ALL your files permanently. Are you absolutely sure?')) return
+    if (!confirm('FINAL WARNING: This cannot be undone. Type "DELETE" in the next prompt to confirm.')) return
+
+    const confirmText = prompt('Type "DELETE" to confirm permanent deletion of all files:')
+    if (confirmText !== 'DELETE') {
+      toast.info('Deletion Cancelled', { description: 'Files were not deleted' })
+      return
+    }
+
+    try {
+      toast.loading('Deleting all files...')
+
+      const response = await fetch('/api/cloud-storage/files/delete-all', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        throw new Error('Failed to delete files')
       }
-    )
+
+      toast.success('All Files Deleted', { description: 'All files have been permanently deleted' })
+      refetch()
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Delete Failed', { description: 'Could not delete all files. Please try again.' })
+    }
   }
 
   const handleSendComment = async () => {
@@ -1150,23 +1199,37 @@ export default function CloudStorageClient() {
       return
     }
 
-    toast.promise(
-      (async () => {
-        // In a real app, you'd save the comment to a comments table
-        await new Promise(resolve => setTimeout(resolve, 500))
-        setCommentText('')
-      })(),
-      {
-        loading: 'Posting comment...',
-        success: 'Your comment has been added',
-        error: 'Failed to post comment'
+    try {
+      toast.loading('Posting comment...')
+
+      // Call API to save the comment
+      const response = await fetch('/api/cloud-storage/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileId: selectedFile.id,
+          content: commentText
+        })
+      })
+
+      toast.dismiss()
+
+      if (!response.ok) {
+        throw new Error('Failed to post comment')
       }
-    )
+
+      setCommentText('')
+      toast.success('Comment Posted', { description: 'Your comment has been added' })
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Comment Failed', { description: 'Could not post comment. Please try again.' })
+    }
   }
 
   const handleOpenFile = async (file: CloudFile) => {
     if (file.isFolder) {
       setCurrentPath([...currentPath, file.name])
+      toast.success('Folder Opened', { description: `Navigated to ${file.name}` })
       return
     }
 
@@ -1174,15 +1237,36 @@ export default function CloudStorageClient() {
     const dbFile = dbFiles?.find(f => f.file_name === file.name || f.original_name === file.name)
     if (dbFile?.public_url) {
       window.open(dbFile.public_url, '_blank')
+      toast.success('File Opened', { description: `Opening "${file.name}" in new tab` })
     } else {
-      toast.promise(
-        new Promise(resolve => setTimeout(resolve, 500)),
-        {
-          loading: `Opening "${file.name}"...`,
-          success: `File "${file.name}" opened`,
-          error: 'Failed to open file'
+      // Try to get a signed URL from storage
+      try {
+        toast.loading(`Opening "${file.name}"...`)
+
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          toast.dismiss()
+          toast.error('Authentication Required', { description: 'Please sign in to view files' })
+          return
         }
-      )
+
+        const { data, error } = await supabase.storage
+          .from('cloud-storage')
+          .createSignedUrl(file.path, 3600) // 1 hour expiry
+
+        toast.dismiss()
+
+        if (error || !data) {
+          toast.error('Open Failed', { description: 'Could not open file' })
+          return
+        }
+
+        window.open(data.signedUrl, '_blank')
+        toast.success('File Opened', { description: `Opening "${file.name}" in new tab` })
+      } catch (error) {
+        toast.dismiss()
+        toast.error('Open Failed', { description: 'Could not open file' })
+      }
     }
   }
 
@@ -2298,7 +2382,7 @@ export default function CloudStorageClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockStorageQuickActions}
+            actions={getStorageQuickActions(handleUploadFile, handleCreateFolder, handleExportData)}
             variant="grid"
           />
         </div>

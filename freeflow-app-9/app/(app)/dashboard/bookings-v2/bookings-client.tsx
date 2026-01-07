@@ -93,11 +93,7 @@ const mockBookingsActivities = [
   { id: '3', user: 'System', action: 'Sent', target: 'reminder to 12 clients', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockBookingsQuickActions = [
-  { id: '1', label: 'New Booking', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening booking form...', success: 'Select service, time, and client details', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'Block Time', icon: 'clock', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening time blocker...', success: 'Block off unavailable hours on your calendar', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '3', label: 'View Calendar', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading calendar...', success: 'Weekly booking calendar displayed', error: 'Failed to load calendar' }), variant: 'outline' as const },
-]
+// Quick actions are defined inside the component to access state setters
 
 export default function BookingsClient({ initialBookings }: { initialBookings: Booking[] }) {
   const [bookingTypeFilter, setBookingTypeFilter] = useState<BookingType | 'all'>('all')
@@ -340,6 +336,116 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
       toast.error('Error', { description: error.message || 'Failed to delete booking' })
     }
   }
+
+  // Send confirmation email handler
+  const handleSendConfirmation = async (booking: Booking) => {
+    toast.promise(
+      (async () => {
+        const response = await fetch(`/api/bookings/${booking.id}/confirm`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: booking.customer_email })
+        })
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message || 'Failed to send confirmation')
+        }
+        return response.json()
+      })(),
+      {
+        loading: 'Sending confirmation email...',
+        success: `Confirmation sent to ${booking.customer_email || 'client'}`,
+        error: (err) => err.message || 'Failed to send confirmation'
+      }
+    )
+  }
+
+  // Send reminder handler
+  const handleSendReminder = async (booking: Booking) => {
+    toast.promise(
+      (async () => {
+        const response = await fetch(`/api/bookings/${booking.id}/reminder`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: booking.customer_email })
+        })
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message || 'Failed to send reminder')
+        }
+        await updateBooking(booking.id, { reminder_sent: true })
+        return response.json()
+      })(),
+      {
+        loading: 'Sending reminder...',
+        success: `Reminder sent to ${booking.customer_email || 'client'}`,
+        error: (err) => err.message || 'Failed to send reminder'
+      }
+    )
+  }
+
+  // Export bookings to CSV
+  const handleExportCSV = async () => {
+    toast.promise(
+      (async () => {
+        // Build CSV content from bookings
+        const headers = ['Booking Number', 'Title', 'Customer Name', 'Customer Email', 'Date', 'Time', 'Duration (min)', 'Status', 'Payment Status', 'Price', 'Paid Amount', 'Balance Due']
+        const rows = filteredBookings.map(booking => [
+          booking.booking_number || '',
+          booking.title,
+          booking.customer_name || '',
+          booking.customer_email || '',
+          new Date(booking.start_time).toLocaleDateString(),
+          new Date(booking.start_time).toLocaleTimeString(),
+          booking.duration_minutes.toString(),
+          booking.status,
+          booking.payment_status,
+          booking.price.toString(),
+          booking.paid_amount.toString(),
+          booking.balance_due.toString()
+        ])
+
+        const csvContent = [headers, ...rows]
+          .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+          .join('\n')
+
+        // Create and download the file
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `bookings-export-${new Date().toISOString().split('T')[0]}.csv`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+
+        return { exported: filteredBookings.length }
+      })(),
+      {
+        loading: 'Generating CSV export...',
+        success: (result) => `Exported ${result.exported} bookings to CSV`,
+        error: 'Failed to export bookings'
+      }
+    )
+  }
+
+  // Open meeting link handler
+  const handleOpenMeeting = (booking: Booking) => {
+    if (booking.meeting_url) {
+      window.open(booking.meeting_url, '_blank')
+      toast.success('Meeting opened', { description: 'Video meeting link opened in new tab' })
+    } else {
+      toast.error('No meeting link', { description: 'This booking does not have a video meeting link' })
+    }
+  }
+
+  // Quick actions for toolbar
+  const bookingsQuickActions = [
+    { id: '1', label: 'New Booking', icon: 'plus', action: () => setShowNewBooking(true), variant: 'default' as const },
+    { id: '2', label: 'Block Time', icon: 'clock', action: () => toast.info('Time Blocker', { description: 'Select unavailable hours on your calendar to block' }), variant: 'default' as const },
+    { id: '3', label: 'View Calendar', icon: 'calendar', action: () => setView('calendar'), variant: 'outline' as const },
+  ]
 
   // Get days of the week
   const getWeekDays = () => {
@@ -1311,7 +1417,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                                 <div className="font-medium text-gray-900 dark:text-white">Export All Data</div>
                                 <p className="text-sm text-gray-500">Download complete booking history</p>
                               </div>
-                              <Button variant="outline" className="gap-2">
+                              <Button variant="outline" className="gap-2" onClick={handleExportCSV}>
                                 <Download className="w-4 h-4" />
                                 Export
                               </Button>
@@ -2053,24 +2159,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                     </button>
                   )}
                   <button
-                    onClick={() => {
-                      if (selectedBooking.meeting_url) {
-                        toast.promise(
-                          new Promise(resolve => {
-                            setTimeout(() => {
-                              window.open(selectedBooking.meeting_url, '_blank')
-                              resolve(true)
-                            }, 600)
-                          }),
-                          { loading: 'Opening meeting link...', success: 'Meeting link opened', error: 'Failed to open meeting' }
-                        )
-                      } else {
-                        toast.promise(
-                          new Promise((_, reject) => setTimeout(() => reject(new Error('No link')), 400)),
-                          { loading: 'Checking meeting link...', success: 'Meeting found', error: 'This booking does not have a video meeting link' }
-                        )
-                      }
-                    }}
+                    onClick={() => handleOpenMeeting(selectedBooking)}
                     className="w-full py-3 px-4 bg-sky-600 text-white rounded-lg hover:bg-sky-700 flex items-center justify-center gap-2"
                   >
                     <Video className="h-4 w-4" />
@@ -2084,12 +2173,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
                     Reschedule
                   </button>
                   <button
-                    onClick={() => {
-                      toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 800)),
-                        { loading: 'Sending reminder...', success: `Reminder sent to ${selectedBooking.customer_email || 'client'}`, error: 'Failed to send reminder' }
-                      )
-                    }}
+                    onClick={() => handleSendReminder(selectedBooking)}
                     className="w-full py-3 px-4 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
                   >
                     <Mail className="h-4 w-4" />
@@ -2192,7 +2276,7 @@ export default function BookingsClient({ initialBookings }: { initialBookings: B
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockBookingsQuickActions}
+            actions={bookingsQuickActions}
             variant="grid"
           />
         </div>

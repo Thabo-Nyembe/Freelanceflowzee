@@ -401,11 +401,7 @@ export default function SettingsPage() {
       clientName: KAZI_CLIENT_DATA.clientInfo.name
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Opening password change dialog...',
-      success: 'Verification email sent! Check your inbox to continue.',
-      error: 'Failed to initiate password change. Please try again.'
-    })
+    toast.success('Verification email sent! Check your inbox to continue.')
   }
 
   // ============================================================================
@@ -552,11 +548,7 @@ export default function SettingsPage() {
                 setNotificationSettings(
                   notificationSettings.map(s => ({ ...s, enabled: !allEnabled }))
                 )
-                toast.promise(new Promise(r => setTimeout(r, 500)), {
-                  loading: allEnabled ? 'Disabling all notifications...' : 'Enabling all notifications...',
-                  success: allEnabled ? 'All notifications disabled!' : 'All notifications enabled!',
-                  error: 'Failed to update notification settings.'
-                })
+                toast.success(allEnabled ? 'All notifications disabled!' : 'All notifications enabled!')
               }}
             >
               {notificationSettings.every(s => s.enabled) ? 'Disable All' : 'Enable All'}
@@ -750,11 +742,7 @@ export default function SettingsPage() {
                 variant="outline"
                 className="mt-4"
                 onClick={() => {
-                  toast.promise(new Promise(r => setTimeout(r, 800)), {
-                    loading: 'Opening privacy policy...',
-                    success: 'Privacy policy opened in new tab',
-                    error: 'Failed to open privacy policy'
-                  })
+                  toast.success('Privacy policy opened in new tab')
                   window.open('/privacy-policy', '_blank')
                 }}
               >
@@ -862,11 +850,7 @@ export default function SettingsPage() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                      loading: 'Processing deactivation request...',
-                      success: 'Deactivation email sent. Check your inbox to confirm.',
-                      error: 'Failed to process deactivation request'
-                    })
+                    toast.success('Deactivation email sent. Check your inbox to confirm.')
                   }}
                 >
                   Deactivate Account
@@ -882,11 +866,7 @@ export default function SettingsPage() {
                   variant="outline"
                   className="border-red-300 text-red-600 hover:bg-red-50"
                   onClick={() => {
-                    toast.promise(new Promise(r => setTimeout(r, 2000)), {
-                      loading: 'Preparing account deletion verification...',
-                      success: 'Verification email sent. Confirm deletion within 24 hours.',
-                      error: 'Failed to initiate account deletion'
-                    })
+                    toast.success('Verification email sent. Confirm deletion within 24 hours.')
                   }}
                 >
                   Delete Account

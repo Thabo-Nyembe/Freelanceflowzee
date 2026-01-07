@@ -545,11 +545,7 @@ export default function MarketingPage() {
     logger.info('Opening campaign analytics', { campaignId: campaign.id })
     setSelectedCampaign(campaign)
     setShowCampaignModal(true)
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Loading campaign analytics...',
-      success: `Viewing detailed analytics for "${campaign.name}"`,
-      error: 'Failed to load analytics'
-    })
+    toast.success('Campaign Analytics', { description: `Viewing "${campaign.name}"` })
     announce('Campaign analytics opened', 'polite')
   }
 

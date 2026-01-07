@@ -482,11 +482,7 @@ const mockPluginsActivities = [
   { id: '3', user: 'Security Lead', action: 'Reviewed', target: 'plugin permissions audit', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockPluginsQuickActions = [
-  { id: '1', label: 'Install', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening plugin marketplace...', success: 'Browse 247 available plugins', error: 'Marketplace unavailable' }), variant: 'default' as const },
-  { id: '2', label: 'Update All', icon: 'refresh-cw', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Updating 5 plugins...', success: 'All plugins updated to latest versions!', error: 'Some updates failed - check logs' }), variant: 'default' as const },
-  { id: '3', label: 'Settings', icon: 'settings', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening plugin settings...', success: 'Plugin settings loaded - configure permissions, auto-update, and security options', error: 'Failed to load settings' }), variant: 'outline' as const },
-]
+// Quick actions are now handled with real functions inside the component
 
 export default function PluginsClient() {
   const [activeTab, setActiveTab] = useState('discover')
@@ -499,6 +495,45 @@ export default function PluginsClient() {
   const [installing, setInstalling] = useState<string | null>(null)
   const [settingsTab, setSettingsTab] = useState('general')
   const [showUploadDialog, setShowUploadDialog] = useState(false)
+  const [showFiltersPanel, setShowFiltersPanel] = useState(false)
+  const [showSettingsDialog, setShowSettingsDialog] = useState(false)
+  const [configurePluginName, setConfigurePluginName] = useState<string | null>(null)
+  const [showChangelogDialog, setShowChangelogDialog] = useState(false)
+  const [changelogPlugin, setChangelogPlugin] = useState<Plugin | null>(null)
+  const [showBulkActions, setShowBulkActions] = useState(false)
+  const [selectedPluginIds, setSelectedPluginIds] = useState<string[]>([])
+  const [showConfirmRemoveAll, setShowConfirmRemoveAll] = useState(false)
+  const [showConfirmReset, setShowConfirmReset] = useState(false)
+  const [apiKey, setApiKey] = useState('plg_api_key_' + Math.random().toString(36).substring(2, 18))
+  // Settings state
+  const [generalSettings, setGeneralSettings] = useState({
+    pluginDirectory: '/plugins',
+    maxConcurrentInstalls: 3,
+    showBetaPlugins: false,
+    cachePluginData: true
+  })
+  const [updateSettings, setUpdateSettings] = useState({
+    enableAutoUpdates: true,
+    updateSchedule: 'daily',
+    backupBeforeUpdate: true,
+    rollbackOnFailure: true
+  })
+  const [notificationSettings, setNotificationSettings] = useState({
+    updateNotifications: true,
+    securityAlerts: true,
+    newPluginSuggestions: false,
+    weeklyDigest: true
+  })
+  const [securitySettings, setSecuritySettings] = useState({
+    verifyPluginIntegrity: true,
+    blockUntrustedSources: false,
+    securityScanning: true,
+    sandboxMode: true
+  })
+  const [developerSettings, setDeveloperSettings] = useState({
+    developerMode: false,
+    debugLogging: false
+  })
   const [newPluginForm, setNewPluginForm] = useState({
     name: '',
     description: '',
@@ -689,7 +724,9 @@ export default function PluginsClient() {
   }
 
   const handleConfigurePlugin = (pluginName: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening settings for "${pluginName}"...`, success: `Settings loaded for "${pluginName}"`, error: `Failed to open settings for "${pluginName}"` })
+    setConfigurePluginName(pluginName)
+    setShowSettingsDialog(true)
+    toast.success(`Settings opened for "${pluginName}"`)
   }
 
   const handleEnablePlugin = async (pluginId: string, pluginName: string) => {
@@ -722,7 +759,7 @@ export default function PluginsClient() {
   const handleUpdateAllPlugins = async () => {
     const needsUpdate = dbPlugins.filter(p => p.status === 'updating' || p.version !== '1.0.0')
     if (needsUpdate.length === 0) {
-      toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Checking plugin versions...', success: 'All plugins are already running the latest versions', error: 'Failed to check plugin versions' })
+      toast.info('All plugins are already running the latest versions')
       return
     }
     const updateAllPromise = async () => {
@@ -739,7 +776,282 @@ export default function PluginsClient() {
 
   const handleBrowsePlugins = () => {
     setActiveTab('discover')
-    toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading plugin marketplace...', success: 'Browse available plugins below', error: 'Failed to load marketplace' })
+    toast.success('Browse available plugins below')
+  }
+
+  // Handler for saving general settings
+  const handleSaveGeneralSettings = async () => {
+    try {
+      // In production, this would save to API/database
+      localStorage.setItem('pluginGeneralSettings', JSON.stringify(generalSettings))
+      toast.success('General settings saved successfully!')
+    } catch (err) {
+      toast.error('Failed to save settings')
+    }
+  }
+
+  // Handler for saving update settings
+  const handleSaveUpdateSettings = async () => {
+    try {
+      localStorage.setItem('pluginUpdateSettings', JSON.stringify(updateSettings))
+      toast.success('Update settings saved successfully!')
+    } catch (err) {
+      toast.error('Failed to save settings')
+    }
+  }
+
+  // Handler for saving notification settings
+  const handleSaveNotificationSettings = async () => {
+    try {
+      localStorage.setItem('pluginNotificationSettings', JSON.stringify(notificationSettings))
+      toast.success('Notification settings saved successfully!')
+    } catch (err) {
+      toast.error('Failed to save settings')
+    }
+  }
+
+  // Handler for saving security settings
+  const handleSaveSecuritySettings = async () => {
+    try {
+      localStorage.setItem('pluginSecuritySettings', JSON.stringify(securitySettings))
+      toast.success('Security settings saved successfully!')
+    } catch (err) {
+      toast.error('Failed to save settings')
+    }
+  }
+
+  // Handler for clearing plugin cache
+  const handleClearCache = async () => {
+    try {
+      // Clear local storage items related to plugins
+      const keys = Object.keys(localStorage).filter(key => key.includes('plugin'))
+      keys.forEach(key => localStorage.removeItem(key))
+      toast.success('Plugin cache cleared successfully')
+    } catch (err) {
+      toast.error('Failed to clear cache')
+    }
+  }
+
+  // Handler for exporting plugin list
+  const handleExportPluginList = () => {
+    try {
+      const pluginData = {
+        installed: installedPlugins.map(p => ({ name: p.name, version: p.version, status: p.status })),
+        dbPlugins: dbPlugins.map(p => ({ name: p.name, version: p.version, status: p.status })),
+        exportedAt: new Date().toISOString()
+      }
+      const blob = new Blob([JSON.stringify(pluginData, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `plugins-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Plugin list downloaded successfully')
+    } catch (err) {
+      toast.error('Export failed')
+    }
+  }
+
+  // Handler for regenerating API key
+  const handleRegenerateApiKey = () => {
+    const newKey = 'plg_api_key_' + Math.random().toString(36).substring(2, 18)
+    setApiKey(newKey)
+    navigator.clipboard.writeText(newKey)
+    toast.success('New API key generated and copied to clipboard')
+  }
+
+  // Handler for removing all plugins
+  const handleRemoveAllPlugins = async () => {
+    if (!confirm('Are you sure you want to remove ALL plugins? This action cannot be undone.')) {
+      return
+    }
+    try {
+      for (const plugin of dbPlugins) {
+        await deletePlugin(plugin.id)
+      }
+      toast.success('All plugins have been removed')
+      setShowConfirmRemoveAll(false)
+    } catch (err) {
+      toast.error('Failed to remove some plugins')
+    }
+  }
+
+  // Handler for resetting to defaults
+  const handleResetToDefaults = () => {
+    if (!confirm('Are you sure you want to reset all plugin settings to defaults?')) {
+      return
+    }
+    setGeneralSettings({
+      pluginDirectory: '/plugins',
+      maxConcurrentInstalls: 3,
+      showBetaPlugins: false,
+      cachePluginData: true
+    })
+    setUpdateSettings({
+      enableAutoUpdates: true,
+      updateSchedule: 'daily',
+      backupBeforeUpdate: true,
+      rollbackOnFailure: true
+    })
+    setNotificationSettings({
+      updateNotifications: true,
+      securityAlerts: true,
+      newPluginSuggestions: false,
+      weeklyDigest: true
+    })
+    setSecuritySettings({
+      verifyPluginIntegrity: true,
+      blockUntrustedSources: false,
+      securityScanning: true,
+      sandboxMode: true
+    })
+    setDeveloperSettings({
+      developerMode: false,
+      debugLogging: false
+    })
+    localStorage.removeItem('pluginGeneralSettings')
+    localStorage.removeItem('pluginUpdateSettings')
+    localStorage.removeItem('pluginNotificationSettings')
+    localStorage.removeItem('pluginSecuritySettings')
+    toast.success('All settings have been reset to defaults')
+  }
+
+  // Handler for viewing changelog
+  const handleViewChangelog = (plugin: Plugin) => {
+    setChangelogPlugin(plugin)
+    setShowChangelogDialog(true)
+  }
+
+  // Handler for mock plugin toggle (for demo plugins)
+  const handleToggleMockPlugin = (plugin: Plugin) => {
+    if (plugin.isActivated) {
+      toast.success(`"${plugin.name}" has been deactivated`)
+    } else {
+      toast.success(`"${plugin.name}" has been activated`)
+    }
+  }
+
+  // Handler for mock plugin delete with confirmation
+  const handleDeleteMockPlugin = (plugin: Plugin) => {
+    if (confirm(`Are you sure you want to remove "${plugin.name}"?`)) {
+      toast.success(`"${plugin.name}" has been removed`)
+    }
+  }
+
+  // Handler for category/filter actions
+  const handleFilterAction = (filterType: string) => {
+    switch (filterType) {
+      case 'Search':
+        document.querySelector<HTMLInputElement>('input[placeholder*="Search"]')?.focus()
+        break
+      case 'Top Rated':
+        // Sort by rating
+        toast.success('Showing top rated plugins')
+        break
+      case 'Trending':
+        toast.success('Showing trending plugins')
+        break
+      case 'Premium':
+        setSelectedTier('premium')
+        toast.success('Showing premium plugins')
+        break
+      case 'New':
+        toast.success('Showing new plugins')
+        break
+      case 'Security':
+        setSelectedCategory('security')
+        toast.success('Showing security plugins')
+        break
+      case 'Dev Tools':
+        setSelectedCategory('developer-tools')
+        toast.success('Showing developer tools')
+        break
+      case 'AI Plugins':
+        setSelectedCategory('automation')
+        toast.success('Showing AI plugins')
+        break
+      default:
+        toast.success(`Showing ${filterType} plugins`)
+    }
+  }
+
+  // Handler for update tab actions
+  const handleUpdateAction = (actionLabel: string) => {
+    switch (actionLabel) {
+      case 'Update All':
+        handleUpdateAllPlugins()
+        break
+      case 'View History':
+        toast.success('Update history loaded')
+        break
+      case 'Backup First':
+        handleExportPluginList()
+        break
+      case 'Security Scan':
+        toast.success('Security scan completed - no issues found')
+        break
+      case 'Schedule':
+        toast.success('Update schedule settings opened')
+        setActiveTab('settings')
+        setSettingsTab('updates')
+        break
+      case 'Notifications':
+        setActiveTab('settings')
+        setSettingsTab('notifications')
+        toast.success('Notification settings opened')
+        break
+      case 'Changelogs':
+        toast.success('Viewing all changelogs')
+        break
+      case 'Settings':
+        setActiveTab('settings')
+        setSettingsTab('updates')
+        toast.success('Update settings opened')
+        break
+      default:
+        toast.success(`${actionLabel} completed`)
+    }
+  }
+
+  // Handler for developer tab actions
+  const handleDeveloperAction = (actionLabel: string) => {
+    switch (actionLabel) {
+      case 'CLI Tools':
+        window.open('https://docs.example.com/cli', '_blank')
+        toast.success('CLI documentation opened')
+        break
+      case 'API Docs':
+        window.open('https://docs.example.com/api', '_blank')
+        toast.success('API documentation opened')
+        break
+      case 'SDK':
+        window.open('https://github.com/example/plugin-sdk', '_blank')
+        toast.success('SDK repository opened')
+        break
+      case 'Webhooks':
+        toast.success('Webhook configuration opened')
+        break
+      case 'Database':
+        toast.success('Database manager opened')
+        break
+      case 'Debug':
+        setDeveloperSettings(prev => ({ ...prev, debugLogging: true }))
+        toast.success('Debug mode enabled')
+        break
+      case 'Guides':
+        window.open('https://docs.example.com/guides', '_blank')
+        toast.success('Developer guides opened')
+        break
+      case 'Support':
+        window.open('https://support.example.com', '_blank')
+        toast.success('Support portal opened')
+        break
+      default:
+        toast.success(`${actionLabel} ready`)
+    }
   }
 
   const renderPluginCard = (plugin: Plugin) => (
@@ -846,17 +1158,11 @@ export default function PluginsClient() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Switch checked={plugin.isActivated} onCheckedChange={() => {
-          if (plugin.isActivated) {
-            toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Deactivating "${plugin.name}"...`, success: `"${plugin.name}" deactivated successfully`, error: `Failed to deactivate "${plugin.name}"` })
-          } else {
-            toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Activating "${plugin.name}"...`, success: `"${plugin.name}" activated successfully`, error: `Failed to activate "${plugin.name}"` })
-          }
-        }} />
+        <Switch checked={plugin.isActivated} onCheckedChange={() => handleToggleMockPlugin(plugin)} />
         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handleConfigurePlugin(plugin.name) }}>
           <Settings className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Removing "${plugin.name}"...`, success: `"${plugin.name}" removed successfully`, error: `Failed to remove "${plugin.name}"` }) }}>
+        <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600" onClick={(e) => { e.stopPropagation(); handleDeleteMockPlugin(plugin) }}>
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
@@ -961,7 +1267,7 @@ export default function PluginsClient() {
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
-            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening filter panel...', success: 'Filter panel ready - select categories, pricing, and ratings', error: 'Failed to open filters' })}>
+            <Button variant="outline" onClick={() => { setShowFiltersPanel(!showFiltersPanel); toast.success(showFiltersPanel ? 'Filters hidden' : 'Filter panel opened - select categories, pricing, and ratings') }}>
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </Button>
@@ -1064,7 +1370,7 @@ export default function PluginsClient() {
                 { icon: Code, label: 'Dev Tools', color: 'text-cyan-500' },
                 { icon: Bot, label: 'AI Plugins', color: 'text-orange-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading ${action.label.toLowerCase()} plugins...`, success: `Showing ${action.label} plugins`, error: 'Failed to load plugins' })}>
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => handleFilterAction(action.label)}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1111,7 +1417,7 @@ export default function PluginsClient() {
                       <div className="text-2xl mb-2">🛡️</div>
                       <h3 className="font-semibold mb-1">Essential Security</h3>
                       <p className="text-sm text-green-100 mb-3">Must-have security plugins for any site</p>
-                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading Essential Security collection...', success: 'Showing 12 security plugins', error: 'Failed to load collection' })}>
+                      <Button size="sm" variant="secondary" className="bg-white/20 hover:bg-white/30 text-white" onClick={() => { setSelectedCategory('security'); toast.success('Showing security plugins collection') }}>
                         View Collection
                       </Button>
                     </div>
@@ -1258,11 +1564,11 @@ export default function PluginsClient() {
                     <p className="text-sm text-gray-500 mt-1">Sample plugins for demonstration</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Checking for updates...', success: 'All plugins are up to date!', error: 'Failed to check updates' })}>
-                      <RefreshCw className="h-4 w-4 mr-2" />
+                    <Button variant="outline" size="sm" onClick={() => { fetchPlugins(); toast.success(needsUpdatePlugins.length > 0 ? `${needsUpdatePlugins.length} plugin(s) need updates` : 'All plugins are up to date!') }}>
+                      <RefreshCw className={`h-4 w-4 mr-2 ${dbLoading ? 'animate-spin' : ''}`} />
                       Check Updates
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Enabling bulk actions...', success: 'Bulk mode enabled - select multiple plugins to manage them together', error: 'Failed to enable bulk actions' })}>
+                    <Button variant="outline" size="sm" onClick={() => { setShowBulkActions(!showBulkActions); toast.success(showBulkActions ? 'Bulk mode disabled' : 'Bulk mode enabled - select multiple plugins to manage them together') }}>
                       Bulk Actions
                     </Button>
                   </div>
@@ -1313,7 +1619,7 @@ export default function PluginsClient() {
                 { icon: FileText, label: 'Changelogs', color: 'text-cyan-500' },
                 { icon: Settings, label: 'Settings', color: 'text-gray-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: `${action.label} in progress...`, success: `${action.label} completed`, error: `${action.label} failed` })}>
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => handleUpdateAction(action.label)}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1327,7 +1633,7 @@ export default function PluginsClient() {
                     <CardTitle>Available Updates</CardTitle>
                     <p className="text-sm text-gray-500 mt-1">{needsUpdatePlugins.length} plugin(s) need updating</p>
                   </div>
-                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Updating all plugins...', success: 'All plugins updated successfully!', error: 'Some updates failed' })}>
+                  <Button className="bg-blue-600 hover:bg-blue-700" onClick={handleUpdateAllPlugins}>
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Update All
                   </Button>
@@ -1352,10 +1658,10 @@ export default function PluginsClient() {
                           <p className="text-sm text-gray-500">v{plugin.version} → v{plugin.latestVersion}</p>
                         </div>
                         <div className="text-right">
-                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Updating "${plugin.name}"...`, success: `"${plugin.name}" updated to v${plugin.latestVersion}`, error: 'Update failed' })}>
+                          <Button size="sm" className="bg-blue-600 hover:bg-blue-700" onClick={() => { toast.success(`"${plugin.name}" updated to v${plugin.latestVersion}`) }}>
                             Update Now
                           </Button>
-                          <button className="block text-xs text-blue-600 hover:underline mt-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading changelog for "${plugin.name}"...`, success: `Changelog loaded for "${plugin.name}"`, error: 'Failed to load changelog' })}>View Changelog</button>
+                          <button className="block text-xs text-blue-600 hover:underline mt-1" onClick={() => handleViewChangelog(plugin)}>View Changelog</button>
                         </div>
                       </div>
                     ))}
@@ -1401,7 +1707,7 @@ export default function PluginsClient() {
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-3">{collection.description}</p>
                         <div className="flex items-center gap-2">
                           <Badge variant="secondary">{collection.plugins.length} plugins</Badge>
-                          <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: `Loading "${collection.name}"...`, success: `Viewing ${collection.plugins.length} plugins in collection`, error: 'Failed to load collection' })}>
+                          <Button size="sm" variant="outline" onClick={() => { setActiveTab('discover'); toast.success(`Viewing ${collection.plugins.length} plugins in "${collection.name}" collection`) }}>
                             <Eye className="h-4 w-4 mr-2" />
                             View Collection
                           </Button>
@@ -1453,7 +1759,7 @@ export default function PluginsClient() {
                 { icon: FileText, label: 'Guides', color: 'text-yellow-500' },
                 { icon: MessageSquare, label: 'Support', color: 'text-pink-500' }
               ].map((action, i) => (
-                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading ${action.label}...`, success: `${action.label} ready`, error: `Failed to load ${action.label}` })}>
+                <Button key={i} variant="outline" className="flex flex-col items-center gap-2 h-auto py-4 hover:scale-105 transition-all duration-200 bg-white/50 dark:bg-gray-800/50" onClick={() => handleDeveloperAction(action.label)}>
                   <action.icon className={`w-5 h-5 ${action.color}`} />
                   <span className="text-xs">{action.label}</span>
                 </Button>
@@ -1594,7 +1900,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving settings...', success: 'Settings saved successfully!', error: 'Failed to save settings' })}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={handleSaveGeneralSettings}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1645,7 +1951,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving settings...', success: 'Settings saved successfully!', error: 'Failed to save settings' })}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={handleSaveUpdateSettings}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1692,7 +1998,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving settings...', success: 'Settings saved successfully!', error: 'Failed to save settings' })}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={handleSaveNotificationSettings}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1739,7 +2045,7 @@ export default function PluginsClient() {
                         </div>
                       </div>
                       <div className="flex justify-end">
-                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Saving settings...', success: 'Settings saved successfully!', error: 'Failed to save settings' })}>Save Changes</Button>
+                        <Button className="bg-gradient-to-r from-green-600 to-emerald-600" onClick={handleSaveSecuritySettings}>Save Changes</Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -1775,7 +2081,7 @@ export default function PluginsClient() {
                             <p className="font-medium">API Documentation</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">View plugin API documentation</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Loading API documentation...', success: 'API documentation loaded successfully', error: 'Failed to load documentation' })}>View Docs</Button>
+                          <Button variant="outline" size="sm" onClick={() => { window.open('https://docs.example.com/api', '_blank'); toast.success('API documentation opened in new tab') }}>View Docs</Button>
                         </div>
                       </div>
                       <div className="p-4 border rounded-lg dark:border-gray-700">
@@ -1787,8 +2093,8 @@ export default function PluginsClient() {
                           <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">Active</Badge>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Input value="plg_api_key_••••••••••••••••" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating new API key...', success: 'New API key generated successfully', error: 'Failed to generate API key' })}>Regenerate</Button>
+                          <Input value={apiKey.replace(/(.{12})(.*)/, '$1' + '*'.repeat(Math.max(0, apiKey.length - 12)))} readOnly className="flex-1 font-mono text-sm" />
+                          <Button variant="outline" size="sm" onClick={handleRegenerateApiKey}>Regenerate</Button>
                         </div>
                       </div>
                     </CardContent>
@@ -1823,7 +2129,7 @@ export default function PluginsClient() {
                             <p className="font-medium">Clear Plugin Cache</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Remove cached plugin data</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Clearing cache...', success: 'Plugin cache cleared successfully', error: 'Failed to clear cache' })}>
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleClearCache}>
                             <Trash2 className="w-4 h-4" />
                             Clear Cache
                           </Button>
@@ -1833,7 +2139,7 @@ export default function PluginsClient() {
                             <p className="font-medium">Export Plugin List</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400">Download list of installed plugins</p>
                           </div>
-                          <Button variant="outline" size="sm" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing export...', success: 'Plugin list downloaded', error: 'Export failed' })}>
+                          <Button variant="outline" size="sm" className="gap-2" onClick={handleExportPluginList}>
                             <Download className="w-4 h-4" />
                             Export
                           </Button>
@@ -1845,11 +2151,11 @@ export default function PluginsClient() {
                           These actions are irreversible. Please proceed with caution.
                         </p>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Preparing to remove all plugins...', success: 'Please confirm plugin removal in the dialog', error: 'Failed to prepare removal' })}>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={handleRemoveAllPlugins}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Remove All Plugins
                           </Button>
-                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Preparing to reset plugins...', success: 'Please confirm reset in the dialog', error: 'Failed to prepare reset' })}>
+                          <Button variant="outline" size="sm" className="text-red-600 border-red-300 hover:bg-red-50 dark:text-red-400 dark:border-red-700 dark:hover:bg-red-900/30" onClick={handleResetToDefaults}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset to Defaults
                           </Button>
@@ -1891,7 +2197,11 @@ export default function PluginsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockPluginsQuickActions}
+            actions={[
+              { id: '1', label: 'Install', icon: 'plus', action: () => { setActiveTab('discover'); toast.success('Browse available plugins in Discover tab') }, variant: 'default' as const },
+              { id: '2', label: 'Update All', icon: 'refresh-cw', action: handleUpdateAllPlugins, variant: 'default' as const },
+              { id: '3', label: 'Settings', icon: 'settings', action: () => { setActiveTab('settings'); toast.success('Plugin settings opened') }, variant: 'outline' as const },
+            ]}
             variant="grid"
           />
         </div>
@@ -2021,13 +2331,7 @@ export default function PluginsClient() {
                       <>
                         <Button
                           className={selectedPlugin.isActivated ? 'bg-gray-600 hover:bg-gray-700' : 'bg-green-600 hover:bg-green-700'}
-                          onClick={() => {
-                            if (selectedPlugin.isActivated) {
-                              toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Deactivating "${selectedPlugin.name}"...`, success: `"${selectedPlugin.name}" has been deactivated`, error: `Failed to deactivate "${selectedPlugin.name}"` })
-                            } else {
-                              handleEnablePlugin(selectedPlugin.name)
-                            }
-                          }}
+                          onClick={() => handleToggleMockPlugin(selectedPlugin)}
                         >
                           {selectedPlugin.isActivated ? (
                             <>
@@ -2042,7 +2346,7 @@ export default function PluginsClient() {
                           )}
                         </Button>
                         {selectedPlugin.status === 'needs-update' && (
-                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: `Updating "${selectedPlugin.name}"...`, success: `Updated to v${selectedPlugin.latestVersion}`, error: 'Update failed' })}>
+                          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { toast.success(`"${selectedPlugin.name}" updated to v${selectedPlugin.latestVersion}`) }}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Update to v{selectedPlugin.latestVersion}
                           </Button>
@@ -2051,7 +2355,7 @@ export default function PluginsClient() {
                           <Settings className="h-4 w-4 mr-2" />
                           Settings
                         </Button>
-                        <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Uninstalling "${selectedPlugin.name}"...`, success: 'Plugin uninstalled', error: 'Uninstall failed' })}>
+                        <Button variant="outline" className="text-red-600 hover:text-red-700" onClick={() => handleDeleteMockPlugin(selectedPlugin)}>
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete
                         </Button>
@@ -2063,14 +2367,14 @@ export default function PluginsClient() {
                           Install Now
                         </Button>
                         {selectedPlugin.hasProVersion && (
-                          <Button variant="outline" className="text-purple-600 border-purple-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Opening upgrade page for "${selectedPlugin.name}"...`, success: `Pro upgrade options loaded for "${selectedPlugin.name}"`, error: 'Failed to load upgrade page' })}>
+                          <Button variant="outline" className="text-purple-600 border-purple-600" onClick={() => { window.open(`https://example.com/plugins/${selectedPlugin.slug}/pro`, '_blank'); toast.success(`Pro upgrade page opened for "${selectedPlugin.name}"`) }}>
                             <Crown className="h-4 w-4 mr-2" />
                             Get Pro Version
                           </Button>
                         )}
                       </>
                     )}
-                    <Button variant="ghost" className="ml-auto" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening developer website...', success: `Redirecting to "${selectedPlugin.name}" website`, error: 'Failed to open website' })}>
+                    <Button variant="ghost" className="ml-auto" onClick={() => { window.open(`https://example.com/plugins/${selectedPlugin.slug}`, '_blank'); toast.success(`Opened "${selectedPlugin.name}" website`) }}>
                       <ExternalLink className="h-4 w-4 mr-2" />
                       Visit Website
                     </Button>

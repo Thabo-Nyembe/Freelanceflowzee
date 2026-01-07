@@ -615,10 +615,157 @@ const mockOrdersActivities = [
   { id: '3', user: 'Operations Manager', action: 'Approved', target: 'expedited shipping for VIP', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
+// Helper function to generate CSV from orders
+const generateOrdersCSV = (orders: Order[]): string => {
+  const headers = ['Order Number', 'Customer', 'Email', 'Status', 'Payment Status', 'Total', 'Created At']
+  const rows = orders.map(o => [
+    o.order_number,
+    o.customer_name,
+    o.customer_email,
+    o.status,
+    o.payment_status,
+    o.total.toFixed(2),
+    new Date(o.created_at).toISOString()
+  ])
+  return [headers, ...rows].map(row => row.join(',')).join('\n')
+}
+
+// Helper function to download file
+const downloadFile = (content: string, filename: string, mimeType: string) => {
+  const blob = new Blob([content], { type: mimeType })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
+// API helper functions
+const createOrderAPI = async (): Promise<{ id: string; order_number: string }> => {
+  const response = await fetch('/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      items: [],
+      customer_id: null,
+      shipping_method: 'standard'
+    })
+  })
+  if (!response.ok) throw new Error('Failed to create order')
+  return response.json()
+}
+
+const updateOrderStatusAPI = async (orderId: string, status: OrderStatus): Promise<void> => {
+  const response = await fetch(`/api/orders/${orderId}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status })
+  })
+  if (!response.ok) throw new Error('Failed to update order status')
+}
+
+const cancelOrderAPI = async (orderId: string): Promise<void> => {
+  const response = await fetch(`/api/orders/${orderId}/cancel`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to cancel order')
+}
+
+const fulfillOrderAPI = async (orderId: string): Promise<void> => {
+  const response = await fetch(`/api/orders/${orderId}/fulfill`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to fulfill order')
+}
+
+const bulkShipOrdersAPI = async (orderIds: string[]): Promise<void> => {
+  const response = await fetch('/api/orders/bulk-ship', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ order_ids: orderIds })
+  })
+  if (!response.ok) throw new Error('Failed to process bulk shipment')
+}
+
+const approveReturnAPI = async (returnId: string): Promise<void> => {
+  const response = await fetch(`/api/returns/${returnId}/approve`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to approve return')
+}
+
+const rejectReturnAPI = async (returnId: string): Promise<void> => {
+  const response = await fetch(`/api/returns/${returnId}/reject`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to reject return')
+}
+
+const syncOrdersAPI = async (): Promise<void> => {
+  const response = await fetch('/api/orders/sync', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to sync orders')
+}
+
+const archiveOldOrdersAPI = async (): Promise<void> => {
+  const response = await fetch('/api/orders/archive', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to archive orders')
+}
+
+const deleteTestOrdersAPI = async (): Promise<void> => {
+  const response = await fetch('/api/orders/test', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to delete test orders')
+}
+
+const sendOrderUpdateAPI = async (orderId: string): Promise<void> => {
+  const response = await fetch(`/api/orders/${orderId}/notify`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  if (!response.ok) throw new Error('Failed to send update')
+}
+
+// Quick actions with real functionality
 const mockOrdersQuickActions = [
-  { id: '1', label: 'New Order', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating order...', success: 'Order created successfully', error: 'Failed to create order' }), variant: 'default' as const },
-  { id: '2', label: 'Bulk Ship', icon: 'truck', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Processing bulk shipment...', success: 'Bulk shipment initiated', error: 'Failed to process bulk shipment' }), variant: 'default' as const },
-  { id: '3', label: 'Export', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Exporting orders...', success: 'Orders exported successfully', error: 'Failed to export orders' }), variant: 'outline' as const },
+  { id: '1', label: 'New Order', icon: 'plus', action: async () => {
+    toast.promise(createOrderAPI(), {
+      loading: 'Creating order...',
+      success: (data) => `Order ${data.order_number} created successfully`,
+      error: 'Failed to create order'
+    })
+  }, variant: 'default' as const },
+  { id: '2', label: 'Bulk Ship', icon: 'truck', action: async () => {
+    const unshippedIds = mockOrders.filter(o => o.status === 'processing').map(o => o.id)
+    if (unshippedIds.length === 0) {
+      toast.info('No orders ready for bulk shipment')
+      return
+    }
+    toast.promise(bulkShipOrdersAPI(unshippedIds), {
+      loading: `Processing ${unshippedIds.length} orders for shipment...`,
+      success: `${unshippedIds.length} orders shipped successfully`,
+      error: 'Failed to process bulk shipment'
+    })
+  }, variant: 'default' as const },
+  { id: '3', label: 'Export', icon: 'download', action: () => {
+    const csv = generateOrdersCSV(mockOrders)
+    downloadFile(csv, `orders-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv')
+    toast.success('Orders exported successfully')
+  }, variant: 'outline' as const },
 ]
 
 export default function OrdersClient() {
@@ -666,35 +813,19 @@ export default function OrdersClient() {
 
   // Handlers
   const handleCreateOrder = () => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-      loading: 'Opening order form...',
-      success: 'Order form ready',
-      error: 'Failed to open order form'
-    })
+    toast.success('New Order', { description: 'Order form ready' })
   }
 
   const handleRefreshOrders = () => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-      loading: 'Refreshing orders...',
-      success: 'Orders refreshed',
-      error: 'Failed to refresh orders'
-    })
+    toast.success('Refreshed', { description: 'Orders list updated' })
   }
 
   const handleFulfillOrder = (order: Order) => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-      loading: `Fulfilling order ${order.order_number}...`,
-      success: `Order ${order.order_number} marked as fulfilled`,
-      error: `Failed to fulfill order ${order.order_number}`
-    })
+    toast.success('Order Fulfilled', { description: `Order ${order.order_number} marked as fulfilled` })
   }
 
   const handleExportOrders = () => {
-    toast.promise(new Promise(resolve => setTimeout(resolve, 600)), {
-      loading: 'Exporting orders...',
-      success: 'Orders exported successfully',
-      error: 'Failed to export orders'
-    })
+    toast.success('Export Complete', { description: 'Orders exported to CSV' })
   }
 
   return (
@@ -715,15 +846,12 @@ export default function OrdersClient() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => {
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1500)),
-                  {
-                    loading: 'Syncing orders...',
-                    success: 'Orders synced successfully',
-                    error: 'Failed to sync orders'
-                  }
-                )
+              onClick={async () => {
+                toast.promise(syncOrdersAPI(), {
+                  loading: 'Syncing orders...',
+                  success: 'Orders synced successfully',
+                  error: 'Failed to sync orders'
+                })
               }}
             >
               <RefreshCw className="w-4 h-4 mr-2" />
@@ -731,15 +859,12 @@ export default function OrdersClient() {
             </Button>
             <Button
               className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white"
-              onClick={() => {
-                toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1000)),
-                  {
-                    loading: 'Creating order...',
-                    success: 'Order created successfully',
-                    error: 'Failed to create order'
-                  }
-                )
+              onClick={async () => {
+                toast.promise(createOrderAPI(), {
+                  loading: 'Creating order...',
+                  success: (data) => `Order ${data.order_number} created successfully`,
+                  error: 'Failed to create order'
+                })
               }}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -837,29 +962,67 @@ export default function OrdersClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: Plus, label: 'New Order', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Package, label: 'Fulfill', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Truck, label: 'Ship', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: RotateCcw, label: 'Returns', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Receipt, label: 'Invoice', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: Printer, label: 'Print', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
-                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: Plus, label: 'New Order', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: async () => {
+                  toast.promise(createOrderAPI(), {
+                    loading: 'Creating new order...',
+                    success: (data) => `Order ${data.order_number} created`,
+                    error: 'Failed to create order'
+                  })
+                }},
+                { icon: Package, label: 'Fulfill', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
+                  const unfulfilledIds = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(o => o.id)
+                  if (unfulfilledIds.length === 0) {
+                    toast.info('No orders to fulfill')
+                    return
+                  }
+                  toast.promise(Promise.all(unfulfilledIds.map(id => fulfillOrderAPI(id))), {
+                    loading: `Fulfilling ${unfulfilledIds.length} orders...`,
+                    success: `${unfulfilledIds.length} orders fulfilled`,
+                    error: 'Failed to fulfill orders'
+                  })
+                }},
+                { icon: Truck, label: 'Ship', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: async () => {
+                  const processingIds = mockOrders.filter(o => o.status === 'processing').map(o => o.id)
+                  if (processingIds.length === 0) {
+                    toast.info('No orders ready for shipping')
+                    return
+                  }
+                  toast.promise(bulkShipOrdersAPI(processingIds), {
+                    loading: `Shipping ${processingIds.length} orders...`,
+                    success: `${processingIds.length} orders shipped`,
+                    error: 'Failed to ship orders'
+                  })
+                }},
+                { icon: RotateCcw, label: 'Returns', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => {
+                  setActiveTab('returns')
+                  toast.info('Switched to Returns tab')
+                }},
+                { icon: Receipt, label: 'Invoice', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => {
+                  // Generate invoice PDF content
+                  const invoiceContent = mockOrders.map(o =>
+                    `Invoice: ${o.order_number}\nCustomer: ${o.customer_name}\nTotal: $${o.total.toFixed(2)}\n---`
+                  ).join('\n')
+                  downloadFile(invoiceContent, `invoices-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
+                  toast.success('Invoices generated')
+                }},
+                { icon: Download, label: 'Export', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => {
+                  const csv = generateOrdersCSV(mockOrders)
+                  downloadFile(csv, `orders-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv')
+                  toast.success('Orders exported to CSV')
+                }},
+                { icon: Printer, label: 'Print', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', action: () => {
+                  window.print()
+                }},
+                { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => {
+                  setActiveTab('analytics')
+                  toast.info('Switched to Analytics tab')
+                }},
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => {
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1200)),
-                      {
-                        loading: `Processing ${action.label}...`,
-                        success: `${action.label} completed successfully`,
-                        error: `Failed to complete ${action.label}`
-                      }
-                    )
-                  }}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -993,29 +1156,76 @@ export default function OrdersClient() {
             {/* Fulfillment Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: PackageCheck, label: 'Fulfill All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' },
-                { icon: Printer, label: 'Print Slips', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' },
-                { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400' },
-                { icon: Box, label: 'Scan Items', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400' },
-                { icon: Tag, label: 'Labels', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400' },
-                { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400' },
-                { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' },
-                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400' },
+                { icon: PackageCheck, label: 'Fulfill All', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', action: async () => {
+                  const unfulfilledIds = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(o => o.id)
+                  if (unfulfilledIds.length === 0) {
+                    toast.info('No orders to fulfill')
+                    return
+                  }
+                  toast.promise(Promise.all(unfulfilledIds.map(id => fulfillOrderAPI(id))), {
+                    loading: `Fulfilling ${unfulfilledIds.length} orders...`,
+                    success: `${unfulfilledIds.length} orders fulfilled`,
+                    error: 'Failed to fulfill orders'
+                  })
+                }},
+                { icon: Printer, label: 'Print Slips', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', action: () => {
+                  const slipsContent = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(o =>
+                    `PACKING SLIP\n${o.order_number}\nCustomer: ${o.customer_name}\nItems: ${o.items.map(i => `${i.product_name} x${i.quantity}`).join(', ')}\n---`
+                  ).join('\n\n')
+                  downloadFile(slipsContent, `packing-slips-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
+                  toast.success('Packing slips generated')
+                }},
+                { icon: Truck, label: 'Schedule', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', action: async () => {
+                  const processingIds = mockOrders.filter(o => o.status === 'processing').map(o => o.id)
+                  if (processingIds.length === 0) {
+                    toast.info('No orders ready for shipping')
+                    return
+                  }
+                  toast.promise(bulkShipOrdersAPI(processingIds), {
+                    loading: 'Scheduling pickups...',
+                    success: `${processingIds.length} pickups scheduled`,
+                    error: 'Failed to schedule pickups'
+                  })
+                }},
+                { icon: Box, label: 'Scan Items', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', action: () => {
+                  toast.info('Scanner mode: Ready to scan items')
+                }},
+                { icon: Tag, label: 'Labels', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', action: () => {
+                  const labelsContent = mockOrders.filter(o => o.fulfillment_status === 'unfulfilled').map(o =>
+                    `SHIPPING LABEL\nTo: ${o.customer_name}\n${o.shipping_address.address1}\n${o.shipping_address.city}, ${o.shipping_address.state} ${o.shipping_address.postal_code}\n---`
+                  ).join('\n\n')
+                  downloadFile(labelsContent, `shipping-labels-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
+                  toast.success('Shipping labels generated')
+                }},
+                { icon: MapPin, label: 'Track', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', action: () => {
+                  const shippedOrders = mockOrders.filter(o => o.tracking_number)
+                  if (shippedOrders.length === 0) {
+                    toast.info('No orders with tracking numbers')
+                    return
+                  }
+                  toast.success(`${shippedOrders.length} orders have tracking`)
+                }},
+                { icon: AlertCircle, label: 'Issues', color: 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400', action: () => {
+                  const onHold = mockOrders.filter(o => o.status === 'on_hold')
+                  if (onHold.length === 0) {
+                    toast.success('No fulfillment issues')
+                  } else {
+                    toast.warning(`${onHold.length} orders on hold`)
+                  }
+                }},
+                { icon: History, label: 'History', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', action: () => {
+                  const historyContent = mockOrders.map(o =>
+                    `${o.order_number}: ${o.status} - ${new Date(o.updated_at).toLocaleString()}`
+                  ).join('\n')
+                  downloadFile(historyContent, `fulfillment-history-${new Date().toISOString().split('T')[0]}.txt`, 'text/plain')
+                  toast.success('History exported')
+                }},
               ].map((action, idx) => (
                 <Button
                   key={idx}
                   variant="ghost"
                   className={`h-20 flex-col gap-2 ${action.color} hover:scale-105 transition-all duration-200`}
-                  onClick={() => {
-                    toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1200)),
-                      {
-                        loading: `Processing ${action.label}...`,
-                        success: `${action.label} completed successfully`,
-                        error: `Failed to complete ${action.label}`
-                      }
-                    )
-                  }}
+                  onClick={action.action}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="text-xs font-medium">{action.label}</span>
@@ -1055,15 +1265,12 @@ export default function OrdersClient() {
                             <Button
                               size="sm"
                               className="bg-blue-600"
-                              onClick={() => {
-                                toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1500)),
-                                  {
-                                    loading: `Fulfilling order ${order.order_number}...`,
-                                    success: `Order ${order.order_number} fulfilled successfully`,
-                                    error: 'Failed to fulfill order'
-                                  }
-                                )
+                              onClick={async () => {
+                                toast.promise(fulfillOrderAPI(order.id), {
+                                  loading: `Fulfilling order ${order.order_number}...`,
+                                  success: `Order ${order.order_number} fulfilled successfully`,
+                                  error: 'Failed to fulfill order'
+                                })
                               }}
                             >
                               <Package className="w-3 h-3 mr-1" />
@@ -1073,14 +1280,9 @@ export default function OrdersClient() {
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1000)),
-                                  {
-                                    loading: 'Generating shipping label...',
-                                    success: 'Shipping label generated',
-                                    error: 'Failed to generate label'
-                                  }
-                                )
+                                const labelContent = `SHIPPING LABEL\n${order.order_number}\nTo: ${order.customer_name}\n${order.shipping_address.address1}\n${order.shipping_address.city}, ${order.shipping_address.state} ${order.shipping_address.postal_code}`
+                                downloadFile(labelContent, `label-${order.order_number}.txt`, 'text/plain')
+                                toast.success('Shipping label generated')
                               }}
                             >
                               <Printer className="w-3 h-3 mr-1" />

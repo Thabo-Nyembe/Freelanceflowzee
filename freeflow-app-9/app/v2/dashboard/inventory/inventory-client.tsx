@@ -979,11 +979,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                     Add Product
                   </button>
                   <button
-                    onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                      loading: 'Initializing barcode scanner...',
-                      success: 'Scanner ready - point camera at barcode',
-                      error: 'Failed to initialize scanner'
-                    })}
+                    onClick={() => toast.success('Barcode Scanner Ready', { description: 'Point camera at barcode to scan' })}
                     className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium"
                   >
                     <QrCode className="w-4 h-4" />
@@ -1036,11 +1032,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                    loading: 'Preparing import wizard...',
-                    success: 'Import ready - drag and drop CSV or Excel file',
-                    error: 'Failed to initialize import'
-                  })}
+                  onClick={() => toast.success('Import Ready', { description: 'Drag and drop CSV or Excel file' })}
                   className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
                 >
                   <Upload className="w-4 h-4" />

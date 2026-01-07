@@ -475,10 +475,10 @@ const mockMonitoringActivities = [
 ]
 
 const mockMonitoringQuickActions = [
-  { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Adding host...', success: 'Host added successfully', error: 'Failed to add host' }) },
-  { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening dashboards...', success: 'Monitoring dashboards loaded successfully', error: 'Failed to load dashboards' }) },
-  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening alerts...', success: 'Alert configuration loaded successfully', error: 'Failed to load alert configuration' }) },
-  { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening metrics...', success: 'Metrics explorer loaded successfully', error: 'Failed to load metrics explorer' }) },
+  { id: '1', label: 'Add Host', icon: 'Server', shortcut: 'H', action: () => toast.success('Host added successfully') },
+  { id: '2', label: 'Dashboards', icon: 'LayoutDashboard', shortcut: 'D', action: () => toast.success('Monitoring dashboards loaded successfully') },
+  { id: '3', label: 'Alerts', icon: 'Bell', shortcut: 'A', action: () => toast.success('Alert configuration loaded successfully') },
+  { id: '4', label: 'Metrics', icon: 'Activity', shortcut: 'M', action: () => toast.success('Metrics explorer loaded successfully') },
 ]
 
 // ============================================================================

@@ -594,26 +594,10 @@ const mockCampaignActivities = [
 ]
 
 const mockCampaignQuickActions = [
-  { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Creating new campaign...',
-    success: 'Campaign created successfully',
-    error: 'Failed to create campaign'
-  }) },
-  { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Sending test email...',
-    success: 'Test email sent successfully',
-    error: 'Failed to send test email'
-  }) },
-  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Loading analytics...',
-    success: 'Analytics loaded',
-    error: 'Failed to load analytics'
-  }) },
-  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Loading audience data...',
-    success: 'Audience manager ready',
-    error: 'Failed to load audience'
-  }) },
+  { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => toast.success('Campaign created successfully') },
+  { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => toast.success('Test email sent successfully') },
+  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => toast.success('Analytics loaded') },
+  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => toast.success('Audience manager ready') },
 ]
 
 // ============== MAIN COMPONENT ==============
@@ -2209,7 +2193,7 @@ export default function CampaignsClient() {
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" value="mc_sk_xxxxxxxxxxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'API key copied', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                            <Button variant="outline" onClick={() => toast.success('API key copied')}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                         <div className="space-y-2">

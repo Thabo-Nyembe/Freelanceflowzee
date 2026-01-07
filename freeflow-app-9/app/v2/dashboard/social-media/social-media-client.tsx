@@ -365,9 +365,9 @@ const mockSocialMediaActivities = [
 ]
 
 const mockSocialMediaQuickActions = [
-  { id: '1', label: 'Create Post', icon: 'edit', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating post...', success: 'Post created successfully', error: 'Failed to create post' }), variant: 'default' as const },
-  { id: '2', label: 'Schedule', icon: 'calendar', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Scheduling...', success: 'Scheduled successfully', error: 'Failed to schedule' }), variant: 'default' as const },
-  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading analytics...', success: 'Analytics loaded successfully', error: 'Failed to load analytics' }), variant: 'outline' as const },
+  { id: '1', label: 'Create Post', icon: 'edit', action: () => toast.success('Post Created', { description: 'Draft saved, ready to publish' }), variant: 'default' as const },
+  { id: '2', label: 'Schedule', icon: 'calendar', action: () => toast.success('Scheduled', { description: 'Post added to publishing queue' }), variant: 'default' as const },
+  { id: '3', label: 'Analytics', icon: 'chart', action: () => toast.success('Analytics Loaded', { description: 'Social media metrics ready' }), variant: 'outline' as const },
 ]
 
 export default function SocialMediaClient() {

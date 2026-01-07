@@ -619,15 +619,11 @@ export default function EscrowPage() {
           notes: ''
         })
 
-        // Show success toast with loading state
+        // Show success toast
         const successMessage = result.achievement
           ? `${result.message} ${result.achievement.message} +${result.achievement.points} points!`
           : result.message
-        toast.promise(new Promise(r => setTimeout(r, 800)), {
-          loading: 'Processing escrow creation...',
-          success: `${successMessage} - Payment link: ${result.paymentUrl}`,
-          error: 'Failed to create escrow deposit'
-        })
+        toast.success(`${successMessage} - Payment link: ${result.paymentUrl}`)
 
         // Show next steps notification
         if (result.nextSteps && result.nextSteps.length > 0) {
@@ -635,11 +631,7 @@ export default function EscrowPage() {
             logger.debug('Next steps available', {
               steps: result.nextSteps
             })
-            toast.promise(new Promise(r => setTimeout(r, 600)), {
-              loading: 'Loading next steps...',
-              success: `Next Steps Available - ${result.nextSteps.join(' • ')}`,
-              error: 'Failed to load next steps'
-            })
+            toast.info(`Next Steps Available - ${result.nextSteps.join(' • ')}`)
           }, 1000)
         }
 
@@ -697,31 +689,21 @@ export default function EscrowPage() {
         setShowPasswordForm(null)
         setReleasePassword('')
 
-        // Show success toast with loading state
+        // Show success toast
         const releaseMessage = result.achievement
           ? `${result.message} ${result.achievement.message} +${result.achievement.points} points!`
           : result.message
-        toast.promise(new Promise(r => setTimeout(r, 1000)), {
-          loading: 'Releasing funds...',
-          success: releaseMessage,
-          error: 'Failed to release funds'
-        })
+        toast.success(releaseMessage)
 
         // Show payout details notification
         if (result.netAmount) {
-          setTimeout(() => {
-            logger.info('Payout details available', {
-              amount: result.amount,
-              processingFee: result.processingFee,
-              netAmount: result.netAmount,
-              estimatedArrival: result.estimatedArrival
-            })
-            toast.promise(new Promise(r => setTimeout(r, 800)), {
-              loading: 'Calculating payout details...',
-              success: `Payout Details - Amount: $${result.amount} | Net: $${result.netAmount.toFixed(2)} | Arrives: ${result.estimatedArrival}`,
-              error: 'Failed to load payout details'
-            })
-          }, 1200)
+          logger.info('Payout details available', {
+            amount: result.amount,
+            processingFee: result.processingFee,
+            netAmount: result.netAmount,
+            estimatedArrival: result.estimatedArrival
+          })
+          toast.info(`Payout Details - Amount: $${result.amount} | Net: $${result.netAmount.toFixed(2)} | Arrives: ${result.estimatedArrival}`)
         }
 
         logger.info('Funds released successfully', {
@@ -763,26 +745,16 @@ export default function EscrowPage() {
         // Update local state
         dispatch({ type: 'COMPLETE_MILESTONE', depositId, milestoneId })
 
-        // Show success toast with loading state
-        toast.promise(new Promise(r => setTimeout(r, 1000)), {
-          loading: 'Completing milestone...',
-          success: `${result.message} - Completed at: ${new Date(result.completedAt).toLocaleString()}`,
-          error: 'Failed to complete milestone'
-        })
+        // Show success toast
+        toast.success(`${result.message} - Completed at: ${new Date(result.completedAt).toLocaleString()}`)
 
         // Show next steps notification
         if (result.nextSteps && result.nextSteps.length > 0) {
-          setTimeout(() => {
-            logger.debug('Milestone next steps available', {
-              milestoneId,
-              nextSteps: result.nextSteps
-            })
-            toast.promise(new Promise(r => setTimeout(r, 600)), {
-              loading: 'Loading next steps...',
-              success: `Next Steps - ${result.nextSteps.join(' • ')}`,
-              error: 'Failed to load next steps'
-            })
-          }, 1200)
+          logger.debug('Milestone next steps available', {
+            milestoneId,
+            nextSteps: result.nextSteps
+          })
+          toast.info(`Next Steps - ${result.nextSteps.join(' • ')}`)
         }
 
         logger.info('Milestone completed successfully', {
@@ -831,6 +803,27 @@ export default function EscrowPage() {
     if (!editingDeposit) return
     setIsSaving(true)
     try {
+      // Make real API call to save deposit changes
+      const response = await fetch('/api/escrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'update-deposit',
+          data: {
+            depositId: editingDeposit.id,
+            projectTitle: editForm.projectTitle,
+            clientName: editForm.clientName,
+            clientEmail: editForm.clientEmail,
+            notes: editForm.notes
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to update deposit')
+      }
+
+      // Update local state
       dispatch({
         type: 'UPDATE_DEPOSIT',
         depositId: editingDeposit.id,
@@ -842,11 +835,7 @@ export default function EscrowPage() {
         }
       })
       logger.info('Deposit updated', { depositId: editingDeposit.id })
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Saving deposit changes...',
-        success: `Deposit Updated - ${editForm.projectTitle} has been updated`,
-        error: 'Failed to update deposit'
-      })
+      toast.success(`Deposit Updated - ${editForm.projectTitle} has been updated`)
       setEditingDeposit(null)
       announce('Deposit updated successfully', 'polite')
     } catch (error: any) {
@@ -863,16 +852,31 @@ export default function EscrowPage() {
     setShowDeleteDepositDialog(true)
   }
 
-  const confirmDeleteDeposit = () => {
+  const confirmDeleteDeposit = async () => {
     if (selectedDepositId) {
-      logger.info('Deposit deleted', { depositId: selectedDepositId })
-      dispatch({ type: 'DELETE_DEPOSIT', depositId: selectedDepositId })
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Deleting escrow deposit...',
-        success: 'Deposit Deleted - Escrow deposit has been removed successfully',
-        error: 'Failed to delete deposit'
-      })
-      announce('Escrow deposit deleted', 'polite')
+      try {
+        // Make real API call to delete deposit
+        const response = await fetch('/api/escrow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete-deposit',
+            data: { depositId: selectedDepositId }
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to delete deposit')
+        }
+
+        logger.info('Deposit deleted', { depositId: selectedDepositId })
+        dispatch({ type: 'DELETE_DEPOSIT', depositId: selectedDepositId })
+        toast.success('Deposit Deleted - Escrow deposit has been removed successfully')
+        announce('Escrow deposit deleted', 'polite')
+      } catch (error: any) {
+        logger.error('Failed to delete deposit', { error: error.message })
+        toast.error('Failed to delete deposit')
+      }
     }
     setShowDeleteDepositDialog(false)
     setSelectedDepositId(null)
@@ -893,31 +897,82 @@ export default function EscrowPage() {
     const input = document.createElement('input')
     input.type = 'file'
     input.accept = '.pdf,.doc,.docx'
-    input.onchange = (e: Event) => {
+    input.onchange = async (e: Event) => {
       const file = (e.target as HTMLInputElement).files?.[0]
       if (file) {
-        logger.info('Contract uploaded successfully', {
-          depositId,
-          fileName: file.name,
-          fileSize: file.size
-        })
-        toast.promise(new Promise(r => setTimeout(r, 1500)), {
-          loading: 'Uploading contract...',
-          success: `Contract Uploaded - File: ${file.name} has been attached to deposit`,
-          error: 'Failed to upload contract'
-        })
+        try {
+          // Create FormData for real file upload
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('depositId', depositId)
+          formData.append('action', 'upload-contract')
+
+          const response = await fetch('/api/escrow/upload', {
+            method: 'POST',
+            body: formData
+          })
+
+          if (!response.ok) {
+            throw new Error('Upload failed')
+          }
+
+          logger.info('Contract uploaded successfully', {
+            depositId,
+            fileName: file.name,
+            fileSize: file.size
+          })
+          toast.success(`Contract Uploaded - File: ${file.name} has been attached to deposit`)
+
+          // Update local state with new contract URL
+          const result = await response.json()
+          if (result.contractUrl) {
+            dispatch({
+              type: 'UPDATE_DEPOSIT',
+              depositId,
+              updates: { contractUrl: result.contractUrl }
+            })
+          }
+        } catch (error: any) {
+          logger.error('Failed to upload contract', { error: error.message })
+          toast.error('Failed to upload contract')
+        }
       }
     }
     input.click()
   }
 
-  const handleSendNotification = (depositId: string) => {
+  const handleSendNotification = async (depositId: string) => {
     logger.info('Send notification initiated', { depositId })
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Sending notification to client...',
-      success: 'Notification Sent - Client has been notified about deposit status update',
-      error: 'Failed to send notification'
-    })
+    const deposit = state.deposits.find(d => d.id === depositId)
+    if (!deposit) {
+      toast.error('Deposit not found')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/escrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send-notification',
+          data: {
+            depositId,
+            clientEmail: deposit.clientEmail,
+            projectTitle: deposit.projectTitle,
+            status: deposit.status
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send notification')
+      }
+
+      toast.success('Notification Sent - Client has been notified about deposit status update')
+    } catch (error: any) {
+      logger.error('Failed to send notification', { error: error.message })
+      toast.error('Failed to send notification')
+    }
   }
 
   const handleDisputeResolution = (depositId: string) => {
@@ -927,16 +982,33 @@ export default function EscrowPage() {
     setShowDisputeDialog(true)
   }
 
-  const confirmDispute = () => {
+  const confirmDispute = async () => {
     if (selectedDepositId && disputeReason.trim()) {
-      logger.info('Dispute filed', { depositId: selectedDepositId, reason: disputeReason })
-      dispatch({ type: 'DISPUTE_DEPOSIT', depositId: selectedDepositId, reason: disputeReason })
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Filing dispute...',
-        success: 'Dispute Filed - Dispute has been submitted for review',
-        error: 'Failed to file dispute'
-      })
-      announce('Dispute filed successfully', 'polite')
+      try {
+        const response = await fetch('/api/escrow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'file-dispute',
+            data: {
+              depositId: selectedDepositId,
+              reason: disputeReason
+            }
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to file dispute')
+        }
+
+        logger.info('Dispute filed', { depositId: selectedDepositId, reason: disputeReason })
+        dispatch({ type: 'DISPUTE_DEPOSIT', depositId: selectedDepositId, reason: disputeReason })
+        toast.success('Dispute Filed - Dispute has been submitted for review')
+        announce('Dispute filed successfully', 'polite')
+      } catch (error: any) {
+        logger.error('Failed to file dispute', { error: error.message })
+        toast.error('Failed to file dispute')
+      }
     }
     setShowDisputeDialog(false)
     setSelectedDepositId(null)
@@ -945,11 +1017,58 @@ export default function EscrowPage() {
 
   const handleDownloadReceipt = (depositId: string) => {
     logger.info('Download receipt initiated', { depositId })
-    toast.promise(new Promise(r => setTimeout(r, 1200)), {
-      loading: 'Generating receipt PDF...',
-      success: 'Receipt Downloaded - Receipt has been saved as PDF',
-      error: 'Failed to download receipt'
-    })
+    const deposit = state.deposits.find(d => d.id === depositId)
+    if (!deposit) {
+      toast.error('Deposit not found')
+      return
+    }
+
+    // Generate receipt data as CSV/text for real download
+    const receiptData = `ESCROW RECEIPT
+=====================================
+Receipt ID: ${depositId}
+Date: ${new Date().toLocaleDateString()}
+
+PROJECT DETAILS
+-------------------------------------
+Project: ${deposit.projectTitle}
+Client: ${deposit.clientName}
+Email: ${deposit.clientEmail}
+
+PAYMENT DETAILS
+-------------------------------------
+Amount: $${deposit.amount.toLocaleString()} ${deposit.currency}
+Platform Fee: $${deposit.fees.platform.toLocaleString()}
+Payment Fee: $${deposit.fees.payment.toLocaleString()}
+Total Fees: $${deposit.fees.total.toLocaleString()}
+Net Amount: $${(deposit.amount - deposit.fees.total).toLocaleString()}
+
+STATUS
+-------------------------------------
+Status: ${deposit.status.toUpperCase()}
+Created: ${new Date(deposit.createdAt).toLocaleDateString()}
+${deposit.releasedAt ? `Released: ${new Date(deposit.releasedAt).toLocaleDateString()}` : ''}
+
+MILESTONES
+-------------------------------------
+${deposit.milestones.map(m => `- ${m.title}: $${m.amount.toLocaleString()} (${m.status})`).join('\n')}
+
+=====================================
+Generated by FreeFlow Escrow System
+`
+
+    // Create and download the file
+    const blob = new Blob([receiptData], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `escrow-receipt-${depositId}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Receipt Downloaded - Receipt has been saved to your device')
   }
 
   const handleViewTransactionHistory = (depositId: string) => {
@@ -1028,11 +1147,7 @@ export default function EscrowPage() {
       })
 
       logger.info('Milestone added', { depositId: addingMilestone, milestoneId: newMilestone.id })
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Adding milestone...',
-        success: `Milestone Added - ${newMilestoneForm.title} has been added to the project`,
-        error: 'Failed to add milestone'
-      })
+      toast.success(`Milestone Added - ${newMilestoneForm.title} has been added to the project`)
       setAddingMilestone(null)
       announce('Milestone added successfully', 'polite')
     } catch (error: any) {
@@ -1049,28 +1164,69 @@ export default function EscrowPage() {
     setShowNotesDialog(true)
   }
 
-  const confirmAddNotes = () => {
+  const confirmAddNotes = async () => {
     if (notesDepositId && notesText.trim()) {
-      logger.info('Notes added', { depositId: notesDepositId, notes: notesText })
-      dispatch({ type: 'UPDATE_DEPOSIT', depositId: notesDepositId, updates: { notes: notesText } })
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Saving notes...',
-        success: 'Notes Added - Notes have been saved to deposit',
-        error: 'Failed to save notes'
-      })
+      try {
+        const response = await fetch('/api/escrow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'update-notes',
+            data: {
+              depositId: notesDepositId,
+              notes: notesText
+            }
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to save notes')
+        }
+
+        logger.info('Notes added', { depositId: notesDepositId, notes: notesText })
+        dispatch({ type: 'UPDATE_DEPOSIT', depositId: notesDepositId, updates: { notes: notesText } })
+        toast.success('Notes Added - Notes have been saved to deposit')
+      } catch (error: any) {
+        logger.error('Failed to save notes', { error: error.message })
+        toast.error('Failed to save notes')
+      }
     }
     setShowNotesDialog(false)
     setNotesDepositId(null)
     setNotesText('')
   }
 
-  const handleRequestApproval = (depositId: string) => {
+  const handleRequestApproval = async (depositId: string) => {
     logger.info('Request approval initiated', { depositId })
-    toast.promise(new Promise(r => setTimeout(r, 1200)), {
-      loading: 'Sending approval request...',
-      success: 'Approval Requested - Client will receive approval request notification',
-      error: 'Failed to send approval request'
-    })
+    const deposit = state.deposits.find(d => d.id === depositId)
+    if (!deposit) {
+      toast.error('Deposit not found')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/escrow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'request-approval',
+          data: {
+            depositId,
+            clientEmail: deposit.clientEmail,
+            projectTitle: deposit.projectTitle
+          }
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send approval request')
+      }
+
+      toast.success('Approval Requested - Client will receive approval request notification')
+    } catch (error: any) {
+      logger.error('Failed to send approval request', { error: error.message })
+      toast.error('Failed to send approval request')
+    }
   }
 
   const handleRefundDeposit = (depositId: string) => {
@@ -1079,15 +1235,47 @@ export default function EscrowPage() {
     setShowRefundDialog(true)
   }
 
-  const confirmRefund = () => {
+  const confirmRefund = async () => {
     if (selectedDepositId) {
-      logger.info('Refund processed', { depositId: selectedDepositId })
-      toast.promise(new Promise(r => setTimeout(r, 2000)), {
-        loading: 'Processing refund...',
-        success: 'Refund Processed - Funds will be returned to client within 5-7 business days',
-        error: 'Failed to process refund'
-      })
-      announce('Refund processed successfully', 'polite')
+      const deposit = state.deposits.find(d => d.id === selectedDepositId)
+      if (!deposit) {
+        toast.error('Deposit not found')
+        setShowRefundDialog(false)
+        setSelectedDepositId(null)
+        return
+      }
+
+      try {
+        const response = await fetch('/api/escrow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'process-refund',
+            data: {
+              depositId: selectedDepositId,
+              amount: deposit.amount,
+              clientEmail: deposit.clientEmail
+            }
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to process refund')
+        }
+
+        logger.info('Refund processed', { depositId: selectedDepositId })
+        // Update status to reflect refund
+        dispatch({
+          type: 'UPDATE_DEPOSIT',
+          depositId: selectedDepositId,
+          updates: { status: 'released' }
+        })
+        toast.success('Refund Processed - Funds will be returned to client within 5-7 business days')
+        announce('Refund processed successfully', 'polite')
+      } catch (error: any) {
+        logger.error('Failed to process refund', { error: error.message })
+        toast.error('Failed to process refund')
+      }
     }
     setShowRefundDialog(false)
     setSelectedDepositId(null)
@@ -1095,29 +1283,116 @@ export default function EscrowPage() {
 
   const handleUpdatePaymentMethod = (depositId: string) => {
     logger.info('Update payment method initiated', { depositId })
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Opening payment settings...',
-      success: 'Payment Settings Opened - Client can update their payment details',
-      error: 'Failed to open payment settings'
-    })
+    // Open payment settings in a new window or modal
+    const paymentSettingsUrl = `/dashboard/settings/payments?depositId=${depositId}`
+    window.open(paymentSettingsUrl, '_blank')
+    toast.success('Payment Settings Opened - You can update payment details in the new tab')
   }
 
-  const handleGenerateInvoice = (depositId: string) => {
+  const handleGenerateInvoice = async (depositId: string) => {
     logger.info('Generate invoice initiated', { depositId })
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Generating invoice...',
-      success: 'Invoice Generated - Invoice has been created and sent to client',
-      error: 'Failed to generate invoice'
-    })
+    const deposit = state.deposits.find(d => d.id === depositId)
+    if (!deposit) {
+      toast.error('Deposit not found')
+      return
+    }
+
+    // Generate invoice data
+    const invoiceData = `INVOICE
+=====================================
+Invoice Number: INV-${depositId.toUpperCase()}
+Date: ${new Date().toLocaleDateString()}
+Due Date: ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+
+FROM
+-------------------------------------
+FreeFlow Escrow Services
+escrow@freeflow.app
+
+BILL TO
+-------------------------------------
+${deposit.clientName}
+${deposit.clientEmail}
+
+PROJECT DETAILS
+-------------------------------------
+Project: ${deposit.projectTitle}
+Payment Method: ${deposit.paymentMethod}
+
+MILESTONES
+-------------------------------------
+${deposit.milestones.map(m => `${m.title}    $${m.amount.toLocaleString()}`).join('\n')}
+
+-------------------------------------
+Subtotal:       $${deposit.amount.toLocaleString()}
+Platform Fee:   $${deposit.fees.platform.toLocaleString()}
+Payment Fee:    $${deposit.fees.payment.toLocaleString()}
+-------------------------------------
+TOTAL:          $${(deposit.amount + deposit.fees.total).toLocaleString()} ${deposit.currency}
+
+Payment Terms: Net 30
+Status: ${deposit.status.toUpperCase()}
+
+=====================================
+Thank you for your business!
+`
+
+    // Create and download the invoice
+    const blob = new Blob([invoiceData], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `invoice-${depositId}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Invoice Generated - Invoice has been downloaded')
   }
 
   const handleExportEscrowReport = () => {
-    logger.info('Export escrow report initiated', { format: 'PDF' })
-    toast.promise(new Promise(r => setTimeout(r, 2000)), {
-      loading: 'Generating PDF report...',
-      success: 'Report Exported - PDF report including all deposits and transactions',
-      error: 'Failed to export report'
-    })
+    logger.info('Export escrow report initiated', { format: 'CSV' })
+
+    // Generate comprehensive CSV report
+    const csvHeaders = ['Deposit ID', 'Project Title', 'Client Name', 'Client Email', 'Amount', 'Currency', 'Status', 'Created At', 'Released At', 'Platform Fee', 'Payment Fee', 'Total Fees', 'Progress %', 'Payment Method', 'Milestones Count', 'Completed Milestones']
+
+    const csvRows = state.deposits.map(deposit => [
+      deposit.id,
+      deposit.projectTitle,
+      deposit.clientName,
+      deposit.clientEmail,
+      deposit.amount,
+      deposit.currency,
+      deposit.status,
+      new Date(deposit.createdAt).toLocaleDateString(),
+      deposit.releasedAt ? new Date(deposit.releasedAt).toLocaleDateString() : '',
+      deposit.fees.platform,
+      deposit.fees.payment,
+      deposit.fees.total,
+      deposit.progressPercentage,
+      deposit.paymentMethod,
+      deposit.milestones.length,
+      deposit.milestones.filter(m => m.status === 'completed').length
+    ])
+
+    const csvContent = [
+      csvHeaders.join(','),
+      ...csvRows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n')
+
+    // Create and download CSV file
+    const blob = new Blob([csvContent], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `escrow-report-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+
+    toast.success('Report Exported - CSV report has been downloaded')
   }
 
   const handleFilterByStatus = (filter: EscrowState['filter']) => {
@@ -1132,11 +1407,21 @@ export default function EscrowPage() {
 
   const handleEditMilestone = (depositId: string, milestoneId: string) => {
     logger.info('Edit milestone initiated', { depositId, milestoneId })
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Opening milestone editor...',
-      success: 'Milestone Editor Opened - Update milestone details and amount',
-      error: 'Failed to open milestone editor'
+    const deposit = state.deposits.find(d => d.id === depositId)
+    const milestone = deposit?.milestones.find(m => m.id === milestoneId)
+    if (!deposit || !milestone) {
+      toast.error('Milestone not found')
+      return
+    }
+    // Pre-fill the milestone form and open the add milestone dialog for editing
+    setNewMilestoneForm({
+      title: milestone.title,
+      description: milestone.description,
+      amount: String(milestone.amount),
+      dueDate: milestone.dueDate || ''
     })
+    setAddingMilestone(depositId)
+    toast.info('Milestone Editor Opened - Update milestone details and save')
   }
 
   const handleDeleteMilestone = (depositId: string, milestoneId: string) => {
@@ -1146,15 +1431,43 @@ export default function EscrowPage() {
     setShowDeleteMilestoneDialog(true)
   }
 
-  const confirmDeleteMilestone = () => {
+  const confirmDeleteMilestone = async () => {
     if (selectedDepositId && selectedMilestoneId) {
-      logger.info('Milestone deleted', { depositId: selectedDepositId, milestoneId: selectedMilestoneId })
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Deleting milestone...',
-        success: 'Milestone Deleted - Milestone has been removed successfully',
-        error: 'Failed to delete milestone'
-      })
-      announce('Milestone deleted', 'polite')
+      try {
+        const response = await fetch('/api/escrow', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'delete-milestone',
+            data: {
+              depositId: selectedDepositId,
+              milestoneId: selectedMilestoneId
+            }
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to delete milestone')
+        }
+
+        // Update local state
+        const deposit = state.deposits.find(d => d.id === selectedDepositId)
+        if (deposit) {
+          const updatedMilestones = deposit.milestones.filter(m => m.id !== selectedMilestoneId)
+          dispatch({
+            type: 'UPDATE_DEPOSIT',
+            depositId: selectedDepositId,
+            updates: { milestones: updatedMilestones }
+          })
+        }
+
+        logger.info('Milestone deleted', { depositId: selectedDepositId, milestoneId: selectedMilestoneId })
+        toast.success('Milestone Deleted - Milestone has been removed successfully')
+        announce('Milestone deleted', 'polite')
+      } catch (error: any) {
+        logger.error('Failed to delete milestone', { error: error.message })
+        toast.error('Failed to delete milestone')
+      }
     }
     setShowDeleteMilestoneDialog(false)
     setSelectedDepositId(null)
@@ -1893,16 +2206,7 @@ export default function EscrowPage() {
                           {deposit.status === 'released' && (
                             <Button
                               variant="outline"
-                              onClick={() => {
-                                logger.info('Download receipt initiated', {
-                                  depositId: deposit.id
-                                })
-                                toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                                  loading: 'Downloading receipt...',
-                                  success: 'Receipt Downloaded - Receipt has been saved to your device',
-                                  error: 'Failed to download receipt'
-                                })
-                              }}
+                              onClick={() => handleDownloadReceipt(deposit.id)}
                             >
                               <Receipt className="w-4 h-4 mr-1" />
                               Receipt
@@ -1918,11 +2222,8 @@ export default function EscrowPage() {
                                   depositId: deposit.id,
                                   disputeReason: deposit.disputeReason || 'Not specified'
                                 })
-                                toast.promise(new Promise(r => setTimeout(r, 600)), {
-                                  loading: 'Loading dispute details...',
-                                  success: `Dispute Details - ${deposit.disputeReason || 'No reason specified'}`,
-                                  error: 'Failed to load dispute details'
-                                })
+                                // Show dispute details immediately
+                                toast.info(`Dispute Details - ${deposit.disputeReason || 'No reason specified'}`)
                               }}
                             >
                               <AlertCircle className="w-4 h-4 mr-1" />
@@ -1938,11 +2239,8 @@ export default function EscrowPage() {
                                 projectTitle: deposit.projectTitle
                               })
                               _setSelectedDeposit(deposit)
-                              toast.promise(new Promise(r => setTimeout(r, 500)), {
-                                loading: 'Loading deposit details...',
-                                success: `Deposit Details - Viewing details for ${deposit.projectTitle}`,
-                                error: 'Failed to load deposit details'
-                              })
+                              setViewingDeposit(deposit)
+                              toast.success(`Viewing details for ${deposit.projectTitle}`)
                             }}
                           >
                             <Eye className="w-4 h-4 mr-1" />

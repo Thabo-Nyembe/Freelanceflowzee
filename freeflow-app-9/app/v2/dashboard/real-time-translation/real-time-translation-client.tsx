@@ -88,21 +88,9 @@ const realTimeTranslationActivities = [
 ]
 
 const realTimeTranslationQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Creating new translation...',
-    success: 'New translation created successfully',
-    error: 'Failed to create translation'
-  }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-    loading: 'Exporting translations...',
-    success: 'Translations exported successfully',
-    error: 'Export failed'
-  }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), {
-    loading: 'Opening settings...',
-    success: 'Settings loaded successfully',
-    error: 'Failed to load settings'
-  }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Translation Created', { description: 'New translation job ready' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Translations Exported', { description: 'Translation data exported' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Translation settings opened' }) },
 ]
 
 export default function RealTimeTranslationClient() {

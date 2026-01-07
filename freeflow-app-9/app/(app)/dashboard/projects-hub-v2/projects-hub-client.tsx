@@ -419,26 +419,22 @@ export default function ProjectsHubClient() {
     }
   }
 
-  const handleExportProjects = async () => {
-    toast.promise(
-      new Promise<void>((resolve) => {
-        const csv = allProjects.map(p =>
-          `${p.name},${p.status},${p.priority},${p.progress}%,$${p.budget},$${p.spent}`
-        ).join('\n')
-        const blob = new Blob([`Name,Status,Priority,Progress,Budget,Spent\n${csv}`], { type: 'text/csv' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'projects-export.csv'
-        a.click()
-        setTimeout(resolve, 600)
-      }),
-      {
-        loading: 'Exporting projects...',
-        success: 'Projects exported to CSV',
-        error: 'Failed to export projects'
-      }
-    )
+  const handleExportProjects = () => {
+    try {
+      const csv = allProjects.map(p =>
+        `${p.name},${p.status},${p.priority},${p.progress}%,$${p.budget},$${p.spent}`
+      ).join('\n')
+      const blob = new Blob([`Name,Status,Priority,Progress,Budget,Spent\n${csv}`], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'projects-export.csv'
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Projects exported to CSV')
+    } catch (error) {
+      toast.error('Failed to export projects')
+    }
   }
 
   return (
@@ -517,7 +513,7 @@ export default function ProjectsHubClient() {
                   <div key={column.id} className="min-w-[280px]">
                     <div className="flex items-center justify-between mb-3 px-2">
                       <div className="flex items-center gap-2"><span className={`w-3 h-3 rounded-full ${column.color}`} /><h3 className="font-semibold">{column.label}</h3><Badge variant="secondary" className="text-xs">{projectsByStatus[column.id]?.length || 0}</Badge></div>
-                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: `Adding project to ${column.label}...`, success: `Project added to ${column.label}`, error: 'Failed to add project' }) }}><Plus className="h-4 w-4" /></Button>
+                      <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => { e.stopPropagation(); setShowNewProjectDialog(true); toast.success(`Create a new project for ${column.label}`) }}><Plus className="h-4 w-4" /></Button>
                     </div>
                     <div className="space-y-3">
                       {projectsByStatus[column.id]?.map(project => (
@@ -552,7 +548,7 @@ export default function ProjectsHubClient() {
                           <td className="px-4 py-4"><div className="w-24"><div className="flex justify-between text-xs mb-1"><span>{project.progress}%</span></div><Progress value={project.progress} className="h-1.5" /></div></td>
                           <td className="px-4 py-4">{project.budget ? <div><span className="font-medium">${(project.spent / 1000).toFixed(0)}K</span><span className="text-gray-500"> / ${(project.budget / 1000).toFixed(0)}K</span></div> : '-'}</td>
                           <td className="px-4 py-4">{project.endDate ? new Date(project.endDate).toLocaleDateString() : '-'}</td>
-                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Loading project options...', success: 'Project options loaded', error: 'Failed to load options' }) }}><MoreHorizontal className="h-4 w-4" /></Button></td>
+                          <td className="px-4 py-4"><Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedProject(project); setShowProjectDialog(true) }}><MoreHorizontal className="h-4 w-4" /></Button></td>
                         </tr>
                       ))}
                     </tbody>

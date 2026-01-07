@@ -765,9 +765,9 @@ const communityHubActivities = [
 ]
 
 const communityHubQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating new item...', success: 'Item created', error: 'Failed to create item' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting data...', success: 'Data exported', error: 'Failed to export' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening settings...', success: 'Settings opened', error: 'Failed to open settings' }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('Item Created', { description: 'New community item ready' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Data Exported', { description: 'Community data exported' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Community settings opened' }) },
 ]
 
 export default function CommunityHubClient() {

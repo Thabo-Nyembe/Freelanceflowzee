@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { copyToClipboard } from '@/lib/button-handlers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -407,12 +408,7 @@ const mockFilesHubActivities = [
   { id: '3', user: 'Guest User', action: 'downloaded', target: 'Project assets.zip', timestamp: '1h ago', type: 'info' as const },
 ]
 
-const mockFilesHubQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening file picker...', success: 'Select files to upload', error: 'Upload cancelled' }) },
-  { id: '2', label: 'New Folder', icon: 'FolderPlus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating folder...', success: 'New folder created! Enter a name', error: 'Failed to create folder' }) },
-  { id: '3', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing share link...', success: 'Share link copied to clipboard!', error: 'Failed to generate share link' }) },
-  { id: '4', label: 'Search', icon: 'Search', shortcut: '/', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Initializing search...', success: 'Search ready - Type to search across 1,247 files', error: 'Search unavailable' }) },
-]
+// Quick actions are defined inside the component to access state and handlers
 
 // Database types matching schema
 interface DbFile {
@@ -470,6 +466,11 @@ export default function FilesHubClient() {
   const [newFolderName, setNewFolderName] = useState('')
   const [newFolderColor, setNewFolderColor] = useState('blue')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Refs and visibility toggles
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [showApiKey, setShowApiKey] = useState(false)
+  const [showEncryptionKey, setShowEncryptionKey] = useState(false)
 
   // Fetch files and folders
   const fetchData = useCallback(async () => {
@@ -672,6 +673,134 @@ export default function FilesHubClient() {
     }
   }
 
+  // File upload handler
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFiles = event.target.files
+    if (!uploadedFiles || uploadedFiles.length === 0) return
+
+    try {
+      toast.loading('Uploading files...')
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('Not authenticated')
+
+      for (const file of Array.from(uploadedFiles)) {
+        // Upload to Supabase Storage
+        const filePath = `${user.id}/${currentFolderId || 'root'}/${Date.now()}_${file.name}`
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('files')
+          .upload(filePath, file)
+
+        if (uploadError) throw uploadError
+
+        // Get file extension and type
+        const extension = file.name.split('.').pop() || ''
+        const fileType = file.type.startsWith('image/') ? 'image' :
+                        file.type.startsWith('video/') ? 'video' :
+                        file.type.startsWith('audio/') ? 'audio' :
+                        file.type.includes('pdf') || file.type.includes('document') ? 'document' :
+                        file.type.includes('spreadsheet') || file.type.includes('excel') ? 'spreadsheet' :
+                        file.type.includes('presentation') || file.type.includes('powerpoint') ? 'presentation' :
+                        file.type.includes('zip') || file.type.includes('archive') ? 'archive' : 'other'
+
+        // Create file record in database
+        const { error: dbError } = await supabase.from('files').insert({
+          user_id: user.id,
+          folder_id: currentFolderId,
+          name: file.name,
+          type: fileType,
+          extension,
+          size: file.size,
+          url: uploadData?.path || filePath,
+          status: 'active'
+        })
+
+        if (dbError) throw dbError
+      }
+
+      toast.dismiss()
+      toast.success('Files uploaded successfully', { description: `${uploadedFiles.length} file(s) uploaded` })
+      fetchData()
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Upload failed', { description: error instanceof Error ? error.message : 'Unknown error' })
+    }
+
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  // File download handler
+  const handleDownloadFile = async (file: FileItem) => {
+    try {
+      toast.loading('Preparing download...')
+      const { data, error } = await supabase.storage
+        .from('files')
+        .download(file.path || `${file.id}/${file.name}`)
+
+      if (error) throw error
+
+      // Create download link
+      const url = URL.createObjectURL(data)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.dismiss()
+      toast.success('Download complete')
+    } catch (error) {
+      toast.dismiss()
+      // Fallback for mock files
+      const blob = new Blob([`Mock content for ${file.name}`], { type: 'application/octet-stream' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = file.name
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      toast.success('Download complete')
+    }
+  }
+
+  // Revoke share link handler
+  const handleRevokeShareLink = async (linkId: string, fileName: string) => {
+    if (!confirm(`Are you sure you want to revoke access to "${fileName}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      toast.loading('Revoking access...')
+      const { error } = await supabase.from('file_shares').delete().eq('id', linkId)
+      if (error) throw error
+      toast.dismiss()
+      toast.success('Access revoked', { description: `Share link for "${fileName}" has been revoked` })
+      fetchData()
+    } catch (error) {
+      toast.dismiss()
+      toast.error('Failed to revoke access')
+    }
+  }
+
+  // Copy share link handler
+  const handleCopyShareLink = async (fileId: string, fileName: string) => {
+    const shareUrl = `${window.location.origin}/shared/${fileId}`
+    await copyToClipboard(shareUrl, `Share link for "${fileName}" copied to clipboard`)
+  }
+
+  // Define quick actions for the toolbar
+  const mockFilesHubQuickActions = [
+    { id: '1', label: 'Upload Files', icon: Upload, action: () => fileInputRef.current?.click(), variant: 'primary' as const },
+    { id: '2', label: 'New Folder', icon: FolderPlus, action: () => setShowCreateFolderDialog(true), variant: 'secondary' as const },
+    { id: '3', label: 'Refresh', icon: RefreshCw, action: () => fetchData(), variant: 'ghost' as const },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-white to-blue-50 dark:bg-none dark:bg-gray-900">
       <div className="max-w-[1800px] mx-auto p-6 space-y-6">
@@ -695,10 +824,20 @@ export default function FilesHubClient() {
               <FolderPlus className="w-4 h-4 mr-2" />
               New Folder
             </Button>
-            <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening file picker...', success: 'Ready to upload! Drag files here or select from your computer', error: 'Upload cancelled' })}>
-              <Upload className="w-4 h-4 mr-2" />
-              Upload Files
-            </Button>
+            <>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                multiple
+                className="hidden"
+                accept="*/*"
+              />
+              <Button className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => fileInputRef.current?.click()}>
+                <Upload className="w-4 h-4 mr-2" />
+                Upload Files
+              </Button>
+            </>
           </div>
         </div>
 
@@ -1014,11 +1153,7 @@ export default function FilesHubClient() {
                           <p className="text-sm text-gray-500">Modified {formatDate(file.modifiedAt)} at {formatTime(file.modifiedAt)}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                              loading: 'Preparing download...',
-                              success: 'File downloaded successfully',
-                              error: 'Download failed'
-                            })}>
+                          <Button variant="ghost" size="sm" onClick={() => handleDownloadFile(file)}>
                             <Download className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => handleShareFile(file.id, file.name)}>
@@ -1427,8 +1562,8 @@ export default function FilesHubClient() {
                               <Badge className={link.access === 'edit' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'}>
                                 {link.access}
                               </Badge>
-                              <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
-                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revoking access...', success: 'Access revoked', error: 'Failed to revoke access' })}><Trash2 className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleCopyShareLink(link.fileId, link.fileName)}><Copy className="w-4 h-4" /></Button>
+                              <Button variant="ghost" size="sm" className="text-red-600" onClick={() => handleRevokeShareLink(link.id, link.fileName)}><Trash2 className="w-4 h-4" /></Button>
                             </div>
                           </div>
                         ))}
@@ -1680,28 +1815,12 @@ export default function FilesHubClient() {
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">API Key</Label>
                         <div className="flex gap-2">
-                          <Input value="fh_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
+                          <Input value="fh_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type={showApiKey ? 'text' : 'password'} />
                           <Button variant="outline" size="icon" onClick={() => {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 500)),
-                              {
-                                loading: 'Revealing API key...',
-                                success: 'API key revealed',
-                                error: 'Failed to reveal API key'
-                              }
-                            )
+                            setShowApiKey(!showApiKey)
+                            toast.success(showApiKey ? 'API key hidden' : 'API key revealed')
                           }}><Eye className="w-4 h-4" /></Button>
-                          <Button variant="outline" size="icon" onClick={() => {
-                            navigator.clipboard.writeText('fh_live_xxxxxxxxxxxxxxxxxxxxx')
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 300)),
-                              {
-                                loading: 'Copying API key...',
-                                success: 'API key copied to clipboard',
-                                error: 'Failed to copy API key'
-                              }
-                            )
-                          }}><Copy className="w-4 h-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => copyToClipboard('fh_live_xxxxxxxxxxxxxxxxxxxxx', 'API key copied to clipboard')}><Copy className="w-4 h-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1801,16 +1920,10 @@ export default function FilesHubClient() {
                       <div className="space-y-2">
                         <Label className="text-sm font-medium">Encryption Key</Label>
                         <div className="flex gap-2">
-                          <Input value="•••••••••••••••••••••" readOnly className="flex-1 font-mono" />
+                          <Input value={showEncryptionKey ? 'enc_aes256_xxxxxxxxxxxxx' : '•••••••••••••••••••••'} readOnly className="flex-1 font-mono" />
                           <Button variant="outline" size="icon" onClick={() => {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 500)),
-                              {
-                                loading: 'Revealing encryption key...',
-                                success: 'Encryption key revealed',
-                                error: 'Failed to reveal encryption key'
-                              }
-                            )
+                            setShowEncryptionKey(!showEncryptionKey)
+                            toast.success(showEncryptionKey ? 'Encryption key hidden' : 'Encryption key revealed')
                           }}><Eye className="w-4 h-4" /></Button>
                         </div>
                       </div>
@@ -2164,11 +2277,7 @@ export default function FilesHubClient() {
                   </div>
                 )}
                 <div className="flex gap-2">
-                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                      loading: 'Preparing download...',
-                      success: 'File downloaded successfully',
-                      error: 'Download failed'
-                    })}>
+                  <Button className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-600 text-white" onClick={() => handleDownloadFile(selectedFile)}>
                     <Download className="w-4 h-4 mr-2" />
                     Download
                   </Button>

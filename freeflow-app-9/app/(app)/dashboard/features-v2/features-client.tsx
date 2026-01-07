@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { downloadAsCsv, apiPost, deleteWithConfirmation } from '@/lib/button-handlers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -411,11 +412,7 @@ const mockFeaturesActivities = [
   { id: '3', user: 'QA', action: 'Approved', target: 'Mobile App v2 for beta', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockFeaturesQuickActions = [
-  { id: '1', label: 'New Feature', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening feature request form...', success: 'Submit your feature idea with priority scoring', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'View Roadmap', icon: 'map', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading roadmap...', success: 'Product Roadmap: View planned features across quarters', error: 'Failed to load roadmap' }), variant: 'default' as const },
-  { id: '3', label: 'Export Report', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating feature report...', success: 'Feature backlog exported to CSV', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside the component to access state
 
 export default function FeaturesClient() {
   const [features] = useState<Feature[]>(mockFeatures)
@@ -473,6 +470,97 @@ export default function FeaturesClient() {
     totalVotes: features.reduce((sum, f) => sum + f.votes.length, 0),
     avgRICE: features.reduce((sum, f) => sum + f.rice.score, 0) / features.length
   }), [features])
+
+  // Real handlers for feature operations
+  const handleCreateFeatureRequest = useCallback(() => {
+    // Open feature request dialog - for now, show form info
+    toast.info('Create Feature Request', {
+      description: 'Opening feature request form. Fill in name, description, category, and priority.'
+    })
+    // In a full implementation, this would open a dialog/modal
+  }, [])
+
+  const handleViewRoadmap = useCallback(() => {
+    setActiveTab('roadmap')
+    toast.success('Roadmap View', {
+      description: 'Switched to product roadmap view showing features across quarters'
+    })
+  }, [])
+
+  const handleExportFeatures = useCallback(() => {
+    const exportData = features.map(f => ({
+      id: f.id,
+      key: f.key,
+      name: f.name,
+      description: f.description,
+      status: f.status,
+      priority: f.priority,
+      category: f.category,
+      team: f.team,
+      owner: f.owner.name,
+      votes: f.votes.length,
+      rice_score: f.rice.score,
+      platforms: f.platforms.join(', '),
+      tags: f.tags.join(', '),
+      target_release: f.targetRelease || '',
+      created_at: f.createdAt,
+      updated_at: f.updatedAt
+    }))
+    downloadAsCsv(exportData, `features-export-${new Date().toISOString().split('T')[0]}.csv`)
+  }, [features])
+
+  const handleVoteForFeature = useCallback(async (featureId: string, featureName: string) => {
+    const result = await apiPost(`/api/features/${featureId}/vote`, { vote: 1 }, {
+      loading: `Voting for ${featureName}...`,
+      success: `Your vote for "${featureName}" has been recorded`,
+      error: 'Failed to record vote'
+    })
+    return result.success
+  }, [])
+
+  const handleToggleFeatureFlag = useCallback(async (featureId: string, featureName: string, currentEnabled: boolean) => {
+    const result = await apiPost(`/api/features/${featureId}/toggle`, { enabled: !currentEnabled }, {
+      loading: `${currentEnabled ? 'Disabling' : 'Enabling'} ${featureName}...`,
+      success: `Feature "${featureName}" has been ${currentEnabled ? 'disabled' : 'enabled'}`,
+      error: `Failed to ${currentEnabled ? 'disable' : 'enable'} feature`
+    })
+    return result.success
+  }, [])
+
+  const handleDeleteFeature = useCallback(async (featureId: string, featureName: string) => {
+    await deleteWithConfirmation(
+      async () => {
+        const response = await fetch(`/api/features/${featureId}`, { method: 'DELETE' })
+        if (!response.ok) throw new Error('Delete failed')
+      },
+      { itemName: `feature "${featureName}"` }
+    )
+  }, [])
+
+  // Quick actions for the toolbar
+  const featuresQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Feature',
+      icon: 'plus',
+      action: handleCreateFeatureRequest,
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'View Roadmap',
+      icon: 'map',
+      action: handleViewRoadmap,
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Export Report',
+      icon: 'download',
+      action: handleExportFeatures,
+      variant: 'outline' as const
+    },
+  ], [handleCreateFeatureRequest, handleViewRoadmap, handleExportFeatures])
 
   const getStatusColor = (status: FeatureStatus) => {
     const colors: Record<FeatureStatus, string> = {
@@ -571,7 +659,7 @@ export default function FeaturesClient() {
                 Plan, prioritize, and ship features with confidence
               </p>
             </div>
-            <Button className="bg-white text-indigo-600 hover:bg-white/90">
+            <Button className="bg-white text-indigo-600 hover:bg-white/90" onClick={handleCreateFeatureRequest}>
               <Plus className="h-4 w-4 mr-2" />
               New Feature
             </Button>
@@ -686,17 +774,18 @@ export default function FeaturesClient() {
             {/* Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { label: 'New Feature', icon: Plus, color: 'from-indigo-500 to-purple-500' },
-                { label: 'Toggle Flag', icon: ToggleRight, color: 'from-green-500 to-emerald-500' },
-                { label: 'Start Rollout', icon: TrendingUp, color: 'from-blue-500 to-cyan-500' },
-                { label: 'A/B Test', icon: Target, color: 'from-orange-500 to-red-500' },
-                { label: 'Add Segment', icon: Users, color: 'from-purple-500 to-pink-500' },
-                { label: 'View Metrics', icon: BarChart3, color: 'from-teal-500 to-cyan-500' },
-                { label: 'Compare', icon: GitBranch, color: 'from-pink-500 to-rose-500' },
-                { label: 'Export', icon: ExternalLink, color: 'from-gray-500 to-gray-600' }
+                { label: 'New Feature', icon: Plus, color: 'from-indigo-500 to-purple-500', onClick: handleCreateFeatureRequest },
+                { label: 'Toggle Flag', icon: ToggleRight, color: 'from-green-500 to-emerald-500', onClick: () => toast.info('Toggle Feature Flag', { description: 'Select a feature from the list to toggle its flag status' }) },
+                { label: 'Start Rollout', icon: TrendingUp, color: 'from-blue-500 to-cyan-500', onClick: () => toast.info('Start Rollout', { description: 'Select a feature to configure and start a gradual rollout' }) },
+                { label: 'A/B Test', icon: Target, color: 'from-orange-500 to-red-500', onClick: () => { setActiveTab('experiments'); toast.success('Switched to Experiments tab') } },
+                { label: 'Add Segment', icon: Users, color: 'from-purple-500 to-pink-500', onClick: () => { setActiveTab('segments'); toast.success('Switched to Segments tab') } },
+                { label: 'View Metrics', icon: BarChart3, color: 'from-teal-500 to-cyan-500', onClick: () => toast.info('View Metrics', { description: 'Select a released feature to view its performance metrics' }) },
+                { label: 'Compare', icon: GitBranch, color: 'from-pink-500 to-rose-500', onClick: () => toast.info('Compare Features', { description: 'Select multiple features to compare RICE scores and metrics' }) },
+                { label: 'Export', icon: ExternalLink, color: 'from-gray-500 to-gray-600', onClick: handleExportFeatures }
               ].map((action, i) => (
                 <button
                   key={i}
+                  onClick={action.onClick}
                   className="flex flex-col items-center gap-2 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow-lg hover:scale-105 transition-all group"
                 >
                   <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color} text-white group-hover:scale-110 transition-transform`}>
@@ -1052,7 +1141,7 @@ export default function FeaturesClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">User Segments</h2>
-              <Button>
+              <Button onClick={() => toast.info('Create Segment', { description: 'Define user targeting rules to control feature rollout to specific user groups' })}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Segment
               </Button>
@@ -1115,7 +1204,7 @@ export default function FeaturesClient() {
 
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">A/B Experiments</h2>
-              <Button>
+              <Button onClick={() => toast.info('New Experiment', { description: 'Create a new A/B test to compare feature variants with your users' })}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Experiment
               </Button>
@@ -1188,7 +1277,17 @@ export default function FeaturesClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-400 border-green-500/30">All Systems Operational</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button
+                    variant="outline"
+                    className="border-white/20 text-white hover:bg-white/10"
+                    onClick={async () => {
+                      const result = await apiPost('/api/features/sync', {}, {
+                        loading: 'Syncing feature settings...',
+                        success: 'Feature settings synchronized successfully',
+                        error: 'Failed to sync settings'
+                      })
+                    }}
+                  >
                     <RefreshCcw className="h-4 w-4 mr-2" />
                     Sync Settings
                   </Button>
@@ -1584,7 +1683,19 @@ export default function FeaturesClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Reset All Flags</p>
                               <p className="text-sm text-red-600">Reset all flags to default state</p>
                             </div>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Button
+                              variant="outline"
+                              className="border-red-300 text-red-600 hover:bg-red-100"
+                              onClick={async () => {
+                                if (confirm('Are you sure you want to reset all feature flags? This action cannot be undone.')) {
+                                  const result = await apiPost('/api/features/reset-all', {}, {
+                                    loading: 'Resetting all feature flags...',
+                                    success: 'All feature flags have been reset to their default state',
+                                    error: 'Failed to reset feature flags'
+                                  })
+                                }
+                              }}
+                            >
                               Reset
                             </Button>
                           </div>
@@ -1593,7 +1704,17 @@ export default function FeaturesClient() {
                               <p className="font-medium text-red-700 dark:text-red-400">Delete Project</p>
                               <p className="text-sm text-red-600">Permanently delete this project</p>
                             </div>
-                            <Button variant="outline" className="border-red-300 text-red-600 hover:bg-red-100">
+                            <Button
+                              variant="outline"
+                              className="border-red-300 text-red-600 hover:bg-red-100"
+                              onClick={() => deleteWithConfirmation(
+                                async () => {
+                                  const response = await fetch('/api/features/project', { method: 'DELETE' })
+                                  if (!response.ok) throw new Error('Delete failed')
+                                },
+                                { itemName: 'project and all its features' }
+                              )}
+                            >
                               Delete
                             </Button>
                           </div>
@@ -1635,7 +1756,7 @@ export default function FeaturesClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockFeaturesQuickActions}
+            actions={featuresQuickActions}
             variant="grid"
           />
         </div>
@@ -1796,7 +1917,7 @@ export default function FeaturesClient() {
                       <div className="text-center py-8 text-gray-500">
                         <Flag className="h-12 w-12 mx-auto mb-4 text-gray-300" />
                         <p>No rollout configured yet</p>
-                        <Button className="mt-4">Configure Rollout</Button>
+                        <Button className="mt-4" onClick={() => toast.info('Configure Rollout', { description: 'Set up rollout percentage, target segments, and deployment schedule for this feature' })}>Configure Rollout</Button>
                       </div>
                     )}
                   </TabsContent>
@@ -1852,7 +1973,11 @@ export default function FeaturesClient() {
                         <ThumbsUp className="h-5 w-5 text-indigo-600" />
                         <span className="font-semibold">{selectedFeature.votes.length} votes</span>
                       </div>
-                      <Button variant="outline" size="sm">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleVoteForFeature(selectedFeature.id, selectedFeature.name)}
+                      >
                         <ThumbsUp className="h-4 w-4 mr-2" />
                         Vote
                       </Button>

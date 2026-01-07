@@ -1054,11 +1054,11 @@ export default function AllocationClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'New Allocation', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => { setFormData(initialFormState); setShowCreateDialog(true) } },
-                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing assignment...', success: 'Select a resource to assign', error: 'Failed to prepare assignment' }) },
+                { icon: UserCheck, label: 'Assign', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.success('Select a resource to assign') },
                 { icon: Calendar, label: 'Schedule', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('schedule') },
-                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading time entry...', success: 'Time tracking feature ready', error: 'Failed to load time entry' }) },
-                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading approvals...', success: 'Select pending allocations to approve', error: 'Failed to load approvals' }) },
-                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing transfer...', success: 'Transfer allocation between projects', error: 'Failed to prepare transfer' }) },
+                { icon: Clock, label: 'Time Entry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.success('Time tracking feature ready') },
+                { icon: CheckCircle, label: 'Approve', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.success('Select pending allocations to approve') },
+                { icon: GitBranch, label: 'Transfer', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.success('Transfer allocation between projects') },
                 { icon: BarChart3, label: 'Reports', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('reports') },
                 { icon: Settings, label: 'Settings', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('settings') },
               ].map((action, idx) => (

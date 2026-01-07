@@ -212,10 +212,36 @@ const mockExpensesActivities = [
   { id: '3', user: 'Accountant', action: 'Processed', target: '$8,500 reimbursement batch', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockExpensesQuickActions = [
-  { id: '1', label: 'New Expense', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening expense form...', success: 'Enter expense details and attach receipt', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'Scan Receipt', icon: 'camera', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Opening camera...', success: 'Take a photo of your receipt for auto-fill', error: 'Camera unavailable' }), variant: 'default' as const },
-  { id: '3', label: 'Report', icon: 'file-text', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating expense report...', success: 'Q4 Report: $12,450 across 45 expenses', error: 'Report failed' }), variant: 'outline' as const },
+// Quick actions will be defined inside the component to access state setters
+const getExpensesQuickActions = (
+  setShowNewExpenseDialog: (show: boolean) => void,
+  handleScanReceipt: () => void,
+  handleGenerateReport: () => void
+) => [
+  {
+    id: '1',
+    label: 'New Expense',
+    icon: 'plus',
+    action: () => {
+      setShowNewExpenseDialog(true)
+      toast.success('Expense form opened', { description: 'Enter expense details and attach receipt' })
+    },
+    variant: 'default' as const
+  },
+  {
+    id: '2',
+    label: 'Scan Receipt',
+    icon: 'camera',
+    action: handleScanReceipt,
+    variant: 'default' as const
+  },
+  {
+    id: '3',
+    label: 'Report',
+    icon: 'file-text',
+    action: handleGenerateReport,
+    variant: 'outline' as const
+  },
 ]
 
 export default function ExpensesClient({ initialExpenses }: ExpensesClientProps) {
@@ -416,15 +442,50 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     }
   }
 
-  const handleExportExpenses = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1500)),
-      {
-        loading: 'Exporting expense data...',
-        success: 'Export complete! Your expense data has been exported',
-        error: 'Failed to export expense data'
+  const handleExportExpenses = async () => {
+    const exportExpenseData = async () => {
+      // Collect all expense data for export
+      const allExpenses = dbExpenses?.length ? dbExpenses : reports
+      const exportData = {
+        exportDate: new Date().toISOString(),
+        totalExpenses: allExpenses.length,
+        totalAmount: allExpenses.reduce((sum: number, r: any) => sum + (r.total_amount || r.totalAmount || 0), 0),
+        expenses: allExpenses.map((expense: any) => ({
+          id: expense.id,
+          title: expense.expense_title || expense.title,
+          amount: expense.total_amount || expense.totalAmount,
+          status: expense.status,
+          category: expense.expense_category || expense.lineItems?.[0]?.category,
+          date: expense.expense_date || expense.createdAt,
+          submittedBy: expense.submittedBy?.name || 'Current User'
+        }))
       }
-    )
+
+      // Create and download CSV file
+      const csvHeaders = ['ID', 'Title', 'Amount', 'Status', 'Category', 'Date', 'Submitted By']
+      const csvRows = exportData.expenses.map((e: any) =>
+        [e.id, e.title, e.amount, e.status, e.category, e.date, e.submittedBy].join(',')
+      )
+      const csvContent = [csvHeaders.join(','), ...csvRows].join('\n')
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `expenses-export-${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      return exportData
+    }
+
+    toast.promise(exportExpenseData(), {
+      loading: 'Exporting expense data...',
+      success: (data) => `Export complete! ${data.totalExpenses} expenses exported`,
+      error: 'Failed to export expense data'
+    })
   }
 
   const handleSubmitReport = async (expenseId: string, title: string) => {
@@ -444,16 +505,109 @@ export default function ExpensesClient({ initialExpenses }: ExpensesClientProps)
     }
   }
 
-  const handleAddReceipt = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 1200)),
-      {
-        loading: 'Opening receipt scanner...',
-        success: 'Receipt scanner ready - capture your receipt',
-        error: 'Failed to open receipt scanner'
+  const handleAddReceipt = async () => {
+    const openReceiptScanner = async (): Promise<{ ready: boolean; method: string }> => {
+      // Check for camera/file input availability
+      const hasCamera = 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices
+
+      if (hasCamera) {
+        // Try to access camera for receipt scanning
+        try {
+          // Just check if camera is available, don't actually start streaming
+          const devices = await navigator.mediaDevices.enumerateDevices()
+          const hasVideoInput = devices.some(device => device.kind === 'videoinput')
+
+          if (hasVideoInput) {
+            // Create file input for receipt capture
+            const input = document.createElement('input')
+            input.type = 'file'
+            input.accept = 'image/*'
+            input.capture = 'environment' // Use back camera on mobile
+
+            input.onchange = (e) => {
+              const file = (e.target as HTMLInputElement).files?.[0]
+              if (file) {
+                toast.success('Receipt captured!', { description: `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)` })
+                // Here you would typically upload the file to storage
+              }
+            }
+
+            input.click()
+            return { ready: true, method: 'camera' }
+          }
+        } catch (err) {
+          console.log('Camera access check failed, falling back to file upload')
+        }
       }
-    )
+
+      // Fallback to file upload
+      const input = document.createElement('input')
+      input.type = 'file'
+      input.accept = 'image/*,.pdf'
+
+      input.onchange = (e) => {
+        const file = (e.target as HTMLInputElement).files?.[0]
+        if (file) {
+          toast.success('Receipt uploaded!', { description: `File: ${file.name} (${(file.size / 1024).toFixed(1)} KB)` })
+          // Here you would typically upload the file to storage
+        }
+      }
+
+      input.click()
+      return { ready: true, method: 'file_upload' }
+    }
+
+    toast.promise(openReceiptScanner(), {
+      loading: 'Opening receipt scanner...',
+      success: (result) => result.method === 'camera'
+        ? 'Camera ready - capture your receipt'
+        : 'File picker ready - select your receipt',
+      error: 'Failed to open receipt scanner'
+    })
   }
+
+  // Handler for scanning receipt from quick actions
+  const handleScanReceipt = () => {
+    handleAddReceipt()
+  }
+
+  // Handler for generating expense report
+  const handleGenerateReport = async () => {
+    const generateReport = async () => {
+      const allExpenses = dbExpenses?.length ? dbExpenses : reports
+      const totalAmount = allExpenses.reduce((sum: number, r: any) => sum + (r.total_amount || r.totalAmount || 0), 0)
+      const expenseCount = allExpenses.length
+
+      // Generate a simple report summary
+      const reportData = {
+        generatedAt: new Date().toISOString(),
+        quarter: `Q${Math.ceil((new Date().getMonth() + 1) / 3)}`,
+        year: new Date().getFullYear(),
+        totalAmount,
+        expenseCount,
+        byStatus: {
+          pending: allExpenses.filter((e: any) => e.status === 'pending').length,
+          approved: allExpenses.filter((e: any) => e.status === 'approved').length,
+          reimbursed: allExpenses.filter((e: any) => e.status === 'reimbursed').length,
+        }
+      }
+
+      return reportData
+    }
+
+    toast.promise(generateReport(), {
+      loading: 'Generating expense report...',
+      success: (data) => `${data.quarter} ${data.year} Report: $${data.totalAmount.toLocaleString()} across ${data.expenseCount} expenses`,
+      error: 'Failed to generate report'
+    })
+  }
+
+  // Get quick actions with real handlers
+  const expensesQuickActions = getExpensesQuickActions(
+    setShowNewExpenseDialog,
+    handleScanReceipt,
+    handleGenerateReport
+  )
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-fuchsia-50 dark:bg-none dark:bg-gray-900">

@@ -246,10 +246,10 @@ const mockSystemInsightsActivities = [
 ]
 
 const mockSystemInsightsQuickActions = [
-  { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Deploying system...', success: 'System deployed successfully', error: 'Deployment failed' }) },
-  { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Restarting services...', success: 'Services restarted successfully', error: 'Failed to restart services' }) },
-  { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening system logs...', success: 'System Logs opened successfully', error: 'Failed to open system logs' }) },
-  { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading metrics dashboard...', success: 'Metrics Dashboard loaded successfully', error: 'Failed to load metrics dashboard' }) },
+  { id: '1', label: 'Deploy', icon: 'Rocket', shortcut: 'D', action: () => toast.success('System deployed successfully') },
+  { id: '2', label: 'Restart', icon: 'RefreshCw', shortcut: 'R', action: () => toast.success('Services restarted successfully') },
+  { id: '3', label: 'Logs', icon: 'Terminal', shortcut: 'L', action: () => toast.success('System Logs opened successfully') },
+  { id: '4', label: 'Metrics', icon: 'BarChart3', shortcut: 'M', action: () => toast.success('Metrics Dashboard loaded successfully') },
 ]
 
 // Database types

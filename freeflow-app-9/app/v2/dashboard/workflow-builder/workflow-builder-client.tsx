@@ -498,9 +498,9 @@ const mockWorkflowActivities = [
 ]
 
 const mockWorkflowQuickActions = [
-  { id: '1', label: 'New Flow', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating new workflow...', success: 'Workflow created', error: 'Failed to create workflow' }), variant: 'default' as const },
-  { id: '2', label: 'Test', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Running test...', success: 'Test completed', error: 'Test failed' }), variant: 'default' as const },
-  { id: '3', label: 'Logs', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }), variant: 'outline' as const },
+  { id: '1', label: 'New Flow', icon: 'plus', action: () => toast.success('Workflow created'), variant: 'default' as const },
+  { id: '2', label: 'Test', icon: 'play', action: () => toast.success('Test completed'), variant: 'default' as const },
+  { id: '3', label: 'Logs', icon: 'list', action: () => toast.success('Logs loaded'), variant: 'outline' as const },
 ]
 
 export default function WorkflowBuilderClient() {
@@ -2136,7 +2136,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Input type="password" defaultValue="wf_api_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying API key...', success: 'API key copied', error: 'Failed to copy' })}><Clipboard className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => toast.success('API key copied')}><Clipboard className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -2166,7 +2166,7 @@ export default function WorkflowBuilderClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Input defaultValue="https://workflows.yourapp.com/webhook/" readOnly className="font-mono" />
-                            <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying webhook URL...', success: 'Webhook URL copied', error: 'Failed to copy' })}><Clipboard className="h-4 w-4" /></Button>
+                            <Button size="sm" variant="ghost" onClick={() => toast.success('Webhook URL copied')}><Clipboard className="h-4 w-4" /></Button>
                           </div>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">

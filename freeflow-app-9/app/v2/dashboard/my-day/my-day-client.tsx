@@ -560,10 +560,45 @@ const mockMyDayActivities = [
   { id: '3', user: 'You', action: 'Started', target: 'focus session (2 hrs)', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
+// Real API handlers for quick actions
+const handleQuickAddTask = async () => {
+  const response = await fetch('/api/tasks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'create',
+      title: 'New Task',
+      priority: 'medium',
+      due_date: new Date().toISOString().split('T')[0]
+    })
+  })
+  if (!response.ok) throw new Error('Failed to create task')
+  return response.json()
+}
+
+const handleStartFocusSession = async () => {
+  const response = await fetch('/api/tasks', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'ai_optimize',
+      date: new Date().toISOString()
+    })
+  })
+  if (!response.ok) throw new Error('Failed to start focus session')
+  return response.json()
+}
+
+const handleLoadReview = async () => {
+  const response = await fetch('/api/tasks?today=true')
+  if (!response.ok) throw new Error('Failed to load review')
+  return response.json()
+}
+
 const mockMyDayQuickActions = [
-  { id: '1', label: 'Add Task', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Adding task...', success: 'Task added successfully', error: 'Failed to add task' }), variant: 'default' as const },
-  { id: '2', label: 'Focus', icon: 'target', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Starting focus session...', success: 'Focus mode activated', error: 'Failed to start focus' }), variant: 'default' as const },
-  { id: '3', label: 'Review', icon: 'check', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading review...', success: 'Review ready', error: 'Failed to load review' }), variant: 'outline' as const },
+  { id: '1', label: 'Add Task', icon: 'plus', action: () => toast.promise(handleQuickAddTask(), { loading: 'Adding task...', success: 'Task added successfully', error: 'Failed to add task' }), variant: 'default' as const },
+  { id: '2', label: 'Focus', icon: 'target', action: () => toast.promise(handleStartFocusSession(), { loading: 'Starting focus session...', success: 'Focus mode activated', error: 'Failed to start focus' }), variant: 'default' as const },
+  { id: '3', label: 'Review', icon: 'check', action: () => toast.promise(handleLoadReview(), { loading: 'Loading review...', success: 'Review ready', error: 'Failed to load review' }), variant: 'outline' as const },
 ]
 
 export default function MyDayClient({ initialTasks, initialSessions }: MyDayClientProps) {

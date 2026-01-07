@@ -331,9 +331,9 @@ const widgetsActivities = [
 ]
 
 const widgetsQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new widget...', success: 'Widget created successfully', error: 'Failed to create widget' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Exporting widgets...', success: 'Widgets exported successfully', error: 'Export failed' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Widget', { description: 'Widget creation form ready' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Started', { description: 'Widgets exported successfully' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Widget settings loaded' }) },
 ]
 
 export default function WidgetsClient() {

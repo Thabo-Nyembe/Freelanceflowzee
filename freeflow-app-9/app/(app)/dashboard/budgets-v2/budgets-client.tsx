@@ -811,15 +811,8 @@ export default function BudgetsClient({ initialBudgets }: { initialBudgets: Budg
                   New Budget
                 </Button>
                 <Button variant="ghost" className="text-white hover:bg-white/20" onClick={() => {
-                  toast.promise(
-                    new Promise(resolve => setTimeout(resolve, 500)),
-                    {
-                      loading: 'Opening settings...',
-                      success: 'Settings opened',
-                      error: 'Failed to open settings'
-                    }
-                  )
                   setActiveTab('settings')
+                  toast.success('Settings opened')
                 }}>
                   <Settings className="h-5 w-5" />
                 </Button>

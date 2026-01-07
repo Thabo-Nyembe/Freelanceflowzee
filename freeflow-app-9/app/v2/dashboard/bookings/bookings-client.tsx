@@ -94,9 +94,9 @@ const mockBookingsActivities = [
 ]
 
 const mockBookingsQuickActions = [
-  { id: '1', label: 'New Booking', icon: 'plus', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new booking...', success: 'Booking form ready', error: 'Failed to create booking' }), variant: 'default' as const },
-  { id: '2', label: 'Block Time', icon: 'clock', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Blocking time slot...', success: 'Time slot blocked', error: 'Failed to block time slot' }), variant: 'default' as const },
-  { id: '3', label: 'View Calendar', icon: 'calendar', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Loading calendar view...', success: 'Calendar loaded', error: 'Failed to load calendar' }), variant: 'outline' as const },
+  { id: '1', label: 'New Booking', icon: 'plus', action: () => toast.success('New Booking', { description: 'Booking form ready' }), variant: 'default' as const },
+  { id: '2', label: 'Block Time', icon: 'clock', action: () => toast.success('Time Blocked', { description: 'Time slot blocked' }), variant: 'default' as const },
+  { id: '3', label: 'View Calendar', icon: 'calendar', action: () => toast.success('Calendar', { description: 'Calendar view loaded' }), variant: 'outline' as const },
 ]
 
 export default function BookingsClient({ initialBookings }: { initialBookings: Booking[] }) {

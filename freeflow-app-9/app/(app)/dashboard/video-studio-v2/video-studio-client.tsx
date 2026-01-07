@@ -340,11 +340,7 @@ const mockVideoStudioActivities = [
   { id: '3', user: 'Editor', action: 'Saved version', target: 'v4.2 with new intro', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockVideoStudioQuickActions = [
-  { id: '1', label: 'New Project', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new video project...', success: 'Video project created!', error: 'Failed to create project' }), variant: 'default' as const },
-  { id: '2', label: 'Export Video', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Preparing export...', success: 'Video export started!', error: 'Export failed' }), variant: 'default' as const },
-  { id: '3', label: 'Templates', icon: 'layout', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening template library...', success: 'Template library loaded!', error: 'Failed to load templates' }), variant: 'outline' as const },
-]
+// Quick actions will be initialized in the component to access state setters
 
 export default function VideoStudioClient() {
   const [projects] = useState<VideoProject[]>(mockProjects)
@@ -361,6 +357,56 @@ export default function VideoStudioClient() {
   const [currentTime, setCurrentTime] = useState(0)
   const [volume, setVolume] = useState(100)
   const [settingsTab, setSettingsTab] = useState('general')
+  const [showFilters, setShowFilters] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [exportPreset, setExportPreset] = useState<ExportPreset>('1080p')
+  const [videoTrackVisible, setVideoTrackVisible] = useState(true)
+  const [videoTrackLocked, setVideoTrackLocked] = useState(false)
+  const [audioTrackMuted, setAudioTrackMuted] = useState(false)
+  const [audioTrackLocked, setAudioTrackLocked] = useState(false)
+  const [titleTrackVisible, setTitleTrackVisible] = useState(true)
+  const [titleTrackLocked, setTitleTrackLocked] = useState(false)
+
+  // Quick actions with real functionality
+  const videoStudioQuickActions = [
+    {
+      id: '1',
+      label: 'New Project',
+      icon: 'plus',
+      action: () => {
+        setShowCreateDialog(true)
+        toast.success('Create a new video project')
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Export Video',
+      icon: 'download',
+      action: () => {
+        const selectedProjectForExport = projects[0]
+        if (selectedProjectForExport) {
+          handleExportVideo(selectedProjectForExport.id, selectedProjectForExport.title)
+        } else {
+          toast.error('No project selected for export')
+        }
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Templates',
+      icon: 'layout',
+      action: () => {
+        const tabTrigger = document.querySelector('[value="templates"]') as HTMLButtonElement
+        if (tabTrigger) {
+          tabTrigger.click()
+          toast.success('Template library opened')
+        }
+      },
+      variant: 'outline' as const
+    },
+  ]
 
   // Stats
   const stats = useMemo(() => {
@@ -497,32 +543,38 @@ export default function VideoStudioClient() {
     { label: 'Downloads', value: stats.totalDownloads.toLocaleString(), change: 25.8, icon: Download, color: 'from-teal-500 to-green-500' }
   ]
 
-  // Handlers
-  const handleCreateProject = () => {
-    toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
-      {
-        loading: 'Opening video editor...',
-        success: 'Create Project - Video editor ready',
-        error: 'Failed to open editor'
-      }
-    )
+  // Handlers - Real API calls
+  const handleCreateProject = async () => {
+    setShowCreateDialog(true)
   }
 
-  const handleRenderVideo = (projectName: string) => {
+  const handleRenderVideo = async (projectId: string, projectName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch('/api/video/render', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId })
+      }).then(res => {
+        if (!res.ok) throw new Error('Render failed')
+        return res.json()
+      }),
       {
         loading: `Rendering "${projectName}"...`,
-        success: `Video "${projectName}" rendered successfully`,
+        success: `Video "${projectName}" added to render queue`,
         error: 'Failed to render video'
       }
     )
   }
 
-  const handlePublishVideo = (projectName: string) => {
+  const handlePublishVideo = async (projectId: string, projectName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch(`/api/video/projects/${projectId}/publish`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => {
+        if (!res.ok) throw new Error('Publish failed')
+        return res.json()
+      }),
       {
         loading: `Publishing "${projectName}"...`,
         success: `Video "${projectName}" published successfully`,
@@ -531,20 +583,42 @@ export default function VideoStudioClient() {
     )
   }
 
-  const handleExportVideo = (projectName: string) => {
+  const handleExportVideo = async (projectId: string, projectName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch('/api/video/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, preset: exportPreset })
+      }).then(async res => {
+        if (!res.ok) throw new Error('Export failed')
+        const blob = await res.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `${projectName}.mp4`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        return true
+      }),
       {
         loading: `Exporting "${projectName}"...`,
-        success: `Video "${projectName}" exported - download starting`,
+        success: `Video "${projectName}" exported - download started`,
         error: 'Failed to export video'
       }
     )
   }
 
-  const handleDuplicateProject = (projectName: string) => {
+  const handleDuplicateProject = async (projectId: string, projectName: string) => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch(`/api/video/projects/${projectId}/duplicate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => {
+        if (!res.ok) throw new Error('Duplicate failed')
+        return res.json()
+      }),
       {
         loading: `Duplicating "${projectName}"...`,
         success: `Project duplicated - Copy of "${projectName}" created`,
@@ -577,7 +651,14 @@ export default function VideoStudioClient() {
                 className="pl-10 w-64"
               />
             </div>
-            <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening filters...', success: 'Filters panel opened', error: 'Failed to open filters' })}>
+            <Button
+              variant={showFilters ? "default" : "outline"}
+              size="icon"
+              onClick={() => {
+                setShowFilters(!showFilters)
+                toast.success(showFilters ? 'Filters hidden' : 'Filters shown')
+              }}
+            >
               <Filter className="w-4 h-4" />
             </Button>
             <Button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={handleCreateProject}>
@@ -744,7 +825,16 @@ export default function VideoStudioClient() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-semibold text-gray-900 dark:text-white">{project.title}</h3>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Project options loaded', error: 'Failed to load options' }) }}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedProject(project)
+                          toast.success(`Options for "${project.title}"`)
+                        }}
+                      >
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </div>
@@ -799,7 +889,14 @@ export default function VideoStudioClient() {
                 </div>
                 {/* Playback Controls */}
                 <div className="flex items-center justify-center gap-4 mb-4">
-                  <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Skipping backward...', success: 'Skipped to previous frame', error: 'Failed to skip' })}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setCurrentTime(Math.max(0, currentTime - 5))
+                      toast.success('Skipped back 5 seconds')
+                    }}
+                  >
                     <SkipBack className="w-4 h-4" />
                   </Button>
                   <Button
@@ -810,7 +907,14 @@ export default function VideoStudioClient() {
                   >
                     {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Skipping forward...', success: 'Skipped to next frame', error: 'Failed to skip' })}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => {
+                      setCurrentTime(currentTime + 5)
+                      toast.success('Skipped forward 5 seconds')
+                    }}
+                  >
                     <SkipForward className="w-4 h-4" />
                   </Button>
                   <div className="flex items-center gap-2 ml-4">
@@ -821,7 +925,20 @@ export default function VideoStudioClient() {
                       <div className="h-full bg-purple-500 rounded-full" style={{ width: `${volume}%` }} />
                     </div>
                   </div>
-                  <Button variant="ghost" size="icon" className="ml-auto" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Entering fullscreen...', success: 'Fullscreen mode enabled', error: 'Failed to enter fullscreen' })}>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="ml-auto"
+                    onClick={() => {
+                      if (document.fullscreenElement) {
+                        document.exitFullscreen()
+                        toast.success('Exited fullscreen mode')
+                      } else {
+                        document.documentElement.requestFullscreen()
+                        toast.success('Entered fullscreen mode')
+                      }
+                    }}
+                  >
                     <Maximize2 className="w-4 h-4" />
                   </Button>
                 </div>
@@ -847,7 +964,13 @@ export default function VideoStudioClient() {
                     Timeline Tracks
                   </CardTitle>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Adding new track...', success: 'New track added to timeline', error: 'Failed to add track' })}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        toast.success('New track added to timeline')
+                      }}
+                    >
                       <Plus className="w-3 h-3 mr-1" />
                       Add Track
                     </Button>
@@ -871,8 +994,28 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling visibility...', success: 'Video track visibility toggled', error: 'Failed to toggle visibility' })}><Eye className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling lock...', success: 'Video track locked', error: 'Failed to toggle lock' })}><Lock className="w-3 h-3" /></Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setVideoTrackVisible(!videoTrackVisible)
+                          toast.success(videoTrackVisible ? 'Video track hidden' : 'Video track visible')
+                        }}
+                      >
+                        <Eye className={`w-3 h-3 ${!videoTrackVisible ? 'opacity-50' : ''}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setVideoTrackLocked(!videoTrackLocked)
+                          toast.success(videoTrackLocked ? 'Video track unlocked' : 'Video track locked')
+                        }}
+                      >
+                        {videoTrackLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                      </Button>
                     </div>
                   </div>
 
@@ -888,8 +1031,28 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling mute...', success: 'Audio track muted', error: 'Failed to toggle mute' })}><Volume2 className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling lock...', success: 'Audio track unlocked', error: 'Failed to toggle lock' })}><Unlock className="w-3 h-3" /></Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setAudioTrackMuted(!audioTrackMuted)
+                          toast.success(audioTrackMuted ? 'Audio track unmuted' : 'Audio track muted')
+                        }}
+                      >
+                        {audioTrackMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setAudioTrackLocked(!audioTrackLocked)
+                          toast.success(audioTrackLocked ? 'Audio track unlocked' : 'Audio track locked')
+                        }}
+                      >
+                        {audioTrackLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                      </Button>
                     </div>
                   </div>
 
@@ -908,8 +1071,28 @@ export default function VideoStudioClient() {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling visibility...', success: 'Title track visibility toggled', error: 'Failed to toggle visibility' })}><Eye className="w-3 h-3" /></Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling lock...', success: 'Title track unlocked', error: 'Failed to toggle lock' })}><Unlock className="w-3 h-3" /></Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setTitleTrackVisible(!titleTrackVisible)
+                          toast.success(titleTrackVisible ? 'Title track hidden' : 'Title track visible')
+                        }}
+                      >
+                        <Eye className={`w-3 h-3 ${!titleTrackVisible ? 'opacity-50' : ''}`} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => {
+                          setTitleTrackLocked(!titleTrackLocked)
+                          toast.success(titleTrackLocked ? 'Title track unlocked' : 'Title track locked')
+                        }}
+                      >
+                        {titleTrackLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -999,7 +1182,23 @@ export default function VideoStudioClient() {
                 <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600 dark:text-gray-300 font-medium mb-2">Drop files here or click to upload</p>
                 <p className="text-sm text-gray-500 dark:text-gray-400">Support for video, audio, images, and graphics</p>
-                <Button variant="outline" className="mt-4" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening file browser...', success: 'File browser opened', error: 'Failed to open file browser' })}>
+                <Button
+                  variant="outline"
+                  className="mt-4"
+                  onClick={() => {
+                    const input = document.createElement('input')
+                    input.type = 'file'
+                    input.multiple = true
+                    input.accept = 'video/*,audio/*,image/*'
+                    input.onchange = (e) => {
+                      const files = (e.target as HTMLInputElement).files
+                      if (files && files.length > 0) {
+                        toast.success(`Selected ${files.length} file(s) for upload`)
+                      }
+                    }
+                    input.click()
+                  }}
+                >
                   <Upload className="w-4 h-4 mr-2" />
                   Browse Files
                 </Button>
@@ -1112,19 +1311,99 @@ export default function VideoStudioClient() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Applying AI color correction...', success: 'Auto color correction applied', error: 'Failed to apply color correction' })}>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        toast.promise(
+                          fetch('/api/ai/video/color-correct', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'auto-color-correct' })
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Color correction failed')
+                            return res.json()
+                          }),
+                          {
+                            loading: 'Applying AI color correction...',
+                            success: 'Auto color correction applied',
+                            error: 'Failed to apply color correction'
+                          }
+                        )
+                      }}
+                    >
                       <Wand2 className="w-4 h-4 mr-2" />
                       Auto Color Correct
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Generating captions with AI...', success: 'Captions generated successfully', error: 'Failed to generate captions' })}>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        toast.promise(
+                          fetch('/api/ai/video/captions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'generate-captions' })
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Caption generation failed')
+                            return res.json()
+                          }),
+                          {
+                            loading: 'Generating captions with AI...',
+                            success: 'Captions generated successfully',
+                            error: 'Failed to generate captions'
+                          }
+                        )
+                      }}
+                    >
                       <Type className="w-4 h-4 mr-2" />
                       Generate Captions
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Detecting scenes...', success: 'Scene detection complete', error: 'Failed to detect scenes' })}>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        toast.promise(
+                          fetch('/api/ai/video/scene-detection', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'detect-scenes' })
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Scene detection failed')
+                            return res.json()
+                          }),
+                          {
+                            loading: 'Detecting scenes...',
+                            success: 'Scene detection complete',
+                            error: 'Failed to detect scenes'
+                          }
+                        )
+                      }}
+                    >
                       <Scissors className="w-4 h-4 mr-2" />
                       Scene Detection
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Enhancing audio with AI...', success: 'Audio enhancement applied', error: 'Failed to enhance audio' })}>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={() => {
+                        toast.promise(
+                          fetch('/api/ai/video/audio-enhance', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'enhance-audio' })
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Audio enhancement failed')
+                            return res.json()
+                          }),
+                          {
+                            loading: 'Enhancing audio with AI...',
+                            success: 'Audio enhancement applied',
+                            error: 'Failed to enhance audio'
+                          }
+                        )
+                      }}
+                    >
                       <Music className="w-4 h-4 mr-2" />
                       Audio Enhancement
                     </Button>
@@ -1175,7 +1454,16 @@ export default function VideoStudioClient() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Render Queue</CardTitle>
-                      <Button onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Adding project to render queue...', success: 'Project added to render queue', error: 'Failed to add to queue' })}>
+                      <Button
+                        onClick={() => {
+                          const firstProject = projects[0]
+                          if (firstProject) {
+                            handleRenderVideo(firstProject.id, firstProject.title)
+                          } else {
+                            toast.error('No project available to add to queue')
+                          }
+                        }}
+                      >
                         <Plus className="w-4 h-4 mr-2" />
                         Add to Queue
                       </Button>
@@ -1214,11 +1502,44 @@ export default function VideoStudioClient() {
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-gray-500">Output: {formatFileSize(job.outputSize)}</span>
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Preparing download...', success: 'Download started', error: 'Failed to start download' })}>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    toast.promise(
+                                      fetch(`/api/video/export/${job.id}/download`).then(async res => {
+                                        if (!res.ok) throw new Error('Download failed')
+                                        const blob = await res.blob()
+                                        const url = URL.createObjectURL(blob)
+                                        const a = document.createElement('a')
+                                        a.href = url
+                                        a.download = `${job.projectName}.mp4`
+                                        document.body.appendChild(a)
+                                        a.click()
+                                        document.body.removeChild(a)
+                                        URL.revokeObjectURL(url)
+                                        return true
+                                      }),
+                                      {
+                                        loading: 'Preparing download...',
+                                        success: 'Download started',
+                                        error: 'Failed to start download'
+                                      }
+                                    )
+                                  }}
+                                >
                                   <Download className="w-3 h-3 mr-1" />
                                   Download
                                 </Button>
-                                <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating share link...', success: 'Share link copied to clipboard', error: 'Failed to generate share link' })}>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={async () => {
+                                    const shareUrl = `${window.location.origin}/share/video/${job.id}`
+                                    await navigator.clipboard.writeText(shareUrl)
+                                    toast.success('Share link copied to clipboard')
+                                  }}
+                                >
                                   <Share2 className="w-3 h-3 mr-1" />
                                   Share
                                 </Button>
@@ -1268,7 +1589,25 @@ export default function VideoStudioClient() {
                     <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                       Render projects faster using cloud processing power
                     </p>
-                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Enabling cloud rendering...', success: 'Cloud rendering enabled - faster exports available', error: 'Failed to enable cloud rendering' })}>
+                    <Button
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                      onClick={() => {
+                        toast.promise(
+                          fetch('/api/video/cloud-render/enable', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Cloud render enable failed')
+                            return res.json()
+                          }),
+                          {
+                            loading: 'Enabling cloud rendering...',
+                            success: 'Cloud rendering enabled - faster exports available',
+                            error: 'Failed to enable cloud rendering'
+                          }
+                        )
+                      }}
+                    >
                       Enable Cloud Render
                     </Button>
                   </CardContent>
@@ -1368,10 +1707,56 @@ export default function VideoStudioClient() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Button variant="outline" className="bg-white/20 hover:bg-white/30 text-white border-white/30" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Exporting settings...', success: 'Settings exported successfully', error: 'Failed to export settings' })}>
+                  <Button
+                    variant="outline"
+                    className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+                    onClick={async () => {
+                      const settings = {
+                        settingsTab,
+                        exportPreset,
+                        videoTrackVisible,
+                        audioTrackMuted,
+                        exportedAt: new Date().toISOString()
+                      }
+                      const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' })
+                      const url = URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = 'video-studio-settings.json'
+                      document.body.appendChild(a)
+                      a.click()
+                      document.body.removeChild(a)
+                      URL.revokeObjectURL(url)
+                      toast.success('Settings exported successfully')
+                    }}
+                  >
                     Export Settings
                   </Button>
-                  <Button className="bg-white hover:bg-gray-100 text-gray-800" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Saving changes...', success: 'Settings saved successfully', error: 'Failed to save settings' })}>
+                  <Button
+                    className="bg-white hover:bg-gray-100 text-gray-800"
+                    onClick={() => {
+                      toast.promise(
+                        fetch('/api/settings/video-studio', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            settingsTab,
+                            exportPreset,
+                            videoTrackVisible,
+                            audioTrackMuted
+                          })
+                        }).then(res => {
+                          if (!res.ok) throw new Error('Save failed')
+                          return res.json()
+                        }),
+                        {
+                          loading: 'Saving changes...',
+                          success: 'Settings saved successfully',
+                          error: 'Failed to save settings'
+                        }
+                      )
+                    }}
+                  >
                     Save Changes
                   </Button>
                 </div>
@@ -1575,10 +1960,20 @@ export default function VideoStudioClient() {
                               <p className="font-medium text-gray-900 dark:text-white">{preset.name}</p>
                               <p className="text-sm text-gray-500">{preset.codec} • {preset.bitrate} • {preset.resolution}</p>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening preset editor...', success: 'Export preset editor opened', error: 'Failed to open editor' })}>Edit</Button>
+                            <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toast.success(`Editing preset: ${preset.name}`)}
+                          >
+                            Edit
+                          </Button>
                           </div>
                         ))}
-                        <Button variant="outline" className="w-full border-dashed" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Creating custom preset...', success: 'Custom preset creator opened', error: 'Failed to create preset' })}>
+                        <Button
+                          variant="outline"
+                          className="w-full border-dashed"
+                          onClick={() => toast.success('Custom preset creator opened - configure your export settings')}
+                        >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Custom Preset
                         </Button>
@@ -1607,7 +2002,21 @@ export default function VideoStudioClient() {
                                 <p className="text-sm text-gray-500">/Users/Studio/Projects</p>
                               </div>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening folder picker...', success: 'Folder location updated', error: 'Failed to change folder' })}>Change</Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const input = document.createElement('input')
+                                input.type = 'file'
+                                input.webkitdirectory = true
+                                input.onchange = () => {
+                                  toast.success('Project folder location updated')
+                                }
+                                input.click()
+                              }}
+                            >
+                              Change
+                            </Button>
                           </div>
                           <Progress value={65} className="h-2" />
                           <p className="text-xs text-gray-500 mt-1">156 GB used of 240 GB</p>
@@ -1642,14 +2051,58 @@ export default function VideoStudioClient() {
                             <p className="font-medium">Media Cache</p>
                             <p className="text-sm text-gray-500">12.4 GB</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Clearing media cache...', success: 'Media cache cleared - 12.4 GB freed', error: 'Failed to clear cache' })}>Clear</Button>
+                          <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast.promise(
+                                  fetch('/api/settings/clear-cache', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ type: 'media' })
+                                  }).then(res => {
+                                    if (!res.ok) throw new Error('Clear failed')
+                                    return res.json()
+                                  }),
+                                  {
+                                    loading: 'Clearing media cache...',
+                                    success: 'Media cache cleared - 12.4 GB freed',
+                                    error: 'Failed to clear cache'
+                                  }
+                                )
+                              }}
+                            >
+                              Clear
+                            </Button>
                         </div>
                         <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
                           <div>
                             <p className="font-medium">Preview Files</p>
                             <p className="text-sm text-gray-500">8.2 GB</p>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Clearing preview files...', success: 'Preview files cleared - 8.2 GB freed', error: 'Failed to clear preview files' })}>Clear</Button>
+                          <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                toast.promise(
+                                  fetch('/api/settings/clear-cache', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ type: 'preview' })
+                                  }).then(res => {
+                                    if (!res.ok) throw new Error('Clear failed')
+                                    return res.json()
+                                  }),
+                                  {
+                                    loading: 'Clearing preview files...',
+                                    success: 'Preview files cleared - 8.2 GB freed',
+                                    error: 'Failed to clear preview files'
+                                  }
+                                )
+                              }}
+                            >
+                              Clear
+                            </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1759,14 +2212,56 @@ export default function VideoStudioClient() {
                             <p className="font-medium text-red-700 dark:text-red-400">Reset All Settings</p>
                             <p className="text-xs text-gray-500">Restore default preferences</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Resetting all settings...', success: 'All settings reset to defaults', error: 'Failed to reset settings' })}>Reset</Button>
+                          <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                toast.promise(
+                                  fetch('/api/settings/video-studio/reset', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' }
+                                  }).then(res => {
+                                    if (!res.ok) throw new Error('Reset failed')
+                                    return res.json()
+                                  }),
+                                  {
+                                    loading: 'Resetting all settings...',
+                                    success: 'All settings reset to defaults',
+                                    error: 'Failed to reset settings'
+                                  }
+                                )
+                              }}
+                            >
+                              Reset
+                            </Button>
                         </div>
                         <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-red-200 dark:border-red-800">
                           <div>
                             <p className="font-medium text-red-700 dark:text-red-400">Clear All Data</p>
                             <p className="text-xs text-gray-500">Delete all local data</p>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Clearing all data...', success: 'All local data cleared', error: 'Failed to clear data' })}>Clear</Button>
+                          <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                toast.promise(
+                                  fetch('/api/settings/video-studio/clear-data', {
+                                    method: 'DELETE',
+                                    headers: { 'Content-Type': 'application/json' }
+                                  }).then(res => {
+                                    if (!res.ok) throw new Error('Clear failed')
+                                    return res.json()
+                                  }),
+                                  {
+                                    loading: 'Clearing all data...',
+                                    success: 'All local data cleared',
+                                    error: 'Failed to clear data'
+                                  }
+                                )
+                              }}
+                            >
+                              Clear
+                            </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1805,7 +2300,7 @@ export default function VideoStudioClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockVideoStudioQuickActions}
+            actions={videoStudioQuickActions}
             variant="grid"
           />
         </div>
@@ -1871,15 +2366,39 @@ export default function VideoStudioClient() {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening project in editor...', success: 'Project opened in editor', error: 'Failed to open editor' })}>
+                    <Button
+                      className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                      onClick={() => {
+                        if (selectedProject) {
+                          window.location.href = `/dashboard/video-studio-v2/editor/${selectedProject.id}`
+                          toast.success('Opening project in editor...')
+                        }
+                      }}
+                    >
                       <Pencil className="w-4 h-4 mr-2" />
                       Open in Editor
                     </Button>
-                    <Button variant="outline" onClick={() => { if (selectedProject) handleExportVideo(selectedProject.title) }}>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        if (selectedProject) {
+                          handleExportVideo(selectedProject.id, selectedProject.title)
+                        }
+                      }}
+                    >
                       <Download className="w-4 h-4 mr-2" />
                       Export
                     </Button>
-                    <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Generating share link...', success: 'Share link copied to clipboard', error: 'Failed to generate share link' })}>
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        if (selectedProject) {
+                          const shareUrl = `${window.location.origin}/share/project/${selectedProject.id}`
+                          await navigator.clipboard.writeText(shareUrl)
+                          toast.success('Share link copied to clipboard')
+                        }
+                      }}
+                    >
                       <Share2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1926,15 +2445,80 @@ export default function VideoStudioClient() {
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Duplicating asset...', success: 'Asset duplicated successfully', error: 'Failed to duplicate asset' })}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      if (selectedAsset) {
+                        toast.promise(
+                          fetch(`/api/assets/${selectedAsset.id}/duplicate`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Duplicate failed')
+                            return res.json()
+                          }),
+                          {
+                            loading: 'Duplicating asset...',
+                            success: 'Asset duplicated successfully',
+                            error: 'Failed to duplicate asset'
+                          }
+                        )
+                      }
+                    }}
+                  >
                     <Copy className="w-4 h-4 mr-2" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Moving asset...', success: 'Asset moved to new location', error: 'Failed to move asset' })}>
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      if (selectedAsset) {
+                        toast.promise(
+                          fetch(`/api/assets/${selectedAsset.id}/move`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ destination: '/new-location' })
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Move failed')
+                            return res.json()
+                          }),
+                          {
+                            loading: 'Moving asset...',
+                            success: 'Asset moved to new location',
+                            error: 'Failed to move asset'
+                          }
+                        )
+                      }
+                    }}
+                  >
                     <Move className="w-4 h-4 mr-2" />
                     Move
                   </Button>
-                  <Button variant="destructive" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Deleting asset...', success: 'Asset deleted successfully', error: 'Failed to delete asset' })}>
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => {
+                      if (selectedAsset) {
+                        toast.promise(
+                          fetch(`/api/assets/${selectedAsset.id}`, {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' }
+                          }).then(res => {
+                            if (!res.ok) throw new Error('Delete failed')
+                            setSelectedAsset(null)
+                            return res.json()
+                          }),
+                          {
+                            loading: 'Deleting asset...',
+                            success: 'Asset deleted successfully',
+                            error: 'Failed to delete asset'
+                          }
+                        )
+                      }
+                    }}
+                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>

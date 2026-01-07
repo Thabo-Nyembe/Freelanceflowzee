@@ -654,12 +654,7 @@ export default function MLInsightsPage() {
 
     dispatch({ type: 'SELECT_INSIGHT', insight })
     setShowViewModal(true)
-
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Loading ML insight details...',
-      success: `Loaded: ${insight.title} - ${insight.type} - ${insight.confidence} confidence - ${(insight.metrics.accuracy * 100).toFixed(1)}% accuracy`,
-      error: 'Failed to load insight details'
-    })
+    toast.success(`${insight.title}`, { description: `${insight.type} - ${insight.confidence} confidence` })
   }
 
   const handleDeleteInsight = async (insightId: string) => {

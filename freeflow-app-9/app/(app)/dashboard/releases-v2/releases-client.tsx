@@ -536,11 +536,7 @@ const mockReleasesActivities = [
   { id: '3', user: 'QA Team', action: 'Approved', target: 'v2.5.1 release candidate', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockReleasesQuickActions = [
-  { id: '1', label: 'New Release', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating release...', success: 'New release created! Add version details and changelog', error: 'Failed to create release' }), variant: 'default' as const },
-  { id: '2', label: 'Rollback', icon: 'undo', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Rolling back to v2.4.0...', success: 'Rollback complete! System restored to v2.4.0', error: 'Rollback failed - check deployment logs' }), variant: 'default' as const },
-  { id: '3', label: 'Export Changelog', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating changelog...', success: 'Changelog exported to changelog-2025.md', error: 'Export failed' }), variant: 'outline' as const },
-]
+// Quick actions are now defined inside the component to access state and handlers
 
 // Initial form state
 const initialFormData: ReleaseFormData = {
@@ -1309,13 +1305,13 @@ export default function ReleasesClient() {
                 { icon: Rocket, label: 'Deploy', desc: 'Deploy now', color: 'green', onClick: () => {
                   const scheduledRelease = releases.find(r => r.status === 'scheduled' || r.status === 'draft')
                   if (scheduledRelease) openDeployDialog(scheduledRelease)
-                  else toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking releases...', success: 'No releases to deploy - create a new release first', error: 'Check failed' })
+                  else toast.info('No releases to deploy', { description: 'Create a new release first' })
                 }},
                 { icon: Calendar, label: 'Schedule', desc: 'Plan release', color: 'purple', onClick: () => setShowCreateDialog(true) },
                 { icon: RotateCcw, label: 'Rollback', desc: 'Revert changes', color: 'orange', onClick: () => {
                   const deployedRelease = releases.find(r => r.status === 'deployed')
                   if (deployedRelease) openRollbackDialog(deployedRelease)
-                  else toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking deployments...', success: 'No deployed releases available to rollback', error: 'Check failed' })
+                  else toast.info('No deployed releases available to rollback', { description: 'Deploy a release first' })
                 }},
                 { icon: Download, label: 'Assets', desc: 'Manage files', color: 'blue', onClick: () => setActiveTab('assets') },
                 { icon: BarChart3, label: 'Analytics', desc: 'View stats', color: 'cyan', onClick: () => setActiveTab('analytics') }
@@ -1518,9 +1514,33 @@ export default function ReleasesClient() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={(e) => {
+                                onClick={async (e) => {
                                   e.stopPropagation()
-                                  toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Pausing deployment...', success: 'Deployment paused successfully', error: 'Failed to pause' })
+                                  const dbRelease = releases.find(r => r.id === release.id)
+                                  if (!dbRelease) return
+
+                                  try {
+                                    const { data: { user } } = await supabase.auth.getUser()
+                                    if (!user) {
+                                      toast.error('You must be logged in to pause deployment')
+                                      return
+                                    }
+
+                                    const { error } = await supabase
+                                      .from('releases')
+                                      .update({ status: 'scheduled', updated_at: new Date().toISOString() })
+                                      .eq('id', dbRelease.id)
+                                      .eq('user_id', user.id)
+
+                                    if (error) throw error
+
+                                    toast.success('Deployment paused successfully', {
+                                      description: `${dbRelease.release_name} deployment has been paused`
+                                    })
+                                    fetchReleases()
+                                  } catch (error: any) {
+                                    toast.error('Failed to pause deployment', { description: error.message })
+                                  }
                                 }}
                               >
                                 <Pause className="w-3 h-3 mr-1" />
@@ -1582,7 +1602,7 @@ export default function ReleasesClient() {
                       if (scheduledRelease) {
                         openDeployDialog(scheduledRelease)
                       } else {
-                        toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking releases...', success: 'No releases to deploy - create a new release or schedule one first', error: 'Check failed' })
+                        toast.info('No releases to deploy', { description: 'Create a new release or schedule one first' })
                       }
                     }}
                   >
@@ -1745,7 +1765,7 @@ export default function ReleasesClient() {
                     if (deployedRelease) {
                       openRollbackDialog(deployedRelease)
                     } else {
-                      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Checking deployments...', success: 'No deployed releases available to rollback', error: 'Check failed' })
+                      toast.info('No deployed releases available to rollback', { description: 'Deploy a release first' })
                     }
                   }}
                 >
@@ -2552,7 +2572,10 @@ export default function ReleasesClient() {
                   <Button
                     variant="outline"
                     onClick={() => {
-                      toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening Git...', success: 'Redirecting to repository...', error: 'Failed to open' })
+                      // Open Git repository in new tab - uses the branch/tag info from the release
+                      const repoUrl = `https://github.com/your-org/your-repo/tree/${selectedRelease.tagName || selectedRelease.branch}`
+                      window.open(repoUrl, '_blank', 'noopener,noreferrer')
+                      toast.success('Opened repository in new tab', { description: selectedRelease.tagName || selectedRelease.branch })
                     }}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />

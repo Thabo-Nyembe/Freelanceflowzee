@@ -83,9 +83,9 @@ const resourceLibraryActivities = [
 ]
 
 const resourceLibraryQuickActions = [
-  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new resource...', success: 'Resource created successfully', error: 'Failed to create resource' }) },
-  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Exporting resources...', success: 'Resources exported successfully', error: 'Export failed' }) },
-  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening settings...', success: 'Settings loaded', error: 'Failed to load settings' }) },
+  { id: '1', label: 'New Item', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Resource', { description: 'Resource creation form ready' }) },
+  { id: '2', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.success('Export Started', { description: 'Resources exported to file' }) },
+  { id: '3', label: 'Settings', icon: 'Settings', shortcut: 'S', action: () => toast.success('Settings', { description: 'Library settings loaded' }) },
 ]
 
 export default function ResourceLibraryClient() {

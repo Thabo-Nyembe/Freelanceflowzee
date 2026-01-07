@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -9,6 +9,13 @@ import {
   GalleryItem,
   GalleryCollection
 } from '@/lib/hooks/use-gallery'
+import {
+  downloadFile,
+  shareContent,
+  deleteWithConfirmation,
+  apiPost,
+  apiDelete
+} from '@/lib/button-handlers'
 import {
   Image,
   Search,
@@ -419,15 +426,12 @@ const mockGalleryActivities = [
   { id: '3', user: 'Ava Williams', action: 'featured', target: '5 photos in showcase', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockGalleryQuickActions = [
-  { id: '1', label: 'Upload', icon: 'Upload', shortcut: 'U', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening file uploader...', success: 'File uploader ready!', error: 'Failed to open uploader' }) },
-  { id: '2', label: 'New Album', icon: 'FolderPlus', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating new album...', success: 'New album created!', error: 'Failed to create album' }) },
-  { id: '3', label: 'Bulk Edit', icon: 'Edit', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening bulk editor...', success: 'Bulk editor ready!', error: 'Failed to open bulk editor' }) },
-  { id: '4', label: 'Share', icon: 'Share2', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening sharing options...', success: 'Sharing options ready!', error: 'Failed to open sharing options' }) },
-]
+// Quick actions are now defined inside the component to access state setters
+// See galleryQuickActions inside GalleryClient component
 
 export default function GalleryClient() {
   const supabase = createClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Hooks for Supabase data
   const {
@@ -486,6 +490,63 @@ export default function GalleryClient() {
   // Liked and saved items state (local tracking for mock data)
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set())
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
+
+  // Bulk edit mode state
+  const [isBulkEditMode, setIsBulkEditMode] = useState(false)
+  const [selectedBulkItems, setSelectedBulkItems] = useState<Set<string>>(new Set())
+
+  // Gallery Quick Actions with real functionality
+  const galleryQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'Upload',
+      icon: 'Upload',
+      shortcut: 'U',
+      action: () => {
+        setShowUploadDialog(true)
+        toast.success('Upload dialog opened', { description: 'Select files to upload to your gallery' })
+      }
+    },
+    {
+      id: '2',
+      label: 'New Album',
+      icon: 'FolderPlus',
+      shortcut: 'A',
+      action: () => {
+        setShowCreateCollection(true)
+        toast.success('Create album dialog opened', { description: 'Enter details for your new album' })
+      }
+    },
+    {
+      id: '3',
+      label: 'Bulk Edit',
+      icon: 'Edit',
+      shortcut: 'E',
+      action: () => {
+        setIsBulkEditMode(!isBulkEditMode)
+        setSelectedBulkItems(new Set())
+        toast.success(
+          isBulkEditMode ? 'Bulk edit mode disabled' : 'Bulk edit mode enabled',
+          { description: isBulkEditMode ? 'Exited bulk edit mode' : 'Select multiple items to edit at once' }
+        )
+      }
+    },
+    {
+      id: '4',
+      label: 'Share',
+      icon: 'Share2',
+      shortcut: 'S',
+      action: async () => {
+        const galleryUrl = `${window.location.origin}/gallery`
+        try {
+          await navigator.clipboard.writeText(galleryUrl)
+          toast.success('Gallery link copied', { description: 'Share link copied to clipboard' })
+        } catch {
+          toast.error('Failed to copy', { description: 'Could not copy share link' })
+        }
+      }
+    },
+  ], [isBulkEditMode])
 
   // Fetch data on mount
   useEffect(() => {
@@ -610,6 +671,10 @@ export default function GalleryClient() {
   }
 
   const handleDeleteCollection = async (collection: GalleryCollection) => {
+    if (!confirm(`Are you sure you want to delete "${collection.name}"? This action cannot be undone.`)) {
+      return
+    }
+
     try {
       await deleteCollection(collection.id)
       toast.success('Collection deleted', { description: `"${collection.name}" has been deleted` })
@@ -619,13 +684,14 @@ export default function GalleryClient() {
   }
 
   const handleToggleLike = async (photoId: string) => {
+    const isCurrentlyLiked = likedItems.has(photoId)
     const newLiked = new Set(likedItems)
-    if (newLiked.has(photoId)) {
+
+    // Optimistic update
+    if (isCurrentlyLiked) {
       newLiked.delete(photoId)
-      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Removing like...', success: 'Unliked - Removed from your likes', error: 'Failed to unlike' })
     } else {
       newLiked.add(photoId)
-      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Adding like...', success: 'Liked - Added to your likes', error: 'Failed to like' })
     }
     setLikedItems(newLiked)
 
@@ -634,35 +700,91 @@ export default function GalleryClient() {
     if (galleryItem) {
       try {
         await updateItem(photoId, {
-          like_count: newLiked.has(photoId) ? galleryItem.like_count + 1 : Math.max(0, galleryItem.like_count - 1)
+          like_count: !isCurrentlyLiked ? galleryItem.like_count + 1 : Math.max(0, galleryItem.like_count - 1)
         })
-      } catch (error) {
+        toast.success(
+          isCurrentlyLiked ? 'Unliked' : 'Liked',
+          { description: isCurrentlyLiked ? 'Removed from your likes' : 'Added to your likes' }
+        )
+      } catch (error: any) {
         // Revert on error
-        if (newLiked.has(photoId)) {
-          newLiked.delete(photoId)
-        } else {
+        if (isCurrentlyLiked) {
           newLiked.add(photoId)
+        } else {
+          newLiked.delete(photoId)
         }
         setLikedItems(newLiked)
+        toast.error('Failed to update like', { description: error.message || 'Please try again' })
       }
+    } else {
+      // For mock data, just show success
+      toast.success(
+        isCurrentlyLiked ? 'Unliked' : 'Liked',
+        { description: isCurrentlyLiked ? 'Removed from your likes' : 'Added to your likes' }
+      )
     }
   }
 
   const handleToggleSave = async (photoId: string) => {
+    const isCurrentlySaved = savedItems.has(photoId)
     const newSaved = new Set(savedItems)
-    if (newSaved.has(photoId)) {
+
+    // Optimistic update
+    if (isCurrentlySaved) {
       newSaved.delete(photoId)
-      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Removing from saved...', success: 'Unsaved - Removed from your saved items', error: 'Failed to unsave' })
     } else {
       newSaved.add(photoId)
-      toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Saving item...', success: 'Saved - Added to your saved items', error: 'Failed to save' })
     }
     setSavedItems(newSaved)
+
+    // For real gallery items, update in Supabase
+    const galleryItem = galleryItems.find(i => i.id === photoId)
+    if (galleryItem) {
+      try {
+        // Call API to update saved status
+        const response = await fetch(`/api/gallery/${photoId}/save`, {
+          method: isCurrentlySaved ? 'DELETE' : 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to update saved status')
+        }
+
+        toast.success(
+          isCurrentlySaved ? 'Unsaved' : 'Saved',
+          { description: isCurrentlySaved ? 'Removed from your saved items' : 'Added to your saved items' }
+        )
+      } catch (error: any) {
+        // Revert on error
+        if (isCurrentlySaved) {
+          newSaved.add(photoId)
+        } else {
+          newSaved.delete(photoId)
+        }
+        setSavedItems(newSaved)
+        toast.error('Failed to update', { description: error.message || 'Please try again' })
+      }
+    } else {
+      // For mock data, just show success
+      toast.success(
+        isCurrentlySaved ? 'Unsaved' : 'Saved',
+        { description: isCurrentlySaved ? 'Removed from your saved items' : 'Added to your saved items' }
+      )
+    }
   }
 
   const handleDownloadPhoto = async (photo: Photo | GalleryItem) => {
-    const title = 'title' in photo ? photo.title : ''
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Preparing download for "${title}"...`, success: `Download started - Downloading "${title}"`, error: 'Download failed' })
+    const title = 'title' in photo ? photo.title : 'photo'
+    const url = 'url' in photo ? photo.url : ('file_url' in photo ? photo.file_url : '')
+
+    if (url) {
+      // Real download using downloadFile from button-handlers
+      await downloadFile(url, `${title.replace(/[^a-z0-9]/gi, '_')}.jpg`)
+    } else {
+      // For mock data without real URLs, show info toast
+      toast.info('Demo mode', { description: `In production, "${title}" would download here` })
+    }
 
     // Track download for gallery items
     if ('download_count' in photo && photo.id) {
@@ -678,16 +800,21 @@ export default function GalleryClient() {
 
   const handleSharePhoto = async (photo: Photo | GalleryItem) => {
     const photoId = photo.id
+    const title = 'title' in photo ? photo.title : 'Photo'
     const url = `${window.location.origin}/gallery/${photoId}`
-    try {
-      await navigator.clipboard.writeText(url)
-      toast.success('Link copied', { description: 'Share link copied to clipboard' })
-    } catch (error) {
-      toast.error('Copy failed', { description: 'Failed to copy link to clipboard' })
-    }
+
+    await shareContent({
+      title: title,
+      text: `Check out this photo: ${title}`,
+      url: url
+    })
   }
 
   const handleDeleteGalleryItem = async (item: GalleryItem) => {
+    if (!confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`)) {
+      return
+    }
+
     try {
       await deleteGalleryItem(item.id)
       toast.success('Photo deleted', { description: `"${item.title}" has been deleted` })
@@ -698,8 +825,70 @@ export default function GalleryClient() {
   }
 
   const handleFollowPhotographer = async (photographerId: string, photographerName: string) => {
-    // In a real implementation, this would update a follows table
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Following ${photographerName}...`, success: `Following - You are now following ${photographerName}`, error: 'Failed to follow' })
+    try {
+      // Call API to follow photographer
+      const response = await fetch(`/api/photographers/${photographerId}/follow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to follow photographer')
+      }
+
+      toast.success('Following', { description: `You are now following ${photographerName}` })
+    } catch (error: any) {
+      toast.error('Failed to follow', { description: error.message || 'Please try again' })
+    }
+  }
+
+  // Handle file selection for upload
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Invalid file', { description: 'Please select an image file' })
+      return
+    }
+
+    // Validate file size (max 50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('File too large', { description: 'Maximum file size is 50MB' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast.error('Authentication required', { description: 'Please sign in to upload photos' })
+        return
+      }
+
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('gallery')
+        .upload(fileName, file)
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('gallery')
+        .getPublicUrl(fileName)
+
+      setUploadForm(prev => ({ ...prev, file_url: publicUrl }))
+      toast.success('File uploaded', { description: 'Now add a title and save' })
+    } catch (error: any) {
+      toast.error('Upload failed', { description: error.message || 'Failed to upload file' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -1865,7 +2054,7 @@ export default function GalleryClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockGalleryQuickActions}
+            actions={galleryQuickActions}
             variant="grid"
           />
         </div>
@@ -2074,10 +2263,30 @@ export default function GalleryClient() {
               <DialogTitle>Upload Photo</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-amber-500 transition-colors cursor-pointer">
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your photo here</p>
-                <p className="text-sm text-gray-500 dark:text-gray-500">or click to browse</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-8 text-center hover:border-amber-500 transition-colors cursor-pointer"
+              >
+                {uploadForm.file_url ? (
+                  <div className="space-y-2">
+                    <Check className="w-12 h-12 text-emerald-500 mx-auto" />
+                    <p className="text-emerald-600 font-medium">File uploaded successfully</p>
+                    <p className="text-sm text-gray-500">Click to replace</p>
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">Drag and drop your photo here</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-500">or click to browse</p>
+                  </>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Title *</label>

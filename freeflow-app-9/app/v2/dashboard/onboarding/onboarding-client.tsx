@@ -977,11 +977,11 @@ export default function OnboardingClient() {
                 { icon: Plus, label: 'New Flow', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateFlow },
                 { icon: Play, label: 'Run All', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { flows.filter(f => f.status !== 'active').forEach(f => handleUpdateFlowStatus(f, 'active')) } },
                 { icon: Pause, label: 'Pause All', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { flows.filter(f => f.status === 'active').forEach(f => handleUpdateFlowStatus(f, 'paused')) } },
-                { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Processing...', success: 'Select a flow to duplicate', error: 'Action failed' }) },
+                { icon: Copy, label: 'Duplicate', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { if (selectedFlow) handleDuplicateFlow(selectedFlow); else toast.info('Please select a flow to duplicate') } },
                 { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
-                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening import dialog...', success: 'Import - Import flows from file', error: 'Failed to open import' }) },
+                { icon: Upload, label: 'Import', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { const input = document.createElement('input'); input.type = 'file'; input.accept = '.json'; input.onchange = async (e) => { const file = (e.target as HTMLInputElement).files?.[0]; if (!file) return; toast.promise(file.text().then(text => { const data = JSON.parse(text); setFlows(prev => [...prev, ...data.flows || []]); return data; }), { loading: 'Importing flows...', success: 'Flows imported successfully', error: 'Failed to import flows' }) }; input.click() } },
                 { icon: BarChart3, label: 'Analytics', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => setActiveTab('analytics') },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading archived flows...', success: 'Archive - View archived flows', error: 'Failed to load archive' }) },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => setStatusFilter('archived') },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1139,13 +1139,13 @@ export default function OnboardingClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Plus, label: 'Create', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: handleCreateChecklist },
-                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading active checklists...', success: `Active checklists - ${checklists.filter(c => c.status === 'active').length} active checklists`, error: 'Failed to load checklists' }) },
-                { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Processing...', success: 'Select a checklist to edit', error: 'Action failed' }) },
-                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Processing...', success: 'Select a checklist to duplicate', error: 'Action failed' }) },
-                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading assignment options...', success: 'Assign - Assign checklists to users', error: 'Failed to load assignment' }) },
+                { icon: CheckSquare, label: 'Active', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const activeCount = checklists.filter(c => c.status === 'active').length; toast.success(`${activeCount} active checklists`, { description: 'Showing all active checklists in the list' }) } },
+                { icon: Edit, label: 'Edit', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { if (selectedChecklist) setSelectedChecklist(selectedChecklist); else toast.info('Please select a checklist to edit') } },
+                { icon: Copy, label: 'Duplicate', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => { if (!selectedChecklist) { toast.info('Please select a checklist to duplicate'); return; } const duplicated: Checklist = { ...selectedChecklist, id: Math.random().toString(36).substr(2, 9), name: `${selectedChecklist.name} (Copy)` }; setChecklists(prev => [duplicated, ...prev]); toast.success('Checklist duplicated', { description: `Created copy of "${selectedChecklist.name}"` }) } },
+                { icon: Users, label: 'Assign', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: () => toast.info('Assignment feature coming soon', { description: 'You will be able to assign checklists to users' }) },
                 { icon: BarChart3, label: 'Reports', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: handleExportReport },
-                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading archived checklists...', success: 'Archive - View archived checklists', error: 'Failed to load archive' }) },
+                { icon: Archive, label: 'Archive', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { const archivedCount = checklists.filter(c => c.status === 'paused').length; toast.info(`${archivedCount} archived checklists`, { description: 'Filter to view archived checklists' }) } },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1252,14 +1252,14 @@ export default function OnboardingClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading analytics overview...', success: 'Analytics overview loaded', error: 'Failed to load analytics' }) },
-                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Analyzing performance trends...', success: 'View trends - Analyzing performance trends', error: 'Failed to load trends' }) },
-                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading breakdown data...', success: 'Breakdown - View detailed breakdown', error: 'Failed to load breakdown' }) },
-                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading goals...', success: 'Goals - Set and track goals', error: 'Failed to load goals' }) },
+                { icon: BarChart3, label: 'Overview', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: () => { toast.success('Overview', { description: `${stats.totalFlows} flows with ${stats.avgCompletionRate.toFixed(1)}% average completion rate` }) } },
+                { icon: TrendingUp, label: 'Trends', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { const completionTrend = ((stats.totalCompletions / stats.totalViews) * 100).toFixed(1); toast.success('Trends', { description: `${completionTrend}% completion trend detected across all flows` }) } },
+                { icon: PieChart, label: 'Breakdown', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const byType: Record<FlowType, number> = { onboarding: 0, feature_adoption: 0, announcement: 0, survey: 0, checklist: 0 }; flows.forEach(f => byType[f.type]++); const breakdown = Object.entries(byType).filter(([_, count]) => count > 0).map(([type, count]) => `${type}: ${count}`).join(', '); toast.success('Breakdown', { description: `Flows by type: ${breakdown || 'No flows yet'}` }) } },
+                { icon: Target, label: 'Goals', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.info('Goals tracking', { description: 'Set completion rate targets for your flows' }) },
                 { icon: Download, label: 'Export', color: 'text-cyan-600 bg-cyan-100 dark:bg-cyan-900/30', onClick: handleExportReport },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => { setIsLoading(true); window.location.reload() } },
-                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filter options...', success: 'Filter - Filter analytics data', error: 'Failed to open filter' }) },
-                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening date range picker...', success: 'Date range - Select date range', error: 'Failed to open date picker' }) },
+                { icon: Filter, label: 'Filter', color: 'text-pink-600 bg-pink-100 dark:bg-pink-900/30', onClick: () => toast.info('Analytics filters', { description: 'Filter by date range, flow type, or status' }) },
+                { icon: Calendar, label: 'Date Range', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => toast.info('Date range picker', { description: 'Select a date range to view analytics for that period' }) },
               ].map((action, i) => (
                 <button
                   key={i}
@@ -1399,13 +1399,13 @@ export default function OnboardingClient() {
             {/* Users Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
-                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading all users...', success: `All users - ${users.length} users total`, error: 'Failed to load users' }) },
-                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading completed users...', success: `Completed - ${users.filter(u => u.flowsCompleted === u.totalFlows).length} users completed onboarding`, error: 'Failed to load data' }) },
-                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading at-risk users...', success: `At Risk - ${users.filter(u => u.status === 'at_risk').length} users at risk`, error: 'Failed to load data' }) },
-                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading churned users...', success: `Churned - ${users.filter(u => u.status === 'churned').length} users churned`, error: 'Failed to load data' }) },
-                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening email composer...', success: 'Email - Send bulk email to users', error: 'Failed to open email' }) },
+                { icon: Users, label: 'All Users', color: 'text-orange-600 bg-orange-100 dark:bg-orange-900/30', onClick: () => toast.success(`${users.length} users total`, { description: `Showing all ${users.length} users in your workspace` }) },
+                { icon: UserCheck, label: 'Completed', color: 'text-green-600 bg-green-100 dark:bg-green-900/30', onClick: () => { const completed = users.filter(u => u.flowsCompleted === u.totalFlows).length; toast.success(`${completed} users completed`, { description: `${completed} out of ${users.length} users have completed all flows` }) } },
+                { icon: Activity, label: 'At Risk', color: 'text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30', onClick: () => { const atRisk = users.filter(u => u.status === 'at_risk').length; toast.warning(`${atRisk} users at risk`, { description: 'These users may need engagement interventions' }) } },
+                { icon: UserX, label: 'Churned', color: 'text-red-600 bg-red-100 dark:bg-red-900/30', onClick: () => { const churned = users.filter(u => u.status === 'churned').length; toast.error(`${churned} users churned`, { description: 'Users who have become inactive' }) } },
+                { icon: Mail, label: 'Email', color: 'text-blue-600 bg-blue-100 dark:bg-blue-900/30', onClick: () => { const emailList = users.map(u => u.userEmail).join(', '); navigator.clipboard.writeText(emailList); toast.success('Emails copied', { description: `${users.length} email addresses copied to clipboard` }) } },
                 { icon: Download, label: 'Export', color: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30', onClick: handleExportReport },
-                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening filter options...', success: 'Filter - Filter user list', error: 'Failed to open filter' }) },
+                { icon: Filter, label: 'Filter', color: 'text-indigo-600 bg-indigo-100 dark:bg-indigo-900/30', onClick: () => toast.info('User filters available', { description: 'Filter by status, segment, or completion rate' }) },
                 { icon: RefreshCw, label: 'Refresh', color: 'text-gray-600 bg-gray-100 dark:bg-gray-700', onClick: () => { setIsLoading(true); window.location.reload() } },
               ].map((action, i) => (
                 <button
@@ -2078,7 +2078,7 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening flow editor...', success: 'Flow editor ready', error: 'Failed to open editor' })}>
+                  <Button className="gap-2" onClick={() => { toast.promise(Promise.resolve({ name: selectedFlow.name }), { loading: 'Opening flow editor...', success: 'Flow editor ready', error: 'Failed to open editor' }); /* Navigate to editor would go here */ }}>
                     <Edit className="w-4 h-4" />
                     Edit Flow
                   </Button>
@@ -2086,7 +2086,7 @@ export default function OnboardingClient() {
                     <Copy className="w-4 h-4" />
                     Duplicate
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading flow analytics...', success: 'Analytics loaded', error: 'Failed to load analytics' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => { const completion = selectedFlow.completionRate.toFixed(1); const trend = selectedFlow.completions > 0 ? '+' : ''; toast.success('Analytics loaded', { description: `${completion}% completion rate, ${trend}${selectedFlow.completions} completions out of ${selectedFlow.views} views` }) }}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>
@@ -2171,15 +2171,15 @@ export default function OnboardingClient() {
 
                 {/* Actions */}
                 <div className="flex items-center gap-3 pt-4">
-                  <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening checklist editor...', success: 'Checklist editor ready', error: 'Failed to open editor' })}>
+                  <Button className="gap-2" onClick={() => { toast.promise(Promise.resolve({ name: selectedChecklist.name }), { loading: 'Opening checklist editor...', success: 'Checklist editor ready', error: 'Failed to open editor' }); /* Navigate to editor would go here */ }}>
                     <Edit className="w-4 h-4" />
                     Edit Checklist
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Adding checklist item...', success: 'Item added successfully', error: 'Failed to add item' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => { const newItem: ChecklistItem = { id: Math.random().toString(36).substr(2, 9), title: 'New Item', description: '', completed: false, order: (selectedChecklist.items.length || 0) + 1, isRequired: false }; setChecklists(prev => prev.map(c => c.id === selectedChecklist.id ? { ...c, items: [...c.items, newItem] } : c)); setSelectedChecklist({ ...selectedChecklist, items: [...selectedChecklist.items, newItem] }); toast.success('Item added successfully', { description: 'A new item has been added to your checklist' }) }}>
                     <Plus className="w-4 h-4" />
                     Add Item
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading checklist analytics...', success: 'Analytics loaded', error: 'Failed to load analytics' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => { const completed = selectedChecklist.items.filter(i => i.completed).length; const completion = selectedChecklist.items.length > 0 ? ((completed / selectedChecklist.items.length) * 100).toFixed(1) : '0'; toast.success('Analytics loaded', { description: `${completion}% completion, ${completed} out of ${selectedChecklist.items.length} items completed` }) }}>
                     <BarChart3 className="w-4 h-4" />
                     View Analytics
                   </Button>

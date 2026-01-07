@@ -442,12 +442,7 @@ const mockFeedbackActivities = [
   { id: '3', user: 'Customer Success', action: 'responded', target: '12 feedback items', timestamp: '3h ago', type: 'info' as const },
 ]
 
-const mockFeedbackQuickActions = [
-  { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Creating idea...', success: 'Idea submitted successfully', error: 'Failed to submit idea' }) },
-  { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening response composer...', success: 'Response composer ready', error: 'Failed to open response composer' }) },
-  { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Merging feedback...', success: 'Feedback merged successfully', error: 'Failed to merge feedback' }) },
-  { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Exporting feedback...', success: 'Feedback exported successfully', error: 'Failed to export feedback' }) },
-]
+// Quick actions will be defined inside component to access handlers
 
 // Database Types
 interface DBFeedback {
@@ -699,18 +694,446 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
     shipped: mockIdeas.filter(i => i.status === 'shipped').length
   }), [])
 
-  // Legacy handlers for mock data compatibility
-  const handleVote = (idea: Idea) => {
-    // For mock ideas, just show toast - real DB items use handleVoteFeedback
+  // Vote on idea via API
+  const handleVote = async (idea: Idea) => {
+    if (!user?.id) {
+      toast.error('Please sign in to vote')
+      return
+    }
+
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 600)),
+      fetch(`/api/feedback/${idea.id}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id })
+      }).then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.message || 'Failed to record vote')
+        }
+        return res.json()
+      }),
       {
         loading: 'Recording vote...',
         success: `Vote recorded for "${idea.title}"`,
-        error: 'Failed to record vote'
+        error: (err) => err.message || 'Failed to record vote'
       }
     )
   }
+
+  // Reply to feedback via API
+  const handleReplyToFeedback = async (feedbackId: string, message: string) => {
+    if (!user?.id) {
+      toast.error('Please sign in to reply')
+      return
+    }
+
+    toast.promise(
+      fetch(`/api/feedback/${feedbackId}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: user.id, message })
+      }).then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.message || 'Failed to post reply')
+        }
+        return res.json()
+      }),
+      {
+        loading: 'Posting reply...',
+        success: 'Reply posted successfully',
+        error: (err) => err.message || 'Failed to post reply'
+      }
+    )
+  }
+
+  // Resolve/update feedback status via API
+  const handleResolveFeedback = async (feedbackId: string, status: string) => {
+    toast.promise(
+      fetch(`/api/feedback/${feedbackId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      }).then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.message || 'Failed to update status')
+        }
+        fetchFeedback()
+        return res.json()
+      }),
+      {
+        loading: 'Updating status...',
+        success: `Status updated to ${status}`,
+        error: (err) => err.message || 'Failed to update status'
+      }
+    )
+  }
+
+  // Export feedback to CSV
+  const handleExportCSV = async () => {
+    toast.promise(
+      (async () => {
+        const { data, error } = await supabase
+          .from('feedback')
+          .select('*')
+          .eq('user_id', user?.id)
+
+        if (error) throw error
+
+        // Convert to CSV
+        const headers = ['ID', 'Title', 'Description', 'Type', 'Status', 'Priority', 'Category', 'Upvotes', 'Comments', 'Views', 'Created At']
+        const csvRows = [headers.join(',')]
+
+        for (const item of data || []) {
+          const row = [
+            item.id,
+            `"${(item.title || '').replace(/"/g, '""')}"`,
+            `"${(item.description || '').replace(/"/g, '""')}"`,
+            item.feedback_type,
+            item.status,
+            item.priority,
+            item.category || '',
+            item.upvotes_count,
+            item.comments_count,
+            item.views_count,
+            item.created_at
+          ]
+          csvRows.push(row.join(','))
+        }
+
+        const csvContent = csvRows.join('\n')
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `feedback-export-${new Date().toISOString().split('T')[0]}.csv`
+        a.click()
+        URL.revokeObjectURL(url)
+
+        return { success: true }
+      })(),
+      {
+        loading: 'Exporting to CSV...',
+        success: 'Feedback exported to CSV',
+        error: 'Failed to export feedback'
+      }
+    )
+  }
+
+  // Delete feedback with confirmation
+  const handleDeleteWithConfirm = async (feedbackId: string, title: string) => {
+    if (!confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+      return
+    }
+
+    toast.promise(
+      fetch(`/api/feedback/${feedbackId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) {
+          const error = await res.json()
+          throw new Error(error.message || 'Failed to delete feedback')
+        }
+        fetchFeedback()
+        return res.json()
+      }),
+      {
+        loading: 'Deleting feedback...',
+        success: 'Feedback deleted successfully',
+        error: (err) => err.message || 'Failed to delete feedback'
+      }
+    )
+  }
+
+  // Create segment via API
+  const handleCreateSegment = async () => {
+    toast.promise(
+      fetch('/api/feedback/segments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'New Segment', filters: [] })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to create segment')
+        return res.json()
+      }),
+      {
+        loading: 'Creating segment...',
+        success: 'Segment created successfully',
+        error: 'Failed to create segment'
+      }
+    )
+  }
+
+  // Update category via API
+  const handleUpdateCategory = async (categoryName: string) => {
+    toast.promise(
+      fetch('/api/feedback/categories', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: categoryName })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to update category')
+        return res.json()
+      }),
+      {
+        loading: `Updating ${categoryName}...`,
+        success: `${categoryName} updated successfully`,
+        error: 'Failed to update category'
+      }
+    )
+  }
+
+  // Add category via API
+  const handleAddCategory = async () => {
+    toast.promise(
+      fetch('/api/feedback/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'New Category' })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to add category')
+        return res.json()
+      }),
+      {
+        loading: 'Adding category...',
+        success: 'Category added successfully',
+        error: 'Failed to add category'
+      }
+    )
+  }
+
+  // Configure status via API
+  const handleConfigureStatus = async (statusName: string) => {
+    toast.promise(
+      fetch('/api/feedback/statuses', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: statusName })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to configure status')
+        return res.json()
+      }),
+      {
+        loading: `Configuring ${statusName}...`,
+        success: `${statusName} configured successfully`,
+        error: 'Failed to configure status'
+      }
+    )
+  }
+
+  // Verify domain via API
+  const handleVerifyDomain = async () => {
+    toast.promise(
+      fetch('/api/feedback/domain/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to verify domain')
+        return res.json()
+      }),
+      {
+        loading: 'Verifying domain...',
+        success: 'Domain verified successfully',
+        error: 'Failed to verify domain'
+      }
+    )
+  }
+
+  // Test Slack connection via API
+  const handleTestSlackConnection = async () => {
+    toast.promise(
+      fetch('/api/feedback/integrations/slack/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to connect to Slack')
+        return res.json()
+      }),
+      {
+        loading: 'Testing Slack connection...',
+        success: 'Slack connection successful',
+        error: 'Failed to connect to Slack'
+      }
+    )
+  }
+
+  // Connect Slack via API
+  const handleConnectSlack = async () => {
+    toast.promise(
+      fetch('/api/feedback/integrations/slack/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to connect Slack')
+        return res.json()
+      }),
+      {
+        loading: 'Connecting to Slack...',
+        success: 'Slack connected successfully',
+        error: 'Failed to connect Slack'
+      }
+    )
+  }
+
+  // Regenerate API key via API
+  const handleRegenerateApiKey = async () => {
+    toast.promise(
+      fetch('/api/feedback/api-keys/regenerate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to regenerate API key')
+        return res.json()
+      }),
+      {
+        loading: 'Regenerating API key...',
+        success: 'API key regenerated',
+        error: 'Failed to regenerate API key'
+      }
+    )
+  }
+
+  // Regenerate webhook secret via API
+  const handleRegenerateWebhookSecret = async () => {
+    toast.promise(
+      fetch('/api/feedback/webhooks/regenerate-secret', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to regenerate secret')
+        return res.json()
+      }),
+      {
+        loading: 'Regenerating webhook secret...',
+        success: 'Webhook secret regenerated',
+        error: 'Failed to regenerate secret'
+      }
+    )
+  }
+
+  // Test webhook via API
+  const handleTestWebhook = async () => {
+    toast.promise(
+      fetch('/api/feedback/webhooks/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Webhook test failed')
+        return res.json()
+      }),
+      {
+        loading: 'Testing webhook...',
+        success: 'Webhook test successful',
+        error: 'Webhook test failed'
+      }
+    )
+  }
+
+  // Connect/Configure integration via API
+  const handleIntegrationAction = async (integration: { name: string; connected: boolean }) => {
+    const action = integration.connected ? 'configure' : 'connect'
+    toast.promise(
+      fetch(`/api/feedback/integrations/${integration.name.toLowerCase()}/${action}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error(`Failed to ${action} ${integration.name}`)
+        return res.json()
+      }),
+      {
+        loading: integration.connected ? `Configuring ${integration.name}...` : `Connecting ${integration.name}...`,
+        success: integration.connected ? `${integration.name} configured successfully` : `${integration.name} connected successfully`,
+        error: `Failed to ${action} ${integration.name}`
+      }
+    )
+  }
+
+  // Reset all votes via API with confirmation
+  const handleResetAllVotes = async () => {
+    if (!confirm('Are you sure you want to reset all votes? This action cannot be undone.')) {
+      return
+    }
+    toast.promise(
+      fetch('/api/feedback/admin/reset-votes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to reset votes')
+        return res.json()
+      }),
+      {
+        loading: 'Resetting all votes...',
+        success: 'All votes have been reset',
+        error: 'Failed to reset votes'
+      }
+    )
+  }
+
+  // Archive all ideas via API with confirmation
+  const handleArchiveAllIdeas = async () => {
+    if (!confirm('Are you sure you want to archive all ideas? This action cannot be undone.')) {
+      return
+    }
+    toast.promise(
+      fetch('/api/feedback/admin/archive-all', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to archive ideas')
+        return res.json()
+      }),
+      {
+        loading: 'Archiving all ideas...',
+        success: 'All ideas have been archived',
+        error: 'Failed to archive ideas'
+      }
+    )
+  }
+
+  // Delete portal via API with confirmation
+  const handleDeletePortal = async () => {
+    if (!confirm('Are you sure you want to delete this portal? This action is PERMANENT and cannot be undone.')) {
+      return
+    }
+    if (!confirm('This will delete ALL feedback, votes, and settings. Type "DELETE" to confirm.')) {
+      return
+    }
+    toast.promise(
+      fetch('/api/feedback/admin/delete-portal', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Deletion blocked - confirm in settings first')
+        return res.json()
+      }),
+      {
+        loading: 'Deleting portal...',
+        success: 'Portal deleted',
+        error: 'Deletion blocked - confirm in settings first'
+      }
+    )
+  }
+
+  // Copy to clipboard helper
+  const handleCopyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(`${label} copied to clipboard`)
+    } catch {
+      toast.error(`Failed to copy ${label}`)
+    }
+  }
+
+  // Quick actions defined inside component to access handlers
+  const feedbackQuickActions = [
+    { id: '1', label: 'New Idea', icon: 'Lightbulb', shortcut: 'N', action: () => setShowSubmitDialog(true) },
+    { id: '2', label: 'Respond', icon: 'MessageSquare', shortcut: 'R', action: () => toast.info('Select a feedback item to respond') },
+    { id: '3', label: 'Merge', icon: 'GitMerge', shortcut: 'M', action: () => toast.info('Select feedback items to merge') },
+    { id: '4', label: 'Export', icon: 'Download', shortcut: 'E', action: handleExportCSV },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-none dark:bg-gray-900">
@@ -1113,10 +1536,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
           <TabsContent value="segments" className="space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">User Segments</h3>
-              <Button variant="outline" onClick={() => toast.promise(
-                new Promise(resolve => setTimeout(resolve, 800)),
-                { loading: 'Creating segment...', success: 'Segment created successfully', error: 'Failed to create segment' }
-              )}>
+              <Button variant="outline" onClick={handleCreateSegment}>
                 <Plus className="w-4 h-4 mr-2" />
                 Create Segment
               </Button>
@@ -1340,18 +1760,12 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                               <span className="font-medium">{cat}</span>
                               <div className="flex items-center gap-2">
                                 <Switch defaultChecked />
-                                <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 600)),
-                                  { loading: `Editing ${cat}...`, success: `${cat} updated successfully`, error: 'Failed to update category' }
-                                )}>Edit</Button>
+                                <Button variant="ghost" size="sm" onClick={() => handleUpdateCategory(cat)}>Edit</Button>
                               </div>
                             </div>
                           ))}
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 800)),
-                          { loading: 'Adding category...', success: 'Category added successfully', error: 'Failed to add category' }
-                        )}>
+                        <Button variant="outline" className="w-full" onClick={handleAddCategory}>
                           <Plus className="w-4 h-4 mr-2" />
                           Add Category
                         </Button>
@@ -1378,10 +1792,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                                 <div className={`w-3 h-3 rounded-full bg-${item.color}-500`} />
                                 <span className="font-medium">{item.status}</span>
                               </div>
-                              <Button variant="ghost" size="sm" onClick={() => toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 600)),
-                                { loading: `Configuring ${item.status}...`, success: `${item.status} configured successfully`, error: 'Failed to configure status' }
-                              )}>Configure</Button>
+                              <Button variant="ghost" size="sm" onClick={() => handleConfigureStatus(item.status)}>Configure</Button>
                             </div>
                           ))}
                         </div>
@@ -1485,10 +1896,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             Add a CNAME record pointing to portal.feedback.app
                           </p>
                         </div>
-                        <Button variant="outline" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1500)),
-                          { loading: 'Verifying domain...', success: 'Domain verified successfully', error: 'Failed to verify domain' }
-                        )}>Verify Domain</Button>
+                        <Button variant="outline" onClick={handleVerifyDomain}>Verify Domain</Button>
                       </CardContent>
                     </Card>
                   </div>
@@ -1591,17 +1999,11 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Input defaultValue="#product-feedback" />
                         </div>
                         <div className="flex gap-2">
-                          <Button variant="outline" className="flex-1" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1200)),
-                            { loading: 'Testing Slack connection...', success: 'Slack connection successful', error: 'Failed to connect to Slack' }
-                          )}>
+                          <Button variant="outline" className="flex-1" onClick={handleTestSlackConnection}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Test Connection
                           </Button>
-                          <Button className="flex-1" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1000)),
-                            { loading: 'Connecting to Slack...', success: 'Slack connected successfully', error: 'Failed to connect Slack' }
-                          )}>Connect Slack</Button>
+                          <Button className="flex-1" onClick={handleConnectSlack}>Connect Slack</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -1763,16 +2165,10 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Label>API Key</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="fb_live_xxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon" onClick={() => toast.promise(
-                              navigator.clipboard.writeText('fb_live_xxxxxxxxxxxxxxxxxx'),
-                              { loading: 'Copying...', success: 'API key copied to clipboard', error: 'Failed to copy API key' }
-                            )}>
+                            <Button variant="outline" size="icon" onClick={() => handleCopyToClipboard('fb_live_xxxxxxxxxxxxxxxxxx', 'API key')}>
                               <Copy className="w-4 h-4" />
                             </Button>
-                            <Button variant="outline" size="icon" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 800)),
-                              { loading: 'Regenerating API key...', success: 'API key regenerated', error: 'Failed to regenerate API key' }
-                            )}>
+                            <Button variant="outline" size="icon" onClick={handleRegenerateApiKey}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1815,10 +2211,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                           <Label>Webhook Secret</Label>
                           <div className="flex gap-2">
                             <Input type="password" defaultValue="whsec_xxxxxxxxxx" className="flex-1 font-mono" />
-                            <Button variant="outline" size="icon" onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 800)),
-                              { loading: 'Regenerating webhook secret...', success: 'Webhook secret regenerated', error: 'Failed to regenerate secret' }
-                            )}>
+                            <Button variant="outline" size="icon" onClick={handleRegenerateWebhookSecret}>
                               <RefreshCw className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1834,10 +2227,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             ))}
                           </div>
                         </div>
-                        <Button variant="outline" onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1200)),
-                          { loading: 'Testing webhook...', success: 'Webhook test successful', error: 'Webhook test failed' }
-                        )}>
+                        <Button variant="outline" onClick={handleTestWebhook}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Test Webhook
                         </Button>
@@ -1867,14 +2257,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-500 mb-3">{integration.description}</p>
-                              <Button variant="outline" size="sm" className="w-full" onClick={() => toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1000)),
-                                {
-                                  loading: integration.connected ? `Configuring ${integration.name}...` : `Connecting ${integration.name}...`,
-                                  success: integration.connected ? `${integration.name} configured successfully` : `${integration.name} connected successfully`,
-                                  error: `Failed to ${integration.connected ? 'configure' : 'connect'} ${integration.name}`
-                                }
-                              )}>
+                              <Button variant="outline" size="sm" className="w-full" onClick={() => handleIntegrationAction(integration)}>
                                 {integration.connected ? 'Configure' : 'Connect'}
                               </Button>
                             </div>
@@ -2023,10 +2406,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Reset All Votes</div>
                             <p className="text-sm text-gray-500">Clear all votes from all ideas</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 1500)),
-                            { loading: 'Resetting all votes...', success: 'All votes have been reset', error: 'Failed to reset votes' }
-                          )}>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleResetAllVotes}>
                             Reset Votes
                           </Button>
                         </div>
@@ -2035,10 +2415,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Archive All Ideas</div>
                             <p className="text-sm text-gray-500">Archive all existing ideas</p>
                           </div>
-                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 2000)),
-                            { loading: 'Archiving all ideas...', success: 'All ideas have been archived', error: 'Failed to archive ideas' }
-                          )}>
+                          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleArchiveAllIdeas}>
                             Archive All
                           </Button>
                         </div>
@@ -2047,10 +2424,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                             <div className="font-medium">Delete Portal</div>
                             <p className="text-sm text-gray-500">Permanently delete this feedback portal</p>
                           </div>
-                          <Button variant="destructive" onClick={() => toast.promise(
-                            new Promise((_, reject) => setTimeout(() => reject(new Error('Deletion blocked for safety')), 1500)),
-                            { loading: 'Deleting portal...', success: 'Portal deleted', error: 'Deletion blocked - confirm in settings first' }
-                          )}>
+                          <Button variant="destructive" onClick={handleDeletePortal}>
                             Delete Portal
                           </Button>
                         </div>
@@ -2091,7 +2465,7 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockFeedbackQuickActions}
+            actions={feedbackQuickActions}
             variant="grid"
           />
         </div>
@@ -2181,17 +2555,16 @@ export default function FeedbackClient({ initialFeedback }: FeedbackClientProps)
                       <ThumbsUp className="w-4 h-4 mr-2" />
                       Vote
                     </Button>
-                    <Button variant="outline" onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 600)),
-                      { loading: 'Opening comment composer...', success: 'Comment composer ready', error: 'Failed to open comment composer' }
-                    )}>
+                    <Button variant="outline" onClick={() => {
+                      const comment = prompt('Enter your comment:')
+                      if (comment) {
+                        handleReplyToFeedback(selectedIdea.id, comment)
+                      }
+                    }}>
                       <MessageSquare className="w-4 h-4 mr-2" />
                       Comment
                     </Button>
-                    <Button variant="outline" onClick={() => toast.promise(
-                      navigator.clipboard.writeText(`${window.location.origin}/feedback/${selectedIdea.id}`),
-                      { loading: 'Copying link...', success: 'Link copied to clipboard', error: 'Failed to copy link' }
-                    )}>
+                    <Button variant="outline" onClick={() => handleCopyToClipboard(`${window.location.origin}/feedback/${selectedIdea.id}`, 'Link')}>
                       <Link2 className="w-4 h-4 mr-2" />
                       Share
                     </Button>

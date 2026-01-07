@@ -537,9 +537,9 @@ const mockReleasesActivities = [
 ]
 
 const mockReleasesQuickActions = [
-  { id: '1', label: 'New Release', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating release...', success: 'Release created successfully', error: 'Failed to create release' }), variant: 'default' as const },
-  { id: '2', label: 'Rollback', icon: 'undo', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Rolling back...', success: 'Rollback completed successfully', error: 'Rollback failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Changelog', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting changelog...', success: 'Changelog exported successfully', error: 'Failed to export changelog' }), variant: 'outline' as const },
+  { id: '1', label: 'New Release', icon: 'plus', action: () => toast.success('Release Created', { description: 'New release draft ready' }), variant: 'default' as const },
+  { id: '2', label: 'Rollback', icon: 'undo', action: () => toast.success('Rollback Complete', { description: 'Successfully rolled back to previous version' }), variant: 'default' as const },
+  { id: '3', label: 'Export Changelog', icon: 'download', action: () => toast.success('Changelog Exported', { description: 'Changelog exported to markdown' }), variant: 'outline' as const },
 ]
 
 // Initial form state

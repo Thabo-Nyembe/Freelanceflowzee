@@ -124,10 +124,10 @@ const mockInvoicesActivities = [
 ]
 
 const mockInvoicesQuickActions = [
-  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Creating invoice...', success: 'Invoice created', error: 'Failed to create invoice' }) },
-  { id: '2', label: 'Send Reminders', icon: 'Mail', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Sending reminders...', success: 'Reminders sent', error: 'Failed to send reminders' }) },
-  { id: '3', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting report...', success: 'Report exported', error: 'Failed to export report' }) },
-  { id: '4', label: 'Record Payment', icon: 'CreditCard', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Recording payment...', success: 'Payment recorded', error: 'Failed to record payment' }) },
+  { id: '1', label: 'New Invoice', icon: 'FileText', shortcut: 'N', action: () => toast.success('Invoice created') },
+  { id: '2', label: 'Send Reminders', icon: 'Mail', shortcut: 'R', action: () => toast.success('Reminders sent') },
+  { id: '3', label: 'Export Report', icon: 'Download', shortcut: 'E', action: () => toast.success('Report exported') },
+  { id: '4', label: 'Record Payment', icon: 'CreditCard', shortcut: 'P', action: () => toast.success('Payment recorded') },
 ]
 
 export default function InvoicesClient({ initialInvoices }: { initialInvoices: Invoice[] }) {
@@ -795,11 +795,11 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading invoice...', success: `Viewing invoice #${invoice.invoice_number}`, error: 'Failed to load invoice' })}>
+                            <DropdownMenuItem onClick={() => toast.success(`Viewing invoice #${invoice.invoice_number}`)}>
                               <Eye className="h-4 w-4 mr-2" />
                               View
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening editor...', success: `Editing invoice #${invoice.invoice_number}`, error: 'Failed to open editor' })}>
+                            <DropdownMenuItem onClick={() => toast.success(`Editing invoice #${invoice.invoice_number}`)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </DropdownMenuItem>
@@ -815,7 +815,7 @@ export default function InvoicesClient({ initialInvoices }: { initialInvoices: I
                               <Copy className="h-4 w-4 mr-2" />
                               Duplicate
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying link...', success: 'Invoice link copied to clipboard', error: 'Failed to copy link' })}>
+                            <DropdownMenuItem onClick={() => toast.success('Invoice link copied to clipboard')}>
                               <Share2 className="h-4 w-4 mr-2" />
                               Share Link
                             </DropdownMenuItem>

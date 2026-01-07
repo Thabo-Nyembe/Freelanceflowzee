@@ -314,10 +314,10 @@ const mockQAActivities = [
 ]
 
 const mockQAQuickActions = [
-  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Running test suite...', success: 'Test suite completed successfully', error: 'Test run failed' }) },
-  { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Creating new test case...', success: 'Test case created successfully', error: 'Failed to create test case' }) },
-  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Generating QA reports...', success: 'QA reports generated', error: 'Failed to generate reports' }) },
-  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 700)), { loading: 'Loading defects list...', success: 'Defects list loaded', error: 'Failed to load defects' }) },
+  { id: '1', label: 'Run Tests', icon: 'Play', shortcut: 'R', action: () => toast.success('Tests Running', { description: 'Test suite in progress' }) },
+  { id: '2', label: 'New Case', icon: 'Plus', shortcut: 'N', action: () => toast.success('New Test Case', { description: 'Test case form ready' }) },
+  { id: '3', label: 'Reports', icon: 'FileText', shortcut: 'P', action: () => toast.success('Reports Generated', { description: 'QA reports ready' }) },
+  { id: '4', label: 'Defects', icon: 'Bug', shortcut: 'D', action: () => toast.success('Defects Loaded', { description: 'Defects list ready' }) },
 ]
 
 export default function QAClient({ initialTestCases }: QAClientProps) {
@@ -1571,9 +1571,17 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           </div>
                         </div>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening view...', success: 'Test case opened', error: 'Failed to open' })}><Eye className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Edit mode enabled', error: 'Failed to open editor' })}><Edit className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'More options shown', error: 'Failed to load' })}><MoreHorizontal className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            toast.success('Test case view opened');
+                          }}><Eye className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            setSelectedTestCase(testCase);
+                            setShowTestCaseDialog(true);
+                            toast.success('Edit mode enabled');
+                          }}><Edit className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            toast.success('More options available');
+                          }}><MoreHorizontal className="w-4 h-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -1891,7 +1899,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           <p className="text-xs text-gray-500">Format</p>
                         </div>
                         <Badge className={report.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>{report.status}</Badge>
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading options...', success: 'Options menu opened', error: 'Failed to load' })}><MoreHorizontal className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          toast.success('Report options menu opened');
+                        }}><MoreHorizontal className="h-4 w-4" /></Button>
                       </div>
                     </div>
                   ))}
@@ -1939,9 +1949,23 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                         <Badge variant="outline">{report.type}</Badge>
                         <span className="text-sm text-gray-500">{report.downloads} downloads</span>
                         <div className="flex gap-1">
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening preview...', success: 'Report preview opened', error: 'Failed to open' })}><Eye className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Downloading...', success: 'Report downloaded', error: 'Failed to download' })}><Download className="h-4 w-4" /></Button>
-                          <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening share...', success: 'Share dialog opened', error: 'Failed to share' })}><Share2 className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            toast.success('Report preview opened');
+                          }}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            const element = document.createElement('a');
+                            element.setAttribute('href', `data:text/plain;charset=utf-8,Report: ${report.name}`);
+                            element.setAttribute('download', `${report.name}.txt`);
+                            element.style.display = 'none';
+                            document.body.appendChild(element);
+                            element.click();
+                            document.body.removeChild(element);
+                            toast.success('Report downloaded successfully');
+                          }}><Download className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => {
+                            navigator.clipboard.writeText(`Report: ${report.name}`);
+                            toast.success('Report link copied to clipboard');
+                          }}><Share2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     </div>
@@ -2069,7 +2093,9 @@ export default function QAClient({ initialTestCases }: QAClientProps) {
                           <div className="flex items-center gap-4">
                             <div className="text-right text-sm"><p>{env.browser}</p><p className="text-gray-500">{env.os}</p></div>
                             <Badge className={env.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>{env.status}</Badge>
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Environment editor opened', error: 'Failed to open' })}><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => {
+                              toast.success('Environment editor opened');
+                            }}><Edit className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}

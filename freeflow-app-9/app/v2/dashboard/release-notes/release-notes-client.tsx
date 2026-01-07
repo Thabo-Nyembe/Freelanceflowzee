@@ -343,10 +343,10 @@ const mockReleaseNotesActivities = [
 ]
 
 const mockReleaseNotesQuickActions = [
-  { id: '1', label: 'New Release', icon: 'Rocket', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new release...', success: 'New release created successfully', error: 'Failed to create release' }) },
-  { id: '2', label: 'Schedule', icon: 'Calendar', shortcut: 'S', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Opening scheduler...', success: 'Release scheduler opened', error: 'Failed to open scheduler' }) },
-  { id: '3', label: 'Preview', icon: 'Eye', shortcut: 'P', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Loading preview...', success: 'Release preview ready', error: 'Failed to load preview' }) },
-  { id: '4', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 700)), { loading: 'Loading analytics...', success: 'Release analytics loaded', error: 'Failed to load analytics' }) },
+  { id: '1', label: 'New Release', icon: 'Rocket', shortcut: 'N', action: () => toast.success('New Release', { description: 'Release form ready' }) },
+  { id: '2', label: 'Schedule', icon: 'Calendar', shortcut: 'S', action: () => toast.success('Scheduler', { description: 'Release scheduler opened' }) },
+  { id: '3', label: 'Preview', icon: 'Eye', shortcut: 'P', action: () => toast.success('Preview Ready', { description: 'Release preview loaded' }) },
+  { id: '4', label: 'Analytics', icon: 'BarChart3', shortcut: 'A', action: () => toast.success('Analytics', { description: 'Release analytics loaded' }) },
 ]
 
 // Default form state for creating/editing release notes
@@ -1747,8 +1747,8 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         <Label className="font-medium">API Key</Label>
                         <div className="flex gap-2">
                           <Input value="rn_live_xxxxxxxxxxxxxxxxxxxxx" readOnly className="flex-1 font-mono text-sm" type="password" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Revealing key...', success: 'Key revealed', error: 'Failed to reveal' })}><Eye className="h-4 w-4" /></Button>
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying key...', success: 'Key copied to clipboard', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.success('Key revealed')}><Eye className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.success('Key copied to clipboard')}><Copy className="h-4 w-4" /></Button>
                         </div>
                       </div>
                       <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
@@ -1775,7 +1775,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                         <Label className="font-medium">RSS Feed URL</Label>
                         <div className="flex gap-2">
                           <Input value="https://yourapp.com/releases/feed.xml" readOnly className="flex-1 font-mono text-sm" />
-                          <Button variant="outline" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying URL...', success: 'URL copied to clipboard', error: 'Failed to copy' })}><Copy className="h-4 w-4" /></Button>
+                          <Button variant="outline" size="icon" onClick={() => toast.success('URL copied to clipboard')}><Copy className="h-4 w-4" /></Button>
                         </div>
                       </div>
                       <div className="space-y-2">
@@ -1820,7 +1820,7 @@ export default function ReleaseNotesClient({ initialReleases, initialStats }: Re
                           </div>
                           <div className="flex items-center gap-2">
                             {template.isDefault && <Badge className="bg-orange-100 text-orange-700">Default</Badge>}
-                            <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening settings...', success: 'Template settings opened', error: 'Failed to open settings' })}><Settings className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="sm" onClick={() => toast.success('Template settings opened')}><Settings className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}

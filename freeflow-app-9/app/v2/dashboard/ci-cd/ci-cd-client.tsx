@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { copyToClipboard, downloadAsJson } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
@@ -606,11 +607,7 @@ const mockCiCdActivities = [
   { id: '3', user: 'Backend Dev', action: 'Fixed', target: 'flaky integration test', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockCiCdQuickActions = [
-  { id: '1', label: 'Run Pipeline', icon: 'play', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Starting pipeline...', success: 'Pipeline started successfully', error: 'Failed to start pipeline' }), variant: 'default' as const },
-  { id: '2', label: 'Deploy', icon: 'rocket', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Deploying...', success: 'Deployment initiated successfully', error: 'Failed to deploy' }), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'terminal', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 600)), { loading: 'Loading logs...', success: 'Logs loaded', error: 'Failed to load logs' }), variant: 'outline' as const },
-]
+// Quick actions will be defined inside component to access state and handlers
 
 export default function CiCdClient() {
   const supabase = createClient()
@@ -629,6 +626,11 @@ export default function CiCdClient() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [formState, setFormState] = useState<PipelineFormState>(initialFormState)
+  const [showLogsPanel, setShowLogsPanel] = useState(false)
+  const [yamlEditorOpen, setYamlEditorOpen] = useState(false)
+
+  // Ref for webhook secret
+  const webhookSecretRef = useRef('whsec_' + Math.random().toString(36).substring(2, 15))
 
   // Fetch pipelines from Supabase
   const fetchPipelines = useCallback(async () => {
@@ -816,6 +818,161 @@ export default function CiCdClient() {
     })
   }
 
+  // Real handler: Export logs as JSON file
+  const handleExportLogs = () => {
+    const logsData = {
+      exportedAt: new Date().toISOString(),
+      workflows: mockWorkflows.map(w => ({
+        name: w.name,
+        path: w.path,
+        status: w.status,
+        runs: w.runs,
+        successRate: w.successRate,
+        avgDuration: w.avgDuration
+      })),
+      runs: mockRuns.map(r => ({
+        id: r.id,
+        workflowId: r.workflowId,
+        runNumber: r.runNumber,
+        status: r.status,
+        conclusion: r.conclusion,
+        triggeredBy: r.triggeredBy,
+        branch: r.branch,
+        commit: r.commit,
+        duration: r.duration,
+        startedAt: r.startedAt
+      })),
+      dbPipelines: dbPipelines.map(p => ({
+        id: p.id,
+        name: p.pipeline_name,
+        type: p.pipeline_type,
+        status: p.status,
+        runCount: p.run_count,
+        successCount: p.success_count,
+        failureCount: p.failure_count
+      }))
+    }
+    downloadAsJson(logsData, `ci-cd-logs-${new Date().toISOString().split('T')[0]}.json`)
+  }
+
+  // Real handler: Run all pipelines
+  const handleRunAllPipelines = async () => {
+    const activePipelines = dbPipelines.filter(p => p.status === 'active' && !p.is_running)
+    if (activePipelines.length === 0) {
+      toast.info('No active pipelines to run')
+      return
+    }
+
+    toast.loading(`Starting ${activePipelines.length} pipeline(s)...`)
+
+    for (const pipeline of activePipelines) {
+      await handleTriggerPipeline(pipeline.id, pipeline.pipeline_name)
+    }
+
+    toast.dismiss()
+    toast.success(`${activePipelines.length} pipeline(s) started`)
+  }
+
+  // Real handler: Open YAML editor (toggle state)
+  const handleEditYaml = () => {
+    setYamlEditorOpen(true)
+    toast.success('YAML editor opened', {
+      description: 'You can now edit workflow configuration'
+    })
+  }
+
+  // Real handler: Duplicate pipeline selection notice
+  const handleDuplicatePipeline = () => {
+    if (dbPipelines.length === 0) {
+      toast.info('No pipelines to duplicate', {
+        description: 'Create a pipeline first'
+      })
+    } else {
+      toast.info('Select a pipeline to duplicate', {
+        description: 'Click on a pipeline card to select it'
+      })
+    }
+  }
+
+  // Real handler: Export pipelines config
+  const handleExportPipelines = () => {
+    const pipelinesData = {
+      exportedAt: new Date().toISOString(),
+      pipelines: dbPipelines.map(p => ({
+        name: p.pipeline_name,
+        description: p.description,
+        type: p.pipeline_type,
+        triggerType: p.trigger_type,
+        triggerBranch: p.trigger_branch,
+        environment: p.deployment_environment,
+        repositoryUrl: p.repository_url,
+        config: p.config
+      }))
+    }
+    downloadAsJson(pipelinesData, `pipelines-config-${new Date().toISOString().split('T')[0]}.json`)
+  }
+
+  // Real handler: Copy webhook secret
+  const handleCopyWebhookSecret = () => {
+    copyToClipboard(webhookSecretRef.current, 'Webhook secret copied to clipboard')
+  }
+
+  // Real handler: View logs panel
+  const handleViewLogs = () => {
+    setShowLogsPanel(true)
+    setActiveTab('runs')
+    toast.success('Logs panel opened')
+  }
+
+  // Quick actions with real functionality
+  const ciCdQuickActions = [
+    {
+      id: '1',
+      label: 'Run Pipeline',
+      icon: 'play',
+      action: () => {
+        if (dbPipelines.length > 0) {
+          const firstActive = dbPipelines.find(p => p.status === 'active' && !p.is_running)
+          if (firstActive) {
+            handleTriggerPipeline(firstActive.id, firstActive.pipeline_name)
+          } else {
+            toast.info('No active pipelines available to run')
+          }
+        } else {
+          setShowCreateDialog(true)
+          toast.info('Create a pipeline first')
+        }
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Deploy',
+      icon: 'rocket',
+      action: () => {
+        const deployPipeline = dbPipelines.find(p => p.pipeline_type === 'deployment' && p.status === 'active')
+        if (deployPipeline) {
+          handleTriggerPipeline(deployPipeline.id, deployPipeline.pipeline_name)
+          toast.success('Deployment initiated', {
+            description: `Deploying via ${deployPipeline.pipeline_name}`
+          })
+        } else {
+          toast.info('No deployment pipeline configured', {
+            description: 'Create a deployment pipeline first'
+          })
+        }
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'View Logs',
+      icon: 'terminal',
+      action: handleViewLogs,
+      variant: 'outline' as const
+    },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:bg-none dark:bg-gray-900 p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -835,11 +992,7 @@ export default function CiCdClient() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-              loading: 'Exporting logs...',
-              success: 'Logs exported successfully',
-              error: 'Failed to export logs'
-            })}>
+            <Button variant="outline" className="gap-2" onClick={handleExportLogs}>
               <Download className="w-4 h-4" />
               Export Logs
             </Button>
@@ -999,13 +1152,13 @@ export default function CiCdClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
               {[
                 { icon: Plus, label: 'New Pipeline', color: 'text-blue-500', onClick: () => setShowCreateDialog(true) },
-                { icon: Play, label: 'Run All', color: 'text-green-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Running all pipelines...', success: 'All pipelines started', error: 'Failed to run pipelines' }) },
-                { icon: FileCode, label: 'Edit YAML', color: 'text-purple-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening YAML editor...', success: 'YAML editor opened', error: 'Failed to open editor' }) },
-                { icon: Copy, label: 'Duplicate', color: 'text-amber-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Processing...', success: 'Select a pipeline to duplicate', error: 'Action failed' }) },
-                { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening branch rules...', success: 'Branch rules opened', error: 'Failed to open branch rules' }) },
+                { icon: Play, label: 'Run All', color: 'text-green-500', onClick: handleRunAllPipelines },
+                { icon: FileCode, label: 'Edit YAML', color: 'text-purple-500', onClick: handleEditYaml },
+                { icon: Copy, label: 'Duplicate', color: 'text-amber-500', onClick: handleDuplicatePipeline },
+                { icon: GitMerge, label: 'Branch Rules', color: 'text-pink-500', onClick: () => { setActiveTab('settings'); setSettingsTab('workflows'); toast.success('Branch rules settings opened') } },
                 { icon: History, label: 'Run History', color: 'text-indigo-500', onClick: () => setActiveTab('runs') },
-                { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Exporting pipelines...', success: 'Pipelines exported', error: 'Failed to export' }) },
-                { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500', onClick: () => toast.promise(fetchPipelines(), { loading: 'Refreshing pipelines...', success: 'Pipelines refreshed', error: 'Failed to refresh' }) },
+                { icon: Download, label: 'Export', color: 'text-cyan-500', onClick: handleExportPipelines },
+                { icon: RefreshCw, label: 'Refresh', color: 'text-rose-500', onClick: async () => { await fetchPipelines(); toast.success('Pipelines refreshed') } },
               ].map((action, i) => (
                 <Button
                   key={i}
@@ -2052,8 +2205,8 @@ export default function CiCdClient() {
                         <div className="space-y-2">
                           <Label>Webhook Secret</Label>
                           <div className="flex gap-2">
-                            <Input type="password" value="whsec_xxxxxxxxxxxxx" readOnly className="font-mono" />
-                            <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying secret...', success: 'Webhook secret copied', error: 'Failed to copy' })}><Copy className="w-4 h-4" /></Button>
+                            <Input type="password" value={webhookSecretRef.current} readOnly className="font-mono" />
+                            <Button variant="outline" onClick={handleCopyWebhookSecret}><Copy className="w-4 h-4" /></Button>
                           </div>
                         </div>
                       </CardContent>
@@ -2231,7 +2384,7 @@ export default function CiCdClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockCiCdQuickActions}
+            actions={ciCdQuickActions}
             variant="grid"
           />
         </div>

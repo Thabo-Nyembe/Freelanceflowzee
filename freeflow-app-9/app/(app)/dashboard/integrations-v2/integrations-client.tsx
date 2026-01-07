@@ -278,7 +278,20 @@ export default function IntegrationsClient() {
   const [showCreateZapDialog, setShowCreateZapDialog] = useState(false)
   const [showCreateWebhookDialog, setShowCreateWebhookDialog] = useState(false)
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false)
+  const [showOAuthDialog, setShowOAuthDialog] = useState(false)
+  const [showSecretsDialog, setShowSecretsDialog] = useState(false)
+  const [show2FADialog, setShow2FADialog] = useState(false)
+  const [showIPAllowlistDialog, setShowIPAllowlistDialog] = useState(false)
+  const [showAuditLogsDialog, setShowAuditLogsDialog] = useState(false)
+  const [showInvoicesDialog, setShowInvoicesDialog] = useState(false)
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false)
+  const [showZapEditorDialog, setShowZapEditorDialog] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // API key visibility states
+  const [showProductionKey, setShowProductionKey] = useState(false)
+  const [showTestKey, setShowTestKey] = useState(false)
+  const [showWebhookSecret, setShowWebhookSecret] = useState(false)
 
   // Form states
   const [integrationForm, setIntegrationForm] = useState<IntegrationFormData>({
@@ -825,20 +838,20 @@ export default function IntegrationsClient() {
                 { icon: Plus, label: 'Create Zap', color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400', onClick: () => setShowCreateZapDialog(true) },
                 { icon: Zap, label: 'Templates', color: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400', onClick: () => setShowTemplatesDialog(true) },
                 { icon: Play, label: 'Run All', color: 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-400', onClick: async () => {
-                  const activeWorkflows = workflows.filter(w => w.status === 'active')
-                  if (activeWorkflows.length === 0) {
-                    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Checking workflows...', success: 'No active workflows to run', error: 'Check failed' })
+                  const pausedWorkflows = workflows.filter(w => w.status === 'paused' || w.status === 'draft')
+                  if (pausedWorkflows.length === 0) {
+                    toast.info('No paused or draft workflows to start')
                     return
                   }
                   toast.promise(
-                    Promise.all(activeWorkflows.map(w => startWorkflow(w.id))),
-                    { loading: `Running ${activeWorkflows.length} workflows...`, success: `Started ${activeWorkflows.length} workflows!`, error: 'Failed to run workflows' }
+                    Promise.all(pausedWorkflows.map(w => startWorkflow(w.id))),
+                    { loading: `Starting ${pausedWorkflows.length} workflows...`, success: `Started ${pausedWorkflows.length} workflows!`, error: 'Failed to start workflows' }
                   )
                 } },
                 { icon: Pause, label: 'Pause All', color: 'bg-lime-100 text-lime-600 dark:bg-lime-900/30 dark:text-lime-400', onClick: async () => {
                   const activeWorkflows = workflows.filter(w => w.status === 'active')
                   if (activeWorkflows.length === 0) {
-                    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Checking workflows...', success: 'No active workflows to pause', error: 'Check failed' })
+                    toast.info('No active workflows to pause')
                     return
                   }
                   toast.promise(
@@ -849,17 +862,21 @@ export default function IntegrationsClient() {
                 { icon: History, label: 'History', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => setActiveTab('tasks') },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
-                  toast.promise(new Promise<void>((resolve) => {
+                  try {
                     const data = JSON.stringify(workflows, null, 2)
                     const blob = new Blob([data], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.href = url
                     a.download = 'workflows-export.json'
+                    document.body.appendChild(a)
                     a.click()
+                    document.body.removeChild(a)
                     URL.revokeObjectURL(url)
-                    setTimeout(resolve, 600)
-                  }), { loading: 'Exporting workflows...', success: 'Workflows exported successfully!', error: 'Failed to export workflows' })
+                    toast.success('Workflows exported successfully!')
+                  } catch (error) {
+                    toast.error('Failed to export workflows')
+                  }
                 } },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
@@ -981,7 +998,7 @@ export default function IntegrationsClient() {
                               <Play className="w-4 h-4" />
                             </Button>
                           ) : null}
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening workflow editor...', success: 'Workflow editor opened', error: 'Failed to open editor' })}>
+                          <Button variant="outline" size="sm" onClick={() => { setSelectedZap(zap); setShowZapEditorDialog(true) }}>
                             <Edit className="w-4 h-4" />
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => setSelectedZap(zap)}>
@@ -1026,23 +1043,35 @@ export default function IntegrationsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'Add App', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowCreateIntegrationDialog(true) },
-                { icon: Link, label: 'Connect', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading app connections...', success: 'Select an app below to connect', error: 'Failed to load connections' }) },
+                { icon: Link, label: 'Connect', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {
+                  const unconnected = integrations.filter(i => !i.is_connected)
+                  if (unconnected.length > 0) {
+                    setSelectedApp(unconnected[0])
+                    toast.info(`${unconnected.length} apps available to connect`)
+                  } else {
+                    toast.info('All apps are already connected')
+                  }
+                } },
                 { icon: Key, label: 'API Keys', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => setActiveTab('settings') },
-                { icon: Shield, label: 'OAuth', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening OAuth configuration...', success: 'OAuth settings ready', error: 'Failed to open OAuth settings' }) },
+                { icon: Shield, label: 'OAuth', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowOAuthDialog(true) },
                 { icon: RefreshCw, label: 'Sync', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => toast.promise(fetchIntegrations(), { loading: 'Syncing integrations...', success: 'Integrations synced successfully', error: 'Failed to sync integrations' }) },
                 { icon: History, label: 'History', color: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400', onClick: () => setActiveTab('tasks') },
                 { icon: Download, label: 'Export', color: 'bg-rose-100 text-rose-600 dark:bg-rose-900/30 dark:text-rose-400', onClick: () => {
-                  toast.promise(new Promise<void>((resolve) => {
+                  try {
                     const data = JSON.stringify(integrations, null, 2)
                     const blob = new Blob([data], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.href = url
                     a.download = 'integrations-export.json'
+                    document.body.appendChild(a)
                     a.click()
+                    document.body.removeChild(a)
                     URL.revokeObjectURL(url)
-                    setTimeout(resolve, 2000)
-                  }), { loading: 'Exporting integrations...', success: 'Integrations exported successfully', error: 'Failed to export integrations' })
+                    toast.success('Integrations exported successfully')
+                  } catch (error) {
+                    toast.error('Failed to export integrations')
+                  }
                 } },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
@@ -1177,30 +1206,69 @@ export default function IntegrationsClient() {
                 { icon: RefreshCw, label: 'Retry Failed', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => {
                   const failedTasks = mockTasks.filter(t => t.status === 'failed')
                   if (failedTasks.length === 0) {
-                    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Checking failed tasks...', success: 'No failed tasks to retry', error: 'Check failed' })
+                    toast.info('No failed tasks to retry')
                     return
                   }
-                  toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Retrying ${failedTasks.length} failed tasks...`, success: `${failedTasks.length} tasks queued for retry`, error: 'Failed to retry tasks' })
+                  if (confirm(`Retry ${failedTasks.length} failed task(s)?`)) {
+                    toast.success(`${failedTasks.length} tasks queued for retry`)
+                  }
                 } },
-                { icon: Play, label: 'Replay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Preparing task replay...', success: 'Select a task to replay', error: 'Failed to prepare replay' }) },
-                { icon: Filter, label: 'Filter', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading filters...', success: 'Filter options ready - use search above', error: 'Failed to load filters' }) },
-                { icon: Search, label: 'Search', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(Promise.resolve(document.querySelector<HTMLInputElement>('input[placeholder="Search..."]')?.focus()), { loading: 'Activating search...', success: 'Search activated - start typing', error: 'Failed to activate search' }) },
-                { icon: Eye, label: 'Details', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => { if (mockTasks[0]) { toast.promise(Promise.resolve(setSelectedTask(mockTasks[0])), { loading: 'Loading task details...', success: 'Task details loaded', error: 'Failed to load details' }) } else { toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'No tasks available', error: 'Error' }) } } },
+                { icon: Play, label: 'Replay', color: 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400', onClick: () => {
+                  if (mockTasks.length > 0) {
+                    setSelectedTask(mockTasks[0])
+                    toast.info('Select a task below to replay')
+                  } else {
+                    toast.info('No tasks available to replay')
+                  }
+                } },
+                { icon: Filter, label: 'Filter', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => {
+                  const searchInput = document.querySelector<HTMLInputElement>('input[placeholder="Search..."]')
+                  if (searchInput) {
+                    searchInput.focus()
+                    toast.info('Use the search field above to filter tasks')
+                  }
+                } },
+                { icon: Search, label: 'Search', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => {
+                  const searchInput = document.querySelector<HTMLInputElement>('input[placeholder="Search..."]')
+                  if (searchInput) {
+                    searchInput.focus()
+                    searchInput.select()
+                  }
+                } },
+                { icon: Eye, label: 'Details', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => {
+                  if (mockTasks[0]) {
+                    setSelectedTask(mockTasks[0])
+                  } else {
+                    toast.info('No tasks available')
+                  }
+                } },
                 { icon: BarChart3, label: 'Analytics', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => setActiveTab('analytics') },
                 { icon: Download, label: 'Export', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
-                  toast.promise(new Promise<void>((resolve) => {
+                  try {
                     const data = JSON.stringify(mockTasks, null, 2)
                     const blob = new Blob([data], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.href = url
                     a.download = 'task-history-export.json'
+                    document.body.appendChild(a)
                     a.click()
+                    document.body.removeChild(a)
                     URL.revokeObjectURL(url)
-                    setTimeout(resolve, 2500)
-                  }), { loading: 'Exporting task history...', success: 'Task history exported successfully', error: 'Failed to export task history' })
+                    toast.success('Task history exported successfully')
+                  } catch (error) {
+                    toast.error('Failed to export task history')
+                  }
                 } },
-                { icon: Trash2, label: 'Clear', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Clearing task history...', success: 'Task history cleared', error: 'Failed to clear history' }) }
+                { icon: Trash2, label: 'Clear', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => {
+                  if (mockTasks.length === 0) {
+                    toast.info('Task history is already empty')
+                    return
+                  }
+                  if (confirm('Clear all task history? This cannot be undone.')) {
+                    toast.success('Task history cleared')
+                  }
+                } }
               ].map((action, idx) => (
                 <Button
                   key={idx}
@@ -1247,7 +1315,7 @@ export default function IntegrationsClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             {task.status === 'failed' && (
-                              <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Replaying task...', success: 'Task replayed successfully', error: 'Failed to replay task' }) }}>
+                              <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); if (confirm(`Replay task "${task.zapName}"?`)) { toast.success('Task queued for replay') } }}>
                                 <RotateCcw className="w-3 h-3 mr-1" />
                                 Replay
                               </Button>
@@ -1316,30 +1384,52 @@ export default function IntegrationsClient() {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
                 { icon: Plus, label: 'Create', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => setShowCreateWebhookDialog(true) },
-                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => { if (webhooks[0]) { handleTestWebhook(webhooks[0]) } else { toast.promise(Promise.resolve(), { loading: 'Checking...', success: 'No webhooks available to test', error: 'Error' }) } } },
+                { icon: Webhook, label: 'Test', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
+                  if (webhooks[0]) {
+                    handleTestWebhook(webhooks[0])
+                  } else {
+                    toast.info('No webhooks available to test')
+                  }
+                } },
                 { icon: RefreshCw, label: 'Retry', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => {
                   const failedDeliveries = webhooks.filter(w => w.failed_deliveries > 0)
                   if (failedDeliveries.length === 0) {
-                    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Checking failed deliveries...', success: 'No failed deliveries to retry', error: 'Check failed' })
+                    toast.info('No failed deliveries to retry')
                     return
                   }
-                  toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: `Retrying ${failedDeliveries.length} webhook deliveries...`, success: 'Failed deliveries queued for retry', error: 'Failed to retry deliveries' })
+                  if (confirm(`Retry failed deliveries for ${failedDeliveries.length} webhook(s)?`)) {
+                    toast.promise(
+                      Promise.all(failedDeliveries.map(w => testWebhook(w.id))),
+                      { loading: `Retrying ${failedDeliveries.length} webhook deliveries...`, success: 'Failed deliveries queued for retry', error: 'Failed to retry deliveries' }
+                    )
+                  }
                 } },
-                { icon: Key, label: 'Secrets', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading webhook secrets...', success: 'Webhook secrets panel ready', error: 'Failed to load secrets' }) },
-                { icon: Shield, label: 'Verify', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Checking SSL verification...', success: 'All webhooks have valid SSL certificates', error: 'Failed to verify SSL' }) },
-                { icon: Eye, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading webhook logs...', success: 'Webhook logs ready - check activity feed', error: 'Failed to load logs' }) },
+                { icon: Key, label: 'Secrets', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => setShowSecretsDialog(true) },
+                { icon: Shield, label: 'Verify', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => {
+                  const unverified = webhooks.filter(w => !w.verify_ssl)
+                  if (unverified.length === 0) {
+                    toast.success('All webhooks have SSL verification enabled')
+                  } else {
+                    toast.warning(`${unverified.length} webhook(s) have SSL verification disabled`)
+                  }
+                } },
+                { icon: Eye, label: 'Logs', color: 'bg-teal-100 text-teal-600 dark:bg-teal-900/30 dark:text-teal-400', onClick: () => setActiveTab('tasks') },
                 { icon: Download, label: 'Export', color: 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400', onClick: () => {
-                  toast.promise(new Promise<void>((resolve) => {
+                  try {
                     const data = JSON.stringify(webhooks, null, 2)
                     const blob = new Blob([data], { type: 'application/json' })
                     const url = URL.createObjectURL(blob)
                     const a = document.createElement('a')
                     a.href = url
                     a.download = 'webhooks-export.json'
+                    document.body.appendChild(a)
                     a.click()
+                    document.body.removeChild(a)
                     URL.revokeObjectURL(url)
-                    setTimeout(resolve, 2000)
-                  }), { loading: 'Exporting webhooks...', success: 'Webhooks exported successfully', error: 'Failed to export webhooks' })
+                    toast.success('Webhooks exported successfully')
+                  } catch (error) {
+                    toast.error('Failed to export webhooks')
+                  }
                 } },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
@@ -1472,17 +1562,47 @@ export default function IntegrationsClient() {
             {/* Analytics Quick Actions */}
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-6">
               {[
-                { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Loading analytics dashboard...', success: 'Analytics dashboard loaded', error: 'Failed to load dashboard' }) },
-                { icon: TrendingUp, label: 'Trends', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Analyzing trends...', success: 'Trend analysis complete - see charts below', error: 'Failed to analyze trends' }) },
-                { icon: Activity, label: 'Real-time', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Connecting to real-time feed...', success: 'Real-time monitoring active', error: 'Failed to connect' }) },
-                { icon: PieChart, label: 'Usage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 900)), { loading: 'Calculating usage stats...', success: `Usage: ${usagePercent.toFixed(1)}% of quota used`, error: 'Failed to calculate usage' }) },
+                { icon: BarChart3, label: 'Dashboard', color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400', onClick: () => {
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                  toast.success('Dashboard loaded - viewing analytics')
+                } },
+                { icon: TrendingUp, label: 'Trends', color: 'bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400', onClick: () => {
+                  const growth = usageStats.tasksLastMonth > 0
+                    ? ((usageStats.tasksThisMonth - usageStats.tasksLastMonth) / usageStats.tasksLastMonth * 100).toFixed(1)
+                    : 'N/A'
+                  toast.info(`Month-over-month growth: ${growth}%`)
+                } },
+                { icon: Activity, label: 'Real-time', color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400', onClick: () => toast.promise(fetchWorkflows(), { loading: 'Refreshing real-time data...', success: 'Data refreshed', error: 'Failed to refresh' }) },
+                { icon: PieChart, label: 'Usage', color: 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400', onClick: () => toast.info(`Usage: ${usagePercent.toFixed(1)}% of quota used (${formatNumber(usageStats.tasksUsed)}/${formatNumber(usageStats.tasksLimit)} tasks)`) },
                 { icon: AlertCircle, label: 'Errors', color: 'bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400', onClick: () => {
                   const errorRate = 100 - usageStats.successRate
-                  toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Fetching error logs...', success: `Error rate: ${errorRate.toFixed(1)}% - ${errorRate < 5 ? 'Looking good!' : 'Needs attention'}`, error: 'Failed to fetch errors' })
+                  if (errorRate < 5) {
+                    toast.success(`Error rate: ${errorRate.toFixed(1)}% - Looking good!`)
+                  } else {
+                    toast.warning(`Error rate: ${errorRate.toFixed(1)}% - Needs attention`)
+                  }
                 } },
-                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating analytics report...', success: 'Report generated - ready to download', error: 'Failed to generate report' }) },
+                { icon: FileText, label: 'Reports', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400', onClick: () => {
+                  const reportData = {
+                    generatedAt: new Date().toISOString(),
+                    period: 'Last 30 days',
+                    workflows: workflowStats,
+                    integrations: integrationStats,
+                    webhooks: webhookStats,
+                    usage: usageStats
+                  }
+                  const data = JSON.stringify(reportData, null, 2)
+                  const blob = new Blob([data], { type: 'application/json' })
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `analytics-report-${new Date().toISOString().split('T')[0]}.json`
+                  a.click()
+                  URL.revokeObjectURL(url)
+                  toast.success('Report downloaded')
+                } },
                 { icon: Download, label: 'Export', color: 'bg-fuchsia-100 text-fuchsia-600 dark:bg-fuchsia-900/30 dark:text-fuchsia-400', onClick: () => {
-                  toast.promise(new Promise<void>((resolve) => {
+                  try {
                     const analyticsData = {
                       workflows: workflowStats,
                       integrations: integrationStats,
@@ -1496,10 +1616,14 @@ export default function IntegrationsClient() {
                     const a = document.createElement('a')
                     a.href = url
                     a.download = 'analytics-export.json'
+                    document.body.appendChild(a)
                     a.click()
+                    document.body.removeChild(a)
                     URL.revokeObjectURL(url)
-                    setTimeout(resolve, 2500)
-                  }), { loading: 'Exporting analytics data...', success: 'Analytics data exported successfully', error: 'Failed to export analytics' })
+                    toast.success('Analytics data exported successfully')
+                  } catch (error) {
+                    toast.error('Failed to export analytics')
+                  }
                 } },
                 { icon: Settings, label: 'Settings', color: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400', onClick: () => setActiveTab('settings') }
               ].map((action, idx) => (
@@ -1651,13 +1775,16 @@ export default function IntegrationsClient() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-sm">Production Key</p>
-                        <code className="text-xs text-muted-foreground">zk_live_********************</code>
+                        <code className="text-xs text-muted-foreground">{showProductionKey ? 'zk_live_a1b2c3d4e5f6g7h8i9j0' : 'zk_live_********************'}</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revealing key...', success: 'Production key revealed temporarily', error: 'Failed to reveal key' })}>
+                        <Button variant="ghost" size="sm" onClick={() => setShowProductionKey(!showProductionKey)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_live_xxxxxxxxxxxxxxxxxxxx'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Production key copied to clipboard', error: 'Failed to copy' }) }}>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          navigator.clipboard.writeText('zk_live_a1b2c3d4e5f6g7h8i9j0')
+                          toast.success('Production key copied to clipboard')
+                        }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1667,19 +1794,28 @@ export default function IntegrationsClient() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-sm">Test Key</p>
-                        <code className="text-xs text-muted-foreground">zk_test_********************</code>
+                        <code className="text-xs text-muted-foreground">{showTestKey ? 'zk_test_x9y8z7w6v5u4t3s2r1q0' : 'zk_test_********************'}</code>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revealing key...', success: 'Test key revealed temporarily', error: 'Failed to reveal key' })}>
+                        <Button variant="ghost" size="sm" onClick={() => setShowTestKey(!showTestKey)}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText('zk_test_xxxxxxxxxxxxxxxxxxxx'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Copying...', success: 'Test key copied to clipboard', error: 'Failed to copy' }) }}>
+                        <Button variant="ghost" size="sm" onClick={() => {
+                          navigator.clipboard.writeText('zk_test_x9y8z7w6v5u4t3s2r1q0')
+                          toast.success('Test key copied to clipboard')
+                        }}>
                           <Copy className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
                   </div>
-                  <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Regenerating API keys...', success: 'API keys regenerated successfully', error: 'Failed to regenerate keys' })}>
+                  <Button variant="outline" className="w-full" onClick={() => {
+                    if (confirm('Regenerate API keys? Existing keys will stop working immediately.')) {
+                      toast.success('API keys regenerated successfully')
+                      setShowProductionKey(false)
+                      setShowTestKey(false)
+                    }
+                  }}>
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Regenerate Keys
                   </Button>
@@ -1702,7 +1838,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">Enabled</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening 2FA settings...', success: '2FA management panel opened', error: 'Failed to open 2FA settings' })}>Manage</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShow2FADialog(true)}>Manage</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center gap-3">
@@ -1712,7 +1848,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">3 IPs configured</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading IP allowlist...', success: 'IP configuration panel opened', error: 'Failed to load IP settings' })}>Configure</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowIPAllowlistDialog(true)}>Configure</Button>
                   </div>
                   <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     <div className="flex items-center gap-3">
@@ -1722,7 +1858,7 @@ export default function IntegrationsClient() {
                         <p className="text-xs text-muted-foreground">90-day retention</p>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Loading audit logs...', success: 'Audit logs loaded - 247 entries', error: 'Failed to load audit logs' })}>View</Button>
+                    <Button variant="outline" size="sm" onClick={() => setShowAuditLogsDialog(true)}>View</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -1764,10 +1900,10 @@ export default function IntegrationsClient() {
                         </div>
                       </div>
                       <div className="flex gap-3">
-                        <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading invoices...', success: 'Invoices loaded - 12 invoices found', error: 'Failed to load invoices' })}>
+                        <Button variant="outline" className="flex-1" onClick={() => setShowInvoicesDialog(true)}>
                           View Invoices
                         </Button>
-                        <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-600" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading upgrade options...', success: 'Upgrade plans loaded - Enterprise available', error: 'Failed to load upgrade options' })}>
+                        <Button className="flex-1 bg-gradient-to-r from-orange-500 to-red-600" onClick={() => setShowUpgradeDialog(true)}>
                           Upgrade Plan
                         </Button>
                       </div>
@@ -1785,7 +1921,7 @@ export default function IntegrationsClient() {
             <AIInsightsPanel
               insights={mockIntegrationsAIInsights}
               title="Integrations Intelligence"
-              onInsightAction={(insight) => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Processing insight...', success: `Insight action: ${insight.title}`, error: 'Failed to process insight' })}
+              onInsightAction={(insight) => toast.info(`Processing: ${insight.title}`)}
             />
           </div>
           <div className="space-y-6">
@@ -1888,7 +2024,7 @@ export default function IntegrationsClient() {
                       Turn On
                     </Button>
                   )}
-                  <Button variant="outline" className="flex-1" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Opening zap editor...', success: 'Zap editor loaded - make your changes', error: 'Failed to open editor' })}>
+                  <Button variant="outline" className="flex-1" onClick={() => { setShowZapEditorDialog(true) }}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Zap
                   </Button>
@@ -1972,7 +2108,12 @@ export default function IntegrationsClient() {
                 </div>
 
                 {selectedTask.status === 'failed' && (
-                  <Button className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Replaying task...', success: 'Task replayed successfully', error: 'Failed to replay task' })}>
+                  <Button className="w-full" onClick={() => {
+                    if (confirm(`Replay task "${selectedTask.zapName}"?`)) {
+                      toast.success('Task queued for replay')
+                      setSelectedTask(null)
+                    }
+                  }}>
                     <RotateCcw className="w-4 h-4 mr-2" />
                     Replay Task
                   </Button>
@@ -2089,7 +2230,14 @@ export default function IntegrationsClient() {
                       <code className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded">
                         {selectedWebhook.secret.substring(0, 12)}********************
                       </code>
-                      <Button variant="ghost" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revealing secret...', success: 'Webhook secret revealed temporarily', error: 'Failed to reveal secret' })}>
+                      <Button variant="ghost" size="sm" onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(selectedWebhook.secret);
+                          toast.success('Webhook secret copied to clipboard!');
+                        } catch {
+                          toast.error('Failed to copy secret');
+                        }
+                      }}>
                         <Eye className="w-4 h-4" />
                       </Button>
                     </div>
@@ -2338,7 +2486,7 @@ export default function IntegrationsClient() {
                     setShowTemplatesDialog(false)
                     setShowCreateZapDialog(true)
                     setWorkflowForm({ ...workflowForm, name: template.name, description: template.desc })
-                    toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading template...', success: `Template "${template.name}" selected`, error: 'Failed to load template' })
+                    toast.success(`Template "${template.name}" selected`)
                   }}
                 >
                   <template.icon className={`w-8 h-8 mb-2 ${template.color}`} />

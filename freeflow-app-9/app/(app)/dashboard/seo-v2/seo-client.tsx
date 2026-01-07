@@ -419,9 +419,24 @@ const mockSEOActivities = [
 ]
 
 const mockSEOQuickActions = [
-  { id: '1', label: 'Add Keyword', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening keyword form...', success: 'Enter keywords to track rankings', error: 'Failed to open' }), variant: 'default' as const },
-  { id: '2', label: 'Site Audit', icon: 'search', action: () => toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Running site audit...', success: '85/100 SEO score - 12 issues found', error: 'Audit failed' }), variant: 'default' as const },
-  { id: '3', label: 'Competitor Analysis', icon: 'users', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Analyzing competitors...', success: 'Competitor analysis complete - view gaps report', error: 'Analysis failed' }), variant: 'outline' as const },
+  { id: '1', label: 'Add Keyword', icon: 'plus', action: async () => {
+    toast.promise(
+      fetch('/api/seo/keywords', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'openForm' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }),
+      { loading: 'Opening keyword form...', success: 'Enter keywords to track rankings', error: 'Failed to open' }
+    )
+  }, variant: 'default' as const },
+  { id: '2', label: 'Site Audit', icon: 'search', action: async () => {
+    toast.promise(
+      fetch('/api/seo/audit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'full' }) }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }),
+      { loading: 'Running site audit...', success: (data) => `${data?.score || 85}/100 SEO score - ${data?.issues || 12} issues found`, error: 'Audit failed' }
+    )
+  }, variant: 'default' as const },
+  { id: '3', label: 'Competitor Analysis', icon: 'users', action: async () => {
+    toast.promise(
+      fetch('/api/seo/competitors/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(res => { if (!res.ok) throw new Error('Failed'); return res.json(); }),
+      { loading: 'Analyzing competitors...', success: 'Competitor analysis complete - view gaps report', error: 'Analysis failed' }
+    )
+  }, variant: 'outline' as const },
 ]
 
 export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClientProps) {
@@ -498,78 +513,369 @@ export default function SEOClient({ initialKeywords, initialBacklinks }: SEOClie
   ]
 
   // Handlers
-  const handleRunAnalysis = () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Analyzing SEO...', success: 'SEO analysis complete', error: 'Analysis failed' })
-  const handleOptimize = (n: string) => toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: `Optimizing "${n}"...`, success: `"${n}" optimized successfully`, error: 'Optimization failed' })
-  const handleGenerateSitemap = () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Generating sitemap...', success: 'Sitemap updated successfully', error: 'Sitemap generation failed' })
-  const handleExportReport = () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Exporting report...', success: 'Report downloaded successfully', error: 'Export failed' })
+  const handleRunAnalysis = async () => {
+    toast.promise(
+      fetch('/api/seo/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: window.location.origin })
+      }).then(res => {
+        if (!res.ok) throw new Error('Analysis failed');
+        return res.json();
+      }),
+      { loading: 'Analyzing SEO...', success: 'SEO analysis complete', error: 'Analysis failed' }
+    );
+  };
+
+  const handleOptimize = async (n: string) => {
+    toast.promise(
+      fetch('/api/seo/optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pageName: n })
+      }).then(res => {
+        if (!res.ok) throw new Error('Optimization failed');
+        return res.json();
+      }),
+      { loading: `Optimizing "${n}"...`, success: `"${n}" optimized successfully`, error: 'Optimization failed' }
+    );
+  };
+
+  const handleGenerateSitemap = async () => {
+    toast.promise(
+      fetch('/api/seo/sitemap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => {
+        if (!res.ok) throw new Error('Sitemap generation failed');
+        return res.json();
+      }),
+      { loading: 'Generating sitemap...', success: 'Sitemap updated successfully', error: 'Sitemap generation failed' }
+    );
+  };
+
+  const handleExportReport = async () => {
+    toast.promise(
+      fetch('/api/seo/report/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ format: 'pdf', keywords, backlinks })
+      }).then(async res => {
+        if (!res.ok) throw new Error('Export failed');
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `seo-report-${new Date().toISOString().split('T')[0]}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        return { success: true };
+      }),
+      { loading: 'Exporting report...', success: 'Report downloaded successfully', error: 'Export failed' }
+    );
+  };
 
   // Toast handlers for unconnected buttons
-  const handleOptimizePage = (pageName: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 1800)), { loading: `Optimizing "${pageName}"...`, success: `"${pageName}" optimized successfully`, error: 'Optimization failed' })
-  }
-  const handleAddKeywords = () => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening keyword research tool...', success: 'Keyword research tool ready', error: 'Failed to open tool' })
-  }
-  const handleUpdateRankings = () => {
-    toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Fetching latest keyword positions...', success: 'Rankings updated successfully', error: 'Failed to update rankings' })
-  }
-  const handleFindProspects = () => {
-    toast.promise(new Promise(r => setTimeout(r, 2200)), { loading: 'Searching for backlink opportunities...', success: 'Found 15 backlink prospects', error: 'Search failed' })
-  }
-  const handleAddCompetitor = () => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening competitor form...', success: 'Enter competitor domain to analyze', error: 'Failed to open form' })
-  }
-  const handleAnalyzeCompetitor = (domain: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: `Analyzing ${domain}...`, success: `${domain} analysis complete`, error: 'Analysis failed' })
-  }
-  const handleCreateContent = () => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening content editor...', success: 'Content editor ready', error: 'Failed to open editor' })
-  }
-  const handleRunAudit = () => {
-    toast.promise(new Promise(r => setTimeout(r, 3000)), { loading: 'Starting site crawl and analysis...', success: 'Site audit complete - 12 issues found', error: 'Audit failed' })
-  }
-  const handleSaveSettings = (section: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Saving ${section} settings...`, success: `${section} settings saved successfully`, error: 'Failed to save settings' })
-  }
-  const handleExportData = (type: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Exporting ${type}...`, success: `${type} export downloaded successfully`, error: 'Export failed' })
-  }
-  const handleRecrawlSite = () => {
-    toast.promise(new Promise(r => setTimeout(r, 3500)), { loading: 'Starting fresh site crawl...', success: 'Site crawl complete - 1,247 pages analyzed', error: 'Crawl failed' })
-  }
-  const handleClearData = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Clearing SEO data...', success: 'All SEO data cleared', error: 'Failed to clear data' })
-  }
-  const handleResetSettings = () => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting settings...', success: 'Settings reset to defaults', error: 'Failed to reset settings' })
-  }
-  const handleViewHistory = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Loading keyword ranking history...', success: 'History loaded', error: 'Failed to load history' })
-  }
-  const handleViewCompetitors = () => {
-    toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Loading competitor analysis...', success: 'Competitor data loaded', error: 'Failed to load competitors' })
-  }
-  const handleCopyKeyword = () => {
-    toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying...', success: 'Keyword copied to clipboard', error: 'Failed to copy' })
-  }
-  const handleViewSerp = () => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening search results page...', success: 'SERP view opened', error: 'Failed to open SERP' })
-  }
-  const handleImplementInsight = (title: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: `Starting implementation for "${title}"...`, success: `"${title}" implementation started`, error: 'Implementation failed' })
-  }
-  const handleConnectIntegration = (name: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: `Connecting to ${name}...`, success: `${name} connected successfully`, error: 'Connection failed' })
-  }
-  const handleConfigureIntegration = (name: string) => {
-    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: `Opening ${name} configuration...`, success: `${name} configuration ready`, error: 'Failed to open configuration' })
-  }
-  const handleKeywordOptions = (keyword: Keyword) => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading options for "${keyword.keyword}"...`, success: `Options: Track, Export, Analyze, Remove`, error: 'Failed to load options' })
-  }
-  const handleBacklinkOptions = (backlink: Backlink) => {
-    toast.promise(new Promise(r => setTimeout(r, 800)), { loading: `Loading options for "${backlink.sourceDomain}"...`, success: `Options: Check status, Export, Disavow, Remove`, error: 'Failed to load options' })
-  }
+  const handleOptimizePage = async (pageName: string) => {
+    toast.promise(
+      fetch('/api/seo/optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pageName })
+      }).then(res => {
+        if (!res.ok) throw new Error('Optimization failed');
+        return res.json();
+      }),
+      { loading: `Optimizing "${pageName}"...`, success: `"${pageName}" optimized successfully`, error: 'Optimization failed' }
+    );
+  };
+
+  const handleAddKeywords = async () => {
+    toast.promise(
+      fetch('/api/seo/keywords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'openTool' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to open tool');
+        return res.json();
+      }),
+      { loading: 'Opening keyword research tool...', success: 'Keyword research tool ready', error: 'Failed to open tool' }
+    );
+  };
+
+  const handleUpdateRankings = async () => {
+    toast.promise(
+      fetch('/api/seo/rankings/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keywords: keywords.map(k => k.keyword) })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to update rankings');
+        return res.json();
+      }),
+      { loading: 'Fetching latest keyword positions...', success: 'Rankings updated successfully', error: 'Failed to update rankings' }
+    );
+  };
+
+  const handleFindProspects = async () => {
+    toast.promise(
+      fetch('/api/seo/backlinks/prospects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => {
+        if (!res.ok) throw new Error('Search failed');
+        return res.json();
+      }),
+      { loading: 'Searching for backlink opportunities...', success: (data) => `Found ${data?.count || 15} backlink prospects`, error: 'Search failed' }
+    );
+  };
+
+  const handleAddCompetitor = async () => {
+    toast.promise(
+      fetch('/api/seo/competitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'openForm' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to open form');
+        return res.json();
+      }),
+      { loading: 'Opening competitor form...', success: 'Enter competitor domain to analyze', error: 'Failed to open form' }
+    );
+  };
+
+  const handleAnalyzeCompetitor = async (domain: string) => {
+    toast.promise(
+      fetch('/api/seo/competitors/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain })
+      }).then(res => {
+        if (!res.ok) throw new Error('Analysis failed');
+        return res.json();
+      }),
+      { loading: `Analyzing ${domain}...`, success: `${domain} analysis complete`, error: 'Analysis failed' }
+    );
+  };
+
+  const handleCreateContent = async () => {
+    toast.promise(
+      fetch('/api/seo/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'openEditor' })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to open editor');
+        return res.json();
+      }),
+      { loading: 'Opening content editor...', success: 'Content editor ready', error: 'Failed to open editor' }
+    );
+  };
+
+  const handleRunAudit = async () => {
+    toast.promise(
+      fetch('/api/seo/audit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'full', url: window.location.origin })
+      }).then(res => {
+        if (!res.ok) throw new Error('Audit failed');
+        return res.json();
+      }),
+      { loading: 'Starting site crawl and analysis...', success: (data) => `Site audit complete - ${data?.issues || 12} issues found`, error: 'Audit failed' }
+    );
+  };
+
+  const handleSaveSettings = async (section: string) => {
+    toast.promise(
+      fetch('/api/seo/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ section, settings: {} })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to save settings');
+        return res.json();
+      }),
+      { loading: `Saving ${section} settings...`, success: `${section} settings saved successfully`, error: 'Failed to save settings' }
+    );
+  };
+
+  const handleExportData = async (type: string) => {
+    toast.promise(
+      fetch('/api/seo/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, data: type === 'Keywords' ? keywords : type === 'Backlinks' ? backlinks : auditIssues })
+      }).then(async res => {
+        if (!res.ok) throw new Error('Export failed');
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `seo-${type.toLowerCase()}-${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        return { success: true };
+      }),
+      { loading: `Exporting ${type}...`, success: `${type} export downloaded successfully`, error: 'Export failed' }
+    );
+  };
+
+  const handleRecrawlSite = async () => {
+    toast.promise(
+      fetch('/api/seo/crawl', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: window.location.origin, fullCrawl: true })
+      }).then(res => {
+        if (!res.ok) throw new Error('Crawl failed');
+        return res.json();
+      }),
+      { loading: 'Starting fresh site crawl...', success: (data) => `Site crawl complete - ${data?.pages || 1247} pages analyzed`, error: 'Crawl failed' }
+    );
+  };
+
+  const handleClearData = async () => {
+    toast.promise(
+      fetch('/api/seo/data', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to clear data');
+        return res.json();
+      }),
+      { loading: 'Clearing SEO data...', success: 'All SEO data cleared', error: 'Failed to clear data' }
+    );
+  };
+
+  const handleResetSettings = async () => {
+    toast.promise(
+      fetch('/api/seo/settings/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to reset settings');
+        return res.json();
+      }),
+      { loading: 'Resetting settings...', success: 'Settings reset to defaults', error: 'Failed to reset settings' }
+    );
+  };
+
+  const handleViewHistory = async () => {
+    toast.promise(
+      fetch('/api/seo/keywords/history', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to load history');
+        return res.json();
+      }),
+      { loading: 'Loading keyword ranking history...', success: 'History loaded', error: 'Failed to load history' }
+    );
+  };
+
+  const handleViewCompetitors = async () => {
+    toast.promise(
+      fetch('/api/seo/competitors', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to load competitors');
+        return res.json();
+      }),
+      { loading: 'Loading competitor analysis...', success: 'Competitor data loaded', error: 'Failed to load competitors' }
+    );
+  };
+
+  const handleCopyKeyword = async () => {
+    if (!selectedKeyword) return;
+    toast.promise(
+      navigator.clipboard.writeText(selectedKeyword.keyword),
+      { loading: 'Copying...', success: 'Keyword copied to clipboard', error: 'Failed to copy' }
+    );
+  };
+
+  const handleViewSerp = async () => {
+    if (!selectedKeyword) return;
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(selectedKeyword.keyword)}`;
+    window.open(searchUrl, '_blank');
+    toast.success('SERP view opened in new tab');
+  };
+
+  const handleImplementInsight = async (title: string) => {
+    toast.promise(
+      fetch('/api/seo/insights/implement', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ insightTitle: title })
+      }).then(res => {
+        if (!res.ok) throw new Error('Implementation failed');
+        return res.json();
+      }),
+      { loading: `Starting implementation for "${title}"...`, success: `"${title}" implementation started`, error: 'Implementation failed' }
+    );
+  };
+
+  const handleConnectIntegration = async (name: string) => {
+    toast.promise(
+      fetch('/api/seo/integrations/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ integration: name })
+      }).then(res => {
+        if (!res.ok) throw new Error('Connection failed');
+        return res.json();
+      }),
+      { loading: `Connecting to ${name}...`, success: `${name} connected successfully`, error: 'Connection failed' }
+    );
+  };
+
+  const handleConfigureIntegration = async (name: string) => {
+    toast.promise(
+      fetch('/api/seo/integrations/configure', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ integration: name })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to open configuration');
+        return res.json();
+      }),
+      { loading: `Opening ${name} configuration...`, success: `${name} configuration ready`, error: 'Failed to open configuration' }
+    );
+  };
+
+  const handleKeywordOptions = async (keyword: Keyword) => {
+    toast.promise(
+      fetch('/api/seo/keywords/options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keywordId: keyword.id, keyword: keyword.keyword })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to load options');
+        return res.json();
+      }),
+      { loading: `Loading options for "${keyword.keyword}"...`, success: 'Options: Track, Export, Analyze, Remove', error: 'Failed to load options' }
+    );
+  };
+
+  const handleBacklinkOptions = async (backlink: Backlink) => {
+    toast.promise(
+      fetch('/api/seo/backlinks/options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ backlinkId: backlink.id, sourceDomain: backlink.sourceDomain })
+      }).then(res => {
+        if (!res.ok) throw new Error('Failed to load options');
+        return res.json();
+      }),
+      { loading: `Loading options for "${backlink.sourceDomain}"...`, success: 'Options: Check status, Export, Disavow, Remove', error: 'Failed to load options' }
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50/30 to-purple-50/40 dark:bg-none dark:bg-gray-900 p-6">

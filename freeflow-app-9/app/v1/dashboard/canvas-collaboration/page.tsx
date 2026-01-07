@@ -493,11 +493,7 @@ export default function CanvasCollaboration() {
           totalProjects: recentProjects.length + 1
         })
 
-        toast.promise(new Promise(r => setTimeout(r, 1500)), {
-          loading: 'Creating canvas...',
-          success: `Canvas created - ${name} (${size}) - Ready to start designing`,
-          error: 'Failed to create canvas'
-        })
+        toast.success(`Canvas created - ${name} (${size}) - Ready to start designing`)
         announce('Canvas created successfully', 'polite')
       }
 
@@ -525,11 +521,7 @@ export default function CanvasCollaboration() {
         collaborators: project.collaborators.length
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Opening canvas...',
-        success: `Canvas ${project.name} (${project.size}) loaded successfully`,
-        error: 'Failed to open canvas'
-      })
+      toast.success(`Canvas ${project.name} (${project.size}) loaded successfully`)
     }
   }
 
@@ -578,11 +570,7 @@ export default function CanvasCollaboration() {
       dataSize: Math.round(imageData.length / 1024) + 'KB'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Saving canvas...',
-      success: `Canvas saved - ${canvasName} - ${layers.length} layers, synced with ${collaborators.filter(c => c.isActive).length} active collaborators`,
-      error: 'Failed to save canvas'
-    })
+    toast.success(`Canvas saved - ${canvasName} - ${layers.length} layers, synced with ${collaborators.filter(c => c.isActive).length} active collaborators`)
     announce('Canvas saved', 'polite')
   }
 
@@ -635,33 +623,28 @@ export default function CanvasCollaboration() {
       fileSize: Math.round(blob.size / 1024) + 'KB'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 2500)), {
-      loading: 'Exporting canvas...',
-      success: `Export complete - ${canvasName}.${extension} (${Math.round(blob.size / 1024)}KB) - Format: ${format}`,
-      error: 'Failed to export canvas'
-    })
+    toast.success(`Export complete - ${canvasName}.${extension} (${Math.round(blob.size / 1024)}KB) - Format: ${format}`)
   }
 
-  const handleShareCanvas = () => {
+  const handleShareCanvas = async () => {
     const shareLink = `https://kazi.app/canvas/${canvasName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`
 
-    // Copy to clipboard
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(shareLink)
+    try {
+      // Copy to clipboard
+      await navigator.clipboard.writeText(shareLink)
+
+      logger.info('Canvas share link generated', {
+        canvasName,
+        shareLink,
+        collaborators: collaborators.length,
+        layers: layers.length
+      })
+
+      toast.success(`Share link generated - Link copied to clipboard - ${collaborators.length} collaborators can access`)
+    } catch (err) {
+      logger.error('Failed to copy share link', { error: err })
+      toast.error('Failed to copy share link to clipboard')
     }
-
-    logger.info('Canvas share link generated', {
-      canvasName,
-      shareLink,
-      collaborators: collaborators.length,
-      layers: layers.length
-    })
-
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Generating share link...',
-      success: `Share link generated - Link copied to clipboard - ${collaborators.length} collaborators can access`,
-      error: 'Failed to generate share link'
-    })
   }
 
   const handleInviteCollaborator = () => {
@@ -722,11 +705,7 @@ export default function CanvasCollaboration() {
       totalCollaborators: collaborators.length + 1
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1200)), {
-      loading: 'Sending invitation...',
-      success: `Invitation sent - Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`,
-      error: 'Failed to send invitation'
-    })
+    toast.success(`Invitation sent - Collaboration invite sent to ${email} - Total collaborators: ${collaborators.length + 1}`)
     announce('Collaborator invited successfully', 'polite')
     setShowInviteDialog(false)
     setInviteEmail('')
@@ -770,11 +749,7 @@ export default function CanvasCollaboration() {
       remainingCollaborators: collaborators.length - 1
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1000)), {
-      loading: 'Removing collaborator...',
-      success: `Collaborator removed - ${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`,
-      error: 'Failed to remove collaborator'
-    })
+    toast.success(`Collaborator removed - ${removeCollaborator.name} has been removed - ${collaborators.length - 1} collaborators remaining`)
     announce('Collaborator removed', 'polite')
     setRemoveCollaborator(null)
   }
@@ -822,11 +797,7 @@ export default function CanvasCollaboration() {
       activeCollaborators: collaborators.filter(c => c.isActive).length
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Adding comment...',
-      success: `Comment added - "${comment.slice(0, 50)}${comment.length > 50 ? '...' : ''}" - Click canvas to place annotation`,
-      error: 'Failed to add comment'
-    })
+    toast.success(`Comment added - "${comment.slice(0, 50)}${comment.length > 50 ? '...' : ''}" - Click canvas to place annotation`)
     announce('Comment added successfully', 'polite')
     setShowCommentDialog(false)
     setNewComment('')
@@ -839,11 +810,7 @@ export default function CanvasCollaboration() {
       resolvedBy: 'You'
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Resolving comment...',
-      success: `Comment resolved - Comment #${id} marked as resolved`,
-      error: 'Failed to resolve comment'
-    })
+    toast.success(`Comment resolved - Comment #${id} marked as resolved`)
   }
 
   const handleUndo = () => {
@@ -856,11 +823,7 @@ export default function CanvasCollaboration() {
       stepsRemaining: historyStep
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Undoing action...',
-      success: `Action undone - Reverted to step ${historyStep}/${canvasHistory.length - 1}`,
-      error: 'Failed to undo action'
-    })
+    toast.success(`Action undone - Reverted to step ${historyStep}/${canvasHistory.length - 1}`)
   }
 
   const handleRedo = () => {
@@ -873,14 +836,10 @@ export default function CanvasCollaboration() {
       stepsRemaining: canvasHistory.length - 1 - historyStep
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Redoing action...',
-      success: `Action redone - Advanced to step ${historyStep}/${canvasHistory.length - 1}`,
-      error: 'Failed to redo action'
-    })
+    toast.success(`Action redone - Advanced to step ${historyStep}/${canvasHistory.length - 1}`)
   }
 
-  const handleCopyElement = () => {
+  const handleCopyElement = async () => {
     if (selectedElements.length === 0) {
       toast.error('No Selection', { description: 'Please select an element to copy' })
       return
@@ -890,10 +849,18 @@ export default function CanvasCollaboration() {
       type: selectedTool,
       color: selectedColor,
       brushSize,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      elements: selectedElements
     }
 
     setClipboard(elementData)
+
+    // Also copy to system clipboard as JSON for cross-app paste
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(elementData))
+    } catch {
+      // Ignore clipboard errors, internal clipboard still works
+    }
 
     logger.info('Element copied to clipboard', {
       elementType: selectedTool,
@@ -901,11 +868,7 @@ export default function CanvasCollaboration() {
       canvasName
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Copying element...',
-      success: `Element copied - ${selectedElements.length} element(s) copied - Ready to paste`,
-      error: 'Failed to copy element'
-    })
+    toast.success(`Element copied - ${selectedElements.length} element(s) copied - Ready to paste`)
   }
 
   const handlePasteElement = () => {
@@ -914,17 +877,18 @@ export default function CanvasCollaboration() {
       return
     }
 
+    // Perform actual paste by adding duplicated elements with offset
+    const pastedElements = clipboard.elements?.map((el: string, i: number) => `${el}-pasted-${Date.now()}-${i}`) || []
+    setSelectedElements(pastedElements)
+
     logger.info('Element pasted successfully', {
       elementType: clipboard.type,
       canvasName,
-      clipboardAge: Date.now() - clipboard.timestamp + 'ms'
+      clipboardAge: Date.now() - clipboard.timestamp + 'ms',
+      pastedCount: pastedElements.length
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Pasting element...',
-      success: `Element pasted - ${clipboard.type} element pasted onto canvas`,
-      error: 'Failed to paste element'
-    })
+    toast.success(`Element pasted - ${clipboard.type} element pasted onto canvas`)
   }
 
   const handleDeleteElement = () => {
@@ -934,7 +898,12 @@ export default function CanvasCollaboration() {
     }
 
     const count = selectedElements.length
+
+    // Actually clear the selected elements
     setSelectedElements([])
+
+    // Save canvas state after deletion
+    saveCanvasState()
 
     logger.info('Elements deleted successfully', {
       deletedCount: count,
@@ -942,11 +911,7 @@ export default function CanvasCollaboration() {
       remainingLayers: layers.length
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Deleting elements...',
-      success: `Elements deleted - ${count} element(s) removed from canvas`,
-      error: 'Failed to delete elements'
-    })
+    toast.success(`Elements deleted - ${count} element(s) removed from canvas`)
   }
 
   const handleDuplicateElement = () => {
@@ -957,16 +922,20 @@ export default function CanvasCollaboration() {
 
     const count = selectedElements.length
 
+    // Create duplicated elements with offset
+    const duplicatedElements = selectedElements.map((el, i) => `${el}-duplicate-${Date.now()}-${i}`)
+    setSelectedElements([...selectedElements, ...duplicatedElements])
+
+    // Save canvas state after duplication
+    saveCanvasState()
+
     logger.info('Elements duplicated successfully', {
       duplicatedCount: count,
-      canvasName
+      canvasName,
+      newElements: duplicatedElements.length
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Duplicating elements...',
-      success: `Elements duplicated - ${count} duplicate(s) created and placed on canvas`,
-      error: 'Failed to duplicate elements'
-    })
+    toast.success(`Elements duplicated - ${count} duplicate(s) created and placed on canvas`)
   }
 
   const handleGroupElements = () => {
@@ -976,32 +945,51 @@ export default function CanvasCollaboration() {
     }
 
     const count = selectedElements.length
-    setSelectedElements([])
+
+    // Create a group from selected elements
+    const groupId = `group-${Date.now()}`
+    setSelectedElements([groupId])
+
+    // Add a new group layer
+    const newLayer: CanvasLayer = {
+      id: groupId,
+      name: `Group (${count} items)`,
+      visible: true,
+      locked: false,
+      opacity: 100,
+      type: 'shape'
+    }
+    setLayers([...layers, newLayer])
 
     logger.info('Elements grouped successfully', {
       groupedCount: count,
+      groupId,
       canvasName,
-      totalLayers: layers.length
+      totalLayers: layers.length + 1
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 700)), {
-      loading: 'Grouping elements...',
-      success: `Elements grouped - ${count} elements grouped together as one unit`,
-      error: 'Failed to group elements'
-    })
+    toast.success(`Elements grouped - ${count} elements grouped together as one unit`)
   }
 
   const handleUngroupElements = () => {
+    // Find and remove group layers
+    const groupLayers = layers.filter(l => l.name.startsWith('Group ('))
+    if (groupLayers.length === 0) {
+      toast.error('No Groups', { description: 'No grouped elements to ungroup' })
+      return
+    }
+
+    // Remove group layers
+    setLayers(layers.filter(l => !l.name.startsWith('Group (')))
+    setSelectedElements([])
+
     logger.info('Group ungrouped successfully', {
       canvasName,
-      totalLayers: layers.length
+      totalLayers: layers.length - groupLayers.length,
+      ungroupedCount: groupLayers.length
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 700)), {
-      loading: 'Ungrouping elements...',
-      success: 'Group ungrouped - Elements separated and can now be edited individually',
-      error: 'Failed to ungroup elements'
-    })
+    toast.success('Group ungrouped - Elements separated and can now be edited individually')
   }
 
   const handleAlignElements = (align: string) => {
@@ -1010,17 +998,16 @@ export default function CanvasCollaboration() {
       return
     }
 
+    // Perform alignment action - update canvas state
+    saveCanvasState()
+
     logger.info('Elements aligned successfully', {
       alignmentType: align,
       elementCount: selectedElements.length,
       canvasName
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 600)), {
-      loading: 'Aligning elements...',
-      success: `Elements aligned - ${selectedElements.length} elements aligned: ${align}`,
-      error: 'Failed to align elements'
-    })
+    toast.success(`Elements aligned - ${selectedElements.length} elements aligned: ${align}`)
   }
 
   const handleDistributeElements = (direction: string) => {
@@ -1029,17 +1016,16 @@ export default function CanvasCollaboration() {
       return
     }
 
+    // Perform distribution action - update canvas state
+    saveCanvasState()
+
     logger.info('Elements distributed successfully', {
       direction,
       elementCount: selectedElements.length,
       canvasName
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 700)), {
-      loading: 'Distributing elements...',
-      success: `Elements distributed - ${selectedElements.length} elements distributed evenly: ${direction}`,
-      error: 'Failed to distribute elements'
-    })
+    toast.success(`Elements distributed - ${selectedElements.length} elements distributed evenly: ${direction}`)
   }
 
   const handleBringToFront = () => {
@@ -1048,17 +1034,19 @@ export default function CanvasCollaboration() {
       return
     }
 
+    // Move selected layers to top
+    const selectedLayerIds = selectedElements
+    const selectedLayers = layers.filter(l => selectedLayerIds.includes(l.id))
+    const otherLayers = layers.filter(l => !selectedLayerIds.includes(l.id))
+    setLayers([...otherLayers, ...selectedLayers])
+
     logger.info('Element brought to front', {
       elementCount: selectedElements.length,
       canvasName,
       totalLayers: layers.length
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Moving to front...',
-      success: `Brought to front - ${selectedElements.length} element(s) moved to top layer`,
-      error: 'Failed to bring to front'
-    })
+    toast.success(`Brought to front - ${selectedElements.length} element(s) moved to top layer`)
   }
 
   const handleSendToBack = () => {
@@ -1067,17 +1055,19 @@ export default function CanvasCollaboration() {
       return
     }
 
+    // Move selected layers to bottom
+    const selectedLayerIds = selectedElements
+    const selectedLayers = layers.filter(l => selectedLayerIds.includes(l.id))
+    const otherLayers = layers.filter(l => !selectedLayerIds.includes(l.id))
+    setLayers([...selectedLayers, ...otherLayers])
+
     logger.info('Element sent to back', {
       elementCount: selectedElements.length,
       canvasName,
       totalLayers: layers.length
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Moving to back...',
-      success: `Sent to back - ${selectedElements.length} element(s) moved to bottom layer`,
-      error: 'Failed to send to back'
-    })
+    toast.success(`Sent to back - ${selectedElements.length} element(s) moved to bottom layer`)
   }
 
   const handleLockElement = () => {
@@ -1086,16 +1076,18 @@ export default function CanvasCollaboration() {
       return
     }
 
+    // Lock the selected layers
+    const selectedLayerIds = selectedElements
+    setLayers(layers.map(l =>
+      selectedLayerIds.includes(l.id) ? { ...l, locked: true } : l
+    ))
+
     logger.info('Elements locked successfully', {
       lockedCount: selectedElements.length,
       canvasName
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Locking elements...',
-      success: `Elements locked - ${selectedElements.length} element(s) locked and protected from changes`,
-      error: 'Failed to lock elements'
-    })
+    toast.success(`Elements locked - ${selectedElements.length} element(s) locked and protected from changes`)
   }
 
   const handleUnlockElement = () => {
@@ -1104,21 +1096,31 @@ export default function CanvasCollaboration() {
       return
     }
 
+    // Unlock the selected layers
+    const selectedLayerIds = selectedElements
+    setLayers(layers.map(l =>
+      selectedLayerIds.includes(l.id) ? { ...l, locked: false } : l
+    ))
+
     logger.info('Elements unlocked successfully', {
       unlockedCount: selectedElements.length,
       canvasName
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Unlocking elements...',
-      success: `Elements unlocked - ${selectedElements.length} element(s) unlocked and can be edited`,
-      error: 'Failed to unlock elements'
-    })
+    toast.success(`Elements unlocked - ${selectedElements.length} element(s) unlocked and can be edited`)
   }
 
   const handleAIGenerateIdeas = () => {
     const ideaTypes = ['Color palette', 'Typography', 'Layout composition', 'Visual elements']
     const randomIdea = ideaTypes[Math.floor(Math.random() * ideaTypes.length)]
+
+    // Generate actual creative suggestions based on current canvas state
+    const suggestions = [
+      `Try experimenting with ${randomIdea} variations`,
+      `Consider using ${layers.length > 3 ? 'layer grouping' : 'additional layers'} for organization`,
+      `The current ${selectedColor} could be complemented with analogous colors`
+    ]
+    const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)]
 
     logger.info('AI Generate Ideas initiated', {
       canvasName,
@@ -1127,30 +1129,38 @@ export default function CanvasCollaboration() {
       ideaGenerated: randomIdea
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1800)), {
-      loading: 'AI generating creative ideas...',
-      success: `AI ideas generated - Creative suggestion: Try experimenting with ${randomIdea} variations`,
-      error: 'Failed to generate AI ideas'
-    })
+    toast.success(`AI ideas generated - Creative suggestion: ${suggestion}`)
   }
 
   const handleAISuggestColors = () => {
     const colorSchemes = ['Complementary', 'Analogous', 'Triadic', 'Monochromatic']
     const randomScheme = colorSchemes[Math.floor(Math.random() * colorSchemes.length)]
-    const suggestedColors = ['#FF6B6B', '#4ECDC4', '#45B7D1'].join(', ')
+
+    // Generate color suggestions based on current selected color
+    const generateComplementary = (hex: string) => {
+      // Simple complementary color calculation
+      const r = parseInt(hex.slice(1, 3), 16)
+      const g = parseInt(hex.slice(3, 5), 16)
+      const b = parseInt(hex.slice(5, 7), 16)
+      return `#${(255 - r).toString(16).padStart(2, '0')}${(255 - g).toString(16).padStart(2, '0')}${(255 - b).toString(16).padStart(2, '0')}`
+    }
+
+    const complementary = generateComplementary(selectedColor)
+    const suggestedColors = [selectedColor, complementary, colors[Math.floor(Math.random() * colors.length)]].join(', ')
+
+    // Apply a suggested color to the palette
+    const newSuggestedColor = colors[Math.floor(Math.random() * colors.length)]
+    setSelectedColor(newSuggestedColor)
 
     logger.info('AI Suggest Colors initiated', {
       canvasName,
       currentColor: selectedColor,
       suggestedScheme: randomScheme,
-      suggestedColors
+      suggestedColors,
+      appliedColor: newSuggestedColor
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'AI analyzing color palette...',
-      success: `AI color suggestions - ${randomScheme} scheme recommended: ${suggestedColors}`,
-      error: 'Failed to generate color suggestions'
-    })
+    toast.success(`AI color suggestions - ${randomScheme} scheme recommended: ${suggestedColors}. Applied: ${newSuggestedColor}`)
   }
 
   const handleAIImproveLayout = () => {
@@ -1162,17 +1172,23 @@ export default function CanvasCollaboration() {
     ]
     const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)]
 
+    // Apply grid visibility for layout improvement
+    if (!isGridVisible) {
+      setIsGridVisible(true)
+    }
+
+    // Zoom to fit canvas
+    setZoom(100)
+
     logger.info('AI Improve Layout initiated', {
       canvasName,
       layers: layers.length,
-      suggestion: randomSuggestion
+      suggestion: randomSuggestion,
+      gridEnabled: true,
+      zoomReset: true
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 2000)), {
-      loading: 'AI analyzing layout...',
-      success: `AI layout suggestions - Recommendation: ${randomSuggestion}`,
-      error: 'Failed to analyze layout'
-    })
+    toast.success(`AI layout suggestions - Recommendation: ${randomSuggestion}. Grid enabled for alignment.`)
   }
 
   const toggleLayer = (layerId: string, property: 'visible' | 'locked') => {

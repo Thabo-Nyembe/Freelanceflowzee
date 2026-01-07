@@ -594,10 +594,10 @@ const mockCampaignActivities = [
 ]
 
 const mockCampaignQuickActions = [
-  { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Creating campaign...', success: 'Campaign created successfully', error: 'Failed to create campaign' }) },
-  { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Sending test email...', success: 'Test email sent successfully', error: 'Failed to send test email' }) },
-  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening analytics dashboard...', success: 'Analytics Dashboard loaded successfully', error: 'Failed to load analytics' }) },
-  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening audience manager...', success: 'Audience Manager loaded successfully', error: 'Failed to load audience manager' }) },
+  { id: '1', label: 'New Campaign', icon: 'Mail', shortcut: '⌘N', action: () => toast.info('Opening new campaign form...', { description: 'Click the + button to create a new campaign' }) },
+  { id: '2', label: 'Send Test', icon: 'Send', shortcut: '⌘T', action: () => toast.info('Send Test Email', { description: 'Select a campaign first, then use the Send Test option in campaign details' }) },
+  { id: '3', label: 'View Analytics', icon: 'BarChart3', shortcut: '⌘A', action: () => toast.info('Analytics Dashboard', { description: 'Navigate to the Analytics tab to view campaign performance' }) },
+  { id: '4', label: 'Manage Audience', icon: 'Users', shortcut: '⌘U', action: () => toast.info('Audience Manager', { description: 'Navigate to the Audiences tab to manage your subscribers' }) },
 ]
 
 // ============== MAIN COMPONENT ==============
@@ -1117,7 +1117,7 @@ export default function CampaignsClient() {
                   onClick={() => {
                     setNewCampaignForm(prev => ({ ...prev, type: 'email' }))
                     setShowNewCampaignDialog(true)
-                    toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Setting up A/B Test...', success: 'A/B Test Campaign ready - enable A/B testing in settings', error: 'Failed to set up A/B test' })
+                    toast.success('A/B Test Campaign ready', { description: 'Enable A/B testing in the campaign settings' })
                   }}
                 >
                   <Split className="w-5 h-5 text-purple-500" />
@@ -2339,7 +2339,17 @@ export default function CampaignsClient() {
                             variant="outline"
                             className="h-auto py-4 flex flex-col items-center gap-2"
                             onClick={() => {
-                              toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Resetting statistics...', success: 'Statistics reset successfully', error: 'Failed to reset statistics' })
+                              if (confirm('Are you sure you want to reset all campaign statistics? This action cannot be undone.')) {
+                                toast.promise(
+                                  fetch('/api/campaigns/reset-statistics', { method: 'POST' })
+                                    .then(res => {
+                                      if (!res.ok) throw new Error('Failed to reset statistics')
+                                      refetch()
+                                      return res
+                                    }),
+                                  { loading: 'Resetting statistics...', success: 'Statistics reset successfully', error: 'Failed to reset statistics' }
+                                )
+                              }
                             }}
                           >
                             <RefreshCw className="w-5 h-5" />

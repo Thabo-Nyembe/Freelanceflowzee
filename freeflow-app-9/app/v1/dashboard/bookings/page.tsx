@@ -187,11 +187,7 @@ export default function UpcomingBookingsPage() {
           userId
         })
 
-        toast.promise(new Promise(r => setTimeout(r, 500)), {
-          loading: 'Loading bookings...',
-          success: `${transformedBookings.length} bookings loaded from database`,
-          error: 'Failed to load bookings'
-        })
+        toast.success(`${transformedBookings.length} bookings loaded from database`)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load bookings'
         setError(errorMessage)
@@ -301,11 +297,7 @@ export default function UpcomingBookingsPage() {
       })
 
       const totalBookings = bookings.length + 1
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Creating new booking...',
-        success: `Booking created: ${newBooking.clientName} - ${newBooking.service} on ${newBooking.date}. Total: ${totalBookings}`,
-        error: 'Failed to create booking'
-      })
+      toast.success(`Booking created: ${newBooking.clientName} - ${newBooking.service} on ${newBooking.date}. Total: ${totalBookings}`)
 
       announce(`New booking created for ${newBooking.clientName}`, 'polite')
     } catch (error: any) {
@@ -383,11 +375,7 @@ export default function UpcomingBookingsPage() {
       )
 
       logger.info('Booking updated successfully', { bookingId: editBooking.id })
-      toast.promise(new Promise(r => setTimeout(r, 600)), {
-        loading: 'Updating booking...',
-        success: `Booking updated: ${editForm.clientName} - ${editForm.service}`,
-        error: 'Failed to update booking'
-      })
+      toast.success(`Booking updated: ${editForm.clientName} - ${editForm.service}`)
       setEditBooking(null)
     } catch (error) {
       logger.error('Failed to update booking', { error })
@@ -474,11 +462,7 @@ export default function UpcomingBookingsPage() {
       const cancelMessage = refundAmount > 0
         ? `$${refundAmount} refund processed for ${booking.clientName}. Total cancelled: ${cancelled}`
         : `Booking cancelled for ${booking.clientName}. Total cancelled: ${cancelled}`
-      toast.promise(new Promise(r => setTimeout(r, 700)), {
-        loading: 'Cancelling booking...',
-        success: cancelMessage,
-        error: 'Failed to cancel booking'
-      })
+      toast.success(cancelMessage)
 
       announce(`Booking cancelled for ${booking.clientName}`, 'polite')
     } catch (error: any) {
@@ -554,11 +538,7 @@ export default function UpcomingBookingsPage() {
         time: booking.time
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 600)), {
-        loading: 'Sending reminder...',
-        success: `Reminder sent to ${booking.clientName} at ${booking.email} for ${booking.date} at ${booking.time}`,
-        error: 'Failed to send reminder'
-      })
+      toast.success(`Reminder sent to ${booking.clientName} at ${booking.email} for ${booking.date} at ${booking.time}`)
 
       announce(`Reminder sent to ${booking.clientName}`, 'polite')
     } catch (error: any) {
@@ -634,11 +614,7 @@ export default function UpcomingBookingsPage() {
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Exporting bookings...',
-      success: `${bookingCount} bookings exported to CSV. Total revenue: $${revenue}`,
-      error: 'Failed to export bookings'
-    })
+    toast.success(`${bookingCount} bookings exported to CSV. Total revenue: $${revenue}`)
 
     announce(`${bookingCount} bookings exported`, 'polite')
   }
@@ -663,11 +639,7 @@ export default function UpcomingBookingsPage() {
         autoConfirm: settingsForm.autoConfirm
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 600)), {
-        loading: 'Saving settings...',
-        success: 'Your booking preferences have been updated',
-        error: 'Failed to save settings'
-      })
+      toast.success('Your booking preferences have been updated')
       setShowSettingsModal(false)
       announce('Booking settings saved', 'polite')
     } catch (error: any) {
@@ -688,11 +660,7 @@ export default function UpcomingBookingsPage() {
       completed: countByStatus(bookings, 'completed')
     })
 
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Refreshing bookings...',
-      success: `${totalBookings} bookings loaded. Revenue: $${revenue}. Status: ${countByStatus(bookings, 'confirmed')} confirmed, ${countByStatus(bookings, 'pending')} pending`,
-      error: 'Failed to refresh bookings'
-    })
+    toast.success(`${totalBookings} bookings loaded. Revenue: $${revenue}. Status: ${countByStatus(bookings, 'confirmed')} confirmed, ${countByStatus(bookings, 'pending')} pending`)
 
     announce('Bookings refreshed', 'polite')
   }

@@ -506,10 +506,15 @@ const mockSecurityActivities = [
   { id: '3', user: 'Security', action: 'Updated', target: 'master password policy', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'update' as const },
 ]
 
-const mockSecurityQuickActions = [
-  { id: '1', label: 'Add Password', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Adding password...', success: 'Password added to vault', error: 'Failed to add password' }), variant: 'default' as const },
-  { id: '2', label: 'Security Audit', icon: 'shield', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Running security audit...', success: 'Security audit completed', error: 'Audit failed' }), variant: 'default' as const },
-  { id: '3', label: 'Export Vault', icon: 'download', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), { loading: 'Exporting vault...', success: 'Vault exported securely', error: 'Failed to export vault' }), variant: 'outline' as const },
+// Real API-backed quick actions - these will be initialized with actual handlers in the component
+const createSecurityQuickActions = (
+  addPasswordHandler: () => Promise<void>,
+  runAuditHandler: () => Promise<void>,
+  exportVaultHandler: () => Promise<void>
+) => [
+  { id: '1', label: 'Add Password', icon: 'plus', action: addPasswordHandler, variant: 'default' as const },
+  { id: '2', label: 'Security Audit', icon: 'shield', action: runAuditHandler, variant: 'default' as const },
+  { id: '3', label: 'Export Vault', icon: 'download', action: exportVaultHandler, variant: 'outline' as const },
 ]
 
 // ============================================================================
@@ -784,17 +789,29 @@ export default function SecurityClient() {
     const deletionRequest = async () => {
       setIsSaving(true)
       try {
-        // Simulate sending deletion request to support
-        await new Promise(resolve => setTimeout(resolve, 2000))
         const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          await supabase.from('security_audit_logs').insert({
-            user_id: user.id,
-            event_type: 'settings_changed',
-            event_description: 'Vault deletion request submitted',
-            additional_data: { requested_at: new Date().toISOString(), status: 'pending_review' }
-          })
+        if (!user) throw new Error('User not authenticated')
+
+        // Submit deletion request via API
+        const response = await fetch('/api/security/vault-deletion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: user.id })
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.message || 'Failed to submit deletion request')
         }
+
+        // Log the deletion request
+        await supabase.from('security_audit_logs').insert({
+          user_id: user.id,
+          event_type: 'settings_changed',
+          event_description: 'Vault deletion request submitted',
+          additional_data: { requested_at: new Date().toISOString(), status: 'pending_review' }
+        })
+
         return { success: true }
       } finally {
         setIsSaving(false)
@@ -807,6 +824,169 @@ export default function SecurityClient() {
       error: 'Failed to submit deletion request. Please try again or contact support directly.'
     })
   }, [supabase])
+
+  // Handler for adding a new password to the vault
+  const handleAddPassword = useCallback(async () => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const response = await fetch('/api/security/vault/passwords', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: 'New Password Entry',
+          type: 'login',
+          // This would typically open a modal - for now we log the action
+        })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to add password')
+      }
+
+      await supabase.from('security_audit_logs').insert({
+        user_id: user.id,
+        event_type: 'vault_item_created',
+        event_description: 'New password entry added to vault',
+        additional_data: { created_at: new Date().toISOString() }
+      })
+
+      toast.success('Password added to vault')
+    } catch (err) {
+      toast.error('Failed to add password', { description: err instanceof Error ? err.message : 'Unknown error' })
+      throw err
+    } finally {
+      setIsSaving(false)
+    }
+  }, [supabase])
+
+  // Handler for refreshing vault data
+  const handleRefreshVault = useCallback(async () => {
+    try {
+      const response = await fetch('/api/security/vault/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to refresh vault')
+      }
+
+      await fetchSettings()
+      await fetchEvents()
+      await fetchSessions()
+
+      toast.success('Vault refreshed successfully')
+    } catch (err) {
+      toast.error('Failed to refresh vault', { description: err instanceof Error ? err.message : 'Unknown error' })
+      throw err
+    }
+  }, [fetchSettings, fetchEvents, fetchSessions])
+
+  // Handler for exporting vault data
+  const handleExportVault = useCallback(async () => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const response = await fetch('/api/security/vault/export', {
+        method: 'GET',
+        headers: { 'Accept': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Failed to export vault')
+      }
+
+      const data = await response.json()
+
+      // Create and download the export file
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `vault-export-${new Date().toISOString().split('T')[0]}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      await supabase.from('security_audit_logs').insert({
+        user_id: user.id,
+        event_type: 'vault_exported',
+        event_description: 'Vault data exported',
+        additional_data: { exported_at: new Date().toISOString() }
+      })
+
+      toast.success('Vault exported securely')
+    } catch (err) {
+      toast.error('Failed to export vault', { description: err instanceof Error ? err.message : 'Unknown error' })
+      throw err
+    } finally {
+      setIsSaving(false)
+    }
+  }, [supabase])
+
+  // Handler for copying text to clipboard
+  const handleCopyToClipboard = useCallback(async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(`${label} copied to clipboard`)
+    } catch (err) {
+      toast.error(`Failed to copy ${label.toLowerCase()}`)
+      throw err
+    }
+  }, [])
+
+  // Handler for exporting audit log as CSV
+  const handleExportAuditLog = useCallback(async () => {
+    setIsSaving(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('User not authenticated')
+
+      const response = await fetch('/api/security/audit-log/export', {
+        method: 'GET',
+        headers: { 'Accept': 'text/csv' }
+      })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Export failed' }))
+        throw new Error(error.message || 'Failed to export audit log')
+      }
+
+      const csvData = await response.text()
+
+      // Create and download the CSV file
+      const blob = new Blob([csvData], { type: 'text/csv' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `security-audit-log-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+
+      toast.success('Audit log exported as CSV')
+    } catch (err) {
+      toast.error('Failed to export audit log', { description: err instanceof Error ? err.message : 'Unknown error' })
+    } finally {
+      setIsSaving(false)
+    }
+  }, [supabase])
+
+  // Memoized quick actions with real handlers
+  const securityQuickActions = useMemo(() =>
+    createSecurityQuickActions(handleAddPassword, handleRunScan, handleExportVault),
+    [handleAddPassword, handleRunScan, handleExportVault]
+  )
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 via-rose-50/30 to-pink-50/40 dark:bg-none dark:bg-gray-900">
@@ -833,16 +1013,7 @@ export default function SecurityClient() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <Button variant="outline" size="icon" onClick={() => {
-                toast.promise(
-                  new Promise((resolve) => setTimeout(resolve, 1500)),
-                  {
-                    loading: 'Refreshing vault...',
-                    success: 'Vault refreshed successfully',
-                    error: 'Failed to refresh vault'
-                  }
-                )
-              }}>
+              <Button variant="outline" size="icon" onClick={handleRefreshVault}>
                 <RefreshCw className="w-4 h-4" />
               </Button>
               <Button className="bg-gradient-to-r from-red-500 to-rose-600 text-white">
@@ -1107,15 +1278,9 @@ export default function SecurityClient() {
                             <Badge key={i} variant="outline" className="text-xs">{tag}</Badge>
                           ))}
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 800)),
-                            {
-                              loading: 'Loading options...',
-                              success: 'Item options loaded',
-                              error: 'Failed to load options'
-                            }
-                          )
+                        <Button variant="ghost" size="icon" onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedItem(item)
                         }}>
                           <MoreHorizontal className="w-4 h-4" />
                         </Button>
@@ -1424,16 +1589,7 @@ export default function SecurityClient() {
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <code className="text-sm bg-muted px-2 py-0.5 rounded">{key.prefix}</code>
-                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => {
-                              toast.promise(
-                                navigator.clipboard.writeText(key.prefix).then(() => new Promise(resolve => setTimeout(resolve, 300))),
-                                {
-                                  loading: 'Copying key...',
-                                  success: 'Secret key copied to clipboard',
-                                  error: 'Failed to copy key'
-                                }
-                              )
-                            }}>
+                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleCopyToClipboard(key.prefix, 'Secret key')}>
                               <Copy className="w-3 h-3" />
                             </Button>
                           </div>
@@ -1965,7 +2121,7 @@ export default function SecurityClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSecurityQuickActions}
+            actions={securityQuickActions}
             variant="grid"
           />
         </div>
@@ -1991,16 +2147,7 @@ export default function SecurityClient() {
                         <p className="text-xs text-muted-foreground">Username</p>
                         <p className="font-medium">{selectedItem.username}</p>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        toast.promise(
-                          navigator.clipboard.writeText(selectedItem.username || '').then(() => new Promise(resolve => setTimeout(resolve, 300))),
-                          {
-                            loading: 'Copying username...',
-                            success: 'Username copied to clipboard',
-                            error: 'Failed to copy username'
-                          }
-                        )
-                      }}>
+                      <Button variant="ghost" size="icon" onClick={() => handleCopyToClipboard(selectedItem.username || '', 'Username')}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
@@ -2016,15 +2163,17 @@ export default function SecurityClient() {
                       <Button variant="ghost" size="icon" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        toast.promise(
-                          navigator.clipboard.writeText('**********').then(() => new Promise(resolve => setTimeout(resolve, 300))),
-                          {
-                            loading: 'Copying password...',
-                            success: 'Password copied to clipboard',
-                            error: 'Failed to copy password'
-                          }
-                        )
+                      <Button variant="ghost" size="icon" onClick={async () => {
+                        // In a real app, this would fetch the actual password from the vault API
+                        try {
+                          const response = await fetch(`/api/security/vault/passwords/${selectedItem.id}`)
+                          if (!response.ok) throw new Error('Failed to fetch password')
+                          const { password } = await response.json()
+                          await handleCopyToClipboard(password, 'Password')
+                        } catch {
+                          // Fallback for demo - would show actual password in production
+                          toast.error('Failed to copy password', { description: 'Could not retrieve password from vault' })
+                        }
                       }}>
                         <Copy className="w-4 h-4" />
                       </Button>
@@ -2037,17 +2186,8 @@ export default function SecurityClient() {
                         <p className="font-medium">{selectedItem.website}</p>
                       </div>
                       <Button variant="ghost" size="icon" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => {
-                            window.open(`https://${selectedItem.website}`, '_blank')
-                            setTimeout(resolve, 500)
-                          }),
-                          {
-                            loading: 'Opening website...',
-                            success: 'Website opened in new tab',
-                            error: 'Failed to open website'
-                          }
-                        )
+                        window.open(`https://${selectedItem.website}`, '_blank')
+                        toast.success('Website opened in new tab')
                       }}>
                         <ExternalLink className="w-4 h-4" />
                       </Button>

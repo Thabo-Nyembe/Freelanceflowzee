@@ -172,11 +172,7 @@ export default function CalendarPage() {
       announce(
         `${day.bookingsCount} booking${day.bookingsCount > 1 ? 's' : ''} on ${format(day.date, 'MMMM d')}`
       )
-      toast.promise(new Promise(r => setTimeout(r, 500)), {
-        loading: 'Loading bookings...',
-        success: `${day.bookingsCount} booking${day.bookingsCount > 1 ? 's' : ''} on ${format(day.date, 'MMMM d, yyyy')}`,
-        error: 'Failed to load bookings'
-      })
+      toast.success(`${day.bookingsCount} booking${day.bookingsCount > 1 ? 's' : ''} on ${format(day.date, 'MMMM d, yyyy')}`)
     } else {
       announce(`No bookings on ${format(day.date, 'MMMM d')}`)
     }
@@ -216,11 +212,7 @@ export default function CalendarPage() {
     logger.info('Exported to Google Calendar', {
       bookingId: selectedBooking.id
     })
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Opening Google Calendar...',
-      success: 'Exported to Google Calendar',
-      error: 'Failed to open Google Calendar'
-    })
+    toast.success('Exported to Google Calendar')
     announce('Exported to Google Calendar')
     setShowExportDialog(false)
   }
@@ -253,11 +245,7 @@ export default function CalendarPage() {
     logger.info('Exported to Outlook Calendar', {
       bookingId: selectedBooking.id
     })
-    toast.promise(new Promise(r => setTimeout(r, 800)), {
-      loading: 'Opening Outlook Calendar...',
-      success: 'Exported to Outlook Calendar',
-      error: 'Failed to open Outlook Calendar'
-    })
+    toast.success('Exported to Outlook Calendar')
     announce('Exported to Outlook Calendar')
     setShowExportDialog(false)
   }
@@ -289,11 +277,7 @@ export default function CalendarPage() {
       downloadICalendar(icsBlob, `booking-${selectedBooking.id}.ics`)
 
       logger.info('Downloaded ICS file', { bookingId: selectedBooking.id })
-      toast.promise(new Promise(r => setTimeout(r, 600)), {
-        loading: 'Downloading calendar file...',
-        success: 'Calendar file downloaded',
-        error: 'Failed to download calendar file'
-      })
+      toast.success('Calendar file downloaded')
       announce('Calendar file downloaded')
       setShowExportDialog(false)
     } catch (error) {
@@ -325,11 +309,7 @@ export default function CalendarPage() {
         maxBookingsPerDay: availabilityForm.maxBookingsPerDay
       })
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Saving availability...',
-        success: 'Your availability preferences have been updated',
-        error: 'Failed to save availability'
-      })
+      toast.success('Your availability preferences have been updated')
       setShowAvailabilityModal(false)
       announce('Availability settings saved', 'polite')
     } catch (error: any) {

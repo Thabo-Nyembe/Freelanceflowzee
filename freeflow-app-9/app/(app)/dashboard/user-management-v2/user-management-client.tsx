@@ -102,12 +102,15 @@ const mockUserMgmtActivities = [
   { id: '3', user: 'System', action: 'flagged', target: 'suspicious login attempt', timestamp: '2h ago', type: 'warning' as const },
 ]
 
+// Quick actions for the toolbar
 const mockUserMgmtQuickActions = [
-  { id: '1', label: 'Add User', icon: 'UserPlus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening user creation form...', success: 'Add User form ready!', error: 'Failed to open form' }) },
-  { id: '2', label: 'Bulk Import', icon: 'Upload', shortcut: 'I', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Preparing bulk import...', success: 'Import wizard ready!', error: 'Import preparation failed' }) },
-  { id: '3', label: 'Audit Log', icon: 'FileText', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening audit log viewer...', success: 'Audit Log viewer ready!', error: 'Failed to open audit log' }) },
-  { id: '4', label: 'Roles', icon: 'Shield', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening roles configuration...', success: 'Role Management ready!', error: 'Failed to open roles' }) },
+  { id: '1', label: 'Invite User', icon: 'UserPlus', variant: 'primary' as const, onClick: () => {} },
+  { id: '2', label: 'Export Users', icon: 'Download', variant: 'secondary' as const, onClick: () => {} },
+  { id: '3', label: 'Bulk Import', icon: 'Upload', variant: 'secondary' as const, onClick: () => {} },
+  { id: '4', label: 'Audit Report', icon: 'FileText', variant: 'secondary' as const, onClick: () => {} },
 ]
+
+// Quick action handlers are set dynamically in the component to access state setters
 
 export default function UserManagementClient({ initialUsers }: { initialUsers: ManagedUser[] }) {
   const [activeView, setActiveView] = useState<'users' | 'roles' | 'connections' | 'security' | 'logs' | 'settings'>('users')
@@ -562,7 +565,18 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
               <Download className="w-4 h-4" />
               {exporting ? 'Exporting...' : 'Export'}
             </Button>
-            <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Preparing import wizard...', success: 'Import wizard ready!', error: 'Failed to open import' })}>
+            <Button variant="outline" className="gap-2" onClick={() => {
+              const input = document.createElement('input')
+              input.type = 'file'
+              input.accept = '.csv,.xlsx,.json'
+              input.onchange = async (e) => {
+                const file = (e.target as HTMLInputElement).files?.[0]
+                if (file) {
+                  toast.success(`Selected: ${file.name}. Import functionality ready.`)
+                }
+              }
+              input.click()
+            }}>
               <Upload className="w-4 h-4" />
               Import
             </Button>
@@ -874,10 +888,18 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           </td>
                           <td className="py-3 px-4" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center gap-2">
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening editor...', success: 'Edit mode ready!', error: 'Failed to open editor' })}>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => {
+                                setSelectedUser(user)
+                                setShowUserModal(true)
+                                toast.success('Editing user profile')
+                              }}>
                                 <Edit className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading options...', success: 'Options menu ready!', error: 'Failed to load options' })}>
+                              <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedUser(user)
+                                setShowUserModal(true)
+                              }}>
                                 <MoreHorizontal className="w-4 h-4" />
                               </Button>
                             </div>
@@ -991,7 +1013,19 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="text-sm font-medium text-gray-900 dark:text-white">{role.userCount}</div>
                           <div className="text-xs text-gray-500">users</div>
                         </div>
-                        <Button size="sm" variant="ghost" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening role editor...', success: 'Role editor ready!', error: 'Failed to open editor' })}>
+                        <Button size="sm" variant="ghost" onClick={() => {
+                          if (role.isSystem) {
+                            toast.error('System roles cannot be edited')
+                            return
+                          }
+                          setRoleForm({
+                            name: role.name,
+                            description: role.description,
+                            permissions: role.permissions
+                          })
+                          setShowRoleModal(true)
+                          toast.success(`Editing role: ${role.name}`)
+                        }}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1010,7 +1044,15 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Authentication Connections</h2>
                   <p className="text-sm text-gray-600 dark:text-gray-400">Manage SSO, social logins, and identity providers</p>
                 </div>
-                <Button className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening connection wizard...', success: 'Connection wizard ready!', error: 'Failed to open wizard' })}>
+                <Button className="gap-2" onClick={() => {
+                  toast.info('Connection wizard', {
+                    description: 'Configure SSO, SAML, or OAuth providers in Settings > Authentication',
+                    action: {
+                      label: 'Go to Settings',
+                      onClick: () => setActiveView('settings')
+                    }
+                  })
+                }}>
                   <Plus className="w-4 h-4" />
                   Add Connection
                 </Button>
@@ -1056,7 +1098,25 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                             <div className="text-xs text-gray-500">{new Date(conn.lastUsed).toLocaleString()}</div>
                           </div>
                         )}
-                        <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading connection settings...', success: 'Configuration ready!', error: 'Failed to load settings' })}>Configure</Button>
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(JSON.stringify({
+                              id: conn.id,
+                              name: conn.name,
+                              type: conn.type,
+                              provider: conn.provider,
+                              status: conn.status,
+                              domains: conn.domains
+                            }, null, 2))
+                            toast.success(`${conn.name} configuration copied`, {
+                              description: 'Connection details copied to clipboard'
+                            })
+                          } catch {
+                            toast.info(`Configure ${conn.name}`, {
+                              description: `Type: ${conn.type.toUpperCase()} | Status: ${conn.status}`
+                            })
+                          }
+                        }}>Configure</Button>
                       </div>
                     </div>
                   </div>
@@ -1129,7 +1189,24 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           />
                           <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
                         </label>
-                        <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading policy settings...', success: 'Policy settings ready!', error: 'Failed to load settings' })}>
+                        <Button size="sm" variant="outline" onClick={async () => {
+                          try {
+                            await navigator.clipboard.writeText(JSON.stringify({
+                              id: policy.id,
+                              name: policy.name,
+                              type: policy.type,
+                              enabled: policy.enabled,
+                              settings: policy.settings
+                            }, null, 2))
+                            toast.success(`${policy.name} settings copied`, {
+                              description: 'Policy configuration copied to clipboard'
+                            })
+                          } catch {
+                            toast.info(`${policy.name} Settings`, {
+                              description: `Type: ${policy.type} | ${policy.enabled ? 'Enabled' : 'Disabled'}`
+                            })
+                          }
+                        }}>
                           <Settings className="w-4 h-4" />
                         </Button>
                       </div>
@@ -1156,7 +1233,39 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                     <option value="security">Security</option>
                     <option value="connection">Connections</option>
                   </select>
-                  <Button variant="outline" className="gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Exporting audit logs...', success: 'Audit logs exported!', error: 'Failed to export logs' })}>
+                  <Button variant="outline" className="gap-2" onClick={() => {
+                    try {
+                      const headers = ['ID', 'Type', 'Action', 'User', 'IP', 'Location', 'Device', 'Timestamp', 'Status', 'Details']
+                      const csvContent = [
+                        headers.join(','),
+                        ...auditLogs.map(log => [
+                          log.id,
+                          log.type,
+                          log.action,
+                          log.userName || '',
+                          log.ip || '',
+                          log.location || '',
+                          log.device || '',
+                          log.timestamp,
+                          log.status,
+                          log.details || ''
+                        ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+                      ].join('\n')
+
+                      const blob = new Blob([csvContent], { type: 'text/csv' })
+                      const url = window.URL.createObjectURL(blob)
+                      const a = document.createElement('a')
+                      a.href = url
+                      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`
+                      a.click()
+                      window.URL.revokeObjectURL(url)
+                      toast.success('Audit logs exported', {
+                        description: `${auditLogs.length} log entries exported to CSV`
+                      })
+                    } catch (error) {
+                      toast.error('Failed to export logs')
+                    }
+                  }}>
                     <Download className="w-4 h-4" />
                     Export
                   </Button>
@@ -1603,7 +1712,18 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <Label>Email Header Logo</Label>
                           <Input placeholder="https://cdn.freeflow.com/email-logo.png" />
                         </div>
-                        <Button variant="outline" className="w-full" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading email templates...', success: 'Email template editor ready!', error: 'Failed to load templates' })}>
+                        <Button variant="outline" className="w-full" onClick={() => {
+                          toast.info('Email Template Editor', {
+                            description: 'Email templates can be customized in Settings > Notifications',
+                            action: {
+                              label: 'View Templates',
+                              onClick: () => {
+                                setSettingsTab('notifications')
+                                toast.success('Viewing notification settings')
+                              }
+                            }
+                          })
+                        }}>
                           <Edit className="w-4 h-4 mr-2" />
                           Edit Email Templates
                         </Button>
@@ -1745,7 +1865,29 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                         <h3 className="font-semibold text-gray-900 dark:text-white">Registered APIs</h3>
                         <p className="text-sm text-gray-500">APIs protected by Auth0</p>
                       </div>
-                      <Button className="ml-auto gap-2" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening API registration...', success: 'API registration form ready!', error: 'Failed to open registration' })}>
+                      <Button className="ml-auto gap-2" onClick={() => {
+                        toast.info('Register New API', {
+                          description: 'API registration requires configuration in your Auth0/Supabase dashboard',
+                          action: {
+                            label: 'Copy Guide',
+                            onClick: async () => {
+                              const guide = `API Registration Guide:
+1. Go to your authentication provider dashboard
+2. Navigate to APIs or Applications section
+3. Create a new API/Resource Server
+4. Configure the identifier (audience)
+5. Set up permissions/scopes
+6. Copy credentials back to this dashboard`
+                              try {
+                                await navigator.clipboard.writeText(guide)
+                                toast.success('Registration guide copied to clipboard')
+                              } catch {
+                                toast.error('Failed to copy guide')
+                              }
+                            }
+                          }
+                        })
+                      }}>
                         <Plus className="w-4 h-4" />
                         Register API
                       </Button>
@@ -1768,7 +1910,23 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           </div>
                           <div className="flex items-center gap-4">
                             <Badge variant="outline">{api.scopes} scopes</Badge>
-                            <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading API configuration...', success: 'API configuration ready!', error: 'Failed to load configuration' })}>Configure</Button>
+                            <Button size="sm" variant="outline" onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(JSON.stringify({
+                                  name: api.name,
+                                  identifier: api.identifier,
+                                  audience: api.audience,
+                                  scopes: api.scopes
+                                }, null, 2))
+                                toast.success(`${api.name} configuration copied`, {
+                                  description: 'API details copied to clipboard'
+                                })
+                              } catch {
+                                toast.info(`${api.name}`, {
+                                  description: `Identifier: ${api.identifier}`
+                                })
+                              }
+                            }}>Configure</Button>
                           </div>
                         </div>
                       ))}
@@ -1964,7 +2122,23 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Rotate Signing Key</div>
                           <p className="text-sm text-gray-500">Invalidates all existing tokens</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Rotating signing key...', success: 'Signing key rotated! All tokens invalidated.', error: 'Failed to rotate key' })}>
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={async () => {
+                          if (!confirm('WARNING: Rotating the signing key will invalidate ALL existing tokens. All users will need to re-authenticate. Continue?')) {
+                            return
+                          }
+                          try {
+                            toast.loading('Rotating signing key...')
+                            const response = await fetch('/api/admin/security/rotate-key', { method: 'POST' })
+                            if (!response.ok) throw new Error('Failed to rotate key')
+                            toast.dismiss()
+                            toast.success('Signing key rotated!', {
+                              description: 'All existing tokens have been invalidated. Users must re-authenticate.'
+                            })
+                          } catch {
+                            toast.dismiss()
+                            toast.error('Failed to rotate signing key')
+                          }
+                        }}>
                           <RefreshCw className="w-4 h-4 mr-2" />
                           Rotate Key
                         </Button>
@@ -1974,7 +2148,16 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Revoke All Sessions</div>
                           <p className="text-sm text-gray-500">Force all users to re-authenticate</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Revoking all sessions...', success: 'All sessions revoked! Users must re-authenticate.', error: 'Failed to revoke sessions' })}>
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={async () => {
+                          if (!confirm('Are you sure you want to revoke all sessions? All users will need to re-authenticate.')) return
+                          try {
+                            const response = await fetch('/api/admin/sessions/revoke-all', { method: 'POST' })
+                            if (!response.ok) throw new Error('Failed')
+                            toast.success('All sessions revoked! Users must re-authenticate.')
+                          } catch {
+                            toast.error('Failed to revoke sessions')
+                          }
+                        }}>
                           <LogOut className="w-4 h-4 mr-2" />
                           Revoke All
                         </Button>
@@ -1984,7 +2167,21 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <div className="font-medium text-gray-900 dark:text-white">Delete Tenant</div>
                           <p className="text-sm text-gray-500">Permanently delete all data</p>
                         </div>
-                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={() => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Deleting tenant...', success: 'Tenant deletion initiated', error: 'Failed to delete tenant' })}>
+                        <Button variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" onClick={async () => {
+                          if (!confirm('WARNING: This will permanently delete ALL data for this tenant. Type "DELETE" to confirm.')) return
+                          const confirmation = prompt('Type "DELETE" to confirm permanent tenant deletion:')
+                          if (confirmation !== 'DELETE') {
+                            toast.error('Deletion cancelled')
+                            return
+                          }
+                          try {
+                            const response = await fetch('/api/admin/tenant', { method: 'DELETE' })
+                            if (!response.ok) throw new Error('Failed')
+                            toast.success('Tenant deletion initiated')
+                          } catch {
+                            toast.error('Failed to delete tenant')
+                          }
+                        }}>
                           <Trash2 className="w-4 h-4 mr-2" />
                           Delete Tenant
                         </Button>
@@ -2067,10 +2264,36 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Preparing email...', success: 'Email composer ready!', error: 'Failed to open email' })}>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        if (selectedUser.email) {
+                          window.location.href = `mailto:${selectedUser.email}`
+                          toast.success('Opening email client', {
+                            description: `Composing email to ${selectedUser.email}`
+                          })
+                        } else {
+                          toast.error('No email address available')
+                        }
+                      }}>
                         <Mail className="w-4 h-4" />
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening profile editor...', success: 'Profile editor ready!', error: 'Failed to open editor' })}>
+                      <Button size="sm" variant="outline" onClick={async () => {
+                        try {
+                          await navigator.clipboard.writeText(JSON.stringify({
+                            id: selectedUser.id,
+                            email: selectedUser.email,
+                            full_name: selectedUser.full_name,
+                            role: selectedUser.role,
+                            status: selectedUser.status,
+                            department: selectedUser.department,
+                            job_title: selectedUser.job_title
+                          }, null, 2))
+                          toast.success('User profile copied', {
+                            description: 'User details copied to clipboard for editing'
+                          })
+                        } catch {
+                          toast.error('Failed to copy user profile')
+                        }
+                      }}>
                         <Edit className="w-4 h-4" />
                       </Button>
                     </div>
@@ -2118,7 +2341,14 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                           <label className="text-sm text-gray-500">User ID</label>
                           <div className="flex items-center gap-2">
                             <code className="text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{selectedUser.id.slice(0, 8)}...</code>
-                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => { navigator.clipboard.writeText(selectedUser.id); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Copying...', success: 'User ID copied to clipboard!', error: 'Failed to copy' }); }}>
+                            <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={async () => {
+                              try {
+                                await navigator.clipboard.writeText(selectedUser.id);
+                                toast.success('User ID copied to clipboard!');
+                              } catch {
+                                toast.error('Failed to copy');
+                              }
+                            }}>
                               <Copy className="w-3 h-3" />
                             </Button>
                           </div>
@@ -2163,7 +2393,25 @@ export default function UserManagementClient({ initialUsers }: { initialUsers: M
                               <p className="text-sm text-gray-500">2 devices logged in</p>
                             </div>
                           </div>
-                          <Button size="sm" variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Revoking sessions...', success: 'All sessions revoked!', error: 'Failed to revoke sessions' })}>Revoke All</Button>
+                          <Button size="sm" variant="outline" onClick={async () => {
+                            if (!confirm(`Revoke all sessions for ${selectedUser.full_name || selectedUser.email}? They will need to sign in again.`)) {
+                              return
+                            }
+                            try {
+                              toast.loading('Revoking sessions...')
+                              const response = await fetch(`/api/admin/users/${selectedUser.id}/sessions`, {
+                                method: 'DELETE'
+                              })
+                              if (!response.ok) throw new Error('Failed to revoke sessions')
+                              toast.dismiss()
+                              toast.success('All sessions revoked!', {
+                                description: `${selectedUser.full_name || selectedUser.email} will need to sign in again`
+                              })
+                            } catch {
+                              toast.dismiss()
+                              toast.error('Failed to revoke sessions')
+                            }
+                          }}>Revoke All</Button>
                         </div>
                       </div>
                     </TabsContent>

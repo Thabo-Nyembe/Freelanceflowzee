@@ -387,11 +387,12 @@ const mockSecurityActivities = [
   { id: '3', user: 'Sam Analyst', action: 'flagged', target: 'suspicious login attempt', timestamp: '1h ago', type: 'warning' as const },
 ]
 
-const mockSecurityQuickActions = [
-  { id: '1', label: 'Run Scan', icon: 'Scan', shortcut: 'S', action: () => toast.promise(new Promise(r => setTimeout(r, 2500)), { loading: 'Running security scan...', success: 'Security scan completed!', error: 'Scan failed' }) },
-  { id: '2', label: 'View Alerts', icon: 'AlertTriangle', shortcut: 'A', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening alerts dashboard...', success: 'Security alerts loaded!', error: 'Failed to load alerts' }) },
-  { id: '3', label: 'Compliance Report', icon: 'FileText', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Generating compliance report...', success: 'Report generated!', error: 'Report generation failed' }) },
-  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Opening security configuration...', success: 'Security settings loaded!', error: 'Failed to load security settings' }) },
+// Quick actions config - handlers set in component
+const mockSecurityQuickActionsConfig = [
+  { id: '1', label: 'Run Scan', icon: 'Scan', shortcut: 'S' },
+  { id: '2', label: 'View Alerts', icon: 'AlertTriangle', shortcut: 'A' },
+  { id: '3', label: 'Compliance Report', icon: 'FileText', shortcut: 'R' },
+  { id: '4', label: 'Settings', icon: 'Settings', shortcut: 'T' },
 ]
 
 export default function SecurityAuditClient() {
@@ -1742,7 +1743,22 @@ export default function SecurityAuditClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSecurityQuickActions}
+            actions={mockSecurityQuickActionsConfig.map(action => ({
+              ...action,
+              action: async () => {
+                switch(action.id) {
+                  case '1':
+                    toast.promise(
+                      fetch('/api/security/scan', { method: 'POST' }).then(r => { if (!r.ok) throw new Error(); return r.json(); }),
+                      { loading: 'Running security scan...', success: 'Security scan completed!', error: 'Scan failed' }
+                    );
+                    break;
+                  case '2': setActiveTab('alerts'); toast.success('Viewing alerts'); break;
+                  case '3': setActiveTab('compliance'); toast.success('Viewing compliance report'); break;
+                  case '4': setActiveTab('settings'); toast.success('Opening settings'); break;
+                }
+              }
+            }))}
             variant="grid"
           />
         </div>

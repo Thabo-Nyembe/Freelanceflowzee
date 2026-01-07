@@ -501,8 +501,139 @@ export default function AnalyticsClient() {
   }
 
   const handleExport = async () => {
-    toast.success('Export started', { description: 'Your analytics report is being generated' })
-    // In production, this would trigger a real export job
+    // Generate real CSV export of analytics data
+    const csvHeaders = ['Metric', 'Value', 'Previous Value', 'Change %', 'Category', 'Status']
+    const csvRows = mockMetrics.map(m => [
+      m.name,
+      m.value,
+      m.previousValue,
+      m.changePercent,
+      m.category,
+      m.status
+    ])
+    const csvContent = [csvHeaders, ...csvRows].map(row => row.join(',')).join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `analytics-export-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success('Export complete', { description: 'Analytics data downloaded as CSV' })
+  }
+
+  const handleExportCohorts = async () => {
+    // Generate real CSV export of cohort data
+    const csvHeaders = ['Cohort', 'Users', 'Week 0', 'Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7']
+    const csvRows = mockCohorts.map(c => [
+      c.cohort,
+      c.users,
+      c.week0,
+      c.week1,
+      c.week2,
+      c.week3,
+      c.week4,
+      c.week5,
+      c.week6,
+      c.week7
+    ])
+    const csvContent = [csvHeaders, ...csvRows].map(row => row.join(',')).join('\n')
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `cohorts-export-${new Date().toISOString().split('T')[0]}.csv`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success('Export complete', { description: 'Cohort data downloaded as CSV' })
+  }
+
+  const handleExportConfig = async () => {
+    // Export analytics configuration as JSON
+    const config = {
+      analyticsName: 'Main Analytics',
+      timeZone: 'UTC',
+      enableAnalytics: true,
+      realtimeDashboard: true,
+      sessionRecording: true,
+      heatmaps: true,
+      errorTracking: true,
+      formAnalytics: true,
+      ipAnonymization: true,
+      cookieConsent: true,
+      gdprMode: true,
+      retentionPeriod: '12 months',
+      exportedAt: new Date().toISOString()
+    }
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `analytics-config-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success('Config exported', { description: 'Analytics configuration downloaded' })
+  }
+
+  const handleCopyTrackingCode = async () => {
+    const trackingCode = `<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://analytics.kazi.app/track.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','kaziLayer','KAZI-XXXXXXXX');
+</script>`
+    try {
+      await navigator.clipboard.writeText(trackingCode)
+      toast.success('Copied', { description: 'Tracking code copied to clipboard' })
+    } catch (err) {
+      toast.error('Failed to copy', { description: 'Please try again' })
+    }
+  }
+
+  const handleEmailTrackingCode = () => {
+    const subject = encodeURIComponent('Kazi Analytics Tracking Code')
+    const body = encodeURIComponent(`Please add the following tracking code to the website:
+
+<script>
+  (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://analytics.kazi.app/track.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','kaziLayer','KAZI-XXXXXXXX');
+</script>
+
+Add this code to the <head> section of your HTML.`)
+    window.open(`mailto:?subject=${subject}&body=${body}`)
+    toast.success('Email opened', { description: 'Compose your email with the tracking code' })
+  }
+
+  const handleExportAllData = async () => {
+    // Comprehensive data export
+    const allData = {
+      metrics: mockMetrics,
+      funnels: mockFunnels,
+      cohorts: mockCohorts,
+      reports: mockReports,
+      dashboards: mockDashboards,
+      exportedAt: new Date().toISOString()
+    }
+    const blob = new Blob([JSON.stringify(allData, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `analytics-full-export-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+    toast.success('Export complete', { description: 'All analytics data downloaded' })
   }
 
   const handleShare = async () => {
@@ -745,7 +876,7 @@ export default function AnalyticsClient() {
                     <p className="text-2xl font-bold">$285K</p>
                     <p className="text-indigo-100 text-sm">Total Revenue</p>
                   </div>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleExport}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1113,7 +1244,7 @@ export default function AnalyticsClient() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Badge className="bg-white/20 text-white border-white/30">{cohortType}</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleExportCohorts}>
                     <Download className="h-4 w-4 mr-2" />
                     Export
                   </Button>
@@ -1580,7 +1711,7 @@ export default function AnalyticsClient() {
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge className="bg-green-500/20 text-green-300 border-green-500/30">Active</Badge>
-                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
+                  <Button variant="outline" className="border-white/20 text-white hover:bg-white/10" onClick={handleExportConfig}>
                     <Download className="h-4 w-4 mr-2" />
                     Export Config
                   </Button>
@@ -1764,11 +1895,11 @@ export default function AnalyticsClient() {
 </script>`}</pre>
                         </div>
                         <div className="mt-4 flex items-center gap-2">
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleCopyTrackingCode}>
                             <Copy className="h-4 w-4 mr-2" />
                             Copy Code
                           </Button>
-                          <Button variant="outline" size="sm">
+                          <Button variant="outline" size="sm" onClick={handleEmailTrackingCode}>
                             <Mail className="h-4 w-4 mr-2" />
                             Email to Developer
                           </Button>
@@ -2023,7 +2154,7 @@ export default function AnalyticsClient() {
                             <Label>Export All Data</Label>
                             <p className="text-sm text-gray-500">Download complete analytics data</p>
                           </div>
-                          <Button variant="outline">
+                          <Button variant="outline" onClick={handleExportAllData}>
                             <Download className="h-4 w-4 mr-2" />
                             Export
                           </Button>

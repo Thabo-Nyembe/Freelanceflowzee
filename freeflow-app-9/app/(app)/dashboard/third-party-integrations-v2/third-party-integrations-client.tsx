@@ -341,9 +341,9 @@ const mockIntegrationsActivities = [
 ]
 
 const mockIntegrationsQuickActions = [
-  { id: '1', label: 'Add Integration', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening integration wizard...', success: 'Integration wizard ready!', error: 'Failed to open wizard' }), variant: 'default' as const },
-  { id: '2', label: 'Test Connection', icon: 'refresh', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Testing connection...', success: 'Connection test passed!', error: 'Connection test failed' }), variant: 'default' as const },
-  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening logs viewer...', success: 'Integration logs loaded!', error: 'Failed to load logs' }), variant: 'outline' as const },
+  { id: '1', label: 'Add Integration', icon: 'plus', action: () => toast.success('Integration Wizard', { description: 'Select an app to connect from the directory' }), variant: 'default' as const },
+  { id: '2', label: 'Test Connection', icon: 'refresh', action: () => toast.success('Connection Test Passed', { description: 'All integrations responding correctly' }), variant: 'default' as const },
+  { id: '3', label: 'View Logs', icon: 'file', action: () => toast.success('Integration Logs', { description: 'Showing recent integration activity' }), variant: 'outline' as const },
 ]
 
 export default function ThirdPartyIntegrationsClient() {

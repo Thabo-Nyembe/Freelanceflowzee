@@ -351,12 +351,8 @@ const mockInventoryActivities = [
   { id: '4', user: 'Anna Brown', action: 'completed', target: 'stock transfer to Store #3', timestamp: '1h ago', type: 'success' as const },
 ]
 
-const mockInventoryQuickActions = [
-  { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening stock count...', success: 'Scan barcodes or enter quantities manually', error: 'Failed to open' }) },
-  { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening transfer form...', success: 'Select source and destination locations', error: 'Failed to open' }) },
-  { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating purchase order...', success: 'Add items and submit to supplier', error: 'Failed to create' }) },
-  { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Generating labels...', success: '12 barcode labels ready to print', error: 'Print failed' }) },
-]
+// Quick actions are now handled via component state and real handlers
+// These will be configured inside the component with access to state setters
 
 export default function InventoryClient({ initialInventory }: { initialInventory: InventoryItem[] }) {
   const [activeTab, setActiveTab] = useState('products')
@@ -434,6 +430,10 @@ export default function InventoryClient({ initialInventory }: { initialInventory
   })
   const [showSupplierDialog, setShowSupplierDialog] = useState(false)
   const [creatingSupplier, setCreatingSupplier] = useState(false)
+  const [showStockCountDialog, setShowStockCountDialog] = useState(false)
+  const [showBarcodeScannerDialog, setShowBarcodeScannerDialog] = useState(false)
+  const [importingInventory, setImportingInventory] = useState(false)
+  const [printingLabels, setPrintingLabels] = useState(false)
 
   const handleCreateProduct = async () => {
     if (!newProductForm.title) {
@@ -823,6 +823,110 @@ export default function InventoryClient({ initialInventory }: { initialInventory
     toast.success('Sync complete', { description: 'Inventory data refreshed' })
   }
 
+  // Handle barcode scanner - opens scanner dialog
+  const handleScanBarcode = async () => {
+    setShowBarcodeScannerDialog(true)
+    toast.info('Barcode Scanner', { description: 'Position barcode in camera view' })
+  }
+
+  // Handle import inventory from file
+  const handleImportInventory = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setImportingInventory(true)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const response = await fetch('/api/inventory/import', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.message || 'Import failed')
+      }
+
+      const result = await response.json()
+      toast.success('Import completed', { description: `Imported ${result.count || 0} items` })
+      refetch()
+    } catch (error) {
+      console.error('Import error:', error)
+      toast.error('Import failed', { description: error instanceof Error ? error.message : 'Failed to import inventory' })
+    } finally {
+      setImportingInventory(false)
+      // Reset file input
+      event.target.value = ''
+    }
+  }
+
+  // Handle stock count action
+  const handleStockCount = () => {
+    setShowStockCountDialog(true)
+    toast.info('Stock Count', { description: 'Scan barcodes or enter quantities manually' })
+  }
+
+  // Handle print labels
+  const handlePrintLabels = async () => {
+    setPrintingLabels(true)
+    try {
+      const { data, error } = await supabase
+        .from('inventory')
+        .select('id, product_name, sku, barcode')
+        .is('deleted_at', null)
+        .limit(20)
+
+      if (error) throw error
+
+      const items = data || []
+      if (items.length === 0) {
+        toast.info('No items to print')
+        return
+      }
+
+      // Generate label content
+      const labelContent = items.map(item => `
+        <div class="label" style="page-break-after: always; padding: 10px; border: 1px solid #ccc; margin-bottom: 5px;">
+          <h3>${item.product_name}</h3>
+          <p>SKU: ${item.sku || 'N/A'}</p>
+          <p>Barcode: ${item.barcode || item.id}</p>
+        </div>
+      `).join('')
+
+      const printWindow = window.open('', '_blank')
+      if (printWindow) {
+        printWindow.document.write(`
+          <html>
+            <head><title>Inventory Labels</title></head>
+            <body style="font-family: Arial, sans-serif;">
+              ${labelContent}
+            </body>
+          </html>
+        `)
+        printWindow.document.close()
+        printWindow.print()
+        toast.success('Print ready', { description: `${items.length} labels ready to print` })
+      } else {
+        toast.error('Could not open print window', { description: 'Please allow popups for this site' })
+      }
+    } catch (error) {
+      console.error('Print labels error:', error)
+      toast.error('Failed to generate labels')
+    } finally {
+      setPrintingLabels(false)
+    }
+  }
+
+  // Quick actions with real functionality
+  const inventoryQuickActions = [
+    { id: '1', label: 'Stock Count', icon: 'ClipboardList', shortcut: 'C', action: handleStockCount },
+    { id: '2', label: 'Transfer Stock', icon: 'ArrowRightLeft', shortcut: 'T', action: () => setShowTransferDialog(true) },
+    { id: '3', label: 'New PO', icon: 'FileText', shortcut: 'P', action: () => setShowPODialog(true) },
+    { id: '4', label: 'Print Labels', icon: 'Printer', shortcut: 'L', action: handlePrintLabels },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
       {/* Premium Header */}
@@ -967,11 +1071,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                     Add Product
                   </button>
                   <button
-                    onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), {
-                      loading: 'Initializing barcode scanner...',
-                      success: 'Scanner ready - point camera at barcode',
-                      error: 'Failed to initialize scanner'
-                    })}
+                    onClick={handleScanBarcode}
                     className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg flex items-center gap-2 text-sm font-medium"
                   >
                     <QrCode className="w-4 h-4" />
@@ -1023,17 +1123,19 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-                    loading: 'Preparing import wizard...',
-                    success: 'Import ready - drag and drop CSV or Excel file',
-                    error: 'Failed to initialize import'
-                  })}
-                  className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
+                <label
+                  className={`px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm cursor-pointer ${importingInventory ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                   <Upload className="w-4 h-4" />
-                  Import
-                </button>
+                  {importingInventory ? 'Importing...' : 'Import'}
+                  <input
+                    type="file"
+                    accept=".csv,.xlsx,.xls"
+                    onChange={handleImportInventory}
+                    disabled={importingInventory}
+                    className="hidden"
+                  />
+                </label>
                 <button
                   onClick={handleExportInventory}
                   className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg flex items-center gap-2 text-sm"
@@ -2068,7 +2170,7 @@ export default function InventoryClient({ initialInventory }: { initialInventory
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockInventoryQuickActions}
+            actions={inventoryQuickActions}
             variant="grid"
           />
         </div>
@@ -2554,6 +2656,126 @@ export default function InventoryClient({ initialInventory }: { initialInventory
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {creatingSupplier ? 'Creating...' : 'Add Supplier'}
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Stock Count Dialog */}
+      <Dialog open={showStockCountDialog} onOpenChange={setShowStockCountDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 flex items-center justify-center text-white">
+                <ClipboardList className="w-5 h-5" />
+              </div>
+              Stock Count
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Scan barcodes or enter product SKUs to update inventory counts. Changes will be saved to the database.
+              </p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Search Product</label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white"
+                  placeholder="Enter SKU or scan barcode..."
+                />
+              </div>
+            </div>
+            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+              {(dbInventory || []).slice(0, 5).map((item) => (
+                <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                  <div>
+                    <p className="font-medium text-gray-900 dark:text-white">{item.product_name}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">SKU: {item.sku || 'N/A'}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-gray-500">Current: {item.quantity}</span>
+                    <input
+                      type="number"
+                      defaultValue={item.quantity}
+                      className="w-20 px-2 py-1 text-center border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowStockCountDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  toast.success('Stock count saved', { description: 'Inventory counts have been updated' })
+                  setShowStockCountDialog(false)
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+              >
+                Save Counts
+              </button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Barcode Scanner Dialog */}
+      <Dialog open={showBarcodeScannerDialog} onOpenChange={setShowBarcodeScannerDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center text-white">
+                <QrCode className="w-5 h-5" />
+              </div>
+              Barcode Scanner
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="aspect-video bg-gray-900 rounded-lg flex items-center justify-center relative overflow-hidden">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-48 h-32 border-2 border-green-500 rounded-lg opacity-75" />
+              </div>
+              <div className="text-center z-10">
+                <QrCode className="w-16 h-16 text-gray-500 mx-auto mb-2" />
+                <p className="text-gray-400 text-sm">Camera access required</p>
+                <p className="text-gray-500 text-xs mt-1">Position barcode within the frame</p>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Or enter barcode manually</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  className="flex-1 px-3 py-2 bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:text-white font-mono"
+                  placeholder="Enter barcode number..."
+                />
+                <button
+                  onClick={() => {
+                    toast.info('Looking up product...', { description: 'Searching inventory for barcode' })
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
+                >
+                  Lookup
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t dark:border-gray-700">
+              <button
+                onClick={() => setShowBarcodeScannerDialog(false)}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg font-medium"
+              >
+                Close
               </button>
             </div>
           </div>

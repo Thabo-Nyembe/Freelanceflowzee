@@ -398,11 +398,14 @@ const mockSprintsActivities = [
   { id: '3', user: 'Scrum Master', action: 'Updated', target: 'Sprint 24 capacity', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'success' as const },
 ]
 
-const mockSprintsQuickActions = [
-  { id: '1', label: 'New Story', icon: 'plus', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Creating user story...', success: 'Story created! Add acceptance criteria', error: 'Failed to create story' }), variant: 'default' as const },
-  { id: '2', label: 'Start Sprint', icon: 'play', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), { loading: 'Starting sprint...', success: 'Sprint 24 started! 2 weeks, 45 story points', error: 'Failed to start sprint' }), variant: 'default' as const },
-  { id: '3', label: 'Backlog', icon: 'list', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Loading product backlog...', success: 'Product Backlog - 78 items • 12 ready for sprint • 234 total points', error: 'Failed to load backlog' }), variant: 'outline' as const },
-]
+// Quick actions will be populated dynamically in the component with real handlers
+const mockSprintsQuickActions: Array<{
+  id: string
+  label: string
+  icon: string
+  action: () => void
+  variant: 'default' | 'outline'
+}> = []
 
 export default function SprintsClient() {
   const [activeTab, setActiveTab] = useState('sprints')
@@ -853,9 +856,16 @@ export default function SprintsClient() {
     )
   }
 
-  const handleRegenerateApiKey = () => {
+  const handleRegenerateApiKey = async () => {
     toast.promise(
-      new Promise(resolve => setTimeout(resolve, 800)),
+      fetch('/api/sprints/api-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'regenerate' })
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to regenerate API key')
+        return res.json()
+      }),
       {
         loading: 'Regenerating API key...',
         success: 'New API key has been generated',
@@ -863,6 +873,71 @@ export default function SprintsClient() {
       }
     )
   }
+
+  // Export sprint data as JSON/CSV
+  const handleExportSprintData = async () => {
+    toast.promise(
+      fetch('/api/sprints/export', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (res) => {
+        if (!res.ok) throw new Error('Failed to export sprint data')
+        const data = await res.json()
+        // Create and download file
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = `sprint-export-${new Date().toISOString().split('T')[0]}.json`
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+        return data
+      }),
+      {
+        loading: 'Exporting sprint data...',
+        success: 'Sprint data exported successfully',
+        error: 'Failed to export sprint data'
+      }
+    )
+  }
+
+  // Dynamic quick actions with real handlers
+  const sprintsQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Story',
+      icon: 'plus',
+      action: () => handleAddTask(activeSprint?.id),
+      variant: 'default' as const
+    },
+    {
+      id: '2',
+      label: 'Start Sprint',
+      icon: 'play',
+      action: async () => {
+        const planningSprintFromDb = dbSprints.find(s => s.status === 'planning')
+        const planningSprintFromMock = mockSprints.find(s => s.status === 'planning')
+        const planningSprint = planningSprintFromDb || planningSprintFromMock
+        if (planningSprint) {
+          await handleStartSprint(planningSprint.id, planningSprint.name)
+        } else {
+          toast.info('No sprint in planning', {
+            description: 'Create a new sprint first'
+          })
+        }
+      },
+      variant: 'default' as const
+    },
+    {
+      id: '3',
+      label: 'Backlog',
+      icon: 'list',
+      action: () => setActiveTab('backlog'),
+      variant: 'outline' as const
+    }
+  ], [activeSprint, dbSprints])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50 dark:bg-none dark:bg-gray-900">
@@ -2223,7 +2298,7 @@ export default function SprintsClient() {
                           </Select>
                         </div>
 
-                        <Button variant="outline" className="w-full">
+                        <Button onClick={handleExportSprintData} variant="outline" className="w-full">
                           <Download className="w-4 h-4 mr-2" />
                           Export Sprint Data
                         </Button>
@@ -2343,7 +2418,7 @@ export default function SprintsClient() {
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockSprintsQuickActions}
+            actions={sprintsQuickActions}
             variant="grid"
           />
         </div>

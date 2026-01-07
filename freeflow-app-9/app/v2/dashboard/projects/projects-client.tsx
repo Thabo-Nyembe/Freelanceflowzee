@@ -17,7 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   Download, Edit, CheckCircle, MessageSquare, FolderOpen, ArrowLeft, AlertCircle, Loader2,
   Plus, Search, Filter, BarChart3, TrendingUp, Users, Calendar, Clock, Target, Zap,
-  Settings, RefreshCw, Eye, Copy, Trash2, MoreHorizontal, Star, Share2, FileText, Activity
+  Settings, RefreshCw, Eye, Copy, Trash2, MoreHorizontal, Star, Share2, FileText, Activity,
+  Archive
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -88,12 +89,7 @@ const projectsActivities = [
   { id: '5', user: 'Client', action: 'requested', target: 'revision on homepage design', timestamp: '3h ago', type: 'info' as const },
 ]
 
-const projectsQuickActions = [
-  { id: '1', label: 'New Project', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1000)), { loading: 'Creating new project...', success: 'Project created successfully', error: 'Failed to create project' }) },
-  { id: '2', label: 'Quick Report', icon: 'FileText', shortcut: 'R', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Generating project report...', success: 'Report generated successfully', error: 'Failed to generate report' }) },
-  { id: '3', label: 'Team Meeting', icon: 'Users', shortcut: 'M', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 800)), { loading: 'Scheduling team meeting...', success: 'Meeting scheduled successfully', error: 'Failed to schedule meeting' }) },
-  { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: () => toast.promise(new Promise(resolve => setTimeout(resolve, 1200)), { loading: 'Exporting project data...', success: 'Data exported successfully', error: 'Failed to export data' }) },
-]
+// Quick actions are defined inside component to access handlers
 
 // ============================================================================
 // MAIN COMPONENT
@@ -121,6 +117,13 @@ export default function ProjectsClient() {
   const [revisionModalOpen, setRevisionModalOpen] = useState(false)
   const [revisionProjectId, setRevisionProjectId] = useState<number | null>(null)
   const [revisionNotes, setRevisionNotes] = useState('')
+
+  // Create project form state
+  const [newProjectName, setNewProjectName] = useState('')
+  const [newProjectDescription, setNewProjectDescription] = useState('')
+  const [newProjectDueDate, setNewProjectDueDate] = useState('')
+  const [newProjectBudget, setNewProjectBudget] = useState('')
+  const [createLoading, setCreateLoading] = useState(false)
 
   // ============================================================================
   // DATA FETCHING
@@ -304,6 +307,254 @@ export default function ProjectsClient() {
       setActionLoading(prev => ({ ...prev, [actionKey]: false }))
     }
   }
+
+  // ============================================================================
+  // PROJECT CRUD HANDLERS
+  // ============================================================================
+
+  const handleCreateProject = async () => {
+    if (!newProjectName.trim()) {
+      toast.error('Project name is required')
+      return
+    }
+
+    setCreateLoading(true)
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newProjectName.trim(),
+          description: newProjectDescription.trim(),
+          due_date: newProjectDueDate || null,
+          budget: newProjectBudget ? parseFloat(newProjectBudget) : null,
+          status: 'planning',
+          priority: 'medium'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to create project')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        toast.success('Project created successfully', { description: `"${newProjectName}" has been created` })
+        setShowCreateModal(false)
+        setNewProjectName('')
+        setNewProjectDescription('')
+        setNewProjectDueDate('')
+        setNewProjectBudget('')
+        await fetchProjects()
+      } else {
+        throw new Error(result.error || 'Failed to create project')
+      }
+    } catch (err: any) {
+      logger.error('Create project failed', { error: err })
+      toast.error('Failed to create project', { description: err.message })
+    } finally {
+      setCreateLoading(false)
+    }
+  }
+
+  const handleDeleteProject = async (projectId: number) => {
+    const project = projects.find(p => p.id === projectId)
+    if (!project) return
+
+    const confirmed = confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)
+    if (!confirmed) return
+
+    const actionKey = `delete-${projectId}`
+    try {
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      logger.info('Deleting project', { projectId })
+
+      const response = await fetch(`/api/projects?id=${projectId}&permanent=true`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to delete project')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        toast.success('Project deleted', { description: `"${project.name}" has been permanently deleted` })
+        await fetchProjects()
+      } else {
+        throw new Error(result.error || 'Failed to delete project')
+      }
+    } catch (err: any) {
+      logger.error('Delete project failed', { error: err })
+      toast.error('Failed to delete project', { description: err.message })
+    } finally {
+      setActionLoading(prev => ({ ...prev, [actionKey]: false }))
+    }
+  }
+
+  const handleArchiveProject = async (projectId: number) => {
+    const project = projects.find(p => p.id === projectId)
+    if (!project) return
+
+    const actionKey = `archive-${projectId}`
+    try {
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      logger.info('Archiving project', { projectId })
+
+      const response = await fetch('/api/projects', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: projectId, status: 'archived' })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to archive project')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        toast.success('Project archived', { description: `"${project.name}" has been archived` })
+        await fetchProjects()
+      } else {
+        throw new Error(result.error || 'Failed to archive project')
+      }
+    } catch (err: any) {
+      logger.error('Archive project failed', { error: err })
+      toast.error('Failed to archive project', { description: err.message })
+    } finally {
+      setActionLoading(prev => ({ ...prev, [actionKey]: false }))
+    }
+  }
+
+  const handleExportProjectData = async () => {
+    try {
+      toast.info('Generating project report...')
+
+      const response = await fetch('/api/projects?include_stats=true', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch project data')
+      }
+
+      const data = await response.json()
+
+      // Generate CSV report
+      const csvContent = generateProjectsCSV(data.projects || [])
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `projects-export-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+
+      toast.success('Project data exported', { description: 'CSV file downloaded successfully' })
+    } catch (err: any) {
+      logger.error('Export failed', { error: err })
+      toast.error('Failed to export data', { description: err.message })
+    }
+  }
+
+  const handleDuplicateProject = async (projectId: number) => {
+    const project = projects.find(p => p.id === projectId)
+    if (!project) return
+
+    const actionKey = `duplicate-${projectId}`
+    try {
+      setActionLoading(prev => ({ ...prev, [actionKey]: true }))
+      logger.info('Duplicating project', { projectId })
+
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `${project.name} (Copy)`,
+          description: project.description,
+          budget: project.budget,
+          status: 'planning',
+          priority: 'medium'
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to duplicate project')
+      }
+
+      const result = await response.json()
+      if (result.success) {
+        toast.success('Project duplicated', { description: `"${project.name}" has been duplicated` })
+        await fetchProjects()
+      } else {
+        throw new Error(result.error || 'Failed to duplicate project')
+      }
+    } catch (err: any) {
+      logger.error('Duplicate project failed', { error: err })
+      toast.error('Failed to duplicate project', { description: err.message })
+    } finally {
+      setActionLoading(prev => ({ ...prev, [actionKey]: false }))
+    }
+  }
+
+  const handleScheduleMeeting = async () => {
+    try {
+      toast.info('Opening calendar...')
+
+      // Create a calendar event URL (Google Calendar)
+      const startTime = new Date()
+      startTime.setHours(startTime.getHours() + 1)
+      startTime.setMinutes(0)
+      const endTime = new Date(startTime)
+      endTime.setHours(endTime.getHours() + 1)
+
+      const eventTitle = encodeURIComponent('Project Team Meeting')
+      const eventDetails = encodeURIComponent('Discuss project progress and next steps')
+      const startStr = startTime.toISOString().replace(/-|:|\.\d\d\d/g, '')
+      const endStr = endTime.toISOString().replace(/-|:|\.\d\d\d/g, '')
+
+      const calendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&details=${eventDetails}&dates=${startStr}/${endStr}`
+
+      window.open(calendarUrl, '_blank')
+      toast.success('Calendar opened', { description: 'Create your meeting in the new tab' })
+    } catch (err: any) {
+      toast.error('Failed to open calendar', { description: err.message })
+    }
+  }
+
+  // Helper function to generate CSV from projects
+  const generateProjectsCSV = (projectList: Project[]) => {
+    const headers = ['ID', 'Name', 'Description', 'Status', 'Phase', 'Progress', 'Budget', 'Spent', 'Due Date', 'Team']
+    const rows = projectList.map(p => [
+      p.id,
+      `"${p.name?.replace(/"/g, '""') || ''}"`,
+      `"${p.description?.replace(/"/g, '""') || ''}"`,
+      p.status || '',
+      p.phase || '',
+      p.progress || 0,
+      p.budget || 0,
+      p.spent || 0,
+      p.dueDate || '',
+      `"${p.team?.join(', ') || ''}"`
+    ])
+    return [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+  }
+
+  // Quick actions with real handlers
+  const projectsQuickActions = [
+    { id: '1', label: 'New Project', icon: 'Plus', shortcut: 'N', action: () => setShowCreateModal(true) },
+    { id: '2', label: 'Quick Report', icon: 'FileText', shortcut: 'R', action: handleExportProjectData },
+    { id: '3', label: 'Team Meeting', icon: 'Users', shortcut: 'M', action: handleScheduleMeeting },
+    { id: '4', label: 'Export Data', icon: 'Download', shortcut: 'E', action: handleExportProjectData },
+  ]
 
   // ============================================================================
   // LOADING STATE
@@ -559,11 +810,21 @@ export default function ProjectsClient() {
                                 <Edit className="h-4 w-4 mr-2" /> Request Revision
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(project.id.toString())}>
+                              <DropdownMenuItem onClick={() => handleDuplicateProject(project.id)}>
+                                <Copy className="h-4 w-4 mr-2" /> Duplicate
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(project.id.toString()).then(() => toast.success('Project ID copied'))}>
                                 <Copy className="h-4 w-4 mr-2" /> Copy ID
                               </DropdownMenuItem>
                               <DropdownMenuItem>
                                 <Share2 className="h-4 w-4 mr-2" /> Share
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleArchiveProject(project.id)}>
+                                <Archive className="h-4 w-4 mr-2" /> Archive
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDeleteProject(project.id)} className="text-red-600 focus:text-red-600">
+                                <Trash2 className="h-4 w-4 mr-2" /> Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -681,27 +942,54 @@ export default function ProjectsClient() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Project Name *</label>
-                <Input placeholder="Enter project name" />
+                <Input
+                  placeholder="Enter project name"
+                  value={newProjectName}
+                  onChange={(e) => setNewProjectName(e.target.value)}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Description</label>
-                <Textarea placeholder="Describe the project..." className="min-h-[100px]" />
+                <Textarea
+                  placeholder="Describe the project..."
+                  className="min-h-[100px]"
+                  value={newProjectDescription}
+                  onChange={(e) => setNewProjectDescription(e.target.value)}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-2">Due Date</label>
-                  <Input type="date" />
+                  <Input
+                    type="date"
+                    value={newProjectDueDate}
+                    onChange={(e) => setNewProjectDueDate(e.target.value)}
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Budget</label>
-                  <Input type="number" placeholder="0.00" />
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    value={newProjectBudget}
+                    onChange={(e) => setNewProjectBudget(e.target.value)}
+                  />
                 </div>
               </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                <Plus className="h-4 w-4 mr-2" /> Create Project
+              <Button
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                onClick={handleCreateProject}
+                disabled={createLoading || !newProjectName.trim()}
+              >
+                {createLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Plus className="h-4 w-4 mr-2" />
+                )}
+                Create Project
               </Button>
             </DialogFooter>
           </DialogContent>

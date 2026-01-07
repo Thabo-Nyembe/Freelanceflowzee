@@ -170,11 +170,7 @@ export default function CRMPage() {
 
       const result = await createDeal(userId, dealData)
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Creating new deal...',
-        success: `Deal "${dealData.company_name}" has been created successfully`,
-        error: 'Failed to create deal'
-      })
+      toast.success(`Deal "${dealData.company_name}" has been created successfully`)
       logger.info('Deal added', { success: true, result })
       announce('Deal added successfully', 'polite')
 
@@ -202,11 +198,7 @@ export default function CRMPage() {
       const { updateDeal, getDeals } = await import('@/lib/admin-overview-queries')
       await updateDeal(dealId, { deal_value: 150000, probability: 85 })
 
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Updating deal...',
-        success: 'Deal has been updated with new information',
-        error: 'Failed to update deal'
-      })
+      toast.success('Deal has been updated with new information')
       logger.info('Deal edited', { success: true, dealId })
       announce('Deal updated successfully', 'polite')
 
@@ -231,11 +223,7 @@ export default function CRMPage() {
       const { deleteDeal: deleteDealQuery, getDeals } = await import('@/lib/admin-overview-queries')
       await deleteDealQuery(deleteDeal.id)
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Deleting deal...',
-        success: `"${deleteDeal.title}" has been permanently removed from pipeline`,
-        error: 'Failed to delete deal'
-      })
+      toast.success(`"${deleteDeal.title}" has been permanently removed from pipeline`)
       logger.info('Deal deleted', { success: true, dealId: deleteDeal.id })
       announce('Deal deleted successfully', 'polite')
 
@@ -266,11 +254,7 @@ export default function CRMPage() {
 
       const result = await updateDealStage(dealId, newStage)
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Moving deal...',
-        success: `Deal moved to ${newStage} stage successfully`,
-        error: 'Failed to move deal'
-      })
+      toast.success(`Deal moved to ${newStage} stage successfully`)
       logger.info('Deal moved', { success: true, dealId, newStage, result })
       announce(`Deal moved to ${newStage}`, 'polite')
 
@@ -308,11 +292,7 @@ export default function CRMPage() {
 
       const result = await createContact(userId, contactData)
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Adding contact...',
-        success: `${contactData.first_name} ${contactData.last_name} has been added to your contact list`,
-        error: 'Failed to add contact'
-      })
+      toast.success(`${contactData.first_name} ${contactData.last_name} has been added to your contact list`)
       logger.info('Contact added', { success: true, result })
       announce('Contact added successfully', 'polite')
 
@@ -340,11 +320,7 @@ export default function CRMPage() {
       const { updateContact, getContacts } = await import('@/lib/admin-overview-queries')
       await updateContact(contactId, { position: 'Senior Manager' })
 
-      toast.promise(new Promise(r => setTimeout(r, 1000)), {
-        loading: 'Updating contact...',
-        success: 'Contact information has been updated successfully',
-        error: 'Failed to update contact'
-      })
+      toast.success('Contact information has been updated successfully')
       logger.info('Contact edited', { success: true, contactId })
       announce('Contact updated successfully', 'polite')
 
@@ -369,11 +345,7 @@ export default function CRMPage() {
       const { deleteContact: deleteContactQuery, getContacts } = await import('@/lib/admin-overview-queries')
       await deleteContactQuery(deleteContact.id)
 
-      toast.promise(new Promise(r => setTimeout(r, 800)), {
-        loading: 'Deleting contact...',
-        success: `${deleteContact.name} has been removed from your contacts`,
-        error: 'Failed to delete contact'
-      })
+      toast.success(`${deleteContact.name} has been removed from your contacts`)
       logger.info('Contact deleted', { success: true, contactId: deleteContact.id })
       announce('Contact deleted successfully', 'polite')
 
@@ -416,11 +388,7 @@ export default function CRMPage() {
       if (!response.ok) throw new Error('Failed to send email')
       const result = await response.json()
 
-      toast.promise(new Promise(r => setTimeout(r, 2000)), {
-        loading: 'Sending email...',
-        success: `Follow-up email sent to ${contactName} successfully`,
-        error: 'Failed to send email'
-      })
+      toast.success(`Follow-up email sent to ${contactName} successfully`)
       logger.info('Email sent', { success: true, contactEmail, result })
       announce('Email sent successfully', 'polite')
     } catch (error) {
@@ -457,11 +425,7 @@ export default function CRMPage() {
       if (!response.ok) throw new Error('Failed to schedule call')
       const result = await response.json()
 
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Scheduling call...',
-        success: `Call with ${contactName} scheduled for tomorrow`,
-        error: 'Failed to schedule call'
-      })
+      toast.success(`Call with ${contactName} scheduled for tomorrow`)
       logger.info('Call scheduled', { success: true, contactId, result })
       announce('Call scheduled successfully', 'polite')
     } catch (error) {
@@ -477,11 +441,7 @@ export default function CRMPage() {
     logger.info('Opening deal details', { dealId: deal.id })
     setSelectedDeal(deal)
     setShowDealModal(true)
-    toast.promise(new Promise(r => setTimeout(r, 500)), {
-      loading: 'Loading deal details...',
-      success: `Viewing details for "${deal.title}"`,
-      error: 'Failed to load deal details'
-    })
+    toast.success(`Viewing details for "${deal.title}"`)
     announce('Deal details opened', 'polite')
   }
 
@@ -524,11 +484,7 @@ export default function CRMPage() {
       a.click()
       URL.revokeObjectURL(url)
 
-      toast.promise(new Promise(r => setTimeout(r, 1500)), {
-        loading: 'Exporting pipeline data...',
-        success: `Exported ${deals.length} deals and ${contacts.length} contacts`,
-        error: 'Failed to export pipeline'
-      })
+      toast.success(`Exported ${deals.length} deals and ${contacts.length} contacts`)
       logger.info('Pipeline export completed', { success: true, dealCount: deals.length, contactCount: contacts.length })
       announce('Pipeline exported successfully', 'polite')
     } catch (error) {
@@ -559,11 +515,7 @@ export default function CRMPage() {
       setDeals(dealsResult || [])
       setContacts(contactsResult || [])
 
-      toast.promise(new Promise(r => setTimeout(r, 1200)), {
-        loading: 'Refreshing CRM data...',
-        success: `Reloaded ${dealsResult?.length || 0} deals and ${contactsResult?.length || 0} contacts`,
-        error: 'Failed to refresh CRM'
-      })
+      toast.success(`Reloaded ${dealsResult?.length || 0} deals and ${contactsResult?.length || 0} contacts`)
       logger.info('CRM refresh completed', {
         success: true,
         dealCount: dealsResult?.length || 0,

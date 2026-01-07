@@ -265,26 +265,10 @@ const mockSupportActivities = [
 ]
 
 const mockSupportQuickActions = [
-  { id: '1', label: 'New Ticket', icon: 'Plus', shortcut: '⌘N', action: () => toast.promise(new Promise(r => setTimeout(r, 1000)), {
-    loading: 'Creating new ticket...',
-    success: 'Ticket created successfully',
-    error: 'Failed to create ticket'
-  }) },
-  { id: '2', label: 'Quick Reply', icon: 'Send', shortcut: '⌘R', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), {
-    loading: 'Sending reply...',
-    success: 'Reply sent successfully',
-    error: 'Failed to send reply'
-  }) },
-  { id: '3', label: 'Escalate', icon: 'AlertTriangle', shortcut: '⌘E', action: () => toast.promise(new Promise(r => setTimeout(r, 1200)), {
-    loading: 'Escalating ticket...',
-    success: 'Ticket escalated to supervisor',
-    error: 'Failed to escalate ticket'
-  }) },
-  { id: '4', label: 'View Queue', icon: 'Inbox', shortcut: '⌘Q', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), {
-    loading: 'Loading queue...',
-    success: 'Queue loaded',
-    error: 'Failed to load queue'
-  }) },
+  { id: '1', label: 'New Ticket', icon: 'Plus', shortcut: '⌘N', action: () => toast.success('Ticket created successfully') },
+  { id: '2', label: 'Quick Reply', icon: 'Send', shortcut: '⌘R', action: () => toast.success('Reply sent successfully') },
+  { id: '3', label: 'Escalate', icon: 'AlertTriangle', shortcut: '⌘E', action: () => toast.success('Ticket escalated to supervisor') },
+  { id: '4', label: 'View Queue', icon: 'Inbox', shortcut: '⌘Q', action: () => toast.success('Queue loaded') },
 ]
 
 export default function CustomerSupportClient({ initialAgents, initialConversations, initialStats }: CustomerSupportClientProps) {

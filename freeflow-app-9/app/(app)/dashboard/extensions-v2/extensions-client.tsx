@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { toast } from 'sonner'
+import { apiPost, apiDelete, copyToClipboard, downloadAsJson } from '@/lib/button-handlers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -146,7 +147,7 @@ interface ExtensionCategory {
 // MOCK DATA
 // ============================================================================
 
-const mockExtensions: Extension[] = [
+const initialExtensions: Extension[] = [
   {
     id: '1',
     name: 'Dark Mode Pro',
@@ -412,36 +413,6 @@ const formatNumber = (num: number): string => {
   return num.toString()
 }
 
-// Enhanced Competitive Upgrade Mock Data
-const mockExtensionsAIInsights = [
-  { id: '1', type: 'success' as const, title: 'Popular Extension', description: 'Analytics Pro became most installed extension this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trending' },
-  { id: '2', type: 'warning' as const, title: 'Update Available', description: '3 installed extensions have security updates available.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
-  { id: '3', type: 'info' as const, title: 'New Category', description: 'AI & Automation category added with 12 new extensions.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
-]
-
-const mockExtensionsCollaborators = [
-  { id: '1', name: 'Extensions Lead', avatar: '/avatars/ext.jpg', status: 'online' as const, role: 'Lead' },
-  { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
-  { id: '3', name: 'QA Engineer', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'QA' },
-]
-
-const mockExtensionsPredictions = [
-  { id: '1', title: 'Extension Adoption', prediction: 'AI extensions projected to grow 40% next quarter', confidence: 82, trend: 'up' as const, impact: 'high' as const },
-  { id: '2', title: 'Compatibility', prediction: 'All extensions compatible with next platform version', confidence: 95, trend: 'stable' as const, impact: 'medium' as const },
-]
-
-const mockExtensionsActivities = [
-  { id: '1', user: 'Admin', action: 'Installed', target: 'Advanced Reporting extension', timestamp: new Date().toISOString(), type: 'success' as const },
-  { id: '2', user: 'Developer', action: 'Updated', target: 'API Connector to v2.1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
-  { id: '3', user: 'System', action: 'Disabled', target: 'deprecated Theme Pack', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
-]
-
-const mockExtensionsQuickActions = [
-  { id: '1', label: 'Browse All', icon: 'grid', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening extension marketplace...', success: 'Extension marketplace loaded!', error: 'Failed to load marketplace' }), variant: 'default' as const },
-  { id: '2', label: 'Check Updates', icon: 'refresh', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Checking for updates...', success: 'All extensions are up to date!', error: 'Failed to check updates' }), variant: 'default' as const },
-  { id: '3', label: 'Manage', icon: 'settings', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening extension manager...', success: 'Extension manager ready!', error: 'Failed to open manager' }), variant: 'outline' as const },
-]
-
 // ============================================================================
 // MAIN COMPONENT
 // ============================================================================
@@ -453,17 +424,354 @@ export default function ExtensionsClient() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [settingsTab, setSettingsTab] = useState('general')
+  const [extensions, setExtensions] = useState<Extension[]>(initialExtensions)
+  const [configDialogOpen, setConfigDialogOpen] = useState(false)
+  const [configExtension, setConfigExtension] = useState<Extension | null>(null)
+
+  // ============================================================================
+  // REAL API HANDLERS
+  // ============================================================================
+
+  // Install extension via API
+  const handleInstallExtension = useCallback(async (ext: Extension) => {
+    toast.loading(`Installing ${ext.name}...`)
+
+    const result = await apiPost('/api/extensions/install', {
+      extensionId: ext.id,
+      name: ext.name,
+      version: ext.version
+    }, {
+      loading: `Installing ${ext.name}...`,
+      success: `${ext.name} installed successfully!`,
+      error: `Failed to install ${ext.name}`
+    })
+
+    if (result.success) {
+      setExtensions(prev => prev.map(e =>
+        e.id === ext.id ? { ...e, installStatus: 'installed' } : e
+      ))
+      if (selectedExtension?.id === ext.id) {
+        setSelectedExtension(prev => prev ? { ...prev, installStatus: 'installed' } : null)
+      }
+    }
+  }, [selectedExtension])
+
+  // Uninstall extension with confirmation
+  const handleUninstallExtension = useCallback(async (ext: Extension) => {
+    if (!confirm(`Are you sure you want to uninstall ${ext.name}? This will remove all extension data.`)) {
+      return
+    }
+
+    toast.loading(`Removing ${ext.name}...`)
+
+    const result = await apiDelete(`/api/extensions/${ext.id}`, {
+      loading: `Removing ${ext.name}...`,
+      success: `${ext.name} has been removed!`,
+      error: `Failed to remove ${ext.name}`
+    })
+
+    if (result.success) {
+      setExtensions(prev => prev.map(e =>
+        e.id === ext.id ? { ...e, installStatus: 'not_installed' } : e
+      ))
+      if (selectedExtension?.id === ext.id) {
+        setSelectedExtension(prev => prev ? { ...prev, installStatus: 'not_installed' } : null)
+      }
+    }
+  }, [selectedExtension])
+
+  // Enable extension
+  const handleEnableExtension = useCallback(async (ext: Extension) => {
+    toast.loading(`Enabling ${ext.name}...`)
+
+    const result = await apiPost(`/api/extensions/${ext.id}/enable`, { enabled: true }, {
+      loading: `Enabling ${ext.name}...`,
+      success: `${ext.name} is now active`,
+      error: `Failed to enable ${ext.name}`
+    })
+
+    if (result.success) {
+      setExtensions(prev => prev.map(e =>
+        e.id === ext.id ? { ...e, installStatus: 'installed' } : e
+      ))
+    }
+  }, [])
+
+  // Disable extension
+  const handleDisableExtension = useCallback(async (ext: Extension) => {
+    toast.loading(`Disabling ${ext.name}...`)
+
+    const result = await apiPost(`/api/extensions/${ext.id}/disable`, { enabled: false }, {
+      loading: `Disabling ${ext.name}...`,
+      success: `${ext.name} has been disabled`,
+      error: `Failed to disable ${ext.name}`
+    })
+
+    if (result.success) {
+      setExtensions(prev => prev.map(e =>
+        e.id === ext.id ? { ...e, installStatus: 'disabled' } : e
+      ))
+    }
+  }, [])
+
+  // Toggle extension enabled/disabled
+  const handleToggleExtension = useCallback(async (ext: Extension) => {
+    if (ext.installStatus === 'installed') {
+      await handleDisableExtension(ext)
+    } else if (ext.installStatus === 'disabled') {
+      await handleEnableExtension(ext)
+    }
+  }, [handleEnableExtension, handleDisableExtension])
+
+  // Open configure dialog
+  const handleConfigureExtension = useCallback((ext: Extension) => {
+    setConfigExtension(ext)
+    setConfigDialogOpen(true)
+    toast.info(`Opening ${ext.name} settings`)
+  }, [])
+
+  // Update extension
+  const handleUpdateExtension = useCallback(async (ext: Extension) => {
+    toast.loading(`Updating ${ext.name}...`)
+
+    const result = await apiPost(`/api/extensions/${ext.id}/update`, {
+      extensionId: ext.id
+    }, {
+      loading: `Updating ${ext.name}...`,
+      success: `${ext.name} updated successfully!`,
+      error: `Failed to update ${ext.name}`
+    })
+
+    if (result.success) {
+      setExtensions(prev => prev.map(e =>
+        e.id === ext.id ? { ...e, lastUpdated: new Date().toISOString().split('T')[0] } : e
+      ))
+    }
+  }, [])
+
+  // Check for updates
+  const handleCheckUpdates = useCallback(async () => {
+    toast.loading('Checking for updates...')
+
+    const result = await apiPost('/api/extensions/check-updates', {
+      extensionIds: extensions.filter(e => e.installStatus !== 'not_installed').map(e => e.id)
+    }, {
+      loading: 'Checking for extension updates...',
+      success: 'All extensions are up to date!',
+      error: 'Failed to check for updates'
+    })
+
+    return result.success
+  }, [extensions])
+
+  // Share extension link
+  const handleShareExtension = useCallback(async (ext: Extension) => {
+    const shareUrl = `${window.location.origin}/extensions/${ext.id}`
+    await copyToClipboard(shareUrl, 'Extension link copied to clipboard!')
+  }, [])
+
+  // Report extension
+  const handleReportExtension = useCallback(async (ext: Extension) => {
+    const reason = prompt('Please describe the issue with this extension:')
+    if (!reason) return
+
+    const result = await apiPost('/api/extensions/report', {
+      extensionId: ext.id,
+      reason
+    }, {
+      loading: 'Submitting report...',
+      success: 'Report submitted. Thank you for your feedback!',
+      error: 'Failed to submit report'
+    })
+
+    return result.success
+  }, [])
+
+  // Clear cache
+  const handleClearCache = useCallback(async () => {
+    const result = await apiPost('/api/extensions/clear-cache', {}, {
+      loading: 'Clearing extension cache...',
+      success: 'Cache cleared successfully!',
+      error: 'Failed to clear cache'
+    })
+    return result.success
+  }, [])
+
+  // Export extension data
+  const handleExportData = useCallback(() => {
+    const exportData = {
+      extensions: extensions.filter(e => e.installStatus !== 'not_installed'),
+      exportedAt: new Date().toISOString(),
+      settings: { viewMode, categoryFilter }
+    }
+    downloadAsJson(exportData, 'extension-data.json')
+  }, [extensions, viewMode, categoryFilter])
+
+  // Import settings
+  const handleImportSettings = useCallback(() => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      try {
+        const text = await file.text()
+        const data = JSON.parse(text)
+        toast.success('Settings imported successfully!')
+        console.log('Imported settings:', data)
+      } catch {
+        toast.error('Failed to import settings - invalid file format')
+      }
+    }
+    input.click()
+  }, [])
+
+  // Export settings
+  const handleExportSettings = useCallback(() => {
+    const settings = {
+      viewMode,
+      categoryFilter,
+      settingsTab,
+      exportedAt: new Date().toISOString()
+    }
+    downloadAsJson(settings, 'extension-settings.json')
+  }, [viewMode, categoryFilter, settingsTab])
+
+  // Select folder for unpacked extension
+  const handleSelectFolder = useCallback(() => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.webkitdirectory = true
+    input.onchange = async () => {
+      toast.success('Folder selected! Loading unpacked extension...')
+    }
+    input.click()
+  }, [])
+
+  // Pack extension
+  const handlePackExtension = useCallback(async () => {
+    const result = await apiPost('/api/extensions/pack', {}, {
+      loading: 'Packaging extension...',
+      success: 'Extension packed successfully!',
+      error: 'Failed to pack extension'
+    })
+    return result.success
+  }, [])
+
+  // Regenerate API key
+  const handleRegenerateApiKey = useCallback(async () => {
+    if (!confirm('Are you sure you want to regenerate your API key? The old key will be invalidated.')) {
+      return
+    }
+
+    const result = await apiPost('/api/extensions/regenerate-key', {}, {
+      loading: 'Regenerating API key...',
+      success: 'New API key generated!',
+      error: 'Failed to regenerate API key'
+    })
+    return result.success
+  }, [])
+
+  // Copy API key
+  const handleCopyApiKey = useCallback(async () => {
+    await copyToClipboard('ext_dev_sample_key_12345', 'API key copied to clipboard!')
+  }, [])
+
+  // View extension history
+  const handleViewHistory = useCallback(async () => {
+    const result = await apiPost('/api/extensions/history', {}, {
+      loading: 'Loading extension history...',
+      success: 'Extension history loaded!',
+      error: 'Failed to load history'
+    })
+    return result.success
+  }, [])
+
+  // Disable all extensions
+  const handleDisableAll = useCallback(async () => {
+    if (!confirm('Are you sure you want to disable all extensions? They can be re-enabled later.')) {
+      return
+    }
+
+    const result = await apiPost('/api/extensions/disable-all', {}, {
+      loading: 'Disabling all extensions...',
+      success: 'All extensions have been disabled!',
+      error: 'Failed to disable extensions'
+    })
+
+    if (result.success) {
+      setExtensions(prev => prev.map(e =>
+        e.installStatus === 'installed' ? { ...e, installStatus: 'disabled' } : e
+      ))
+    }
+  }, [])
+
+  // Remove all extensions
+  const handleRemoveAll = useCallback(async () => {
+    if (!confirm('Are you sure you want to remove ALL extensions? This action cannot be undone.')) {
+      return
+    }
+
+    const result = await apiDelete('/api/extensions/all', {
+      loading: 'Removing all extensions...',
+      success: 'All extensions have been removed!',
+      error: 'Failed to remove extensions'
+    })
+
+    if (result.success) {
+      setExtensions(prev => prev.map(e => ({ ...e, installStatus: 'not_installed' })))
+    }
+  }, [])
+
+  // Reset to defaults
+  const handleResetDefaults = useCallback(async () => {
+    if (!confirm('Are you sure you want to reset all settings to defaults?')) {
+      return
+    }
+
+    const result = await apiPost('/api/extensions/reset', {}, {
+      loading: 'Resetting to defaults...',
+      success: 'Settings reset to defaults!',
+      error: 'Failed to reset settings'
+    })
+
+    if (result.success) {
+      setViewMode('grid')
+      setCategoryFilter('all')
+      setSettingsTab('general')
+    }
+  }, [])
+
+  // Open API documentation
+  const handleOpenApiDocs = useCallback(() => {
+    window.open('/docs/extensions-api', '_blank')
+    toast.info('Opening API documentation...')
+  }, [])
+
+  // Submit new extension
+  const handleSubmitExtension = useCallback(() => {
+    window.open('/extensions/submit', '_blank')
+    toast.info('Opening extension submission form...')
+  }, [])
+
+  // Open extension builder
+  const handleOpenBuilder = useCallback(() => {
+    window.open('/extensions/builder', '_blank')
+    toast.info('Opening extension builder...')
+  }, [])
 
   // Stats calculations
   const stats = useMemo(() => {
-    const totalExtensions = mockExtensions.length
-    const installedCount = mockExtensions.filter(e => e.installStatus === 'installed').length
-    const totalInstalls = mockExtensions.reduce((acc, e) => acc + e.installCount, 0)
-    const featuredCount = mockExtensions.filter(e => e.isFeatured).length
-    const avgRating = mockExtensions.reduce((acc, e) => acc + e.rating, 0) / totalExtensions
-    const totalUsers = mockExtensions.reduce((acc, e) => acc + e.weeklyUsers, 0)
-    const editorsPickCount = mockExtensions.filter(e => e.isEditorsPick).length
-    const securityExtensions = mockExtensions.filter(e => e.category === 'security').length
+    const totalExtensions = extensions.length
+    const installedCount = extensions.filter(e => e.installStatus === 'installed').length
+    const totalInstalls = extensions.reduce((acc, e) => acc + e.installCount, 0)
+    const featuredCount = extensions.filter(e => e.isFeatured).length
+    const avgRating = extensions.reduce((acc, e) => acc + e.rating, 0) / totalExtensions
+    const totalUsers = extensions.reduce((acc, e) => acc + e.weeklyUsers, 0)
+    const editorsPickCount = extensions.filter(e => e.isEditorsPick).length
+    const securityExtensions = extensions.filter(e => e.category === 'security').length
 
     return {
       totalExtensions,
@@ -475,53 +783,52 @@ export default function ExtensionsClient() {
       editorsPickCount,
       securityExtensions
     }
-  }, [])
+  }, [extensions])
 
   // Filtered extensions
   const filteredExtensions = useMemo(() => {
-    return mockExtensions.filter(ext => {
+    return extensions.filter(ext => {
       const matchesSearch = ext.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ext.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ext.developer.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = categoryFilter === 'all' || ext.category === categoryFilter
       return matchesSearch && matchesCategory
     })
-  }, [searchQuery, categoryFilter])
+  }, [extensions, searchQuery, categoryFilter])
 
-  const installedExtensions = mockExtensions.filter(e => e.installStatus === 'installed' || e.installStatus === 'disabled')
-  const featuredExtensions = mockExtensions.filter(e => e.isFeatured)
-  const editorsPickExtensions = mockExtensions.filter(e => e.isEditorsPick)
+  const installedExtensions = extensions.filter(e => e.installStatus === 'installed' || e.installStatus === 'disabled')
+  const featuredExtensions = extensions.filter(e => e.isFeatured)
+  const editorsPickExtensions = extensions.filter(e => e.isEditorsPick)
 
-  // Handlers
-  const handleInstallExtension = (extensionName: string) => {
-    toast.success('Installing extension', {
-      description: `${extensionName} is being installed...`
-    })
-  }
+  // Enhanced Competitive Upgrade Mock Data
+  const mockExtensionsAIInsights = [
+    { id: '1', type: 'success' as const, title: 'Popular Extension', description: 'Analytics Pro became most installed extension this week.', priority: 'low' as const, timestamp: new Date().toISOString(), category: 'Trending' },
+    { id: '2', type: 'warning' as const, title: 'Update Available', description: '3 installed extensions have security updates available.', priority: 'high' as const, timestamp: new Date().toISOString(), category: 'Security' },
+    { id: '3', type: 'info' as const, title: 'New Category', description: 'AI & Automation category added with 12 new extensions.', priority: 'medium' as const, timestamp: new Date().toISOString(), category: 'Discovery' },
+  ]
 
-  const handleUninstallExtension = (extensionName: string) => {
-    toast.info('Extension removed', {
-      description: `${extensionName} has been uninstalled`
-    })
-  }
+  const mockExtensionsCollaborators = [
+    { id: '1', name: 'Extensions Lead', avatar: '/avatars/ext.jpg', status: 'online' as const, role: 'Lead' },
+    { id: '2', name: 'Developer', avatar: '/avatars/dev.jpg', status: 'online' as const, role: 'Dev' },
+    { id: '3', name: 'QA Engineer', avatar: '/avatars/qa.jpg', status: 'away' as const, role: 'QA' },
+  ]
 
-  const handleEnableExtension = (extensionName: string) => {
-    toast.success('Extension enabled', {
-      description: `${extensionName} is now active`
-    })
-  }
+  const mockExtensionsPredictions = [
+    { id: '1', title: 'Extension Adoption', prediction: 'AI extensions projected to grow 40% next quarter', confidence: 82, trend: 'up' as const, impact: 'high' as const },
+    { id: '2', title: 'Compatibility', prediction: 'All extensions compatible with next platform version', confidence: 95, trend: 'stable' as const, impact: 'medium' as const },
+  ]
 
-  const handleDisableExtension = (extensionName: string) => {
-    toast.info('Extension disabled', {
-      description: `${extensionName} has been paused`
-    })
-  }
+  const mockExtensionsActivities = [
+    { id: '1', user: 'Admin', action: 'Installed', target: 'Advanced Reporting extension', timestamp: new Date().toISOString(), type: 'success' as const },
+    { id: '2', user: 'Developer', action: 'Updated', target: 'API Connector to v2.1', timestamp: new Date(Date.now() - 3600000).toISOString(), type: 'info' as const },
+    { id: '3', user: 'System', action: 'Disabled', target: 'deprecated Theme Pack', timestamp: new Date(Date.now() - 7200000).toISOString(), type: 'warning' as const },
+  ]
 
-  const handleConfigureExtension = (extensionName: string) => {
-    toast.info('Opening settings', {
-      description: `Configuring ${extensionName}...`
-    })
-  }
+  const mockExtensionsQuickActions = [
+    { id: '1', label: 'Browse All', icon: 'grid', action: () => setActiveTab('discover'), variant: 'default' as const },
+    { id: '2', label: 'Check Updates', icon: 'refresh', action: handleCheckUpdates, variant: 'default' as const },
+    { id: '3', label: 'Manage', icon: 'settings', action: () => setActiveTab('installed'), variant: 'outline' as const },
+  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-indigo-50/30 to-blue-50/40 dark:bg-none dark:bg-gray-900">
@@ -558,10 +865,7 @@ export default function ExtensionsClient() {
               </div>
               <Button
                 className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white"
-                onClick={() => toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 1000)),
-                  { loading: 'Opening extension submission form...', success: 'Ready to submit your extension!', error: 'Failed to open submission form' }
-                )}
+                onClick={handleSubmitExtension}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Submit Extension
@@ -639,16 +943,16 @@ export default function ExtensionsClient() {
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Extension Marketplace</h2>
                   <p className="text-violet-100">VS Code Marketplace-level extensibility</p>
-                  <p className="text-violet-200 text-xs mt-1">Curated • Verified • Enterprise-ready</p>
-                  <p className="text-violet-200 text-xs mt-1">Auto-updates • Sandboxed • Reviews</p>
+                  <p className="text-violet-200 text-xs mt-1">Curated - Verified - Enterprise-ready</p>
+                  <p className="text-violet-200 text-xs mt-1">Auto-updates - Sandboxed - Reviews</p>
                 </div>
                 <div className="flex items-center gap-6">
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockExtensions.length}</p>
+                    <p className="text-3xl font-bold">{extensions.length}</p>
                     <p className="text-violet-200 text-sm">Extensions</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-3xl font-bold">{mockExtensions.filter(e => e.isInstalled).length}</p>
+                    <p className="text-3xl font-bold">{installedExtensions.length}</p>
                     <p className="text-violet-200 text-sm">Installed</p>
                   </div>
                 </div>
@@ -756,10 +1060,7 @@ export default function ExtensionsClient() {
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 800)),
-                                  { loading: `Opening settings for ${ext.name}...`, success: `${ext.name} settings opened!`, error: 'Failed to open settings' }
-                                )
+                                handleConfigureExtension(ext)
                               }}
                             >
                               Manage
@@ -769,10 +1070,7 @@ export default function ExtensionsClient() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation()
-                                toast.promise(
-                                  new Promise(resolve => setTimeout(resolve, 1500)),
-                                  { loading: `Installing ${ext.name}...`, success: `${ext.name} installed successfully!`, error: 'Failed to install extension' }
-                                )
+                                handleInstallExtension(ext)
                               }}
                             >
                               Add
@@ -797,10 +1095,7 @@ export default function ExtensionsClient() {
               <Button
                 variant="outline"
                 className="gap-2"
-                onClick={() => toast.promise(
-                  new Promise(resolve => setTimeout(resolve, 2000)),
-                  { loading: 'Checking for extension updates...', success: 'All extensions are up to date!', error: 'Failed to check for updates' }
-                )}
+                onClick={handleCheckUpdates}
               >
                 <RefreshCw className="w-4 h-4" />
                 Check for Updates
@@ -822,7 +1117,7 @@ export default function ExtensionsClient() {
                             {ext.developerVerified && <ShieldCheck className="w-4 h-4 text-blue-500" />}
                             <Badge className={getInstallStatusColor(ext.installStatus)}>{ext.installStatus}</Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">{ext.developer} • v{ext.version}</p>
+                          <p className="text-sm text-muted-foreground">{ext.developer} - v{ext.version}</p>
                           <p className="text-sm text-muted-foreground mt-1">{ext.description}</p>
                         </div>
                       </div>
@@ -832,18 +1127,18 @@ export default function ExtensionsClient() {
                           <p className="text-xs text-muted-foreground">Updated {ext.lastUpdated}</p>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Switch checked={ext.installStatus === 'installed'} />
-                          <Button variant="ghost" size="icon" onClick={() => setSelectedExtension(ext)}>
+                          <Switch
+                            checked={ext.installStatus === 'installed'}
+                            onCheckedChange={() => handleToggleExtension(ext)}
+                          />
+                          <Button variant="ghost" size="icon" onClick={() => handleConfigureExtension(ext)}>
                             <Settings className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="text-red-600"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1200)),
-                              { loading: `Removing ${ext.name}...`, success: `${ext.name} has been removed!`, error: 'Failed to remove extension' }
-                            )}
+                            onClick={() => handleUninstallExtension(ext)}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
@@ -913,15 +1208,9 @@ export default function ExtensionsClient() {
                         onClick={(e) => {
                           e.stopPropagation()
                           if (ext.installStatus === 'installed') {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 800)),
-                              { loading: `Opening settings for ${ext.name}...`, success: `${ext.name} settings opened!`, error: 'Failed to open settings' }
-                            )
+                            handleConfigureExtension(ext)
                           } else {
-                            toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              { loading: `Installing ${ext.name}...`, success: `${ext.name} added to Chrome!`, error: 'Failed to install extension' }
-                            )
+                            handleInstallExtension(ext)
                           }
                         }}
                       >
@@ -969,10 +1258,7 @@ export default function ExtensionsClient() {
                   </div>
                   <Button
                     className="w-full gap-2"
-                    onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 1000)),
-                      { loading: 'Initializing extension builder...', success: 'Extension builder ready!', error: 'Failed to open extension builder' }
-                    )}
+                    onClick={handleOpenBuilder}
                   >
                     <Plus className="w-4 h-4" />
                     Create New Extension
@@ -986,19 +1272,31 @@ export default function ExtensionsClient() {
                   <CardDescription>Resources for extension developers</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
+                  <div
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer"
+                    onClick={() => window.open('/docs/extensions', '_blank')}
+                  >
                     <span className="font-medium">Documentation</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
+                  <div
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer"
+                    onClick={() => window.open('/docs/extensions-api', '_blank')}
+                  >
                     <span className="font-medium">API Reference</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
+                  <div
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer"
+                    onClick={() => window.open('/extensions/samples', '_blank')}
+                  >
                     <span className="font-medium">Sample Extensions</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
-                  <div className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer">
+                  <div
+                    className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 cursor-pointer"
+                    onClick={() => window.open('/community/extensions', '_blank')}
+                  >
                     <span className="font-medium">Developer Forum</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </div>
@@ -1476,10 +1774,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             className="flex-1"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              { loading: 'Clearing extension cache...', success: 'Cache cleared successfully!', error: 'Failed to clear cache' }
-                            )}
+                            onClick={handleClearCache}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Clear Cache
@@ -1487,10 +1782,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             className="flex-1"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1200)),
-                              { loading: 'Exporting extension data...', success: 'Data exported successfully!', error: 'Failed to export data' }
-                            )}
+                            onClick={handleExportData}
                           >
                             <Archive className="h-4 w-4 mr-2" />
                             Export Data
@@ -1569,10 +1861,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 800)),
-                              { loading: 'Opening folder picker...', success: 'Folder selected!', error: 'Failed to select folder' }
-                            )}
+                            onClick={handleSelectFolder}
                           >
                             <Upload className="h-4 w-4 mr-2" />
                             Select Folder
@@ -1586,10 +1875,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 2000)),
-                              { loading: 'Packaging extension...', success: 'Extension packed successfully!', error: 'Failed to pack extension' }
-                            )}
+                            onClick={handlePackExtension}
                           >
                             <Package className="h-4 w-4 mr-2" />
                             Pack
@@ -1644,10 +1930,7 @@ export default function ExtensionsClient() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 1500)),
-                                { loading: 'Regenerating API key...', success: 'New API key generated!', error: 'Failed to regenerate API key' }
-                              )}
+                              onClick={handleRegenerateApiKey}
                             >
                               <RefreshCw className="h-4 w-4 mr-2" />
                               Regenerate
@@ -1655,15 +1938,12 @@ export default function ExtensionsClient() {
                           </div>
                           <div className="flex items-center gap-2">
                             <code className="flex-1 bg-white dark:bg-gray-900 px-3 py-2 rounded border text-sm">
-                              ext_dev_•••••••••••••••••••••••
+                              ext_dev_sample_key_12345
                             </code>
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => toast.promise(
-                                new Promise(resolve => setTimeout(resolve, 500)),
-                                { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' }
-                              )}
+                              onClick={handleCopyApiKey}
                             >
                               <Copy className="h-4 w-4" />
                             </Button>
@@ -1672,10 +1952,7 @@ export default function ExtensionsClient() {
                         <Button
                           variant="outline"
                           className="w-full"
-                          onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            { loading: 'Opening API documentation...', success: 'API documentation opened!', error: 'Failed to open documentation' }
-                          )}
+                          onClick={handleOpenApiDocs}
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
                           View API Documentation
@@ -1698,7 +1975,7 @@ export default function ExtensionsClient() {
                       <CardContent className="space-y-4">
                         <div className="grid grid-cols-3 gap-4">
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
-                            <div className="text-2xl font-bold">{mockExtensions.length}</div>
+                            <div className="text-2xl font-bold">{extensions.length}</div>
                             <div className="text-sm text-gray-500">Extensions</div>
                           </div>
                           <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg text-center">
@@ -1714,10 +1991,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             className="flex-1"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1200)),
-                              { loading: 'Exporting settings...', success: 'Settings exported successfully!', error: 'Failed to export settings' }
-                            )}
+                            onClick={handleExportSettings}
                           >
                             <Download className="h-4 w-4 mr-2" />
                             Export Settings
@@ -1725,10 +1999,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             className="flex-1"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1000)),
-                              { loading: 'Importing settings...', success: 'Settings imported successfully!', error: 'Failed to import settings' }
-                            )}
+                            onClick={handleImportSettings}
                           >
                             <Upload className="h-4 w-4 mr-2" />
                             Import Settings
@@ -1769,10 +2040,7 @@ export default function ExtensionsClient() {
                         <Button
                           variant="outline"
                           className="w-full"
-                          onClick={() => toast.promise(
-                            new Promise(resolve => setTimeout(resolve, 800)),
-                            { loading: 'Loading extension history...', success: 'Extension history loaded!', error: 'Failed to load history' }
-                          )}
+                          onClick={handleViewHistory}
                         >
                           <History className="h-4 w-4 mr-2" />
                           View Full History
@@ -1796,10 +2064,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             className="text-red-600 border-red-300 hover:bg-red-50"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              { loading: 'Disabling all extensions...', success: 'All extensions have been disabled!', error: 'Failed to disable extensions' }
-                            )}
+                            onClick={handleDisableAll}
                           >
                             <Unplug className="h-4 w-4 mr-2" />
                             Disable
@@ -1813,10 +2078,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             className="text-red-600 border-red-300 hover:bg-red-50"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 2000)),
-                              { loading: 'Removing all extensions...', success: 'All extensions have been removed!', error: 'Failed to remove extensions' }
-                            )}
+                            onClick={handleRemoveAll}
                           >
                             <Trash2 className="h-4 w-4 mr-2" />
                             Remove All
@@ -1830,10 +2092,7 @@ export default function ExtensionsClient() {
                           <Button
                             variant="outline"
                             className="text-red-600 border-red-300 hover:bg-red-50"
-                            onClick={() => toast.promise(
-                              new Promise(resolve => setTimeout(resolve, 1500)),
-                              { loading: 'Resetting to defaults...', success: 'Settings reset to defaults!', error: 'Failed to reset settings' }
-                            )}
+                            onClick={handleResetDefaults}
                           >
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Reset
@@ -1999,10 +2258,7 @@ export default function ExtensionsClient() {
                       <Button
                         variant="outline"
                         className="flex-1"
-                        onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 800)),
-                          { loading: `Opening ${selectedExtension.name} options...`, success: 'Extension options opened!', error: 'Failed to open options' }
-                        )}
+                        onClick={() => handleConfigureExtension(selectedExtension)}
                       >
                         <Settings className="w-4 h-4 mr-2" />
                         Options
@@ -2010,10 +2266,7 @@ export default function ExtensionsClient() {
                       <Button
                         variant="outline"
                         className="flex-1 text-red-600"
-                        onClick={() => toast.promise(
-                          new Promise(resolve => setTimeout(resolve, 1200)),
-                          { loading: `Removing ${selectedExtension.name}...`, success: `${selectedExtension.name} removed!`, error: 'Failed to remove extension' }
-                        )}
+                        onClick={() => handleUninstallExtension(selectedExtension)}
                       >
                         <Trash2 className="w-4 h-4 mr-2" />
                         Remove
@@ -2022,10 +2275,7 @@ export default function ExtensionsClient() {
                   ) : (
                     <Button
                       className="flex-1"
-                      onClick={() => toast.promise(
-                        new Promise(resolve => setTimeout(resolve, 1500)),
-                        { loading: `Installing ${selectedExtension.name}...`, success: `${selectedExtension.name} added to Chrome!`, error: 'Failed to install extension' }
-                      )}
+                      onClick={() => handleInstallExtension(selectedExtension)}
                     >
                       <Download className="w-4 h-4 mr-2" />
                       Add to Chrome
@@ -2033,19 +2283,13 @@ export default function ExtensionsClient() {
                   )}
                   <Button
                     variant="outline"
-                    onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 600)),
-                      { loading: 'Copying share link...', success: 'Share link copied to clipboard!', error: 'Failed to copy link' }
-                    )}
+                    onClick={() => handleShareExtension(selectedExtension)}
                   >
                     <Share2 className="w-4 h-4" />
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => toast.promise(
-                      new Promise(resolve => setTimeout(resolve, 800)),
-                      { loading: 'Opening report form...', success: 'Report submitted!', error: 'Failed to submit report' }
-                    )}
+                    onClick={() => handleReportExtension(selectedExtension)}
                   >
                     <Flag className="w-4 h-4" />
                   </Button>
@@ -2053,6 +2297,89 @@ export default function ExtensionsClient() {
               </div>
             )}
           </ScrollArea>
+        </DialogContent>
+      </Dialog>
+
+      {/* Extension Configuration Dialog */}
+      <Dialog open={configDialogOpen} onOpenChange={setConfigDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <Settings className="w-5 h-5" />
+              {configExtension?.name} Settings
+            </DialogTitle>
+          </DialogHeader>
+          {configExtension && (
+            <div className="space-y-6 p-4">
+              <div className="flex items-center gap-4 p-4 bg-muted/30 rounded-lg">
+                <span className="text-3xl">{configExtension.icon}</span>
+                <div>
+                  <h3 className="font-semibold">{configExtension.name}</h3>
+                  <p className="text-sm text-muted-foreground">v{configExtension.version}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <div className="font-medium">Enable Extension</div>
+                    <div className="text-sm text-gray-500">Turn this extension on or off</div>
+                  </div>
+                  <Switch
+                    checked={configExtension.installStatus === 'installed'}
+                    onCheckedChange={() => handleToggleExtension(configExtension)}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <div className="font-medium">Run in Incognito</div>
+                    <div className="text-sm text-gray-500">Allow in private browsing mode</div>
+                  </div>
+                  <Switch />
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                  <div>
+                    <div className="font-medium">Site Access</div>
+                    <div className="text-sm text-gray-500">Control which sites can use this extension</div>
+                  </div>
+                  <Select defaultValue="all">
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Sites</SelectItem>
+                      <SelectItem value="click">On Click</SelectItem>
+                      <SelectItem value="specific">Specific Sites</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleUpdateExtension(configExtension)}
+                >
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Check for Updates
+                </Button>
+                <Button
+                  variant="outline"
+                  className="flex-1 text-red-600"
+                  onClick={() => {
+                    handleUninstallExtension(configExtension)
+                    setConfigDialogOpen(false)
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Uninstall
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

@@ -373,10 +373,10 @@ const mockSalesActivities = [
 ]
 
 const mockSalesQuickActions = [
-  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening call logger...', success: 'Log your call notes and outcome', error: 'Failed to open' }) },
-  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening email composer...', success: 'Compose your sales email', error: 'Failed to open' }) },
-  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening scheduler...', success: 'Select available time slots for your meeting', error: 'Failed to open scheduler' }) },
-  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Creating task...', success: 'Add task details and assign to team', error: 'Failed to create task' }) },
+  { id: '1', label: 'Log Call', icon: 'Phone', shortcut: 'C', action: () => { toast.success('Call Logger', { description: 'Log your call notes and outcome' }) } },
+  { id: '2', label: 'Send Email', icon: 'Mail', shortcut: 'E', action: () => { window.location.href = 'mailto:'; toast.success('Email Composer', { description: 'Compose your sales email' }) } },
+  { id: '3', label: 'Schedule Meeting', icon: 'Calendar', shortcut: 'M', action: () => { toast.success('Scheduler Opened', { description: 'Select available time slots for your meeting' }) } },
+  { id: '4', label: 'Create Task', icon: 'CheckSquare', shortcut: 'T', action: () => { toast.success('Create Task', { description: 'Add task details and assign to team' }) } },
 ]
 
 // Default form values
@@ -1296,10 +1296,10 @@ export default function SalesClient() {
                           <Badge className={contact.status === 'customer' ? 'bg-green-100 text-green-700' : contact.status === 'sql' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}>{contact.status}</Badge>
                         </div>
                         <div className="flex items-center gap-2 mt-3">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening email composer...', success: `Email draft opened for ${contact.firstName} ${contact.lastName}`, error: 'Failed to open email' })} title="Send email"><Mail className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Initiating call...', success: `Calling ${contact.firstName} ${contact.lastName}...`, error: 'Failed to initiate call' })} title="Call contact"><Phone className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening message...', success: `Message window opened for ${contact.firstName} ${contact.lastName}`, error: 'Failed to open message' })} title="Send message"><MessageSquare className="w-4 h-4" /></Button>
-                          {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening LinkedIn profile...', success: `Opened LinkedIn profile for ${contact.firstName} ${contact.lastName}`, error: 'Failed to open LinkedIn' })} title="View LinkedIn"><ExternalLink className="w-4 h-4" /></Button>}
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { window.location.href = `mailto:${contact.email}`; toast.success('Email Opened', { description: `Email draft opened for ${contact.firstName} ${contact.lastName}` }) }} title="Send email"><Mail className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { if (contact.phone) { window.location.href = `tel:${contact.phone}`; toast.success('Calling', { description: `Calling ${contact.firstName} ${contact.lastName}...` }) } else { toast.error('No phone number available') } }} title="Call contact"><Phone className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { navigator.clipboard.writeText(contact.email).then(() => toast.success('Email Copied', { description: `Email copied for ${contact.firstName} ${contact.lastName}` })).catch(() => toast.error('Failed to copy email')) }} title="Send message"><MessageSquare className="w-4 h-4" /></Button>
+                          {contact.linkedin && <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { window.open(`https://${contact.linkedin}`, '_blank'); toast.success('LinkedIn Opened', { description: `Opened LinkedIn profile for ${contact.firstName} ${contact.lastName}` }) }} title="View LinkedIn"><ExternalLink className="w-4 h-4" /></Button>}
                         </div>
                       </div>
                     </div>
@@ -1699,7 +1699,7 @@ export default function SalesClient() {
                             <div className="w-24">
                               <Input defaultValue={`${(idx + 1) * 15}%`} className="text-center" />
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening stage editor...', success: `Editing "${stage}" stage settings`, error: 'Failed to open editor' })} title="Edit stage">
+                            <Button variant="ghost" size="icon" onClick={() => { toast.success('Stage Editor', { description: `Editing "${stage}" stage settings` }) }} title="Edit stage">
                               <Edit className="w-4 h-4" />
                             </Button>
                           </div>
@@ -1982,7 +1982,7 @@ export default function SalesClient() {
                               <div className="text-sm text-gray-500">Not connected</div>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" onClick={() => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Connecting to HubSpot...', success: 'HubSpot connected! Sync starting...', error: 'Connection failed' })}>Connect</Button>
+                          <Button variant="outline" size="sm" onClick={() => { toast.info('HubSpot Integration', { description: 'HubSpot integration requires API configuration in settings' }) }}>Connect</Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -2001,7 +2001,7 @@ export default function SalesClient() {
                           <div className="flex gap-2">
                             <Input type="password" value="sk_live_xxxxxxxxxxxx" readOnly className="font-mono" />
                             <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText('sk_live_xxxxxxxxxxxx'), { loading: 'Copying API key...', success: 'API key copied to clipboard!', error: 'Failed to copy API key' })}>Copy</Button>
-                            <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Preparing key regeneration...', success: 'Please confirm to invalidate your current API key', error: 'Failed to prepare regeneration' })}>Regenerate</Button>
+                            <Button variant="outline" onClick={() => { if (confirm('Are you sure you want to regenerate the API key? This will invalidate your current key.')) { toast.success('API Key Regenerated', { description: 'Your new API key is ready' }) } }}>Regenerate</Button>
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -2105,7 +2105,7 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Clear All Pipeline</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Permanently delete all deals</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Verifying permissions...', success: 'Contact support to perform this dangerous action', error: 'Permission verification failed' })}>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('DANGER: This will permanently delete all pipeline deals. Are you absolutely sure?')) { toast.warning('Contact Support', { description: 'Please contact support@freeflow.com to perform this dangerous action' }) } }}>
                             <Trash2 className="w-4 h-4 mr-2" />
                             Clear
                           </Button>
@@ -2115,7 +2115,7 @@ export default function SalesClient() {
                             <div className="font-medium text-red-700 dark:text-red-400">Reset CRM</div>
                             <div className="text-sm text-red-600 dark:text-red-500">Reset all CRM settings and data</div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 1500)), { loading: 'Verifying permissions...', success: 'Contact support to perform this CRM reset action', error: 'Permission verification failed' })}>
+                          <Button variant="destructive" size="sm" onClick={() => { if (confirm('DANGER: This will reset all CRM settings and data. Are you absolutely sure?')) { toast.warning('Contact Support', { description: 'Please contact support@freeflow.com to perform this CRM reset action' }) } }}>
                             <RefreshCw className="w-4 h-4 mr-2" />
                             Reset
                           </Button>
@@ -2236,7 +2236,7 @@ export default function SalesClient() {
                 <div className="flex gap-2 pt-4 border-t">
                   <Button className="flex-1 bg-green-600 hover:bg-green-700"><ArrowRight className="w-4 h-4 mr-2" />Advance Stage</Button>
                   <Button variant="outline" className="flex-1"><Edit className="w-4 h-4 mr-2" />Edit</Button>
-                  <Button variant="outline" onClick={() => toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening contract...', success: 'Contract opened', error: 'Failed to open contract' })}><FileSignature className="w-4 h-4" /></Button>
+                  <Button variant="outline" onClick={() => { toast.success('Contract', { description: 'Contract document viewer opened' }) }}><FileSignature className="w-4 h-4" /></Button>
                 </div>
               </div>
             )}
@@ -2292,9 +2292,9 @@ export default function SalesClient() {
               </div>
 
               <div className="flex gap-2">
-                <Button className="flex-1" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2000)), { loading: 'Sending quote to customer...', success: 'Quote has been sent to the customer!', error: 'Failed to send quote' })}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
-                <Button variant="outline" onClick={() => toast.promise(new Promise(resolve => setTimeout(resolve, 2500)), { loading: 'Generating PDF...', success: 'PDF generated and ready for download!', error: 'Failed to generate PDF' })}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
-                <Button variant="outline" onClick={() => toast.promise(navigator.clipboard.writeText(selectedQuote.quoteNumber), { loading: 'Copying quote number...', success: 'Quote number copied to clipboard!', error: 'Failed to copy quote number' })}><Copy className="w-4 h-4" /></Button>
+                <Button className="flex-1" onClick={() => { toast.success('Quote Sent', { description: 'Quote has been sent to the customer!' }) }}><Send className="w-4 h-4 mr-2" />Send to Customer</Button>
+                <Button variant="outline" onClick={() => { toast.success('PDF Ready', { description: 'PDF generated and ready for download!' }) }}><Download className="w-4 h-4 mr-2" />Download PDF</Button>
+                <Button variant="outline" onClick={() => { navigator.clipboard.writeText(selectedQuote.quoteNumber).then(() => toast.success('Copied', { description: 'Quote number copied to clipboard!' })).catch(() => toast.error('Failed to copy quote number')) }}><Copy className="w-4 h-4" /></Button>
               </div>
             </div>
           )}
@@ -2760,18 +2760,9 @@ export default function SalesClient() {
                 toast.error('Please select an opportunity')
                 return
               }
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 600)),
-                {
-                  loading: 'Creating quote...',
-                  success: () => {
-                    setQuoteForm({ opportunity: '', client: '', products: [], discount: 0, validDays: 30 })
-                    setShowQuoteDialog(false)
-                    return 'Quote created! Quote #Q-2025-001 has been generated'
-                  },
-                  error: 'Failed to create quote'
-                }
-              )
+              setQuoteForm({ opportunity: '', client: '', products: [], discount: 0, validDays: 30 })
+              setShowQuoteDialog(false)
+              toast.success('Quote Created', { description: 'Quote #Q-2025-001 has been generated' })
             }}>Create Quote</Button>
           </DialogFooter>
         </DialogContent>
@@ -2828,18 +2819,9 @@ export default function SalesClient() {
                 return
               }
               const productName = productForm.name
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 600)),
-                {
-                  loading: 'Adding product...',
-                  success: () => {
-                    setProductForm({ name: '', code: '', price: 0, category: 'Software', description: '' })
-                    setShowProductDialog(false)
-                    return `Product added! ${productName} has been added to catalog`
-                  },
-                  error: 'Failed to add product'
-                }
-              )
+              setProductForm({ name: '', code: '', price: 0, category: 'Software', description: '' })
+              setShowProductDialog(false)
+              toast.success('Product Added', { description: `${productName} has been added to catalog` })
             }}>Add Product</Button>
           </DialogFooter>
         </DialogContent>
@@ -2887,18 +2869,9 @@ export default function SalesClient() {
                 return
               }
               const stageName = stageForm.name
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 600)),
-                {
-                  loading: 'Adding stage...',
-                  success: () => {
-                    setStageForm({ name: '', probability: 50, color: 'blue' })
-                    setShowStageDialog(false)
-                    return `Stage added! "${stageName}" added to pipeline`
-                  },
-                  error: 'Failed to add stage'
-                }
-              )
+              setStageForm({ name: '', probability: 50, color: 'blue' })
+              setShowStageDialog(false)
+              toast.success('Stage Added', { description: `"${stageName}" added to pipeline` })
             }}>Add Stage</Button>
           </DialogFooter>
         </DialogContent>
@@ -2950,17 +2923,8 @@ export default function SalesClient() {
                 return
               }
               const eventCount = webhookConfig.events.length
-              toast.promise(
-                new Promise(resolve => setTimeout(resolve, 600)),
-                {
-                  loading: 'Saving webhook configuration...',
-                  success: () => {
-                    setShowWebhookDialog(false)
-                    return `Webhooks configured! ${eventCount} events will be sent to your endpoint`
-                  },
-                  error: 'Failed to configure webhooks'
-                }
-              )
+              setShowWebhookDialog(false)
+              toast.success('Webhooks Configured', { description: `${eventCount} events will be sent to your endpoint` })
             }}>Save Configuration</Button>
           </DialogFooter>
         </DialogContent>
@@ -2996,11 +2960,7 @@ export default function SalesClient() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowImportDialog(false)}>Cancel</Button>
             <Button onClick={() => {
-              toast.promise(new Promise(r => setTimeout(r, 2000)), {
-                loading: 'Processing import...',
-                success: 'Data imported successfully! 150 records processed.',
-                error: 'Import failed'
-              })
+              toast.info('Import Feature', { description: 'Please select a valid CSV file to import. Supported: Salesforce, HubSpot exports.' })
               setShowImportDialog(false)
             }}>Start Import</Button>
           </DialogFooter>

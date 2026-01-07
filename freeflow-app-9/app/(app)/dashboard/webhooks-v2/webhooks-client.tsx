@@ -371,12 +371,7 @@ const mockWebhooksActivities = [
   { id: '3', user: 'Partner Dev', action: 'tested', target: 'order.created webhook', timestamp: '45m ago', type: 'info' as const },
 ]
 
-const mockWebhooksQuickActions = [
-  { id: '1', label: 'New Webhook', icon: 'Plus', shortcut: 'N', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening webhook builder...', success: 'Configure URL, events, and authentication', error: 'Failed to open' }) },
-  { id: '2', label: 'Test Delivery', icon: 'Send', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 1500)), { loading: 'Sending test payload...', success: 'Test delivered! Response: 200 OK', error: 'Delivery failed' }) },
-  { id: '3', label: 'View Logs', icon: 'FileJson', shortcut: 'L', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading delivery logs...', success: 'Delivery logs loaded - view request/response history and errors', error: 'Failed to load delivery logs' }) },
-  { id: '4', label: 'Retry Failed', icon: 'RefreshCw', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 2000)), { loading: 'Retrying 23 failed deliveries...', success: '20 retries successful, 3 still failing', error: 'Retry failed' }) },
-]
+// Quick actions are now defined inside the component to access real handlers
 
 export default function WebhooksClient({
   initialWebhooks,
@@ -639,26 +634,104 @@ export default function WebhooksClient({
     }))
   }
 
-  const handleExportWebhooks = () => {
+  const handleExportWebhooks = async () => {
+    try {
+      const exportData = JSON.stringify(webhooks, null, 2)
+      const blob = new Blob([exportData], { type: 'application/json' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'webhooks-export.json'
+      a.click()
+      URL.revokeObjectURL(url)
+      toast.success('Webhook configuration downloaded')
+    } catch (error) {
+      toast.error('Failed to export webhooks')
+    }
+  }
+
+  // Handler for retrying failed webhook deliveries
+  const handleRetryFailedDeliveries = async () => {
+    const failedWebhooks = webhooks.filter(w => w.status === 'failed')
+    if (failedWebhooks.length === 0) {
+      toast.info('No failed deliveries to retry')
+      return
+    }
+
     toast.promise(
-      new Promise<void>((resolve) => {
-        const exportData = JSON.stringify(webhooks, null, 2)
-        const blob = new Blob([exportData], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = 'webhooks-export.json'
-        a.click()
-        URL.revokeObjectURL(url)
-        setTimeout(resolve, 500)
-      }),
+      (async () => {
+        const results = await Promise.allSettled(
+          failedWebhooks.map(w =>
+            fetch(`/api/webhooks/${w.id}/retry`, { method: 'POST' })
+          )
+        )
+        const successful = results.filter(r => r.status === 'fulfilled').length
+        const failed = results.filter(r => r.status === 'rejected').length
+        return { successful, failed, total: failedWebhooks.length }
+      })(),
       {
-        loading: 'Exporting webhook configuration...',
-        success: 'Webhook configuration downloaded',
-        error: 'Failed to export webhooks'
+        loading: `Retrying ${failedWebhooks.length} failed deliveries...`,
+        success: (data) => `${data.successful} retries successful${data.failed > 0 ? `, ${data.failed} still failing` : ''}`,
+        error: 'Failed to retry deliveries'
       }
     )
   }
+
+  // Quick actions with real functionality
+  const webhooksQuickActions = useMemo(() => [
+    {
+      id: '1',
+      label: 'New Webhook',
+      icon: 'Plus',
+      shortcut: 'N',
+      action: () => {
+        openCreateDialog()
+        toast.success('Webhook builder opened', { description: 'Configure URL, events, and authentication' })
+      }
+    },
+    {
+      id: '2',
+      label: 'Test Delivery',
+      icon: 'Send',
+      shortcut: 'T',
+      action: async () => {
+        const firstActiveWebhook = webhooks.find(w => w.status === 'active')
+        if (!firstActiveWebhook) {
+          toast.error('No active webhooks', { description: 'Create or activate a webhook first' })
+          return
+        }
+        toast.promise(
+          fetch(`/api/webhooks/${firstActiveWebhook.id}/test`, { method: 'POST' })
+            .then(res => {
+              if (!res.ok) throw new Error('Test failed')
+              return res.json()
+            }),
+          {
+            loading: 'Sending test payload...',
+            success: 'Test delivered successfully!',
+            error: 'Delivery failed'
+          }
+        )
+      }
+    },
+    {
+      id: '3',
+      label: 'View Logs',
+      icon: 'FileJson',
+      shortcut: 'L',
+      action: () => {
+        setActiveTab('logs')
+        toast.success('Viewing delivery logs', { description: 'Request/response history and errors' })
+      }
+    },
+    {
+      id: '4',
+      label: 'Retry Failed',
+      icon: 'RefreshCw',
+      shortcut: 'R',
+      action: handleRetryFailedDeliveries
+    },
+  ], [webhooks, openCreateDialog, setActiveTab])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50/30 to-cyan-50/40 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800 dark:bg-none dark:bg-gray-900">
@@ -1894,7 +1967,7 @@ export default function WebhooksClient({
             maxItems={5}
           />
           <QuickActionsToolbar
-            actions={mockWebhooksQuickActions}
+            actions={webhooksQuickActions}
             variant="grid"
           />
         </div>

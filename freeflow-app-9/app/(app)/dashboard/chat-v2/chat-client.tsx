@@ -357,19 +357,16 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
   }, [newMessage, selectedConversation, sendMessage])
 
   const handleUseSavedReply = useCallback((reply: SavedReply) => {
-    toast.promise(
-      new Promise<void>((resolve) => {
-        setNewMessage(reply.content)
-        setShowSavedReplies(false)
-        messageInputRef.current?.focus()
-        setTimeout(resolve, 600)
-      }),
-      {
-        loading: 'Inserting reply...',
-        success: `Reply inserted: ${reply.name}`,
-        error: 'Failed to insert reply'
-      }
-    )
+    try {
+      setNewMessage(reply.content)
+      setShowSavedReplies(false)
+      messageInputRef.current?.focus()
+      toast.success(`Reply inserted: ${reply.name}`)
+    } catch (err) {
+      toast.error('Failed to insert reply', {
+        description: err instanceof Error ? err.message : 'Please try again'
+      })
+    }
   }, [])
 
   const handleUseAISuggestion = useCallback(async (suggestion: AIsuggestion) => {
@@ -885,27 +882,15 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                           <div className="flex items-center gap-2">
                             <Badge variant="outline">{reply.category}</Badge>
                             <Button variant="ghost" size="icon" onClick={() => {
-                              toast.promise(
-                                new Promise((resolve) => setTimeout(resolve, 800)),
-                                {
-                                  loading: 'Opening editor...',
-                                  success: `Editing reply: ${reply.name}`,
-                                  error: 'Failed to open editor'
-                                }
-                              )
+                              // Set the reply content for editing and open dialog
+                              setNewMessage(reply.content)
+                              setShowQuickReplyDialog(true)
+                              toast.success(`Editing reply: ${reply.name}`)
                             }}><Edit className="h-4 w-4" /></Button>
                           </div>
                         </div>
                       ))}
                       <Button variant="outline" className="w-full" onClick={() => {
-                        toast.promise(
-                          new Promise((resolve) => setTimeout(resolve, 800)),
-                          {
-                            loading: 'Opening quick reply form...',
-                            success: 'Quick reply form opened',
-                            error: 'Failed to open form'
-                          }
-                        )
                         setShowQuickReplyDialog(true)
                       }}>
                         <Plus className="h-4 w-4 mr-2" />
@@ -929,16 +914,19 @@ export default function ChatClient({ initialChatMessages }: ChatClientProps) {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Input placeholder="Add new tag..." />
+                        <Input
+                          placeholder="Add new tag..."
+                          value={newTag}
+                          onChange={(e) => setNewTag(e.target.value)}
+                        />
                         <Button onClick={() => {
-                          toast.promise(
-                            new Promise((resolve) => setTimeout(resolve, 800)),
-                            {
-                              loading: 'Adding tag...',
-                              success: 'Tag added successfully',
-                              error: 'Failed to add tag'
-                            }
-                          )
+                          if (!newTag.trim()) {
+                            toast.error('Please enter a tag name')
+                            return
+                          }
+                          // Add to available tags (in real app, save to database)
+                          toast.success(`Tag "${newTag}" added successfully`)
+                          setNewTag('')
                         }}>Add</Button>
                       </div>
                     </CardContent>

@@ -197,11 +197,7 @@ export default function AICodeCompletionPage() {
           language: selectedLanguage
         })
 
-        toast.promise(new Promise(r => setTimeout(r, 500)), {
-          loading: 'Initializing AI Code Completion...',
-          success: `AI Code Completion loaded - ${completionsResult.data?.length || 0} completions, ${snippetsResult.data?.length || 0} snippets`,
-          error: 'Failed to initialize AI Code Completion'
-        })
+        toast.success(`AI Code Completion loaded - ${completionsResult.data?.length || 0} completions, ${snippetsResult.data?.length || 0} snippets`)
         announce('AI Code Completion loaded successfully', 'polite')
 
         setIsLoading(false)
@@ -272,22 +268,14 @@ export default function AICodeCompletionPage() {
         setSuggestions(completionSuggestions)
         setIsCompleting(false)
 
-        toast.promise(new Promise(r => setTimeout(r, 600)), {
-          loading: 'Finalizing code completion...',
-          success: `Code Completed - ${mockCompletion.split('\n').length} lines generated, ${completionSuggestions.length} suggestions`,
-          error: 'Failed to complete code'
-        })
+        toast.success(`Code Completed - ${mockCompletion.split('\n').length} lines generated, ${completionSuggestions.length} suggestions`)
         announce('Code completion generated', 'polite')
       } catch (err) {
         logger.error('Exception during completion', { error: err })
         setCompletion(mockCompletion)
         setSuggestions(completionSuggestions)
         setIsCompleting(false)
-        toast.promise(new Promise(r => setTimeout(r, 600)), {
-          loading: 'Finalizing code completion...',
-          success: `Code Completed - ${mockCompletion.split('\n').length} lines generated`,
-          error: 'Failed to complete code'
-        })
+        toast.success(`Code Completed - ${mockCompletion.split('\n').length} lines generated`)
       }
     } else {
       // Fallback for non-authenticated users
@@ -295,11 +283,7 @@ export default function AICodeCompletionPage() {
         setCompletion(mockCompletion)
         setSuggestions(completionSuggestions)
         setIsCompleting(false)
-        toast.promise(new Promise(r => setTimeout(r, 600)), {
-          loading: 'Finalizing code completion...',
-          success: `Code Completed - ${mockCompletion.split('\n').length} lines generated`,
-          error: 'Failed to complete code'
-        })
+        toast.success(`Code Completed - ${mockCompletion.split('\n').length} lines generated`)
       }, 1500)
     }
   }, [codeInput, userId, selectedLanguage, announce])

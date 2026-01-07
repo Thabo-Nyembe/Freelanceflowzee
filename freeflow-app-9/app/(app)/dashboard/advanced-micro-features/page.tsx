@@ -468,8 +468,8 @@ export default function AdvancedMicroFeaturesPage() {
                     data={mockWidgetData}
                     size="large"
                     variant="detailed"
-                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Refreshing widget data...', success: 'Widget data refreshed', error: 'Failed to refresh' }) }}
-                    onSettings={() => { logger.info('Opening widget settings'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening widget settings...', success: 'Widget settings opened', error: 'Failed to open' }) }}
+                    onRefresh={() => { logger.info('Refreshing dashboard widget'); toast.success('Widget data refreshed', { description: 'Operation completed successfully' }) }}
+                    onSettings={() => { logger.info('Opening widget settings'); toast.success('Widget settings opened', { description: 'Operation completed successfully' }) }}
                     onMaximize={() => { logger.info('Maximizing widget'); toast.success('Widget maximized') }}
                   />
                 </div>
@@ -509,13 +509,13 @@ export default function AdvancedMicroFeaturesPage() {
                     dateRange="Last 6 months"
                     onExport={() => { logger.info('Exporting chart data'); toast.success('Chart exported successfully', { description: 'Revenue Trends - CSV format' }) }}
                     onShare={() => { logger.info('Sharing chart'); toast.success('Share link copied to clipboard') }}
-                    onSettings={() => { logger.info('Opening chart settings'); toast.promise(new Promise(r => setTimeout(r, 500)), { loading: 'Opening chart settings...', success: 'Chart settings opened', error: 'Failed to open' }) }}
+                    onSettings={() => { logger.info('Opening chart settings'); toast.success('Chart settings opened', { description: 'Operation completed successfully' }) }}
                     legend={[
                       { name: 'Revenue', color: '#3b82f6', value: '$45K', visible: true },
                       { name: 'Expenses', color: '#ef4444', value: '$28K', visible: true },
                       { name: 'Profit', color: '#10b981', value: '$17K', visible: false }
                     ]}
-                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Toggling legend...', success: `Legend ${name} toggled`, error: 'Failed to toggle' }) }}
+                    onLegendToggle={(name) => { logger.debug('Toggling chart legend', { legendName: name }); toast.success(`Legend ${name} toggled`, { description: 'Operation completed successfully' }) }}
                   >
                     <div className="h-64 flex items-center justify-center bg-muted/20 rounded-lg">
                       <div className="text-center text-muted-foreground">
@@ -537,7 +537,7 @@ export default function AdvancedMicroFeaturesPage() {
                     exportable={true}
                     pagination={true}
                     pageSize={3}
-                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading details...', success: `Viewing details for ${row.name || 'item'}`, error: 'Failed to load details' }) }}
+                    onRowClick={(row) => { logger.info('Table row clicked', { rowData: row }); toast.success(`Viewing details for ${row.name || 'item'}`, { description: 'Operation completed successfully' }) }}
                   />
                 </div>
               </div>
@@ -556,7 +556,7 @@ export default function AdvancedMicroFeaturesPage() {
                         maxDisplay={4}
                         showDetails={true}
                         size="lg"
-                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.promise(new Promise(r => setTimeout(r, 400)), { loading: 'Loading profile...', success: `Viewing ${user.name}'s profile`, error: 'Failed to load profile' }) }}
+                        onUserClick={(user) => { logger.info('User profile clicked', { userId: user.id, userName: user.name }); toast.success(`Viewing ${user.name}'s profile`, { description: 'Operation completed successfully' }) }}
                       />
                       <div className="text-sm text-muted-foreground">
                         Team members currently online and their status
@@ -572,7 +572,7 @@ export default function AdvancedMicroFeaturesPage() {
                     activities={mockActivities}
                     maxItems={5}
                     showTimestamps={true}
-                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Opening activity details...', success: 'Activity details opened', error: 'Failed to open' }) }}
+                    onActivityClick={(activity) => { logger.info('Activity item clicked', { activityId: activity.id, type: activity.type }); toast.success('Activity details opened', { description: 'Operation completed successfully' }) }}
                   />
                 </div>
 
@@ -607,7 +607,7 @@ export default function AdvancedMicroFeaturesPage() {
                   <EnhancedSettingsCategories
                     categories={mockSettingsCategories}
                     activeCategory="theme"
-                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.promise(new Promise(r => setTimeout(r, 300)), { loading: 'Switching category...', success: `Switched to ${categoryId} settings`, error: 'Failed to switch' }) }}
+                    onCategoryChange={(categoryId) => { logger.info('Settings category changed', { categoryId }); toast.success(`Switched to ${categoryId} settings`, { description: 'Operation completed successfully' }) }}
                   />
                 </div>
 

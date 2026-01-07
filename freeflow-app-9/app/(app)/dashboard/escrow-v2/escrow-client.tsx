@@ -57,6 +57,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useEscrow, type EscrowDeposit } from '@/lib/hooks/use-escrow'
 import { createClient } from '@/lib/supabase/client'
+import { downloadAsCsv } from '@/lib/button-handlers'
 
 // Types
 type TransactionType = 'payment' | 'payout' | 'transfer' | 'refund' | 'fee'
@@ -432,11 +433,12 @@ const mockEscrowActivities = [
   { id: '3', user: 'Compliance Officer', action: 'flagged', target: 'transaction for review', timestamp: '1h ago', type: 'warning' as const },
 ]
 
-const mockEscrowQuickActions = [
-  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T', action: () => toast.promise(new Promise(r => setTimeout(r, 800)), { loading: 'Opening transfer form...', success: 'Transfer form ready!', error: 'Failed to open transfer form' }) },
-  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading payouts dashboard...', success: 'Payouts dashboard opened!', error: 'Failed to load payouts' }) },
-  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D', action: () => toast.promise(new Promise(r => setTimeout(r, 700)), { loading: 'Opening dispute center...', success: 'Dispute center ready!', error: 'Failed to open disputes' }) },
-  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R', action: () => toast.promise(new Promise(r => setTimeout(r, 600)), { loading: 'Loading financial reports...', success: 'Reports viewer opened!', error: 'Failed to load reports' }) },
+// Quick actions - base structure, actual actions bound inside component for real functionality
+const mockEscrowQuickActionsBase = [
+  { id: '1', label: 'New Transfer', icon: 'Send', shortcut: 'T' },
+  { id: '2', label: 'View Payouts', icon: 'DollarSign', shortcut: 'P' },
+  { id: '3', label: 'Disputes', icon: 'AlertTriangle', shortcut: 'D' },
+  { id: '4', label: 'Reports', icon: 'BarChart3', shortcut: 'R' },
 ]
 
 export default function EscrowClient() {
@@ -514,6 +516,49 @@ export default function EscrowClient() {
   useEffect(() => {
     fetchDeposits()
   }, [fetchDeposits])
+
+  // Quick actions with real functionality
+  const mockEscrowQuickActions = useMemo(() => [
+    {
+      ...mockEscrowQuickActionsBase[0],
+      action: () => {
+        setShowCreatePayout(true)
+        toast.success('Transfer form opened')
+      }
+    },
+    {
+      ...mockEscrowQuickActionsBase[1],
+      action: () => {
+        setActiveTab('payouts')
+        toast.success('Viewing payouts')
+      }
+    },
+    {
+      ...mockEscrowQuickActionsBase[2],
+      action: () => {
+        setActiveTab('disputes')
+        toast.success('Viewing disputes')
+      }
+    },
+    {
+      ...mockEscrowQuickActionsBase[3],
+      action: () => {
+        // Export transactions as CSV report
+        const reportData = mockTransactions.map(t => ({
+          id: t.id,
+          type: t.type,
+          amount: t.amount,
+          fee: t.fee,
+          net: t.net,
+          status: t.status,
+          description: t.description,
+          customer: t.customer || 'N/A',
+          date: new Date(t.createdAt).toLocaleDateString()
+        }))
+        downloadAsCsv(reportData, `escrow-transactions-${new Date().toISOString().split('T')[0]}.csv`)
+      }
+    },
+  ], [])
 
   // Stats - combining mock data with real escrow stats
   const totalVolume = mockTransactions.filter(t => t.type === 'payment' && t.status === 'succeeded')

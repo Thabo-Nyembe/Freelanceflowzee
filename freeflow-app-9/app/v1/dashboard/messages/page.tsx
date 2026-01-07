@@ -289,12 +289,28 @@ export default function MessagesPage() {
     logger.info('File upload initiated for message')
     const input = document.createElement('input')
     input.type = 'file'
+    input.multiple = true
+    input.onchange = async (e) => {
+      const files = (e.target as HTMLInputElement).files
+      if (files && files.length > 0) {
+        toast.loading('Uploading files...')
+        try {
+          const formData = new FormData()
+          Array.from(files).forEach(file => formData.append('files', file))
+          const response = await fetch('/api/upload', { method: 'POST', body: formData })
+          toast.dismiss()
+          if (response.ok) {
+            toast.success(`${files.length} file(s) uploaded successfully`)
+          } else {
+            toast.error('Failed to upload files')
+          }
+        } catch {
+          toast.dismiss()
+          toast.error('Failed to upload files')
+        }
+      }
+    }
     input.click()
-    toast.promise(new Promise(r => setTimeout(r, 1500)), {
-      loading: 'Preparing file upload...',
-      success: 'File upload ready. Select your file',
-      error: 'Failed to initialize file upload'
-    })
   }, [])
 
   // ============================================================================

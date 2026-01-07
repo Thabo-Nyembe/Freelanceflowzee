@@ -216,14 +216,7 @@ export default function MeetingsPage() {
         count: transformedMeetings.length,
         userId
       });
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 800)),
-        {
-          loading: 'Loading meetings...',
-          success: `${transformedMeetings.length} meetings loaded`,
-          error: 'Failed to load meetings'
-        }
-      );
+      toast.success(`${transformedMeetings.length} meetings loaded`);
       announce(`${transformedMeetings.length} meetings loaded successfully`, "polite");
     } catch (err: any) {
       const errorMessage = err.message || "Failed to fetch meetings";
@@ -292,14 +285,7 @@ export default function MeetingsPage() {
       setIsScheduleOpen(false);
 
       logger.info("Meeting scheduled successfully", { meetingId: newMeeting.id, userId });
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1200)),
-        {
-          loading: 'Scheduling meeting...',
-          success: 'Meeting scheduled successfully',
-          error: 'Failed to schedule meeting'
-        }
-      );
+      toast.success("Meeting scheduled successfully");
       announce("Meeting scheduled successfully", "polite");
     } catch (error) {
       logger.error("Failed to schedule meeting", { error, userId });
@@ -333,14 +319,7 @@ export default function MeetingsPage() {
       setCallState({ ...callState, isInCall: true });
 
       logger.info("Joined meeting successfully", { meetingId });
-      toast.promise(
-        new Promise((resolve) => setTimeout(resolve, 1500)),
-        {
-          loading: 'Joining meeting...',
-          success: `Joined meeting - ${meeting.title}`,
-          error: 'Failed to join meeting'
-        }
-      );
+      toast.success(`Joined meeting - ${meeting.title}`);
       announce(`Joined meeting: ${meeting.title}`, "polite");
     } catch (error) {
       logger.error("Failed to join meeting", { error, meetingId });
